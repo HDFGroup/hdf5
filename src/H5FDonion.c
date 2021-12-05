@@ -123,22 +123,22 @@ static hid_t H5FD_ONION_g = 0;
  ******************************************************************************
  */
 typedef struct H5FD_onion_t {
-    H5FD_t                             pub;
-    H5FD_onion_fapl_info_t             fa;
-    H5FD_t *                           backing_canon;
-    H5FD_t *                           backing_onion;
-    H5FD_t *                           backing_recov;
-    char *                             name_recov;
-    hbool_t                            is_open_rw;
-    hbool_t                            page_align_history;
-    H5FD_onion_history_header_t        header;
-    H5FD_onion_whole_history_t         summary;
-    H5FD_onion_revision_record_t       rev_record;
-    H5FD__onion_revision_index_t *     rev_index;
-    haddr_t                            history_eof;
-    haddr_t                            origin_eof;
-    haddr_t                            logi_eoa;
-    haddr_t                            logi_eof;
+    H5FD_t                        pub;
+    H5FD_onion_fapl_info_t        fa;
+    H5FD_t *                      backing_canon;
+    H5FD_t *                      backing_onion;
+    H5FD_t *                      backing_recov;
+    char *                        name_recov;
+    hbool_t                       is_open_rw;
+    hbool_t                       page_align_history;
+    H5FD_onion_history_header_t   header;
+    H5FD_onion_whole_history_t    summary;
+    H5FD_onion_revision_record_t  rev_record;
+    H5FD__onion_revision_index_t *rev_index;
+    haddr_t                       history_eof;
+    haddr_t                       origin_eof;
+    haddr_t                       logi_eoa;
+    haddr_t                       logi_eof;
 } H5FD_onion_t;
 
 H5FL_DEFINE_STATIC(H5FD_onion_t);

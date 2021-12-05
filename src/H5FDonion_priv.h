@@ -183,9 +183,9 @@ H5_DLL int     H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t 
                                               const H5FD_onion_index_entry_t **);
 
 H5_DLL H5FD__onion_revision_index_t *H5FD_onion_revision_index_init(uint32_t page_size);
-H5_DLL herr_t                             H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *);
-H5_DLL herr_t                             H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *,
-                                                                           const H5FD_onion_index_entry_t *);
+H5_DLL herr_t                        H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *);
+H5_DLL herr_t                        H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *,
+                                                                      const H5FD_onion_index_entry_t *);
 H5_DLL int H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *, uint64_t,
                                           const H5FD_onion_index_entry_t **);
 

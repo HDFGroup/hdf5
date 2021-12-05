@@ -113,14 +113,14 @@ typedef enum H5FD_onion_target_file_constant_t {
  *-----------------------------------------------------------------------------
  */
 typedef struct H5FD_onion_fapl_info_t {
-    uint8_t                              version;
-    hid_t                                backing_fapl_id;
-    uint32_t                             page_size;
-    H5FD_onion_target_file_constant_t    store_target;
-    uint64_t                             revision_id;
-    uint8_t                              force_write_open;
-    uint8_t                              creation_flags;
-    char                                 comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
+    uint8_t                           version;
+    hid_t                             backing_fapl_id;
+    uint32_t                          page_size;
+    H5FD_onion_target_file_constant_t store_target;
+    uint64_t                          revision_id;
+    uint8_t                           force_write_open;
+    uint8_t                           creation_flags;
+    char                              comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
 } H5FD_onion_fapl_info_t;
 
 #ifdef __cplusplus

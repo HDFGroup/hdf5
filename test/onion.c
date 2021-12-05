@@ -2470,7 +2470,8 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     size = a_off + a_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size, H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
+                 H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     buf = (unsigned char *)HDmalloc(sizeof(unsigned char) * size);
@@ -3122,17 +3123,17 @@ test_integration_create(void)
     /*
      * Create first revision
      */
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     ///
@@ -3141,7 +3142,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     int dset_data[4][7];
     for (i = 0; i < 4; i++)
@@ -3158,14 +3159,14 @@ test_integration_create(void)
     }
 #endif
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
@@ -3178,17 +3179,17 @@ test_integration_create(void)
     /*
      * Create second revision
      */
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3196,7 +3197,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 4; i++)
         for (j = 0; j < 7; j++)
@@ -3212,14 +3213,14 @@ test_integration_create(void)
     }
 #endif
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3245,17 +3246,17 @@ test_integration_create(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     ///
@@ -3264,7 +3265,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
 #if 0
     HDputs("\n\nREADING\n\n");
 #endif
@@ -3450,7 +3451,7 @@ test_integration_create_simple(void)
 
     ////////////////////////////
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3458,7 +3459,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3466,7 +3467,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     int dset_data[1][1024];
     for (i = 0; i < 1024; i++)
@@ -3482,14 +3483,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
@@ -3502,7 +3503,7 @@ test_integration_create_simple(void)
     /*
      * Create second revision
      */
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3511,7 +3512,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3520,7 +3521,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 1024; i++)
         dset_data[0][i] = i + 2048;
@@ -3535,14 +3536,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3560,7 +3561,7 @@ test_integration_create_simple(void)
      * Create third revision
      */
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3569,7 +3570,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3578,7 +3579,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 1024; i += 20)
         dset_data[0][i] = i + 3072;
@@ -3593,14 +3594,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3630,18 +3631,18 @@ test_integration_create_simple(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    //HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-    //HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3650,7 +3651,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    //HDputs(".");
+    // HDputs(".");
 #if 0
     HDputs("\n\nREADING\n\n");
 #endif
