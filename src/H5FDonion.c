@@ -41,9 +41,6 @@ static hid_t H5FD_ONION_g = 0;
  *              This structure is created when such a file is "opened" and
  *              discarded when it is "closed".
  *
- * Programmer:  Jacob "Jake" Smith
- *              6 July 2020
- *
  * `pub` (H5FD_t)
  *
  *      Instance of H5FD_t which contains all fields common to all VFDs.
@@ -84,15 +81,15 @@ static hid_t H5FD_ONION_g = 0;
  *
  *      Remember whether onion-writes must be aligned to page boundaries.
  *
- * `header` (struct H5FD__onion_history_header)
+ * `header` (H5FD_onion_history_header_t)
  *
  *      In-memory copy of the onion history data header.
  *
- * `summary` (struct H5FD__onion_whole_history)
+ * `summary` (H5FD_onion_whole_history_t)
  *
  *      In-memory copy of the onion history "whole-history".
  *
- * `rev_record` (struct H5FD__onion_revision_record)
+ * `rev_record` (H5FD_onion_revision_record_t)
  *
  * `history_eof` (haddr_t)
  *
@@ -134,10 +131,10 @@ typedef struct H5FD_onion_t {
     char *                             name_recov;
     hbool_t                            is_open_rw;
     hbool_t                            page_align_history;
-    struct H5FD__onion_history_header  header;
-    struct H5FD__onion_whole_history   summary;
-    struct H5FD__onion_revision_record rev_record;
-    struct H5FD__onion_revision_index *rev_index;
+    H5FD_onion_history_header_t        header;
+    H5FD_onion_whole_history_t         summary;
+    H5FD_onion_revision_record_t       rev_record;
+    H5FD__onion_revision_index_t *     rev_index;
     haddr_t                            history_eof;
     haddr_t                            origin_eof;
     haddr_t                            logi_eoa;
@@ -162,11 +159,11 @@ static herr_t  H5FD__onion_term(void);
 static herr_t  H5FD__onion_write(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, const void *);
 
 static int      H5FD__onion_archival_index_list_sort_cmp(const void *, const void *);
-static herr_t   H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file,
+static herr_t   H5FD__onion_ingest_whole_history(H5FD_onion_whole_history_t *whs_out, H5FD_t *raw_file,
                                                  haddr_t addr, haddr_t size);
 static herr_t   H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t, bool new_open);
 static herr_t   H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *);
-static uint64_t H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *file_dest,
+static uint64_t H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs, H5FD_t *file_dest,
                                                 haddr_t off_start, haddr_t filesize_curr);
 
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
@@ -510,7 +507,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static uint64_t
-H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *file_dest, haddr_t off_start,
+H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs, H5FD_t *file_dest, haddr_t off_start,
                                 haddr_t filesize_curr)
 {
     uint32_t       _sum      = 0; /* Required by the API call but unused here */
@@ -588,14 +585,14 @@ done:
 static herr_t
 H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 {
-    uint32_t                            _sum      = 0; /* required */
-    uint64_t                            size      = 0;
-    uint64_t                            phys_addr = 0; /* offset in history file to record start */
-    unsigned char *                     buf       = NULL;
-    herr_t                              ret_value = SUCCEED;
-    struct H5FD__onion_revision_record *rec_p     = &file->rev_record;
-    struct H5FD__onion_whole_history *  whs_p     = &file->summary;
-    struct H5FD__onion_record_pointer * new_list  = NULL;
+    uint32_t                      _sum      = 0; /* required */
+    uint64_t                      size      = 0;
+    uint64_t                      phys_addr = 0; /* offset in history file to record start */
+    unsigned char *               buf       = NULL;
+    herr_t                        ret_value = SUCCEED;
+    H5FD_onion_revision_record_t *rec_p     = &file->rev_record;
+    H5FD_onion_whole_history_t *  whs_p     = &file->summary;
+    H5FD_onion_record_pointer_t * new_list  = NULL;
 
     time_t     rawtime;
     struct tm *info;
@@ -639,7 +636,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
         HDassert(whs_p->record_pointer_list == NULL);
         whs_p->n_revisions = 1;
-        if (NULL == (whs_p->record_pointer_list = H5MM_calloc(sizeof(struct H5FD__onion_record_pointer))))
+        if (NULL == (whs_p->record_pointer_list = H5MM_calloc(sizeof(H5FD_onion_record_pointer_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
 
         whs_p->record_pointer_list[0].phys_addr   = phys_addr;
@@ -655,11 +652,10 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
         HDassert(whs_p->record_pointer_list != NULL);
 
-        if (NULL ==
-            (new_list = H5MM_calloc((whs_p->n_revisions + 1) * sizeof(struct H5FD__onion_record_pointer))))
+        if (NULL == (new_list = H5MM_calloc((whs_p->n_revisions + 1) * sizeof(H5FD_onion_record_pointer_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
         HDmemcpy(new_list, whs_p->record_pointer_list,
-                 sizeof(struct H5FD__onion_record_pointer) * whs_p->n_revisions);
+                 sizeof(H5FD_onion_record_pointer_t) * whs_p->n_revisions);
         H5MM_xfree(whs_p->record_pointer_list);
         whs_p->record_pointer_list                                 = new_list;
         new_list                                                   = NULL;
@@ -833,7 +829,7 @@ get_legit_fapl_id(hid_t fapl_id)
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_history_header_decode(unsigned char *buf, struct H5FD__onion_history_header *header)
+H5FD_onion_history_header_decode(unsigned char *buf, H5FD_onion_history_header_t *header)
 {
     uint32_t       ui32      = 0;
     uint32_t       sum       = 0;
@@ -917,8 +913,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_history_header_encode(struct H5FD__onion_history_header *header, unsigned char *buf,
-                                 uint32_t *sum_out)
+H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned char *buf, uint32_t *sum_out)
 {
     unsigned char *ptr       = buf;
     uint64_t       ret_value = 0;
@@ -985,7 +980,7 @@ H5FD_onion_history_header_encode(struct H5FD__onion_history_header *header, unsi
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_revision_record_decode(unsigned char *buf, struct H5FD__onion_revision_record *record)
+H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
     uint32_t       ui32          = 0;
     uint32_t       page_size     = 0;
@@ -1074,8 +1069,8 @@ H5FD_onion_revision_record_decode(unsigned char *buf, struct H5FD__onion_revisio
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "n_entries in archival index does not match decoded")
     }
     else {
-        struct H5FD__onion_index_entry *entry_p = NULL;
-        size_t                          i       = 0;
+        H5FD_onion_index_entry_t *entry_p = NULL;
+        size_t                    i       = 0;
 
         if (record->archival_index.list == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no archival index entry list")
@@ -1173,8 +1168,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_revision_record_encode(struct H5FD__onion_revision_record *record, unsigned char *buf,
-                                  uint32_t *sum_out)
+H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf, uint32_t *sum_out)
 {
     unsigned char *ptr       = buf;                       /* original pointer */
     uint32_t       vers_u32  = (uint32_t)record->version; /* pad out unused bytes */
@@ -1211,9 +1205,9 @@ H5FD_onion_revision_record_encode(struct H5FD__onion_revision_record *record, un
 
         HDassert(record->archival_index.list != NULL);
         for (i = 0; i < record->archival_index.n_entries; i++) {
-            uint32_t                        sum       = 0;
-            struct H5FD__onion_index_entry *entry_p   = NULL;
-            uint64_t                        logi_addr = 0;
+            uint32_t                  sum       = 0;
+            H5FD_onion_index_entry_t *entry_p   = NULL;
+            uint64_t                  logi_addr = 0;
 
             entry_p   = &record->archival_index.list[i];
             logi_addr = entry_p->logi_page << page_size_log2;
@@ -1274,7 +1268,7 @@ H5FD_onion_revision_record_encode(struct H5FD__onion_revision_record *record, un
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_whole_history_decode(unsigned char *buf, struct H5FD__onion_whole_history *summary)
+H5FD_onion_whole_history_decode(unsigned char *buf, H5FD_onion_whole_history_t *summary)
 {
     uint32_t       ui32        = 0;
     uint32_t       sum         = 0;
@@ -1317,7 +1311,7 @@ H5FD_onion_whole_history_decode(unsigned char *buf, struct H5FD__onion_whole_his
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL -- cannot populate")
 
         for (i = 0; i < n_revisions; i++) {
-            struct H5FD__onion_record_pointer *rpp = &summary->record_pointer_list[i];
+            H5FD_onion_record_pointer_t *rpp = &summary->record_pointer_list[i];
 
             HDmemcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
@@ -1375,8 +1369,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_whole_history_encode(struct H5FD__onion_whole_history *summary, unsigned char *buf,
-                                uint32_t *sum_out)
+H5FD_onion_whole_history_encode(H5FD_onion_whole_history_t *summary, unsigned char *buf, uint32_t *sum_out)
 {
     unsigned char *ptr      = buf;
     uint32_t       vers_u32 = (uint32_t)summary->version; /* pad out unused bytes */
@@ -1419,7 +1412,7 @@ H5FD_onion_whole_history_encode(struct H5FD__onion_whole_history *summary, unsig
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_set_userinfo_in_record(struct H5FD__onion_revision_record *rec_p)
+H5FD__onion_set_userinfo_in_record(H5FD_onion_revision_record_t *rec_p)
 {
     uid_t          uid       = 0;
     struct passwd *user_info = NULL;
@@ -1467,13 +1460,13 @@ static herr_t
 H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, const char *name_onion,
                                   const char *name_recovery, unsigned int flags, haddr_t maxaddr)
 {
-    hid_t                               backing_fapl_id = H5I_INVALID_HID;
-    struct H5FD__onion_history_header * hdr_p           = NULL;
-    struct H5FD__onion_whole_history *  whs_p           = NULL;
-    struct H5FD__onion_revision_record *rec_p           = NULL;
-    unsigned char *                     buf             = NULL;
-    uint64_t                            size            = 0;
-    herr_t                              ret_value       = SUCCEED;
+    hid_t                         backing_fapl_id = H5I_INVALID_HID;
+    H5FD_onion_history_header_t * hdr_p           = NULL;
+    H5FD_onion_whole_history_t *  whs_p           = NULL;
+    H5FD_onion_revision_record_t *rec_p           = NULL;
+    unsigned char *               buf             = NULL;
+    uint64_t                      size            = 0;
+    herr_t                        ret_value       = SUCCEED;
 
     FUNC_ENTER_STATIC;
 
@@ -1579,7 +1572,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ingest_history_header(struct H5FD__onion_history_header *hdr_out, H5FD_t *raw_file, haddr_t addr)
+H5FD__onion_ingest_history_header(H5FD_onion_history_header_t *hdr_out, H5FD_t *raw_file, haddr_t addr)
 {
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
@@ -1624,8 +1617,8 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5FD_t *raw_file,
-                                   const struct H5FD__onion_whole_history *whs, uint64_t revision_id)
+H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *raw_file,
+                                   const H5FD_onion_whole_history_t *whs, uint64_t revision_id)
 {
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
@@ -1747,8 +1740,8 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate comment space")
 
     if (r_out->archival_index.n_entries > 0)
-        if (NULL == (r_out->archival_index.list = H5MM_calloc(r_out->archival_index.n_entries *
-                                                              sizeof(struct H5FD__onion_index_entry))))
+        if (NULL == (r_out->archival_index.list =
+                         H5MM_calloc(r_out->archival_index.n_entries * sizeof(H5FD_onion_index_entry_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate index entry list")
 
     if (H5FD_onion_revision_record_decode(buf, r_out) != size)
@@ -1779,7 +1772,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file, haddr_t addr,
+H5FD__onion_ingest_whole_history(H5FD_onion_whole_history_t *whs_out, H5FD_t *raw_file, haddr_t addr,
                                  haddr_t size)
 {
     unsigned char *buf       = NULL;
@@ -1814,8 +1807,7 @@ H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
     }
 
-    whs_out->record_pointer_list =
-        H5MM_calloc(whs_out->n_revisions * sizeof(struct H5FD__onion_record_pointer));
+    whs_out->record_pointer_list = H5MM_calloc(whs_out->n_revisions * sizeof(H5FD_onion_record_pointer_t));
     if (whs_out->n_revisions > 0 && NULL == whs_out->record_pointer_list) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list");
     }
@@ -1961,13 +1953,13 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* TODO: Move to a new function */
         if (NULL == file->backing_onion) {
             if (H5F_ACC_RDWR & flags) {
-                struct H5FD__onion_history_header * hdr_p      = NULL;
-                struct H5FD__onion_whole_history *  whs_p      = NULL;
-                struct H5FD__onion_revision_record *rec_p      = NULL;
-                unsigned char *                     head_buf   = NULL;
-                unsigned char *                     wh_buf     = NULL;
-                uint64_t                            size       = 0;
-                uint64_t                            saved_size = 0;
+                H5FD_onion_history_header_t * hdr_p      = NULL;
+                H5FD_onion_whole_history_t *  whs_p      = NULL;
+                H5FD_onion_revision_record_t *rec_p      = NULL;
+                unsigned char *               head_buf   = NULL;
+                unsigned char *               wh_buf     = NULL;
+                uint64_t                      size       = 0;
+                uint64_t                      saved_size = 0;
 
                 HDassert(file != NULL);
 
@@ -2311,11 +2303,11 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     /* Read, page-by-page */
     for (i = 0; i < n_pages; i++) {
-        const struct H5FD__onion_index_entry *entry_out_p   = NULL;
-        haddr_t                               page_gap_head = 0; /* start of page to start of buffer */
-        haddr_t                               page_gap_tail = 0; /* end of buffer to end of page */
-        size_t                                page_readsize = 0;
-        uint64_t                              page_i        = page_0 + i;
+        const H5FD_onion_index_entry_t *entry_out_p   = NULL;
+        haddr_t                         page_gap_head = 0; /* start of page to start of buffer */
+        haddr_t                         page_gap_tail = 0; /* end of buffer to end of page */
+        size_t                          page_readsize = 0;
+        uint64_t                        page_i        = page_0 + i;
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
@@ -2467,13 +2459,13 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     /* Write, page-by-page */
     for (i = 0; i < n_pages; i++) {
-        const unsigned char *                 write_buf = buf;
-        struct H5FD__onion_index_entry        new_entry;
-        const struct H5FD__onion_index_entry *entry_out_p   = NULL;
-        haddr_t                               page_gap_head = 0; /* start of page to start of buffer */
-        haddr_t                               page_gap_tail = 0; /* end of buffer to end of page */
-        size_t                                page_n_used   = 0; /* nbytes from buffer for this page-write */
-        uint64_t                              page_i        = page_0 + i;
+        const unsigned char *           write_buf = buf;
+        H5FD_onion_index_entry_t        new_entry;
+        const H5FD_onion_index_entry_t *entry_out_p   = NULL;
+        haddr_t                         page_gap_head = 0; /* start of page to start of buffer */
+        haddr_t                         page_gap_tail = 0; /* end of buffer to end of page */
+        size_t                          page_n_used   = 0; /* nbytes from buffer for this page-write */
+        uint64_t                        page_i        = page_0 + i;
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
@@ -2600,7 +2592,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 hbool_t
-H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *aix)
+H5FD_onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
     hbool_t ret_value = TRUE;
 
@@ -2640,15 +2632,15 @@ done:
  *-----------------------------------------------------------------------------
  */
 int
-H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uint64_t logi_page,
-                               const struct H5FD__onion_index_entry **entry_out_p)
+H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t logi_page,
+                               const H5FD_onion_index_entry_t **entry_out_p)
 {
-    uint64_t                        low       = 0;
-    uint64_t                        high      = 0;
-    uint64_t                        n         = 0;
-    uint64_t                        range     = 0;
-    struct H5FD__onion_index_entry *x         = NULL;
-    int                             ret_value = 0;
+    uint64_t                  low       = 0;
+    uint64_t                  high      = 0;
+    uint64_t                  n         = 0;
+    uint64_t                  range     = 0;
+    H5FD_onion_index_entry_t *x         = NULL;
+    int                       ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
@@ -2722,8 +2714,8 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
 
     for (i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
-        struct H5FD__onion_revision_index_hash_chain_node *next_p = NULL;
-        struct H5FD__onion_revision_index_hash_chain_node *node_p = rix->_hash_table[i];
+        H5FD_onion_revision_index_hash_chain_node_t *next_p = NULL;
+        H5FD_onion_revision_index_hash_chain_node_t *node_p = rix->_hash_table[i];
 
         if (node_p != NULL)
             rix->_hash_table_n_keys_populated -= 1;
@@ -2770,8 +2762,8 @@ H5FD_onion_revision_index_init(uint32_t page_size)
     if (NULL == (rix = H5MM_calloc(sizeof(H5FD__onion_revision_index_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate index")
 
-    if (NULL == (rix->_hash_table =
-                     H5MM_calloc(table_size * sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+    if (NULL ==
+        (rix->_hash_table = H5MM_calloc(table_size * sizeof(H5FD_onion_revision_index_hash_chain_node_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate hash table")
 
     rix->version   = H5FD__ONION_REVISION_INDEX_VERSION_CURR;
@@ -2811,12 +2803,12 @@ done:
 static herr_t
 H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
 {
-    struct H5FD__onion_revision_index_hash_chain_node **new_table            = NULL;
-    uint64_t                                            i                    = 0;
-    uint64_t                                            new_size_log2        = rix->_hash_table_size_log2 + 1;
-    uint64_t                                            new_size             = U64_EXP2(new_size_log2);
-    uint64_t                                            new_n_keys_populated = 0;
-    herr_t                                              ret_value            = SUCCEED;
+    H5FD_onion_revision_index_hash_chain_node_t **new_table            = NULL;
+    uint64_t                                      i                    = 0;
+    uint64_t                                      new_size_log2        = rix->_hash_table_size_log2 + 1;
+    uint64_t                                      new_size             = U64_EXP2(new_size_log2);
+    uint64_t                                      new_n_keys_populated = 0;
+    herr_t                                        ret_value            = SUCCEED;
 
     FUNC_ENTER_STATIC;
 
@@ -2824,14 +2816,13 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
     HDassert(rix->_hash_table);
 
-    if (NULL ==
-        (new_table = H5MM_calloc(new_size * sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+    if (NULL == (new_table = H5MM_calloc(new_size * sizeof(H5FD_onion_revision_index_hash_chain_node_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new hash table")
 
     for (i = 0; i < rix->_hash_table_size; i++) {
         while (rix->_hash_table[i] != NULL) {
-            struct H5FD__onion_revision_index_hash_chain_node *node = NULL;
-            uint64_t                                           key  = 0;
+            H5FD_onion_revision_index_hash_chain_node_t *node = NULL;
+            uint64_t                                     key  = 0;
 
             /* Pop entry off of bucket stack and re-hash */
             node                = rix->_hash_table[i];
@@ -2876,13 +2867,12 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
-                                 const struct H5FD__onion_index_entry *entry)
+H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *rix, const H5FD_onion_index_entry_t *entry)
 {
-    uint64_t                                            key         = 0;
-    struct H5FD__onion_revision_index_hash_chain_node * node        = NULL;
-    struct H5FD__onion_revision_index_hash_chain_node **append_dest = NULL;
-    herr_t                                              ret_value   = SUCCEED;
+    uint64_t                                      key         = 0;
+    H5FD_onion_revision_index_hash_chain_node_t * node        = NULL;
+    H5FD_onion_revision_index_hash_chain_node_t **append_dest = NULL;
+    herr_t                                        ret_value   = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT;
 
@@ -2915,7 +2905,7 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
                 if (entry->phys_addr != node->entry_data.phys_addr) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "physical address mismatch");
                 }
-                HDmemcpy(&node->entry_data, entry, sizeof(struct H5FD__onion_index_entry));
+                HDmemcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
                 append_dest = NULL; /* Node updated, do not append */
                 break;
             }
@@ -2924,11 +2914,11 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
 
     /* Add new entry to bucket chain */
     if (append_dest != NULL) {
-        if (NULL == (node = H5MM_malloc(sizeof(struct H5FD__onion_revision_index_hash_chain_node))))
+        if (NULL == (node = H5MM_malloc(sizeof(H5FD_onion_revision_index_hash_chain_node_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node")
         node->version = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
         node->next    = NULL;
-        HDmemcpy(&node->entry_data, entry, sizeof(struct H5FD__onion_index_entry));
+        HDmemcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
         *append_dest = node;
         rix->n_entries++;
     }
@@ -2954,7 +2944,7 @@ done:
  */
 int
 H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64_t logi_page,
-                               const struct H5FD__onion_index_entry **entry_out_p)
+                               const H5FD_onion_index_entry_t **entry_out_p)
 {
     uint64_t key       = 0;
     int      ret_value = 0;
@@ -2970,7 +2960,7 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
     HDassert(key < rix_p->_hash_table_size);
 
     if (rix_p->_hash_table[key] != NULL) {
-        struct H5FD__onion_revision_index_hash_chain_node *node = NULL;
+        H5FD_onion_revision_index_hash_chain_node_t *node = NULL;
 
         for (node = rix_p->_hash_table[key]; node != NULL; node = node->next) {
             if (logi_page == node->entry_data.logi_page) {
@@ -2993,8 +2983,8 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
 static int
 H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
 {
-    const struct H5FD__onion_index_entry *a = (const struct H5FD__onion_index_entry *)_a;
-    const struct H5FD__onion_index_entry *b = (const struct H5FD__onion_index_entry *)_b;
+    const H5FD_onion_index_entry_t *a = (const H5FD_onion_index_entry_t *)_a;
+    const H5FD_onion_index_entry_t *b = (const H5FD_onion_index_entry_t *)_b;
 
     if (a->logi_page < b->logi_page)
         return -1;
@@ -3023,12 +3013,12 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
  */
 herr_t
 H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_index_t *rix,
-                                                    struct H5FD__onion_archival_index * aix)
+                                                    H5FD_onion_archival_index_t *       aix)
 {
-    uint64_t                          i         = 0;
-    uint64_t                          n_kept    = 0;
-    struct H5FD__onion_index_entry *  kept_list = NULL;
-    struct H5FD__onion_archival_index new_aix   = {
+    uint64_t                    i         = 0;
+    uint64_t                    n_kept    = 0;
+    H5FD_onion_index_entry_t *  kept_list = NULL;
+    H5FD_onion_archival_index_t new_aix   = {
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 0, /* page_size_log2 tbd */
         0,                                          /* n_entries */
         NULL,                                       /* list pointer (allocated later) */
@@ -3050,21 +3040,20 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
     /* Add all revision index entries to new archival list */
     new_aix.page_size_log2 = aix->page_size_log2;
 
-    if (NULL == (new_aix.list = H5MM_calloc(rix->n_entries * sizeof(struct H5FD__onion_index_entry))))
+    if (NULL == (new_aix.list = H5MM_calloc(rix->n_entries * sizeof(H5FD_onion_index_entry_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate new archival index list")
 
     for (i = 0; i < rix->_hash_table_size; i++) {
-        const struct H5FD__onion_revision_index_hash_chain_node *node_p = NULL;
+        const H5FD_onion_revision_index_hash_chain_node_t *node_p = NULL;
 
         for (node_p = rix->_hash_table[i]; node_p != NULL; node_p = node_p->next) {
-            HDmemcpy(&new_aix.list[new_aix.n_entries], &node_p->entry_data,
-                     sizeof(struct H5FD__onion_index_entry));
+            HDmemcpy(&new_aix.list[new_aix.n_entries], &node_p->entry_data, sizeof(H5FD_onion_index_entry_t));
             new_aix.n_entries++;
         }
     }
 
     /* Sort the new archival list */
-    HDqsort(new_aix.list, new_aix.n_entries, sizeof(struct H5FD__onion_index_entry),
+    HDqsort(new_aix.list, new_aix.n_entries, sizeof(H5FD_onion_index_entry_t),
             H5FD__onion_archival_index_list_sort_cmp);
 
     /* Add the old archival index entries to a 'kept' list containing the
@@ -3075,15 +3064,15 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
      * archival list.
      */
     if (aix->n_entries > 0)
-        if (NULL == (kept_list = H5MM_calloc(aix->n_entries * sizeof(struct H5FD__onion_index_entry))))
+        if (NULL == (kept_list = H5MM_calloc(aix->n_entries * sizeof(H5FD_onion_index_entry_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
 
     for (i = 0; i < aix->n_entries; i++) {
-        const struct H5FD__onion_index_entry *_p = NULL;
+        const H5FD_onion_index_entry_t *_p = NULL;
 
         /* Add only if page not already added from revision index */
         if (H5FD_onion_archival_index_find(&new_aix, aix->list[i].logi_page, &_p) == 0) {
-            HDmemcpy(&kept_list[n_kept], &aix->list[i], sizeof(struct H5FD__onion_index_entry));
+            HDmemcpy(&kept_list[n_kept], &aix->list[i], sizeof(H5FD_onion_index_entry_t));
             n_kept++;
         }
     }
@@ -3092,22 +3081,21 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
      * the revision list entries and the kept list entries
      */
     H5MM_xfree(aix->list);
-    if (NULL ==
-        (aix->list = H5MM_calloc((new_aix.n_entries + n_kept) * sizeof(struct H5FD__onion_index_entry))))
+    if (NULL == (aix->list = H5MM_calloc((new_aix.n_entries + n_kept) * sizeof(H5FD_onion_index_entry_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list")
 
     /* Copy (new) revision list entries to replacement list */
-    HDmemcpy(aix->list, new_aix.list, sizeof(struct H5FD__onion_index_entry) * new_aix.n_entries);
+    HDmemcpy(aix->list, new_aix.list, sizeof(H5FD_onion_index_entry_t) * new_aix.n_entries);
     aix->n_entries = new_aix.n_entries;
 
     /* Copy (old) kept archival list entries to replacement list */
     if (n_kept > 0) {
-        HDmemcpy(&aix->list[aix->n_entries], kept_list, sizeof(struct H5FD__onion_index_entry) * n_kept);
+        HDmemcpy(&aix->list[aix->n_entries], kept_list, sizeof(H5FD_onion_index_entry_t) * n_kept);
         aix->n_entries += n_kept;
     }
 
     /* Sort this list */
-    HDqsort(aix->list, aix->n_entries, sizeof(struct H5FD__onion_index_entry),
+    HDqsort(aix->list, aix->n_entries, sizeof(H5FD_onion_index_entry_t),
             H5FD__onion_archival_index_list_sort_cmp);
 
 done:

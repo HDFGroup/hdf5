@@ -29,11 +29,11 @@
 #define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN                      255
 #define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST                   (uint64_t)(-1)
 
-enum H5FD_onion_target_file_constant {
-    H5FD_ONION_STORE_TARGET_H5,    /* onion history as part of H5 file */
-    H5FD_ONION_STORE_TARGET_ONION, /* separate, single "onion" file */
+typedef enum H5FD_onion_target_file_constant_t {
+    H5FD_ONION_STORE_TARGET_H5,    /* Onion history as part of HDF5 file */
+    H5FD_ONION_STORE_TARGET_ONION, /* Separate, single "onion" file */
                                    /* TODO: other storage location/scheme? */
-};
+} H5FD_onion_target_file_constant_t;
 
 /*-----------------------------------------------------------------------------
  * Structure    H5FD_onion_fapl_info_t
@@ -50,8 +50,8 @@ enum H5FD_onion_target_file_constant {
  *              original file.
  *
  * page_size:   Size of the amended data pages. If opening an existing file,
- *              must equal the existing page size or zero (0). If creating a
- *              new file or an initial revision of an existing file, must be a
+ *              must equal the existing page size or zero. If creating a new
+ *              file or an initial revision of an existing file, must be a
  *              power of 2.
  *
  * store_target:
@@ -116,7 +116,7 @@ typedef struct H5FD_onion_fapl_info_t {
     uint8_t                              version;
     hid_t                                backing_fapl_id;
     uint32_t                             page_size;
-    enum H5FD_onion_target_file_constant store_target;
+    H5FD_onion_target_file_constant_t    store_target;
     uint64_t                             revision_id;
     uint8_t                              force_write_open;
     uint8_t                              creation_flags;
