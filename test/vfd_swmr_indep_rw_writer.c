@@ -46,7 +46,6 @@
 #define DATA_RANK    2
 #define NUM_ATTEMPTS 100
 
-
 /* Structure for filling the dataset values. Adapted from vfd_swmr_bigset_writer.c. */
 typedef struct _mat {
     unsigned rows, cols;
@@ -95,7 +94,7 @@ state_initializer(void)
                      .first_proc     = true};
 }
 
-/* Obtain the data value at index [i][j] for the 2D matrix. 
+/* Obtain the data value at index [i][j] for the 2D matrix.
    All the routines related to the matrix are adapted from the vfd_swmr_bigset_writer.c. */
 static uint32_t
 matget(const mat_t *mat, unsigned i, unsigned j)
@@ -355,8 +354,8 @@ error:
     return false;
 }
 
-/* Initialize the configuration and the file creation and access property lists 
- *  for the VFD SMWR independence of the reader/writer test. 
+/* Initialize the configuration and the file creation and access property lists
+ *  for the VFD SMWR independence of the reader/writer test.
  */
 static bool
 indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
@@ -507,9 +506,9 @@ error:
     return false;
 }
 
-/* Verify a dataset, this routine must be called after the open_dset(). 
+/* Verify a dataset, this routine must be called after the open_dset().
  * It will use the dataset ID assigned by open_dset().
- */  
+ */
 static bool
 vrfy_dset(const state_t *s, mat_t *mat)
 {
