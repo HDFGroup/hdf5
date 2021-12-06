@@ -1656,12 +1656,10 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF")
 
-	/* recovery-open may have EOA below revision record */
-    if ((H5FD_get_eoa(raw_file, H5FD_MEM_DRAW) < (addr + size))
-    &&  (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0))
-    {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL,
-                "can't modify EOA");
+    /* recovery-open may have EOA below revision record */
+    if ((H5FD_get_eoa(raw_file, H5FD_MEM_DRAW) < (addr + size)) &&
+        (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)) {
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA");
     }
 
     /* Perform binary search on records to find target revision by ID.
@@ -2086,12 +2084,13 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                 fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
-			if (fa->revision_id == 0) {
-				file->rev_record.logi_eof = canon_eof;
-			} else if (file->summary.n_revisions > 0 &&
-                H5FD__onion_ingest_revision_record(
-                    &file->rev_record, file->backing_onion, &file->summary,
-                    MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) < 0) {
+            if (fa->revision_id == 0) {
+                file->rev_record.logi_eof = canon_eof;
+            }
+            else if (file->summary.n_revisions > 0 &&
+                     H5FD__onion_ingest_revision_record(
+                         &file->rev_record, file->backing_onion, &file->summary,
+                         MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) < 0) {
 #if 0
                 HDprintf("fa->revision_id: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_id,
                          file->summary.n_revisions, MIN(fa->revision_id, file->summary.n_revisions));

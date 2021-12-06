@@ -1875,11 +1875,11 @@ error:
 static int
 verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl_info_t *onion_info)
 {
-    H5FD_t *       file    = NULL; /* virtual file to look at raw file contents */
-    unsigned char *act_buf = NULL; /* allocated area for actual file bytes */
-    hid_t          fapl_id = onion_info->backing_fapl_id;
-    herr_t err_ret = FAIL;
-    unsigned char hdr_exp_bytes[] = {
+    H5FD_t *       file            = NULL; /* virtual file to look at raw file contents */
+    unsigned char *act_buf         = NULL; /* allocated area for actual file bytes */
+    hid_t          fapl_id         = onion_info->backing_fapl_id;
+    herr_t         err_ret         = FAIL;
+    unsigned char  hdr_exp_bytes[] = {
         'O', 'H', 'D', 'H', 1, 1, 0, 0, 0, 0, 0, 0, /* page-size encoded below */
         0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0,   0,   20,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* checksum encoded below */
@@ -1925,9 +1925,11 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     if (NULL == act_buf)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         err_ret = H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 1, act_buf);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
     if (err_ret != FAIL)
         TEST_ERROR; /* cannot read from empty file */
 
@@ -3236,7 +3238,7 @@ test_integration_create(void)
 
     // Read back data to check for validtiy
     onion_info.revision_id = 0;
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -3286,8 +3288,8 @@ test_integration_create(void)
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
             // printf("i: %d, j: %d\n", i, j);
-            //int expected = i * 3 + j + 5;
-            //int expected = i * 6 + j + 1;
+            // int expected = i * 3 + j + 5;
+            // int expected = i * 6 + j + 1;
             int expected = i * j - j;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
@@ -3310,10 +3312,10 @@ test_integration_create(void)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
-/////
-    //onion_info.revision_id = 2;
+    /////
+    // onion_info.revision_id = 2;
     onion_info.revision_id = 1;
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -3361,8 +3363,8 @@ test_integration_create(void)
 
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
-            //printf("i: %d, j: %d\n", i, j);
-            //int expected = i * 3 + j + 5;
+            // printf("i: %d, j: %d\n", i, j);
+            // int expected = i * 3 + j + 5;
             int expected = i * 6 + j + 1;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
@@ -3386,9 +3388,7 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-
-
-/////
+    /////
     onion_info.revision_id = 2;
     // onion_info.revision_id = 1;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
