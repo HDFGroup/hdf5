@@ -84,7 +84,7 @@ static void onion_filepaths_destroy(struct onion_filepaths *);
 static struct onion_filepaths *onion_filepaths_init(const char *, H5FD_onion_fapl_info_t *);
 #if 0
 static int is_onion_data_page_aligned(
-        const struct H5FD__onion_history_header *);
+        const H5FD_onion_history_header_t *);
 static uint32_t up_size_to_page_boundary(uint64_t, uint32_t);
 #endif
 
@@ -161,7 +161,7 @@ onion_filepaths_destroy(struct onion_filepaths *s)
 
 #if 0
 static int
-is_onion_data_page_aligned(const struct H5FD__onion_history_header *header)
+is_onion_data_page_aligned(const H5FD_onion_history_header_t *header)
 {
     return header->flags & H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
 }
@@ -191,26 +191,26 @@ static int
 test_archival_index(void)
 {
     /* We can ignore each entry's physical address and checksum values */
-    struct H5FD__onion_index_entry e0                   = {1, 474};
-    struct H5FD__onion_index_entry e1                   = {4, 558};
-    struct H5FD__onion_index_entry e2                   = {5, 306};
-    struct H5FD__onion_index_entry e3                   = {9, 515};
-    struct H5FD__onion_index_entry e4                   = {14, 386};
-    struct H5FD__onion_index_entry e5                   = {18, 90};
-    struct H5FD__onion_index_entry e6                   = {19, 94};
-    struct H5FD__onion_index_entry e7                   = {20, 509};
-    struct H5FD__onion_index_entry sorted[8]            = {e0, e1, e2, e3, e4, e5, e6, e7};
-    struct H5FD__onion_index_entry sorted_duplicates[8] = {e0, e1, e2, e2, e4, e5, e6, e7};
-    struct H5FD__onion_index_entry sorted_incomplete[8] = {e1, e3, e4, e5};
+    H5FD_onion_index_entry_t e0                   = {1, 474};
+    H5FD_onion_index_entry_t e1                   = {4, 558};
+    H5FD_onion_index_entry_t e2                   = {5, 306};
+    H5FD_onion_index_entry_t e3                   = {9, 515};
+    H5FD_onion_index_entry_t e4                   = {14, 386};
+    H5FD_onion_index_entry_t e5                   = {18, 90};
+    H5FD_onion_index_entry_t e6                   = {19, 94};
+    H5FD_onion_index_entry_t e7                   = {20, 509};
+    H5FD_onion_index_entry_t sorted[8]            = {e0, e1, e2, e3, e4, e5, e6, e7};
+    H5FD_onion_index_entry_t sorted_duplicates[8] = {e0, e1, e2, e2, e4, e5, e6, e7};
+    H5FD_onion_index_entry_t sorted_incomplete[8] = {e1, e3, e4, e5};
     /* partially-sorted list also aligned to 2 * page-size */
-    struct H5FD__onion_index_entry    sorted_partial[8] = {e1, e4, e5, e7, e0, e6, e2, e3}; /* 0..3 sorted */
-    struct H5FD__onion_index_entry    unsorted[8]       = {e3, e1, e4, e5, e0, e6, e2, e7};
-    struct H5FD__onion_archival_index aix               = {
+    H5FD_onion_index_entry_t    sorted_partial[8] = {e1, e4, e5, e7, e0, e6, e2, e3}; /* 0..3 sorted */
+    H5FD_onion_index_entry_t    unsorted[8]       = {e3, e1, e4, e5, e0, e6, e2, e7};
+    H5FD_onion_archival_index_t aix               = {
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 1, /* page_size_log2 */
         8,      /* list must be populated and sorted through 0 .. (count-1) */
         sorted, /* list */
     };
-    const struct H5FD__onion_index_entry *entry_out_p = NULL;
+    const H5FD_onion_index_entry_t *entry_out_p = NULL;
 
     TESTING("archival index");
 
@@ -319,12 +319,12 @@ error:
 static int
 test_revision_index(void)
 {
-    struct H5FD__onion_revision_index *rix_p = NULL;
-    struct H5FD__onion_index_entry     entry = {
+    H5FD__onion_revision_index_t *rix_p = NULL;
+    H5FD_onion_index_entry_t      entry = {
         42,     /* logi_page */
         111112, /* phys_addr */
     };
-    const struct H5FD__onion_index_entry *entry_out_p = NULL;
+    const H5FD_onion_index_entry_t *entry_out_p = NULL;
 
     TESTING("revision index");
 
@@ -424,15 +424,15 @@ error:
 static int
 test_revision_index_collisions(void)
 {
-    H5FD__onion_revision_index_t * rix_p = NULL;
-    struct H5FD__onion_index_entry entry = {
+    H5FD__onion_revision_index_t *rix_p = NULL;
+    H5FD_onion_index_entry_t      entry = {
         0, /* logi_page */
         0, /* phys_addr */
     };
-    const struct H5FD__onion_index_entry *entry_out_p       = NULL;
-    uint64_t                              i                 = 0;
-    const uint64_t                        n_insert          = 40;
-    const uint64_t                        offset_from_power = 5;
+    const H5FD_onion_index_entry_t *entry_out_p       = NULL;
+    uint64_t                        i                 = 0;
+    const uint64_t                  n_insert          = 40;
+    const uint64_t                  offset_from_power = 5;
 
     TESTING("revision index collisions");
 
@@ -488,14 +488,14 @@ error:
 static int
 test_revision_index_resizing(void)
 {
-    H5FD__onion_revision_index_t * rix_p = NULL;
-    struct H5FD__onion_index_entry entry = {
+    H5FD__onion_revision_index_t *rix_p = NULL;
+    H5FD_onion_index_entry_t      entry = {
         0, /* logi_page */
         0, /* phys_addr */
     };
-    const struct H5FD__onion_index_entry *entry_out_p = NULL;
-    uint64_t                              i           = 0;
-    const uint64_t n_insert = U64_EXP2((H5FD__ONION_REVISION_INDEX_STARTING_SIZE_LOG2 + 3));
+    const H5FD_onion_index_entry_t *entry_out_p = NULL;
+    uint64_t                        i           = 0;
+    const uint64_t                  n_insert = U64_EXP2((H5FD__ONION_REVISION_INDEX_STARTING_SIZE_LOG2 + 3));
 
     TESTING("revision index resizing");
 
@@ -550,12 +550,12 @@ error:
 static int
 test_revision_index_to_archival_index(void)
 {
-    H5FD__onion_revision_index_t * rix_p     = NULL;
-    struct H5FD__onion_index_entry rix_entry = {
+    H5FD__onion_revision_index_t *rix_p     = NULL;
+    H5FD_onion_index_entry_t      rix_entry = {
         0, /* logi_page */
         0, /* phys_addr */
     };
-    struct H5FD__onion_archival_index aix = {
+    H5FD_onion_archival_index_t aix = {
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
         5, /* page_size_log2 */
         0, /* n_entries to be set */
@@ -601,8 +601,8 @@ test_revision_index_to_archival_index(void)
         TEST_ERROR; /* Failed to resize and/or update archival index info */
 
     for (i = 0; i < n_insert; i++) {
-        const struct H5FD__onion_index_entry *aix_entry_p = NULL;
-        uint64_t                              n           = 2003 * (i + 1) + 47;
+        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+        uint64_t                        n           = 2003 * (i + 1) + 47;
 
         aix_entry_p = &aix.list[i];
 
@@ -616,7 +616,7 @@ test_revision_index_to_archival_index(void)
 
     H5MM_xfree(aix.list);
     aix.list = NULL;
-    if (NULL == (aix.list = H5MM_malloc(sizeof(struct H5FD__onion_index_entry) * 2)))
+    if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
         TEST_ERROR;
     aix.list[0].logi_page = 47;
     aix.list[0].phys_addr = 47 * 13;
@@ -637,8 +637,8 @@ test_revision_index_to_archival_index(void)
         TEST_ERROR;
 
     for (i = 0; i < (n_insert + 2); i++) {
-        const struct H5FD__onion_index_entry *aix_entry_p = NULL;
-        uint64_t                              n           = 2003 * i + 47;
+        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+        uint64_t                        n           = 2003 * i + 47;
 
         aix_entry_p = &aix.list[i];
 
@@ -652,7 +652,7 @@ test_revision_index_to_archival_index(void)
 
     H5MM_xfree(aix.list);
     aix.list = NULL;
-    if (NULL == (aix.list = H5MM_malloc(sizeof(struct H5FD__onion_index_entry) * 2)))
+    if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
         TEST_ERROR;
     aix.list[0].logi_page = 2003 * (n_insert / 2) + 47;
     aix.list[0].phys_addr = 103;
@@ -673,8 +673,8 @@ test_revision_index_to_archival_index(void)
         TEST_ERROR;
 
     for (i = 0; i < n_insert; i++) {
-        const struct H5FD__onion_index_entry *aix_entry_p = NULL;
-        uint64_t                              n           = 2003 * (i + 1) + 47;
+        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+        uint64_t                        n           = 2003 * (i + 1) + 47;
 
         aix_entry_p = &aix.list[i];
 
@@ -922,13 +922,13 @@ test_header_encode_decode(void)
         88,   0,    0,    0,   0,    0,    0, 0,                /* whole_history_size */
         0,    0,    0,    0                                     /* sum populated below */
     };
-    unsigned char *                   ptr      = NULL;
-    uint32_t                          sum      = 0;
-    uint32_t                          sum_out  = 0;
-    size_t                            i        = 0;
-    uint64_t                          size_ret = 0;
-    struct H5FD__onion_history_header hdr;
-    struct H5FD__onion_history_header hdr_out;
+    unsigned char *             ptr      = NULL;
+    uint32_t                    sum      = 0;
+    uint32_t                    sum_out  = 0;
+    size_t                      i        = 0;
+    uint64_t                    size_ret = 0;
+    H5FD_onion_history_header_t hdr;
+    H5FD_onion_history_header_t hdr_out;
 
     TESTING("encode/decode history header");
 
@@ -1043,17 +1043,17 @@ test_whole_history_encode_decode_empty(void)
         1,   0,   0,   0,                          /* NOTE: update version w/ "current" as needed */
         0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *                  ptr      = NULL;
-    uint32_t                         sum      = 0;
-    uint32_t                         sum_out  = 0;
-    size_t                           i        = 0;
-    uint64_t                         size_ret = 0;
-    struct H5FD__onion_whole_history whs      = {
+    unsigned char *            ptr      = NULL;
+    uint32_t                   sum      = 0;
+    uint32_t                   sum_out  = 0;
+    size_t                     i        = 0;
+    uint64_t                   size_ret = 0;
+    H5FD_onion_whole_history_t whs      = {
         H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
         NULL,                                      /* list */
         0,                                         /* checksum */
     };
-    struct H5FD__onion_whole_history whs_out = {
+    H5FD_onion_whole_history_t whs_out = {
         H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
         NULL,                                      /* list */
         0,                                         /* checksum */
@@ -1165,15 +1165,15 @@ test_whole_history_encode_decode(void)
         /* final checksum */
         0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *                  buf_p   = NULL;
-    uint32_t                         sum_out = 0;
-    size_t                           i       = 0;
-    struct H5FD__onion_whole_history whs     = {
+    unsigned char *            buf_p   = NULL;
+    uint32_t                   sum_out = 0;
+    size_t                     i       = 0;
+    H5FD_onion_whole_history_t whs     = {
         H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 3, /* n_revisions */
         NULL,                                      /* list set below */
         0,                                         /* checksum  not set by us */
     };
-    struct H5FD__onion_whole_history whs_out = {
+    H5FD_onion_whole_history_t whs_out = {
         H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions must start as zero */
         NULL,                                      /* list */
         0,                                         /* checksum */
@@ -1186,8 +1186,8 @@ test_whole_history_encode_decode(void)
     if (80 != exp_size)
         TEST_ERROR;
 
-    whs.record_pointer_list = (struct H5FD__onion_record_pointer *)HDcalloc(
-        whs.n_revisions, sizeof(struct H5FD__onion_record_pointer));
+    whs.record_pointer_list =
+        (H5FD_onion_record_pointer_t *)HDcalloc(whs.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs.record_pointer_list)
         TEST_ERROR;
 
@@ -1245,8 +1245,8 @@ test_whole_history_encode_decode(void)
     /* True decode requires allocating space for record pointers
      */
 
-    whs_out.record_pointer_list = (struct H5FD__onion_record_pointer *)HDcalloc(
-        whs_out.n_revisions, sizeof(struct H5FD__onion_record_pointer));
+    whs_out.record_pointer_list =
+        (H5FD_onion_record_pointer_t *)HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
         TEST_ERROR;
 
@@ -1261,8 +1261,8 @@ test_whole_history_encode_decode(void)
     if (NULL == whs_out.record_pointer_list)
         TEST_ERROR;
     for (i = 0; i < whs.n_revisions; i++) {
-        struct H5FD__onion_record_pointer exp_rp = whs.record_pointer_list[i];
-        struct H5FD__onion_record_pointer act_rp = whs_out.record_pointer_list[i];
+        H5FD_onion_record_pointer_t exp_rp = whs.record_pointer_list[i];
+        H5FD_onion_record_pointer_t act_rp = whs_out.record_pointer_list[i];
 
         if (exp_rp.phys_addr != act_rp.phys_addr)
             TEST_ERROR;
@@ -1340,14 +1340,14 @@ test_revision_record_encode_decode(void)
         /* final checksum */
         0, 0, 0, 0 /* sum populated below */ /* checksum                  */
     };
-    unsigned char *                    buf_p = NULL;
-    size_t                             i     = 0;
-    uint64_t                           size_ret;
-    struct H5FD__onion_revision_record r_out;
-    uint32_t                           sum_out     = 0;
-    char                               username[8] = "JohnDoe";
-    char                               comment[25] = "Example comment message.";
-    struct H5FD__onion_revision_record record      = {
+    unsigned char *              buf_p = NULL;
+    size_t                       i     = 0;
+    uint64_t                     size_ret;
+    H5FD_onion_revision_record_t r_out;
+    uint32_t                     sum_out     = 0;
+    char                         username[8] = "JohnDoe";
+    char                         comment[25] = "Example comment message.";
+    H5FD_onion_revision_record_t record      = {
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
         5,             /* revision ID */
         2,             /* parent revision ID */
@@ -1379,8 +1379,8 @@ test_revision_record_encode_decode(void)
         TEST_ERROR;
 
     HDmemcpy(record.time_of_creation, "19411207T190643Z", 16);
-    record.archival_index.list = (struct H5FD__onion_index_entry *)HDcalloc(
-        record.archival_index.n_entries, sizeof(struct H5FD__onion_index_entry));
+    record.archival_index.list = (H5FD_onion_index_entry_t *)HDcalloc(record.archival_index.n_entries,
+                                                                      sizeof(H5FD_onion_index_entry_t));
     if (NULL == record.archival_index.list)
         TEST_ERROR;
     /* convert logi_page and should match address in expected buffer */
@@ -1495,8 +1495,8 @@ test_revision_record_encode_decode(void)
     r_out.comment = (char *)HDcalloc(r_out.comment_size, sizeof(char));
     if (NULL == r_out.comment)
         TEST_ERROR;
-    r_out.archival_index.list = (struct H5FD__onion_index_entry *)HDcalloc(
-        r_out.archival_index.n_entries, sizeof(struct H5FD__onion_index_entry));
+    r_out.archival_index.list = (H5FD_onion_index_entry_t *)HDcalloc(r_out.archival_index.n_entries,
+                                                                     sizeof(H5FD_onion_index_entry_t));
     if (NULL == r_out.archival_index.list)
         TEST_ERROR;
 
@@ -1541,8 +1541,8 @@ test_revision_record_encode_decode(void)
     if (record.archival_index.n_entries != r_out.archival_index.n_entries)
         TEST_ERROR;
     for (i = 0; i < record.archival_index.n_entries; i++) {
-        struct H5FD__onion_index_entry *ep = &record.archival_index.list[i];
-        struct H5FD__onion_index_entry *ap = &r_out.archival_index.list[i];
+        H5FD_onion_index_entry_t *ep = &record.archival_index.list[i];
+        H5FD_onion_index_entry_t *ap = &r_out.archival_index.list[i];
 
         if (ep->phys_addr != ap->phys_addr)
             TEST_ERROR;
@@ -1651,13 +1651,13 @@ error:
 static int
 verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filter)
 {
-    unsigned char *                    buf = NULL; /* allocated area for actual file bytes */
-    struct H5FD__onion_history_header  hdr_out;
-    struct H5FD__onion_whole_history   whs_out;
-    struct H5FD__onion_revision_record rev_out;
-    uint64_t                           filesize = 0;
-    uint64_t                           readsize = 0;
-    size_t                             i        = 0;
+    unsigned char *              buf = NULL; /* allocated area for actual file bytes */
+    H5FD_onion_history_header_t  hdr_out;
+    H5FD_onion_whole_history_t   whs_out;
+    H5FD_onion_revision_record_t rev_out;
+    uint64_t                     filesize = 0;
+    uint64_t                     readsize = 0;
+    size_t                       i        = 0;
 
     hdr_out.version = H5FD__ONION_HEADER_VERSION_CURR;
 
@@ -1725,15 +1725,15 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         TEST_ERROR;
 
     /* Final read, populate pointers to revision records */
-    whs_out.record_pointer_list = (struct H5FD__onion_record_pointer *)HDcalloc(
-        whs_out.n_revisions, sizeof(struct H5FD__onion_record_pointer));
+    whs_out.record_pointer_list =
+        (H5FD_onion_record_pointer_t *)HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
         TEST_ERROR;
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != readsize)
         TEST_ERROR;
 
     /* Re-use buffer space to sanity-check checksum for record pointer(s). */
-    HDassert(readsize >= sizeof(struct H5FD__onion_record_pointer));
+    HDassert(readsize >= sizeof(H5FD_onion_record_pointer_t));
     for (i = 0; i < whs_out.n_revisions; i++) {
 #if 0
         uint32_t sum = 0;
@@ -1755,8 +1755,8 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
      */
 
     for (i = 0; i < whs_out.n_revisions; i++) {
-        struct H5FD__onion_record_pointer *rpp = &whs_out.record_pointer_list[i];
-        struct expected_revision *         erp = &filter->revisions[i];
+        H5FD_onion_record_pointer_t *rpp = &whs_out.record_pointer_list[i];
+        struct expected_revision *   erp = &filter->revisions[i];
 
         rev_out.archival_index.list           = NULL;
         rev_out.archival_index.n_entries      = 0;
@@ -1796,8 +1796,8 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         rev_out.comment = (char *)HDmalloc((size_t)rev_out.comment_size);
         if (NULL == rev_out.comment)
             TEST_ERROR;
-        rev_out.archival_index.list = (struct H5FD__onion_index_entry *)HDcalloc(
-            rev_out.archival_index.n_entries, sizeof(struct H5FD__onion_index_entry));
+        rev_out.archival_index.list = (H5FD_onion_index_entry_t *)HDcalloc(rev_out.archival_index.n_entries,
+                                                                           sizeof(H5FD_onion_index_entry_t));
         if (NULL == rev_out.archival_index.list)
             TEST_ERROR;
         rev_out.username = (char *)HDmalloc((size_t)rev_out.username_size);
@@ -2342,14 +2342,14 @@ test_several_revisions_with_logical_gaps(void)
     unsigned char *         buf = NULL;
     struct revise_revision  about[4];
 #if 0
-    struct H5FD__onion_history_header hdr_out;
-    struct H5FD__onion_revision_record rev_out;
+    H5FD_onion_history_header_t hdr_out;
+    H5FD_onion_revision_record_t rev_out;
 #endif
-    struct H5FD__onion_whole_history whs_out;
-    size_t                           i     = 0;
-    haddr_t                          size  = 0;
-    uint64_t                         a_off = ONION_TEST_PAGE_SIZE_5 + 7; /* 39 */
-    uint64_t b_off = (((a_off + a_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5) << 5) +
+    H5FD_onion_whole_history_t whs_out;
+    size_t                     i     = 0;
+    haddr_t                    size  = 0;
+    uint64_t                   a_off = ONION_TEST_PAGE_SIZE_5 + 7; /* 39 */
+    uint64_t                   b_off = (((a_off + a_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5) << 5) +
                      ONION_TEST_PAGE_SIZE_5 + 7; /* full page between */
 
     TESTING("multiple revisions with gaps and overlap");
@@ -2422,7 +2422,7 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (8 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (H5FDclose(file) < 0)
@@ -2443,7 +2443,7 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (H5FDclose(file) < 0)
@@ -2466,7 +2466,8 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     size = a_off + a_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not %llu, it is: %llu\n", size, H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
+                 H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     buf = (unsigned char *)HDmalloc(sizeof(unsigned char) * size);
@@ -2807,16 +2808,16 @@ test_page_aligned_history_create(void)
         H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT,
         "initial commit" /* comment          */
     };
-    H5FD_t *                          file = NULL; /* Onion virtual file for read/write */
-    unsigned char *                   buf  = NULL;
-    struct revise_revision            about[2];
-    struct H5FD__onion_history_header hdr_out;
+    H5FD_t *                    file = NULL; /* Onion virtual file for read/write */
+    unsigned char *             buf  = NULL;
+    struct revise_revision      about[2];
+    H5FD_onion_history_header_t hdr_out;
 #if 0
-    struct H5FD__onion_revision_record rev_out;
+    H5FD_onion_revision_record_t rev_out;
 #endif
-    struct H5FD__onion_whole_history whs_out;
-    size_t                           i     = 0;
-    uint64_t                         a_off = b_list_size_s - a_list_size_s;
+    H5FD_onion_whole_history_t whs_out;
+    size_t                     i     = 0;
+    uint64_t                   a_off = b_list_size_s - a_list_size_s;
 
     TESTING("page-aligned history on onion-created file");
 
@@ -2933,8 +2934,8 @@ test_page_aligned_history_create(void)
         TEST_ERROR;
     if (whs_out.n_revisions != 2)
         TEST_ERROR;
-    whs_out.record_pointer_list = (struct H5FD__onion_record_pointer *)HDcalloc(
-        whs_out.n_revisions, sizeof(struct H5FD__onion_record_pointer));
+    whs_out.record_pointer_list =
+        (H5FD_onion_record_pointer_t *)HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
         TEST_ERROR;
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != hdr_out.whole_history_size)
@@ -2943,7 +2944,7 @@ test_page_aligned_history_create(void)
     buf = NULL;
 
     for (i = 0; i < whs_out.n_revisions; i++) {
-        struct H5FD__onion_record_pointer *rr_p = &whs_out.record_pointer_list[i];
+        H5FD_onion_record_pointer_t *rr_p = &whs_out.record_pointer_list[i];
         if (rr_p->phys_addr & ((1 << 5) - 1)) /* 5::PAGE_SIZE_5 */
             TEST_ERROR;
         /* TODO: check phys_addr of each page entry? */
@@ -3119,17 +3120,17 @@ test_integration_create(void)
     /*
      * Create first revision
      */
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     ///
@@ -3138,7 +3139,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     int dset_data[128][256];
     for (i = 0; i < 128; i++)
@@ -3155,14 +3156,14 @@ test_integration_create(void)
     }
 #endif
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
@@ -3175,17 +3176,17 @@ test_integration_create(void)
     /*
      * Create second revision
      */
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3193,7 +3194,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 128; i++)
         for (j = 0; j < 256; j++)
@@ -3209,14 +3210,14 @@ test_integration_create(void)
     }
 #endif
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3396,17 +3397,17 @@ test_integration_create(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     ///
@@ -3415,7 +3416,7 @@ test_integration_create(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
 #if 0
     HDputs("\n\nREADING\n\n");
 #endif
@@ -3600,7 +3601,7 @@ test_integration_create_simple(void)
 
     ////////////////////////////
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3608,7 +3609,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3616,7 +3617,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     int dset_data[1][1024];
     for (i = 0; i < 1024; i++)
@@ -3632,14 +3633,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
@@ -3652,7 +3653,7 @@ test_integration_create_simple(void)
     /*
      * Create second revision
      */
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3661,7 +3662,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3670,7 +3671,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 1024; i++)
         dset_data[0][i] = i + 2048;
@@ -3685,14 +3686,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3710,7 +3711,7 @@ test_integration_create_simple(void)
      * Create third revision
      */
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3719,7 +3720,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3728,7 +3729,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     for (i = 0; i < 1024; i += 20)
         dset_data[0][i] = i + 3072;
@@ -3743,14 +3744,14 @@ test_integration_create_simple(void)
     }
 #endif
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     /*
@@ -3780,18 +3781,18 @@ test_integration_create_simple(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    HDputs(".");
+    // HDputs(".");
     fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-    HDputs(".");
+    // HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3800,7 +3801,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    HDputs(".");
+    // HDputs(".");
 #if 0
     HDputs("\n\nREADING\n\n");
 #endif

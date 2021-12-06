@@ -60,7 +60,7 @@ static H5FD_onion_fapl_info_t onion_fa_g = {
     0,                        /* creation_flags                 */
     "indoor speaking voices", /* comment                        */
 };
-static int64_t onion_revision_g = -1;
+static uint64_t onion_revision_g = UINT64_MAX;
 
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
@@ -1273,8 +1273,9 @@ end_collect:
                 vol_info_g.info_string = H5_optarg;
                 break;
             case 'F':
-                onion_revision_g = atol(H5_optarg);
-                HDprintf("Using revision %d\n", onion_revision_g);
+                /* TODO: Convert to strtoumax */
+                onion_revision_g = (uint64_t)HDatol(H5_optarg);
+                HDprintf("Using revision %" PRIu64 "\n", onion_revision_g);
                 break;
             case '?':
             default:
