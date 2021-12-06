@@ -46,11 +46,14 @@
 #define DATA_RANK    2
 #define NUM_ATTEMPTS 100
 
+
+/* Structure for filling the dataset values. Adapted from vfd_swmr_bigset_writer.c. */
 typedef struct _mat {
     unsigned rows, cols;
     uint32_t elt[1];
 } mat_t;
 
+/* Structure to hold the information of various parameters used in the program. */
 typedef struct {
     hid_t        file[2];
     const char * filename[2];
@@ -69,6 +72,7 @@ typedef struct {
     bool         first_proc;
 } state_t;
 
+/* Assign the initialized values to struct state_t declared above */
 static inline state_t
 state_initializer(void)
 {
@@ -91,12 +95,15 @@ state_initializer(void)
                      .first_proc     = true};
 }
 
+/* Obtain the data value at index [i][j] for the 2D matrix. 
+   All the routines related to the matrix are adapted from the vfd_swmr_bigset_writer.c. */
 static uint32_t
 matget(const mat_t *mat, unsigned i, unsigned j)
 {
     return mat->elt[i * mat->cols + j];
 }
 
+/* Set the data value at index [i][j] for the 2D matrix. */
 static bool
 matset(mat_t *mat, unsigned i, unsigned j, uint32_t v)
 {
@@ -113,6 +120,7 @@ error:
     return false;
 }
 
+/* Allocate memory for the 2-D matrix. */
 static mat_t *
 newmat(state_t s)
 {
@@ -196,18 +204,21 @@ set_or_verify_matrix(mat_t *mat, unsigned int which, bool do_set)
     return ret;
 }
 
+/* Initialize the matrix values. The parameter 'which' determines the data value. */
 static bool
 init_matrix(mat_t *mat, unsigned int which)
 {
     return set_or_verify_matrix(mat, which, true);
 }
 
+/* Verify the matrix values at each point. The parameter 'which" determines the data value. */
 static bool
 verify_matrix(mat_t *mat, unsigned int which)
 {
     return set_or_verify_matrix(mat, which, false);
 }
 
+/* Usage of this program when running with the -h option */
 static void
 usage(const char *progname)
 {
@@ -233,6 +244,7 @@ usage(const char *progname)
     exit(EXIT_FAILURE);
 }
 
+/* Initialize the state_t with different options specified by the user. */
 static bool
 state_init(state_t *s, int argc, char **argv)
 {
@@ -343,6 +355,9 @@ error:
     return false;
 }
 
+/* Initialize the configuration and the file creation and access property lists 
+ *  for the VFD SMWR independence of the reader/writer test. 
+ */
 static bool
 indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
 {
@@ -370,6 +385,7 @@ error:
     return false;
 }
 
+/* Write the matrix mat to a dataset. The dataset name depends on the process it runs. */
 static bool
 write_dataset(const state_t *s, mat_t *mat)
 {
@@ -436,6 +452,8 @@ error:
     return false;
 }
 
+/* Open the dataset according to the dataset name related to the process.
+   The dataset ID is saved in the state_t s */
 static bool
 open_dset(state_t *s)
 {
@@ -489,6 +507,9 @@ error:
     return false;
 }
 
+/* Verify a dataset, this routine must be called after the open_dset(). 
+ * It will use the dataset ID assigned by open_dset().
+ */  
 static bool
 vrfy_dset(const state_t *s, mat_t *mat)
 {
@@ -541,6 +562,7 @@ error:
     return false;
 }
 
+/* The wrapper routine of open_dset() and vrfy_dset() for readers to verify a dataset.  */
 static bool
 read_vrfy_dataset(state_t *s, mat_t *mat)
 {
@@ -570,6 +592,7 @@ error:
     return false;
 }
 
+/* Close the file access and creation property lists. */
 static bool
 close_pl(const state_t *s)
 {
