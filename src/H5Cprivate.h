@@ -1428,7 +1428,7 @@ typedef int H5C_ring_t;
  *        with no flush dependency children.
  *
  *        Since the image_fd_height is used to order entries in the
- *        cache image so that fd parents proceed fd children, for
+ *        cache image so that fd parents precede fd children, for
  *        purposes of this field, and entry is at flush dependency
  *        level 0 if it either has no children, or if all of its
  *        children are not in the cache image.
@@ -1734,7 +1734,7 @@ typedef struct H5C_cache_entry_t {
  *              with no flush dependency children.
  *
  *              Since the image_fd_height is used to order entries in the
- *              cache image so that fd parents proceed fd children, for
+ *              cache image so that fd parents precede fd children, for
  *              purposes of this field, an entry is at flush dependency
  *              level 0 if it either has no children, or if all of its
  *              children are not in the cache image.
