@@ -1878,9 +1878,7 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     H5FD_t *       file    = NULL; /* virtual file to look at raw file contents */
     unsigned char *act_buf = NULL; /* allocated area for actual file bytes */
     hid_t          fapl_id = onion_info->backing_fapl_id;
-#if 0
     herr_t err_ret = FAIL;
-#endif
     unsigned char hdr_exp_bytes[] = {
         'O', 'H', 'D', 'H', 1, 1, 0, 0, 0, 0, 0, 0, /* page-size encoded below */
         0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1916,7 +1914,6 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     UINT32ENCODE(ptr, sum);
     ptr = NULL;
 
-#if 0  /* TODO: fails because EOA not set, not because it's empty */
     /* Look at h5 file: should have zero bytes.
      */
 
@@ -1940,7 +1937,6 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     if (H5FDclose(file) < 0)
         TEST_ERROR;
     file = NULL;
-#endif /* TODO */
 
     /* Look at onion file: should have header.
      */
@@ -2415,7 +2411,7 @@ test_several_revisions_with_logical_gaps(void)
 
     /* Inspect logical file */
 
-    /* THIS IS THE INITIAL FILE, SHOULD BE EMPTY */
+    /* THIS IS THE INITIAL FILE, SHOULD ONLY HAVE 8 BYTES */
     onion_info.revision_id = 0;
     fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
@@ -2425,7 +2421,7 @@ test_several_revisions_with_logical_gaps(void)
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
         TEST_ERROR;
-    if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
+    if (8 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
         HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
@@ -2699,6 +2695,7 @@ error:
  *
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
+// TODO: Modify to create initial file without onion
 static int
 do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_info_p, size_t n_ops,
                          struct revise_revision *about)
@@ -3028,7 +3025,7 @@ test_integration_create(void)
     };
     hid_t file_id = H5I_INVALID_HID;
 
-    TESTING("onion-created HDF5 file with revisions");
+    TESTING("onion-created two dimensional HDF5 file with revisions");
 
     /*********
      * SETUP *
@@ -3051,15 +3048,15 @@ test_integration_create(void)
 
     /* Create skeleton file without onion */
     hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 7}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    int     wdata[4][7], /* Write buffer */
+    hsize_t dims[2] = {128, 256}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
+    int     wdata[128][256], /* Write buffer */
         fillval, i, j;
 
     /*
      * Initialize data.
      */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 7; j++)
+    for (i = 0; i < 128; i++)
+        for (j = 0; j < 256; j++)
             wdata[i][j] = i * j - j;
 
     /*
@@ -3143,9 +3140,9 @@ test_integration_create(void)
 
     HDputs(".");
     HDfflush(stdout);
-    int dset_data[4][7];
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 7; j++)
+    int dset_data[128][256];
+    for (i = 0; i < 128; i++)
+        for (j = 0; j < 256; j++)
             dset_data[i][j] = i * 6 + j + 1;
 
 #if 0
@@ -3198,15 +3195,15 @@ test_integration_create(void)
 
     HDputs(".");
     HDfflush(stdout);
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 7; j++)
+    for (i = 0; i < 128; i++)
+        for (j = 0; j < 256; j++)
             dset_data[i][j] = i * 3 + j + 5;
 
 #if 0
     printf("Second revision\n");
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 128; i++) {
         printf(" [");
-        for (j = 0; j < 7; j++)
+        for (j = 0; j < 256; j++)
             printf(" %3d", dset_data[i][j]);
         printf("]\n");
     }
@@ -3237,6 +3234,160 @@ test_integration_create(void)
     fapl_id = H5I_INVALID_HID;
 
     // Read back data to check for validtiy
+    onion_info.revision_id = 0;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == fapl_id)
+        TEST_ERROR;
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    HDputs(".");
+    fflush(stdout);
+
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+
+    HDputs(".");
+    fflush(stdout);
+    if (H5I_INVALID_HID == file_id) {
+        TEST_ERROR;
+    }
+    HDputs(".");
+    HDfflush(stdout);
+
+    ///
+    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
+    if (dset < 0) {
+        TEST_ERROR
+    }
+
+    HDputs(".");
+#if 0
+    HDputs("\n\nREADING\n\n");
+#endif
+    HDfflush(stdout);
+    int rdata[128][256];
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+        TEST_ERROR
+#if 0
+    HDputs("\n\nDONE READING\n\n");
+#endif
+    HDfflush(stdout);
+
+#if 0
+    for (i = 0; i < 128; i++) {
+        printf(" [");
+        for (j = 0; j < 256; j++)
+            printf(" %3d", rdata[i][j]);
+        printf("]\n");
+    }
+#endif
+
+    for (i = 0; i < 128; i++) {
+        for (j = 0; j < 256; j++) {
+            // printf("i: %d, j: %d\n", i, j);
+            //int expected = i * 3 + j + 5;
+            //int expected = i * 6 + j + 1;
+            int expected = i * j - j;
+            if (rdata[i][j] != expected) {
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+                TEST_ERROR
+            }
+            else {
+                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+            }
+        }
+    }
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR
+    file_id = H5I_INVALID_HID;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+    fapl_id = H5I_INVALID_HID;
+/////
+    //onion_info.revision_id = 2;
+    onion_info.revision_id = 1;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == fapl_id)
+        TEST_ERROR;
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    HDputs(".");
+    fflush(stdout);
+
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+
+    HDputs(".");
+    fflush(stdout);
+    if (H5I_INVALID_HID == file_id) {
+        TEST_ERROR;
+    }
+    HDputs(".");
+    HDfflush(stdout);
+
+    ///
+    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
+    if (dset < 0) {
+        TEST_ERROR
+    }
+
+    HDputs(".");
+#if 0
+    HDputs("\n\nREADING\n\n");
+#endif
+    HDfflush(stdout);
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+        TEST_ERROR
+#if 0
+    HDputs("\n\nDONE READING\n\n");
+#endif
+    HDfflush(stdout);
+
+#if 0
+    for (i = 0; i < 128; i++) {
+        printf(" [");
+        for (j = 0; j < 256; j++)
+            printf(" %3d", rdata[i][j]);
+        printf("]\n");
+    }
+#endif
+
+    for (i = 0; i < 128; i++) {
+        for (j = 0; j < 256; j++) {
+            //printf("i: %d, j: %d\n", i, j);
+            //int expected = i * 3 + j + 5;
+            int expected = i * 6 + j + 1;
+            if (rdata[i][j] != expected) {
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+                TEST_ERROR
+            }
+            else {
+                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+            }
+        }
+    }
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR
+    file_id = H5I_INVALID_HID;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+    fapl_id = H5I_INVALID_HID;
+
+
+
+/////
     onion_info.revision_id = 2;
     // onion_info.revision_id = 1;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -3269,7 +3420,6 @@ test_integration_create(void)
     HDputs("\n\nREADING\n\n");
 #endif
     HDfflush(stdout);
-    int rdata[4][7];
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
 #if 0
@@ -3278,16 +3428,16 @@ test_integration_create(void)
     HDfflush(stdout);
 
 #if 0
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 128; i++) {
         printf(" [");
-        for (j = 0; j < 7; j++)
+        for (j = 0; j < 256; j++)
             printf(" %3d", rdata[i][j]);
         printf("]\n");
     }
 #endif
 
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 7; j++) {
+    for (i = 0; i < 128; i++) {
+        for (j = 0; j < 256; j++) {
             // printf("i: %d, j: %d\n", i, j);
             int expected = i * 3 + j + 5;
             // int expected = i * 6 + j + 1;
@@ -3358,7 +3508,7 @@ test_integration_create_simple(void)
     };
     hid_t file_id = H5I_INVALID_HID;
 
-    TESTING("onion-created HDF5 file with revisions");
+    TESTING("onion-created one-dimensional HDF5 file with revisions");
 
     /*********
      * SETUP *

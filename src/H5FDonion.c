@@ -63,7 +63,7 @@ static hid_t H5FD_ONION_g = 0;
  * `backing_onion` (H5FD_t *)
  *
  *      Virtual file handle for the onion file in the backing store.
- *      NULL if not set to use the single, separate storage target. (TODO)
+ *      NULL if not set to use the single, separate storage target.
  *
  * `backing_recov` (H5FD_t *)
  *
@@ -1663,15 +1663,13 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF")
 
-#if 0 /* TODO: recovery-open */
-/* recovery-open may have EOA below revision record */
+	/* recovery-open may have EOA below revision record */
     if ((H5FD_get_eoa(raw_file, H5FD_MEM_DRAW) < (addr + size))
     &&  (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0))
     {
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL,
                 "can't modify EOA");
     }
-#endif
 
     /* Perform binary search on records to find target revision by ID.
      * As IDs are added sequentially, they are "guaranteed" to be sorted.
@@ -2096,7 +2094,9 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                 fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
-            if (file->summary.n_revisions > 0 && fa->revision_id != 0 &&
+			if (fa->revision_id == 0) {
+				file->rev_record.logi_eof = canon_eof;
+			} else if (file->summary.n_revisions > 0 &&
                 H5FD__onion_ingest_revision_record(
                     &file->rev_record, file->backing_onion, &file->summary,
                     MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) < 0) {
