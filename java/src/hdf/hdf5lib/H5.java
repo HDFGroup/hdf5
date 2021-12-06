@@ -64,8 +64,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps a single
  * HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  * <p>
- * For details of the HDF5 library, see the HDF5 Documentation at: <a
- * href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
+ * For details of the HDF5 library, see the HDF5 Documentation at:
+ * <a href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>
@@ -162,8 +162,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * <p>
  * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore, multidimensional
  * arrays are definitely <i>not</i> layed out contiguously in memory. It would be infeasible to declare a separate
- * routine for every combination of number type and dimensionality. For that reason, the <a
- * href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
+ * routine for every combination of number type and dimensionality. For that reason, the
+ * <a href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
  * data array at run time, and to convert to and from a contiguous array of bytes in synchronized static native C order.
  * <p>
  * The upshot is that any Java array of numbers (either primitive or sub-classes of type <b>Number</b>) can be passed as
@@ -187,8 +187,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * <b><i>H5F_ACC_RDWR</i></b> and <b><i>H5P_DEFAULT</i></b>.
  * <p>
  * The HDF-5 API defines a set of values that describe number types and sizes, such as "H5T_NATIVE_INT" and "hsize_t".
- * These values are determined at run time by the HDF-5 C library. To support these parameters, the Java class <a
- * href="./hdf.hdf5lib.HDF5CDataTypes.html"> <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values
+ * These values are determined at run time by the HDF-5 C library. To support these parameters, the Java class
+ * <a href="./hdf.hdf5lib.HDF5CDataTypes.html"> <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values
  * can be accessed as public variables of the Java class, such as:
  *
  * <pre>
@@ -204,8 +204,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * JHI5. Errors are converted into Java exceptions. This is totally different from the C interface, but is very natural
  * for Java programming.
  * <p>
- * The exceptions of the JHI5 are organized as sub-classes of the class <a
- * href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two subclasses of
+ * The exceptions of the JHI5 are organized as sub-classes of the class
+ * <a href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two subclasses of
  * <b>HDF5Exception</b>, <a href="./hdf.hdf5lib.exceptions.HDF5LibraryException.html"> <b>HDF5LibraryException</b></a>
  * and <a href="./hdf.hdf5lib.exceptions.HDF5JavaException.html"> <b>HDF5JavaException</b></a>. The sub-classes of the
  * former represent errors from the HDF-5 C library, while sub-classes of the latter represent errors in the JHI5
@@ -216,7 +216,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.13.0 <BR>
+ * @version HDF5 1.13.1 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -239,7 +239,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 13, 0 };
+    public final static int LIB_VERSION[] = { 1, 13, 1 };
 
     /**
     *  add system property to load library by path
@@ -12776,8 +12776,11 @@ public class H5 implements java.io.Serializable {
      *            IN: Field name of the field index to retrieve.
      *
      * @return if field is defined, the index; else negative.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native int H5Tget_member_index(long type_id, String field_name);
+    public synchronized static native int H5Tget_member_index(long type_id, String field_name) throws HDF5LibraryException;
 
     /**
      * H5Tget_member_name retrieves the name of a field of a compound datatype or an element of an enumeration datatype.
@@ -12788,8 +12791,11 @@ public class H5 implements java.io.Serializable {
      *            IN: Field index (0-based) of the field name to retrieve.
      *
      * @return a valid pointer to the name if successful; otherwise null.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native String H5Tget_member_name(long type_id, int field_idx);
+    public synchronized static native String H5Tget_member_name(long type_id, int field_idx) throws HDF5LibraryException;
 
     /**
      * H5Tget_member_offset returns the byte offset of the specified member of the compound datatype. This is the byte
@@ -12801,11 +12807,8 @@ public class H5 implements java.io.Serializable {
      *            IN: Field index (0-based) of the field type to retrieve.
      *
      * @return the offset of the member.
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5Tget_member_offset(long type_id, int membno) throws HDF5LibraryException;
+    public synchronized static native long H5Tget_member_offset(long type_id, int membno);
 
     /**
      * H5Tget_member_type returns the datatype of the specified member.
@@ -13460,7 +13463,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLregister_connector_by_name(String connector_name, long vipl_id);
+    public synchronized static native long H5VLregister_connector_by_name(String connector_name, long vipl_id) throws HDF5LibraryException;
     /**
      * H5VLregister_connector_by_value registers a new VOL connector as a member of the virtual object layer class.
      *
@@ -13475,7 +13478,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLregister_connector_by_value(int connector_value, long vipl_id);
+    public synchronized static native long H5VLregister_connector_by_value(int connector_value, long vipl_id) throws HDF5LibraryException;
     /**
      * H5VLis_connector_registered_by_name tests whether a VOL class has been registered.
      *
@@ -13487,7 +13490,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native boolean H5VLis_connector_registered_by_name(String name);
+    public synchronized static native boolean H5VLis_connector_registered_by_name(String name) throws HDF5LibraryException;
     /**
      * H5VLis_connector_registered_by_value tests whether a VOL class has been registered.
      *
@@ -13499,7 +13502,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native boolean H5VLis_connector_registered_by_value(int connector_value);
+    public synchronized static native boolean H5VLis_connector_registered_by_value(int connector_value) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id retrieves the ID for a registered VOL connector for a given object.
      *
@@ -13511,7 +13514,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id(long object_id);
+    public synchronized static native long H5VLget_connector_id(long object_id) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id_by_name retrieves the ID for a registered VOL connector.
      *
@@ -13523,7 +13526,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id_by_name(String name);
+    public synchronized static native long H5VLget_connector_id_by_name(String name) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id_by_value retrieves the ID for a registered VOL connector.
      *
@@ -13535,7 +13538,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id_by_value(int connector_value);
+    public synchronized static native long H5VLget_connector_id_by_value(int connector_value) throws HDF5LibraryException;
     /**
      * H5VLget_connector_name returns the connector name for the VOL associated with the
      *              object or file ID.
@@ -13548,7 +13551,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native String H5VLget_connector_name(long object_id);
+    public synchronized static native String H5VLget_connector_name(long object_id) throws HDF5LibraryException;
     /**
      * H5VLclose closes a VOL connector ID.
      *
@@ -13558,7 +13561,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5VLclose(long connector_id);
+    public synchronized static native void H5VLclose(long connector_id) throws HDF5LibraryException;
     /**
      * H5VLunregister_connector removes a VOL connector ID from the library.
      *
@@ -13568,7 +13571,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5VLunregister_connector(long connector_id);
+    public synchronized static native void H5VLunregister_connector(long connector_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
     // hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
