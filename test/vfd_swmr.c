@@ -4363,7 +4363,7 @@ test_updater_generate_md_checksums(hbool_t file_create)
     if (verify_ud_chk(config.md_file_path, config.updater_file_path) < 0)
         TEST_ERROR;
 
-    /*  It's important to clean up the chechsum and updater files. */
+    /*  It's important to clean up the checksum and updater files. */
     clean_chk_ud_files(config.md_file_path, config.updater_file_path);
 
     PASSED();
@@ -4449,8 +4449,10 @@ main(void)
     if (use_file_locking) {
         nerrors += test_updater_flags();
         nerrors += test_updater_flags_same_file_opens();
+#ifndef H5_HAVE_WIN32_API
         nerrors += test_updater_generate_md_checksums(TRUE);
         nerrors += test_updater_generate_md_checksums(FALSE);
+#endif
 
         nerrors += test_shadow_index_lookup();
 
