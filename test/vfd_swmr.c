@@ -4450,6 +4450,7 @@ main(void)
         nerrors += test_updater_flags();
         nerrors += test_updater_flags_same_file_opens();
 #ifndef H5_HAVE_WIN32_API
+        /* VFD SWMR: Fails on windows due to error from generate_md_ck_cb(). */
         nerrors += test_updater_generate_md_checksums(TRUE);
         nerrors += test_updater_generate_md_checksums(FALSE);
 #endif
