@@ -1501,7 +1501,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Z_filter_in_pline
  *
- * Purpose:  Check wheter a filter is in the filter pipeline using the
+ * Purpose:  Check whether a filter is in the filter pipeline using the
  *           filter ID.  This function is very similar to H5Z_filter_info
  *
  * Return:   TRUE   - found filter

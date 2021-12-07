@@ -155,7 +155,7 @@ coll_chunk2(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -209,7 +209,7 @@ coll_chunk3(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -261,7 +261,7 @@ coll_chunk4(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -315,7 +315,7 @@ coll_chunk5(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -367,7 +367,7 @@ coll_chunk6(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -419,7 +419,7 @@ coll_chunk7(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -471,7 +471,7 @@ coll_chunk8(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -523,7 +523,7 @@ coll_chunk9(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size

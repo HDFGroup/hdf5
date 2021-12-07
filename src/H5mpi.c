@@ -38,7 +38,7 @@ static hsize_t bigio_count_g = H5_MAX_MPI_COUNT;
 /*-------------------------------------------------------------------------
  * Function:  H5_mpi_set_bigio_count
  *
- * Purpose:   Allow us to programatically change the switch point
+ * Purpose:   Allow us to programmatically change the switch point
  *            when we utilize derived datatypes.  This is of
  *            particular interest for allowing nightly testing
  *

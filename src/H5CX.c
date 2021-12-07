@@ -50,7 +50,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5CX_get_my_context() must be preceeded
+ * In order for this macro to work, H5CX_get_my_context() must be preceded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context() H5CX__get_context()

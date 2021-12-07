@@ -662,7 +662,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
      * configured as per the default both by looking at its internal
      * configuration, and via the H5Fget_mdc_config() call.
      *
-     * Then set serveral different configurations, and verify that
+     * Then set several different configurations, and verify that
      * they took as per above.
      */
 
@@ -1054,7 +1054,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             }
 
             /* set the dataset creation plist to specify that the raw data is
-             * to be partioned into 10X10 element chunks.
+             * to be partitioned into 10X10 element chunks.
              */
 
             if (pass) {
@@ -1885,7 +1885,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
     pass = TRUE;
 
-    /* Create a file for test purposes, and veify that its metadata cache
+    /* Create a file for test purposes, and verify that its metadata cache
      * set to the default MDC configuration.
      */
 
@@ -2254,7 +2254,7 @@ main(void)
     } /* end if */
 
     /* Test with paged aggregation enabled or not */
-    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordinly */
+    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordingly */
     for (paged = FALSE; paged <= TRUE; paged++) {
         hid_t my_fcpl = fcpl_id;
 

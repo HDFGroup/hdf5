@@ -778,7 +778,7 @@ H5C_prep_for_file_close(H5F_t *f)
          *
          * 2) Since the FSM settle routines are only invoked once during
          *    file close, invoking them now will prevent their invocation
-         *    during a flush, and thus avoid any resulting entrie dirties,
+         *    during a flush, and thus avoid any resulting entry dirties,
          *    deletions, insertion, or moves during the flush.
          */
         if (H5C__serialize_cache(f) < 0)
@@ -1484,7 +1484,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
          * Finally, we usually don't check to see if the cache is
          * oversized at the end of an unprotect.  As a result, it is
          * possible to have a vastly oversized cache with no protected
-         * entries as long as all the protects preceed the unprotects.
+         * entries as long as all the protects proceed the unprotects.
          *
          * Since items 1 and 2 are not changing any time soon, I see
          * no point in worrying about the third.
@@ -2444,7 +2444,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
              * Finally, we usually don't check to see if the cache is
              * oversized at the end of an unprotect.  As a result, it is
              * possible to have a vastly oversized cache with no protected
-             * entries as long as all the protects preceed the unprotects.
+             * entries as long as all the protects proceed the unprotects.
              *
              * Since items 1, 2, and 3 are not changing any time soon, I
              * see no point in worrying about the fourth.
@@ -2559,7 +2559,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
              *
              * Also, if the min_clean_size requirement is not met, we
              * should also call H5C__make_space_in_cache() to bring us
-             * into complience.
+             * into compliance.
              */
 
             if (cache_ptr->index_size >= cache_ptr->max_cache_size)
@@ -4848,7 +4848,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
 
         /* for now at least, don't bother to maintain the minimum clean size,
          * as the cache should now be less than its maximum size.  Due to
-         * the vaguries of the cache size reduction algorthim, we may not
+         * the vaguries of the cache size reduction algorithm, we may not
          * reduce the size of the cache.
          *
          * If we do, we will calculate a new minimum clean size, which will
@@ -5860,7 +5860,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                      * If either of these happen, and one of the target
                      * or proxy entries happens to be the next entry in
                      * the hash bucket, we could either find ourselves
-                     * either scanning a non-existant entry, scanning
+                     * either scanning a non-existent entry, scanning
                      * through a different bucket, or skipping an entry.
                      *
                      * Neither of these are good, so restart the
@@ -8059,7 +8059,7 @@ done:
  *            To cork the object
  *            Return error if the object is already corked
  *        H5C__UNCORK:
- *            To uncork the obejct
+ *            To uncork the object
  *            Return error if the object is not corked
  *         H5C__GET_CORKED:
  *            To retrieve the cork status of an object in
@@ -8490,7 +8490,7 @@ H5C__serialize_cache(H5F_t *f)
      * each entry in the cache to zero before we start the serialization.
      * This allows us to detect the case in which any entry is serialized
      * more than once (a performance issues), and more importantly, the
-     * case is which any flush depencency parent is serializes more than
+     * case is which any flush dependency parent is serializes more than
      * once (a correctness issue).
      */
     {
@@ -8647,8 +8647,8 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
      * are serialized correctly, it doesn't matter if we have to go back
      * and serialize an entry a second time.
      *
-     * These possible actions result in the following modfications to
-     * tha basic algorithm:
+     * These possible actions result in the following modifications to
+     * the basic algorithm:
      *
      * 1) In the event of an entry expunge, eviction or removal, we must
      *    restart the scan as it is possible that the next entry in our
@@ -8698,7 +8698,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
      *    condition appears.
      *
      * Observe that either eviction or removal of entries as a result of
-     * a serialization is not a problem as long as the flush depencency
+     * a serialization is not a problem as long as the flush dependency
      * tree does not change beyond the removal of a leaf.
      */
     while (!done) {
