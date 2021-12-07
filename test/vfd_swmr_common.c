@@ -344,7 +344,7 @@ await_signal(hid_t fid)
 #endif /* H5_HAVE_WIN32_API */
 
 /* Revised support routines that can be used for all VFD SWMR integration tests
- * NOTE: For tests that call this common routine, md_file_path needs to be set 
+ * NOTE: For tests that call this common routine, md_file_path needs to be set
  * regardless of whether maintain_metadata_file is true or false.
  */
 void

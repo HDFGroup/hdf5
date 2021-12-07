@@ -1856,7 +1856,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5F_generate_md_ck_cb_t cb_info             = {NULL};   /* For VFD SWMR NFS testing:
                                                                initialize the callback to generate
                                                                checksums for metadata files */
-    H5F_t *                 ret_value           = NULL;     /* Actual return value */
+    H5F_t *ret_value = NULL;                                /* Actual return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
