@@ -55,7 +55,7 @@
 
 #define FNAME "non_vfd_swmr_file.h5"
 
-#define FILE_NAME_LEN       1024
+#define FILE_NAME_LEN 1024
 
 /* Defines used by verify_updater_flags() and verify_ud_chk() helper routine */
 
@@ -3716,7 +3716,7 @@ verify_updater_flags(char *ud_name, uint16_t expected_flags)
         FAIL_STACK_ERROR;
 
     /* Read "flags" from the updater file */
-    if(HDfread(&flags, UD_SIZE_2, 1, ud_fp) != (size_t)1)
+    if (HDfread(&flags, UD_SIZE_2, 1, ud_fp) != (size_t)1)
         FAIL_STACK_ERROR;
 
     if (flags != expected_flags)
@@ -4035,8 +4035,8 @@ error:
 static void
 clean_chk_ud_files(char *md_file_path, char *updater_file_path)
 {
-    char     chk_name[FILE_NAME_LEN];   /* Checksum file name */
-    char     ud_name[FILE_NAME_LEN];    /* Updater file name */
+    char     chk_name[FILE_NAME_LEN]; /* Checksum file name */
+    char     ud_name[FILE_NAME_LEN];  /* Updater file name */
     uint64_t i;
 
     /* Name of the checksum file: <md_file_path>.chk */
@@ -4084,15 +4084,15 @@ clean_chk_ud_files(char *md_file_path, char *updater_file_path)
 static herr_t
 verify_ud_chk(char *md_file_path, char *ud_file_path)
 {
-    char     chk_name[FILE_NAME_LEN]; /* Checksum file name */
-    char     ud_name[FILE_NAME_LEN];  /* Updater file name */
-    FILE *   chk_fp = NULL;           /* Checksum file pointer */
-    FILE *   ud_fp = NULL;            /* Updater file pointer */
-    uint64_t ud_seq_num = 0;          /* Sequence number in the updater file */
-    uint64_t chk_ud_seq_num = 0;      /* Updater sequence number in the checksum file */
-    uint64_t i;                       /* Local index variable */
-    long     size = 0;                /* Size of the file */
-    size_t   change_list_len = 0;     /* change_list_len in the updater file header */
+    char     chk_name[FILE_NAME_LEN];     /* Checksum file name */
+    char     ud_name[FILE_NAME_LEN];      /* Updater file name */
+    FILE *   chk_fp         = NULL;       /* Checksum file pointer */
+    FILE *   ud_fp          = NULL;       /* Updater file pointer */
+    uint64_t ud_seq_num     = 0;          /* Sequence number in the updater file */
+    uint64_t chk_ud_seq_num = 0;          /* Updater sequence number in the checksum file */
+    uint64_t i;                           /* Local index variable */
+    long     size                    = 0; /* Size of the file */
+    size_t   change_list_len         = 0; /* change_list_len in the updater file header */
     uint32_t num_change_list_entries = 0; /* num_change_list_entries in the updater change list header */
 
     /* Open the checksum file */
@@ -4199,13 +4199,13 @@ error:
 static herr_t
 md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
 {
-    FILE *   md_fp  = NULL;      /* Metadata file pointer */
-    FILE *   chk_fp = NULL;      /* Checksum file pointer */
-    long     size   = 0;         /* File size returned from HDftell() */
-    void *   buf    = NULL;      /* Buffer for holding the metadata file content */
-    uint32_t chksum = 0;         /* The checksum generated for the metadata file */
-    char     chk_name[FILE_NAME_LEN];     /* Buffer for the checksum file name */
-    size_t   ret;                /* Return value */
+    FILE *   md_fp  = NULL;           /* Metadata file pointer */
+    FILE *   chk_fp = NULL;           /* Checksum file pointer */
+    long     size   = 0;              /* File size returned from HDftell() */
+    void *   buf    = NULL;           /* Buffer for holding the metadata file content */
+    uint32_t chksum = 0;              /* The checksum generated for the metadata file */
+    char     chk_name[FILE_NAME_LEN]; /* Buffer for the checksum file name */
+    size_t   ret;                     /* Return value */
 
     /* Open the metadata file */
     if ((md_fp = HDfopen(md_file_path, "r")) == NULL)
@@ -4332,20 +4332,21 @@ test_updater_generate_md_checksums(hbool_t file_create)
     cb_info.func = md_ck_cb;
 
     /* Activate private property to generate checksums for updater's metadata file */
-    if(H5Pset(fapl, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
+    if (H5Pset(fapl, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
         FAIL_STACK_ERROR;
 
     /* Use file creation or file open for testing */
     if (file_create) {
-        if((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        if ((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             FAIL_STACK_ERROR;
-    } else {
-        if((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+    }
+    else {
+        if ((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
-        if(H5Fclose(fid) < 0)
+        if (H5Fclose(fid) < 0)
             FAIL_STACK_ERROR;
 
-        if((fid = H5Fopen(FILENAME4, H5F_ACC_RDWR, fapl)) < 0)
+        if ((fid = H5Fopen(FILENAME4, H5F_ACC_RDWR, fapl)) < 0)
             FAIL_STACK_ERROR;
     }
 
