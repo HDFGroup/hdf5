@@ -517,9 +517,9 @@ vrfy_dset(const state_t *s, mat_t *mat)
     unsigned int which = 0;
     herr_t       status;
 
-    /* The approach is adapted from the big set test. A failure to read the data may indicate the data isn't ready yet.  
-     * For this case, we will not display the error stack, instead sleeping for one tenth of a second,
-     * call H5Drefresh and try to call H5Dread again. After NUM_ATTEMPTS times, issue an error.
+    /* The approach is adapted from the big set test. A failure to read the data may indicate the data isn't
+     * ready yet. For this case, we will not display the error stack, instead sleeping for one tenth of a
+     * second, call H5Drefresh and try to call H5Dread again. After NUM_ATTEMPTS times, issue an error.
      */
 
     for (i = 0; i < NUM_ATTEMPTS; i++) {
