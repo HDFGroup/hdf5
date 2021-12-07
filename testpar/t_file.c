@@ -179,7 +179,7 @@ test_page_buffer_access(void)
 
     data = (int *)HDmalloc(sizeof(int) * (size_t)num_elements);
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for (i = 0; i < num_elements; i++)
         data[i] = -1;
     if (MAINPROCESS) {

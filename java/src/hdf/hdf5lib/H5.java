@@ -161,7 +161,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * disk (source) and in memory (destination).
  * <p>
  * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore, multidimensional
- * arrays are definitely <i>not</i> layed out contiguously in memory. It would be infeasible to declare a separate
+ * arrays are definitely <i>not</i> laid out contiguously in memory. It would be infeasible to declare a separate
  * routine for every combination of number type and dimensionality. For that reason, the
  * <a href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
  * data array at run time, and to convert to and from a contiguous array of bytes in synchronized static native C order.
@@ -442,7 +442,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * Turn on error handling. By default, the C library prints the error stack of the HDF-5 C library on stdout. This
-     * behavior may be reenabled by calling H5error_on().
+     * behavior may be re-enabled by calling H5error_on().
      */
     public synchronized static native void H5error_on();
 
@@ -2097,7 +2097,7 @@ public class H5 implements java.io.Serializable {
      *            IN: Identifier for object to which attributes are attached; may be group, dataset, or named datatype.
      * @param idx_type
      *            IN: The type of index specified by idx_type can be one of the following:
-     *                      H5_INDEX_NAME             An alpha-numeric index by attribute name.
+     *                      H5_INDEX_NAME             An alphanumeric index by attribute name.
      *                      H5_INDEX_CRT_ORDER        An index by creation order.
      * @param order
      *            IN: The order in which the index is to be traversed, as specified by order, can be one of the following:
@@ -2137,7 +2137,7 @@ public class H5 implements java.io.Serializable {
      *            IN: Name of object, relative to location.
      * @param idx_type
      *            IN: The type of index specified by idx_type can be one of the following:
-     *                      H5_INDEX_NAME             An alpha-numeric index by attribute name.
+     *                      H5_INDEX_NAME             An alphanumeric index by attribute name.
      *                      H5_INDEX_CRT_ORDER        An index by creation order.
      * @param order
      *            IN: The order in which the index is to be traversed, as specified by order, can be one of the following:
@@ -4577,7 +4577,7 @@ public class H5 implements java.io.Serializable {
             throws HDF5LibraryException, NullPointerException;
 
     /**
-     * Given a mount point, H5Funmount dissassociates the mount point's file from the file mounted there.
+     * Given a mount point, H5Funmount disassociates the mount point's file from the file mounted there.
      *
      * @param loc_id
      *            The identifier for the location at which the specified file is to be unmounted.
@@ -5205,7 +5205,7 @@ public class H5 implements java.io.Serializable {
      */
     /**
      * retrieves information of all objects (recurvisely) under the group (name) located in the file or group specified
-     * by loc_id upto maximum specified by objMax.
+     * by loc_id up to maximum specified by objMax.
      *
      * @param loc_id
      *            IN: File or group identifier
@@ -7182,7 +7182,7 @@ public class H5 implements java.io.Serializable {
      * @param size
      *            IN: Size the property value.
      * @param def_value
-     *            IN: Defaul value of the property
+     *            IN: Default value of the property
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
@@ -7202,7 +7202,7 @@ public class H5 implements java.io.Serializable {
      * @param size
      *            IN: Size the property value.
      * @param value
-     *            IN: Defaul value of the property
+     *            IN: Default value of the property
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
@@ -7245,7 +7245,7 @@ public class H5 implements java.io.Serializable {
      * @param ocpl_id
      *            IN: : Object (dataset or group) creation property list identifier
      * @param attributes
-     *            The maximun and minimum no. of attributes to be stored.
+     *            The maximum and minimum no. of attributes to be stored.
      *
      * <pre>
      *      attributes[0] =  The maximum number of attributes to be stored in compact storage
@@ -7353,7 +7353,7 @@ public class H5 implements java.io.Serializable {
      *              transfer property list.  The FLAGS argument specifies certain
      *              general properties of the filter and is documented below.
      *              The CD_VALUES is an array of CD_NELMTS integers which are
-     *              auxiliary data for the filter.  The integer vlues will be
+     *              auxiliary data for the filter.  The integer values will be
      *              stored in the dataset object header as part of the filter
      *              information.
      *<p>
@@ -8054,9 +8054,9 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      * @exception NullPointerException
-     *                - aligment array is null.
+     *                - alignment array is null.
      * @exception IllegalArgumentException
-     *                - aligment array is invalid.
+     *                - alignment array is invalid.
      **/
     public synchronized static native int H5Pget_alignment(long plist, long[] alignment) throws HDF5LibraryException,
     NullPointerException, IllegalArgumentException;
@@ -8202,7 +8202,7 @@ public class H5 implements java.io.Serializable {
             throws HDF5LibraryException;
 
     /**
-     * H5Pget_gc_references Returns the current setting for the garbage collection refernces property from a file access
+     * H5Pget_gc_references Returns the current setting for the garbage collection references property from a file access
      * property list.
      *
      * @param fapl_id
@@ -9254,7 +9254,7 @@ public class H5 implements java.io.Serializable {
      * the raw data chunk cache on a per-datset basis.
      *
      * @param dapl_id
-     *            IN: Identifier of the datset access property list.
+     *            IN: Identifier of the dataset access property list.
      * @param rdcc_nslots
      *            IN: Number of elements (objects) in the raw data chunk cache.
      * @param rdcc_nbytes

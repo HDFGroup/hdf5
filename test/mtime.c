@@ -117,7 +117,7 @@ main(void)
     if (0 == oi1.ctime) {
         SKIPPED();
         HDputs("    The modification time could not be decoded on this OS.");
-        HDputs("    Modification times will be mantained in the file but");
+        HDputs("    Modification times will be maintained in the file but");
         HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }

@@ -109,7 +109,7 @@ main(void)
     }
 
     /*
-     * Close all identifers
+     * Close all identifiers
      */
     H5Tclose(tid);
     H5Dclose(did);

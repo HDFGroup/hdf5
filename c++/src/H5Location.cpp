@@ -1745,7 +1745,7 @@ H5Location::getObjinfo(const H5std_string &name, hbool_t follow_link, H5G_stat_t
 // Function:    H5Location::getObjinfo
 ///\brief       This is an overloaded member function, provided for convenience.
 ///             It differs from the above functions in that it doesn't have
-///             the paramemter \a follow_link.
+///             the parameter \a follow_link.
 // Nov, 2005
 //--------------------------------------------------------------------------
 void

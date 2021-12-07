@@ -630,7 +630,7 @@ while [ $# -gt 0 ]; do
 	    # setup the directory structure for snapshot test.
 	    CMD=setup
 	    ;;
-	-*) # Unknow option
+	-*) # Unknown option
 	    PRINT "Unknown option ($1)"
 	    USAGE
 	    exit 1
@@ -830,7 +830,7 @@ if [ -z "$NOCVS" ]; then
 else
     # make sure the cvs update, if done by another host, has completed.
     # First wait for the presence of $CVSLOG which signals some host
-    # has started the cvs update.  Then wait for the absense of $CVSLOG_LOCK
+    # has started the cvs update.  Then wait for the absence of $CVSLOG_LOCK
     # which signals the host has completed the cvs update.
     WAITFOR $CVSLOG 90
     if [ $WAIT_STATUS -ne 0 ]; then
@@ -911,7 +911,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 		PRINT $h is not reachable  "(`date`)"
 		;;
 	    *)
-		PRINT "CHECK_RSH for $h returned unknow result ($RSH)"
+		PRINT "CHECK_RSH for $h returned unknown result ($RSH)"
 		;;
 	esac >> $TMP_OUTPUT 2>&1
     done
