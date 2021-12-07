@@ -811,7 +811,7 @@ uint64_decode(uint8_t **pp)
      + 4                 /* Page size */                                                                     \
      + 8                 /* Sequence number */                                                               \
      + 8                 /* Tick number */                                                                   \
-     + 8                 /* Chnage list offset */                                                            \
+     + 8                 /* Change list offset */                                                            \
      + 8                 /* Change list length */                                                            \
      + H5F_SIZEOF_CHKSUM /* Updater file header checksum */                                                  \
     )
@@ -935,7 +935,7 @@ typedef enum H5F_prefix_open_t {
  *
  *  An array of instances of H5F_vfd_swmr_updater_cl_entry_t of length equal to
  *  the number of metadata pages and multi-page metadata entries modified in
- *  the past tick is used ot aseemble the assoicated data in preparation for
+ *  the past tick is used to assemble the associated data in preparation for
  *  writing an updater file.
  *
  *  Each entry in this array pertains to a given modified metdata page or
@@ -1062,7 +1062,7 @@ typedef struct H5F_vfd_swmr_updater_cl_entry_t {
  *           array of H5F_vfd_swmr_updater_cl_ entry_t whose base address
  *           is stored in the change_list field below.  This value is also the
  *           number of metadata pages and multi-page metadata entries that have
- *           been modified in the past tick
+ *           been modified in the past tick.
  *
  *           If this field is zero, there is no change list, and the change_list
  *           field below is NULL.

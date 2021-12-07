@@ -1850,11 +1850,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t                 evict_on_close;                 /* Evict on close value from plist */
     hbool_t                 use_file_locking    = TRUE;     /* Using file locks? */
     hbool_t                 ci_load             = FALSE;    /* Whether MDC ci load requested */
-    hbool_t                 ci_write            = FALSE;    /* Whether MDC CI write requested */
+    hbool_t                 ci_write            = FALSE;    /* Whether MDC ci write requested */
     hbool_t                 file_create         = FALSE;    /* Creating a new file or not */
     H5F_vfd_swmr_config_t * vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
-    H5F_generate_md_ck_cb_t cb_info             = {NULL};
-    H5F_t *                 ret_value           = NULL; /* Actual return value */
+    H5F_generate_md_ck_cb_t cb_info             = {NULL};   /* For VFD SWMR NFS testing:
+                                                               initialize the callback to generate
+                                                               checksums for metadata files */
+    H5F_t *                 ret_value           = NULL;     /* Actual return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -3772,7 +3774,7 @@ herr_t
 H5F__start_swmr_write(H5F_t *f)
 {
     hbool_t     ci_load        = FALSE;  /* whether MDC ci load requested */
-    hbool_t     ci_write       = FALSE;  /* whether MDC CI write requested */
+    hbool_t     ci_write       = FALSE;  /* whether MDC ci write requested */
     size_t      grp_dset_count = 0;      /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;      /* # of opened named datatypes  + opened attributes */
     hid_t *     obj_ids        = NULL;   /* List of ids */
