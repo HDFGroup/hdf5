@@ -364,7 +364,7 @@ done:
  *
  * Return:
  *              Success:        Non-negative
- *              Failture:       Negative
+ *              Failure:       Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -711,7 +711,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     H5T_t *     type             = NULL;
     H5O_fill_t *fill_prop        = NULL;
     hbool_t     use_at_least_v18 = FALSE;
-    const char  continuation[1]  = ""; /* requred for work-around */
+    const char  continuation[1]  = ""; /* required for work-around */
     size_t      get_value        = 0;
     size_t      ret_value        = 0;
 
@@ -758,7 +758,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of continuation message")
     ret_value += get_value;
 
-    /* Fill Value (backwards compatability) message size */
+    /* Fill Value (backwards compatibility) message size */
     if (fill_prop->buf && !use_at_least_v18) {
         H5O_fill_t old_fill_prop; /* Copy for writing "old" fill value */
 
@@ -847,7 +847,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     if (ohdr_size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
-    /* Special allocation of space for compact datsets is handled by the call here. */
+    /* Special allocation of space for compact datasets is handled by the call here. */
     if (H5O_apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 

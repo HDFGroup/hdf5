@@ -27,7 +27,7 @@
 # IMPORTANT OS X NOTE
 #
 # If you are using OS X, you will probably not have flex or bison
-# installed. In addtion, even if you do have bison installed, the bison
+# installed. In addition, even if you do have bison installed, the bison
 # version you have installed may also have a bug that makes it unable to
 # process our input files.
 #

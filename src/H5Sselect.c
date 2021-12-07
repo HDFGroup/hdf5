@@ -2246,7 +2246,7 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
     if (new_space_rank == 0) {
         hssize_t npoints; /* Number of points selected */
 
-        /* Retreve the number of elements selected */
+        /* Retrieve the number of elements selected */
         if ((npoints = (hssize_t)H5S_GET_SELECT_NPOINTS(base_space)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get number of points selected")
         HDassert(npoints <= 1);
@@ -2315,12 +2315,12 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
          * true on selections of different rank iff:
          *
          * 1) the selection in the lower rank dataspace matches that
-         *    in the dimensions with the fastest changing indicies in
+         *    in the dimensions with the fastest changing indices in
          *    the larger rank dataspace, and
          *
          * 2) the selection has thickness 1 in all ranks that appear
          *    only in the higher rank dataspace (i.e. those with
-         *    more slowly changing indicies).
+         *    more slowly changing indices).
          */
         if (new_space_rank > base_space_rank) {
             hsize_t tmp_dim_size = 1; /* Temporary dimension value, for filling arrays */

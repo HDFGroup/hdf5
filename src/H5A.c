@@ -1868,7 +1868,7 @@ done:
     if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id' & 'obj_name'.  For each attribute of the object,
     the 'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*idx'
@@ -1956,7 +1956,7 @@ done:
     if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id' & 'obj_name'.  For each attribute of the object,
     the 'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*idx'
@@ -2410,7 +2410,7 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    hbool_t exists;           /* Flag for attribute existance */
+    hbool_t exists;           /* Flag for attribute existence */
     htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2526,7 +2526,7 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    hbool_t exists;           /* Flag for attribute existance */
+    hbool_t exists;           /* Flag for attribute existence */
     htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)

@@ -86,7 +86,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 7, 2001
 !
-!  Added optional parameter 'tapl_id' for compatability
+!  Added optional parameter 'tapl_id' for compatibility
 !  with H5Topen2. April 9, 2009.
 !
 ! SOURCE
@@ -212,7 +212,7 @@ CONTAINS
 !  h5tcopy_f
 !
 ! PURPOSE
-!  Creates a copy of exisiting datatype.
+!  Creates a copy of existing datatype.
 !
 ! INPUTS
 !  type_id 	 - datatype identifier

@@ -1306,7 +1306,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Funmount
  *
- * Purpose:     Given a mount point, dissassociate the mount point's file
+ * Purpose:     Given a mount point, disassociate the mount point's file
  *              from the file mounted there. Do not close either file.
  *
  *              The mount point can either be the group in the parent or the
@@ -2262,7 +2262,7 @@ done:
  *              1) The file being opened has v3 superblock
  *              2) The file is opened with H5F_ACC_RDWR
  *              3) The file is not already marked for SWMR writing
- *              4) Current implementaion for opened objects:
+ *              4) Current implementation for opened objects:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects

@@ -29,7 +29,7 @@
 #define ARRAY_DIM 4
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1
@@ -2637,7 +2637,7 @@ test_compound_13(void)
         data_out.x[u] = (unsigned char)u;
     data_out.y = 99.99f;
 
-    /* Set latest_format in access propertly list to enable the latest
+    /* Set latest_format in access property list to enable the latest
      * compound datatype format.
      */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -3794,7 +3794,7 @@ error:
  *
  * Modifications:
  *              Raymond Lu
- *              Wednesday, Febuary 9, 2005
+ *              Wednesday, February 9, 2005
  *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
  *              H5Tget_member_value.
  *-------------------------------------------------------------------------
@@ -6847,7 +6847,7 @@ test_set_order(void)
 {
     hid_t       dtype;            /* Datatype ID */
     H5T_order_t order;            /* Byte order */
-    hsize_t     dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t     dims[2] = {3, 4}; /* Array dimensions */
     herr_t      ret;              /* Generic return value */
 
     TESTING("H5Tset/get_order");
@@ -7095,7 +7095,7 @@ test_set_order_compound(hid_t fapl)
     hid_t   file = -1;
     hid_t   cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
     hid_t   vl_id   = -1;
-    hsize_t dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t dims[2] = {3, 4}; /* Array dimensions */
     char    filename[1024];
     herr_t  ret; /* Generic return value */
 
@@ -7950,7 +7950,7 @@ test_deprec(hid_t fapl)
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
 
-    TESTING("deprected API routines for datatypes");
+    TESTING("deprecated API routines for datatypes");
 
     /* Create an array datatype with an atomic base type */
     /* (dimension permutations allowed, but not stored) */

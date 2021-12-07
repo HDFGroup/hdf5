@@ -1665,7 +1665,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
  *              signal file from disk, and only continues once it has
  *              successfully done so (i.e., only after another process has
  *              called the "h5_send_message" function to write the signal file).
- *              This functon will then immediately remove the file (i.e.,
+ *              This function will then immediately remove the file (i.e.,
  *              to indicate that it has been received and can be reused),
  *              and then exits, allowing the calling function to continue.
  *

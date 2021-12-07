@@ -33,7 +33,7 @@
 #define H5_NFILTERS_IMPL                                                                                     \
     8 /* Number of currently implemented filters + one to                                                    \
          accommodate for user-define filters + one                                                           \
-         to accomodate datasets whithout any filters */
+         to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
