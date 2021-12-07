@@ -3047,7 +3047,7 @@ compress_readAll(void)
                     nerrors++;
                 }
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
             ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
             VRFY((ret >= 0), "H5Dwrite succeeded");
 #endif

@@ -620,14 +620,9 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
          *  use collective IO will defer until each chunk IO is reached.
          */
 
-#if MPI_VERSION < 3
-    /*
-     * Don't allow parallel writes to filtered datasets if the MPI version
-     * is less than 3. The functions needed (MPI_Mprobe and MPI_Imrecv) will
-     * not be available.
-     */
-    if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->layout.type == H5D_CHUNKED &&
-        io_info->dset->shared->dcpl_cache.pline.nused > 0)
+#ifndef H5_HAVE_PARALLEL_FILTERED_WRITES
+    /* Don't allow writes to filtered datasets if the functionality is disabled */
+    if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0)
         local_cause[0] |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
 #endif
 

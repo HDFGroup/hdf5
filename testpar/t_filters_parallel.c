@@ -53,7 +53,7 @@ typedef struct filter_options_t {
 
 static herr_t set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_options);
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 /* Tests for writing data in parallel */
 static void test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id,
                                                   hid_t fapl_id, hid_t dxpl_id);
@@ -133,7 +133,7 @@ static void test_read_cmpd_filtered_dataset_type_conversion_shared(const char * 
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
                                                                    hid_t dxpl_id);
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 /* Other miscellaneous tests */
 static void test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
                                           hid_t dxpl_id);
@@ -150,13 +150,13 @@ static void test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t
  */
 static void test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
                                             hid_t dxpl_id);
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 static void test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
                                             hid_t dxpl_id);
 #endif
 
 static test_func tests[] = {
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
     test_write_one_chunk_filtered_dataset,
     test_write_filtered_dataset_no_overlap,
     test_write_filtered_dataset_overlap,
@@ -189,7 +189,7 @@ static test_func tests[] = {
     test_read_cmpd_filtered_dataset_type_conversion_unshared,
     test_read_cmpd_filtered_dataset_type_conversion_shared,
     test_write_serial_read_parallel,
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
     test_write_parallel_read_serial,
     test_shrinking_growing_chunks,
 #endif
@@ -228,7 +228,7 @@ set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_
     }
 }
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 /*
  * Tests parallel write of filtered data in the special
  * case where a dataset is composed of a single chunk.
@@ -5917,7 +5917,7 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     return;
 }
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 /*
  * Tests parallel write of filtered data
  * to a dataset. After the write has
