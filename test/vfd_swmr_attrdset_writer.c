@@ -1979,8 +1979,9 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, true, 128, "./attrdset-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, FALSE, TRUE, 128, "./attrdset-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {

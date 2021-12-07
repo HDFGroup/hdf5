@@ -125,8 +125,9 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
         if ((config = HDcalloc(1, sizeof(*config))) == NULL)
             return -1;
 
-        /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-        init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, TRUE, 128, "generator-shadow");
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+         * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+        init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, TRUE, FALSE, TRUE, 128, "generator-shadow", NULL);
     }
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */

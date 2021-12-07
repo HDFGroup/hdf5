@@ -275,6 +275,31 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *          A boolean flag indicating whether the file opened with this FAPL entry
  *          will be opened R/W. (i.e. as a VFD SWMR writer)
  *
+ *      maintain_metadata_file
+ *          A boolean flag indicating whether the writer should create and
+ *          maintain the metadata file.  Note that this field is only revelant
+ *          if the above writer flag is TRUE.
+ *          If this flag is TRUE, the writer must create and maintain the
+ *          metadata file in the location specified in the md_file_path.
+ *          Observe that at least one of maintain_metadata_file and
+ *          generate_updater_files fields must be TRUE if writer is TRUE.
+ *
+ *      generate_updater_files
+ *          A boolean flag indicating whether the writer should generate a
+ *          sequence of updater files describing how the metadata file
+ *          should be updated at the end of each tick.
+ *          If the flag is TRUE, all modifications to the metadata file
+ *          (including its creation) are described in an ordered sequence of
+ *          updater files.  These files are read in order by auxiliary processes,
+ *          and used to generate local copies of the metadata file as required.
+ *          This mechanism exists to allow VFD SWMR to operate on storage
+ *          systems that do not support POSIX semantics.
+ *          This field is only used by the VFD SWMR writer.  VFD SWMR readers
+ *          ignore this field, as they always look to the specified metadata
+ *          file, regardless of whether it is generated and maintained
+ *          directly by the VFD SWMR writer, or by an auxiliary process that
+ *          polls for new updater files, and applies them as they appear.
+ *
  *      flush_raw_data:
  *          A boolean flag indicating whether raw data should be flushed
  *          as part of the end of tick processing.  If set to TRUE, raw
@@ -307,11 +332,16 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *          of tick is triggered.
  *
  *      md_file_path:
- *          POSIX: this field contains the path of the metadata file.
- *          NFS: it contains the path and base name of the metadata file
- *          updater files.
- *          Object store: it contains the base URL for the objects used
- *          to store metadata file updater objects.
+ *          If both the writer and maintain_metadata_file fields are TRUE, this
+ *          field contains the path of the metadata file.
+ *          If writer is FALSE, this field contains the path of the (possibly
+ *          local copy of the) metadata file.
+ *
+ *      updater_file_path:
+ *          If generate_updater_files is TRUE, the contents of this field depends
+ *          on whether the writer field is TRUE.  If it is, the field contains
+ *          the path and base name of the metadatea file updater files.
+ *          If writer is FALSE, the field is ignored.
  *
  *      log_file_path:
  *          This field contains the path to the log file.  If defined, this path should
@@ -324,10 +354,13 @@ typedef struct H5F_vfd_swmr_config_t {
     uint32_t tick_len;
     uint32_t max_lag;
     hbool_t  writer;
+    hbool_t  maintain_metadata_file;
+    hbool_t  generate_updater_files;
     hbool_t  flush_raw_data;
     uint32_t md_pages_reserved;
     uint32_t pb_expansion_threshold;
     char     md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+    char     updater_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
     char     log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
 } H5F_vfd_swmr_config_t;
 

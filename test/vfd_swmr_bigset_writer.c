@@ -2470,9 +2470,10 @@ main(int argc, char **argv)
             continue;
         }
 
-        /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-        init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, s.flush_raw_data, 128,
-                             "./bigset-shadow-%zu", i);
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+         * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+        init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, TRUE, FALSE, s.flush_raw_data, 128,
+                             "./bigset-shadow-%zu", NULL, i);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, s.page_buf_size, &config)) < 0) {
