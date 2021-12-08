@@ -846,8 +846,10 @@ AC_SUBST([HDF5_HL_TOOLS])
 ## The high-level library is enabled unless the build mode is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
   HDF5_HL=no
+  HDF5_HL_TOOLS=no
 else
   HDF5_HL=yes
+  HDF5_HL_TOOLS=yes
 fi
 
 ## high-level library directories (set when needed, blank until then)
