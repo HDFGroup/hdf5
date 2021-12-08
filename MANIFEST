@@ -1441,6 +1441,7 @@
 ./test/vfd_swmr_group_writer.c
 ./test/vfd_swmr_gperf_writer.c
 ./test/vfd_swmr_gfail_writer.c
+./test/vfd_swmr_indep_rw_writer.c
 ./test/vfd_swmr_reader.c
 ./test/vfd_swmr_remove_reader.c
 ./test/vfd_swmr_remove_writer.c
