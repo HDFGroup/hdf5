@@ -15,8 +15,30 @@
 ###           T E S T I N G  S H E L L  S C R I P T S                      ###
 ##############################################################################
 
-if (UNIX)
+find_program (PWSH NAMES pwsh powershell)
+if (PWSH)
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
+    set (srcdir ${HDF5_TEST_SOURCE_DIR})
+    set (bindir ${CMAKE_TEST_OUTPUT_DIRECTORY})
+    set (testdir ${HDF5_TEST_BINARY_DIR}/H5TEST)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1 @ONLY)
+    # test commented out as currently the programs are not allowing another access to the data file
+    #add_test (H5SHELL-testswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1)
+    #set_tests_properties (H5SHELL-testswmr PROPERTIES
+    #        ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    #        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    #)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/testvdsswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1 @ONLY)
+    # test commented out as currently the programs are not allowing another access to the data file
+    #add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1)
+    #set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+    #        ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    #        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    #)
+elseif (UNIX)
   find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
@@ -35,23 +57,12 @@ if (UNIX)
     ##############################################################################
     #  copy test programs to test dir
     ##############################################################################
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     add_custom_command (
         TARGET     accum_swmr_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
     )
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     ##############################################################################
     ##############################################################################
@@ -108,6 +119,5 @@ if (UNIX)
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-
   endif ()
 endif ()
