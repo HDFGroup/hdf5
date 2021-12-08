@@ -835,7 +835,11 @@ error:
 static herr_t
 test_compact_io(hid_t fapl)
 {
-    hid_t        file, dataset, space, plist;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t dataset = H5I_INVALID_HID;
+    hid_t space   = H5I_INVALID_HID;
+    hid_t plist   = H5I_INVALID_HID;
+
     hid_t        verfile = -1, new_fapl = -1;
     hsize_t      dims[2];
     int          wbuf[16][8], rbuf[16][8];
@@ -7587,9 +7591,9 @@ test_missing_chunk(hid_t file)
     hsize_t csize2[2] = {5, 5};
     size_t  u, i, j; /* Local Index variable */
 
-    hid_t             fapl;                /* File access property list */
-    H5F_libver_t      low;                 /* File format low bound */
-    H5D_chunk_index_t idx_type, idx_type2; /* Dataset chunk index types */
+    hid_t             fapl = H5I_INVALID_HID; /* File access property list */
+    H5F_libver_t      low;                    /* File format low bound */
+    H5D_chunk_index_t idx_type, idx_type2;    /* Dataset chunk index types */
 
     TESTING("Read dataset with unwritten chunk & undefined fill value");
 
@@ -10722,8 +10726,8 @@ test_fixed_array(hid_t fapl)
     const hsize_t dim2_big[2] = {500, 60}; /* Big dataset dimensions */
     hsize_t       dim2_max[2] = {120, 50}; /* Maximum dataset dimensions */
 
-    hid_t mem_id;     /* Memory space ID */
-    hid_t big_mem_id; /* Memory space ID for big dataset */
+    hid_t mem_id = H5I_INVALID_HID; /* Memory space ID */
+    hid_t big_mem_id;               /* Memory space ID for big dataset */
 
     hsize_t msize[1]     = {POINTS};     /* Size of memory space */
     hsize_t msize_big[1] = {POINTS_BIG}; /* Size of memory space for big dataset */
