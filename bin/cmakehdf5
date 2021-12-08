@@ -199,7 +199,7 @@ DUMP_LOGFILE()
 # Show a start time stamp
 TIMESTAMP
 
-# Initialize njobs if $AMKE is defined
+# Initialize njobs if $MAKE is defined
 if [ -n "$MAKE" ]; then
     # assume all arguments are for --jobs
     njobs=`echo $MAKE | cut -s -d' ' -f2-`
@@ -365,7 +365,7 @@ STEP "Test the library and tools..." "ctest . -C Release $njobs" $testlog
 #      7. Create an install image with this command:
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
 
-# The implementation of installation is imcomplete (only works for linux).
+# The implementation of installation is incomplete (only works for linux).
 # Screen it out for now till it is completed.
 if false; then
 #      8. Install with this command:

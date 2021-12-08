@@ -579,7 +579,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show mpi write statics */
+    /* show mpi write statistics */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(3);
@@ -645,7 +645,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
         if (pio_debug_level >= 3) {
             /* output all of the times for all iterations */
             print_indent(3);

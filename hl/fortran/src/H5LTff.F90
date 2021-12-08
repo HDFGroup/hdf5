@@ -88,7 +88,7 @@ MODULE H5LT_CONST
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
-                                                                     ! R=Real, D=DOUBLE, I=Interger, C=Character
+                                                                     ! R=Real, D=DOUBLE, I=Integer, C=Character
        INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltset_attribute_c
   END INTERFACE
@@ -107,7 +107,7 @@ MODULE H5LT_CONST
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
-                                                                     ! R=Real, D=DOUBLE, I=Interger
+                                                                     ! R=Real, D=DOUBLE, I=Integer
        INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
   END INTERFACE

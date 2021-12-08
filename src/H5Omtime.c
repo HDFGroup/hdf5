@@ -43,7 +43,7 @@ const H5O_msg_class_t H5O_MSG_MTIME[1] = {{
     H5O_MTIME_ID,      /*message id number		*/
     "mtime",           /*message name for debugging	*/
     sizeof(time_t),    /*native message size		*/
-    0,                 /* messages are sharable?       */
+    0,                 /* messages are shareable?       */
     H5O__mtime_decode, /*decode message		*/
     H5O__mtime_encode, /*encode message		*/
     H5O__mtime_copy,   /*copy the native value		*/
@@ -68,7 +68,7 @@ const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
     H5O_MTIME_NEW_ID,      /*message id number		*/
     "mtime_new",           /*message name for debugging	*/
     sizeof(time_t),        /*native message size		*/
-    0,                     /* messages are sharable?       */
+    0,                     /* messages are shareable?       */
     H5O__mtime_new_decode, /*decode message		*/
     H5O__mtime_new_encode, /*encode message		*/
     H5O__mtime_copy,       /*copy the native value		*/

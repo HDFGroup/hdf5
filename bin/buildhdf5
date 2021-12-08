@@ -178,7 +178,7 @@ LOCATE_SZLIB()
 	    esac
 	    ;;	# end of case ncsa
 	unknown)
-	    # Unknow domain. Give a shot at the some standard places.
+	    # Unknown domain. Give a shot at the some standard places.
 	    szlibpaths="/usr/local"
 	    ;;
     esac	# end of case $mydomain

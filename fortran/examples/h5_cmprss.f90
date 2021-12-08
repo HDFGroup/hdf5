@@ -51,7 +51,7 @@ PROGRAM h5_cmprss
   !INTEGER :: szip_pixels_per_block
 
   !
-  !Initialize FORTRAN predifined datatypes
+  !Initialize FORTRAN predefined datatypes
   !
   CALL h5open_f(error)
   !

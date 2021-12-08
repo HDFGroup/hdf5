@@ -14,7 +14,7 @@
 !
 ! NOTES
 !  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
-!  depending on availablity.It generates code that makes use of
+!  depending on availability.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5_gen.F90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -437,7 +437,7 @@ PROGRAM H5_buildiface
 !  dims parameter was added to make code portable;
 !  Aprile 4, 2001
 !
-!  Changed buf intent to INOUT to be consistant
+!  Changed buf intent to INOUT to be consistent
 !  with how the C functions handles it. The pg
 !  compiler will return 0 if a buf value is not set.
 !  February, 2008
@@ -564,7 +564,7 @@ PROGRAM H5_buildiface
 !  dims parameter was added to make code portable;
 !  Aprile 4, 2001
 !
-!  Changed buf intent to INOUT to be consistant
+!  Changed buf intent to INOUT to be consistent
 !  with how the C functions handles it. The pg
 !  compiler will return 0 if a buf value is not set.
 !  February, 2008
@@ -677,7 +677,7 @@ PROGRAM H5_buildiface
 ! Optional parameters:
 !		mem_space_id	- memory dataspace identifier
 !		file_space_id 	- file dataspace identifier
-!		xfer_prp	- trasfer property list identifier
+!		xfer_prp	- transfer property list identifier
 !
 ! AUTHOR
 !  Elena Pourmal

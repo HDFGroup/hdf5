@@ -3666,7 +3666,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dcpl  = -1;           /* A copy of dataset creation property */
     hid_t dapl  = -1;           /* A copy of dataset access property */
@@ -3889,7 +3889,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dapl  = -1;           /* A copy of dataset access property */
     hid_t ddapl = -1;           /* The dataset access property of the opened dataset */
@@ -4107,7 +4107,7 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dcpl  = -1;           /* A copy of dataset creation property */
     hid_t dapl1 = -1;           /* A copy of dataset access property */
@@ -7412,7 +7412,7 @@ main(void)
     /*
      * Modify the following routines to test for files:
      *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
-     *   --both result in v3 superblock and latest version suppport
+     *   --both result in v3 superblock and latest version support
      */
     nerrors += test_start_swmr_write(fapl, TRUE);
     nerrors += test_start_swmr_write(fapl, FALSE);
@@ -7446,7 +7446,7 @@ main(void)
          *
          * Modify the following 2 routines to test for files:
          *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
-         *   --both result in v3 superblock and latest version suppport
+         *   --both result in v3 superblock and latest version support
          */
         nerrors += test_file_lock_swmr_same(fapl);
         nerrors += test_file_lock_swmr_concur(fapl);
