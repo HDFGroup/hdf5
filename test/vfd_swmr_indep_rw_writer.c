@@ -363,8 +363,9 @@ indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
 
     H5F_vfd_swmr_config_t config;
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, s->tick_len, s->max_lag, writer, TRUE, 128, mdf_path);
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, s->tick_len, s->max_lag, writer, TRUE, FALSE, TRUE, 128, mdf_path,NULL);
 
     /* Pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
     if ((s->fapl = vfd_swmr_create_fapl(true, s->use_vfd_swmr, true, s->pbs, &config)) < 0) {
