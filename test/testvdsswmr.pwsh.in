@@ -130,7 +130,7 @@ if ($rp.ExitCode -ne 0) {
     $nerrors += 1
 }
 
-# Check for error and exit if one occured
+# Check for error and exit if one occurred
 #Write-Output "nerrors=$nerrors"
 if ($nerrors -ne 0) {
     Write-Warning "VDS SWMR tests failed with $nerrors errors."
@@ -183,7 +183,7 @@ foreach ($xpid in $pid_readers) {
     }
 }
 
-# Check for error and exit if one occured
+# Check for error and exit if one occurred
 #Write-Output "nerrors=$nerrors"
 if ($nerrors -ne 0) {
     Write-Warning "VDS SWMR tests failed with $nerrors errors."

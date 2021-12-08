@@ -159,7 +159,7 @@ foreach ($index_type in $IndexTypeLoop) {
             $nerrors += 1
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
@@ -220,7 +220,7 @@ foreach ($index_type in $IndexTypeLoop) {
             $nerrors += 1
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
@@ -291,7 +291,7 @@ foreach ($index_type in $IndexTypeLoop) {
             $nerrors += 1
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
@@ -353,7 +353,7 @@ foreach ($index_type in $IndexTypeLoop) {
             $nerrors += 1
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
@@ -433,7 +433,7 @@ foreach ($index_type in $IndexTypeLoop) {
             $nerrors += 1
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
@@ -502,7 +502,7 @@ foreach ($index_type in $IndexTypeLoop) {
             }
         }
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         #Write-Output "nerrors=$nerrors"
         if ($nerrors -ne 0) {
             Write-Warning "SWMR tests failed with $nerrors errors."
