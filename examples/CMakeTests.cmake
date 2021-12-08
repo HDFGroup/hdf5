@@ -101,22 +101,26 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
   # Ensure that 24 is a multiple of the number of processes.
   # The number 24 corresponds to SPACE1_DIM1 and SPACE1_DIM2 defined in ph5example.c
   math(EXPR NUMPROCS "24 / ((24 + ${MPIEXEC_MAX_NUMPROCS} - 1) / ${MPIEXEC_MAX_NUMPROCS})")
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
-  else ()
-    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example>;${MPIEXEC_POSTFLAGS}"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_EXPECT=0"
-        -D "TEST_OUTPUT=ph5example.out"
-        -D "TEST_REFERENCE:STRING=PHDF5 tests finished with no errors"
-        -D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
-    )
-  endif ()
-  if (last_test)
-    set_tests_properties (MPI_TEST_EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "MPI_TEST_EXAMPLES-ph5example")
+
+  foreach (parallel_example ${parallel_examples})
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${parallel_example}> ${MPIEXEC_POSTFLAGS})
+    else ()
+      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${parallel_example}>;${MPIEXEC_POSTFLAGS}"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${parallel_example}.out"
+          #-D "TEST_REFERENCE:STRING=PHDF5 tests finished with no errors"
+          #-D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+      )
+    endif ()
+    if (last_test)
+      set_tests_properties (MPI_TEST_EXAMPLES-${parallel_example} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "MPI_TEST_EXAMPLES-${parallel_example}")
+  endforeach ()
 endif ()
