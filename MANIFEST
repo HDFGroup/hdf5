@@ -160,7 +160,6 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
-./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -175,10 +174,9 @@
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-9
+./config/gnu-warnings/cxx-developer-4.8
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
-./config/gnu-warnings/cxx-noerror-5
-./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -190,15 +188,13 @@
 ./config/gnu-warnings/general
 ./config/gnu-warnings/gfort-general
 ./config/gnu-warnings/gfort-4.8
-./config/gnu-warnings/gfort-5
+./config/gnu-warnings/developer-gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-cxx-developer-4.8
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
-./config/gnu-warnings/noerror-5
-./config/gnu-warnings/noerror-8
-./config/gnu-warnings/noerror-general
 ./config/intel-warnings/15
 ./config/intel-warnings/18
 ./config/intel-warnings/developer-general
@@ -206,6 +202,10 @@
 ./config/intel-warnings/win-developer-general
 ./config/intel-warnings/win-general
 ./config/intel-warnings/ifort-general
+
+./config/cmake/FindMFU.cmake
+./config/cmake/FindDTCMP.cmake
+./config/cmake/FindCIRCLE.cmake
 
 ./config/site-specific/BlankForm
 
@@ -219,7 +219,7 @@
 ./doc/vfd-swmr-user-guide.md
 ./doc/code-conventions.md
 ./doc/contributing.md
-
+./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
@@ -228,11 +228,10 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
-./doxygen/dox/FileFormatSpec.dox
+./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
-./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
 ./doxygen/dox/RFC.dox
@@ -248,9 +247,12 @@
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
+./doxygen/examples/DebuggingHDF5Applications.html
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/Filters.html
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/H5.format.1.0.html
@@ -279,6 +281,7 @@
 ./doxygen/examples/H5Z_examples.c
 ./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
+./doxygen/examples/IOFlow.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
 ./doxygen/examples/TableSpec.html
@@ -294,6 +297,9 @@
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
 ./doxygen/img/HDFG-logo.png
+./doxygen/img/IOFlow.gif
+./doxygen/img/IOFlow2.gif
+./doxygen/img/IOFlow3.gif
 ./doxygen/img/PaletteExample1.gif
 ./doxygen/img/Palettes.fm.anc.gif
 ./doxygen/img/ftv2node.png
@@ -3114,7 +3120,10 @@
 ./hl/test/sepia.pal
 ./hl/test/test_ds.c
 ./hl/test/test_ds_be.h5
+./hl/test/test_ds_be_new_ref.h5
+./hl/test/test_ds_be_new_ref-32bit.h5
 ./hl/test/test_ds_le.h5
+./hl/test/test_ds_le_new_ref.h5
 ./hl/test/test_dset_append.c
 ./hl/test/test_file_image.c
 ./hl/test/test_h5do_compat.c
@@ -3337,6 +3346,7 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_prp_set_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/package-info.java
 
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5BtreeException.java
@@ -3362,6 +3372,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5ReferenceException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java
+./java/src/hdf/hdf5lib/exceptions/package-info.java
 
 ./java/src/hdf/hdf5lib/structs/H5_ih_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5A_info_t.java
@@ -3376,12 +3387,14 @@
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_token_t.java
+./java/src/hdf/hdf5lib/structs/package-info.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
 ./java/src/hdf/hdf5lib/HDF5GroupInfo.java
 ./java/src/hdf/hdf5lib/HDFArray.java
 ./java/src/hdf/hdf5lib/HDFNativeData.java
+./java/src/hdf/hdf5lib/package-info.java
 
 ./java/examples/Makefile.am
 ./java/examples/CMakeLists.txt
@@ -3632,7 +3645,6 @@
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/javaTargets.cmake.in
 ./config/cmake/jrunTest.cmake
-./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
@@ -3874,6 +3886,7 @@
 ./tools/src/h5import/Makefile.in
 ./tools/src/h5jam/Makefile.in
 ./tools/src/h5ls/Makefile.in
+./tools/src/h5perf/Makefile.in
 ./tools/src/h5repack/Makefile.in
 ./tools/src/h5stat/Makefile.in
 ./tools/src/misc/Makefile.in
