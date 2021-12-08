@@ -26,7 +26,7 @@
      IMPLICIT NONE
      CHARACTER(LEN=10), PARAMETER :: filename = "FORTRAN.h5"  ! File
      CHARACTER(LEN=8), PARAMETER :: dsetnamei = "INTEGERS"    ! Dataset with the integer data
-     CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES" ! Dataset wtih object
+     CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES" ! Dataset with object
                                                                      ! references
      CHARACTER(LEN=6), PARAMETER :: groupname1 = "GROUP1"            ! Groups in the file
      CHARACTER(LEN=6), PARAMETER :: groupname2 = "GROUP2"            !

@@ -36,7 +36,7 @@ RM='rm -f'
 PURPOSE() {
     echo "Tests for the H5check_version function."
     echo "Note that abort messages may appear due to the expected termination"
-    echo "of the program when it is tested with mis-matched version numnbers."
+    echo "of the program when it is tested with mis-matched version numbers."
 }
 
 # Print a line-line message left justified in a field of 70 characters.
@@ -232,7 +232,7 @@ esac
 
 # RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
 if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
-    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Serial Exit Code is not passed back to shell correctly."
     echo "***Warning*** Exit code checking is skipped."
     h5haveexitcode=no
 fi

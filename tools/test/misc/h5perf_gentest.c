@@ -255,9 +255,9 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
     buf_vlen_s     = (char **)calloc(dim0, sizeof(char *));
     buf_str        = malloc(dim0 * sizeof(*buf_str));
 
-    /* allocate array of doulbe pointers */
+    /* allocate array of double pointers */
     buf_double2d = (double **)calloc(dims2d[0], sizeof(double *));
-    /* allocate a contigous chunk of memory for the data */
+    /* allocate a contiguous chunk of memory for the data */
     buf_double2d[0] = (double *)calloc(dims2d[0] * dims2d[1], sizeof(double));
     /* assign memory city to pointer array */
     for (i = 1; i < dims2d[0]; i++)
@@ -396,7 +396,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 6 add compound data */
-        HDsprintf(name, "%05d compund data", j);
+        HDsprintf(name, "%05d compound data", j);
         did = H5Dcreate(gid1, name, cmp_tid, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, cmp_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_comp);
         if (!j)

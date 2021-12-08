@@ -16,7 +16,7 @@
 /* The HDF5 test files */
 const char *FILENAME[] = {
     "h5clear_sec2_v3.h5", /* 0 -- sec2 file with superblock version 3 */
-    "h5clear_log_v3.h5",  /* 1 -- log file with superblock veresion 3 */
+    "h5clear_log_v3.h5",  /* 1 -- log file with superblock version 3 */
     "h5clear_sec2_v0.h5", /* 2 -- sec2 file with superblock version 0 */
     "h5clear_sec2_v2.h5"  /* 3 -- sec2 file with superblock version 2 */
 };

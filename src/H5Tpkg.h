@@ -123,7 +123,7 @@
 #endif
 
 /* Define an internal macro for converting unsigned long long to long double.  SGI compilers give
- * some incorect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
+ * some incorrect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
  * not support unsigned long long.  For FreeBSD(sleipnir), the last 2 bytes of mantissa are lost when
  * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly.
  * Mac OS 10.4 gives some incorrect result. */

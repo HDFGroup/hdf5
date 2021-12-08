@@ -313,7 +313,7 @@ TOOLTEST_MASK_OUT() {
     $RM $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
-# Same as TOOLTEST_OUT except only compares error outout
+# Same as TOOLTEST_OUT except only compares error output
 TOOLTEST_ERR() {
     # Prepare expected and actual output
     expect="$TESTDIR/$1"

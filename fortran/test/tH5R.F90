@@ -142,7 +142,7 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("h5gclose_f",error,total_error)
 
   !
-  ! Craete references to two groups, integer dataset and shared datatype
+  ! Create references to two groups, integer dataset and shared datatype
   ! and write it to the dataset in the file
   !
   CALL h5rcreate_f(file_id, groupname1, ref(1), error)

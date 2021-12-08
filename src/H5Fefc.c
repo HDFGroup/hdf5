@@ -450,7 +450,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     /* Sanity checks */
     HDassert(efc);
 
-    /* Lock the EFC to prevent manipulation of the EFC wile we are releasing it.
+    /* Lock the EFC to prevent manipulation of the EFC while we are releasing it.
      * The EFC should never be locked when we enter this function because that
      * would require a cycle, a cycle would necessarily invoke
      * H5F__efc_try_close(), and that function checks the status of the lock

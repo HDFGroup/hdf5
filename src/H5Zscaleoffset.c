@@ -659,7 +659,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 buf[i] = (type)(buf[i] + (type)(minval));                                                    \
     } while (0)
 
-/* Retrive minimum value of floating-point type */
+/* Retrieve minimum value of floating-point type */
 #define H5Z_scaleoffset_get_min(type, minval, min)                                                           \
     {                                                                                                        \
         if (sizeof(type) <= sizeof(long long))                                                               \
@@ -1388,7 +1388,7 @@ done:
  * assume one byte has 8 bit
  * assume padding bit is 0
  * assume size of unsigned char is one byte
- * assume one data item of certain datatype is stored continously in bytes
+ * assume one data item of certain datatype is stored continuously in bytes
  * atomic datatype is treated on byte basis
  */
 

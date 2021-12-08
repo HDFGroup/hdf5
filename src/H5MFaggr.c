@@ -195,7 +195,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
             haddr_t    aggr_frag_addr = HADDR_UNDEF; /* Address of aggregrator fragment */
             hsize_t    aggr_frag_size = 0;           /* Size of aggregator fragment */
             hsize_t    alignment;                    /* Alignment of this section */
-            hsize_t    aggr_mis_align = 0;           /* Mis-alignment of aggregator */
+            hsize_t    aggr_mis_align = 0;           /* Misalignment of aggregator */
             H5FD_mem_t alloc_type, other_alloc_type; /* Current aggregator & 'other' aggregator types */
 
 #ifdef H5MF_AGGR_DEBUG

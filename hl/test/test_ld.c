@@ -189,7 +189,7 @@ typedef struct set_t {
  * This will fail on heiwa and amani when VALID_FIELDS1 is "field1,field3,field4"
  * because of alignment problems:
  *    amani and heiwa - 8 byte alignment
- *    jam - 4 byte alignemnt
+ *    jam - 4 byte alignment
  * This will need to be fixed in the library for H5Tget_native_type().
  */
 /* VALID_FIELDS1 "field1,field2.a,field3,field4" */
@@ -213,8 +213,8 @@ typedef struct test_valid_fields2 {
 #define TEST_BUF_SIZE 100
 int *               iibuf; /* buffer for storing retrieved elements */
 int *               ibuf;  /* buffer for storing retrieved elements (integer) */
-set_t *             cbuf;  /* buffer for storing retrieved elemnets (compound) */
-set_t *             ccbuf; /* buffer for storing retrieved elemnets (compound) */
+set_t *             cbuf;  /* buffer for storing retrieved elements (compound) */
+set_t *             ccbuf; /* buffer for storing retrieved elements (compound) */
 test_valid_fields1 *vbuf1; /* buffer for storing retrieved elements (FIELDS1) */
 test_valid_fields2 *vbuf2; /* buffer for storing retrieved elements (FIELDS2) */
 
