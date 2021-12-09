@@ -11,6 +11,16 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5D H5D
+ *
+ * Use the functions in this module to manage HDF5 datasets, including the
+ * transfer of data between memory and disk and the description of dataset
+ * properties. Datasets are used by other HDF5 APIs and referenced either by
+ * name or by a handle. Such handles can be obtained by either creating or
+ * opening the dataset.
+ *
+ */
+
 /*
  * This file contains public declarations for the H5D module.
  */
@@ -130,16 +140,81 @@ typedef enum H5D_fill_value_t {
 extern "C" {
 #endif
 
-/* Define the operator function pointer for H5Diterate() */
+//! <!-- [H5D_operator_t_snip] -->
+/**
+ * \brief Callback for H5Diterate()
+ *
+ * \param[in,out] elem Pointer to the memory buffer containing the current dataset
+ *                     element
+ * \param[in] type_id Datatype identifier of the elements stored in \p elem
+ * \param[in] ndim Number of dimensions for the \p point array
+ * \param[in] point Array containing the location of the element within
+ *                  the original dataspace
+ * \param[in,out] operator_data Pointer to any user-defined data associated with
+ *                the operation
+ * \return \herr_t_iter
+ *
+ */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                  void *operator_data);
+//! <!-- [H5D_operator_t_snip] -->
 
-/* Define the operator function pointer for H5Dscatter() */
+//! <!-- [H5D_scatter_func_t_snip] -->
+/**
+ * \brief Callback for H5Dscatter()
+ *
+ * \param[out] src_buf Pointer to the buffer holding the next set of elements to
+ *                     scatter. On entry, the value of where \p src_buf points to
+ *                     is undefined. The callback function should set \p src_buf
+ *                     to point to the next set of elements.
+ * \param[out] src_buf_bytes_used Pointer to the number of valid bytes in \p src_buf.
+ *                                On entry, the value where \p src_buf_bytes_used points
+ *                                to is undefined. The callback function should set
+ *                                \p src_buf_bytes_used to the of valid bytes in \p src_buf.
+ *                                This number must be a multiple of the datatype size.
+ * \param[in,out] op_data User-defined pointer to data required by the callback
+ *                        function. A pass-through of the \p op_data pointer provided
+ *                        with the H5Dscatter() function call.
+ * \return herr_t
+ *
+ * \details The callback function should always return at least one
+ *          element in \p src_buf, and must not return more elements
+ *          than are remaining to be scattered. This function will be
+ *          repeatedly called until all elements to be scattered have
+ *          been returned. The callback function should return zero (0)
+ *          to indicate success, and a negative value to indicate failure.
+ *
+ */
 typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/,
                                      void *op_data);
+//! <!-- [H5D_scatter_func_t_snip] -->
 
-/* Define the operator function pointer for H5Dgather() */
+//! <!-- [H5D_gather_func_t_snip] -->
+/**
+ * \brief Callback for H5Dgather()
+ *
+ * \param[in] dst_buf Pointer to the destination buffer which has been filled
+ *                    with the next set of elements gathered. This will always
+ *                    be identical to the \p dst_buf passed to H5Dgather()
+ * \param[in] dst_buf_bytes_used  Pointer to the number of valid bytes in
+ *                                \p dst_buf. This number must be a multiple of
+ *                                the datatype size.
+ * \param[in,out] op_data User-defined pointer to data required by the callback
+ *                        function; a pass-through of the \p op_data pointer
+ *                        provided with the H5Dgather() function call.
+ * \returns \herr_t
+ *
+ * \details The callback function should process, store, or otherwise make use
+ *          of the data returned in dst_buf before it returns, because the
+ *          buffer will be overwritten unless it is the last call to the
+ *          callback. This function will be repeatedly called until all gathered
+ *          elements have been passed to the callback in dst_buf. The callback
+ *          function should return zero (0) to indicate success, and a negative
+ *          value to indicate failure.
+ *
+ */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
+//! <!-- [H5D_gather_func_t_snip] -->
 
 /**
  * --------------------------------------------------------------------------

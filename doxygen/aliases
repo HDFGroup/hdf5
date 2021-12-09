@@ -22,6 +22,12 @@ ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns 
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
 ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failure) value."
 
+ALIASES += api_vers_2{3}="\1() is a macro that is mapped to either \2() or \3().\n\see \ref api-compat-macros"
+ALIASES += api_vers_3{4}="\1() is a macro that is mapped to either \2() or \3() or \4().\n\see \ref api-compat-macros"
+ALIASES += api_vers_4{5}="\1() is a macro that is mapped to either \2() or \3() or \4() or \5().\n\see \ref api-compat-macros"
+
+ALIASES += deprecation_note{1}="\deprecated Superseded by \1."
+
 ################################################################################
 # General
 ################################################################################
@@ -40,6 +46,12 @@ ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
 
 ALIASES += op_data_in="\param[in] op_data User-defined callback function context"
 ALIASES += op_data_in{1}="\param[in] \1 User-defined callback function context"
+
+################################################################################
+# Asynchronous
+################################################################################
+
+ALIASES += async_variant_of{1}="Asynchronous version of \1()"
 
 ################################################################################
 # Attributes
@@ -116,6 +128,13 @@ ALIASES += fg_loc_id="\loc_id. The identifier may be that of a file or group."
 ALIASES += fg_loc_id{1}="\loc_id{\1}. The identifier may be that of a file or group."
 
 ################################################################################
+# Maps
+################################################################################
+
+ALIASES += map_id="\param[in] map_id Map identifier"
+ALIASES += map_id{1}="\param[in] \1 Map identifier"
+
+################################################################################
 # Property lists
 ################################################################################
 
@@ -136,6 +155,9 @@ ALIASES += dcpl_id{1}="\param[in] \1 Dataset creation property list identifier"
 ALIASES += dxpl_id="\param[in] dxpl_id Dataset transfer property list identifier"
 ALIASES += dxpl_id{1}="\param[in] \1 Dataset transfer property list identifier"
 
+ALIASES += gacpl_id="\param[in] plist_id File, group, dataset, datatype, link, or attribute access property list identifier"
+ALIASES += gacpl_id{1}="\param[in] \1 File, group, dataset, datatype, link, or attribute access property list identifier"
+
 ALIASES += gapl_id="\param[in] gapl_id Group access property list identifier"
 ALIASES += gapl_id{1}="\param[in] \1 Group access property list identifier"
 
@@ -148,14 +170,35 @@ ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
 ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
 ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
 
-ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
-ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
+ALIASES += mapl_id="\param[in] mapl_id Map access property list identifier"
+ALIASES += mapl_id{1}="\param[in] \1 Map access property list identifier"
+
+ALIASES += mcpl_id="\param[in] mcpl_id Map creation property list identifier"
+ALIASES += mcpl_id{1}="\param[in] \1 Map creation property list identifier"
+
+ALIASES += oapl_id="\param[in] oapl_id Object access property list identifier"
+ALIASES += oapl_id{1}="\param[in] \1 Object access property list identifier"
+
+ALIASES += ocpl_id="\param[in] oapl_id Object creation property list identifier"
+ALIASES += ocpl_id{1}="\param[in] \1 Object creation property list identifier"
 
 ALIASES += plist_id="\param[in] plist_id Property list identifier"
 ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
 
 ALIASES += plistcls_id="\param[in] plistcls_id Property list class identifier"
 ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
+
+ALIASES += rapl_id="\param[in] rapl_id Reference access property list identifier"
+ALIASES += rapl_id{1}="\param[in] \1 Reference access property list identifier"
+
+ALIASES += tapl_id="\param[in] tapl_id Datatype access property list identifier"
+ALIASES += tapl_id{1}="\param[in] \1 Datatype access property list identifier"
+
+ALIASES += tcpl_id="\param[in] tcpl_id Datatype creation property list identifier"
+ALIASES += tcpl_id{1}="\param[in] \1 Datatype creation property list identifier"
+
+ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
+ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
 
 ################################################################################
 # Objects
@@ -170,14 +213,140 @@ ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, g
 ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
 
 ################################################################################
+# Asynchronous Arguments
+################################################################################
+
+ALIASES += app_file="\param[in] app_file For internal use only, not a visible user parameter"
+ALIASES += app_func="\param[in] app_func For internal use only, not a visible user parameter"
+ALIASES += app_line="\param[in] app_line For internal use only, not a visible user parameter"
+ALIASES += es_id="\param[in] es_id Event set identifier"
+ALIASES += es_id{1}="\param[in] \1 Event set identifier"
+
+################################################################################
 # Others
 ################################################################################
 
-ALIASES += estack_id="\param[in] estack_id Error stack identifier"
-ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
 ALIASES += cpp_c_api_note="\attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n Several functions in this C-API take function pointers or callbacks as arguments. Examples include H5Pset_elink_cb(), H5Pset_type_conv_cb(), H5Tconvert(), and H5Ewalk2(). Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C \c setjmp / \c longjmp mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a \Code{catch(…)} statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior."
 ALIASES += par_compr_note="\attention If you are planning to use compression with parallel HDF5, ensure that calls to H5Dwrite() occur in collective mode. In other words, all MPI ranks (in the relevant communicator) call H5Dwrite() and pass a dataset transfer property list with the MPI-IO collective option property set to #H5FD_MPIO_COLLECTIVE_IO.\n Note that data transformations are currently \Bold{not} supported when writing to datasets in parallel and with compression enabled."
 ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
+
+################################################################################
+# References
+################################################################################
+
+ALIASES += ref_cons_semantics="<a href=\"https://portal.hdfgroup.org/display/HDF5/Enabling+a+Strict+Consistency+Semantics+Model+in+Parallel+HDF5\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
+ALIASES += ref_dld_filters="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Dynamically+Loaded+Filters\">HDF5 Dynamically Loaded Filters</a>"
+ALIASES += ref_file_image_ops="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations\">HDF5 File Image Operations</a>"
+ALIASES += ref_filter_pipe="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Data+Flow+Pipeline+for+H5Dread\">Data Flow Pipeline for H5Dread()</a>"
+ALIASES += ref_group_impls="<a href=\"https://portal.hdfgroup.org/display/HDF5/Groups\">Group implementations in HDF5</a>"
+ALIASES += ref_h5lib_relver="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Library+Release+Version+Numbers\">HDF5 Library Release Version Numbers</a>"
+ALIASES += ref_mdc_in_hdf5="<a href=\"https://portal.hdfgroup.org/display/HDF5/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
+ALIASES += ref_mdc_logging="<a href=\"https://portal.hdfgroup.org/display/HDF5/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
+ALIASES += ref_news_112="<a href=\"https://portal.hdfgroup.org/display/HDF5/New+Features+in+HDF5+Release+1.12\">New Features in HDF5 Release 1.12</a>"
+ALIASES += ref_h5ocopy="<a href=\"https://portal.hdfgroup.org/display/HDF5/Copying+Committed+Datatypes+with+H5Ocopy\">Copying Committed Datatypes with H5Ocopy()</a>"
+ALIASES += ref_sencode_fmt_change="<a href=\"https://portal.hdfgroup.org/pages/viewpage.action?pageId=58100093&preview=/58100093/58100094/encode_format_RFC.pdf\">RFC H5Secnode() / H5Sdecode() Format Change</a>"
+ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
+ALIASES += ref_vol_doc="VOL documentation"
+
+################################################################################
+# RFCs
+################################################################################
+
+ALIASES += ref_rfc20210528="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
+ALIASES += ref_rfc20210219="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/selection_io_RFC_210610.pdf\">Selection I/O</a>"
+ALIASES += ref_rfc20200213="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD_subfiling_200424.pdf\">VFD Sub-filing</a>"
+ALIASES += ref_rfc20200210="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Onion_VFD_RFC_211122.pdf\">Onion VFD</a>"
+ALIASES += ref_rfc20190923="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2019-09-23-RFC_VOL_feature_flags.pdf\">Virtual Object Layer (VOL) API Compatibility</a>"
+ALIASES += ref_rfc20190715="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/var_len_data_sketch_design_190715.pdf\">Variable-Length Data in HDF5 Sketch Design</a>"
+ALIASES += ref_rfc20190410="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD_Plugin.docx.pdf\">A Plugin Interface for HDF5 Virtual File Drivers</a>"
+ALIASES += ref_rfc20181231="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Min_Obj_Headers_181231.pdf\">Dataset Object Header Size</a>"
+ALIASES += ref_rfc20181220="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/3.2.1_3.2.2_deliverable_181220_v4.pdf\">MS 3.2 – Addressing Scalability: Scalability of open, close, flush CASE STUDY: CGNS Hotspot analysis of CGNS cgp_open</a>"
+ALIASES += ref_rfc20180830="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Sparse_Chunks180830.pdf\">Sparse Chunks</a>"
+ALIASES += ref_rfc20180829="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/mirror_VFD_RFC_2018-10-05.pdf\">H5FD_MIRROR Virtual File Driver</a>"
+ALIASES += ref_rfc20180815="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/splitter_VFD_RFC_180830.pdf\">Splitter_VFD</a>"
+ALIASES += ref_rfc20180620="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Chunking%20Functions-2018-06-20-v3.docx.pdf\">Chunk query functionality in HDF5</a>"
+ALIASES += ref_rfc20180610="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/VFD_SWMR_RFC_200916.pdf\">VFD SWMR</a>"
+ALIASES += ref_rfc20180321="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-API_Contexts-2018-03-21.docx.pdf\">API Contexts</a>"
+ALIASES += ref_rfc20180125="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/enhance_h5clear.docx.pdf\">Enhancement to the tool <tt>h5clear</tt></a>"
+ALIASES += ref_rfc20170707="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5Sencode_format.docx.pdf\"><tt>H5Sencode/H5Sdecode</tt> Format Change</a>"
+ALIASES += ref_rfc20160105="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-bounds.pdf\">Setting Bounds for Object Creation in HDF5 1.10.0</a>"
+ALIASES += ref_rfc20150915="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2015-09-28-RFC-HDF5-1.10.0-File-Format-Superblock-Changes-EP.docx.pdf\">File Format Changes in HDF5 1.10.0</a>"
+ALIASES += ref_rfc20150709="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Page_Buffering.pdf\">Page Buffering</a>"
+ALIASES += ref_rfc20150615="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/cache_image_RFC_150929-QAK.docx.pdf\">Metadata Cache Image</a>"
+ALIASES += ref_rfc20150429="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/new_datatypes.pdf\">New Datatypes</a>"
+ALIASES += ref_rfc20150424="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-CollectiveMetadataWrites.pdf\">Collective Metadata Writes</a>"
+ALIASES += ref_rfc20150423="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-CollectiveMetadataReads.pdf\">Enabling Collective Metadata Reads</a>"
+ALIASES += ref_rfc20150301="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/sent_RFC_format_convert-v3.docx.pdf\">The Tool to Handle HDF5 File Format Compatibility for Chunked Datasets</a>"
+ALIASES += ref_rfc20150212="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_H5LTget_hardlinkds.docx.pdf\"><tt>H5LTget_hardlinks</tt> – High-level API to list all the hard links to an object</a>"
+ALIASES += ref_rfc20150205="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_F2003_v6.docx.pdf\">HDF5 Fortran Wrappers Maintenance: Dropping Support for Non-Fortran 2003 Standard Compliant Compilers</a>"
+ALIASES += ref_rfc20150202="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20New%20Autotools%20Behavior.docx.pdf\">New Autotools Behavior</a>"
+ALIASES += ref_rfc20141210="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf\">HDF5 Virtual Dataset</a>"
+ALIASES += ref_rfc20141201="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20filter%20memory%20issues%20on%20Windows.docx.pdf\">Allocate/Free Mismatches in HDF5 Filter Code on Windows</a>"
+ALIASES += ref_rfc20140916="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VOL.pdf\">Virtual Object Layer</a>"
+ALIASES += ref_rfc20140827="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/CompressNChunk_RFC.pdf\">Chunking and Compression Performance Tool Requirements</a>"
+ALIASES += ref_rfc20140729="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5fis_accessible.pdf\">Replacing H5Fis_hdf5() with H5Fis_accessible()</a>"
+ALIASES += ref_rfc20140722="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/64bit_hid_t-v1.docx.pdf\">Switching to a 64-bit <tt>hid_t</tt> Space in HDF5</a>"
+ALIASES += ref_rfc20140717="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/analysis_ext.pdf\">Data Analysis Extensions</a>"
+ALIASES += ref_rfc20140707="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2014-08-28-RFC_VOL.pdf\">Virtual Object Layer</a>"
+ALIASES += ref_rfc20140524="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Why%20does%20not%20compression%20work-GH-EP.docx.pdf\">HDF5 Compression Demystified</a>"
+ALIASES += ref_rfc20140318="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20H5free_memory%20v2.pdf\">Freeing Memory Allocated by the HDF5 Library</a>"
+ALIASES += ref_rfc20140313="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Compat-Tool-v2.docx.pdf\">Options to handle compatibility issues for HDF5 files</a>"
+ALIASES += ref_rfc20140224="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Design-MetadataCache-Logging-THG20140224-v4.pdf\">Design: Metadata Cache Logging</a>"
+ALIASES += ref_rfc20131211="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20H5Ocork%20v5%20new%20fxn%20names.pdf\">Fine-Grained Control of Metadata Cache Flushes</a>"
+ALIASES += ref_rfc20130930="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Read-Attempts-for-Metadata-with-Checksum-v3.pdf\">Read Attempts for Metadata with Checksum</a>"
+ALIASES += ref_rfc20130919="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/core%20CFD%20paging%20v5.docx.pdf\">Core VFD Backing Store Paged Writes</a>"
+ALIASES += ref_rfc20130630="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Design-HDF5-FlushDependencyTesting-20130630-v1.1.pdf\">Flush Dependency Testing</a>"
+ALIASES += ref_rfc20130316="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5DynamicallyLoadedFilters.pdf\">HDF5 Dynamically Loaded Filters</a>"
+ALIASES += ref_rfc20121114="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/DECTRIS%20Integration%20RFC%202012-11-29.pdf\">Direct Chunk Write</a>"
+ALIASES += ref_rfc20121024="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/FileSpaceManagement.pdf\">HDF5 File Space Management</a>"
+ALIASES += ref_rfc20120828="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5HPC_MultiDset_RW_IO_RFC_v4_20130320.docx.pdf\">New HDF5 API Routines for HPC Applications</a>"
+ALIASES += ref_rfc20120523="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/paged_aggregation.pdf\">HDF5 File Space Management: Paged Aggregation</a>"
+ALIASES += ref_rfc20120501="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5FileImageOperations.pdf\">HDF5 File Image Operations</a>"
+ALIASES += ref_rfc20120305="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
+ALIASES += ref_rfc20120220="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5repack_improve_hyperslab_over_chunked_dataset_v1.pdf\"><tt>h5repack</tt>: Improved Hyperslab selections for Large Chunked Datasets</a>"
+ALIASES += ref_rfc20120120="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2012-1-25-Maintainers-guide-for-datatype.docx.pdf\">A Maintainer’s Guide for the Datatype Module in HDF5 Library</a>"
+ALIASES += ref_rfc20120104="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_actual_io_v4-1_done.docx.pdf\">Actual I/O Mode</a>"
+ALIASES += ref_rfc20111119="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-H5Ocompare-review_v6.pdf\">New public functions to handle comparison</a>"
+ALIASES += ref_rfc20110825="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2011-08-31-RFC_H5Ocopy_Named_DT_v2.docx.pdf\">Merging Named Datatypes in H5Ocopy()</a>"
+ALIASES += ref_rfc20110811="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Enhancement_Hyperslab_Selection-1.4.docx.pdf\">Expanding the HDF5 Hyperslab Selection Interface</a>"
+ALIASES += ref_rfc20110726="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/metadata_aggregation_RFC_v03.docx.pdf\">HDF5 File Space Allocation and Aggregation</a>"
+ALIASES += ref_rfc20110614="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_h5dump_refactor_v3.docx.pdf\"> Refactor <tt>h5dump</tt> to Improve Maintenance</a>"
+ALIASES += ref_rfc20110329="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Tools_Extlink_Cache_v3_r2.docx.pdf\">Support External Link Open File Cache in HDF5 Tools</a>"
+ALIASES += ref_rfc20110118="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20for%20h5diff%20Attribute%20Comparisons_v7.docx.pdf\"><tt>h5diff</tt> Attribute Comparisons</a>"
+ALIASES += ref_rfc20101122="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_swmr_timeouts_v2.docx.pdf\">SWMR Timeouts</a>"
+ALIASES += ref_rfc20101104="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/CacheExternalLinkFileOpens.pdf\">Caching Files Opened Through External Links</a>"
+ALIASES += ref_rfc20101018="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5-comparisons_v3-RFC-2011-08-03.pdf\">HDF5 File and Object Comparison Specification</a>"
+ALIASES += ref_rfc20100902="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5edit-RFC-Draft-v5.pdf\"><tt>h5edit</tt> – An HDF5 File Editing Tool</a>"
+ALIASES += ref_rfc20100727="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_HDF5_reservedCharacters-v2.pdf\">Reserved Characters for HDF5 Applications</a>"
+ALIASES += ref_rfc20100726="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5HPC_RFC-2010-09-28.pdf\">High-Level HDF5 API routines for HPC Applications</a>"
+ALIASES += ref_rfc20100511="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_h5diff_exclude_obj_v1_3.pdf\"><tt>h5diff</tt> – Exclude Object(s) from Comparison</a>"
+ALIASES += ref_rfc20100422="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_gen_attribute_tool_v2_f.pdf\">Generating attributes into an object with a tool</a>"
+ALIASES += ref_rfc20100312="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Support_HDF518_in_Tools.pdf\">Supporting HDF5 1.8 in HDF5 Command Line Tools</a>"
+ALIASES += ref_rfc20091218="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RCF_h5diff_link_v1.2.docx.pdf\">Supporting soft-link and external-link for <tt>h5diff</tt></a>"
+ALIASES += ref_rfc20090907="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Tools_Lib_v2.pdf\">HDF5 Tools Library Functions</a>"
+ALIASES += ref_rfc20090612="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_h5diff_default_epsilon.pdf\">Default EPSILON values for comparing floating point data</a>"
+ALIASES += ref_rfc20081218="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_h5diff_NonComparable.pdf\">Reporting of Non-Comparable Datasets by <tt>h5diff</tt></a>"
+ALIASES += ref_rfc20081205="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_elink_callback.pdf\">External Link Traversal Callback</a>"
+ALIASES += ref_rfc20081030="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_chunk_cache_functions.pdf\">Setting Raw Data Chunk Cache Parameters in HDF5</a>"
+ALIASES += ref_rfc20080915="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/FileFreeSpacePerformance.pdf\">Performance Report for Free-space Manager</a>"
+ALIASES += ref_rfc20080904="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/ExternalLinkFileAccessProperty.pdf\">Setting File Access Property List for accessing External Link</a>"
+ALIASES += ref_rfc20080728="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Native_Time_Types.pdf\">Native Time Types in HDF5</a>"
+ALIASES += ref_rfc20080723="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Special_Values_in_HDF5.pdf\">Special Values in HDF5</a>"
+ALIASES += ref_rfc20080301="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/DynamicTransformations_RFC.pdf\">Dynamic Transformations to HDF5 Data</a>"
+ALIASES += ref_rfc20080209="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Using-SVN-branching-Feb9.pdf\">Using SVN branching to improve software development process at THG</a>"
+ALIASES += ref_rfc20080206="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-HIS-REL-1.8_Feb6.pdf\">Maintaining the <tt>HISTORY.txt</tt> and <tt>RELEASE.txt</tt> files in HDF5</a>"
+ALIASES += ref_rfc20071111="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/AURA-corruption-2007-11-12.pdf\">Addressing HDF5 file corruption issue</a>"
+ALIASES += ref_rfc20071018="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_NaNsHDF5.pdf\"><tt>NaN</tt> detection in HDF5</a>"
+ALIASES += ref_rfc20070801="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Metadata_Journaling_RFC.pdf\">Metadata Journaling to Improve Crash Survivability</a>"
+ALIASES += ref_rfc20070413="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/API_Compatibility_RFC.txt.pdf\">API Compatibility Strategies for HDF5</a>"
+ALIASES += ref_rfc20070115="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/PrivateHeap.pdf\">A \"Private\" Heap for HDF5</a>"
+ALIASES += ref_rfc20060623="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/coll_ind_dd6.pdf\">Performance Comparison of Collective I/O and Independent I/O with Derived Datatypes</a>"
+ALIASES += ref_rfc20060604="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5stat_spec_v3_2006-06-04.pdf\"><tt>h5stat</tt> tool</a>"
+ALIASES += ref_rfc20060505="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Simple%20Performance%20Test%20on%20Fletcher32%20Filter.pdf\">Simple Performance Test on Fletcher32 Filter</a>"
+ALIASES += ref_rfc20060410="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5chk_Requirements.pdf\">Requirement Specifications of an HDF5 File Format Validation Tool</a>"
+ALIASES += ref_rfc20060317="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/sec2driver-RFC.pdf\">Proposed changes to the <tt>sec2</tt> driver </a>"
+ALIASES += ref_rfc20060124="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/FITS%20to%20HDF5%20mapping.pdf\">Mapping FITS data to HDF5</a>"
+ALIASES += ref_rfc20040811="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/text-dtype.htm.pdf\">Conversion Between Text and Datatype</a>"
 
 ################################################################################
 # The Usual Suspects
@@ -186,7 +355,7 @@ ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_co
 ALIASES += click4more="(Click on a enumerator, field, or type for more information.)"
 ALIASES += csets="<table><tr><td>#H5T_CSET_ASCII</td><td>US ASCII</td></tr><tr><td>#H5T_CSET_UTF8</td><td>UTF-8 Unicode encoding</td></tr></table>"
 ALIASES += datatype_class=" \li #H5T_INTEGER \li #H5T_FLOAT \li #H5T_STRING \li #H5T_BITFIELD \li #H5T_OPAQUE \li #H5T_COMPOUND \li #H5T_REFERENCE \li #H5T_ENUM \li #H5T_VLEN \li #H5T_ARRAY"
-ALIASES += file_access="<table><tr><td>#H5F_ACC_RDWR</td><td>File was opened with read/write access.</td></tr><tr><td>#H5F_ACC_RDONLY</td><td>File was opened with read-only access.</td></tr><tr><td>#H5F_ACC_SWMR_WRITE</td><td>File was opened with read/write access for a single-writer/multiple-reader (SWMR) scenario. Note that the writer process must also open the file with the #H5F_ACC_RDWR flag.</td></tr><tr><td>#H5F_ACC_SWMR_READ</td><td>File was opened with read-only access for a single-writer/multiple-reader (SWMR) scenario. Note that the reader process must also open the file with the #H5F_ACC_RDONLY flag.</td></tr></table>"
+ALIASES += file_access="<table><tr><td>#H5F_ACC_RDWR</td><td>File was opened with read/write access.</td></tr><tr><td>#H5F_ACC_RDONLY</td><td>File was opened with read-only access.</td></tr></table>"
 ALIASES += id_types="<table><tr><td>#H5I_FILE</td><td>File</td></tr><tr><td>#H5I_GROUP</td><td>Group</td></tr><tr><td>#H5I_DATATYPE</td><td>Datatype</td></tr><tr><td>#H5I_DATASPACE</td><td>Dataspace</td></tr><tr><td>#H5I_DATASET</td><td>Dataset</td></tr><tr><td>#H5I_ATTR</td><td>Attribute</td></tr></table>"
 ALIASES += indexes="<table><tr><td>#H5_INDEX_NAME</td><td>Lexicographic order on name</td></tr><tr><td>#H5_INDEX_CRT_ORDER</td><td>Index on creation order</td></tr></table>"
 ALIASES += link_types="<table><tr><td>#H5L_TYPE_HARD</td><td>Hard link</td></tr><tr><td>#H5L_TYPE_SOFT</td><td>Soft link</td></tr><tr><td>#H5L_TYPE_EXTERNAL</td><td>External link</td></tr><tr><td>#H5L_TYPE_ERROR</td><td>Error</td></tr></table>"
@@ -199,4 +368,5 @@ ALIASES += scopes="<table><tr><td>#H5F_SCOPE_GLOBAL</td><td>Flushes the entire v
 ALIASES += sign_prop="<table><tr><td>#H5T_SGN_NONE</td><td>0</td><td>Unsigned integer type</td></tr><tr><td>#H5T_SGN_2</td><td>1</td><td>Two's complement signed integer type</td></tr></table>"
 ALIASES += storage_type="<table><tr><td>#H5G_STORAGE_TYPE_COMPACT</td><td>Compact storage</td></tr><tr><td>#H5G_STORAGE_TYPE_DENSE</td><td>Indexed storage</td></tr><tr><td>#H5G_STORAGE_TYPE_SYMBOL_TABLE</td><td>Symbol tables, the original HDF5 structure</td></tr></table>"
 ALIASES += str_pad_type="<table><tr><td>#H5T_STR_NULLTERM</td><td>0</td><td>Null terminate (as C does)</td></tr><tr><td>#H5T_STR_NULLPAD</td><td>1</td><td>Pad with zeros</td></tr><tr><td>#H5T_STR_SPACEPAD</td><td>2</td><td>Pad with spaces (as FORTRAN does)</td></tr></table>"
+ALIASES += see_virtual=" \see Supporting Functions: H5Pget_layout(), H5Pset_layout(), H5Sget_regular_hyperslab(), H5Sis_regular_hyperslab(), H5Sselect_hyperslab() \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(), H5Pget_virtual_filename(), H5Pget_virtual_prefix(), H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(), H5Pget_virtual_view(), H5Pget_virtual_vspace(), H5Pset_virtual(), H5Pset_virtual_prefix(), H5Pset_virtual_printf_gap(), H5Pset_virtual_view()"
 ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"

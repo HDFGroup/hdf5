@@ -11,6 +11,19 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5A H5A
+ *
+ * Use the functions in this module to manage HDF5 attributes.
+ *
+ * Like HDF5 datasets, HDF5 attributes are array variables which have an element
+ * datatype and a shape (dataspace). However, they perform a different function:
+ * Attributes decorate other HDF5 objects, and are typically used to
+ * represent application metadata. Unlike datasets, the HDF5 library does not
+ * support partial I/O operations for attributes and they cannot be compressed
+ * or extended.
+ *
+ */
+
 /*
  * This file contains public declarations for the H5A module.
  */

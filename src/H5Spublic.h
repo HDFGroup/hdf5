@@ -11,6 +11,20 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5S H5S
+ *
+ * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
+ *
+ * HDF5 dataspaces describe the \Emph{shape} of datasets in memory or in HDF5
+ * files. Dataspaces can be empty (#H5S_NULL), a singleton (#H5S_SCALAR), or
+ * a multi-dimensional, regular grid (#H5S_SIMPLE). Dataspaces can be re-shaped.
+ *
+ * Subsets of dataspaces can be "book-marked" or used to restrict I/O operations
+ * using \Emph{selections}. Furthermore, certain set operations are supported
+ * for selections.
+ *
+ */
+
 /*
  * This file contains public declarations for the H5S module.
  */

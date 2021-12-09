@@ -10,6 +10,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5PL H5PL
+ *
+ * Use the functions in this module to manage the loading behavior of HDF5
+ * plugins.
+ *
+ * \attention The loading behavior of HDF5 plugins can be controlled via the
+ *            functions described below and certain environment variables, such
+ *            as \c HDF5_PLUGIN_PRELOAD  and \c HDF5_PLUGIN_PATH.
+ *
+ */
+
 /*
  * This file contains public declarations for the H5PL module.
  */
