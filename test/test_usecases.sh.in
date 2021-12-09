@@ -36,12 +36,12 @@ verbose=yes
 ###############################################################################
 srcdir=@srcdir@
 top_builddir=@abs_top_builddir@
-utilstestdir=$top_builddir/@H5_UTILS_TEST_BUILDDIR@
+utils_testdir=$top_builddir/@H5_UTILS_TEST_BUILDDIR@
 testdir=$top_builddir/@H5_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$utilstestdir/swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [[ $rc != 0 ]] ; then
     echo

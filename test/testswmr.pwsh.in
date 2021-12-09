@@ -11,7 +11,7 @@
 # Tests for the swmr feature.
 
 $srcdir  = '@srcdir@'
-$utilstestdir=@H5_UTILS_TEST_BUILDDIR@
+$utils_testdir=@H5_UTILS_TEST_BUILDDIR@
 $testdir=@H5_TEST_BUILDDIR@
 
 ###############################################################################
@@ -96,7 +96,7 @@ function Wait-Message {
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$testprog = Join-Path -Path $utilstestdir -ChildPath swmr_check_compat_vfd.exe
+$testprog = Join-Path -Path $utils_testdir -ChildPath swmr_check_compat_vfd.exe
 $rp = Start-Process -FilePath $testprog -PassThru -Wait -NoNewWindow
 if ($rp.ExitCode -ne 0) {
     Write-Output ""
