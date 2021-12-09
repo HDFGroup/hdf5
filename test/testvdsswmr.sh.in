@@ -17,7 +17,8 @@
 #   Dana Robinson, November 2015
 
 srcdir=@srcdir@
-utilstestdir=@utilstestdir@
+top_builddir=@top_builddir@
+utilstestdir=$top_builddir/@utilstestdir@
 testdir=@testdir@
 
 ###############################################################################

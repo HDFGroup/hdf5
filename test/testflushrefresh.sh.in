@@ -59,7 +59,8 @@ fi
 ## Main
 ###############################################################################
 srcdir=@srcdir@
-utilstestdir=@utilstestdir@
+top_builddir=@top_builddir@
+utilstestdir=$top_builddir/@utilstestdir@
 testdir=@testdir@
 
 # The build (current) directory might be different than the source directory.

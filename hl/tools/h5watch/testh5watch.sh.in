@@ -13,7 +13,8 @@
 #
 # Tests for the h5watch tool
 #
-utilstestdir=@utilstestdir@
+top_builddir=@top_builddir@
+utilstestdir=$top_builddir/@utilstestdir@
 
 # If the utilstestdir directory is not set just use current (.).
 if test -z "$utilstestdir"; then
