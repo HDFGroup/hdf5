@@ -35,9 +35,8 @@ verbose=yes
 ## Main
 ###############################################################################
 srcdir=@srcdir@
-top_builddir=@abs_top_builddir@
-utils_testdir=$top_builddir/@H5_UTILS_TEST_BUILDDIR@
-testdir=$top_builddir/@H5_TEST_BUILDDIR@
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
