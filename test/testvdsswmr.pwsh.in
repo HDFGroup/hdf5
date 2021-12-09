@@ -14,8 +14,8 @@
 #   Dana Robinson, November 2015
 
 $srcdir  = '@srcdir@'
-$utilstestdir  = '@utilstestdir@'
-$testdir = '@testdir@'
+$utilstestdir=@H5_UTILS_TEST_BUILDDIR@
+$testdir=@H5_TEST_BUILDDIR@
 
 ###############################################################################
 ## test parameters
@@ -29,9 +29,9 @@ $nerrors      = 0
 ## definitions for message file to coordinate test runs
 ###############################################################################
 $WRITER_MESSAGE = 'SWMR_WRITER_MESSAGE'    # The message file created by writer that the open is complete
-                                           # This should be the same as the define in "$srcdir/swmr_common.h"
+                                           # This should be the same as the define in "test/swmr_common.h"
 $MESSAGE_TIMEOUT = 300                     # Message timeout length in secs
-                                           # This should be the same as the define in "$srcdir/h5test.h"
+                                           # This should be the same as the define in "test/h5test.h"
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -82,23 +82,6 @@ function Wait-Message {
 ###############################################################################
 ## Main
 ###############################################################################
-# The build (current) directory might be different than the source directory.
-if (![System.IO.Directory]::Exists($srcdir)) {
-   $srcdir = Get-Location
-   Write-Output "Setting srcdir to default: $srcdir"
-}
-
-# If the utilstestdir directory is not set just use current (.).
-if (![System.IO.Directory]::Exists($utilstestdir)) {
-   $utilstestdir = Get-Location
-   Write-Output "Setting utilstestdir to default: $utilstestdir"
-}
-
-# If the testdir directory is not set just use current (.).
-if (![System.IO.Directory]::Exists($testdir)) {
-   $testdir = Get-Location
-   Write-Output "Setting testdir to default: $testdir"
-}
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
@@ -124,7 +107,7 @@ Write-Output "##################################################################
 
 # Launch the file generator
 Write-Output "launch the swmr_generator"
-$rp = Start-Process -FilePath $utilstestdir/vds_swmr_gen.exe -NoNewWindow -PassThru -Wait
+$rp = Start-Process -FilePath $testdir/vds_swmr_gen.exe -NoNewWindow -PassThru -Wait
 if ($rp.ExitCode -ne 0) {
     Write-Warning "generator had error"
     $nerrors += 1
@@ -142,7 +125,7 @@ Write-Output "launch the $Nwriters SWMR VDS writers (1 per source)"
 $pid_writers = @()
 $n = 0
 while ($n -lt $Nwriters) {
-    $rp = Start-Process -FilePath $utilstestdir/vds_swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "$n" 2>&1 | tee swmr_writer.out.$n
+    $rp = Start-Process -FilePath $testdir/vds_swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "$n" 2>&1 | tee swmr_writer.out.$n
     $pid_writers +=  $rp.id
     $n += 1
 }
@@ -156,7 +139,7 @@ Write-Output "launch $Nreaders SWMR readers"
 $pid_readers = @()
 $n = 0
 while ($n -lt $Nreaders) {
-    $rp = Start-Process -FilePath $utilstestdir/vds_swmr_reader.exe -NoNewWindow -PassThru 2>&1 | tee swmr_reader.out.$n
+    $rp = Start-Process -FilePath $testdir/vds_swmr_reader.exe -NoNewWindow -PassThru 2>&1 | tee swmr_reader.out.$n
     $pid_readers +=  $rp.id
     $n += 1
 }

@@ -18,8 +18,8 @@
 
 srcdir=@srcdir@
 top_builddir=@top_builddir@
-utilstestdir=$top_builddir/@utilstestdir@
-testdir=@testdir@
+utilstestdir=$top_builddir/@H5_UTILS_TEST_BUILDDIR@
+testdir=$top_builddir/@H5_TEST_BUILDDIR@
 
 ###############################################################################
 ## test parameters
@@ -33,9 +33,9 @@ nerrors=0
 ## definitions for message file to coordinate test runs
 ###############################################################################
 WRITER_MESSAGE=SWMR_WRITER_MESSAGE      # The message file created by writer that the open is complete
-                                        # This should be the same as the define in "$utilstestdir/swmr_common.h"
+                                        # This should be the same as the define in "test/swmr_common.h"
 MESSAGE_TIMEOUT=300                     # Message timeout length in secs
-                                        # This should be the same as the define in "./h5test.h"
+                                        # This should be the same as the define in "test/h5test.h"
 
 ###############################################################################
 ## short hands and function definitions
@@ -81,20 +81,6 @@ WAIT_MESSAGE() {
 ###############################################################################
 ## Main
 ###############################################################################
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
-# If the utilstestdir directory is not set just use current (.).
-if test -z "$utilstestdir"; then
-   utilstestdir=.
-fi
-
-# If the testdir directory is not set just use current (.).
-if test -z "$testdir"; then
-   testdir=.
-fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.

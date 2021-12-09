@@ -1122,9 +1122,11 @@ else
   AC_MSG_RESULT([no])
 fi
 
-## This needs to be exposed for some tests.
-AC_SUBST([utilstestdir])
-utilstestdir='utils/test'
+## These need to be exposed for some tests.
+AC_SUBST([H5_UTILS_TEST_BUILDDIR])
+H5_UTILS_TEST_BUILDDIR='utils/test'
+AC_SUBST([H5_TEST_BUILDDIR])
+H5_TEST_BUILDDIR='test'
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
