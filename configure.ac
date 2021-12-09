@@ -1123,7 +1123,8 @@ else
 fi
 
 ## This needs to be exposed for some tests.
-AC_SUBST([utilstestdir, $(top_builddir)/utils/test])
+AC_SUBST([utilstestdir])
+utilstestdir=${top_builddir}/utils/test
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
