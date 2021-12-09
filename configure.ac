@@ -1122,6 +1122,9 @@ else
   AC_MSG_RESULT([no])
 fi
 
+## This needs to be exposed for some tests.
+AC_SUBST([utilstestdir, $(top_builddir)/utils/test])
+
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
 ##
@@ -1686,7 +1689,7 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
-AC_SUBST([LL_PATH]) 
+AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
@@ -3037,7 +3040,7 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Build parallel tools if parallel tools, parallel, and build tools options 
+## Build parallel tools if parallel tools, parallel, and build tools options
 ## are all enabled.
 ##
 AC_SUBST([PARALLEL_TOOLS])
@@ -3057,7 +3060,7 @@ if test "X${PARALLEL_TOOLS}" = "Xyes"; then
     AC_MSG_ERROR([--enable-tools is required for --enable-parallel-tools])
   fi
   if test "X${PARALLEL}" != "Xyes"; then
-    AC_MSG_ERROR([--enable-parallel is required for --enable-parallel-tools])  
+    AC_MSG_ERROR([--enable-parallel is required for --enable-parallel-tools])
   fi
 fi
 

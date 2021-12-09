@@ -13,16 +13,16 @@
 #
 # Tests for the h5watch tool
 #
-bindir=@bindir@
+utilstestdir=@utilstestdir@
 
-# If the bindir directory is not set just use current (.).
-if test -z "$bindir"; then
-   bindir=.
+# If the utilstestdir directory is not set just use current (.).
+if test -z "$utilstestdir"; then
+   utilstestdir=.
 fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$bindir/swmr_check_compat_vfd
+$utilstestdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc != 0 ] ; then
     echo
