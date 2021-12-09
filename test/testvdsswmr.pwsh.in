@@ -9,9 +9,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the swmr feature using virtual datasets.
-#
-# Created:
-#   Dana Robinson, November 2015
 
 $srcdir  = '@srcdir@'
 $utils_testdir=@H5_UTILS_TEST_BUILDDIR@
