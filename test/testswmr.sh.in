@@ -17,7 +17,7 @@
 #   Albert Cheng, 2009/07/22
 
 srcdir=@srcdir@
-top_builddir=@top_builddir@
+top_builddir=@abs_top_builddir@
 utilstestdir=$top_builddir/@H5_UTILS_TEST_BUILDDIR@
 testdir=$top_builddir/@H5_TEST_BUILDDIR@
 

@@ -13,7 +13,7 @@
 #
 # Tests for the h5watch tool
 #
-top_builddir=@top_builddir@
+top_builddir=@abs_top_builddir@
 utilstestdir=$top_builddir/@utilstestdir@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
