@@ -106,7 +106,10 @@ test_split_comm_access(void)
 
         /* delete the test file */
         if (sub_mpi_rank == 0) {
-            mrc = MPI_File_delete((char *)filename, info);
+            char fname[NAME_MAX];
+            strncpy(fname, filename, strlen(filename));
+            // mrc = MPI_File_delete((char *)filename, info);
+            mrc = MPI_File_delete(fname, info);
             /*VRFY((mrc==MPI_SUCCESS), ""); */
         }
     }
