@@ -3247,7 +3247,7 @@ test_integration_create(void)
     HDputs(".");
     fflush(stdout);
 
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
     HDputs(".");
     fflush(stdout);
@@ -3324,7 +3324,7 @@ test_integration_create(void)
     HDputs(".");
     fflush(stdout);
 
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
     HDputs(".");
     fflush(stdout);
@@ -3400,7 +3400,7 @@ test_integration_create(void)
     // HDputs(".");
     fflush(stdout);
 
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
     // HDputs(".");
     fflush(stdout);
@@ -3784,7 +3784,7 @@ test_integration_create_simple(void)
     // HDputs(".");
     fflush(stdout);
 
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
     // HDputs(".");
     fflush(stdout);
