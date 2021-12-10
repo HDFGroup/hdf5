@@ -1352,8 +1352,10 @@
 ./test/testlinks_env.sh.in
 ./test/testmeta.c
 ./test/test_mirror.sh.in
+./test/testswmr.pwsh.in
 ./test/testswmr.sh.in
 ./test/testvds_env.sh.in
+./test/testvdsswmr.pwsh.in
 ./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
