@@ -11,8 +11,8 @@
 # Tests for the swmr feature.
 
 $srcdir  = '@srcdir@'
-$bindir  = '@bindir@'
-$testdir = '@testdir@'
+$utils_testdir=@H5_UTILS_TEST_BUILDDIR@
+$testdir=@H5_TEST_BUILDDIR@
 
 ###############################################################################
 ## test parameters
@@ -32,9 +32,9 @@ $nerrors      = 0
 ## definitions for message file to coordinate test runs
 ###############################################################################
 $WRITER_MESSAGE = 'SWMR_WRITER_MESSAGE'    # The message file created by writer that the open is complete
-                                           # This should be the same as the define in "$bindir/swmr_common.h"
+                                           # This should be the same as the define in "test/swmr_common.h"
 $MESSAGE_TIMEOUT = 300                     # Message timeout length in secs
-                                           # This should be the same as the define in "./h5test.h"
+                                           # This should be the same as the define in "test/h5test.h"
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -93,27 +93,10 @@ function Wait-Message {
 ##     to proceed as expected.
 ##
 ###############################################################################
-# The build (current) directory might be different than the source directory.
-if (![System.IO.Directory]::Exists($srcdir)) {
-   $srcdir = Get-Location
-   Write-Output "Setting srcdir to default: $srcdir"
-}
-
-# If the bindir directory is not set just use current (.).
-if (![System.IO.Directory]::Exists($bindir)) {
-   $bindir = Get-Location
-   Write-Output "Setting bindir to default: $bindir"
-}
-
-# If the testdir directory is not set just use current (.).
-if (![System.IO.Directory]::Exists($testdir)) {
-   $testdir = Get-Location
-   Write-Output "Setting testdir to default: $testdir"
-}
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$testprog = Join-Path -Path $bindir -ChildPath swmr_check_compat_vfd.exe
+$testprog = Join-Path -Path $utils_testdir -ChildPath swmr_check_compat_vfd.exe
 $rp = Start-Process -FilePath $testprog -PassThru -Wait -NoNewWindow
 if ($rp.ExitCode -ne 0) {
     Write-Output ""
@@ -145,7 +128,7 @@ foreach ($index_type in $IndexTypeLoop) {
         Write-Output "###############################################################################"
         # Launch the Generator without SWMR_WRITE
         Write-Output "launch the swmr_generator"
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow -ArgumentList "$compress $index_type" -PassThru -Wait
+        $rp = Start-Process -FilePath $testdir/swmr_generator.exe -NoNewWindow -ArgumentList "$compress $index_type" -PassThru -Wait
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -153,7 +136,7 @@ foreach ($index_type in $IndexTypeLoop) {
 
         # Launch the Generator with SWMR_WRITE
         Write-Output "launch the swmr_generator with SWMR_WRITE"
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow -ArgumentList "-s $compress $index_type" -PassThru -Wait
+        $rp = Start-Process -FilePath $testdir/swmr_generator.exe -NoNewWindow -ArgumentList "-s $compress $index_type" -PassThru -Wait
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -179,7 +162,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Launch the Writer
         Write-Output "launch the swmr_start_writer"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_start_write.exe -NoNewWindow -PassThru -ArgumentList "$compress $index_type $Nrecords $seed" 2>&1 |tee swmr_writer.out
+        $rp = Start-Process -FilePath $testdir/swmr_start_write.exe -NoNewWindow -PassThru -ArgumentList "$compress $index_type $Nrecords $seed" 2>&1 |tee swmr_writer.out
         $pid_writer = $rp.id
         #Write-Output "pid_writer=$pid_writer"
 
@@ -195,7 +178,7 @@ foreach ($index_type in $IndexTypeLoop) {
         while ($n -lt $Nreaders) {
             #seed = "-r ${seeds[$n]}"
             $seed = ""
-            $rp = Start-Process -FilePath $bindir/swmr_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_add $seed" 2>&1 | tee swmr_reader.out.$n
+            $rp = Start-Process -FilePath $testdir/swmr_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_add $seed" 2>&1 | tee swmr_reader.out.$n
             $pid_readers +=  $rp.id
             $n += 1
         }
@@ -239,7 +222,7 @@ foreach ($index_type in $IndexTypeLoop) {
 
         # Launch the Generator
         Write-Output "launch the swmr_generator"
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow -PassThru -Wait -ArgumentList "-s $compress $index_type"
+        $rp = Start-Process -FilePath $testdir/swmr_generator.exe -NoNewWindow -PassThru -Wait -ArgumentList "-s $compress $index_type"
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -251,7 +234,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Launch the Writer
         Write-Output "launch the swmr_writer"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "-o $Nrecords $seed" 2>&1 |tee swmr_writer.out
+        $rp = Start-Process -FilePath $testdir/swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "-o $Nrecords $seed" 2>&1 |tee swmr_writer.out
         $pid_writer = $rp.id
         #Write-Output "pid_writer=$pid_writer"
 
@@ -266,7 +249,7 @@ foreach ($index_type in $IndexTypeLoop) {
         while ($n -lt $Nreaders) {
             #seed = "-r ${seeds[$n]}"
             $seed = ""
-            $rp = Start-Process -FilePath $bindir/swmr_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_add $seed" 2>&1 |tee swmr_reader.out.$n
+            $rp = Start-Process -FilePath $testdir/swmr_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_add $seed" 2>&1 |tee swmr_reader.out.$n
             $pid_readers += $rp.id
             $n += 1
         }
@@ -313,7 +296,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Launch the Remove Writer
         Write-Output "launch the swmr_remove_writer"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_remove_writer.exe -NoNewWindow -PassThru -ArgumentList "-o $Nrecs_rem $seed" 2>&1 |tee swmr_writer.out
+        $rp = Start-Process -FilePath $testdir/swmr_remove_writer.exe -NoNewWindow -PassThru -ArgumentList "-o $Nrecs_rem $seed" 2>&1 |tee swmr_writer.out
         $pid_writer = $rp.id
         #Write-Output "pid_writer=$pid_writer"
 
@@ -328,7 +311,7 @@ foreach ($index_type in $IndexTypeLoop) {
         while ($n -lt $Nreaders) {
             #seed = "-r ${seeds[$n]}"
             $seed = ""
-            $rp = Start-Process -FilePath $bindir/swmr_remove_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_rem $seed" 2>&1 |tee swmr_reader.out.$n
+            $rp = Start-Process -FilePath $testdir/swmr_remove_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_rem $seed" 2>&1 |tee swmr_reader.out.$n
             $pid_readers += $rp.id
             $n += 1
         }
@@ -372,7 +355,7 @@ foreach ($index_type in $IndexTypeLoop) {
 
         # Launch the Generator
         Write-Output "launch the swmr_generator"
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow-PassThru -Wait -ArgumentList "$compress $index_type"
+        $rp = Start-Process -FilePath $testdir/swmr_generator.exe -NoNewWindow-PassThru -Wait -ArgumentList "$compress $index_type"
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -381,7 +364,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Launch the Writer (not in parallel - just to rebuild the datasets)
         Write-Output "launch the swmr_writer"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_writer.exe -NoNewWindow -PassThru -Wait -ArgumentList "$Nrecords $seed"
+        $rp = Start-Process -FilePath $testdir/swmr_writer.exe -NoNewWindow -PassThru -Wait -ArgumentList "$Nrecords $seed"
         if ($rp.ExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
@@ -393,7 +376,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Launch the Add/Remove Writer
         Write-Output "launch the swmr_addrem_writer"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_addrem_writer.exe -NoNewWindow -PassThru -ArgumentList "$Nrecords $seed" 2>&1 |tee swmr_writer.out
+        $rp = Start-Process -FilePath $testdir/swmr_addrem_writer.exe -NoNewWindow -PassThru -ArgumentList "$Nrecords $seed" 2>&1 |tee swmr_writer.out
         $pid_writer = $rp.id
         #Write-Output "pid_writer=$pid_writer"
 
@@ -408,7 +391,7 @@ foreach ($index_type in $IndexTypeLoop) {
         while ($n -lt $Nreaders) {
             #seed = "-r ${seeds[$n]}"
             $seed = ""
-            $rp = Start-Process -FilePath $bindir/swmr_remove_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_addrem $seed" 2>&1 |tee swmr_reader.out.$n
+            $rp = Start-Process -FilePath $testdir/swmr_remove_reader.exe -NoNewWindow -PassThru -ArgumentList "$Nsecs_addrem $seed" 2>&1 |tee swmr_reader.out.$n
             $pid_readers += $rp.id
             $n += 1
         }
@@ -455,7 +438,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #       created by the generator.
         Write-Output "launch the swmr_generator"
         $seed = "" # Put -r <random seed> command here
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow -PassThru -Wait -ArgumentList "$compress $index_type $seed"
+        $rp = Start-Process -FilePath $testdir/swmr_generator.exe -NoNewWindow -PassThru -Wait -ArgumentList "$compress $index_type $seed"
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -465,7 +448,7 @@ foreach ($index_type in $IndexTypeLoop) {
         Remove-Item $WRITER_MESSAGE
         # Launch the Sparse writer
         Write-Output "launch the swmr_sparse_writer"
-        $rp = Start-Process -FilePath $bindir/swmr_sparse_writer.exe -NoNewWindow -PassThru -ArgumentList "$Nrecs_spa" 2>&1 |tee swmr_writer.out
+        $rp = Start-Process -FilePath $testdir/swmr_sparse_writer.exe -NoNewWindow -PassThru -ArgumentList "$Nrecs_spa" 2>&1 |tee swmr_writer.out
         $pid_writer = $rp.Id
         #Write-Output "pid_writer=$pid_writer"
 
@@ -478,7 +461,7 @@ foreach ($index_type in $IndexTypeLoop) {
         Write-Output "launch $Nrdrs_spa swmr_sparse_readers"
         while ($n -lt $Nrdrs_spa) {
             # The sparse reader spits out a LOT of data so it's set to 'quiet'
-            $rp = Start-Process -FilePath $bindir/swmr_sparse_reader.exe -NoNewWindow -PassThru -ArgumentList "-q $Nrecs_spa" 2>&1 |tee swmr_reader.out.$n
+            $rp = Start-Process -FilePath $testdir/swmr_sparse_reader.exe -NoNewWindow -PassThru -ArgumentList "-q $Nrecs_spa" 2>&1 |tee swmr_reader.out.$n
             $pid_readers += $rp.id
             $n += 1
         }

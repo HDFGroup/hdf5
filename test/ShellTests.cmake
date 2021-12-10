@@ -22,8 +22,8 @@ if (PWSH)
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
-    set (bindir ${CMAKE_TEST_OUTPUT_DIRECTORY})
-    set (testdir ${HDF5_TEST_BINARY_DIR}/H5TEST)
+    set (H5_UTILS_TEST_BUILDDIR ${CMAKE_TEST_OUTPUT_DIRECTORY})
+    set (H5_TEST_BUILDDIR ${HDF5_TEST_BINARY_DIR}/H5TEST)
     configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1 @ONLY)
     # test commented out as currently the programs are not allowing another access to the data file
     #add_test (H5SHELL-testswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1)
@@ -42,8 +42,8 @@ elseif (UNIX)
   find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
-    set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    set (testdir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (H5_UTILS_TEST_BUILDDIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (H5_TEST_BUILDDIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
