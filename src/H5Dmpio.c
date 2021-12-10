@@ -125,17 +125,6 @@ typedef enum H5D_mpio_no_rank0_bcast_cause_t {
 } H5D_mpio_no_rank0_bcast_cause_t;
 
 /*
- * Information necessary for redistributing shared chunks during
- * a parallel write of a chunk datasets with filters applied.
- */
-typedef struct H5D_filtered_collective_io_redistribute_info_t {
-    H5F_block_t chunk_block;
-    int         orig_owner;
-    int         new_owner;
-    int         num_writers;
-} H5D_filtered_collective_io_redistribute_info_t;
-
-/*
  * Information necessary for re-allocating file space for a chunk
  * during a parallel write of a chunked dataset with filters
  * applied.
@@ -146,16 +135,14 @@ typedef struct H5D_filtered_collective_io_fspace_info_t {
 } H5D_filtered_collective_io_fspace_info_t;
 
 /*
- * Information necessary for re-inserting a chunk into a dataset's
- * chunk index during a parallel write of a chunked dataset with
- * filters applied.
+ * Information for a chunk pertaining to the dataset's chunk
+ * index entry for the chunk
  */
-typedef struct H5D_filtered_collective_io_insert_info_t {
-    hsize_t  scaled[H5O_LAYOUT_NDIMS];
+typedef struct H5D_filtered_collective_io_index_info_t {
     hsize_t  chunk_idx;
     unsigned filter_mask;
     hbool_t  need_insert;
-} H5D_filtered_collective_io_insert_info_t;
+} H5D_filtered_collective_io_index_info_t;
 
 /*
  * Information about a single chunk when performing collective filtered I/O. All
@@ -179,12 +166,10 @@ typedef struct H5D_filtered_collective_io_insert_info_t {
  *                 in the file for all of the chunks written to in the I/O operation, as
  *                 their sizes may have changed after their data has been filtered.
  *
- * insert_info - A structure containing the information needed when collectively
- *               re-inserting the chunk into the dataset's chunk index. The structure
- *               is distributed to all ranks during the re-insertion operation. Its fields
- *               are as follows:
- *
- *     scaled - The scaled coordinates of the chunk in the dataset's file dataspace.
+ * index_info - A structure containing the information needed when collectively
+ *              re-inserting the chunk into the dataset's chunk index. The structure
+ *              is distributed to all ranks during the re-insertion operation. Its fields
+ *              are as follows:
  *
  *     chunk_idx - The index of the chunk in the dataset's chunk index.
  *
@@ -247,7 +232,7 @@ typedef struct H5D_filtered_collective_io_insert_info_t {
  */
 typedef struct H5D_filtered_collective_io_info_t {
     H5D_filtered_collective_io_fspace_info_t fspace_info;
-    H5D_filtered_collective_io_insert_info_t insert_info;
+    H5D_filtered_collective_io_index_info_t  index_info;
 
     H5D_chunk_info_t *chunk_info;
     hbool_t           need_read;
@@ -264,6 +249,27 @@ typedef struct H5D_filtered_collective_io_info_t {
         int             num_receive_requests;
     } async_info;
 } H5D_filtered_collective_io_info_t;
+
+/*
+ * Information necessary for redistributing shared chunks during
+ * a parallel write of a chunked dataset with filters applied.
+ */
+typedef struct H5D_filtered_collective_io_redistribute_info_t {
+    H5F_block_t chunk_block;
+    int         orig_owner;
+    int         new_owner;
+    int         num_writers;
+} H5D_filtered_collective_io_redistribute_info_t;
+
+/*
+ * Information used when re-inserting a chunk into a dataset's
+ * chunk index during a parallel write of a chunked dataset with
+ * filters applied.
+ */
+typedef struct H5D_filtered_collective_io_insert_info_t {
+    H5F_block_t                             chunk_block;
+    H5D_filtered_collective_io_index_info_t index_info;
+} H5D_filtered_collective_io_insert_info_t;
 
 /* Function pointer typedef for function to redistribute
  * shared chunks during parallel filtered writes
@@ -342,9 +348,9 @@ static herr_t H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_t
 static herr_t H5D__mpio_get_chunk_fspace_info_types(MPI_Datatype *struct_type, hbool_t *struct_type_derived,
                                                     MPI_Datatype *resized_type,
                                                     hbool_t *     resized_type_derived);
-static herr_t H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig_type_derived,
-                                                    MPI_Datatype *resized_type,
-                                                    hbool_t *     resized_type_derived);
+static herr_t H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype *contig_type,
+                                                    hbool_t *contig_type_derived, MPI_Datatype *resized_type,
+                                                    hbool_t *resized_type_derived);
 static herr_t H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_list,
                                                     size_t num_entries, H5D_io_op_type_t op_type,
                                                     MPI_Datatype *new_mem_type, hbool_t *mem_type_derived,
@@ -3060,11 +3066,9 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
             local_info_array[i].fspace_info.chunk_current = udata.chunk_block;
             local_info_array[i].fspace_info.chunk_new     = udata.chunk_block;
 
-            local_info_array[i].insert_info.chunk_idx   = chunk_info->index;
-            local_info_array[i].insert_info.filter_mask = udata.filter_mask;
-            local_info_array[i].insert_info.need_insert = FALSE;
-            H5MM_memcpy(local_info_array[i].insert_info.scaled, chunk_info->scaled,
-                        sizeof(chunk_info->scaled));
+            local_info_array[i].index_info.chunk_idx   = chunk_info->index;
+            local_info_array[i].index_info.filter_mask = udata.filter_mask;
+            local_info_array[i].index_info.need_insert = FALSE;
 
             /* Finally, initialize the info for non-blocking MPI calls */
             local_info_array[i].async_info.receive_requests_array = NULL;
@@ -3443,10 +3447,10 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
 
             /* Send modification data to new owner */
             H5_CHECK_OVERFLOW(mod_data_size, size_t, int)
-            H5_CHECK_OVERFLOW(chunk_entry->insert_info.chunk_idx, hsize_t, int)
+            H5_CHECK_OVERFLOW(chunk_entry->index_info.chunk_idx, hsize_t, int)
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_Isend(chunk_mod_data[num_send_requests], (int)mod_data_size, MPI_BYTE,
-                                      chunk_entry->new_owner, (int)chunk_entry->insert_info.chunk_idx,
+                                      chunk_entry->new_owner, (int)chunk_entry->index_info.chunk_idx,
                                       io_info->comm, &send_requests[num_send_requests])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code)
 
@@ -3487,7 +3491,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
                      * much memory for the non-blocking receive
                      */
                     if (MPI_SUCCESS !=
-                        (mpi_code = MPI_Mprobe(MPI_ANY_SOURCE, (int)chunk_entry->insert_info.chunk_idx,
+                        (mpi_code = MPI_Mprobe(MPI_ANY_SOURCE, (int)chunk_entry->index_info.chunk_idx,
                                                io_info->comm, &message, &status)))
                         HMPI_GOTO_ERROR(FAIL, "MPI_Mprobe failed", mpi_code)
 
@@ -3780,7 +3784,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
         /* Unfilter the chunk */
         if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
-                         &(chunk_list[i].insert_info.filter_mask), err_detect, filter_cb,
+                         &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                          (size_t *)&chunk_list[i].fspace_info.chunk_new.length, &chunk_list[i].chunk_buf_size,
                          &chunk_list[i].buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
@@ -3944,7 +3948,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
              */
             if (chunk_list[i].need_read) {
                 if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
-                                 &(chunk_list[i].insert_info.filter_mask), err_detect, filter_cb,
+                                 &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                                  (size_t *)&chunk_list[i].fspace_info.chunk_new.length,
                                  &chunk_list[i].chunk_buf_size, &chunk_list[i].buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
@@ -4001,7 +4005,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
             /* Finally, filter the chunk */
             if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, 0,
-                             &(chunk_list[i].insert_info.filter_mask), err_detect, filter_cb,
+                             &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_list[i].fspace_info.chunk_new.length,
                              &chunk_list[i].chunk_buf_size, &chunk_list[i].buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
@@ -4150,7 +4154,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
                     coll_entry  = &collective_list[i];
 
                     if (H5D__chunk_file_alloc(idx_info, &coll_entry->chunk_current, &coll_entry->chunk_new,
-                                              &chunk_list[num_processed].insert_info.need_insert, NULL) < 0)
+                                              &chunk_list[num_processed].index_info.need_insert, NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate chunk")
                     *local_entry = *coll_entry;
                 } while ((++num_processed < chunk_list_num_entries) && (++i < collective_num_entries));
@@ -4214,8 +4218,9 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
 {
     MPI_Datatype send_type;
     MPI_Datatype recv_type;
-    hbool_t      send_type_derived      = FALSE;
-    hbool_t      recv_type_derived      = FALSE;
+    hbool_t      send_type_derived = FALSE;
+    hbool_t      recv_type_derived = FALSE;
+    hsize_t      scaled_coords[H5O_LAYOUT_NDIMS];
     size_t       collective_num_entries = 0;
     size_t       i;
     void *       gathered_array = NULL;
@@ -4240,7 +4245,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         H5D_MPIO_INIT_CHUNK_UD_INFO(chunk_ud, idx_info);
 
         /* Create derived datatypes for the chunk re-insertion info needed */
-        if (H5D__mpio_get_chunk_insert_info_types(&recv_type, &recv_type_derived, &send_type,
+        if (H5D__mpio_get_chunk_insert_info_types(idx_info, &recv_type, &recv_type_derived, &send_type,
                                                   &send_type_derived) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                         "can't create derived datatypes for chunk re-insertion info")
@@ -4257,20 +4262,23 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
                         "can't gather chunk index re-insertion info to/from ranks")
 
         for (i = 0; i < collective_num_entries; i++) {
-            struct insert_info {
-                H5F_block_t                              chunk_block;
-                H5D_filtered_collective_io_insert_info_t info;
-            } *coll_entry = &((struct insert_info *)gathered_array)[i];
+            H5D_filtered_collective_io_insert_info_t *coll_entry =
+                &((H5D_filtered_collective_io_insert_info_t *)gathered_array)[i];
 
             /*
              * We only need to reinsert this chunk if we had to actually
              * allocate or reallocate space in the file for it
              */
-            if (coll_entry->info.need_insert) {
+            if (coll_entry->index_info.need_insert) {
                 chunk_ud.chunk_block   = coll_entry->chunk_block;
-                chunk_ud.common.scaled = coll_entry->info.scaled;
-                chunk_ud.chunk_idx     = coll_entry->info.chunk_idx;
-                chunk_ud.filter_mask   = coll_entry->info.filter_mask;
+                chunk_ud.chunk_idx     = coll_entry->index_info.chunk_idx;
+                chunk_ud.filter_mask   = coll_entry->index_info.filter_mask;
+                chunk_ud.common.scaled = scaled_coords;
+
+                /* Calculate scaled coordinates for the chunk */
+                H5VM_array_calc_pre(chunk_ud.chunk_idx, io_info->dset->shared->ndims,
+                                    io_info->dset->shared->layout.u.chunk.down_chunks, scaled_coords);
+                scaled_coords[io_info->dset->shared->ndims] = 0;
 
                 if ((idx_info->storage->ops->insert)(idx_info, &chunk_ud, io_info->dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
@@ -4562,50 +4570,54 @@ done:
  * Function:    H5D__mpio_get_chunk_insert_info_types
  *
  * Purpose:     Constructs MPI derived datatypes for communicating the
- *              inner `insert_info` structure of a
- *              H5D_filtered_collective_io_info_t structure.
+ *              information necessary when reinserting chunks into a
+ *              dataset's chunk index. This includes the chunk's new offset
+ *              and size (H5F_block_t) and the inner `index_info` structure
+ *              of a H5D_filtered_collective_io_info_t structure.
  *
  *              The datatype returned through `contig_type` has an extent
- *              equal to the size of the `insert_info` structure + the size
- *              of an H5F_block_t structure and is suitable for receiving
- *              one or more `insert_info` structures packed together with
- *              their corresponding H5F_block_t structures into a
- *              contiguous array.
+ *              equal to the combined size of the information being
+ *              communicated and is suitable for packing this information
+ *              from one or more chunk H5D_filtered_collective_io_info_t
+ *              structures into contiguous memory.
  *
  *              The datatype returned through `resized_type` has an extent
  *              equal to the size of the encompassing
  *              H5D_filtered_collective_io_info_t structure. This makes it
  *              suitable for sending an array of
  *              H5D_filtered_collective_io_info_t structures, while
- *              extracting out just the nested `insert_info` structure
- *              during communication.
+ *              extracting out just the information needed during
+ *              communication.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig_type_derived,
-                                      MPI_Datatype *resized_type, hbool_t *resized_type_derived)
+H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype *contig_type,
+                                      hbool_t *contig_type_derived, MPI_Datatype *resized_type,
+                                      hbool_t *resized_type_derived)
 {
     MPI_Datatype struct_type              = MPI_DATATYPE_NULL;
     hbool_t      struct_type_derived      = FALSE;
     MPI_Datatype chunk_block_type         = MPI_DATATYPE_NULL;
     hbool_t      chunk_block_type_derived = FALSE;
+    MPI_Aint     contig_type_extent;
 #if MPI_VERSION >= 3
     MPI_Count chunk_block_type_size;
 #else
     int chunk_block_type_size;
 #endif
-    MPI_Datatype types[5];
-    MPI_Aint     displacements[5];
-    int          block_lengths[5];
+    MPI_Datatype types[4];
+    MPI_Aint     displacements[4];
+    int          block_lengths[4];
     int          field_count;
     int          mpi_code;
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
+    HDassert(idx_info);
     HDassert(contig_type);
     HDassert(contig_type_derived);
     HDassert(resized_type);
@@ -4630,38 +4642,38 @@ H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig
     H5_CHECK_OVERFLOW(chunk_block_type_size, MPI_Count, MPI_Aint);
 #endif
 
-    field_count = 5;
+    field_count = 4;
     HDassert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
 
-    /* Create struct type to pack H5F_block_t structure right next to `insert_info` struct */
+    /*
+     * Create struct type to pack information into memory as follows:
+     *
+     * Chunk's new Offset/Size (H5F_block_t) ->
+     * Chunk Index Info (H5D_filtered_collective_io_index_info_t)
+     */
     block_lengths[0] = 1;
-    block_lengths[1] = H5O_LAYOUT_NDIMS;
+    block_lengths[1] = 1;
     block_lengths[2] = 1;
     block_lengths[3] = 1;
-    block_lengths[4] = 1;
     displacements[0] = 0;
     displacements[1] = (MPI_Aint)((size_t)chunk_block_type_size +
-                                  offsetof(H5D_filtered_collective_io_insert_info_t, scaled));
+                                  offsetof(H5D_filtered_collective_io_index_info_t, chunk_idx));
     displacements[2] = (MPI_Aint)((size_t)chunk_block_type_size +
-                                  offsetof(H5D_filtered_collective_io_insert_info_t, chunk_idx));
+                                  offsetof(H5D_filtered_collective_io_index_info_t, filter_mask));
     displacements[3] = (MPI_Aint)((size_t)chunk_block_type_size +
-                                  offsetof(H5D_filtered_collective_io_insert_info_t, filter_mask));
-    displacements[4] = (MPI_Aint)((size_t)chunk_block_type_size +
-                                  offsetof(H5D_filtered_collective_io_insert_info_t, need_insert));
+                                  offsetof(H5D_filtered_collective_io_index_info_t, need_insert));
     types[0]         = chunk_block_type;
     types[1]         = H5_MPI_HSIZE_T;
-    types[2]         = H5_MPI_HSIZE_T;
-    types[3]         = MPI_UNSIGNED;
-    types[4]         = MPI_C_BOOL;
+    types[2]         = MPI_UNSIGNED;
+    types[3]         = MPI_C_BOOL;
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, &struct_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
     struct_type_derived = TRUE;
 
-    if (MPI_SUCCESS !=
-        (mpi_code = MPI_Type_create_resized(
-             struct_type, 0, sizeof(H5F_block_t) + sizeof(H5D_filtered_collective_io_insert_info_t),
-             contig_type)))
+    contig_type_extent = (MPI_Aint)(sizeof(H5F_block_t) + sizeof(H5D_filtered_collective_io_index_info_t));
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_create_resized(struct_type, 0, contig_type_extent, contig_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_resized failed", mpi_code)
     *contig_type_derived = TRUE;
 
@@ -4672,15 +4684,15 @@ H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig
     if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&struct_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
 
-    /* Create struct type to correctly extract `insert_info` structure and
-     * the chunk's new size from the `fspace_info` structure inside a
-     * H5D_filtered_collective_io_info_t structure.
+    /*
+     * Create struct type to correctly extract all needed
+     * information from a H5D_filtered_collective_io_info_t
+     * structure.
      */
     displacements[0] = offsetof(H5D_filtered_collective_io_info_t, fspace_info.chunk_new);
-    displacements[1] = offsetof(H5D_filtered_collective_io_info_t, insert_info.scaled);
-    displacements[2] = offsetof(H5D_filtered_collective_io_info_t, insert_info.chunk_idx);
-    displacements[3] = offsetof(H5D_filtered_collective_io_info_t, insert_info.filter_mask);
-    displacements[4] = offsetof(H5D_filtered_collective_io_info_t, insert_info.need_insert);
+    displacements[1] = offsetof(H5D_filtered_collective_io_info_t, index_info.chunk_idx);
+    displacements[2] = offsetof(H5D_filtered_collective_io_info_t, index_info.filter_mask);
+    displacements[3] = offsetof(H5D_filtered_collective_io_info_t, index_info.need_insert);
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, &struct_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
