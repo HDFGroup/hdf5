@@ -112,7 +112,7 @@ int
 main(int argc, char *argv[])
 {
     int           fd = -1;        /* file descriptor                      */
-    ssize_t       bytes_wrote;    /* the nubmer of bytes written          */
+    ssize_t       bytes_wrote;    /* the number of bytes written          */
     unsigned int *buf = NULL;     /* buffer to hold written data          */
     unsigned int  n, u, i;        /* local index variable                 */
     int           temp;           /* temporary variable                   */

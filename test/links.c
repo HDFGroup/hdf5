@@ -8201,7 +8201,7 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     if (status >= 0) {
         H5_FAILED();
         HDputs(
-            "    Retreiving name of object by index through dangling file external link should have failed.");
+            "    Retrieving name of object by index through dangling file external link should have failed.");
     } /* end if */
 
     /* Close root group */
@@ -8674,7 +8674,7 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
     }
     H5E_END_TRY;
 
-    /* should be able to find the target file with abolute path */
+    /* should be able to find the target file with absolute path */
     if (gid < 0) {
         H5_FAILED();
         HDputs("    Should have found the file in tmp_links directory.");
@@ -16598,7 +16598,7 @@ link_filters(hid_t fapl, hbool_t new_format)
             TEST_ERROR
         filesize_unfiltered = h5_get_file_size(filename, fapl);
 
-        /* Set deflate fitler */
+        /* Set deflate filter */
         if (H5Pset_deflate(fcpl, 6) < 0)
             TEST_ERROR
 
@@ -22567,7 +22567,7 @@ main(void)
 
     for (minimize_dset_oh = 0; minimize_dset_oh <= 1; minimize_dset_oh++) {
         if (minimize_dset_oh) {
-            HDprintf("\n-Testing with minimzed dataset object headers-\n");
+            HDprintf("\n-Testing with minimized dataset object headers-\n");
             dcpl_g = H5Pcreate(H5P_DATASET_CREATE);
             if (0 > dcpl_g)
                 TEST_ERROR

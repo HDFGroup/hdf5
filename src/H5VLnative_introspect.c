@@ -53,7 +53,7 @@
 /*******************/
 
 /* Note: H5VL__native_introspect_get_conn_cls and H5VL__native_introspect_get_cap_flags
- *      are in src/H5VLnative.c so that they can work with the staticly declared
+ *      are in src/H5VLnative.c so that they can work with the statically declared
  *      class struct.
  */
 

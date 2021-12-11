@@ -145,7 +145,7 @@ done:
  *  plist1_id - property list identifier
  *  plist2_id - property list identifier
  * OUTPUTS
- *  c_flag    - flag to indicate that lists are eqaul
+ *  c_flag    - flag to indicate that lists are equal
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -936,7 +936,7 @@ h5pset_fapl_stdio_c(hid_t_f *prp_id)
  * NAME
  *  h5pget_fapl_stdio_c
  * PURPOSE
- *  Call H5Pget_fapl_stdio to determine whther the low level file driver
+ *  Call H5Pget_fapl_stdio to determine whether the low level file driver
  *  uses the functions declared in the stdio.h
  * INPUTS
  *  prp_id - property list identifier
@@ -1013,7 +1013,7 @@ h5pset_fapl_sec2_c(hid_t_f *prp_id)
  * NAME
  *  h5pget_fapl_sec2_c
  * PURPOSE
- *  Call H5Pget_fapl_stdio to determine whther the low level file driver
+ *  Call H5Pget_fapl_stdio to determine whether the low level file driver
  *  uses the functions declared in the  unistd.h
  * INPUTS
  *  prp_id - property list identifier
@@ -2186,7 +2186,7 @@ h5pset_fclose_degree_c(hid_t_f *fapl_id, int_f *degree)
  * PURPOSE
  *  Call H5Pset_buffer to set size of conversion buffer
  * INPUTS
- *  prp_id - t`dataset trasfer property list identifier
+ *  prp_id - t`dataset transfer property list identifier
  *  size   - size of the buffer
  * OUTPUTS
  *     NONE
@@ -2221,7 +2221,7 @@ h5pset_buffer_c(hid_t_f *prp_id, hsize_t_f *size)
  * PURPOSE
  *  Call H5Pget_buffer to get size of conversion buffer
  * INPUTS
- *  prp_id - t`dataset trasfer property list identifier
+ *  prp_id - t`dataset transfer property list identifier
  * OUTPUTS
  *  size - size of conversion buffer
  * RETURNS
@@ -3005,11 +3005,11 @@ h5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
  *  h5pget_class_parent_c
  * PURPOSE
  *  Call H5Pget_class_parent to get the parent class of
- *  a genereic property class
+ *  a generic property class
  * INPUTS
  *  prp_id - property list to query
  * OUTPUTS
- *  parent_id - parent classs identifier
+ *  parent_id - parent class identifier
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -3505,7 +3505,7 @@ h5pset_family_offset_c(hid_t_f *prp_id, hsize_t_f *offset)
  * NAME
  *  h5pset_fapl_multi_c
  * PURPOSE
- *  Call H5Pset_fapl_multi to set multi file dirver
+ *  Call H5Pset_fapl_multi to set multi file driver
  * INPUTS
  *  prp_id - file_creation property list identifier
  *  mem_map - memory mapping array
@@ -3570,7 +3570,7 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
         tmp_p          = tmp_p + c_lenmax;
     }
     /*
-     *  Take care of othe arguments
+     *  Take care of other arguments
      */
     tmp_max_addr = (long double)(HADDR_MAX);
     c_prp_id     = (hid_t)*prp_id;
@@ -3603,7 +3603,7 @@ DONE:
  * NAME
  *  h5pset_fapl_multi_sc
  * PURPOSE
- *  Call H5Pset_fapl_multi to set multi file dirver
+ *  Call H5Pset_fapl_multi to set multi file driver
  * INPUTS
  *  prp_id - file_creation property list identifier
  * RETURNS
@@ -3641,7 +3641,7 @@ h5pset_fapl_multi_sc(hid_t_f *prp_id, int_f *flag)
  * NAME
  *  h5pget_fapl_multi_c
  * PURPOSE
- *  Call H5Pget_fapl_multi to set multi file dirver
+ *  Call H5Pget_fapl_multi to set multi file driver
  * INPUTS
  *  prp_id - file_creation property list identifier
  *  lenmax - length of the name a sdeclared in Fortran
@@ -4607,7 +4607,7 @@ h5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  * INPUTS
  *
  *  prp_id - property list identifier to query
- *  expression_len - buffer size transorm expression
+ *  expression_len - buffer size transform expression
  *
  *  Output:
  *  expression - buffer to hold transform expression
@@ -4670,7 +4670,7 @@ done:
  *
  *  prp_id - property list identifier to query
  *  expression - buffer to hold transform expression
- *  expression_len - buffer size transorm expression
+ *  expression_len - buffer size transform expression
  *
  *  Output:
  *
@@ -5478,7 +5478,7 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  *  h5pset_dxpl_mpio_c
  * PURPOSE
  *  Call H5Pset_dxpl_mpio to set transfer mode of the dataset
- *  trasfer property list
+ *  transfer property list
  * INPUTS
  *  prp_id - property list identifier
  *  data_xfer_mode - transfer mode
@@ -5530,7 +5530,7 @@ h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode)
  *  h5pget_dxpl_mpio_c
  * PURPOSE
  *  Call H5Pget_dxpl_mpio to get transfer mode of the dataset
- *  trasfer property list
+ *  transfer property list
  * INPUTS
  *  prp_id - property list identifier
  *  data_xfer_mode  - buffer to retrieve transfer mode

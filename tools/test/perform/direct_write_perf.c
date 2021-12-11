@@ -625,7 +625,7 @@ test_unix_write(void)
             TEST_ERROR;
         }
         else if (op_size == 0) {
-            printf(" unable to write sufficent data to file because %s \n", strerror(errno));
+            printf(" unable to write sufficient data to file because %s \n", strerror(errno));
             TEST_ERROR;
         }
     }

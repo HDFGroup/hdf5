@@ -462,7 +462,7 @@ H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func,
  *
  * \return \herr_t
  *
- * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
+ * \details H5Lget_val() returns the value of link \p name. For smbolic links,
  *          this is the path to which the link points, including the null
  *          terminator. For external and user-defined links, it is the link
  *          buffer.
@@ -492,7 +492,7 @@ H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func,
  *
  *          This function should be used only after H5Lget_info() has been
  *          called to verify that \p name is a symbolic link. This can be
- *          deteremined from the \c link_type field of the \ref H5L_info_t
+ *          determined from the \c link_type field of the \ref H5L_info_t
  *          \c struct.
  *
  * \note This function will fail if called on a hard link.
@@ -625,7 +625,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          root group of an HDF5 file, and let \c lapl denote a valid link
  *          access property list identifier. A call to H5Lexists() with
  *          arguments c root, \c "/", and \c lapl returns a positive value;
- *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a postive
+ *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a positive
  *          value. In HDF5 version 1.8.16, this function returns 0.</li>
  *       </ol>
  *       Note that the function accepts link names and path names. This is
@@ -1094,7 +1094,7 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          \p idx_type specifies the index to be used. If the links have not
  *          been indexed by the index type, they will first be sorted by that
  *          index then the iteration will begin; if the links have been so
- *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          indexed, the sorting step will be unnecessary, so the iteration may
  *          begin more quickly. Valid values include the following:
  *          \indexes
  *
@@ -1853,7 +1853,7 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          \p idx_type specifies the index to be used. If the links have not
  *          been indexed by the index type, they will first be sorted by that
  *          index then the iteration will begin; if the links have been so
- *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          indexed, the sorting step will be unnecessary, so the iteration may
  *          begin more quickly. Valid values include the following:
  *          \indexes
  *
