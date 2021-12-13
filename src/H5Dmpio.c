@@ -2504,6 +2504,7 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     const H5D_filtered_collective_io_info_t *entry2;
     haddr_t                                  addr1 = HADDR_UNDEF;
     haddr_t                                  addr2 = HADDR_UNDEF;
+    int                                      ret_value;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2513,7 +2514,16 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     addr1 = entry1->fspace_info.chunk_new.offset;
     addr2 = entry2->fspace_info.chunk_new.offset;
 
-    FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
+    if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
+        hsize_t chunk_idx1 = entry1->chunk_info->index;
+        hsize_t chunk_idx2 = entry2->chunk_info->index;
+
+        ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
+    }
+    else
+        ret_value = H5F_addr_cmp(addr1, addr2);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
 
 /*-------------------------------------------------------------------------
@@ -3798,7 +3808,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     }
 
 done:
-    /* On failure, try to free all resources used by entries in the chunk list */
+    /* Free all resources used by entries in the chunk list */
     for (i = 0; i < chunk_list_num_entries; i++) {
         if (chunk_list[i].buf) {
             H5MM_free(chunk_list[i].buf);
@@ -4380,7 +4390,7 @@ H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_type, hbool_t *
 #endif
 
     /*
-     * Create stucture type to pack chunk H5F_block_t structure right
+     * Create structure type to pack chunk H5F_block_t structure right
      * next to orig_owner, new_owner and num_writers fields
      */
     field_count      = 2;
