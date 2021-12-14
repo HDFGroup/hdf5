@@ -143,12 +143,13 @@ fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
 all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrdset"
-tests=${all_tests}
 
-# For exhaustive run, add: os_groups_attrs, os_groups_ops, os_groups_seg, dsetops, dsetchks
+# For exhaustive run, add: os_groups_attrs, os_groups_ops, os_groups_seg, dsetops, dsetchks,independ_wr
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg dsetops dsetchks"
+    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg dsetops dsetchks independ_wr"
 fi
+
+tests=${all_tests}
 
 if [ $# -gt 0 ]; then
 	tests=
@@ -1366,6 +1367,25 @@ for flush in "" "-U"; do
 	    rm -f vfd_swmr_dsetchks_reader.*.{out,rc}
     done
 done
+
+if [ ${do_independ_wr:-no} = yes ]; then
+	echo launch vfd_swmr_indep_wr_p0 ..... process 0 ......
+	echo launch vfd_swmr_indep_wr_p1 ..... process 1 ......
+	catch_out_err_and_rc vfd_swmr_indep_wr_p0 \
+	    ../vfd_swmr_indep_wr_p0  &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_indep_wr_p1  &
+	pid_reader=$!
+
+        wait $pid_reader
+        wait $pid_writer
+	# Clean up output files
+	rm -f vfd_swmr_indep_wr_p0.{out,rc}
+	rm -f vfd_swmr_indep_wr_p1.{out,rc}
+fi
+
 
 ###############################################################################
 ## Report and exit

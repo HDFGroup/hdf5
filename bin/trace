@@ -53,6 +53,7 @@ $Source = "";
                "H5D_scatter_func_t"         => "DS",
                "H5FD_mpio_xfer_t"           => "Dt",
                "H5D_vds_view_t"             => "Dv",
+               "H5FD_class_value_t"         => "DV",
                "H5D_chunk_iter_op_t"        => "x",
                "herr_t"                     => "e",
                "H5E_auto1_t"                => "Ea",
@@ -497,7 +498,7 @@ for $file (@ARGV) {
   $file_args = 0;
 
   # Ignore some files that do not need tracing macros
-  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c") {
+  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c" or $file eq "src/H5FDperform.c") {
 
     # Snarf up the entire file
     open SOURCE, $file or die "$file: $!\n";
