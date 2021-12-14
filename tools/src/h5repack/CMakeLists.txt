@@ -50,6 +50,30 @@ if (HDF5_ENABLE_FORMATTERS)
   endif ()
 endif ()
 
+if (H5_HAVE_PARALLEL)
+  if (NOT ONLY_SHARED_LIBS)
+    add_executable (h5prepack ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5prepack_main.c)
+    target_include_directories (h5prepack PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_compile_options(h5prepack PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+    TARGET_C_PROPERTIES (h5prepack STATIC)
+    target_link_libraries (h5prepack PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+    set_target_properties (h5prepack PROPERTIES FOLDER tools)
+    set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5prepack")
+    set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5prepack)
+  endif ()
+  if (BUILD_SHARED_LIBS)
+    add_executable (h5prepack-shared ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5prepack_main.c)
+    target_include_directories (h5prepack-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_compile_options(h5prepack-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+    TARGET_C_PROPERTIES (h5prepack-shared SHARED)
+    target_link_libraries (h5prepack-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+    set_target_properties (h5prepack-shared PROPERTIES FOLDER tools)
+    set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5prepack-shared")
+    set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5prepack-shared)
+  endif ()
+endif ()
+
+
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###

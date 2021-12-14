@@ -17,8 +17,9 @@
 #include "h5diff.h"
 #include "ph5diff.h"
 
-/* global variables */
-int g_nTasks = 1;
+/* global MPI variables */
+int      g_nTasks = 1;
+unsigned g_nID    = 0;
 
 /*-------------------------------------------------------------------------
  * Function: print_dimensions

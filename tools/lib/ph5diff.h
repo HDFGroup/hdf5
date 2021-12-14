@@ -40,4 +40,10 @@ struct diffs_found {
     int     not_cmp;
 };
 
+
+typedef struct ph5diff_print_objs {
+	int     obj_idx;
+	char *  obj_diffs;
+} print_objs_t;
+
 #endif /* PH5DIFF_H */

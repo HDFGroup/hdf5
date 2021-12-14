@@ -28,11 +28,14 @@ extern "C" {
 
 /* ``parallel_print'' information */
 #define PRINT_DATA_MAX_SIZE 512
-#define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE * 4)
+#define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE * 2)
 
+H5TOOLS_DLLVAR unsigned      g_nID;
 H5TOOLS_DLLVAR int           g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
 H5TOOLS_DLLVAR char          outBuff[];
+H5TOOLS_DLLVAR char *        p_diffOutput;
+H5TOOLS_DLLVAR int           p_diffOutputSize;
 H5TOOLS_DLLVAR unsigned      outBuffOffset;
 H5TOOLS_DLLVAR FILE *overflow_file;
 
@@ -65,7 +68,46 @@ typedef struct find_objs_t {
     table_t *dset_table;
 } find_objs_t;
 
+/* Parallel h5diff structures */
+typedef struct ds_table_t {
+    hid_t       fid;
+    hid_t       type;
+    hsize_t     size[H5S_MAX_RANK];
+    hsize_t     maxsize[H5S_MAX_RANK];
+    int         ndims;
+} ds_table_t;
+
+typedef struct h5tools_table_list_t {
+    size_t nalloc;
+    size_t nused;
+    struct h5tools_table_items_t {
+        unsigned long fileno;      /* File number that these tables refer to */
+        hid_t         oid;         /* ID of an object in this file, held open so fileno is consistent */
+        table_t *     group_table; /* Table of groups */
+        table_t *     dset_table;  /* Table of datasets */
+        table_t *     type_table;  /* Table of datatypes */
+        ds_table_t *  ds_table; /* Dataspace for each dset_table entry */
+    } * tables;
+} h5tools_table_list_t;
+
+
+typedef struct diff_instance_t {
+    int                       obj_idx;     /* Diff (object) Index  */
+    hsize_t                   outbuff_size; /* Size of 'outbuff' initially OUTBUFF_SIZE */
+    hsize_t                   outbuffoffset; /* current offset into the output buffer */
+    hsize_t                   baseOffset;
+    char *                    outbuff;
+} diff_instance_t;
+
+H5TOOLS_DLLVAR diff_instance_t *my_diffs;
+H5TOOLS_DLLVAR diff_instance_t *current_diff;
+H5TOOLS_DLLVAR hsize_t * local_diff_offsets;
+H5TOOLS_DLLVAR hsize_t * local_diff_lengths;
+H5TOOLS_DLLVAR hsize_t local_diff_total;
+
 H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
+H5TOOLS_DLLVAR size_t prefix_len;
+H5TOOLS_DLLVAR char * prefix;
 
 /* Definitions of useful routines */
 H5TOOLS_DLL void   indentation(unsigned);
@@ -86,6 +128,11 @@ H5TOOLS_DLL obj_t *search_obj(table_t *temp, const H5O_token_t *obj_token);
 #ifndef H5_HAVE_TMPFILE
 H5TOOLS_DLL FILE *tmpfile(void);
 #endif
+
+#ifdef H5_HAVE_PARALLEL
+H5TOOLS_DLL int get_global_hid_t(hid_t *flag);
+#endif 
+
 
 /*************************************************************
  *

@@ -73,11 +73,21 @@ check_options(diff_opt_t *opts)
      * These options are mutually exclusive.
      */
     if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
+#ifdef H5_HAVE_PARALLEL
+        if (g_nID == 0) {
+            HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+            HDprintf("use no more than one.\n");
+            HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
+                     "Reference Manual'.\n",
+                     PROGRAMNAME);
+        }
+#else
         HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
         HDprintf("use no more than one.\n");
         HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
                  "Reference Manual'.\n",
                  PROGRAMNAME);
+#endif
         h5diff_exit(EXIT_FAILURE);
     }
 }
@@ -363,7 +373,12 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 opts->delta_bool = 1;
 
                 if (check_d_input(H5_optarg) == -1) {
+#ifdef H5_HAVE_PARALLEL
+                    if (g_nID == 0)
+                       HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+#else
                     HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+#endif
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -374,7 +389,12 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
             case 'p':
                 opts->percent_bool = 1;
                 if (check_p_input(H5_optarg) == -1) {
+#ifdef H5_HAVE_PARALLEL
+                    if (g_nID == 0)
+                       HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+#else
                     HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+#endif
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -388,7 +408,12 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
             case 'n':
                 opts->count_bool = 1;
                 if (check_n_input(H5_optarg) == -1) {
+#ifdef H5_HAVE_PARALLEL
+                    if (g_nID == 0)
+                       HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+#else
                     HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+#endif
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -541,6 +566,25 @@ print_info(diff_opt_t *opts)
             HDprintf("Use -v for a list of objects.\n");
     }
 
+#ifdef H5_HAVE_PARALLEL
+    int g_not_cmp = 0;
+    if (g_Parallel) {
+        g_not_cmp = h5diff_get_global(&opts->not_cmp);
+    }
+    if ((opts->not_cmp == 1) || (g_not_cmp > 0)) {
+        if (opts->mode_list_not_cmp == 0) {
+            if (g_nID == 0) {
+                HDprintf("--------------------------------\n");
+                HDprintf("Some objects are not comparable\n");
+                HDprintf("--------------------------------\n");
+                if (opts->mode_verbose)
+                    HDprintf("Use -c for a list of objects without details of differences.\n");
+                else
+                    HDprintf("Use -c for a list of objects.\n");
+            }
+        }
+    }
+#else
     if (opts->not_cmp == 1) {
         if (opts->mode_list_not_cmp == 0) {
             HDprintf("--------------------------------\n");
@@ -552,6 +596,8 @@ print_info(diff_opt_t *opts)
                 HDprintf("Use -c for a list of objects.\n");
         }
     }
+#endif
+
 }
 
 /*-------------------------------------------------------------------------
@@ -646,6 +692,10 @@ check_d_input(const char *str)
 void
 usage(void)
 {
+#ifdef H5_HAVE_PARALLEL
+    if (g_Parallel && g_nID)
+       return;
+#endif
     PRINTVALSTREAM(rawoutstream, "usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]\n");
     PRINTVALSTREAM(rawoutstream, "  file1             File name of the first HDF5 file\n");
     PRINTVALSTREAM(rawoutstream, "  file2             File name of the second HDF5 file\n");

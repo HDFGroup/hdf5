@@ -17,6 +17,31 @@
 #include "h5diff.h"
 #include "ph5diff.h"
 
+#define DIFF_COUNT 128
+int diff_count_limit = DIFF_COUNT;
+int rank_diff_count = 0;
+
+diff_instance_t **rank_diffs = NULL;
+diff_instance_t *my_diffs = NULL;
+diff_instance_t *current_diff = NULL;
+hsize_t *local_diff_offsets = NULL;
+hsize_t *local_diff_lengths = NULL;
+hsize_t local_diff_total = 0;
+
+
+
+static int h5diff_open(const char *fname1, const char *fname2, diff_opt_t *opts, hid_t *_file_id1, hid_t *_file_id2);
+static int h5diff_initialize_lists(const char *fname1, const char *fname2,
+                                   const char *objname1, const char *objname2,
+                                   hid_t file1_id, hid_t file2_id, diff_opt_t *opts,
+                                   char ** _obj1fullname, trav_info_t ** _info1_lp,
+                                   char ** _obj2fullname, trav_info_t ** _info2_lp,
+                                   int *_both_objs_grp, trav_table_t **_match_list);
+
+static herr_t trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited, void *udata);
+static herr_t trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata);
+static void   ph5diff_gather_diffs(void);
+
 /*-------------------------------------------------------------------------
  * Function: print_objname
  *
@@ -76,7 +101,7 @@ print_warn(diff_opt_t *opts)
     return ((opts->mode_verbose)) ? 1 : 0;
 }
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(USE_ORIGINAL_CODE)
 /*-------------------------------------------------------------------------
  * Function: phdiff_dismiss_workers
  *
@@ -140,6 +165,12 @@ is_valid_options(diff_opt_t *opts)
     /*-----------------------------------------------
      * no -q(quiet) with -v (verbose) or -r (report) */
     if (opts->mode_quiet && (opts->mode_verbose || opts->mode_report)) {
+#ifdef H5_HAVE_PARALLEL
+        /* Allow MPI RANK(0) to print. */
+        if (g_Parallel && (g_nID == 0)) {
+            g_Parallel = 0;
+        }
+#endif
         parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
         opts->err_stat = H5DIFF_ERR;
         H5TOOLS_GOTO_DONE(0);
@@ -148,6 +179,12 @@ is_valid_options(diff_opt_t *opts)
     /* -------------------------------------------------------
      * only allow --no-dangling-links along with --follow-symlinks */
     if (opts->no_dangle_links && !opts->follow_links) {
+#ifdef H5_HAVE_PARALLEL
+        /* Allow MPI RANK(0) to print. */
+        if (g_Parallel && (g_nID == 0)) {
+            g_Parallel = 0;
+        }
+#endif
         parallel_print("Error: --no-dangling-links must be used along with --follow-symlinks option.\n");
         opts->err_stat = H5DIFF_ERR;
         H5TOOLS_GOTO_DONE(0);
@@ -464,6 +501,571 @@ done:
     H5TOOLS_ENDDEBUG(" ");
 }
 
+
+static
+int	h5diff_initialize_lists(const char *fname1, const char *fname2,
+                            const char *objname1, const char *objname2,
+							hid_t file1_id, hid_t file2_id, diff_opt_t *opts,
+                            char ** _obj1fullname, trav_info_t ** _info1_lp,
+                            char ** _obj2fullname, trav_info_t ** _info2_lp,
+							int *_both_objs_grp, trav_table_t **_match_list)
+{
+    trav_info_t * info1_obj    = NULL;
+    trav_info_t * info2_obj    = NULL;
+    char *        obj1fullname = NULL;
+    char *        obj2fullname = NULL;
+
+    h5trav_type_t obj1type     = H5TRAV_TYPE_GROUP;
+    h5trav_type_t obj2type     = H5TRAV_TYPE_GROUP;
+
+    /* object info */
+    H5O_info2_t oinfo1;
+    H5O_info2_t oinfo2;
+
+    /* for group object */
+    trav_info_t *info1_grp     = NULL;
+    trav_info_t *info2_grp     = NULL;
+
+    /* local pointer */
+    trav_info_t * info1_lp     = NULL;
+    trav_info_t * info2_lp     = NULL;
+
+    /* link info from specified object */
+    H5L_info2_t src_linfo1;
+    H5L_info2_t src_linfo2;
+
+    /* local return checks */
+    int l_ret1                 = -1;
+    int l_ret2                 = -1;
+
+    /* link info from member object */
+    h5tool_link_info_t trg_linfo1;
+    h5tool_link_info_t trg_linfo2;
+
+    /* list for common objects */
+    trav_table_t *match_list   = NULL;
+    diff_err_t ret_value       = H5DIFF_NO_ERR;
+
+	/* flag the same object optimization */
+    int both_objs_grp          = 0;
+
+    /* flag errors */
+    int errors                 = 0;
+    /* count/flag */
+    int nfound                 = 0;
+
+
+    /* init link info struct */
+    HDmemset(&trg_linfo1, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&trg_linfo2, 0, sizeof(h5tool_link_info_t));
+
+    /*-------------------------------------------------------------------------
+     * Initialize the info structs
+     *-------------------------------------------------------------------------
+     */
+    trav_info_init(fname1, file1_id, &info1_obj);
+    trav_info_init(fname2, file2_id, &info2_obj);
+
+    H5TOOLS_DEBUG("trav_info_init initialized");
+    /* if any object is specified */
+    if (objname1) {
+        /* make the given object1 fullpath, start with "/"  */
+        if (HDstrncmp(objname1, "/", 1) != 0) {
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            if (HDasprintf(&obj1fullname, "/%s", objname1) < 0) {
+                errors++;
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+#else  /* H5_HAVE_ASPRINTF */
+            /* (malloc 2 more for "/" and end-of-line) */
+            if ((obj1fullname = (char *)HDmalloc(HDstrlen(objname1) + 2)) == NULL) {
+                errors++;
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+            HDstrcpy(obj1fullname, "/");
+            HDstrcat(obj1fullname, objname1);
+#endif /* H5_HAVE_ASPRINTF */
+        }
+        else
+            obj1fullname = HDstrdup(objname1);
+        H5TOOLS_DEBUG("obj1fullname = %s", obj1fullname);
+
+        /* make the given object2 fullpath, start with "/" */
+        if (HDstrncmp(objname2, "/", 1) != 0) {
+#ifdef H5_HAVE_ASPRINTF
+            /* Use the asprintf() routine, since it does what we're trying to do below */
+            if (HDasprintf(&obj2fullname, "/%s", objname2) < 0) {
+                errors++;
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+#else  /* H5_HAVE_ASPRINTF */
+            /* (malloc 2 more for "/" and end-of-line) */
+            if ((obj2fullname = (char *)HDmalloc(HDstrlen(objname2) + 2)) == NULL) {
+                errors++;
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+            HDstrcpy(obj2fullname, "/");
+            HDstrcat(obj2fullname, objname2);
+#endif /* H5_HAVE_ASPRINTF */
+        }
+        else
+            obj2fullname = HDstrdup(objname2);
+        H5TOOLS_DEBUG("obj2fullname = %s", obj2fullname);
+
+        /*----------------------------------------------------------
+         * check if obj1 is root, group, single object or symlink
+         */
+        H5TOOLS_DEBUG("h5diff check if obj1=%s is root, group, single object or symlink", obj1fullname);
+        if (!HDstrcmp(obj1fullname, "/")) {
+            obj1type = H5TRAV_TYPE_GROUP;
+        }
+        else {
+            /* check if link itself exist */
+            if (H5Lexists(file1_id, obj1fullname, H5P_DEFAULT) <= 0) {
+                errors++;
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                parallel_print("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
+#ifdef H5_HAVE_PARALLEL
+                g_Parallel = was_Parallel;
+#endif
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Object could not be found");
+            }
+            /* get info from link */
+            if (H5Lget_info2(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0) {
+                errors++;
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                parallel_print("Unable to get link info from <%s>\n", obj1fullname);
+#ifdef H5_HAVE_PARALLEL
+                g_Parallel = was_Parallel;
+#endif
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Lget_info failed");
+            }
+
+            info1_lp = info1_obj;
+
+            /*
+             * check the type of specified path for hard and symbolic links
+             */
+            if (src_linfo1.type == H5L_TYPE_HARD) {
+                size_t idx;
+
+                /* optional data pass */
+                info1_obj->opts = (diff_opt_t *)opts;
+
+                if (H5Oget_info_by_name3(file1_id, obj1fullname, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+                    errors++;
+                    parallel_print("Error: Could not get file contents\n");
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Could not get file contents");
+                }
+                obj1type = (h5trav_type_t)oinfo1.type;
+                trav_info_add(info1_obj, obj1fullname, obj1type);
+                idx = info1_obj->nused - 1;
+                HDmemcpy(&info1_obj->paths[idx].obj_token, &oinfo1.token, sizeof(H5O_token_t));
+                info1_obj->paths[idx].fileno = oinfo1.fileno;
+            }
+            else if (src_linfo1.type == H5L_TYPE_SOFT) {
+                obj1type = H5TRAV_TYPE_LINK;
+                trav_info_add(info1_obj, obj1fullname, obj1type);
+            }
+            else if (src_linfo1.type == H5L_TYPE_EXTERNAL) {
+                obj1type = H5TRAV_TYPE_UDLINK;
+                trav_info_add(info1_obj, obj1fullname, obj1type);
+            }
+        }
+
+        /*----------------------------------------------------------
+         * check if obj2 is root, group, single object or symlink
+         */
+        H5TOOLS_DEBUG("h5diff check if obj2=%s is root, group, single object or symlink", obj2fullname);
+        if (!HDstrcmp(obj2fullname, "/")) {
+            obj2type = H5TRAV_TYPE_GROUP;
+        }
+        else {
+            /* check if link itself exist */
+            if (H5Lexists(file2_id, obj2fullname, H5P_DEFAULT) <= 0) {
+                errors++;
+                parallel_print("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Object could not be found");
+            }
+            /* get info from link */
+            if (H5Lget_info2(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0) {
+                errors++;
+                parallel_print("Unable to get link info from <%s>\n", obj2fullname);
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Lget_info failed");
+            }
+
+            info2_lp = info2_obj;
+
+            /*
+             * check the type of specified path for hard and symbolic links
+             */
+            if (src_linfo2.type == H5L_TYPE_HARD) {
+                size_t idx;
+
+                /* optional data pass */
+                info2_obj->opts = (diff_opt_t *)opts;
+
+                if (H5Oget_info_by_name3(file2_id, obj2fullname, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+                    errors++;
+                    parallel_print("Error: Could not get file contents\n");
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Could not get file contents");
+                }
+                obj2type = (h5trav_type_t)oinfo2.type;
+                trav_info_add(info2_obj, obj2fullname, obj2type);
+                idx = info2_obj->nused - 1;
+                HDmemcpy(&info2_obj->paths[idx].obj_token, &oinfo2.token, sizeof(H5O_token_t));
+                info2_obj->paths[idx].fileno = oinfo2.fileno;
+            }
+            else if (src_linfo2.type == H5L_TYPE_SOFT) {
+                obj2type = H5TRAV_TYPE_LINK;
+                trav_info_add(info2_obj, obj2fullname, obj2type);
+            }
+            else if (src_linfo2.type == H5L_TYPE_EXTERNAL) {
+                obj2type = H5TRAV_TYPE_UDLINK;
+                trav_info_add(info2_obj, obj2fullname, obj2type);
+            }
+        }
+    }
+    /* if no object specified */
+    else {
+        H5TOOLS_DEBUG("h5diff no object specified");
+        /* set root group */
+        obj1fullname = (char *)HDstrdup("/");
+        obj1type     = H5TRAV_TYPE_GROUP;
+        obj2fullname = (char *)HDstrdup("/");
+        obj2type     = H5TRAV_TYPE_GROUP;
+    }
+
+    H5TOOLS_DEBUG("get any symbolic links info - errstat:%d", opts->err_stat);
+
+    /* get any symbolic links info */
+    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, opts->follow_links);
+    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, opts->follow_links);
+
+    /*---------------------------------------------
+     * check for following symlinks
+     */
+    if (opts->follow_links) {
+        /* pass how to handle printing warning to linkinfo option */
+        if (print_warn(opts))
+            trg_linfo1.opt.msg_mode = trg_linfo2.opt.msg_mode = 1;
+
+        /*-------------------------------
+         * check symbolic link (object1)
+         */
+        H5TOOLS_DEBUG("h5diff check symbolic link (object1)");
+        /* dangling link */
+        if (l_ret1 == 0) {
+            H5TOOLS_DEBUG("h5diff ... dangling link");
+            if (opts->no_dangle_links) {
+                errors++;
+                /* treat dangling link as error */
+                if (opts->mode_verbose) {
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                    parallel_print("Warning: <%s> is a dangling link.\n", obj1fullname);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+#endif
+                }
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "treat dangling link as error");
+            }
+            else {
+                if (opts->mode_verbose) {
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                    parallel_print("obj1 <%s> is a dangling link.\n", obj1fullname);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+#endif
+                }
+                if (l_ret1 != 0 || l_ret2 != 0) {
+                    nfound++;
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                    print_found((hsize_t)nfound);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+                    H5TOOLS_GOTO_DONE(H5PDIFF_NO_ERR);
+#else
+                    H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+#endif
+                }
+            }
+        }
+        else if (l_ret1 < 0) { /* fail */
+#ifdef H5_HAVE_PARALLEL
+            unsigned char was_Parallel = g_Parallel;
+            if (g_Parallel && (g_nID == 0))
+                g_Parallel = 0;
+#endif
+            parallel_print("Object <%s> could not be found in <%s>\n", obj1fullname, fname1);
+#ifdef H5_HAVE_PARALLEL
+            g_Parallel = was_Parallel;
+#endif
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Object could not be found");
+        }
+        else if (l_ret1 != 2) { /* symbolic link */
+            obj1type = (h5trav_type_t)trg_linfo1.trg_type;
+            H5TOOLS_DEBUG("h5diff ... ... trg_linfo1.trg_type == H5L_TYPE_HARD");
+            if (info1_lp != NULL) {
+                size_t idx = info1_lp->nused - 1;
+
+                H5TOOLS_DEBUG("h5diff ... ... ... info1_obj not null");
+                HDmemcpy(&info1_lp->paths[idx].obj_token, &trg_linfo1.obj_token, sizeof(H5O_token_t));
+                info1_lp->paths[idx].type   = (h5trav_type_t)trg_linfo1.trg_type;
+                info1_lp->paths[idx].fileno = trg_linfo1.fileno;
+            }
+            H5TOOLS_DEBUG("h5diff check symbolic link (object1) finished");
+        }
+
+        /*-------------------------------
+         * check symbolic link (object2)
+         */
+        H5TOOLS_DEBUG("h5diff check symbolic link (object2)");
+        /* dangling link */
+        if (l_ret2 == 0) {
+            H5TOOLS_DEBUG("h5diff ... dangling link");
+            if (opts->no_dangle_links) {
+                errors++;
+                /* treat dangling link as error */
+                if (opts->mode_verbose) {
+#ifdef H5_HAVE_PARALLEL
+                    unsigned char was_Parallel = g_Parallel;
+                    if (g_Parallel && (g_nID == 0))
+                        g_Parallel = 0;
+#endif
+                    parallel_print("Warning: <%s> is a dangling link.\n", obj2fullname);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+#endif
+                }
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "treat dangling link as error");
+            }
+            else {
+                if (opts->mode_verbose) {
+#ifdef H5_HAVE_PARALLEL
+                    unsigned char was_Parallel = g_Parallel;
+                    if (g_Parallel && (g_nID == 0))
+                        g_Parallel = 0;
+#endif
+                    parallel_print("obj2 <%s> is a dangling link.\n", obj2fullname);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+#endif
+                }
+
+                if (l_ret1 != 0 || l_ret2 != 0) {
+                    nfound++;
+#ifdef H5_HAVE_PARALLEL
+                unsigned char was_Parallel = g_Parallel;
+                if (g_Parallel && (g_nID == 0))
+                    g_Parallel = 0;
+#endif
+                    print_found((hsize_t)nfound);
+#ifdef H5_HAVE_PARALLEL
+                    g_Parallel = was_Parallel;
+                    H5TOOLS_GOTO_DONE(H5PDIFF_NO_ERR);
+#else
+                    H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+#endif
+                }
+            }
+        }
+        else if (l_ret2 < 0) { /* fail */
+            errors++;
+#ifdef H5_HAVE_PARALLEL
+            unsigned char was_Parallel = g_Parallel;
+            if (g_Parallel && (g_nID == 0))
+                g_Parallel = 0;
+#endif
+            parallel_print("Object <%s> could not be found in <%s>\n", obj2fullname, fname2);
+#ifdef H5_HAVE_PARALLEL
+            g_Parallel = was_Parallel;
+#endif
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Object could not be found");
+        }
+        else if (l_ret2 != 2) { /* symbolic link */
+            obj2type = (h5trav_type_t)trg_linfo2.trg_type;
+            if (info2_lp != NULL) {
+                size_t idx = info2_lp->nused - 1;
+
+                H5TOOLS_DEBUG("h5diff ... ... ... info2_obj not null");
+                HDmemcpy(&info2_lp->paths[idx].obj_token, &trg_linfo2.obj_token, sizeof(H5O_token_t));
+                info2_lp->paths[idx].type   = (h5trav_type_t)trg_linfo2.trg_type;
+                info2_lp->paths[idx].fileno = trg_linfo2.fileno;
+            }
+            H5TOOLS_DEBUG("h5diff check symbolic link (object1) finished");
+        }
+    } /* end of if follow symlinks */
+
+    /*
+     * If verbose options is not used, don't need to traverse through the list
+     * of objects in the group to display objects information,
+     * So use h5tools_is_obj_same() to improve performance by skipping
+     * comparing details of same objects.
+     */
+
+    if (!(opts->mode_verbose || opts->mode_report)) {
+        H5TOOLS_DEBUG("h5diff NOT (opts->mode_verbose || opts->mode_report)");
+        /* if no danglink links */
+        if (l_ret1 > 0 && l_ret2 > 0)
+            if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname) != 0)
+                H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+    }
+
+    both_objs_grp = (obj1type == H5TRAV_TYPE_GROUP && obj2type == H5TRAV_TYPE_GROUP);
+    if (both_objs_grp) {
+        H5TOOLS_DEBUG("h5diff both_objs_grp TRUE");
+        /*
+         * traverse group1
+         */
+        trav_info_init(fname1, file1_id, &info1_grp);
+        /* optional data pass */
+        info1_grp->opts = (diff_opt_t *)opts;
+
+        if (h5trav_visit(file1_id, obj1fullname, TRUE, TRUE, trav_grp_objs, trav_grp_symlinks, info1_grp,
+                         H5O_INFO_BASIC) < 0) {
+            errors++;
+            parallel_print("Error: Could not get file contents\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not get file contents");
+        }
+        info1_lp = info1_grp;
+
+        /*
+         * traverse group2
+         */
+        trav_info_init(fname2, file2_id, &info2_grp);
+        /* optional data pass */
+        info2_grp->opts = (diff_opt_t *)opts;
+
+        if (h5trav_visit(file2_id, obj2fullname, TRUE, TRUE, trav_grp_objs, trav_grp_symlinks, info2_grp,
+                         H5O_INFO_BASIC) < 0) {
+            errors++;
+            parallel_print("Error: Could not get file contents\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not get file contents");
+        } /* end if */
+        info2_lp = info2_grp;
+    }
+
+    H5TOOLS_DEBUG("groups traversed - errstat:%d", opts->err_stat);
+    H5TOOLS_DEBUG("build_match_list next - errstat:%d", opts->err_stat);
+
+    /* process the objects */
+    build_match_list(obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
+    H5TOOLS_DEBUG("build_match_list finished - errstat:%d", opts->err_stat);
+
+    *_obj1fullname  = obj1fullname;
+    *_obj2fullname  = obj2fullname;
+    *_info1_lp      = info1_lp;
+    *_info2_lp      = info2_lp;
+    *_both_objs_grp = both_objs_grp;
+    *_match_list    = match_list;
+
+done:
+    opts->err_stat = opts->err_stat | ret_value;
+
+    /* free link info buffer */
+    if (trg_linfo1.trg_path) {
+        HDfree(trg_linfo1.trg_path);
+        trg_linfo1.trg_path = NULL;
+    }
+    if (trg_linfo2.trg_path) {
+        HDfree(trg_linfo2.trg_path);
+        trg_linfo2.trg_path = NULL;
+    }
+
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
+
+#ifdef H5_HAVE_PARALLEL
+    if ((ret_value == H5PDIFF_ERR) || (ret_value == H5PDIFF_NO_ERR))
+		return -1;
+#endif
+    if (errors)
+        return -1;
+    return nfound;
+}
+
+static
+int h5diff_open(const char *fname1, const char *fname2, diff_opt_t *opts, hid_t *_file_id1, hid_t *_file_id2)
+{
+    int     ret_value = 0;
+    hid_t   fapl1_id = H5P_DEFAULT;
+    hid_t   fapl2_id = H5P_DEFAULT;
+    hid_t   file1_id = H5I_INVALID_HID;
+    hid_t   file2_id = H5I_INVALID_HID;
+    /*-------------------------------------------------------------------------
+     * open the files first; if they are not valid, no point in continuing
+     *-------------------------------------------------------------------------
+     */
+    /* open file 1 */
+    if (opts->custom_vol[0] || opts->custom_vfd[0]) {
+        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
+                                         opts->custom_vfd[0] ? &(opts->vfd_info[0]) : NULL)) < 0) {
+            ret_value = -1;
+            parallel_print("%s: unable to create fapl for input file\n", __func__);
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+        }
+    }
+
+    if ((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, (fapl1_id != H5P_DEFAULT), NULL,
+                                  (size_t)0)) < 0) {
+       ret_value = -1;
+       parallel_print("%s: <%s>: unable to open file\n", __func__, fname1);
+       H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname1);
+    }
+
+    *_file_id1 = file1_id;
+
+    H5TOOLS_DEBUG("file1_id = %s", fname1);
+
+
+    if (opts->custom_vol[1] || opts->custom_vfd[1]) {
+        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
+                                         opts->custom_vfd[1] ? &(opts->vfd_info[1]) : NULL)) < 0) {
+          ret_value = -2;
+          parallel_print("%s: unable to create fapl for input file\n", __func__);
+          H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+       }
+    }
+
+    if ((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id, (fapl2_id != H5P_DEFAULT), NULL,
+                                  (size_t)0)) < 0) {
+       ret_value = -2;
+       parallel_print("%s: <%s>: unable to open file\n", __func__, fname2);
+       H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname2);
+    }
+    *_file_id2 = file2_id;
+
+    H5TOOLS_DEBUG("file2_id = %s", fname2);
+done:
+    if (fapl1_id != H5P_DEFAULT)
+        H5Pclose(fapl1_id);
+    if (fapl2_id != H5P_DEFAULT)
+        H5Pclose(fapl2_id);
+
+    return ret_value;
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: trav_grp_objs
  *
@@ -580,6 +1182,309 @@ done:
     H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
+
+#ifdef H5_HAVE_PARALLEL
+
+static int
+compare_objIDs(const void *h1, const void *h2)
+{
+    const print_objs_t *obj1 = (const print_objs_t *) h1;
+    const print_objs_t *obj2 = (const print_objs_t *) h2;
+    return (obj1->obj_idx > obj2->obj_idx);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: phdiff_gather_diffs
+ *
+ * Purpose:  print all saved buffers
+ *
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+static void
+ph5diff_gather_diffs(void)
+{
+	int mpi_rank, mpi_size;
+	int total_bytes = 0, total_diff_count = 0;
+	int k, my_size = (int)local_diff_total + rank_diff_count;
+	int send_offset = 0;
+	int local_counts[2] = {(int)my_size, rank_diff_count};
+
+	int *recvcounts = NULL;
+	int *recvtuples = NULL;
+	int *rankIDs = NULL;
+	int *displs = NULL;
+	int *indices = NULL;
+	char *sendbuf = NULL;
+	char *recvbuf = NULL;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+	if (mpi_rank == 0) {
+		displs	   = (int *)malloc((size_t)((size_t)mpi_size * sizeof(int)));
+		recvcounts = (int *)malloc((size_t)((size_t)mpi_size * sizeof(int)));
+		recvtuples = (int *)malloc((size_t)((size_t)mpi_size * 2 * sizeof(int)));
+	}
+
+	MPI_Gather(local_counts, 2, MPI_INT, recvtuples, 2, MPI_INT, 0, MPI_COMM_WORLD);
+
+	/* Maybe create a contiguous buffer to send to the root */
+	if (rank_diff_count > 1) {
+		rankIDs = (int *)malloc((size_t)((size_t)rank_diff_count * sizeof(int)));
+		sendbuf = (char *)malloc((size_t)((size_t)local_diff_total + (size_t)rank_diff_count));
+		for (k=0; k < rank_diff_count; k++) {
+			int len = (int)rank_diffs[k]->outbuffoffset;
+			strncpy(&sendbuf[send_offset], rank_diffs[k]->outbuff, (size_t)len );
+			send_offset += len;
+			sendbuf[send_offset++] = 0; /* Null terminiate the text */
+			rankIDs[k] = rank_diffs[k]->obj_idx;
+		}
+	}
+	else if (rank_diff_count > 0) {
+		rankIDs = (int *)malloc((size_t)rank_diff_count * sizeof(int));
+		rankIDs[0] = rank_diffs[0]->obj_idx;
+		/* If ONLY a single outbuff, then use it rather than malloc and copy */
+		sendbuf = rank_diffs[0]->outbuff;
+	}
+
+	if (mpi_rank == 0) {
+		int *next = (int *)recvtuples;
+
+		displs[0] = 0;
+		total_bytes = next[0];			 /* tuple[0] */
+		total_diff_count = next[1];		 /* tuple[1] */
+		recvcounts[0] = total_bytes;
+		next += 2;
+
+		for (k=1; k < mpi_size; k++) {
+			recvcounts[k] = next[0];		 /* tuple[0] */
+			total_diff_count += next[1];  /* tuple[1] */
+
+			total_bytes += recvcounts[k];
+			displs[k] = displs[k-1] + recvcounts[k-1];
+
+			next += 2;
+		}
+		recvbuf = (char *)malloc((size_t)(total_bytes));
+	}
+
+	MPI_Gatherv(sendbuf, my_size, MPI_CHAR,
+				recvbuf, recvcounts, displs, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+	/* The 'recvcounts' and 'displs' variables can be reallocated
+	 * for the next MPI_Gatherv operation...
+	 */
+	if (mpi_rank == 0) {
+		int *next = (int *)recvtuples;
+        displs	   = (int *)realloc(displs, (size_t)((size_t)total_diff_count * sizeof(int)));
+        recvcounts = (int *)realloc(recvcounts, (size_t)((size_t)total_diff_count * sizeof(int)));
+		indices = (int *)malloc((size_t)total_diff_count * sizeof(int));
+		displs[0] = 0;
+		recvcounts[0] = rank_diff_count;
+
+		next += 2;
+		for (k=1; k < mpi_size; k++) {
+			recvcounts[k] = next[1];
+			displs[k] = displs[k-1] + recvcounts[k-1];
+			next += 2;
+		}
+	}
+
+	MPI_Gatherv(rankIDs, rank_diff_count, MPI_INT,
+				indices, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
+
+	if (mpi_rank == 0) {
+		char *next = recvbuf;
+		print_objs_t *ordered_objs = (print_objs_t *)HDcalloc((size_t)total_diff_count, sizeof(print_objs_t));
+		for (k=0; k < total_diff_count; k++) {
+			size_t len;
+			len = strlen(next);
+			ordered_objs[k].obj_idx = indices[k];
+			ordered_objs[k].obj_diffs = next;
+			next += (len+1);
+		}
+		qsort(ordered_objs, (size_t)total_diff_count, sizeof(print_objs_t), compare_objIDs);
+		for (k=0; k < total_diff_count; k++) {
+			printf("%s", ordered_objs[k].obj_diffs);
+		}
+		HDfree(ordered_objs);
+	}
+
+    fflush(stdout);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (displs)
+        HDfree(displs);
+    if (recvcounts)
+        HDfree(recvcounts);
+    if (recvtuples)
+        HDfree(recvtuples);
+    if (indices)
+        HDfree(indices);
+    if (rankIDs)
+        HDfree(rankIDs);
+    if ((rank_diff_count > 1) && sendbuf)
+        HDfree(sendbuf);
+    if (recvbuf)
+        HDfree(recvbuf);
+}
+
+/*
+ *  NEWER Version of the ph5diff implementation
+ */
+hsize_t
+ph5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2, diff_opt_t *opts)
+{
+    hid_t   file1_id = H5I_INVALID_HID;
+    hid_t   file2_id = H5I_INVALID_HID;
+    hid_t   fapl1_id = H5P_DEFAULT;
+    hid_t   fapl2_id = H5P_DEFAULT;
+    char    filenames[2][MAX_FILENAME];
+    hsize_t nfound        = 0;
+    char *  obj1fullname  = NULL;
+    char *  obj2fullname  = NULL;
+    int     both_objs_grp = 0;
+
+    /* for group object */
+    trav_info_t *info1_grp = NULL;
+    trav_info_t *info2_grp = NULL;
+
+    /* local pointer */
+    trav_info_t *info1_lp = NULL;
+    trav_info_t *info2_lp = NULL;
+    h5tool_link_info_t trg_linfo1;
+    h5tool_link_info_t trg_linfo2;
+
+    /* list for common objects */
+    trav_table_t *match_list = NULL;
+    diff_err_t    ret_value  = H5DIFF_NO_ERR;
+
+    H5TOOLS_START_DEBUG(" ");
+    /* init filenames */
+    HDmemset(filenames, 0, MAX_FILENAME * 2);
+    /* init link info struct */
+    HDmemset(&trg_linfo1, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&trg_linfo2, 0, sizeof(h5tool_link_info_t));
+
+    /*-------------------------------------------------------------------------
+     * check invalid combination of options
+     *-----------------------------------------------------------------------*/
+    if (!is_valid_options(opts))
+        H5TOOLS_GOTO_DONE(0);
+
+    opts->cmn_objs = 1;             /* eliminate warning */
+    opts->err_stat = H5DIFF_NO_ERR; /* initialize error status */
+
+    if (h5diff_open(fname1, fname2, opts, &file1_id, &file2_id) < 0) {
+        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "file open failure\n");
+    }
+	if (h5diff_initialize_lists(fname1, fname2,
+                                objname1, objname2,
+                                file1_id, file2_id, opts,
+                                &obj1fullname, &info1_lp,
+                                &obj2fullname, &info2_lp,
+                                &both_objs_grp, &match_list) < 0) {
+
+        goto done;
+	}
+
+    if (both_objs_grp) {
+        /*------------------------------------------------------
+         * print the list
+         */
+        if (opts->mode_verbose) {
+            unsigned u;
+
+#if defined(H5_HAVE_PARALLEL)
+            if (g_nID == 0) {
+                if (g_Parallel) {
+                    char *outbuff = NULL;
+                    diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
+                    HDassert((new_diff != NULL));
+                    outbuff = (char *)malloc(OUTBUFF_SIZE);
+                    HDassert((outbuff != NULL));
+                    new_diff->obj_idx = 0;
+                    new_diff->outbuff_size = OUTBUFF_SIZE;
+                    new_diff->outbuffoffset = 0;
+                    new_diff->outbuff = outbuff;
+                    if (rank_diff_count == 0) {
+                        rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
+                        rank_diffs[rank_diff_count++] = new_diff;
+                    }
+                    current_diff = new_diff;
+                }
+#endif
+
+            if (opts->mode_verbose_level > 2) {
+                parallel_print("file1: %s\n", fname1);
+                parallel_print("file2: %s\n", fname2);
+            }
+
+            parallel_print("\n");
+            /* if given objects is group under root */
+            if (HDstrcmp(obj1fullname, "/") != 0 || HDstrcmp(obj2fullname, "/") != 0)
+                parallel_print("group1   group2\n");
+            else
+                parallel_print("file1     file2\n");
+            parallel_print("---------------------------------------\n");
+            for (u = 0; u < match_list->nobjs; u++) {
+                int c1, c2;
+                c1 = (match_list->objs[u].flags[0]) ? 'x' : ' ';
+                c2 = (match_list->objs[u].flags[1]) ? 'x' : ' ';
+                parallel_print("%5c %6c    %-15s\n", c1, c2, match_list->objs[u].name);
+            } /* end for */
+            parallel_print("\n");
+#if defined(H5_HAVE_PARALLEL)
+            }
+#endif
+        } /* end if */
+    }
+
+    H5TOOLS_DEBUG("diff_match next - errstat:%d", opts->err_stat);
+    nfound = diff_match(file1_id, obj1fullname, info1_lp, file2_id, obj2fullname, info2_lp, match_list, opts);
+    H5TOOLS_DEBUG("diff_match nfound: %d - errstat:%d", nfound, opts->err_stat);
+
+    ph5diff_gather_diffs();
+
+done:
+    opts->err_stat = opts->err_stat | ret_value;
+
+    if (info1_grp)
+        trav_info_free(info1_grp);
+    if (info2_grp)
+        trav_info_free(info2_grp);
+
+    /* free buffers */
+    if (obj1fullname)
+        HDfree(obj1fullname);
+    if (obj2fullname)
+        HDfree(obj2fullname);
+
+    /* free link info buffer */
+    if (trg_linfo1.trg_path)
+        HDfree(trg_linfo1.trg_path);
+    if (trg_linfo2.trg_path)
+        HDfree(trg_linfo2.trg_path);
+
+    /* close */
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file1_id);
+        H5Fclose(file2_id);
+        if (fapl1_id != H5P_DEFAULT)
+            H5Pclose(fapl1_id);
+        if (fapl2_id != H5P_DEFAULT)
+            H5Pclose(fapl2_id);
+    }
+    H5E_END_TRY;
+
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
+
+    return nfound;
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
@@ -980,7 +1885,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     }
     H5TOOLS_DEBUG("groups traversed - errstat:%d", opts->err_stat);
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(USE_ORIGINAL_CODE)
     if (g_Parallel) {
         int i;
 
@@ -1004,12 +1909,12 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     build_match_list(obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
     H5TOOLS_DEBUG("build_match_list finished - errstat:%d", opts->err_stat);
     if (both_objs_grp) {
+
         /*------------------------------------------------------
          * print the list
          */
         if (opts->mode_verbose) {
             unsigned u;
-
             if (opts->mode_verbose_level > 2) {
                 parallel_print("file1: %s\n", fname1);
                 parallel_print("file2: %s\n", fname2);
@@ -1038,7 +1943,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 done:
     opts->err_stat = opts->err_stat | ret_value;
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(USE_ORIGINAL_CODE)
     if (g_Parallel)
         /* All done at this point, let tasks know that they won't be needed */
         phdiff_dismiss_workers();
@@ -1114,6 +2019,16 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     size_t      idx2      = 0;
     diff_err_t  ret_value = opts->err_stat;
 
+#if defined(H5_HAVE_PARALLEL)
+    int         mpi_rank = 0, mpi_size = 1;
+    int         diff_count = 0;
+
+    if (g_Parallel) {
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    }
+#endif
+
     H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
     /*
      * if not root, prepare object name to be pre-appended to group path to
@@ -1158,14 +2073,6 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 #ifdef H5_HAVE_PARALLEL
     {
         char *               workerTasks = (char *)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
-        int                  n;
-        int                  busyTasks = 0;
-        struct diffs_found   nFoundbyWorker;
-        struct diff_mpi_args args;
-        int                  havePrintToken = 1;
-        MPI_Status           Status;
-
-        /*set all tasks as free */
         HDmemset(workerTasks, 1, (size_t)(g_nTasks - 1) * sizeof(char));
 #endif
 
@@ -1225,7 +2132,40 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                     H5TOOLS_DEBUG("diff paths - errstat:%d", opts->err_stat);
                     nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
                 } /* end if */
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL)
+                else {  /* g_Parallel is true(1) */
+                    int mod_rank = diff_count % mpi_size;
+                    if (mod_rank == mpi_rank) {
+                       char *outbuff = NULL;
+                       diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
+                       HDassert((new_diff != NULL));
+                       outbuff = (char *)malloc(OUTBUFF_SIZE);
+                       HDassert((outbuff != NULL));
+                       new_diff->obj_idx = diff_count;
+                       new_diff->outbuff_size = OUTBUFF_SIZE;
+                       new_diff->outbuffoffset = 0;
+                       new_diff->outbuff = outbuff;
+
+                       if (rank_diff_count == 0) {
+                         rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
+                       }
+                       else if (rank_diff_count == diff_count_limit) {
+                         diff_count_limit += DIFF_COUNT;
+                         rank_diffs = (diff_instance_t **)realloc(rank_diffs, (size_t)diff_count_limit);
+                       }
+                       rank_diffs[rank_diff_count++] = new_diff;
+                       my_diffs = new_diff;
+                       /* Add a previous outbuff (length) into the accumulated total for this rank */
+                       if (current_diff)
+                           local_diff_total += current_diff->outbuffoffset;
+                       /* Assign a new diff to be the current (working) outbuff */
+                       current_diff = new_diff;
+                       nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
+                    }
+                    diff_count++;
+                }
+
+#elif defined(H5_HAVE_PARALLEL) && defined(USE_ORIGINAL_CODE)
                 else {
                     int workerFound = 0;
 
@@ -1401,7 +2341,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
         }     /* end for */
         H5TOOLS_DEBUG("done with for loop - errstat:%d", opts->err_stat);
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(USE_ORIGINAL_CODE)
         if (g_Parallel) {
             /* make sure all tasks are done */
             while (busyTasks > 0) {
@@ -1483,13 +2423,18 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 
             /* Print any final data waiting in our queue */
             print_incoming_data();
-        } /* end if */
+        } /* end if (g_Parallel) */
+#endif /* H5_HAVE_PARALLEL */
         H5TOOLS_DEBUG("done with if block");
 
         HDfree(workerTasks);
     }
-#endif /* H5_HAVE_PARALLEL */
-
+#if defined(H5_HAVE_PARALLEL)
+	/* Update the final 'local_diff_total' */
+    if (g_Parallel && (current_diff != NULL)) {
+        local_diff_total += current_diff->outbuffoffset;
+    }
+#endif
     opts->err_stat = opts->err_stat | ret_value;
 
     free_exclude_attr_list(opts);
@@ -1926,4 +2871,13 @@ done:
     H5TOOLS_ENDDEBUG(": %d - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
+}
+
+
+int
+h5diff_get_global(int *flag)
+{
+    int global_flag;
+	MPI_Reduce(flag,&global_flag,1,MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    return global_flag;
 }

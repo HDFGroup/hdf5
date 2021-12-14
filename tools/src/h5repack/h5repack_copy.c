@@ -47,6 +47,37 @@ static int  copy_user_block(const char *infile, const char *outfile, hsize_t siz
 static void print_user_block(const char *filename, hid_t fid);
 #endif
 
+
+/*-------------------------------------------------------------------------
+ * Function: select_objs_by_rank
+ *
+ * Purpose:  choose a set of HDF5 objects to duplicate (based on MPI rank)
+ *
+ * Return:   0, ok,
+ *          -1 no
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+static int
+select_objs_by_rank(trav_table_t *orig, trav_table_t *new)
+{
+    int count = 0;
+    size_t k;
+    if (g_Parallel && (g_nTasks > 1)) {
+        new->objs = (trav_obj_t *)HDcalloc(orig->size, sizeof(trav_obj_t));
+        for (k=0; k < orig->nobjs; k++) {
+            int mod_rank = (int)((int)k % g_nTasks);
+            if (mod_rank == (int)g_nID) {
+                new->objs[count++] = orig->objs[k];
+                new->nobjs++;
+            }
+        }
+		new->size = orig->size;
+    }
+    return count;
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function: copy_objects
  *
@@ -77,7 +108,9 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     hsize_t               in_pagesize;     /* File space page size from input file */
     unsigned              crt_order_flags; /* group creation order flag */
     int                   ret_value = 0;
-
+#ifdef H5_HAVE_PARALLEL
+    MPI_Info              info = MPI_INFO_NULL;
+#endif
     /*-------------------------------------------------------------------------
      * open input file
      *-------------------------------------------------------------------------
@@ -212,6 +245,18 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create a file creation property list");
 
+        /* If running a parallel repack, then try using the MPIO driver.
+         * Using the default (Sec2) driver always fails due to file locking 
+         * which cannot be avoided when creating the superblock.
+         * It seems safer to do this collectively.
+         * RAW 12-2021
+         */
+#ifdef H5_HAVE_PARALLEL
+        if (g_Parallel) {
+            if (H5Pset_fapl_mpio(fcpl, MPI_COMM_WORLD, info) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+        }
+#endif
         /* set user block size */
         if (H5Pset_userblock(fcpl, options->ublock_size) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Pset_userblock failed to set userblock size");
@@ -300,6 +345,9 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
     if (options->verbose > 0)
+#ifdef H5_HAVE_PARALLEL
+        if (g_nID == 0)	/* Only allow MPI rank 0 to print stuff */
+#endif
         HDprintf("Making new file ...\n");
 
     if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
@@ -316,10 +364,21 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     trav_table_init(fidin, &travt);
 
     if (travt) {
+
         /* get the list of objects in the file */
         if (h5trav_gettable(fidin, travt) < 0)
             H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 
+#ifdef H5_HAVE_PARALLEL
+        if (g_Parallel) {
+            trav_table_t * my_travt = NULL;
+            trav_table_init(fidin, &my_travt);
+            if (select_objs_by_rank(travt, my_travt) > 0) {
+                trav_table_free(travt);
+                travt = my_travt; /* Replace the original travt with my copy */
+			}
+        }
+#endif
         /*-------------------------------------------------------------------------
          * do the copy
          *-------------------------------------------------------------------------

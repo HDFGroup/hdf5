@@ -230,4 +230,5 @@ obj_list_t *parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
 obj_list_t *parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about object */
                          pack_opt_t *options);
 
+
 #endif /* H5REPACK_H */
