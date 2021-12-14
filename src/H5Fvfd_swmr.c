@@ -2251,7 +2251,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     H5FD_t *               ud_file = NULL; /* Low-level file struct            */
     char                   namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN];
     char                   newname[H5F__MAX_VFD_SWMR_FILE_NAME_LEN];
-    unsigned               i;
+    unsigned               i, j;
     hsize_t                alloc_size;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2337,21 +2337,23 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for ud cl")
 
             /* Initialize change list entries */
-            for (i = 0; i < num_entries; i++) {
+            i = 0;
+            for (j = 0; j < num_entries; j++) {
 
-                if (shared->mdf_idx[i].entry_ptr != NULL &&
-                    shared->mdf_idx[i].tick_of_last_change == shared->tick_num) {
+                if (shared->mdf_idx[j].entry_ptr != NULL &&
+                    shared->mdf_idx[j].tick_of_last_change == shared->tick_num) {
 
-                    updater.change_list[i].entry_image_ptr                 = shared->mdf_idx[i].entry_ptr;
+                    updater.change_list[i].entry_image_ptr                 = shared->mdf_idx[j].entry_ptr;
                     updater.change_list[i].entry_image_ud_file_page_offset = 0;
                     updater.change_list[i].entry_image_md_file_page_offset =
-                        (uint32_t)shared->mdf_idx[i].md_file_page_offset;
+                        (uint32_t)shared->mdf_idx[j].md_file_page_offset;
                     updater.change_list[i].entry_image_h5_file_page_offset =
-                        (uint32_t)shared->mdf_idx[i].hdf5_page_offset;
-                    updater.change_list[i].entry_image_len      = shared->mdf_idx[i].length;
-                    updater.change_list[i].entry_image_checksum = shared->mdf_idx[i].checksum;
+                        (uint32_t)shared->mdf_idx[j].hdf5_page_offset;
+                    updater.change_list[i].entry_image_len      = shared->mdf_idx[j].length;
+                    updater.change_list[i].entry_image_checksum = shared->mdf_idx[j].checksum;
 
-                    shared->mdf_idx[i].entry_ptr = NULL;
+                    shared->mdf_idx[j].entry_ptr = NULL;
+                    i++;
                 }
             }
 
