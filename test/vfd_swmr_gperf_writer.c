@@ -2786,8 +2786,10 @@ main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, FALSE, 128, "./group-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, TRUE, FALSE, FALSE, 128, "./group-shadow",
+                         NULL);
 
     /* If the log flag is on, create the log file log-test under the current directory. */
     if (s.glog == true)

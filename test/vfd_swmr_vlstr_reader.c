@@ -115,8 +115,9 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, false, TRUE, 128, "./vlstr-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, 4, 7, false, TRUE, FALSE, TRUE, 128, "./vlstr-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);

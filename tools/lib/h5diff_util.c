@@ -133,10 +133,8 @@ print_type(hid_t type)
                 parallel_print("H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
                 parallel_print("H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
             else if (H5Tequal(type, H5T_NATIVE_LDOUBLE))
                 parallel_print("H5T_NATIVE_LDOUBLE");
-#endif
             else
                 parallel_print("undefined float");
             break;

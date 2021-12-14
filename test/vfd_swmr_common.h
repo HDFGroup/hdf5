@@ -74,8 +74,10 @@ H5TEST_DLL hid_t vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr,
                                       size_t page_buf_size, H5F_vfd_swmr_config_t *config);
 
 H5TEST_DLL void init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag,
-                                     hbool_t writer, hbool_t flush_raw_data, uint32_t md_pages_reserved,
-                                     const char *md_file_fmtstr, ...) H5_ATTR_FORMAT(printf, 7, 8);
+                                     hbool_t writer, hbool_t maintain_metadata_file,
+                                     hbool_t generate_updater_files, hbool_t flush_raw_data,
+                                     uint32_t md_pages_reserved, const char *md_file_fmtstr,
+                                     const char *updater_file_path, ...) H5_ATTR_FORMAT(printf, 9, 11);
 
 H5TEST_DLL void init_vfd_swmr_log(H5F_vfd_swmr_config_t *config, const char *log_file_fmtstr, ...)
     H5_ATTR_FORMAT(printf, 2, 3);

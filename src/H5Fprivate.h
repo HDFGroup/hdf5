@@ -647,10 +647,15 @@ uint64_decode(uint8_t **pp)
     {                                                                                                        \
         /* int32_t    version                 = */ 0, /* int32_t    tick_len                = */ 0,          \
             /* int32_t    max_lag                 = */ 0, /* hbool_t    vfd_swmr_writer         = */ FALSE,  \
+            /* hbool_t    maintain_metadata_file         = */ FALSE,                                         \
+            /* hbool_t    generate_updater_files         = */ FALSE,                                         \
             /* hbool_t    flush_raw_data          = */ FALSE, /* int32_t    md_pages_reserved       = */ 0,  \
             /* int32_t    pb_expansion_threshold  = */ 0, /* char       md_file_path[]          = */ "",     \
-            /* char       log_file_path[]         = */ ""                                                    \
+            /* char       updater_file_path[]     = */ "", /* char       log_file_path[]         = */ ""     \
     }
+
+/*  For VFD SWMR testing only: private property to generate checksum for metadata file via callback */
+#define H5F_ACS_GENERATE_MD_CK_CB_NAME "generate md ck callback"
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -784,6 +789,72 @@ uint64_decode(uint8_t **pp)
 #define H5SM_TABLE_MAGIC "SMTB" /* Shared Message Table */
 #define H5SM_LIST_MAGIC  "SMLI" /* Shared Message List */
 
+/*
+ * VFD SWMR
+ */
+
+/* Updater file header */
+#define H5F_UD_VERSION      0      /* Version of the updater file format */
+#define H5F_UD_HEADER_OFF   0      /* Updater file header offset */
+#define H5F_UD_HEADER_MAGIC "VUDH" /* Updater file header magic */
+#define H5F_SIZEOF_CHKSUM   4      /* Size of checksum */
+
+/* Flags in the updater file header */
+#define CREATE_METADATA_FILE_ONLY_FLAG 0x0001
+#define FINAL_UPDATE_FLAG              0x0002
+
+/* Size of updater file header */
+#define H5F_UD_HEADER_SIZE                                                                                   \
+    (H5_SIZEOF_MAGIC     /* Signature */                                                                     \
+     + 2                 /* Version number */                                                                \
+     + 2                 /* Flags */                                                                         \
+     + 4                 /* Page size */                                                                     \
+     + 8                 /* Sequence number */                                                               \
+     + 8                 /* Tick number */                                                                   \
+     + 8                 /* Change list offset */                                                            \
+     + 8                 /* Change list length */                                                            \
+     + H5F_SIZEOF_CHKSUM /* Updater file header checksum */                                                  \
+    )
+
+#define H5F_UD_CL_MAGIC "VUCL" /* Updater file change list magic */
+
+/* Size of an updater file change list entry */
+#define H5F_UD_CL_ENTRY_SIZE                                                                                 \
+    (4                   /* Updater file page offset */                                                      \
+     + 4                 /* Metadata file page offset */                                                     \
+     + 4                 /* HDF5 file page offset */                                                         \
+     + 4                 /* Length */                                                                        \
+     + H5F_SIZEOF_CHKSUM /* Updater file change list entry checksum */                                       \
+    )
+
+/* Size of updater file change list */
+#define H5F_UD_CL_SIZE(N)         /* N is number of change list entries */                                   \
+    (H5_SIZEOF_MAGIC              /* Signature */                                                            \
+     + 8                          /* Tick num */                                                             \
+     + 4                          /* Metadata file header updater file page offset */                        \
+     + 4                          /* Metadata file header length */                                          \
+     + 4                          /* Metadata file header checksum */                                        \
+     + 4                          /* Metadata file index updater file page offset */                         \
+     + 8                          /* Metadata file index metadata file offset */                             \
+     + 4                          /* Metadata file index length */                                           \
+     + 4                          /* Metadata file index checksum */                                         \
+     + 4                          /* Number of change list entries */                                        \
+     + (N * H5F_UD_CL_ENTRY_SIZE) /* Change list entries */                                                  \
+     + H5F_SIZEOF_CHKSUM          /* Updater file change list checksum */                                    \
+    )
+
+/*
+ *  For VFD SWMR testing only:
+ */
+
+/* Callback routine to generate checksum for metadata file specified by md_path */
+typedef herr_t (*H5F_generate_md_ck_t)(char *md_path, uint64_t updater_seq_num);
+
+/* Structure for "generate checksum callback" private property */
+typedef struct H5F_generate_md_ck_cb_t {
+    H5F_generate_md_ck_t func;
+} H5F_generate_md_ck_cb_t;
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -853,6 +924,180 @@ typedef enum H5F_prefix_open_t {
     H5F_PREFIX_ELINK = 1, /* External link prefix   */
     H5F_PREFIX_EFILE = 2  /* External file prefix   */
 } H5F_prefix_open_t;
+
+/*
+ * VFD SWMR
+ */
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct H5F_vfd_swmr_updater_cl_entry_t
+ *
+ *  An array of instances of H5F_vfd_swmr_updater_cl_entry_t of length equal to
+ *  the number of metadata pages and multi-page metadata entries modified in
+ *  the past tick is used to assemble the associated data in preparation for
+ *  writing an updater file.
+ *
+ *  Each entry in this array pertains to a given modified metdata page or
+ *  multi-page metadata entry, and contains the following fields:
+ *
+ *  entry_image_ptr: void pointer to a buffer containing the image of the
+ *      target metadata page or multi-page metadata entry as modified in
+ *      this tick, or NULL if undefined.
+ *
+ *  entry_image_ud_file_page_offset: Page offset of the entry in the
+ *      updater file, or 0 if undefined.
+ *
+ *  entry_image_md_file_page_offset: Page offset of the entry in the
+ *      metadata file, or 0 if undefined.
+ *
+ *  entry_image_h5_file_page_offset: Page offset of the entry in the
+ *      HDF5 file.  In this case, a page offset of zero is valid,
+ *      so we havd no easy marker for an invalid value.  Instead,
+ *      presume that this field is invalid if the entry_image_md_file_page_offset
+ *      is invalid.
+ *
+ *  entry_image_len: The size of the metadata page or multi-page metadata
+ *      entry in bytes.
+ *  entry_image_checksum: Checksum of the entry image.
+ *
+ *----------------------------------------------------------------------------
+ */
+typedef struct H5F_vfd_swmr_updater_cl_entry_t {
+    void *   entry_image_ptr;
+    uint32_t entry_image_ud_file_page_offset;
+    uint32_t entry_image_md_file_page_offset;
+    uint32_t entry_image_h5_file_page_offset;
+    size_t   entry_image_len;
+    uint32_t entry_image_checksum;
+} H5F_vfd_swmr_updater_cl_entry_t;
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct H5F_vfd_swmr_updater_t
+ *
+ *  Instances of this structure are used to assemble the data required to
+ *  write a metadata file updater file.
+ *
+ *  Updater file header related fields:
+ *
+ *  version: Version of the updater file format to be used.  At present this
+ *          must be zero.
+ *
+ *  flags: This field contains any flags to be set in the updater file header.
+ *      Currently defined flags are:
+ *
+ *              0x0001        CREATE_METADATA_FILE_ONLY_FLAG
+ *      If set, the auxiliary process should create the metadata file,
+ *      but leave it empty.  This flag may only be set if sequence_num
+ *      is zero.
+ *
+ *              0x0002        FINAL_UPDATE_FLAG
+ *      If set, the VFD SWMR writer is closing the target file, and this
+ *      updater contains the final set of updates to the metadata file.
+ *      On receipt, the auxiliary process should apply the enclosed
+ *      changes to the metadata file, unlink it, and exit.
+ *
+ *  sequence_num: This field contains the sequence number of this updater file.
+ *      The sequence number of the first updater file must be zero, and
+ *      this sequence number must be increased by one for each new updater
+ *      file.  Note that under some circumstances, the sequence number
+ *      will not match the tick_num.
+ *
+ *  tick_num: Number of the tick for which this updater file is to be generated.
+ *      This value should match that of the index used to fill our this
+ *      structure.
+ *
+ *  header_image_ptr: void pointer to the buffer in which the
+ *      updater file header is constructed.
+ *      This field is NULL if the buffer is undefined.
+ *
+ *  header_image_len: This field contains the length of the updater file
+ *      header in bytes.
+ *
+ *  change_list_image_ptr: void pointer to a buffer containing the on disk image
+ *      of the updater file change list, or NULL if that buffer does not exist.
+ *
+ *  change_list_offset: This field contains the offset in bytes of the change
+ *      list in the updater file.  This will typically be the offset of
+ *      the first byte in the updater file after the header.
+ *
+ *  change_list_len: This field contains the size in bytes of the on disk image
+ *      of the change list in the updater file.
+ *
+ *  Updater File Change List Related Fields:
+ *
+ *  The updater file change list is a section of the updater file that details the
+ *  locations and lengths of all metadata file entries that must be modified for
+ *  this tick.
+ *
+ *  md_file_header_image_ptr: void pointer to a buffer containing the on disk image
+ *      of the metadata file header as updated for tick_num.
+ *
+ *  md_file_header_ud_file_page_offset: This field contains the updater file
+ *           page offset of the metadata file header image.  Note that we do
+ *           not store the metadata file page offset of the metadata file header,
+ *           as it is always written to offset 0 in the metadata file.
+ *
+ *  md_file_header_len: This field contains the size of the metadata file header
+ *           image in bytes.
+ *
+ *  md_file_index_image: void pointer to a buffer containing the on disk image
+ *           of the metadata file index as updated for tick_num.
+ *
+ *  md_file_index_md_file_offset: This field contains the offset of the
+ *           metadata file index in the metadata file in bytes.
+ *
+ *           This value will either be the size of the metadata file header
+ *           (if the metadata file header and index are adjacent), or a page
+ *           aligned value.
+ *
+ *  md_file_index_ud_file_page_offset: This field contains the page offset of the
+ *           metadata file index in the updater file.
+ *
+ *  md_file_index_len: This field contains the size of the metadata file index in
+ *           bytes.
+ *
+ *  num_change_list_entries: This field contains the number of entries in the
+ *           array of H5F_vfd_swmr_updater_cl_ entry_t whose base address
+ *           is stored in the change_list field below.  This value is also the
+ *           number of metadata pages and multi-page metadata entries that have
+ *           been modified in the past tick.
+ *
+ *           If this field is zero, there is no change list, and the change_list
+ *           field below is NULL.
+ *
+ *  change_list: This field contains the base address of a dynamically allocated
+ *          array of H5F_vfd_swmr_updater_cl_entry_t of length num_change_list_entries,
+ *          or NULL if undefined.
+ *
+ *----------------------------------------------------------------------------
+ */
+typedef struct H5F_vfd_swmr_updater_t {
+    /* Updater file header related fields */
+    uint16_t version;
+    uint16_t flags;
+    uint32_t page_size;
+    uint64_t sequence_number;
+    uint64_t tick_num;
+    void *   header_image_ptr;
+    size_t   header_image_len;
+    void *   change_list_image_ptr;
+    uint64_t change_list_offset;
+    size_t   change_list_len;
+    /* Updater file change list related fields */
+    void *                           md_file_header_image_ptr;
+    uint32_t                         md_file_header_image_chksum;
+    uint32_t                         md_file_header_ud_file_page_offset;
+    size_t                           md_file_header_len;
+    void *                           md_file_index_image_ptr;
+    uint32_t                         md_file_index_image_chksum;
+    uint64_t                         md_file_index_md_file_offset;
+    uint32_t                         md_file_index_ud_file_page_offset;
+    size_t                           md_file_index_len;
+    uint32_t                         num_change_list_entries;
+    H5F_vfd_swmr_updater_cl_entry_t *change_list;
+} H5F_vfd_swmr_updater_t;
 
 /*****************************/
 /* Library-private Variables */

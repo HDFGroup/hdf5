@@ -23,7 +23,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.1-1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -235,6 +235,41 @@ elif test $hdf5_cv_host != $host; then
   echo "this is $host.  Please remove that file and try again."
   AC_MSG_ERROR([config.cache file is invalid])
 fi
+
+## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## We have to set WARNINGS_AS_ERRORS before sourcing a $host_config
+## file, below.
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+AC_MSG_CHECKING([enable warnings as errors])
+AC_ARG_ENABLE([warnings-as-errors],
+              [AS_HELP_STRING([--enable-warnings-as-errors],
+                              [Determines whether certain warnings will be
+                               considered errors. This is mainly for use
+                               by HDF5 library developers.
+                               [default=no]
+                               ])],
+              [WARNINGS_AS_ERRORS=$enableval])
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes|X-no)
+    AC_MSG_RESULT([$WARNINGS_AS_ERRORS])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Source any special files that we need.  These files normally aren't
@@ -788,11 +823,14 @@ AC_LANG_POP(C++)
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
 
-## The high-level library is enabled unless the build mode is clean.
+## The high-level library and high-level tools are enabled unless the build mode
+## is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
   HDF5_HL=no
+  HDF5_HL_TOOLS=no
 else
   HDF5_HL=yes
+  HDF5_HL_TOOLS=yes
 fi
 
 ## high-level library directories (set when needed, blank until then)
@@ -839,6 +877,38 @@ else
   AC_MSG_RESULT([no])
 fi
 
+
+## ----------------------------------------------------------------------
+## Enable new references for dimension scales
+##
+AC_SUBST([DIMENSION_SCALES_WITH_NEW_REF])
+AC_MSG_CHECKING([whether to use new references with dimension scales]);
+AC_ARG_ENABLE([dimension-scales-with-new-ref],
+              [AS_HELP_STRING([--enable-dimension-scales-with-new-ref],
+                     [Use new references when creating dimension scales.
+                      [default=no]
+                     ])],
+             [DIMENSION_SCALES_WITH_NEW_REF=$enableval])
+
+## Set the default value to use old references.
+if test "X-$DIMENSION_SCALES_WITH_NEW_REF" = X- ; then
+  DIMENSION_SCALES_WITH_NEW_REF=no
+fi
+
+case "X-$DIMENSION_SCALES_WITH_NEW_REF" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([DIMENSION_SCALES_WITH_NEW_REF], [1],
+              [Define if new references for dimension scales were requested])
+
+    ;;
+  X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $DIMENSION_SCALES_WITH_NEW_REF])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -1126,6 +1196,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
   AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
   AC_SUBST([DOXYGEN_STRIP_FROM_PATH])
+  AC_SUBST([DOXYGEN_STRIP_FROM_INC_PATH])
   AC_SUBST([DOXYGEN_PREDEFINED])
 
 # SRCDIR Environment variables used inside doxygen macro for the source location:
@@ -1133,7 +1204,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
-  DOXYGEN_PROJECT_BRIEF='C-API Reference'
+  DOXYGEN_PROJECT_BRIEF=''
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
@@ -1149,6 +1220,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
+  DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
@@ -1504,6 +1576,7 @@ case "X-$withval" in
     fi
     ;;
 esac
+
 
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
@@ -2230,6 +2303,13 @@ case "X-$ASSERTS" in
     ;;
 esac
 
+## Incorporate the potentially warning-to-error promoting flags after
+## feature tests.  Some of the tests (e.g., `off_t`) generate compilation
+## errors with the flags we chose for the HDF5 library and tools.
+##
+H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
+
 ## ----------------------------------------------------------------------
 ## Check if developer warnings should be turned on
 ## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
@@ -2257,6 +2337,7 @@ fi
 case "X-$DEV_WARNINGS" in
   X-yes)
     H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEVELOPER_WARNING_FCFLAGS"
     AC_MSG_RESULT([yes])
     ;;
   X-no)
@@ -2265,45 +2346,6 @@ case "X-$DEV_WARNINGS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Check if we should consider certain compiler warnings as errors
-##
-## These should NOT be on by default as the risk of breakage is high
-## when compiling HDF5 on new (or new versions) of platforms and
-## compilers. It can also cause failures when header files we have no
-## control over (e.g. MPI, HDFS) raise warnings.
-##
-AC_MSG_CHECKING([enable warnings as errors])
-AC_ARG_ENABLE([warnings-as-errors],
-              [AS_HELP_STRING([--enable-warnings-as-errors],
-                              [Determines whether certain warnings will be
-                               considered errors. This is mainly for use
-                               by HDF5 library developers.
-                               [default=no]
-                               ])],
-              [WARNINGS_AS_ERRORS=$enableval])
-
-## Set default
-if test "X-$WARNINGS_AS_ERRORS" = X- ; then
-  WARNINGS_AS_ERRORS=no
-fi
-
-case "X-$WARNINGS_AS_ERRORS" in
-  X-yes)
-    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
-    AC_MSG_RESULT([yes])
-    ;;
-  X-no)
-    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
-    AC_MSG_RESULT([no])
-    ;;
-  *)
-    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
     ;;
 esac
 

@@ -287,7 +287,7 @@ public class TestH5 {
      */
     @Test
     public void testH5get_libversion() {
-        int libversion[] = { 1, 13, 0 };
+        int libversion[] = { 1, 13, 1 };
 
         try {
             H5.H5get_libversion(libversion);
@@ -326,7 +326,7 @@ public class TestH5 {
      */
     @Test
     public void testH5check_version() {
-        int majnum = 1, minnum = 13, relnum = 0;
+        int majnum = 1, minnum = 13, relnum = 1;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);
