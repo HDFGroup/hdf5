@@ -80,7 +80,7 @@ typedef struct {
     struct exclude_path_list *exclude_attr;       /* keep exclude attribute list */
     int                       count_bool;         /* count, compare up to count */
     hsize_t                   count;              /* count value */
-    diff_err_t                err_stat;  /* an error ocurred (2, error, 1, differences, 0, no error) */
+    diff_err_t                err_stat;  /* an error occurred (2, error, 1, differences, 0, no error) */
     hsize_t                   nelmts;    /* total number of elements */
     hsize_t                   hs_nelmts; /* number of elements to read at a time*/
     int                       rank;      /* dimensionality */

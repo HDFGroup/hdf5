@@ -1336,7 +1336,7 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, app_ref) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
 
-    /* If connector alread registered, increment ref count on ID and return ID */
+    /* If connector already registered, increment ref count on ID and return ID */
     if (op_data.found_id != H5I_INVALID_HID) {
         if (H5I_inc_ref(op_data.found_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID,
@@ -1396,7 +1396,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
     if (H5I_iterate(H5I_VOL, H5VL__get_connector_cb, &op_data, app_ref) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VOL ids")
 
-    /* If connector alread registered, increment ref count on ID and return ID */
+    /* If connector already registered, increment ref count on ID and return ID */
     if (op_data.found_id != H5I_INVALID_HID) {
         if (H5I_inc_ref(op_data.found_id, app_ref) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID,

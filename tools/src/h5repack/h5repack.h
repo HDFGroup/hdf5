@@ -124,7 +124,7 @@ typedef struct {
     int            grp_compact; /* Set the maximum number of links to store as header messages in the group */
     int            grp_indexed; /* Set the minimum number of links to store in the indexed format */
     int            msg_size[8]; /* Minimum size of shared messages: dataspace,
-                                   datatype, fill value, filter pipleline, attribute */
+                                   datatype, fill value, filter pipeline, attribute */
     const char *          ublock_filename; /* user block file name */
     hsize_t               ublock_size;     /* user block size */
     hsize_t               meta_block_size; /* metadata aggregation block size (for H5Pset_meta_block_size) */

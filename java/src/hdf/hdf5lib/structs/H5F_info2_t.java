@@ -40,7 +40,7 @@ public class H5F_info2_t implements Serializable{
     public H5_ih_info_t    sohm_msgs_info;
 
     /**
-     * Constructor fot current "global" information about file
+     * Constructor for current "global" information about file
      * @param super_version: Superblock version number
      * @param super_size: Superblock size
      * @param super_ext_size: Superblock extension size

@@ -32,7 +32,7 @@
 
 #define NAME_BUF_SIZE 2048
 /*
- *  Alternative formating for data dumped by H5LS
+ *  Alternative formatting for data dumped by H5LS
  *
  *  This table only affects H5LS output.
  */

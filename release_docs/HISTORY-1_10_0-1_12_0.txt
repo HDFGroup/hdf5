@@ -810,7 +810,7 @@ Bug Fixes since HDF5-1.10.2 release
 
       When the function is called with the 'allgather' parameter set
       to a non-true value, the function will receive data from all MPI
-      ranks and gather it to the single rank specied by the 'root'
+      ranks and gather it to the single rank specified by the 'root'
       parameter. However, the bug in the function caused memory for
       the received data to be allocated on all MPI ranks, not just the
       singular rank specified as the receiver. In some circumstances,

@@ -554,7 +554,7 @@ CONTAINS
           do i = 1, NX
               do j = 1, NY
                   IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-                      write(*, *) "reopen test error occured"
+                      write(*, *) "reopen test error occurred"
                   END IF
               end do
           end do

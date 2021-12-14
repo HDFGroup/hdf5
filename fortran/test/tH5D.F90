@@ -187,7 +187,7 @@ CONTAINS
     DO i = 1, 4
        DO j = 1, 6
           IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-             WRITE(*, *) "dataset test error occured"
+             WRITE(*, *) "dataset test error occurred"
              WRITE(*,*) "data read is not the same as the data written"
           END IF
        END DO
@@ -196,7 +196,7 @@ CONTAINS
     ! Check if no change to null_dset_data
     !
     IF (null_dset_data .NE. 1) THEN
-       WRITE(*, *) "null dataset test error occured"
+       WRITE(*, *) "null dataset test error occurred"
     END IF
     !
     ! End access to the dataset and release resources used by it.
@@ -258,7 +258,7 @@ CONTAINS
     INTEGER(HID_T) :: dset_id       ! Dataset identifier
     INTEGER(HID_T) :: dataspace     ! Dataspace identifier
     INTEGER(HID_T) :: memspace      ! memory Dataspace identifier
-    INTEGER(HID_T) :: crp_list        ! dataset creatation property identifier
+    INTEGER(HID_T) :: crp_list        ! dataset creation property identifier
 
     !
     !dataset dimensions at creation time
@@ -313,7 +313,7 @@ CONTAINS
     END DO
 
     !
-    !Initialize FORTRAN predifined datatypes
+    !Initialize FORTRAN predefined datatypes
     !
 !          CALL h5init_types_f(error)
 !               CALL check("h5init_types_f",error,total_error)
@@ -347,7 +347,7 @@ CONTAINS
     CALL check("h5pset_chunk_f",error,total_error)
 
     !
-    !Create a dataset with 3X3 dimensions using cparms creation propertie .
+    !Create a dataset with 3X3 dimensions using cparms creation properties .
     !
     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, dset_id, error, crp_list )
     CALL check("h5dcreate_f",error,total_error)
@@ -426,7 +426,7 @@ CONTAINS
     CALL h5sget_simple_extent_ndims_f(dataspace, rankr, error)
     CALL check("h5sget_simple_extent_ndims_f",error,total_error)
     IF (rankr .NE. RANK) THEN
-       WRITE(*,*) "dataset rank error occured"
+       WRITE(*,*) "dataset rank error occurred"
        STOP
     END IF
 
@@ -436,7 +436,7 @@ CONTAINS
     CALL h5sget_simple_extent_dims_f(dataspace, dimsr, maxdimsr, error)
     CALL check("h5sget_simple_extent_dims_f",error,total_error)
     IF ((dimsr(1) .NE. dims1(1)) .OR. (dimsr(2) .NE. dims1(2))) THEN
-       WRITE(*,*) "dataset dimensions error occured"
+       WRITE(*,*) "dataset dimensions error occurred"
        STOP
     END IF
 
@@ -466,7 +466,7 @@ CONTAINS
     DO ih = 1, dims1(1)
        DO jh = 1, dims1(2)
           IF (data_out(ih,jh) .NE. data_in(ih, jh)) THEN
-             WRITE(*, *) "extend dataset test error occured"
+             WRITE(*, *) "extend dataset test error occurred"
              WRITE(*, *) "read value is not the same as the written values"
           END IF
        END DO

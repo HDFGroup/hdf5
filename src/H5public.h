@@ -46,7 +46,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is available
  * on Windows, though it doesn't necessarily contain all the POSIX types
  * we need for HDF5 (e.g. ssize_t).
  */

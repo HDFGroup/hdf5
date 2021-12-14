@@ -675,7 +675,7 @@ done:
  NAME
     H5Pexist
  PURPOSE
-    Routine to query the existance of a property in a property object.
+    Routine to query the existence of a property in a property object.
  USAGE
     htri_t H5P_exist(id, name)
         hid_t id;           IN: Property object ID to check
@@ -709,7 +709,7 @@ H5Pexist(hid_t id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
-    /* Check for the existance of the property in the list or class */
+    /* Check for the existence of the property in the list or class */
     if (H5I_GENPROP_LST == H5I_get_type(id)) {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
@@ -855,7 +855,7 @@ done:
     Failure: H5I_INVALID_HID (negative)
  DESCRIPTION
      Decodes a property list from a binary buffer. The contents of the buffer
-     contain the values for the correponding properties of the plist. The decode
+     contain the values for the corresponding properties of the plist. The decode
      callback of a certain property decodes its value from the buffer and sets it
      in the property list.
  GLOBAL VARIABLES
@@ -1296,7 +1296,7 @@ done:
     Returns non-negative on success, negative on failure.
  DESCRIPTION
         Removes a property from a property list.  Both properties which were
-    in existance when the property list was created (i.e. properties registered
+    in existence when the property list was created (i.e. properties registered
     with H5Pregister2) and properties added to the list after it was created
     (i.e. added with H5Pinsert2) may be removed from a property list.
     Properties do not need to be removed a property list before the list itself

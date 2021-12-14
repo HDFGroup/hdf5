@@ -238,7 +238,7 @@ help_ref_msg(FILE *output)
  *     * Last two characters in the string MUST be ")\0".
  *
  *     * Generates a copy of the input string `start`, (src..")\0"), replacing
- *       separators and close-paren with null charaters.
+ *       separators and close-paren with null characters.
  *         * This string is allocated at runtime and should be freed when done.
  *     * Generates array of char pointers, and directs start of each element
  *       (each pointer) into this copy.
@@ -285,7 +285,7 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
     char *   elem_ptr    = NULL;
     char *   dest_ptr    = NULL;
     unsigned elems_count = 0;
-    char **  elems       = NULL; /* more like *elems[], but complier... */
+    char **  elems       = NULL; /* more like *elems[], but compiler... */
     char **  elems_re    = NULL; /* temporary pointer, for realloc */
     char *   cpy         = NULL;
     herr_t   ret_value   = SUCCEED;
@@ -395,7 +395,7 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
             /* Found terminal, non-escaped close-paren. Last element.
              * Write null terminator to copy.
              * Advance source pointer to gently break from loop.
-             * Requred to prevent ")" from always being added to last element.
+             * Required to prevent ")" from always being added to last element.
              */
             start++;
         }

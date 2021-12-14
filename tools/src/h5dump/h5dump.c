@@ -1474,7 +1474,7 @@ main(int argc, const char *argv[])
         dset_table  = table_list.tables[0].dset_table;
         type_table  = table_list.tables[0].type_table;
 
-        /* does there exist unamed committed datatype */
+        /* does there exist unnamed committed datatype */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 unamedtype = 1;

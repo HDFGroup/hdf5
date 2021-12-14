@@ -322,7 +322,7 @@ H5PL__close_path_table(void)
  * Purpose:     Gets the number of plugin paths that have been stored.
  *
  * Return:      Success:    The number of paths
- *              Failture:   Can't fail
+ *              Failure:   Can't fail
  *-------------------------------------------------------------------------
  */
 unsigned

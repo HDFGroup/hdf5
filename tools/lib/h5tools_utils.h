@@ -147,7 +147,7 @@ typedef enum toolname_t {
     TOOL__H5DUMP /* add as necessary */
 } h5tool_toolname_t;
 
-/* this struct can be used to differntiate among tools */
+/* this struct can be used to differentiate among tools */
 typedef struct {
     h5tool_toolname_t toolname;
     int               msg_mode;
