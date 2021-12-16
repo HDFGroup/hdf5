@@ -40,7 +40,9 @@ static int h5diff_initialize_lists(const char *fname1, const char *fname2,
 
 static herr_t trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited, void *udata);
 static herr_t trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata);
+static int    is_large_dataset(trav_obj_t *this_object);
 static void   ph5diff_gather_diffs(void);
+
 
 /*-------------------------------------------------------------------------
  * Function: print_objname
@@ -1184,6 +1186,32 @@ done:
 }
 
 #ifdef H5_HAVE_PARALLEL
+#define DEFAULT_LARGE_DSET_SIZE 1048576;
+
+/*-------------------------------------------------------------------------
+ *  Function: is_large_dataset
+ */
+
+static int
+is_large_dataset(trav_obj_t *this_object)
+{
+    static size_t large_dset_size = 0;
+    if (large_dset_size == 0) {
+        char *envValue;
+        if ((envValue = HDgetenv("H5_PARALLEL_DSET_SIZE")) != NULL) {
+            size_t value_check = (size_t)HDatol(envValue);
+            if (value_check > 0) {
+                large_dset_size = value_check;
+            }
+        }
+		else large_dset_size = DEFAULT_LARGE_DSET_SIZE;
+    }
+
+    if (this_object->type == H5TRAV_TYPE_DATASET) {
+
+    }
+	return 0;
+}
 
 static int
 compare_objIDs(const void *h1, const void *h2)
@@ -2135,6 +2163,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 #if defined(H5_HAVE_PARALLEL)
                 else {  /* g_Parallel is true(1) */
                     int mod_rank = diff_count % mpi_size;
+                    // int shared_dset = is_large_dataset(&table->objs[i]);
                     if (mod_rank == mpi_rank) {
                        char *outbuff = NULL;
                        diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));

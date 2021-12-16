@@ -63,6 +63,20 @@ get_global_hid_t(hid_t *flag)
     int status = MPI_Bcast(flag, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
     return status;
 }
+
+
+int
+get_global_flag(int *flag)
+{
+    int status = MPI_Bcast(flag, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    return status;
+}
+
+int
+ptools_barrier(void)
+{
+	return MPI_Barrier(MPI_COMM_WORLD);
+}
 #endif
 
 

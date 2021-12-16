@@ -100,6 +100,7 @@ typedef struct trav_obj_t {
     trav_link_t * links;          /* array of possible link names */
     size_t        sizelinks;      /* size of links array */
     size_t        nlinks;         /* number of links */
+    hbool_t       use_h5ocopy;    /* for copying datasets */
 } trav_obj_t;
 
 /*-------------------------------------------------------------------------

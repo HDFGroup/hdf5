@@ -131,6 +131,8 @@ H5TOOLS_DLL FILE *tmpfile(void);
 
 #ifdef H5_HAVE_PARALLEL
 H5TOOLS_DLL int get_global_hid_t(hid_t *flag);
+H5TOOLS_DLL int get_global_flag(int *flag);
+H5TOOLS_DLL int ptools_barrier(void);
 #endif 
 
 
