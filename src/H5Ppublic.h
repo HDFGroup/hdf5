@@ -264,15 +264,15 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
-    /**< \todo FIXME! */
+    /**< Collective I/O was disabled by environment variable (\Code{HDF5_MPI_OPT_TYPES}) */
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
     /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
     H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED = 0x40,
-    /**< \todo FIXME! */
+    /**< Collective I/O was not performed because parallel filtered writes are disabled */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
-    /**< \todo FIXME! */
+    /**< Error */
     H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x100
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
@@ -4205,16 +4205,13 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *
  * \note Note: Raw dataset chunk caching is not currently
  *       supported when using the MPI I/O and MPI POSIX file drivers
- *       in read/write mode; see H5Pset_fapl_mpio() and
- *       H5Pset_fapl_mpiposix(), respectively. When using one of these
- *       file drivers, all calls to H5Dread() and H5Dwrite() will access
+ *       in read/write mode; see H5Pset_fapl_mpio(). When using this
+ *       file driver, all calls to H5Dread() and H5Dwrite() will access
  *       the disk directly, and H5Pset_cache() will have no effect on
  *       performance.
  *
  * \note Raw dataset chunk caching is supported when these drivers are
  *       used in read-only mode.
- *
- * \todo Check on H5Pset_fapl_mpio() and H5Pset_fapl_mpiposix().
  *
  * \version 1.8.0 The use of the \p mdc_nelmts parameter was discontinued.
  *                Metadata cache configuration is managed with
@@ -5483,12 +5480,38 @@ H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
 
 /**
- * \todo Add missing documentation
+ * \ingroup FAPL
+ *
+ * \brief Get the MPI communicator and info
+ *
+ * \fapl_id
+ * \param[out] comm MPI communicator
+ * \param[out] info MPI info object
+ * \return \herr_t
+ *
+ * \details H5Pget_mpi_params() gets the MPI communicator and info stored in
+ *          the file access property list \p fapl_id.
+ *
+ * \todo When was this introduced?
+ *
  */
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 
 /**
- * \todo Add missing documentation
+ * \ingroup FAPL
+ *
+ * \brief Set the MPI communicator and info
+ *
+ * \fapl_id
+ * \param[in] comm MPI communicator
+ * \param[in] info MPI info object
+ * \return \herr_t
+ *
+ * \details H5Pset_mpi_params() sets the MPI communicator and info stored in
+ *          the file access property list \p fapl_id.
+ *
+ * \todo When was this introduced?
+ *
  */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
@@ -7100,9 +7123,6 @@ H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t dapl_id, hsize_t *gap_size);
  *
  * \dapl_id
  * \param[out] view The flag specifying the view of the virtual dataset.
- *                  Valid values are:
- *                  \li #H5D_VDS_FIRST_MISSING
- *                  \li #H5D_VDS_LAST_AVAILABLE
  *
  * \return \herr_t
  *
@@ -7456,11 +7476,7 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t dapl_id, hsize_t gap_size);
  *
  * \dapl_id
  * \param[in] view Flag specifying the extent of the data to be included
- *                 in the view. Valid values are:
- *                 \li #H5D_VDS_FIRST_MISSING: View includes all data
- *                     before the first missing mapped data
- *                 \li #H5D_VDS_LAST_AVAILABLE View includes all
- *                     available mapped data
+ *                 in the view.
  *
  * \return \herr_t
  *
@@ -7628,8 +7644,11 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  * \details H5Pget_preserve() checks the status of the dataset transfer
  *          property list.
  *
+ * \since 1.0.0
+ *
  * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to
  *                better match the C API. (Fortran 90)
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL int H5Pget_preserve(hid_t plist_id);
@@ -7657,6 +7676,8 @@ H5_DLL int H5Pget_preserve(hid_t plist_id);
  *
  *          Please refer to the function H5Pset_type_conv_cb() for more details.
  *
+ * \since 1.8.0
+ *
  */
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
 /**
@@ -7679,6 +7700,8 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  * \details H5Pget_vlen_mem_manager() is the companion function to
  *          H5Pset_vlen_mem_manager(), returning the parameters set by
  *          that function.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
@@ -7923,8 +7946,9 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
  *          I/O pipeline treats the destination datapoints as completely
  *          uninitialized.
  *
- * \todo Add missing version information: introduction, deprecation, etc.
- *       Why is the declaration not in the deprecated section?
+ * \since 1.0.0
+ *
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
@@ -7952,7 +7976,7 @@ H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
  *          function prototype is as follows:
  *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
  *
- * \todo Add version information.
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data);
@@ -8002,7 +8026,8 @@ H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void
  *          set to \c NULL and the \p alloc_info and \p free_info parameters are
  *          ignored.
  *
- * \todo Add version information.
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
