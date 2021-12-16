@@ -5220,7 +5220,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* The number of bytes accessed in the chunk */
     /* (i.e. the bytes replaced with fill values) */
-    H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, uint32_t);
+    H5_CHECK_OVERFLOW(sel_nelmts, hsize_t, uint32_t);
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
