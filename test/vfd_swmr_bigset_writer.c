@@ -151,6 +151,7 @@ typedef struct {
     bool            use_vfd_swmr;
     bool            use_legacy_swmr;
     bool            use_named_pipe;
+    bool            use_aux_proc;
     bool            do_perf;
     bool            cross_chunk_read;
     bool            writer;
@@ -217,6 +218,7 @@ state_initializer(void)
                      .use_vfd_swmr     = true,
                      .use_legacy_swmr  = false,
                      .use_named_pipe   = true,
+                     .use_aux_proc     = false,
                      .do_perf          = false,
                      .cross_chunk_read = false,
                      .writer           = true,
@@ -245,11 +247,12 @@ usage(const char *progname)
 {
     HDfprintf(
         stderr,
-        "usage: %s [-C] [-F] [-M] [-P] [-R] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
+        "usage: %s [-A] [-C] [-F] [-M] [-P] [-R] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
         "    [-d dims] [-e depth] [-f tick_len] [-g max_lag] [-j skip_chunk] [-k part_chunk]\n"
         "    [-l tick_num] [-n iterations] [-o page_buf_size] [-p fsp_size] [-r rows]\n"
         "    [-s datasets] [-t] [-u over_extend] [-v chunk_cache_size] [-w deflate_level]\n"
         "\n"
+        "-A:                   use the auxiliary process to update the metadata file\n"
         "-C:                   cross-over chunk read during chunk verification\n"
         "-F:                   fixed maximal dimension for the chunked datasets\n"
         "-M:	               use virtual datasets and many source\n"
@@ -342,8 +345,11 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "CFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
+    while ((ch = getopt(argc, argv, "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
         switch (ch) {
+            case 'A':
+                s->use_aux_proc = true;
+                break;
             case 'C':
                 /* This flag indicates cross-over chunk read during data validation */
                 s->cross_chunk_read = true;
@@ -1147,6 +1153,101 @@ notify_reader(np_state_t *np, unsigned step)
 error:
     return -1;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    md_ck_cb()
+ *
+ * Purpose:     This is the callback function for debugging only.  It's used
+ *              when the H5F_ACS_GENERATE_MD_CK_CB_NAME property is set in fapl.
+ *                  --Opens and read the metadata file into a buffer.
+ *                  --Generate checksum for the metadata file
+ *                  --Write the tick number and the checksum to the checksum file
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
+{
+    FILE *   md_fp  = NULL;      /* Metadata file pointer */
+    FILE *   chk_fp = NULL;      /* Checksum file pointer */
+    long     size   = 0;         /* File size returned from HDftell() */
+    void *   buf    = NULL;      /* Buffer for holding the metadata file content */
+    uint32_t chksum = 0;         /* The checksum generated for the metadata file */
+    char     chk_name[1024 + 4]; /* Buffer for the checksum file name */
+    size_t   ret;                /* Return value */
+
+    /* Open the metadata file */
+    if ((md_fp = HDfopen(md_file_path, "r")) == NULL)
+        FAIL_STACK_ERROR;
+
+    /* Set file pointer at end of file.*/
+    if (HDfseek(md_fp, 0, SEEK_END) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get the current position of the file pointer.*/
+    if ((size = HDftell(md_fp)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (size != 0) {
+
+        HDrewind(md_fp);
+
+        if ((buf = HDmalloc((size_t)size)) == NULL)
+            FAIL_STACK_ERROR;
+
+        /* Read the metadata file to buf */
+        if ((ret = HDfread(buf, 1, (size_t)size, md_fp)) != (size_t)size)
+            FAIL_STACK_ERROR;
+
+        /* Calculate checksum of the metadata file */
+        chksum = H5_checksum_metadata(buf, (size_t)size, 0);
+    }
+
+    /* Close the metadata file */
+    if (md_fp && HDfclose(md_fp) < 0)
+        FAIL_STACK_ERROR;
+
+    /*
+     *  Checksum file
+     */
+
+    /* Generate checksum file name: <md_file_path>.chk */
+    HDsprintf(chk_name, "%s.chk", md_file_path);
+
+    /* Open checksum file for append */
+    if ((chk_fp = HDfopen(chk_name, "a")) == NULL)
+        FAIL_STACK_ERROR;
+
+    /* Write the updater sequence number to the checksum file */
+    if ((ret = HDfwrite(&updater_seq_num, sizeof(uint64_t), 1, chk_fp)) != 1)
+        FAIL_STACK_ERROR;
+
+    /* Write the checksum to the checksum file */
+    if ((ret = HDfwrite(&chksum, sizeof(uint32_t), 1, chk_fp)) != 1)
+        FAIL_STACK_ERROR;
+
+    /* Close the checksum file */
+    if (chk_fp && HDfclose(chk_fp) != 0)
+        FAIL_STACK_ERROR;
+
+    if (buf)
+        HDfree(buf);
+
+    return 0;
+
+error:
+    if (buf)
+        HDfree(buf);
+    if (md_fp)
+        HDfclose(md_fp);
+    if (chk_fp)
+        HDfclose(chk_fp);
+
+    return -1;
+} /* md_ck_cb() */
 
 static bool
 create_extensible_dset(state_t *s, unsigned int which)
@@ -2443,10 +2544,29 @@ main(int argc, char **argv)
     state_t    s;
     np_state_t np;
     size_t     i;
+    pid_t      pid;
+    H5F_generate_md_ck_cb_t cb_info;   /* Callback */
 
     if (!state_init(&s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
         TEST_ERROR;
+    }
+
+    /* If using the auxiliary process, the reader creates a child process to run it */
+    if (s.use_aux_proc && !s.writer) {
+        pid = fork();
+
+        if (pid == 0) {
+            /* Run the auxiliary process to apply the updater files to the metadata file.
+             * 'aux' is the executable of the auxiliary process which should be in the shell
+             * path.  Otherwise, use its absolute path. 'mdfile' is the metadata file created
+             * by the auxiliary process.  'bigset_updater.*' are the updater files created
+             * by the writer. */
+            system("aux mdfile bigset_updater");
+
+            /* Exit this process after the auxiliary process finishes */
+            exit(0);
+        }
     }
 
     if ((mat = newmat(s)) == NULL) {
@@ -2472,8 +2592,20 @@ main(int argc, char **argv)
 
         /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
          * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-        init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, TRUE, FALSE, s.flush_raw_data, 128,
+        if (s.use_aux_proc) {
+            /* If using the auxiliary process, the writer creates the updater files.
+             * The reader uses the metadata file generated by the auxiliary process. */
+            if (s.writer) {
+                init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, FALSE, TRUE, s.flush_raw_data, 128,
+                             "./bigset-shadow-%zu", "bigset_updater", i);
+            } else {
+                init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, TRUE, FALSE, s.flush_raw_data, 128,
+                             "./mdfile", NULL);
+            }
+        } else {
+            init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, TRUE, FALSE, s.flush_raw_data, 128,
                              "./bigset-shadow-%zu", NULL, i);
+        }
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, s.page_buf_size, &config)) < 0) {
@@ -2501,6 +2633,17 @@ main(int argc, char **argv)
                 TEST_ERROR;
             }
         }
+
+        /* This part is for debugging only */
+#ifdef TMP
+        {
+            /* Set up callback to generate checksums for updater's metadata files */
+            cb_info.func = md_ck_cb;
+
+            /* Activate private property to generate checksums for updater's metadata file */
+            H5Pset(fapl, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info);
+        }
+#endif
 
         s.file[i] = s.writer ? H5Fcreate(s.filename[i], H5F_ACC_TRUNC, fcpl, fapl)
                              : H5Fopen(s.filename[i], H5F_ACC_RDONLY, fapl);
