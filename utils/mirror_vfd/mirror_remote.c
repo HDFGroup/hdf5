@@ -78,7 +78,7 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
  * ----------------------------------------------------------------------------
  */
 void
-mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_bytes, const unsigned char *buf)
+mirror_log_bytes(struct mirror_log_info *info, unsigned int level, ssize_t n_bytes, const unsigned char *buf)
 {
     FILE *       stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
@@ -93,7 +93,7 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
     }
 
     if (level <= verbosity) {
-        size_t               bytes_written = 0;
+        ssize_t              bytes_written = 0;
         const unsigned char *b             = NULL;
 
         /* print whole lines */
@@ -147,7 +147,7 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
  * ----------------------------------------------------------------------------
  */
 loginfo_t *
-mirror_log_init(char *path, char *prefix, unsigned int verbosity)
+mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
 {
     loginfo_t *info = NULL;
 
