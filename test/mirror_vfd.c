@@ -2183,8 +2183,9 @@ test_on_disk_zoo(void)
     if (pass) {
         validate_zoo(file_id, grp_name, 0); /* sanity-check */
     }
+
     if (!pass) {
-        HDprintf(failure_mssg);
+        HDprintf("%s", failure_mssg);
         TEST_ERROR;
     }
 
@@ -2609,6 +2610,7 @@ main(void)
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
         nerrors -= test_xmit_encode_decode();
+        nerrors -= test_on_disk_zoo();
         nerrors -= test_create_and_close();
         nerrors -= test_basic_dataset_write();
         nerrors -= test_chunked_dataset_write();
