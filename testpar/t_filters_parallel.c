@@ -212,8 +212,36 @@ set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_
             return H5Pset_shuffle(dcpl_id);
         case H5Z_FILTER_FLETCHER32:
             return H5Pset_fletcher32(dcpl_id);
-        case H5Z_FILTER_SZIP:
-            return H5Pset_szip(dcpl_id, 0, H5_SZIP_MAX_PIXELS_PER_BLOCK);
+        case H5Z_FILTER_SZIP: {
+            unsigned pixels_per_block         = H5_SZIP_MAX_PIXELS_PER_BLOCK;
+            hsize_t  chunk_dims[H5S_MAX_RANK] = {0};
+            size_t   i, chunk_nelemts;
+
+            VRFY(H5Pget_chunk(dcpl_id, H5S_MAX_RANK, chunk_dims) >= 0, "H5Pget_chunk succeeded");
+
+            for (i = 0, chunk_nelemts = 1; i < H5S_MAX_RANK; i++)
+                if (chunk_dims[i] > 0)
+                    chunk_nelemts *= chunk_dims[i];
+
+            if (chunk_nelemts < H5_SZIP_MAX_PIXELS_PER_BLOCK) {
+                /*
+                 * Can't set SZIP for chunk of 1 data element.
+                 * Pixels-per-block value must be both even
+                 * and non-zero.
+                 */
+                if (chunk_nelemts == 1)
+                    return SUCCEED;
+
+                if ((chunk_nelemts % 2) == 0)
+                    pixels_per_block = (unsigned)chunk_nelemts;
+                else
+                    pixels_per_block = (unsigned)(chunk_nelemts - 1);
+            }
+            else
+                pixels_per_block = H5_SZIP_MAX_PIXELS_PER_BLOCK;
+
+            return H5Pset_szip(dcpl_id, 0, pixels_per_block);
+        }
         case H5Z_FILTER_NBIT:
             return H5Pset_nbit(dcpl_id);
         case H5Z_FILTER_SCALEOFFSET:
@@ -1924,8 +1952,8 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
         HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype "
                "conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -2099,8 +2127,8 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
         HDputs("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype "
                "conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -2292,8 +2320,8 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
         return;
     }
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -2485,8 +2513,8 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
         return;
     }
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -4914,8 +4942,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
         HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
                "conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -5135,8 +5163,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
         HDputs("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
                "conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -5362,8 +5390,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
         HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
                "conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
@@ -5592,8 +5620,8 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
         HDputs(
             "Testing read from shared filtered chunks in Compound Datatype dataset with Datatype conversion");
 
-    /* ScaleOffset filter doesn't support compound types */
-    if (filter_id == H5Z_FILTER_SCALEOFFSET) {
+    /* SZIP and ScaleOffset filters don't support compound types */
+    if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
         if (MAINPROCESS)
             SKIPPED();
         return;
