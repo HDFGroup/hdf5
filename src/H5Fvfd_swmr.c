@@ -255,14 +255,14 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(shared->fs_page_size > 0);
         /* This is a bug uncovered by issue #3 of the group test failures.
          *  See Kent's documentation "Designed to Fail Tests and Issues".
-         *  The file opening process in H5F__new() initializes the cache copy of 
-         *  page_size via H5AC_create().  However, later on H5F__super_read() 
-         *  may change page size due to non-default setting of 
+         *  The file opening process in H5F__new() initializes the cache copy of
+         *  page_size via H5AC_create().  However, later on H5F__super_read()
+         *  may change page size due to non-default setting of
          *  'free-space manager info' in superblock extension.
-         *  Fix: set the cache copy of page_size again if different from 
+         *  Fix: set the cache copy of page_size again if different from
          *  f->shared->fs_page_size.
          */
-        if(shared->cache) {
+        if (shared->cache) {
             if (H5AC_set_vfd_swmr_reader(shared->cache, TRUE, shared->fs_page_size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set page size in cache for VFD SWMR reader");
         }
@@ -1273,7 +1273,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 #if 0 /*Kent*/
                     HDassert(oent->length == nent->length);
 #endif
-                    /* This is a bug uncovered by issue #1 of the 
+                    /* This is a bug uncovered by issue #1 of the
                      * group test failures.  See Kent's documentation
                      * "Designed to Fail Tests and Issues".
                      * nent->length can be <, =, > to oent->length.
