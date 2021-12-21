@@ -169,7 +169,7 @@ H5FL_DEFINE(eot_queue_entry_t);
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  Vailin Choi -- 11/??/18
+ * Programmer:  Vailin Choi -- 10/??/18
  *
  * Changes:     None.
  *
@@ -251,6 +251,21 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
     else { /* VFD SWMR reader  */
 
         HDassert(!shared->vfd_swmr_config.writer);
+
+        HDassert(shared->fs_page_size > 0);
+        /* This is a bug uncovered by issue #3 of the group test failures.
+         *  See Kent's documentation "Designed to Fail Tests and Issues".
+         *  The file opening process in H5F__new() initializes the cache copy of 
+         *  page_size via H5AC_create().  However, later on H5F__super_read() 
+         *  may change page size due to non-default setting of 
+         *  'free-space manager info' in superblock extension.
+         *  Fix: set the cache copy of page_size again if different from 
+         *  f->shared->fs_page_size.
+         */
+        if(shared->cache) {
+            if (H5AC_set_vfd_swmr_reader(shared->cache, TRUE, shared->fs_page_size) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set page size in cache for VFD SWMR reader");
+        }
 
         shared->vfd_swmr_writer = FALSE;
         shared->max_jump_ticks  = 0;
@@ -1258,6 +1273,14 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 #if 0 /*Kent*/
                     HDassert(oent->length == nent->length);
 #endif
+                    /* This is a bug uncovered by issue #1 of the 
+                     * group test failures.  See Kent's documentation
+                     * "Designed to Fail Tests and Issues".
+                     * nent->length can be <, =, > to oent->length.
+                     * Fix: HDassert the 1st two cases: < and =.
+                     * John will address the > case.
+                     */
+                    HDassert(nent->length <= oent->length);
 
                     /* the page has been altered -- evict it and
                      * any contained metadata cache entries.

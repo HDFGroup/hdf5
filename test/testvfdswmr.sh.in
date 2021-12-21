@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/us/bin/env bash
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -75,6 +75,13 @@ DSETCHKS_FIFO_WRITER_TO_READER=fifo_dsetchks_writer_to_reader
 DSETCHKS_FIFO_READER_TO_WRITER=fifo_dsetchks_reader_to_writer
 
 ###############################################################################
+## For gfail{1,2,3,4} test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+GFAIL_FIFO_WRITER_TO_READER=fifo_group_writer_to_reader
+GFAIL_FIFO_READER_TO_WRITER=fifo_group_reader_to_writer
+
+###############################################################################
 ## short hands and function definitions
 ###############################################################################
 #
@@ -147,6 +154,7 @@ all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrds
 # For exhaustive run, add: os_groups_attrs, os_groups_ops, os_groups_seg, dsetops, dsetchks,independ_wr
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
     all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg dsetops dsetchks independ_wr"
+    all_tests="${all_tests} gfail_entry_length gfail_page_size"
 fi
 
 tests=${all_tests}
@@ -1386,6 +1394,118 @@ if [ ${do_independ_wr:-no} = yes ]; then
 	rm -f vfd_swmr_indep_wr_p1.{out,rc}
 fi
 
+
+###############################################################################
+#
+# "gfail_entry_length" test
+#
+# Only for exhaustive run
+#
+# Verify that the assertion failure for old and new entry length is fixed.
+# (See issue #1 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_entry_length:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 10 -n 340000
+	catch_out_err_and_rc vfd_swmr_gfail_entry_length_writer \
+	    ../vfd_swmr_gfail_writer -q -m 10 -n 340000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 10 -n 340000
+	catch_out_err_and_rc vfd_swmr_gfail_entry_length_reader \
+	    ../vfd_swmr_gfail_reader -m 10 -n 340000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+    if [ $(cat vfd_swmr_gfail_entry_length_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+    fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_entry_length_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_entry_length_writer.{out,rc}
+	rm -f vfd_swmr_gfail_entry_length_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "gfail_page_size" test
+#
+# Only for exhaustive run
+#
+# Verify that the assertion failure is fixed when non-default page size is set.
+# (See issue #3 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_page_size:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 10 -B 8192 -s 8192 -n 320000
+	catch_out_err_and_rc vfd_swmr_gfail_page_size_writer \
+	    ../vfd_swmr_gfail_writer -q -m 10 -B 8192 -s 8192 -n 320000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 10 -B 8192 -s 8192 -n 320000
+	catch_out_err_and_rc vfd_swmr_gfail_page_size_reader  \
+	    ../vfd_swmr_gfail_reader -m 10 -B 8192 -s 8192 -n 320000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_gfail_page_size_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_page_size_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_page_size_writer.{out,rc}
+	rm -f vfd_swmr_gfail_page_size_reader.*.{out,rc}
+fi
 
 ###############################################################################
 ## Report and exit

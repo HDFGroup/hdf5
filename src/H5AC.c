@@ -2777,3 +2777,34 @@ H5AC_get_mdc_image_info(const H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_set_vfd_swmr_reader
+ *
+ * Purpose:     Wrapper function for H5C_set_vfd_swmr_reader().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi; Dec 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_set_vfd_swmr_reader(H5AC_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+
+    if(cache_ptr->page_size != page_size) {
+
+        if (H5C_set_vfd_swmr_reader((H5C_t *)cache_ptr, vfd_swmr_reader, page_size) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set page_size for VFD SWMR reader")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_set_vfd_swmr_reader() */
