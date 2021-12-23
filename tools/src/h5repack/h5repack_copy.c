@@ -32,6 +32,8 @@
 
 /* size of buffer/# of bytes to xfer at a time when copying userblock */
 #define USERBLOCK_XFER_SIZE 512
+#define DEFAULT_LARGE_DSET_SIZE 1048576
+
 
 /*-------------------------------------------------------------------------
  * local functions
@@ -391,10 +393,7 @@ done:
 static int
 pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidout, trav_table_t *travt, pack_opt_t *options)
 {
-    static double read_time  = 0;
-    static double write_time = 0;
-
-    hid_t fidout;
+    hid_t fidout = H5I_INVALID_HID;
     int ret_value = 0;
     int g_ret = 0;
 
@@ -428,8 +427,6 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
             hid_t grp_out  = H5I_INVALID_HID; /* group ID */
             hid_t gcpl_in  = H5I_INVALID_HID; /* group creation property list */
             hid_t gcpl_out = H5I_INVALID_HID; /* group creation property list */
-            hid_t dset_in  = H5I_INVALID_HID; /* read dataset ID */
-            hid_t dset_out = H5I_INVALID_HID; /* read dataset ID */
 
             unsigned crt_order_flags;         /* group creation order flag */
 
@@ -442,8 +439,6 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
             hbool_t use_h5ocopy;
             h5tool_link_info_t linkinfo;
             named_dt_t * named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
-            H5_timer_t timer;                  /* Timer for read/write operations */
-            H5_timevals_t times;               /* Elapsed time for each operation */
 
             for (i = 0; i < travt->nobjs; i++) {
                 /* init variables per obj */
@@ -658,7 +653,7 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
        hid_t dset_in  = H5I_INVALID_HID; /* read dataset ID */
        hid_t ftype_id = H5I_INVALID_HID; /* file type ID */
        hbool_t use_h5ocopy;
-       htri_t is_named;
+       htri_t is_named = 0;
 
        /* We need to wait for MPI rank 0 to finish...
         * The following barrier is matched to the one just a
@@ -780,6 +775,69 @@ done:
 } /* pcreate_new_objects() */
 
 /*-------------------------------------------------------------------------
+ * Function: check_dataset_sizes
+ *
+ * Purpose:  Compare dataset sizes to a known size limit. If the size
+ *           exceeds the limit then the dataset is marked for utilizing
+ *           hyperslabs to subdivide the diff operation between parallel
+ *           ranks.
+ *
+ *           TODO:  Maybe we should also be checking link objects which
+ *           in turn could point to a dataset?
+ * Return:   none
+ *-------------------------------------------------------------------------
+ */
+static int
+check_dataset_sizes(hid_t fidin, trav_table_t *travt)
+{
+    size_t i;
+    hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
+    static size_t large_dset_size = 0;
+    int j, ret_value = 0;
+
+    if (large_dset_size == 0) {
+        char *envValue;
+        if ((envValue = HDgetenv("H5_PARALLEL_DSET_SIZE")) != NULL) {
+            size_t value_check = (size_t)HDatol(envValue);
+            if (value_check > 0) {
+                large_dset_size = value_check;
+            }
+        }
+		else large_dset_size = DEFAULT_LARGE_DSET_SIZE;
+    }
+
+    for (i=0; i < travt->nobjs; i++) {
+        if (travt->objs[i].type == H5TRAV_TYPE_DATASET) {
+            size_t nelmts;
+            int rank;
+            hid_t dset_in = H5I_INVALID_HID;
+            hid_t f_space_id = H5I_INVALID_HID;
+            if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
+            if ((f_space_id = H5Dget_space(dset_in)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+            if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
+
+            H5Sget_simple_extent_dims(f_space_id, dims, NULL);
+
+            nelmts = 1;
+            for (j = 0; j < rank; j++)
+                 nelmts *= dims[j];
+
+            if (nelmts >= large_dset_size)
+                travt->objs[i].use_hyperslab = true;
+            if (H5Sclose(f_space_id) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
+            if (H5Dclose(dset_in) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
+        }
+	}
+done:
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
  * Function: select_objs_by_rank
  *
  * Purpose:  choose a set of HDF5 objects to duplicate (based on MPI rank)
@@ -790,7 +848,7 @@ done:
  */
 
 static int
-select_objs_by_rank(trav_table_t *orig, int **table_index)
+select_objs_by_rank(hid_t fidin, trav_table_t *orig, int **table_index)
 {
     int count = 0;
     int *index = NULL;
@@ -806,10 +864,11 @@ select_objs_by_rank(trav_table_t *orig, int **table_index)
      * may allow skipping over links that point to nowhere...
      */
     if (g_Parallel && (g_nTasks > 1)) {
+        check_dataset_sizes(fidin, orig);
         index = (int *)HDcalloc(orig->nobjs, sizeof(int));
         for (k=0; k < (int)orig->nobjs; k++) {
             int mod_rank = (int)((int)k % g_nTasks);
-            if (mod_rank == (int)g_nID) {
+            if ((orig->objs[k].use_hyperslab) || (mod_rank == (int)g_nID)) {
                 index[count++] = k;
             }
         }
@@ -1102,7 +1161,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
 
 #ifdef H5_HAVE_PARALLEL
         if (g_Parallel) {
-            if ((tiCount = select_objs_by_rank(travt, &travt_indices)) > 0) {
+            if ((tiCount = select_objs_by_rank(fidin, travt, &travt_indices)) > 0) {
                 /* When running parallel processes, all object creations need to be done
                  * either collectively, or by a single rank (usually this will be MPI rank 0).
                  * Note that most object types, e.g. groups, datatypes, and links are
@@ -1243,10 +1302,10 @@ done:
  *   * hslab_nbytes_p : [OUT] total byte of the hyperslab
  *
  * Update:
- *   The hyperslab calucation would be depend on if the dataset is chunked
+ *   The hyperslab calculation would be depend on if the dataset is chunked
  *   or not.
  *
- *   There care 3 conditions to cover:
+ *   There are 3 conditions to cover:
  *   1. If chunked and a chunk fits in buffer, each chunk would be a unit of
  *      collection and the boundary would be dataset's dims.
  *   2. If chunked but a chunk doesn't fit in buffer, each data element would
@@ -1385,63 +1444,43 @@ done:
 int
 pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count, pack_opt_t *options)
 {
-    hid_t              grp_in        = H5I_INVALID_HID; /* group ID */
-    hid_t              grp_out       = H5I_INVALID_HID; /* group ID */
     hid_t              dset_in       = H5I_INVALID_HID; /* read dataset ID */
     hid_t              dset_out      = H5I_INVALID_HID; /* write dataset ID */
-    hid_t              gcpl_in       = H5I_INVALID_HID; /* group creation property list */
-    hid_t              gcpl_out      = H5I_INVALID_HID; /* group creation property list */
-    hid_t              type_in       = H5I_INVALID_HID; /* named type ID */
-    hid_t              type_out      = H5I_INVALID_HID; /* named type ID */
     hid_t              dcpl_in       = H5I_INVALID_HID; /* dataset creation property list ID */
     hid_t              dcpl_out      = H5I_INVALID_HID; /* dataset creation property list ID */
     hid_t              f_space_id    = H5I_INVALID_HID; /* file space ID */
-    hid_t              ftype_id      = H5I_INVALID_HID; /* file type ID */
     hid_t              wtype_id      = H5I_INVALID_HID; /* read/write type ID */
     hid_t              ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
-    hid_t              lcpl_id       = H5I_INVALID_HID; /* link creation property list */
-    hid_t              dxpl_id       = H5I_INVALID_HID; /* dataset transfer property list */
+    hid_t              dxpl_id       = H5P_DEFAULT;     /* dataset transfer property list */
     named_dt_t *       named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
     size_t             msize;                           /* size of type */
     hsize_t            nelmts;                          /* number of elements in dataset */
-    H5D_space_status_t space_status;       /* determines whether space has been allocated for the dataset  */
     int                rank;               /* rank of dataset */
     hsize_t            dims[H5S_MAX_RANK]; /* dimensions of dataset */
     hsize_t            dsize_in;           /* input dataset size before filter */
-    hsize_t            dsize_out;          /* output dataset size after filter */
-    int                apply_s;            /* flag for apply filter to small dataset sizes */
-    int                apply_f;            /* flag for apply filter to return error on H5Dcreate */
     void *             buf       = NULL;   /* buffer for raw data */
     void *             hslab_buf = NULL;   /* hyperslab buffer for raw data */
-    int                has_filter;         /* current object has a filter */
-    int                req_filter;         /* there was a request for a filter */
-    int                req_obj_layout = 0; /* request layout to current object */
-    unsigned           crt_order_flags;    /* group creation order flag */
     H5_timer_t         timer;              /* Timer for read/write operations */
     H5_timevals_t      times;              /* Elapsed time for each operation */
     static double      read_time  = 0;
     static double      write_time = 0;
     h5tool_link_info_t linkinfo;
     int                i;
-    unsigned           u;
-    int                ifil;
-    int                is_ref = 0;
-    htri_t             is_named;
-    hbool_t            limit_maxdims;
-    hsize_t            size_dset;
     int                ret_value = 0;
     int                g_ret;
 
     /* init linkinfo struct */
     HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    /* init dims array */
+    HDmemset(dims, 0, sizeof(dims));
 
     if (travt->objs) {
         int obj_i;
         for (i = 0; i < obj_count; i++) {
             /* init variables per obj */
             buf           = NULL;
-            limit_maxdims = FALSE;
             obj_i         = obj_index[i];
+
             switch(travt->objs[obj_i].type) {
                 case H5TRAV_TYPE_UNKNOWN:
                     break;
@@ -1451,20 +1490,20 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                      *-------------------------------------------------------------------------
                      */
                 case H5TRAV_TYPE_GROUP:
-                    break;		/* Already accomplished by pcreate_new_objects() */
+                    break;      /* Already accomplished by pcreate_new_objects() */
                 case H5TRAV_TYPE_DATASET: {
+                    dataset_context_t *hs_context = NULL;
                     hbool_t use_h5ocopy = travt->objs[obj_i].use_h5ocopy;
-                    hsize_t *dims = NULL;
-                    hsize_t dsize_in, totalsize;
-                    hid_t wtype_id = H5I_INVALID_HID;
-                    hid_t dspace = H5I_INVALID_HID;
-                    int n, ndims = 0;
                     char *dataBuf;
-                    herr_t status;
                     read_time  = 0.0;
                     write_time = 0.0;
 
+                    /* Potentially override the default size where we will transistion
+                     * to using hyperslab selections to divide the work between mpi ranks.
+                     */
+
                     if (use_h5ocopy) {
+                        
                         /*-------------------------------------------------------------------------
                          * Copy attrs manually
                          *-------------------------------------------------------------------------
@@ -1488,13 +1527,169 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
 
                         dsize_in = H5Dget_storage_size(dset_in);
 
-                        dataBuf = (char *)HDmalloc(dsize_in);
-                        if (H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataBuf) < 0)
-                            H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
-                        if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataBuf) < 0)
-                            H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
+                        if (travt->objs[obj_i].use_hyperslab) {
+                            size_t       p_type_nbytes = msize;       /*size of memory type */
+                            hsize_t      p_nelmts      = nelmts;      /*total elements */
+                            hsize_t      elmtno;                      /*counter  */
+                            int          carry;                       /*counter carry value */
+                            unsigned int vl_data = 0;                 /*contains VL datatypes */
 
-                        HDfree(dataBuf);
+                            /* hyperslab info */
+                            hsize_t      hslab_dims[H5S_MAX_RANK];    /*hyperslab dims */
+                            hsize_t      hslab_nbytes;                /*bytes per hyperslab */
+                            hsize_t      hslab_nelmts;                /*elements per hyperslab*/
+                            hid_t        hslab_space;                 /*hyperslab data space */
+
+                            /* hyperslab selection info */
+                            hsize_t      hs_sel_offset[H5S_MAX_RANK]; /* selection offset */
+                            hsize_t      hs_sel_count[H5S_MAX_RANK];  /* selection count */
+                            hsize_t      hs_select_nelmts;            /* selected elements */
+                            hsize_t      zero[8];                     /*vector of zeros */
+                            int          k;
+                            H5D_layout_t dset_layout;
+                            hid_t        dcpl_tmp = H5I_INVALID_HID;  /* dataset creation property list ID */
+
+                            if ((f_space_id = H5Dget_space(dset_in)) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+
+                            if (h5tools_initialize_hyperslab_context(dset_in, &hs_context) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "h5tools_initialize_hyperslab_context failed");
+
+                            p_type_nbytes = hs_context->dt_size;
+
+                            rank = hs_context->ds_rank;
+
+                            p_nelmts = 1;
+                            for (k=0; k < rank; k++) {
+                                dims[k] = hs_context->hs_block[k];
+                                p_nelmts *= dims[k];
+                            }
+
+                            if ((dcpl_in = H5Dget_create_plist(dset_in)) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
+
+                            if ((dcpl_out = H5Pcopy(dcpl_in)) < 0) {
+                                H5TOOLS_GOTO_ERROR((-1), "H5Pcopy failed");
+                            }
+
+                            /* check if we have VL data in the dataset's datatype */
+                            if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
+                                vl_data = TRUE;
+
+                            /* check first if writing dataset is chunked,
+                             * if so use its chunk layout for better performance. */
+                            dset_layout = H5Pget_layout(dcpl_out);
+                            dcpl_tmp = dcpl_in;      /* reading dataset */
+
+                            if (dset_layout == H5D_CHUNKED)
+                                dcpl_tmp = dcpl_out; /* writing dataset */
+
+                            /* get hyperslab dims and size in byte */
+                            if (get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims,
+                                              &hslab_nbytes) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "get_hyperslab failed");
+
+                            hslab_buf = HDmalloc((size_t)hslab_nbytes);
+                            if (hslab_buf == NULL)
+                                H5TOOLS_GOTO_ERROR((-1), "can't allocate space for hyperslab");
+
+                            hslab_nelmts = hslab_nbytes / p_type_nbytes;
+                            hslab_space  = H5Screate_simple(1, &hslab_nelmts, NULL);
+                            /* the hyperslab selection loop */
+                            HDmemset(hs_sel_offset, 0, sizeof(hs_sel_offset));
+                            HDmemset(zero, 0, sizeof zero);
+
+                            hs_sel_offset[0] = hs_context->hs_offset[0];
+                            for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts) {
+                                if (rank > 0) {
+                                    /* calculate the hyperslab selections.
+                                     * The selection would be same as the hyperslab
+                                     * except for remaining edge portion of the dataset
+                                     * which is smaller then the hyperslab.
+                                     */
+                                    for (k = 0, hs_select_nelmts = 1; k < rank; k++) {
+                                        /* MIN() is used to get the remaining edge portion if
+                                         * exist. "dims[k] - hs_sel_offset[k]" is remaining edge
+                                         * portion that is smaller then the hyperslab.*/
+                                        hs_sel_count[k] =
+                                            MIN(dims[k] - hs_sel_offset[k], hslab_dims[k]);
+                                        hs_select_nelmts *= hs_sel_count[k];
+                                    }
+
+                                    if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET,
+                                                            hs_sel_offset, NULL, hs_sel_count,
+                                                            NULL) < 0)
+                                        H5TOOLS_GOTO_ERROR((-1), "H5Sselect_hyperslab failed");
+                                    if (H5Sselect_hyperslab(hslab_space, H5S_SELECT_SET, zero,
+                                                            NULL, &hs_select_nelmts, NULL) < 0)
+                                        H5TOOLS_GOTO_ERROR((-1), "H5Sselect_hyperslab failed");
+
+                                } /* end if rank > 0 */
+                                else {
+                                    H5Sselect_all(f_space_id);
+                                    H5Sselect_all(hslab_space);
+                                    hs_select_nelmts = 1;
+                                } /* end (else) rank  == 0 */
+
+                                if (options->verbose == 2) {
+                                    H5_timer_init(&timer);
+                                    H5_timer_start(&timer);
+                                }
+
+                                if (H5Dread(dset_in, wtype_id, hslab_space, f_space_id,
+                                            H5P_DEFAULT, hslab_buf) < 0)
+                                    H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
+
+                                if (options->verbose == 2) {
+                                    H5_timer_stop(&timer);
+                                    H5_timer_get_times(timer, &times);
+                                    read_time += times.elapsed;
+                                    H5_timer_init(&timer);
+                                    H5_timer_start(&timer);
+                                }
+
+                                if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id, dxpl_id,
+                                             hslab_buf) < 0)
+                                    H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
+
+                                if (options->verbose == 2) {
+                                    H5_timer_stop(&timer);
+                                    H5_timer_get_times(timer, &times);
+                                    write_time += times.elapsed;
+                                }
+
+                                /* reclaim any VL memory, if necessary */
+                                if (vl_data)
+                                    H5Treclaim(wtype_id, hslab_space, H5P_DEFAULT, hslab_buf);
+
+                                /* calculate the next hyperslab offset */
+                                for (k = rank, carry = 1; k > 0 && carry; --k) {
+                                    hs_sel_offset[k - 1] += hs_sel_count[k - 1];
+                                    /* if reached the end of a dim */
+                                    if (hs_sel_offset[k - 1] == dims[k - 1])
+                                        hs_sel_offset[k - 1] = 0;
+                                    else
+                                        carry = 0;
+                                }
+                            } /* end for (hyperslab selection loop) */
+
+                            H5Sclose(hslab_space);
+                            if (hslab_buf != NULL) {
+                                HDfree(hslab_buf);
+                                hslab_buf = NULL;
+                            }
+                            if (hs_context)
+                                HDfree(hs_context);
+                        }
+                        else {
+                            dataBuf = (char *)HDmalloc(dsize_in);
+                            if (H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataBuf) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
+                            if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dataBuf) < 0)
+                                H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
+
+                            HDfree(dataBuf);
+                        }
 
                         if (H5Dclose(dset_in) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
@@ -1504,8 +1699,9 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                         dset_out = H5I_INVALID_HID;
                         if (options->verbose == 2)
                             HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[obj_i].name);
-                        else
+                        else if (g_nID == 0)
                             HDprintf(FORMAT_OBJ, "dset", travt->objs[obj_i].name);
+
 
                     } /* end whether we have request for filter/chunking */
 
@@ -1538,7 +1734,7 @@ done:
     ptools_barrier();
 
     g_ret = ret_value;
-	get_global_flag(&g_ret);
+    get_global_flag(&g_ret);
 
     /* free link info path */
     if (linkinfo.trg_path)
@@ -2733,7 +2929,6 @@ print_user_block(const char *filename, hid_t fid)
             nread = HDread(fh, rbuf, (size_t)size);
 
         for (i = 0; i < nread; i++) {
-
             HDprintf("%c ", rbuf[i]);
         }
         HDprintf("\n");

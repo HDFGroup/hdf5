@@ -40,8 +40,10 @@ static int h5diff_initialize_lists(const char *fname1, const char *fname2,
 
 static herr_t trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited, void *udata);
 static herr_t trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata);
-static int    is_large_dataset(trav_obj_t *this_object);
+static int    check_dataset_sizes(hid_t file_id, trav_table_t *match_list);
 static void   ph5diff_gather_diffs(void);
+static hsize_t hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
+                               diff_opt_t *opts, diff_args_t *argdata);
 
 
 /*-------------------------------------------------------------------------
@@ -973,6 +975,10 @@ int	h5diff_initialize_lists(const char *fname1, const char *fname2,
 
     /* process the objects */
     build_match_list(obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
+#ifdef H5_HAVE_PARALLEL
+    if (g_Parallel)
+        check_dataset_sizes(file1_id, match_list);
+#endif
     H5TOOLS_DEBUG("build_match_list finished - errstat:%d", opts->err_stat);
 
     *_obj1fullname  = obj1fullname;
@@ -1186,16 +1192,30 @@ done:
 }
 
 #ifdef H5_HAVE_PARALLEL
-#define DEFAULT_LARGE_DSET_SIZE 1048576;
+#define DEFAULT_LARGE_DSET_SIZE 1048576
+
 
 /*-------------------------------------------------------------------------
- *  Function: is_large_dataset
+ * Function: check_dataset_sizes
+ *
+ * Purpose:  Compare dataset sizes to a known size limit. If the size
+ *           exceeds the limit then the dataset is marked for utilizing
+ *           hyperslabs to subdivide the diff operation between parallel
+ *           ranks.
+ *
+ *           TODO:  Maybe we should also be checking link objects which
+ *           in turn could point to a dataset?
+ * Return:   none
+ *-------------------------------------------------------------------------
  */
-
 static int
-is_large_dataset(trav_obj_t *this_object)
+check_dataset_sizes(hid_t fidin, trav_table_t *travt)
 {
+    size_t i;
+    hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
     static size_t large_dset_size = 0;
+    int j, ret_value = 0;
+
     if (large_dset_size == 0) {
         char *envValue;
         if ((envValue = HDgetenv("H5_PARALLEL_DSET_SIZE")) != NULL) {
@@ -1207,11 +1227,37 @@ is_large_dataset(trav_obj_t *this_object)
 		else large_dset_size = DEFAULT_LARGE_DSET_SIZE;
     }
 
-    if (this_object->type == H5TRAV_TYPE_DATASET) {
+    for (i=0; i < travt->nobjs; i++) {
+        if (travt->objs[i].type == H5TRAV_TYPE_DATASET) {
+            size_t nelmts;
+            int rank;
+            hid_t dset_in = H5I_INVALID_HID;
+            hid_t f_space_id = H5I_INVALID_HID;
+            if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
+            if ((f_space_id = H5Dget_space(dset_in)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+            if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
 
-    }
-	return 0;
+            H5Sget_simple_extent_dims(f_space_id, dims, NULL);
+
+            nelmts = 1;
+            for (j = 0; j < rank; j++)
+                 nelmts *= dims[j];
+
+            if (nelmts >= large_dset_size)
+                travt->objs[i].use_hyperslab = true;
+            if (H5Sclose(f_space_id) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
+            if (H5Dclose(dset_in) < 0)
+                 H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
+        }
+	}
+done:
+    return ret_value;
 }
+
 
 static int
 compare_objIDs(const void *h1, const void *h2)
@@ -1281,15 +1327,14 @@ ph5diff_gather_diffs(void)
 		int *next = (int *)recvtuples;
 
 		displs[0] = 0;
-		total_bytes = next[0];			 /* tuple[0] */
-		total_diff_count = next[1];		 /* tuple[1] */
+		total_bytes = next[0];            /* tuple[0] */
+		total_diff_count = next[1];	      /* tuple[1] */
 		recvcounts[0] = total_bytes;
 		next += 2;
 
 		for (k=1; k < mpi_size; k++) {
-			recvcounts[k] = next[0];		 /* tuple[0] */
+			recvcounts[k] = next[0];      /* tuple[0] */
 			total_diff_count += next[1];  /* tuple[1] */
-
 			total_bytes += recvcounts[k];
 			displs[k] = displs[k-1] + recvcounts[k-1];
 
@@ -1371,6 +1416,7 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
     hid_t   fapl2_id = H5P_DEFAULT;
     char    filenames[2][MAX_FILENAME];
     hsize_t nfound        = 0;
+
     char *  obj1fullname  = NULL;
     char *  obj2fullname  = NULL;
     int     both_objs_grp = 0;
@@ -1473,6 +1519,7 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
     H5TOOLS_DEBUG("diff_match next - errstat:%d", opts->err_stat);
     nfound = diff_match(file1_id, obj1fullname, info1_lp, file2_id, obj2fullname, info2_lp, match_list, opts);
     H5TOOLS_DEBUG("diff_match nfound: %d - errstat:%d", nfound, opts->err_stat);
+
 
     ph5diff_gather_diffs();
 
@@ -2163,8 +2210,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 #if defined(H5_HAVE_PARALLEL)
                 else {  /* g_Parallel is true(1) */
                     int mod_rank = diff_count % mpi_size;
-                    // int shared_dset = is_large_dataset(&table->objs[i]);
-                    if (mod_rank == mpi_rank) {
+                    if (table->objs[diff_count].use_hyperslab || (mod_rank == mpi_rank)) {
                        char *outbuff = NULL;
                        diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
                        HDassert((new_diff != NULL));
@@ -2189,7 +2235,10 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                            local_diff_total += current_diff->outbuffoffset;
                        /* Assign a new diff to be the current (working) outbuff */
                        current_diff = new_diff;
-                       nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
+                       if (table->objs[i].use_hyperslab)
+                           nfound += hyperslab_pdiff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
+                       else 
+                            nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
                     }
                     diff_count++;
                 }
@@ -2476,6 +2525,926 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 
     return nfound;
 }
+
+static hsize_t
+hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
+                diff_opt_t *opts, diff_args_t *argdata)
+{
+    int           i, j;
+    int           status          = -1;
+    hid_t         dset1_id        = H5I_INVALID_HID;
+    hid_t         dset2_id        = H5I_INVALID_HID;
+    hid_t         m_tid1          = H5I_INVALID_HID;
+    hid_t         m_tid2          = H5I_INVALID_HID;
+    hid_t         sid1            = H5I_INVALID_HID;
+    hid_t         sid2            = H5I_INVALID_HID;
+    hid_t         sm_space1       = H5I_INVALID_HID; /*stripmine data space */
+    hid_t         sm_space2       = H5I_INVALID_HID; /*stripmine data space */
+    hid_t         f_tid1          = H5I_INVALID_HID;
+    hid_t         f_tid2          = H5I_INVALID_HID;
+
+    size_t        m_size1;
+    size_t        m_size2;
+    H5T_sign_t    sign1;
+    H5T_sign_t    sign2;
+
+    hbool_t       is_dangle_link1 = FALSE;
+    hbool_t       is_dangle_link2 = FALSE;
+    hbool_t       is_hard_link    = FALSE;
+
+    void * buf1    = NULL;
+    void * buf2    = NULL;
+    void * sm_buf1 = NULL;
+    void * sm_buf2 = NULL;
+
+    hsize_t nfound  = 0;
+    int can_compare = 1; /* do diff or not */
+    h5trav_type_t object_type;
+    diff_err_t    ret_value = opts->err_stat;
+
+    unsigned int vl_data1  = 0; /*contains VL datatypes */
+    unsigned int vl_data2  = 0; /*contains VL datatypes */
+
+    /* to get link info (COVERING options ...) */
+    h5tool_link_info_t linkinfo1;
+    h5tool_link_info_t linkinfo2;
+    dataset_context_t *hs_context1 = NULL;
+    dataset_context_t *hs_context2 = NULL;
+
+    /*init link info struct */
+    HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&linkinfo2, 0, sizeof(h5tool_link_info_t));
+
+    /* pass how to handle printing warnings to linkinfo option */
+    if (print_warn(opts))
+        linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
+
+    /* for symbolic links, take care follow symlink and no dangling link
+     * options */
+    if (argdata->type[0] == H5TRAV_TYPE_LINK || argdata->type[0] == H5TRAV_TYPE_UDLINK ||
+        argdata->type[1] == H5TRAV_TYPE_LINK || argdata->type[1] == H5TRAV_TYPE_UDLINK) {
+        /*
+         * check dangling links for path1 and path2
+         */
+
+        H5TOOLS_DEBUG("diff links");
+        /* target object1 - get type and name */
+        if ((status = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5tools_get_symlink_info failed");
+
+        /* dangling link */
+        if (status == 0) {
+            if (opts->no_dangle_links) {
+                /* dangling link is error */
+                if (opts->mode_verbose)
+                    parallel_print("Warning: <%s> is a dangling link.\n", path1);
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "dangling link is error");
+            }
+            else
+                is_dangle_link1 = TRUE;
+        }
+
+        /* target object2 - get type and name */
+        if ((status = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, opts->follow_links)) < 0)
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5tools_get_symlink_info failed");
+        /* dangling link */
+        if (status == 0) {
+            if (opts->no_dangle_links) {
+                /* dangling link is error */
+                if (opts->mode_verbose)
+                    parallel_print("Warning: <%s> is a dangling link.\n", path2);
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "dangling link is error");
+            }
+            else
+                is_dangle_link2 = TRUE;
+        }
+
+        /* found dangling link */
+        if (is_dangle_link1 || is_dangle_link2) {
+            H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+        }
+
+        /* follow symbolic link option */
+        if (opts->follow_links) {
+            if (linkinfo1.linfo.type == H5L_TYPE_SOFT || linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[0] = (h5trav_type_t)linkinfo1.trg_type;
+
+            if (linkinfo2.linfo.type == H5L_TYPE_SOFT || linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                argdata->type[1] = (h5trav_type_t)linkinfo2.trg_type;
+        }
+    }
+
+    /* if objects are not the same type */
+    if (argdata->type[0] != argdata->type[1]) {
+        H5TOOLS_DEBUG("diff objects are not the same");
+        if (opts->mode_verbose || opts->mode_list_not_cmp) {
+            parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n", path1,
+                           get_type(argdata->type[0]), path2, get_type(argdata->type[1]));
+        }
+
+        opts->not_cmp = 1;
+        /* TODO: will need to update non-comparable is different
+         * opts->contents = 0;
+         */
+        H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+    }
+    else /* now both object types are same */
+        object_type = argdata->type[0];
+
+    /*
+     * If both points to the same target object, skip comparing details inside
+     * of the objects to improve performance.
+     * Always check for the hard links, otherwise if follow symlink option is
+     * specified.
+     *
+     * Perform this to match the outputs as bypassing.
+     */
+    if (argdata->is_same_trgobj) {
+        H5TOOLS_DEBUG("argdata->is_same_trgobj");
+        is_hard_link = (object_type == H5TRAV_TYPE_DATASET || object_type == H5TRAV_TYPE_NAMED_DATATYPE ||
+                        object_type == H5TRAV_TYPE_GROUP);
+        if (opts->follow_links || is_hard_link) {
+            /* print information is only verbose option is used */
+            if (opts->mode_verbose || opts->mode_report) {
+                switch (object_type) {
+                    case H5TRAV_TYPE_DATASET:
+                        do_print_objname("dataset", path1, path2, opts);
+                        break;
+                    case H5TRAV_TYPE_NAMED_DATATYPE:
+                        do_print_objname("datatype", path1, path2, opts);
+                        break;
+                    case H5TRAV_TYPE_GROUP:
+                        do_print_objname("group", path1, path2, opts);
+                        break;
+                    case H5TRAV_TYPE_LINK:
+                        do_print_objname("link", path1, path2, opts);
+                        break;
+                    case H5TRAV_TYPE_UDLINK:
+                        if (linkinfo1.linfo.type == H5L_TYPE_EXTERNAL &&
+                            linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                            do_print_objname("external link", path1, path2, opts);
+                        else
+                            do_print_objname("user defined link", path1, path2, opts);
+                        break;
+                    case H5TRAV_TYPE_UNKNOWN:
+                    default:
+                        parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n", path1,
+                                       path2, get_type(object_type));
+                        opts->not_cmp = 1;
+                        break;
+                } /* switch(type)*/
+
+                print_found(nfound);
+            } /* if(opts->mode_verbose || opts->mode_report) */
+
+            /* exact same, so comparison is done */
+            H5TOOLS_GOTO_DONE(H5DIFF_NO_ERR);
+        }
+    }
+
+    switch (object_type) {
+            /*----------------------------------------------------------------------
+             * H5TRAV_TYPE_DATASET
+             * This should be the princpal use case for this function.
+             * We may may also deal with links.
+             * NOTE: This particular function is ONLY called when we have identified
+             * the specfic input object as a dataset which contain a moderately
+             * large number of elements (DEFAULT_LARGE_DSET_SIZE = 1M).  The concern
+             * is two fold. 1) By utilizing parallelism, we can improve performance;
+             * and 2) The memory footprint utilized for processing the dataset
+             * is minimized.  With regards to the latter, we also implement the
+             * strip mining approach used by serial version for large datasets.
+             *----------------------------------------------------------------------
+             */
+        case H5TRAV_TYPE_DATASET:
+            if ((dset1_id = H5Dopen2(file1_id, path1, H5P_DEFAULT)) < 0)
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dopen2 failed");
+
+            if (h5tools_initialize_hyperslab_context(dset1_id, &hs_context1) < 0)
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "hyperslab_context failed");
+
+            if ((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dopen2 failed");
+
+            if (h5tools_initialize_hyperslab_context(dset2_id, &hs_context2) < 0)
+                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "hyperslab_context failed");
+
+            f_tid1  = hs_context1->t_id;
+            f_tid2  = hs_context2->t_id;
+
+            /*-------------------------------------------------------------------------
+             * check for comparable TYPE and SPACE
+             *-------------------------------------------------------------------------
+             */
+            if (diff_can_type(hs_context1->t_id, hs_context2->t_id,
+                              hs_context1->ds_rank, hs_context2->ds_rank,
+                              hs_context1->dims, hs_context2->dims,
+                              hs_context1->maxdims, hs_context2->maxdims,
+                              opts, 0) != 1)
+                can_compare = 0;
+
+            /*-------------------------------------------------------------------------
+             * memory type and sizes
+             *-------------------------------------------------------------------------
+             */
+            if (H5Tget_class(hs_context1->t_id) == H5T_REFERENCE) {
+                if ((m_tid1 = H5Tcopy(H5T_STD_REF)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Tcopy(H5T_STD_REF) first ftype failed");
+            }
+            else {
+                if ((m_tid1 = H5Tget_native_type(hs_context1->t_id, H5T_DIR_DEFAULT)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Tget_native_type first ftype failed");
+            }
+
+            if (H5Tget_class(hs_context2->t_id) == H5T_REFERENCE) {
+                if ((m_tid2 = H5Tcopy(H5T_STD_REF)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Tcopy(H5T_STD_REF) second ftype failed");
+            }
+            else {
+                if ((m_tid2 = H5Tget_native_type(hs_context2->t_id, H5T_DIR_DEFAULT)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Tget_native_type second ftype failed");
+            }
+
+            m_size1 = H5Tget_size(m_tid1);
+            m_size2 = H5Tget_size(m_tid2);
+            H5TOOLS_DEBUG("type size: %ld - %ld", m_size1, m_size2);
+
+            /*-------------------------------------------------------------------------
+             * check for different signed/unsigned types
+             *-------------------------------------------------------------------------
+             */
+            if (can_compare) {
+                H5TOOLS_DEBUG("can_compare for sign");
+                sign1 = H5Tget_sign(m_tid1);
+                sign2 = H5Tget_sign(m_tid2);
+                if (sign1 != sign2) {
+                    H5TOOLS_DEBUG("sign1 != sign2");
+                    if ((opts->mode_verbose || opts->mode_list_not_cmp) && path1 && path2) {
+                        parallel_print("Not comparable: <%s> has sign %s ", path1, get_sign(sign1));
+                        parallel_print("and <%s> has sign %s\n", path2, get_sign(sign2));
+                    }
+
+                    can_compare   = 0;
+                    opts->not_cmp = 1;
+                }
+                H5TOOLS_DEBUG("can_compare for sign - can_compare=%d opts->not_cmp=%d", can_compare, opts->not_cmp);
+            }
+
+            /* Check if type is either VLEN-data or VLEN-string to reclaim any
+             * VLEN memory buffer later
+             */
+            if (TRUE == h5tools_detect_vlen(m_tid1))
+                vl_data1 = TRUE;
+            if (TRUE == h5tools_detect_vlen(m_tid2))
+                vl_data2 = TRUE;
+            H5TOOLS_DEBUG("h5tools_detect_vlen %d:%d - errstat:%d", vl_data1, vl_data2, opts->err_stat);
+
+            /*------------------------------------------------------------------------
+             * only attempt to compare if possible
+             *-------------------------------------------------------------------------
+             */
+
+            if (can_compare) { /* it is possible to compare */
+                hsize_t  need;
+                hsize_t  nelmts1 = hs_context1->hs_nelmts;
+                hsize_t  nelmts2 = hs_context2->hs_nelmts;
+                int      rank1   = hs_context1->ds_rank;
+                int      rank2   = hs_context2->ds_rank;
+                hsize_t *dims1   = &hs_context1->dims[0];
+                hsize_t *dims2   = &hs_context1->dims[0];
+                H5T_class_t tclass = H5Tget_class(hs_context1->t_id);
+
+                if ((sid1 = H5Dget_space(dset1_id)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dget_space failed");
+                if ((sid2 = H5Dget_space(dset2_id)) < 0)
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dget_space failed");
+
+
+                if (tclass != H5T_ARRAY) {
+                    /*-----------------------------------------------------------------
+                     * "upgrade" the smaller memory size
+                     *------------------------------------------------------------------
+                     */
+                    H5TOOLS_DEBUG("NOT H5T_ARRAY, upgrade the smaller memory size?");
+                    if (FAIL == match_up_memsize(f_tid1, f_tid2, &m_tid1, &m_tid2, &m_size1, &m_size2))
+                        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "match_up_memsize failed");
+                    H5TOOLS_DEBUG("m_size: %ld - %ld", m_size1, m_size2);
+                    opts->rank = rank1;
+                    for (i = 0; i < rank1; i++)
+                        opts->dims[i] = dims1[i];
+                    opts->m_size = m_size1;
+                    opts->m_tid  = m_tid1;
+                    opts->nelmts = nelmts1;
+                    need = (size_t)(nelmts1 * m_size1); /* bytes needed */
+                }
+                else {
+                    H5TOOLS_DEBUG("Array dims: %d - %d", dims1[0], dims2[0]);
+                    /* Compare the smallest array, but create the largest buffer */
+                    if (m_size1 <= m_size2) {
+                        opts->rank = rank1;
+                        for (i = 0; i < rank1; i++)
+                            opts->dims[i] = dims1[i];
+                        opts->m_size = m_size1;
+                        opts->m_tid  = m_tid1;
+                        opts->nelmts = nelmts1;
+                        need = (size_t)(nelmts2 * m_size2); /* bytes needed */
+                    }
+                    else {
+                        opts->rank = rank2;
+                        for (i = 0; i < rank2; i++)
+                            opts->dims[i] = dims2[i];
+                        opts->m_size = m_size2;
+                        opts->m_tid  = m_tid2;
+                        opts->nelmts = nelmts2;
+                        need = (size_t)(nelmts1 * m_size1); /* bytes needed */
+                    }
+                }
+                opts->hs_nelmts = opts->nelmts;
+
+                /*----------------------------------------------------------------
+                 * read/compare
+                 *-----------------------------------------------------------------
+                 */
+                if (need < H5TOOLS_MALLOCSIZE) {
+                    buf1 = HDmalloc(need);
+                    buf2 = HDmalloc(need);
+                } /* end if */
+
+                /* Assume entire data space to be printed */
+                init_acc_pos((unsigned)opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
+
+                for (i = 0; i < opts->rank; i++) {
+                    opts->p_max_idx[i] = opts->dims[i];
+                }
+
+                if (buf1 != NULL && buf2 != NULL && opts->sset[0] == NULL && opts->sset[1] == NULL) {
+                    H5TOOLS_DEBUG("buf1 != NULL && buf2 != NULL");
+                    H5TOOLS_DEBUG("H5Dread did1");
+                    if (H5Dread(dset1_id, m_tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1) < 0)
+                        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dread failed");
+                    H5TOOLS_DEBUG("H5Dread did2");
+                    if (H5Dread(dset2_id, m_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2) < 0)
+                        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dread failed");
+
+                    /* initialize the current stripmine position; this is necessary to print the array indices */
+                    for (j = 0; j < opts->rank; j++)
+                        opts->sm_pos[j] = (hsize_t)0;
+
+                    /* array diff */
+                    nfound = diff_array(buf1, buf2, opts, dset1_id, dset2_id);
+                    H5TOOLS_DEBUG("diff_array ret nfound:%d - errstat:%d", nfound, opts->err_stat);
+
+                    /* reclaim any VL memory, if necessary */
+                    H5TOOLS_DEBUG("check vl_data1:%d", vl_data1);
+                    if (vl_data1)
+                        H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
+                    H5TOOLS_DEBUG("check vl_data2:%d", vl_data2);
+                    if (vl_data2)
+                        H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
+                    if (buf1 != NULL) {
+                        HDfree(buf1);
+                        buf1 = NULL;
+                    }
+                    if (buf2 != NULL) {
+                        HDfree(buf2);
+                        buf2 = NULL;
+                    }
+                }                   /* end if */
+                else {              /* possibly not enough memory, read/compare by hyperslabs */
+                    hsize_t elmtno; /* counter  */
+                    int     carry;  /* counter carry value */
+
+                    /* stripmine info */
+                    hsize_t  sm_size[H5S_MAX_RANK];  /* stripmine size */
+                    hsize_t  sm_block[H5S_MAX_RANK]; /* stripmine block size  */
+                    hsize_t  sm_nbytes;              /* bytes per stripmine */
+                    hsize_t  sm_nelmts1;             /* elements per stripmine */
+                    hsize_t  sm_nelmts2;             /* elements per stripmine */
+                    hsize_t  ssm_limit;
+                    hsize_t  ssm_remaining;
+                    hssize_t ssm_nelmts;             /* elements temp */
+
+
+                    /* hyperslab info */
+                    hsize_t hs_offset1[H5S_MAX_RANK]; /* starting offset */
+                    hsize_t hs_count1[H5S_MAX_RANK];  /* number of blocks */
+                    hsize_t hs_block1[H5S_MAX_RANK];  /* size of blocks */
+                    hsize_t hs_stride1[H5S_MAX_RANK]; /* stride */
+                    hsize_t hs_size1[H5S_MAX_RANK];   /* size this pass */
+                    hsize_t hs_offset2[H5S_MAX_RANK]; /* starting offset */
+                    hsize_t hs_count2[H5S_MAX_RANK];  /* number of blocks */
+                    hsize_t hs_block2[H5S_MAX_RANK];  /* size of blocks */
+                    hsize_t hs_stride2[H5S_MAX_RANK]; /* stride */
+                    hsize_t hs_size2[H5S_MAX_RANK];   /* size this pass */
+                    hsize_t hs_nelmts1 = 0;           /* elements in request */
+                    hsize_t hs_nelmts2 = 0;           /* elements in request */
+                    hsize_t hs_extra1;                /* temp for strip mining */
+                    hsize_t zero[8];                  /* vector of zeros */
+                    hsize_t low[H5S_MAX_RANK];        /* low bound of hyperslab */
+                    hsize_t high[H5S_MAX_RANK];       /* higher bound of hyperslab */
+
+
+                    H5TOOLS_DEBUG("reclaim any VL memory and free unused buffers");
+                    if (buf1 != NULL) {
+                        /* reclaim any VL memory, if necessary */
+                        if (vl_data1)
+                            H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
+                        HDfree(buf1);
+                        buf1 = NULL;
+                    }
+                    if (buf2 != NULL) {
+                        /* reclaim any VL memory, if necessary */
+                        if (vl_data2)
+                            H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
+                        HDfree(buf2);
+                        buf2 = NULL;
+                    }
+
+                    /* the stripmine loop */
+                    HDmemset(hs_offset1, 0, sizeof hs_offset1);
+                    HDmemset(hs_stride1, 0, sizeof hs_stride1);
+                    HDmemset(hs_count1, 0, sizeof hs_count1);
+                    HDmemset(hs_block1, 0, sizeof hs_block1);
+                    HDmemset(hs_size1, 0, sizeof hs_size1);
+                    HDmemset(hs_offset2, 0, sizeof hs_offset2);
+                    HDmemset(hs_stride2, 0, sizeof hs_stride2);
+                    HDmemset(hs_count2, 0, sizeof hs_count2);
+                    HDmemset(hs_block2, 0, sizeof hs_block2);
+                    HDmemset(hs_size2, 0, sizeof hs_size2);
+                    HDmemset(zero, 0, sizeof zero);
+
+                    for (i=0; i < hs_context1->ds_rank; i++) {
+                        hs_offset1[i] = hs_context1->hs_offset[i];
+                        hs_offset2[i] = hs_context2->hs_offset[i];
+                    }
+                    /* IF subsetting was requested - initialize the subsetting variables */
+                    /* CAUTION!! I haven't verified this portion of the code for parallel execution!
+                     * It is my belief that the user subsetting specification doesn't account for
+                     * parallelism and thus the approach here, should probably be done by a single
+                     * rank. In particular, our parallel assumptions might be unjustfied since
+                     * the subsetting was NOT accounted for when sizing the dataset vs. the
+                     * size limit over which, we feel justified for multiple MPI ranks to share
+                     * the work.
+                     *
+                     * [RAW] December 2021
+                     */
+                    H5TOOLS_DEBUG("compare by hyperslabs: opts->nelmts=%ld - opts->m_size=%ld", opts->nelmts,
+                                  opts->m_size);
+                    if (opts->sset[0] != NULL) {
+                        H5TOOLS_DEBUG("opts->sset[0] != NULL");
+
+                        /* Check for valid settings - default if not specified */
+                        if (!opts->sset[0]->start.data || !opts->sset[0]->stride.data || !opts->sset[0]->count.data ||
+                            !opts->sset[0]->block.data) {
+                            /* they didn't specify a ``stride'' or ``block''. default to 1 in all
+                             * dimensions */
+                            if (!opts->sset[0]->start.data) {
+                                /* default to (0, 0, ...) for the start coord */
+                                opts->sset[0]->start.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                                opts->sset[0]->start.len  = (unsigned)rank1;
+                            }
+
+                            if (!opts->sset[0]->stride.data) {
+                                opts->sset[0]->stride.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                                opts->sset[0]->stride.len  = (unsigned)rank1;
+                                for (i = 0; i < rank1; i++)
+                                    opts->sset[0]->stride.data[i] = 1;
+                            }
+
+                            if (!opts->sset[0]->count.data) {
+                                opts->sset[0]->count.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                                opts->sset[0]->count.len  = (unsigned)rank1;
+                                for (i = 0; i < rank1; i++)
+                                    opts->sset[0]->count.data[i] = 1;
+                            }
+
+                            if (!opts->sset[0]->block.data) {
+                                opts->sset[0]->block.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                                opts->sset[0]->block.len  = (unsigned)rank1;
+                                for (i = 0; i < rank1; i++)
+                                    opts->sset[0]->block.data[i] = 1;
+                            }
+
+                            /*-------------------------------------------------------------------------
+                             * check for block overlap
+                             *-------------------------------------------------------------------------
+                             */
+                            for (i = 0; i < rank1; i++) {
+                                if (opts->sset[0]->count.data[i] > 1) {
+                                    if (opts->sset[0]->stride.data[i] < opts->sset[0]->block.data[i]) {
+                                        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "wrong subset selection[0]; blocks overlap");
+                                    } /* end if */
+                                }     /* end if */
+                            }         /* end for */
+                        }
+
+                        /* Reset the total number of elements to the subset from the command */
+                        opts->nelmts = 1;
+                        for (i = 0; i < rank1; i++) {
+                            hs_offset1[i] = opts->sset[0]->start.data[i];
+                            hs_stride1[i] = opts->sset[0]->stride.data[i];
+                            hs_count1[i]  = opts->sset[0]->count.data[i];
+                            hs_block1[i]  = opts->sset[0]->block.data[i];
+                            opts->nelmts *= hs_count1[i] * hs_block1[i];
+                            hs_size1[i] = 0;
+                            H5TOOLS_DEBUG("[%d]hs_offset1:%ld, hs_stride1:%ld, hs_count1:%ld, hs_block1:%ld", i,
+                                          hs_offset1[i], hs_stride1[i], hs_count1[i], hs_block1[i]);
+                        }
+                    }
+                    if (opts->sset[1] != NULL) {
+                        H5TOOLS_DEBUG("opts->sset[1] != NULL");
+
+                        /* Check for valid settings - default if not specified */
+                        if (!opts->sset[1]->start.data || !opts->sset[1]->stride.data || !opts->sset[1]->count.data ||
+                            !opts->sset[1]->block.data) {
+                            /* they didn't specify a ``stride'' or ``block''. default to 1 in all
+                             * dimensions */
+                            if (!opts->sset[1]->start.data) {
+                                /* default to (0, 0, ...) for the start coord */
+                                opts->sset[1]->start.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                                opts->sset[1]->start.len  = (unsigned)rank2;
+                            }
+
+                            if (!opts->sset[1]->stride.data) {
+                                opts->sset[1]->stride.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                                opts->sset[1]->stride.len  = (unsigned)rank2;
+                                for (i = 0; i < rank2; i++)
+                                    opts->sset[1]->stride.data[i] = 1;
+                            }
+
+                            if (!opts->sset[1]->count.data) {
+                                opts->sset[1]->count.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                                opts->sset[1]->count.len  = (unsigned)rank2;
+                                for (i = 0; i < rank2; i++)
+                                    opts->sset[1]->count.data[i] = 1;
+                            }
+
+                            if (!opts->sset[1]->block.data) {
+                                opts->sset[1]->block.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                                opts->sset[1]->block.len  = (unsigned)rank2;
+                                for (i = 0; i < rank2; i++)
+                                    opts->sset[1]->block.data[i] = 1;
+                            }
+
+                            /*-------------------------------------------------------------------------
+                             * check for block overlap
+                             *-------------------------------------------------------------------------
+                             */
+                            for (i = 0; i < rank2; i++) {
+                                if (opts->sset[1]->count.data[i] > 1) {
+                                    if (opts->sset[1]->stride.data[i] < opts->sset[1]->block.data[i]) {
+                                        H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "wrong subset selection[1]; blocks overlap");
+                                    } /* end if */
+                                }     /* end if */
+                            }         /* end for */
+                        }
+
+                        for (i = 0; i < rank2; i++) {
+                            hs_offset2[i] = opts->sset[1]->start.data[i];
+                            hs_stride2[i] = opts->sset[1]->stride.data[i];
+                            hs_count2[i]  = opts->sset[1]->count.data[i];
+                            hs_block2[i]  = opts->sset[1]->block.data[i];
+                            hs_size2[i]   = 0;
+                            H5TOOLS_DEBUG("[%d]hs_offset2:%ld, hs_stride2:%ld, hs_count2:%ld, hs_block2:%ld", i,
+                                          hs_offset2[i], hs_stride2[i], hs_count2[i], hs_block2[i]);
+                        }
+                    } /* End subsetting */
+
+                    /*
+                     * determine the strip mine size and allocate a buffer. The strip mine is
+                     * a hyperslab whose size is manageable.
+                     */
+                    if (opts->mode_verbose || opts->mode_report) {
+                        if (hs_context1->mpi_rank == 0)
+                            do_print_objname("dataset", path1, path2, opts);
+                    }
+                    sm_nbytes = opts->m_size;
+                    for (i=0; i < hs_context1->ds_rank; i++) {
+                        hs_block1[i] = hs_context1->hs_block[i];
+                        hs_block2[i] = hs_context2->hs_block[i];
+                    }
+
+                    if (opts->rank > 0) {
+                        for (i = hs_context1->ds_rank; i > 0; --i) {
+                            hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                            if (size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                                size = 1;
+                            H5TOOLS_DEBUG("opts->dims[%d]: %ld - size: %ld", i - 1, opts->dims[i - 1], size);
+                            if (opts->sset[1] != NULL) {
+                                sm_size[i - 1]  = MIN(hs_block1[i - 1] * hs_count1[i - 1], size);
+                                sm_block[i - 1] = MIN(hs_block1[i - 1], sm_size[i - 1]);
+                            }
+                            else {
+                                sm_size[i - 1]  = MIN(hs_context1->hs_block[i - 1], size);
+                                sm_block[i - 1] = sm_size[i - 1];
+                            }
+                            H5TOOLS_DEBUG("sm_size[%d]: %ld - sm_block:%ld", i - 1, sm_size[i - 1], sm_block[i - 1]);
+                            sm_nbytes *= sm_size[i - 1];
+                            H5TOOLS_DEBUG("sm_nbytes: %ld", sm_nbytes);
+                        }
+                    }
+
+                    H5TOOLS_DEBUG("opts->nelmts: %ld", opts->nelmts);
+                    hs_nelmts1 = sm_nbytes / hs_context1->dt_size;
+                    ssm_limit = hs_nelmts1 * 2;
+                    for (elmtno = 0; elmtno < opts->nelmts; elmtno += hs_nelmts1) {
+                        H5TOOLS_DEBUG("elmtno: %ld - hs_nelmts1: %ld", elmtno, hs_nelmts1);
+                        ssm_remaining = opts->nelmts - elmtno;
+                        if (ssm_remaining < ssm_limit) {
+                            hsize_t elmts_per_row = 1;
+                            hsize_t extra_rows;
+                            hs_nelmts1 = sm_nbytes / hs_context1->dt_size;
+                            hs_extra1 = ssm_remaining - hs_nelmts1;
+                            for (i = 1; i < opts->rank; i++)
+                                elmts_per_row *= sm_block[i];
+                            extra_rows = hs_extra1 / elmts_per_row;
+                            sm_nbytes += (extra_rows * elmts_per_row);
+                            sm_block[0] += extra_rows;
+                            hs_block1[0] += extra_rows;
+                            hs_block2[0] += extra_rows;
+                        }
+                        if (NULL == (sm_buf1 = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
+                            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not allocate buffer for strip-mine");
+                        if (NULL == (sm_buf2 = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
+                            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not allocate buffer for strip-mine");
+
+                        /* calculate the hyperslab size */
+                        /* initialize subset */
+                        if (opts->rank > 0) {
+                            if (opts->sset[0] != NULL) {
+                                H5TOOLS_DEBUG("sset1 has data");
+                                /* calculate the potential number of elements */
+                                for (i = 0; i < rank1; i++) {
+                                    H5TOOLS_DEBUG("[%d]opts->dims: %ld - hs_offset1: %ld - sm_block: %ld", i,
+                                                  opts->dims[i], hs_offset1[i], sm_block[i]);
+                                    hs_size1[i] = MIN(opts->dims[i] - hs_offset1[i], sm_block[i]);
+                                    H5TOOLS_DEBUG("hs_size1[%d]: %ld", i, hs_size1[i]);
+                                }
+                                if (H5Sselect_hyperslab(sid1, H5S_SELECT_SET, hs_offset1, hs_stride1, hs_count1,
+                                                        hs_size1) < 0)
+                                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab sid1 failed");
+                            }
+                            else {
+                                for (i = 0, hs_nelmts1 = 1; i < rank1; i++) {
+                                    /* Use the hyperslab context values rather than the serial hyperslab
+                                     * implementation (opts->xxx values)
+                                     */
+                                    H5TOOLS_DEBUG("[%d]opts->dims: %ld - hs_offset1: %ld - sm_block: %ld", i,
+                                                  opts->dims[i], hs_offset1[i], sm_block[i]);
+                                    hs_size1[i] = MIN(hs_block1[i] - hs_offset1[i], sm_block[i]);
+                                    H5TOOLS_DEBUG("hs_size1[%d]: %ld", i, hs_size1[i]);
+                                    hs_nelmts1 *= hs_size1[i];
+                                    H5TOOLS_DEBUG("hs_nelmts1:%ld *= hs_size1[%d]: %ld", hs_nelmts1, i, hs_size1[i]);
+                                }
+                                if (H5Sselect_hyperslab(sid1, H5S_SELECT_SET, hs_offset1, NULL, hs_size1, NULL) < 0)
+                                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab sid1 failed");
+                            }
+
+                            if ((ssm_nelmts = H5Sget_select_npoints(sid1)) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sget_select_npoints failed");
+                            sm_nelmts1 = (hsize_t)ssm_nelmts;
+                            H5TOOLS_DEBUG("sm_nelmts1: %ld", sm_nelmts1);
+                            hs_nelmts1 = sm_nelmts1;
+
+                            if ((sm_space1 = H5Screate_simple(1, &sm_nelmts1, NULL)) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Screate_simple failed");
+
+                            if (H5Sselect_hyperslab(sm_space1, H5S_SELECT_SET, zero, NULL, &sm_nelmts1, NULL) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab failed");
+
+                            if (opts->sset[1] != NULL) {
+                                H5TOOLS_DEBUG("sset2 has data");
+                                for (i = 0; i < rank2; i++) {
+                                    H5TOOLS_DEBUG("[%d]opts->dims: %ld - hs_offset2: %ld - sm_block: %ld", i,
+                                                  opts->dims[i], hs_offset2[i], sm_block[i]);
+                                    hs_size2[i] = MIN(opts->dims[i] - hs_offset2[i], sm_block[i]);
+                                    H5TOOLS_DEBUG("hs_size2[%d]: %ld", i, hs_size2[i]);
+                                }
+                                if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset2, hs_stride2, hs_count2,
+                                                        hs_size2) < 0)
+                                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab sid2 failed");
+                            }
+                            else {
+                                for (i = 0, hs_nelmts2 = 1; i < rank2; i++) {
+                                    /* Use the hyperslab context values rather than the serial hyperslab
+                                     * implementation (opts->xxx values)
+                                     */
+                                    H5TOOLS_DEBUG("[%d]opts->dims: %ld - hs_offset2: %ld - sm_block: %ld", i,
+                                                  opts->dims[i], hs_offset2[i], sm_block[i]);
+                                    hs_size2[i] = MIN(hs_block2[i] - hs_offset2[i], sm_block[i]);
+                                    H5TOOLS_DEBUG("hs_size2[%d]: %ld", i, hs_size2[i]);
+                                    hs_nelmts2 *= hs_size2[i];
+                                    H5TOOLS_DEBUG("hs_nelmts2:%ld *= hs_size2[%d]: %ld", hs_nelmts2, i, hs_size2[i]);
+                                }
+                                if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset2, NULL, hs_size2, NULL) < 0)
+                                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab sid2 failed");
+                            }
+
+                            if ((ssm_nelmts = H5Sget_select_npoints(sid2)) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sget_select_npoints failed");
+                            sm_nelmts2 = (hsize_t)ssm_nelmts;
+                            H5TOOLS_DEBUG("sm_nelmts2: %ld", sm_nelmts2);
+                            hs_nelmts2 = sm_nelmts2;
+
+                            if ((sm_space2 = H5Screate_simple(1, &sm_nelmts2, NULL)) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Screate_simple failed");
+
+                            if (H5Sselect_hyperslab(sm_space2, H5S_SELECT_SET, zero, NULL, &sm_nelmts2, NULL) < 0)
+                                H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sselect_hyperslab failed");
+                        }
+                        else
+                            hs_nelmts1 = 1;
+                        opts->hs_nelmts = hs_nelmts1;
+                        H5TOOLS_DEBUG("hs_nelmts: %ld", opts->hs_nelmts);
+
+                        /* read the data */
+                        if (H5Dread(dset1_id, m_tid1, sm_space1, sid1, H5P_DEFAULT, sm_buf1) < 0)
+                            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dread failed");
+                        if (H5Dread(dset2_id, m_tid2, sm_space2, sid2, H5P_DEFAULT, sm_buf2) < 0)
+                            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dread failed");
+
+                        /* print array indices. get the lower bound of the hyperslab and calculate
+                           the element position at the start of hyperslab */
+                        if (H5Sget_select_bounds(sid1, low, high) < 0)
+                            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Sget_select_bounds failed");
+                        /* initialize the current stripmine position; this is necessary to print the array indices */
+                        for (j = 0; j < opts->rank; j++)
+                            opts->sm_pos[j] = low[j];
+
+                        /* Assume entire data space to be printed */
+                        init_acc_pos((unsigned)opts->rank, opts->dims, opts->acc, opts->pos, opts->p_min_idx);
+
+                        /* get array differences. in the case of hyperslab read, increment the number of differences
+                        found in each hyperslab and pass the position at the beginning for printing */
+                        nfound += diff_array(sm_buf1, sm_buf2, opts, dset1_id, dset2_id);
+
+                        if (sm_buf1 != NULL) {
+                            /* reclaim any VL memory, if necessary */
+                            if (vl_data1)
+                                H5Treclaim(m_tid1, sm_space1, H5P_DEFAULT, sm_buf1);
+                            HDfree(sm_buf1);
+                            sm_buf1 = NULL;
+                        }
+                        if (sm_buf2 != NULL) {
+                            /* reclaim any VL memory, if necessary */
+                            if (vl_data2)
+                                H5Treclaim(m_tid2, sm_space2, H5P_DEFAULT, sm_buf2);
+                            HDfree(sm_buf2);
+                            sm_buf2 = NULL;
+                        }
+
+                        H5Sclose(sm_space1);
+                        H5Sclose(sm_space2);
+
+                        /* calculate the next hyperslab offset */
+                        for (i = opts->rank, carry = 1; i > 0 && carry; --i) {
+                            if (opts->sset[0] != NULL) {
+                                H5TOOLS_DEBUG("[%d]hs_size1:%ld - hs_block1:%ld - hs_stride1:%ld", i - 1,
+                                              hs_size1[i - 1], hs_block1[i - 1], hs_stride1[i - 1]);
+                                if (hs_size1[i - 1] >= hs_block1[i - 1]) {
+                                    hs_offset1[i - 1] += hs_size1[i - 1];
+                                }
+                                else {
+                                    hs_offset1[i - 1] += hs_stride1[i - 1];
+                                }
+                            }
+                            else
+                                hs_offset1[i - 1] += hs_size1[i - 1];
+                            H5TOOLS_DEBUG("[%d]hs_offset1:%ld - opts->dims:%ld", i - 1, hs_offset1[i - 1],
+                                          opts->dims[i - 1]);
+                            if (hs_offset1[i - 1] >= opts->dims[i - 1])
+                                hs_offset1[i - 1] = 0;
+                            else
+                                carry = 0;
+                            H5TOOLS_DEBUG("[%d]hs_offset1:%ld", i - 1, hs_offset1[i - 1]);
+                            if (opts->sset[1] != NULL) {
+                                H5TOOLS_DEBUG("[%d]hs_size2:%ld - hs_block2:%ld - hs_stride2:%ld", i - 1,
+                                              hs_size2[i - 1], hs_block2[i - 1], hs_stride2[i - 1]);
+                                if (hs_size2[i - 1] >= hs_block2[i - 1]) {
+                                    hs_offset2[i - 1] += hs_size2[i - 1];
+                                }
+                                else {
+                                    hs_offset2[i - 1] += hs_stride2[i - 1];
+                                }
+                            }
+                            else
+                                hs_offset2[i - 1] += hs_size2[i - 1];
+                            H5TOOLS_DEBUG("[%d]hs_offset2:%ld - opts->dims:%ld", i - 1, hs_offset2[i - 1],
+                                          opts->dims[i - 1]);
+                            if (hs_offset2[i - 1] >= opts->dims[i - 1])
+                                hs_offset2[i - 1] = 0;
+                            H5TOOLS_DEBUG("[%d]hs_offset2:%ld", i - 1, hs_offset2[i - 1]);
+
+                        }
+                    } /* elmtno for loop */
+                }     /* hyperslab read */
+                H5TOOLS_DEBUG("can compare complete");
+            } /*can_compare*/
+
+
+            H5E_BEGIN_TRY
+            {
+                H5Sclose(sid1);
+                H5Sclose(sid2);
+                H5Sclose(sm_space1);
+                H5Sclose(sm_space2);
+                H5Pclose(hs_context1->dcpl);
+                H5Pclose(hs_context2->dcpl);
+                H5Tclose(f_tid1);
+                H5Tclose(f_tid2);
+                H5Tclose(m_tid1);
+                H5Tclose(m_tid2);
+                /* enable error reporting */
+            }
+            H5E_END_TRY;
+
+            HDfree(hs_context1);
+            HDfree(hs_context2);
+
+            break;
+
+            /*----------------------------------------------------------------------
+             * H5TRAV_TYPE_LINK
+             *----------------------------------------------------------------------
+             */
+        case H5TRAV_TYPE_LINK: {
+            H5TOOLS_DEBUG("H5TRAV_TYPE_LINK 1:%s  2:%s ", path1, path2);
+            status = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
+
+            /* if the target link name is not same then the links are "different" */
+            nfound = (status != 0) ? 1 : 0;
+
+            if (print_objname(opts, nfound))
+                do_print_objname("link", path1, path2, opts);
+
+            /* always print the number of differences found in verbose mode */
+            if (opts->mode_verbose)
+                print_found(nfound);
+        } break;
+
+            /*----------------------------------------------------------------------
+             * H5TRAV_TYPE_UDLINK
+             *----------------------------------------------------------------------
+             */
+        case H5TRAV_TYPE_UDLINK: {
+            H5TOOLS_DEBUG("H5TRAV_TYPE_UDLINK 1:%s  2:%s ", path1, path2);
+            /* Only external links will have a query function registered */
+            if (linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL) {
+                /* If the buffers are the same size, compare them */
+                if (linkinfo1.linfo.u.val_size == linkinfo2.linfo.u.val_size) {
+                    status = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
+                }
+                else
+                    status = 1;
+
+                /* if "linkinfo1.trg_path" != "linkinfo2.trg_path" then the links
+                 * are "different" extlinkinfo#.path is combination string of
+                 * file_name and obj_name
+                 */
+                nfound = (status != 0) ? 1 : 0;
+
+                if (print_objname(opts, nfound))
+                    do_print_objname("external link", path1, path2, opts);
+
+            } /* end if */
+            else {
+                /* If one or both of these links isn't an external link, we can only
+                 * compare information from H5Lget_info since we don't have a query
+                 * function registered for them.
+                 *
+                 * If the link classes or the buffer length are not the
+                 * same, the links are "different"
+                 */
+                if ((linkinfo1.linfo.type != linkinfo2.linfo.type) ||
+                    (linkinfo1.linfo.u.val_size != linkinfo2.linfo.u.val_size))
+                    nfound = 1;
+                else
+                    nfound = 0;
+
+                if (print_objname(opts, nfound))
+                    do_print_objname("user defined link", path1, path2, opts);
+            } /* end else */
+
+            /* always print the number of differences found in verbose mode */
+            if (opts->mode_verbose)
+                print_found(nfound);
+        } break;
+
+        case H5TRAV_TYPE_UNKNOWN:
+        default:
+            if (opts->mode_verbose)
+                parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n", path1, path2,
+                               get_type(object_type));
+            opts->not_cmp = 1;
+            break;
+
+    }
+
+done:
+    opts->err_stat = opts->err_stat | ret_value;
+
+    return nfound;
+} /* end hyperslab_pdiff() */
 
 /*-------------------------------------------------------------------------
  * Function: diff

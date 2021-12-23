@@ -964,6 +964,139 @@ done:
     return ret_value;
 }
 
+#ifdef H5_HAVE_PARALLEL
+
+/*-----------------------------------------------------------
+ * PURPOSE :
+ * Intialize a context which is used as an input to the
+ * h5tools_get_hyperslab_data() function, which is designed
+ * to be callable repeatedly until all data from the dataset
+ * has be retrieved.
+ * By default, a hyperslab will be accessed by rows, i.e.
+ * the lowest numbered dimension is subdivided between the
+ * MPI ranks so that all ranks get "roughly" the same amount
+ * of data to work with.   This works best since the default
+ * memory storage model is "row major"; that is to say that
+ * continuous locations in memory contain the sequence of data
+ * elements the array [0,1,2,... ,row-length-1]
+ */
+int
+h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context)
+{
+    int mpi_size;
+	int mpi_rank;
+    int i;
+    hid_t s_id = H5I_INVALID_HID;
+    hsize_t storage_size, elements;
+    dataset_context_t *new_context = NULL;
+    int ret_value = 0;
+    hsize_t row_total;
+    hsize_t row_diff;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (context == NULL) {
+        HDputs("Input argument (context) is missing");
+        return -1;
+    }
+    new_context = (dataset_context_t *)HDmalloc(sizeof(dataset_context_t));
+    if (new_context == NULL) {
+        HDputs("Unable to allocate new_context!");
+        return -1;
+    }
+    memset(new_context, 0, sizeof(dataset_context_t));
+    new_context->dset_id  = dset_id;
+    new_context->mpi_size = mpi_size;
+    new_context->mpi_rank = mpi_rank;
+
+    if ((s_id = H5Dget_space(dset_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
+
+    if ((new_context->ds_rank = H5Sget_simple_extent_ndims(s_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
+
+    if (H5Sget_simple_extent_dims(s_id, &new_context->dims[0], &new_context->maxdims[0]) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
+
+    if ((new_context->t_id = H5Dget_type(dset_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
+
+    if ((long)(new_context->dt_size = H5Tget_size(new_context->t_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
+
+    if ((new_context->dcpl = H5Dget_create_plist(dset_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
+
+    new_context->hs_block[0] = (new_context->dims[0] / (size_t)mpi_size);
+    /* Sanity check to validate that we handle the entire dataset
+     * not just a subset that results from an uneven division
+     * of the input data.
+     */
+    row_total = new_context->hs_block[0] * (hsize_t)mpi_size;
+    row_diff  = new_context->dims[0] - row_total;
+
+    /* Handle size differences in each rank when the dataset doesn't
+     * divide equally between the number of mpi ranks.
+     * The 'row_diff' variable is the size difference between an
+     * equal size distribution and what we actually have.
+     * The approach is to add extra rows to mpi ranks, i.e 1 row
+     * per rank until the row_diff value is accounted for.
+     *
+     * Of course these added rows by the lower numbered MPI ranks
+     * throws off the starting offsets for higher numbered mpi ranks.
+     * The following if, else if, end else handle the low mpi
+     * ranks, followed by the high numbered ranks, and the final
+     * else handles the equally distibuted arrays.
+     */
+    if ((row_diff > 0) && ((hsize_t)mpi_rank < row_diff)) {
+        new_context->hs_block[0] += 1;
+        new_context->hs_stride[0] = new_context->hs_block[0];
+        new_context->hs_offset[0] = (hsize_t)mpi_rank * new_context->hs_block[0];
+        new_context->hs_count[0]  = 1;
+    }
+	else if (row_diff > 0) {
+        int extra = (int)(((hsize_t)mpi_rank - row_diff) * new_context->hs_block[0]);
+        new_context->hs_stride[0] = new_context->hs_block[0];
+        new_context->hs_offset[0] = (hsize_t)mpi_rank * (new_context->hs_block[0] +1) + (hsize_t)extra;
+        new_context->hs_count[0]  = 1;
+    }
+	else {
+        new_context->hs_stride[0] = new_context->hs_block[0];
+        new_context->hs_offset[0] = (hsize_t)mpi_rank * new_context->hs_block[0];
+        new_context->hs_count[0]  = 1;
+    }
+
+    for (i=1; i < new_context->ds_rank; i++) {
+        new_context->hs_block[i] = new_context->dims[i];
+        new_context->hs_stride[i] = new_context->hs_block[i];
+        new_context->hs_count[i] = 1;
+        new_context->hs_offset[i] = 0;
+    }
+
+    elements = 1;
+    for (i=0; i < new_context->ds_rank; i++)
+        elements *= new_context->hs_block[i];
+
+    new_context->hs_nelmts = elements;
+    storage_size = elements * new_context->dt_size;
+    new_context->hs_storage_size = storage_size;
+
+    *context = new_context;
+
+    H5Dclose(s_id);
+
+    return ret_value;
+
+done:
+    if (new_context)
+        HDfree(new_context);
+
+	return ret_value;
+}
+
+#endif
+
 #ifdef H5_HAVE_ROS3_VFD
 /*----------------------------------------------------------------------------
  *

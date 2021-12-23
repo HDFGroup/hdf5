@@ -99,6 +99,30 @@ typedef struct diff_instance_t {
     char *                    outbuff;
 } diff_instance_t;
 
+#ifdef H5_HAVE_PARALLEL
+typedef struct dataset_context {
+    hid_t             dset_id;
+    hid_t             t_id;
+    hid_t             dcpl;
+    int               mpi_size;
+	int               mpi_rank;
+    int               ds_rank;
+    hsize_t           dims[H5S_MAX_RANK];
+    hsize_t           maxdims[H5S_MAX_RANK];
+    hsize_t           hs_offset[H5S_MAX_RANK];
+    hsize_t           hs_count[H5S_MAX_RANK];
+    hsize_t           hs_block[H5S_MAX_RANK];
+    hsize_t           hs_stride[H5S_MAX_RANK];
+    hsize_t           hs_size[H5S_MAX_RANK];
+    hsize_t           hs_nelmts;
+    hsize_t           hs_storage_size;
+    size_t            dt_size;
+    size_t            buf_offset;
+    void *            data_buf;
+} dataset_context_t;
+
+#endif
+
 H5TOOLS_DLLVAR diff_instance_t *my_diffs;
 H5TOOLS_DLLVAR diff_instance_t *current_diff;
 H5TOOLS_DLLVAR hsize_t * local_diff_offsets;
@@ -133,6 +157,7 @@ H5TOOLS_DLL FILE *tmpfile(void);
 H5TOOLS_DLL int get_global_hid_t(hid_t *flag);
 H5TOOLS_DLL int get_global_flag(int *flag);
 H5TOOLS_DLL int ptools_barrier(void);
+H5TOOLS_DLL int h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context);
 #endif 
 
 
