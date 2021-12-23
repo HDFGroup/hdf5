@@ -1183,7 +1183,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform write */
@@ -1320,7 +1320,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform write */
@@ -2154,7 +2154,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform collective read */
@@ -2291,7 +2291,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform read */
