@@ -46,11 +46,11 @@ typedef enum {
     H5DIFF_NO_ERR,   /* No error occurred */
     H5DIFF_ERR_DIFF, /* Differences were found */
 #ifdef H5_HAVE_PARALLEL
-    H5DIFF_ERR,      /* An error occurred */
+    H5DIFF_ERR, /* An error occurred */
     H5PDIFF_NO_ERR,
     H5PDIFF_ERR
 #else
-    H5DIFF_ERR       /* An error occurred */
+    H5DIFF_ERR /* An error occurred */
 #endif
 } diff_err_t;
 
@@ -109,17 +109,17 @@ typedef struct {
 extern "C" {
 #endif
 
-H5TOOLS_DLL hsize_t ph5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2,
-                           diff_opt_t *opts);
+H5TOOLS_DLL hsize_t ph5diff(const char *fname1, const char *fname2, const char *objname1,
+                            const char *objname2, diff_opt_t *opts);
 
 H5TOOLS_DLL hsize_t h5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2,
                            diff_opt_t *opts);
 
-H5TOOLS_DLL hsize_t diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts,
-                         diff_args_t *argdata);
+H5TOOLS_DLL hsize_t diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
+                         diff_opt_t *opts, diff_args_t *argdata);
 
 #ifdef H5_HAVE_PARALLEL
-H5TOOLS_DLL int h5diff_get_global(int *flag);
+H5TOOLS_DLL int  h5diff_get_global(int *flag);
 H5TOOLS_DLL void phdiff_dismiss_workers(void);
 H5TOOLS_DLL void print_manager_output(void);
 #endif

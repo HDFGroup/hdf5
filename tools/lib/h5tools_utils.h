@@ -70,11 +70,11 @@ typedef struct find_objs_t {
 
 /* Parallel h5diff structures */
 typedef struct ds_table_t {
-    hid_t       fid;
-    hid_t       type;
-    hsize_t     size[H5S_MAX_RANK];
-    hsize_t     maxsize[H5S_MAX_RANK];
-    int         ndims;
+    hid_t   fid;
+    hid_t   type;
+    hsize_t size[H5S_MAX_RANK];
+    hsize_t maxsize[H5S_MAX_RANK];
+    int     ndims;
 } ds_table_t;
 
 typedef struct h5tools_table_list_t {
@@ -86,52 +86,51 @@ typedef struct h5tools_table_list_t {
         table_t *     group_table; /* Table of groups */
         table_t *     dset_table;  /* Table of datasets */
         table_t *     type_table;  /* Table of datatypes */
-        ds_table_t *  ds_table; /* Dataspace for each dset_table entry */
+        ds_table_t *  ds_table;    /* Dataspace for each dset_table entry */
     } * tables;
 } h5tools_table_list_t;
 
-
 typedef struct diff_instance_t {
-    int                       obj_idx;     /* Diff (object) Index  */
-    hsize_t                   outbuff_size; /* Size of 'outbuff' initially OUTBUFF_SIZE */
-    hsize_t                   outbuffoffset; /* current offset into the output buffer */
-    hsize_t                   baseOffset;
-    char *                    outbuff;
+    int     obj_idx;       /* Diff (object) Index  */
+    hsize_t outbuff_size;  /* Size of 'outbuff' initially OUTBUFF_SIZE */
+    hsize_t outbuffoffset; /* current offset into the output buffer */
+    hsize_t baseOffset;
+    char *  outbuff;
 } diff_instance_t;
 
 #ifdef H5_HAVE_PARALLEL
 typedef struct dataset_context {
-    hid_t             dset_id;
-    hid_t             t_id;
-    hid_t             dcpl;
-    int               mpi_size;
-	int               mpi_rank;
-    int               ds_rank;
-    hsize_t           dims[H5S_MAX_RANK];
-    hsize_t           maxdims[H5S_MAX_RANK];
-    hsize_t           hs_offset[H5S_MAX_RANK];
-    hsize_t           hs_count[H5S_MAX_RANK];
-    hsize_t           hs_block[H5S_MAX_RANK];
-    hsize_t           hs_stride[H5S_MAX_RANK];
-    hsize_t           hs_size[H5S_MAX_RANK];
-    hsize_t           hs_nelmts;
-    hsize_t           hs_storage_size;
-    size_t            dt_size;
-    size_t            buf_offset;
-    void *            data_buf;
+    hid_t   dset_id;
+    hid_t   t_id;
+    hid_t   dcpl;
+    int     mpi_size;
+    int     mpi_rank;
+    int     ds_rank;
+    hsize_t dims[H5S_MAX_RANK];
+    hsize_t maxdims[H5S_MAX_RANK];
+    hsize_t hs_offset[H5S_MAX_RANK];
+    hsize_t hs_count[H5S_MAX_RANK];
+    hsize_t hs_block[H5S_MAX_RANK];
+    hsize_t hs_stride[H5S_MAX_RANK];
+    hsize_t hs_size[H5S_MAX_RANK];
+    hsize_t hs_nelmts;
+    hsize_t hs_storage_size;
+    size_t  dt_size;
+    size_t  buf_offset;
+    void *  data_buf;
 } dataset_context_t;
 
 #endif
 
 H5TOOLS_DLLVAR diff_instance_t *my_diffs;
 H5TOOLS_DLLVAR diff_instance_t *current_diff;
-H5TOOLS_DLLVAR hsize_t * local_diff_offsets;
-H5TOOLS_DLLVAR hsize_t * local_diff_lengths;
-H5TOOLS_DLLVAR hsize_t local_diff_total;
+H5TOOLS_DLLVAR hsize_t *local_diff_offsets;
+H5TOOLS_DLLVAR hsize_t *local_diff_lengths;
+H5TOOLS_DLLVAR hsize_t  local_diff_total;
 
 H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
-H5TOOLS_DLLVAR size_t prefix_len;
-H5TOOLS_DLLVAR char * prefix;
+H5TOOLS_DLLVAR size_t   prefix_len;
+H5TOOLS_DLLVAR char *   prefix;
 
 /* Definitions of useful routines */
 H5TOOLS_DLL void   indentation(unsigned);
@@ -158,8 +157,7 @@ H5TOOLS_DLL int get_global_hid_t(hid_t *flag);
 H5TOOLS_DLL int get_global_flag(int *flag);
 H5TOOLS_DLL int ptools_barrier(void);
 H5TOOLS_DLL int h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context);
-#endif 
-
+#endif
 
 /*************************************************************
  *

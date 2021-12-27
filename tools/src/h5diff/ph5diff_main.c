@@ -18,7 +18,6 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-
 /* Name of tool */
 #if defined(PROGRAMNAME)
 #undef PROGRAMNAME
@@ -64,7 +63,6 @@ main(int argc, const char *argv[])
     outBuffOffset = 0;
     g_Parallel    = 1;
 
-
     MPI_Init(&argc, (char ***)&argv);
 
     MPI_Comm_rank(MPI_COMM_WORLD, (int *)&g_nID);
@@ -92,7 +90,6 @@ main(int argc, const char *argv[])
 
     return 0;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: h5diff_exit
