@@ -2144,6 +2144,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
     char        linkval[LINK_BUF_SIZE];
     char        filename[NAME_BUF_SIZE];
     herr_t      status;
+    htri_t      exists;
 
     if (new_format)
         TESTING("link queries using deprecated routines (w/new group format)")
@@ -2183,20 +2184,20 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
     H5E_BEGIN_TRY
     {
-        status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
+        exists = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
     }
     H5E_END_TRY;
-    if (status >= 0) {
+    if (exists >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
         TEST_ERROR
     } /* end if */
     H5E_BEGIN_TRY
     {
-        status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
+        exists = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
     }
     H5E_END_TRY;
-    if (status >= 0) {
+    if (exists >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
         TEST_ERROR
