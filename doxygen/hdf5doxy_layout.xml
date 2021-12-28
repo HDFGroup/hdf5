@@ -7,7 +7,7 @@
     <tab type="user" url="@ref Cookbook" title="Cookbook" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+User+Guides" title="User Guides" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide" title="Application Developer's Guide" />
-    <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Glossary" title="Glossary" />
+    <tab type="user" url="@ref GLS" title="Glossary" />
     <tab type="user" url="@ref RM" title="Reference Manual" />
     <tab type="user" url="@ref TN" title="Technical Notes" />
     <tab type="user" url="@ref SPEC" title="Specifications" />

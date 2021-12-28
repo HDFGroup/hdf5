@@ -223,6 +223,7 @@
 ./doxygen/dox/DDLBNF112.dox
 ./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
+./doxygen/dox/Glossary.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
 ./doxygen/dox/Overview.dox
