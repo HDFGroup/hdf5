@@ -2077,9 +2077,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     hsize_t     ret_value = 0;
 
 #if defined(H5_HAVE_PARALLEL)
-    diff_err_t  err_stat = opts->err_stat;
-    int         mpi_rank = 0, mpi_size = 1;
-    int         diff_count = 0;
+    diff_err_t err_stat = opts->err_stat;
+    int        mpi_rank = 0, mpi_size = 1;
+    int        diff_count = 0;
 
     if (g_Parallel) {
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -2510,7 +2510,6 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 
     return nfound;
 }
-
 
 #if defined(H5_HAVE_PARALLEL)
 static hsize_t
@@ -3445,7 +3444,7 @@ done:
 
     return nfound;
 } /* end hyperslab_pdiff() */
-#endif	/* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: diff

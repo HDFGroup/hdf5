@@ -50,10 +50,10 @@ static void print_user_block(const char *filename, hid_t fid);
 
 #ifdef H5_HAVE_PARALLEL
 
-static int  pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *fidout,
-                                trav_table_t *travt, pack_opt_t *options);
-static int  pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index,
-                          int obj_count, pack_opt_t *options);
+static int pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *fidout,
+                               trav_table_t *travt, pack_opt_t *options);
+static int pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count,
+                         pack_opt_t *options);
 
 static int
 create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hbool_t *_use_h5ocopy,
@@ -1438,7 +1438,6 @@ done:
     return ret_value;
 } /* end get_hyperslab() */
 
-
 #ifdef H5_HAVE_PARALLEL
 
 int
@@ -1759,7 +1758,7 @@ done:
 
 } /* pcopy_objects() */
 
-#endif	/* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_objects
