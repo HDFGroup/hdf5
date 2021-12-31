@@ -43,7 +43,7 @@ hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024); /* 32 MB */
 /* ``parallel_print'' variables */
 unsigned char g_Parallel = 0; /*0 for serial, 1 for parallel */
 char          outBuff[OUTBUFF_SIZE];
-char *        p_diffOutput = NULL;
+char *        p_diffOutput     = NULL;
 int           p_diffOutputSize = 0;
 unsigned      outBuffOffset;
 FILE *        overflow_file = NULL;
@@ -55,15 +55,13 @@ static void dump_table(hid_t fid, char *tablename, table_t *table);
 #endif /* H5DUMP_DEBUG */
 static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t recorded);
 
-
-#ifdef H5_HAVE_PARALLEL 
+#ifdef H5_HAVE_PARALLEL
 int
 get_global_hid_t(hid_t *flag)
 {
     int status = MPI_Bcast(flag, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
     return status;
 }
-
 
 int
 get_global_flag(int *flag)
@@ -75,10 +73,9 @@ get_global_flag(int *flag)
 int
 ptools_barrier(void)
 {
-	return MPI_Barrier(MPI_COMM_WORLD);
+    return MPI_Barrier(MPI_COMM_WORLD);
 }
 #endif
-
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -99,18 +96,19 @@ parallel_print(const char *format, ...)
     else {
 #if defined(H5_HAVE_PARALLEL)
         if (current_diff != NULL) {
-            hbool_t completed = false;
+            hbool_t completed    = false;
             hsize_t outbuff_size = current_diff->outbuff_size;
             while (!completed) {
                 hsize_t outbuffoffset = current_diff->outbuffoffset;
-                char *outbuff = current_diff->outbuff;
+                char *  outbuff       = current_diff->outbuff;
 
-                bytes_written = HDvsnprintf(outbuff + outbuffoffset, outbuff_size - outbuffoffset, format, ap);
+                bytes_written =
+                    HDvsnprintf(outbuff + outbuffoffset, outbuff_size - outbuffoffset, format, ap);
                 HDva_end(ap);
                 HDva_start(ap, format);
 
                 if ((bytes_written < 0) || ((unsigned)bytes_written >= (outbuff_size - outbuffoffset))) {
-					current_diff->outbuff_size += OUTBUFF_SIZE;
+                    current_diff->outbuff_size += OUTBUFF_SIZE;
                     outbuff_size += OUTBUFF_SIZE;
                     current_diff->outbuff = realloc(outbuff, outbuff_size);
                 }
@@ -118,7 +116,7 @@ parallel_print(const char *format, ...)
                     completed = true;
                     current_diff->outbuffoffset += (unsigned)bytes_written;
                 }
-			}
+            }
         }
         else if (overflow_file == NULL) /*no overflow has occurred yet */ {
             bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
@@ -128,7 +126,7 @@ parallel_print(const char *format, ...)
             if ((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
-                overflow_file = HDtmpfile();
+                overflow_file          = HDtmpfile();
                 if (overflow_file == NULL)
                     HDfprintf(rawerrorstream,
                               "warning: could not create overflow file.  Output may be truncated.\n");
@@ -983,15 +981,15 @@ done:
 int
 h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context)
 {
-    int mpi_size;
-	int mpi_rank;
-    int i;
-    hid_t s_id = H5I_INVALID_HID;
-    hsize_t storage_size, elements;
+    int                mpi_size;
+    int                mpi_rank;
+    int                i;
+    hid_t              s_id = H5I_INVALID_HID;
+    hsize_t            storage_size, elements;
     dataset_context_t *new_context = NULL;
-    int ret_value = 0;
-    hsize_t row_total;
-    hsize_t row_diff;
+    int                ret_value   = 0;
+    hsize_t            row_total;
+    hsize_t            row_diff;
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -1055,31 +1053,31 @@ h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context)
         new_context->hs_offset[0] = (hsize_t)mpi_rank * new_context->hs_block[0];
         new_context->hs_count[0]  = 1;
     }
-	else if (row_diff > 0) {
-        int extra = (int)(((hsize_t)mpi_rank - row_diff) * new_context->hs_block[0]);
+    else if (row_diff > 0) {
+        int extra                 = (int)(((hsize_t)mpi_rank - row_diff) * new_context->hs_block[0]);
         new_context->hs_stride[0] = new_context->hs_block[0];
-        new_context->hs_offset[0] = (hsize_t)mpi_rank * (new_context->hs_block[0] +1) + (hsize_t)extra;
+        new_context->hs_offset[0] = (hsize_t)mpi_rank * (new_context->hs_block[0] + 1) + (hsize_t)extra;
         new_context->hs_count[0]  = 1;
     }
-	else {
+    else {
         new_context->hs_stride[0] = new_context->hs_block[0];
         new_context->hs_offset[0] = (hsize_t)mpi_rank * new_context->hs_block[0];
         new_context->hs_count[0]  = 1;
     }
 
-    for (i=1; i < new_context->ds_rank; i++) {
-        new_context->hs_block[i] = new_context->dims[i];
+    for (i = 1; i < new_context->ds_rank; i++) {
+        new_context->hs_block[i]  = new_context->dims[i];
         new_context->hs_stride[i] = new_context->hs_block[i];
-        new_context->hs_count[i] = 1;
+        new_context->hs_count[i]  = 1;
         new_context->hs_offset[i] = 0;
     }
 
     elements = 1;
-    for (i=0; i < new_context->ds_rank; i++)
+    for (i = 0; i < new_context->ds_rank; i++)
         elements *= new_context->hs_block[i];
 
-    new_context->hs_nelmts = elements;
-    storage_size = elements * new_context->dt_size;
+    new_context->hs_nelmts       = elements;
+    storage_size                 = elements * new_context->dt_size;
     new_context->hs_storage_size = storage_size;
 
     *context = new_context;
@@ -1092,7 +1090,7 @@ done:
     if (new_context)
         HDfree(new_context);
 
-	return ret_value;
+    return ret_value;
 }
 
 #endif

@@ -75,7 +75,8 @@ check_options(diff_opt_t *opts)
     if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
 #ifdef H5_HAVE_PARALLEL
         if (g_nID == 0) {
-            HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+            HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n",
+                     PROGRAMNAME);
             HDprintf("use no more than one.\n");
             HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
                      "Reference Manual'.\n",
@@ -375,7 +376,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 if (check_d_input(H5_optarg) == -1) {
 #ifdef H5_HAVE_PARALLEL
                     if (g_nID == 0)
-                       HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+                        HDprintf("<-d %s> is not a valid option\n", H5_optarg);
 #else
                     HDprintf("<-d %s> is not a valid option\n", H5_optarg);
 #endif
@@ -391,7 +392,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 if (check_p_input(H5_optarg) == -1) {
 #ifdef H5_HAVE_PARALLEL
                     if (g_nID == 0)
-                       HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+                        HDprintf("<-p %s> is not a valid option\n", H5_optarg);
 #else
                     HDprintf("<-p %s> is not a valid option\n", H5_optarg);
 #endif
@@ -410,7 +411,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 if (check_n_input(H5_optarg) == -1) {
 #ifdef H5_HAVE_PARALLEL
                     if (g_nID == 0)
-                       HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+                        HDprintf("<-n %s> is not a valid option\n", H5_optarg);
 #else
                     HDprintf("<-n %s> is not a valid option\n", H5_optarg);
 #endif
@@ -593,7 +594,6 @@ print_info(diff_opt_t *opts)
         }
     }
 #endif
-
 }
 
 /*-------------------------------------------------------------------------
@@ -690,7 +690,7 @@ usage(void)
 {
 #ifdef H5_HAVE_PARALLEL
     if (g_Parallel && g_nID)
-       return;
+        return;
 #endif
     PRINTVALSTREAM(rawoutstream, "usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]\n");
     PRINTVALSTREAM(rawoutstream, "  file1             File name of the first HDF5 file\n");

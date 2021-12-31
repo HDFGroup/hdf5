@@ -26,7 +26,8 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in, 
                                trav_table_t *travt);
 
 int
-pcopy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count, pack_opt_t *options)
+pcopy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count,
+              pack_opt_t *options)
 {
     return 0;
 }

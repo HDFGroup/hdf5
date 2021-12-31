@@ -85,7 +85,7 @@ usage(const char *prog)
 {
 #ifdef H5_HAVE_PARALLEL
     if (g_Parallel && g_nID)
-       return;
+        return;
 #endif
 
     FLUSHSTREAM(rawoutstream);
@@ -886,7 +886,7 @@ main(int argc, const char **argv)
     /* Initialize h5tools lib */
     h5tools_init();
 
-    g_Parallel    = 1;
+    g_Parallel = 1;
 
     MPI_Init(&argc, (char ***)&argv);
 
@@ -894,7 +894,7 @@ main(int argc, const char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
     if (g_nTasks == 1)
-		g_Parallel = 0;
+        g_Parallel = 0;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -953,5 +953,3 @@ done:
 
     leave(h5tools_getstatus());
 }
-
-

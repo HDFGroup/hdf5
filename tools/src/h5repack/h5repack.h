@@ -189,8 +189,8 @@ int   copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_
 int copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options);
 
 int do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
-int pcopy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index,
-                  int obj_count, pack_opt_t *options);
+int pcopy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count,
+                  pack_opt_t *options);
 
 /*-------------------------------------------------------------------------
  * filters and verify module
@@ -231,6 +231,5 @@ obj_list_t *parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
 
 obj_list_t *parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about object */
                          pack_opt_t *options);
-
 
 #endif /* H5REPACK_H */
