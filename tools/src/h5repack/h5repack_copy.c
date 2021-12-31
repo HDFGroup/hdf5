@@ -43,10 +43,6 @@ static int  get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[
                           hsize_t dims_hslab[], hsize_t *hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr, pack_opt_t *options,
                                double read_time, double write_time);
-static int  pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *fidout,
-                                trav_table_t *travt, pack_opt_t *options);
-static int  pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index,
-                          int obj_count, pack_opt_t *options);
 static int  do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
 static int  copy_user_block(const char *infile, const char *outfile, hsize_t size);
 #if defined(H5REPACK_DEBUG_USER_BLOCK)
@@ -54,6 +50,11 @@ static void print_user_block(const char *filename, hid_t fid);
 #endif
 
 #ifdef H5_HAVE_PARALLEL
+
+static int  pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *fidout,
+                                trav_table_t *travt, pack_opt_t *options);
+static int  pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index,
+                          int obj_count, pack_opt_t *options);
 
 static int
 create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hbool_t * _use_h5ocopy, pack_opt_t *options)
@@ -1440,7 +1441,7 @@ done:
     return ret_value;
 } /* end get_hyperslab() */
 
-
+#ifdef H5_HAVE_PARALLEL
 int
 pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count, pack_opt_t *options)
 {
@@ -1761,6 +1762,7 @@ done:
 
 } /* pcopy_objects() */
 
+#endif	/* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_objects

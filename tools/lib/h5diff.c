@@ -2092,9 +2092,10 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     diff_args_t argdata;
     size_t      idx1      = 0;
     size_t      idx2      = 0;
-    diff_err_t  ret_value = opts->err_stat;
+    hsize_t     ret_value = 0;
 
 #if defined(H5_HAVE_PARALLEL)
+    diff_err_t  err_stat = opts->err_stat;
     int         mpi_rank = 0, mpi_size = 1;
     int         diff_count = 0;
 
@@ -2102,6 +2103,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
         MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     }
+
 #endif
 
     H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
@@ -2502,20 +2504,22 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
             /* Print any final data waiting in our queue */
             print_incoming_data();
         } /* end if (g_Parallel) */
-#endif /* H5_HAVE_PARALLEL */
         H5TOOLS_DEBUG("done with if block");
 
         HDfree(workerTasks);
     }
+
+#endif /* H5_HAVE_PARALLEL */
+
 #if defined(H5_HAVE_PARALLEL)
 	/* Update the final 'local_diff_total' */
     if (g_Parallel && (current_diff != NULL)) {
         local_diff_total += current_diff->outbuffoffset;
     }
-#endif
-    opts->err_stat = opts->err_stat | ret_value;
 
+    opts->err_stat = opts->err_stat | ret_value;
     free_exclude_attr_list(opts);
+#endif
 
     /* free table */
     if (table)
@@ -2526,6 +2530,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     return nfound;
 }
 
+
+#if defined(H5_HAVE_PARALLEL)
 static hsize_t
 hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
                 diff_opt_t *opts, diff_args_t *argdata)
@@ -3445,6 +3451,7 @@ done:
 
     return nfound;
 } /* end hyperslab_pdiff() */
+#endif	/* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: diff
@@ -3872,6 +3879,7 @@ done:
 }
 
 
+#ifdef H5_HAVE_PARALLEL
 int
 h5diff_get_global(int *flag)
 {
@@ -3879,3 +3887,5 @@ h5diff_get_global(int *flag)
 	MPI_Reduce(flag,&global_flag,1,MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     return global_flag;
 }
+
+#endif
