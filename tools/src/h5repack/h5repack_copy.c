@@ -955,16 +955,16 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
         if ((options->fout_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
-            /* If running a parallel repack, then try using the MPIO driver.
-             * Using the default (Sec2) driver always fails due to file locking
-             * which cannot be avoided when creating the superblock.
-             * It seems safer to do this collectively.
-             * RAW 12-2021
-             if (g_Parallel) {
-                if (H5Pset_fapl_mpio(options->fout_fapl, MPI_COMM_WORLD, info) < 0)
-                    H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
-             }
-             */
+    /* If running a parallel repack, then try using the MPIO driver.
+     * Using the default (Sec2) driver always fails due to file locking
+     * which cannot be avoided when creating the superblock.
+     * It seems safer to do this collectively.
+     * RAW 12-2021
+     if (g_Parallel) {
+        if (H5Pset_fapl_mpio(options->fout_fapl, MPI_COMM_WORLD, info) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+     }
+     */
 
     /* It can be default, latest or other settings by users */
     if (H5Pset_libver_bounds(options->fout_fapl, options->low_bound, options->high_bound) < 0)
@@ -1190,7 +1190,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                                        fnameout);
             }
         }
-        else 
+        else
 #endif
         {
             /*-------------------------------------------------------------------------

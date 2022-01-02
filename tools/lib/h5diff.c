@@ -35,17 +35,17 @@ static int h5diff_initialize_lists(const char *fname1, const char *fname2, const
                                    char **_obj1fullname, trav_info_t **_info1_lp, char **_obj2fullname,
                                    trav_info_t **_info2_lp, int *_both_objs_grp, trav_table_t **_match_list);
 
-static herr_t  trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited,
-                             void *udata);
-static herr_t  trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata);
-static int     check_dataset_sizes(hid_t file_id, trav_table_t *match_list);
-static void    ph5diff_gather_diffs(void);
+static herr_t trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_visited,
+                            void *udata);
+static herr_t trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata);
+static int    check_dataset_sizes(hid_t file_id, trav_table_t *match_list);
+static void   ph5diff_gather_diffs(void);
 
-static hsize_t hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts, diff_args_t *argdata);
+static hsize_t hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
+                               diff_opt_t *opts, diff_args_t *argdata);
 
-static hsize_t pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id, const char *grp2,
-                           trav_info_t *info2, trav_table_t *table, diff_opt_t *opts);
-
+static hsize_t pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
+                           const char *grp2, trav_info_t *info2, trav_table_t *table, diff_opt_t *opts);
 
 /*-------------------------------------------------------------------------
  * Function: print_objname
@@ -151,7 +151,7 @@ print_incoming_data(void)
         }
     } while (incomingMessage);
 }
-#endif	/* USE_ORIGINAL_CODE */
+#endif /* USE_ORIGINAL_CODE */
 
 /*-------------------------------------------------------------------------
  * Function: is_valid_options
@@ -1190,7 +1190,8 @@ done:
 #define DEFAULT_LARGE_DSET_SIZE 1048576
 
 static hsize_t
-hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts, diff_args_t *argdata)
+hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts,
+                diff_args_t *argdata)
 {
     int   i, j;
     int   status    = -1;
@@ -2121,7 +2122,6 @@ done:
     return nfound;
 } /* end hyperslab_pdiff() */
 
-
 /*-------------------------------------------------------------------------
  * Function: check_dataset_sizes
  *
@@ -2986,7 +2986,7 @@ done:
 
 hsize_t
 pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id, const char *grp2,
-           trav_info_t *info2, trav_table_t *table, diff_opt_t *opts)
+            trav_info_t *info2, trav_table_t *table, diff_opt_t *opts)
 {
     hsize_t     nfound = 0;
     unsigned    i;
@@ -2999,9 +2999,9 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
     size_t      idx2      = 0;
     diff_err_t  ret_value = opts->err_stat;
 
-    int         mpi_rank = 0, mpi_size = 1;
-    int         diff_count = 0;
-    int         mod_rank = -1;
+    int mpi_rank = 0, mpi_size = 1;
+    int diff_count = 0;
+    int mod_rank   = -1;
 
     if (g_Parallel) {
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -3105,31 +3105,31 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
 
             mod_rank = diff_count % mpi_size;
             if (mod_rank == mpi_rank) {
-               char *outbuff = NULL;
-               diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
-               HDassert((new_diff != NULL));
-               outbuff = (char *)malloc(OUTBUFF_SIZE);
-               HDassert((outbuff != NULL));        
-               new_diff->obj_idx = diff_count;
-               new_diff->outbuff_size = OUTBUFF_SIZE;
-               new_diff->outbuffoffset = 0;
-               new_diff->outbuff = outbuff;
+                char *           outbuff  = NULL;
+                diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
+                HDassert((new_diff != NULL));
+                outbuff = (char *)malloc(OUTBUFF_SIZE);
+                HDassert((outbuff != NULL));
+                new_diff->obj_idx       = diff_count;
+                new_diff->outbuff_size  = OUTBUFF_SIZE;
+                new_diff->outbuffoffset = 0;
+                new_diff->outbuff       = outbuff;
 
-               if (rank_diff_count == 0) {
-                   rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
-               }
-               else if (rank_diff_count == diff_count_limit) {
-                   diff_count_limit += DIFF_COUNT;
-                   rank_diffs = (diff_instance_t **)realloc(rank_diffs, (size_t)diff_count_limit);
-               }
-               rank_diffs[rank_diff_count++] = new_diff;
-               my_diffs = new_diff;
-               /* Add a previous outbuff (length) into the accumulated total for this rank */
-               if (current_diff)
-                   local_diff_total += current_diff->outbuffoffset;
-               /* Assign a new diff to be the current (working) outbuff */
-               current_diff = new_diff;
-               nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
+                if (rank_diff_count == 0) {
+                    rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
+                }
+                else if (rank_diff_count == diff_count_limit) {
+                    diff_count_limit += DIFF_COUNT;
+                    rank_diffs = (diff_instance_t **)realloc(rank_diffs, (size_t)diff_count_limit);
+                }
+                rank_diffs[rank_diff_count++] = new_diff;
+                my_diffs                      = new_diff;
+                /* Add a previous outbuff (length) into the accumulated total for this rank */
+                if (current_diff)
+                    local_diff_total += current_diff->outbuffoffset;
+                /* Assign a new diff to be the current (working) outbuff */
+                current_diff = new_diff;
+                nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
             }
             diff_count++;
             if (obj1_fullpath) {
@@ -3142,12 +3142,10 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
             }
         }
 
-    }     /* end for (common objects) */
+    } /* end for (common objects) */
     H5TOOLS_DEBUG("done with for loop - errstat:%d", opts->err_stat);
 
-
-
-	/* Update the final 'local_diff_total' */
+    /* Update the final 'local_diff_total' */
     if (current_diff != NULL) {
         local_diff_total += current_diff->outbuffoffset;
     }
@@ -3165,7 +3163,7 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
     return nfound;
 }
 
-#endif	/* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function: diff_match
@@ -3188,7 +3186,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
            trav_info_t *info2, trav_table_t *table, diff_opt_t *opts)
 {
 #if defined(H5_HAVE_PARALLEL) && !defined(USE_ORIGINAL_CODE)
-    if (g_Parallel) 
+    if (g_Parallel)
         return pdiff_match(file1_id, grp1, info1, file2_id, grp2, info2, table, opts);
 #endif
 
@@ -3268,14 +3266,14 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
 #else  /* H5_HAVE_ASPRINTF */
-                if ((obj1_fullpath = (char *)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) ==
-                    NULL) {
-                    H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
-                }
-                else {
-                    HDstrcpy(obj1_fullpath, grp1_path);
-                    HDstrcat(obj1_fullpath, table->objs[i].name);
-                }
+            if ((obj1_fullpath = (char *)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1)) ==
+                NULL) {
+                H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+            else {
+                HDstrcpy(obj1_fullpath, grp1_path);
+                HDstrcat(obj1_fullpath, table->objs[i].name);
+            }
 #endif /* H5_HAVE_ASPRINTF */
                 H5TOOLS_DEBUG("diff_match path1 - %s", obj1_fullpath);
 
@@ -3286,14 +3284,14 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
 #else  /* H5_HAVE_ASPRINTF */
-                if ((obj2_fullpath = (char *)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) ==
-                    NULL) {
-                    H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
-                }
-                else {
-                    HDstrcpy(obj2_fullpath, grp2_path);
-                    HDstrcat(obj2_fullpath, table->objs[i].name);
-                }
+            if ((obj2_fullpath = (char *)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1)) ==
+                NULL) {
+                H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
+            }
+            else {
+                HDstrcpy(obj2_fullpath, grp2_path);
+                HDstrcat(obj2_fullpath, table->objs[i].name);
+            }
 #endif /* H5_HAVE_ASPRINTF */
                 H5TOOLS_DEBUG("diff_match path2 - %s", obj2_fullpath);
 
@@ -3481,7 +3479,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                         }     /* end else */
                     }         /* end if */
                 }             /* end else */
-#endif          /* USE_ORIGINAL_CODE (PARALLEL) */
+#endif                        /* USE_ORIGINAL_CODE (PARALLEL) */
 
                 if (obj1_fullpath)
                     HDfree(obj1_fullpath);
@@ -3591,7 +3589,6 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     H5TOOLS_ENDDEBUG(" diffs=%d - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
-
 }
 
 /*-------------------------------------------------------------------------
