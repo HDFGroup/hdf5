@@ -568,7 +568,14 @@ print_info(diff_opt_t *opts)
     }
 
 #ifdef H5_HAVE_PARALLEL
-    if (opts->not_cmp == 1) {
+    int not_cmp, any_not_cmp = opts->not_cmp; 
+
+    if (g_Parallel) {
+       not_cmp = opts->not_cmp; 
+       any_not_cmp = h5diff_get_global(&not_cmp);
+    }
+
+    if (any_not_cmp > 0) {
         if (opts->mode_list_not_cmp == 0) {
             if (g_nID == 0) {
                 HDprintf("--------------------------------\n");

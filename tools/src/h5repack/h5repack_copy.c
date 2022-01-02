@@ -960,14 +960,11 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
              * which cannot be avoided when creating the superblock.
              * It seems safer to do this collectively.
              * RAW 12-2021
+             if (g_Parallel) {
+                if (H5Pset_fapl_mpio(options->fout_fapl, MPI_COMM_WORLD, info) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+             }
              */
-#if 0
-// #ifdef H5_HAVE_PARALLEL
-    if (g_Parallel) {
-        if (H5Pset_fapl_mpio(options->fout_fapl, MPI_COMM_WORLD, info) < 0)
-            H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
-    }
-#endif
 
     /* It can be default, latest or other settings by users */
     if (H5Pset_libver_bounds(options->fout_fapl, options->low_bound, options->high_bound) < 0)
@@ -1139,6 +1136,16 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
             H5TOOLS_GOTO_ERROR((-1), "H5Pset_file_space_page_size failed to set file space page size");
 
     /*-------------------------------------------------------------------------
+     * create the output file
+     *-------------------------------------------------------------------------
+     */
+    if (options->verbose > 0)
+        HDprintf("Making new file ...\n");
+
+    if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+
+    /*-------------------------------------------------------------------------
      * get list of objects
      *-------------------------------------------------------------------------
      */
@@ -1183,15 +1190,9 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                                        fnameout);
             }
         }
-        else {
-            /*-------------------------------------------------------------------------
-             * create the output file
-             *-------------------------------------------------------------------------
-             */
-
-            if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
-                H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
-
+        else 
+#endif
+        {
             /*-------------------------------------------------------------------------
              * do the copy
              *-------------------------------------------------------------------------
@@ -1209,7 +1210,6 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                 H5TOOLS_GOTO_ERROR((-1), "do_copy_refobjs from <%s> could not copy data to <%s>", fnamein,
                                    fnameout);
         }
-#endif
     }
 
     /*-------------------------------------------------------------------------
@@ -1865,9 +1865,6 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
 
     /* init linkinfo struct */
     HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
-
-    if (options->verbose > 0)
-        HDprintf("Making new file ...\n");
 
     /*-------------------------------------------------------------------------
      * copy the supplied object list
