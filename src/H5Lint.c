@@ -596,7 +596,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
 
     /* Set the link's name correctly */
     /* Casting away const OK -QAK */
-    udata->lnk->name = strdup(name);
+    udata->lnk->name = HDstrdup(name);
     if (NULL == udata->lnk->name) {
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "out of memory")
     }
