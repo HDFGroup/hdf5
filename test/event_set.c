@@ -445,7 +445,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, NULL, &count) < 0)
@@ -471,7 +471,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 2;
+    count       = 2;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, NULL, requests, &count) < 0)
@@ -503,7 +503,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     requests[0] = NULL;
@@ -535,7 +535,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 1;
+    count            = 1;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, NULL, &count) < 0)
@@ -561,7 +561,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 1;
+    count       = 1;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, NULL, requests, &count) < 0)
@@ -591,11 +591,11 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Try with H5_ITER_DEC */
-    count = 1;
+    count            = 1;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
-    requests[0] = NULL;
-    requests[1] = NULL;
+    requests[0]      = NULL;
+    requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, requests, &count) < 0)
         TEST_ERROR
     if (connector_ids[0] != connector_ids_g[1])
