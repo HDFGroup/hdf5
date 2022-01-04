@@ -331,6 +331,7 @@ H5_GCC_DIAG_ON("long-long")
 #define PRIXHSIZE          H5_PRINTF_LL_WIDTH "X"
 #define H5_SIZEOF_HSIZE_T  H5_SIZEOF_LONG_LONG
 #define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
+#define H5_PRINTF_HSIZE_FMT "%" PRIuHSIZE
 #define HSIZE_UNDEF        ULLONG_MAX
 #else
 #error "nothing appropriate for hsize_t"
