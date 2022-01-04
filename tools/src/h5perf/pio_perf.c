@@ -188,7 +188,7 @@ typedef struct _minmax {
 
 /* local functions */
 static off_t           parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, char *argv[]);
+static struct options *parse_command_line(int argc, const char *argv[]);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -214,21 +214,32 @@ static off_t squareo(off_t);
  * Modifications:
  */
 int
-main(int argc, char *argv[])
+main(int argc, const char *argv[])
 {
+    int             i = 0;
     int             ret;
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
-
+    char **         obj        = NULL;
 #ifndef STANDALONE
     /* Initialize h5tools lib */
     h5tools_init();
 #endif
 
     output = stdout;
+    if ((obj = (char **)HDcalloc((size_t)argc, sizeof(char *))) == NULL) {
+        HDfprintf(stderr, "%s: HDcalloc call failed\n", progname);
+        return EXIT_FAILURE;
+    }
+    else {
+        for (i = 0; i < argc; i++) {
+            obj[i] = HDstrdup(argv[i]);
+        }
+    }
 
     /* initialize MPI and get the maximum num of processors we started with */
-    MPI_Init(&argc, &argv);
+    /* MPI_Init(&argc, (char**) &argv); */
+    MPI_Init(&argc, &obj);
     ret = MPI_Comm_size(MPI_COMM_WORLD, &comm_world_nprocs_g);
 
     if (ret != MPI_SUCCESS) {
@@ -283,6 +294,13 @@ main(int argc, char *argv[])
 finish:
     MPI_Finalize();
     free(opts);
+    if (obj) {
+        for (i = 0; i < argc; i++) {
+            if (obj[i])
+                HDfree(obj[i]);
+        }
+        HDfree(obj);
+    }
     return exit_value;
 }
 
@@ -1276,7 +1294,7 @@ report_parameters(struct options *opts)
  *    Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static struct options *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *argv[])
 {
     register int    opt;
     struct options *cl_opts;
@@ -1305,7 +1323,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
                 cl_opts->h5_alignment = parse_size_directive(H5_optarg);
