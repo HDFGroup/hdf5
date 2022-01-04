@@ -238,7 +238,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5ESget_requests
  *
- * Purpose:     Retrieve the requests in an event set
+ * Purpose:     Retrieve the requests in an event set.  Up to *count
+ *              requests are stored in the provided requests array, and
+ *              the connector ids corresponding to these requests are
+ *              stored in the provided connector_ids array.  Either or
+ *              both of these arrays may be NULL, in which case this
+ *              information is not returned.  If these arrays are
+ *              non-NULL, they must be large enough to contain *count
+ *              entries.  On exit, *count is set to the total number of
+ *              events in the event set.
+ *
+ *              Events are returned in the order they were added to the
+ *              event set.  If order is H5_ITER_INC or H5_ITER_NATIVE,
+ *              events will be returned starting from the oldest. If order
+ *              is H5_ITER_DEC, events will be returned starting with the
+ *              newest/most recent.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -248,21 +262,23 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ESget_requests(hid_t es_id, hid_t *connector_ids, void **requests, size_t *count /*out*/)
+H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t *count /*out*/)
 {
     H5ES_t *es;                  /* Event set */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*i**xx", es_id, connector_ids, requests, count);
+    H5TRACE5("e", "iIo*i**xx", es_id, order, connector_ids, requests, count);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+    if (order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Call internal routine */
     if (count && *count > 0 && (requests || connector_ids))
-        if (H5ES__get_requests(es, connector_ids, requests, *count) < 0)
+        if (H5ES__get_requests(es, order, connector_ids, requests, *count) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get requests")
 
     /* Retrieve the count, if non-NULL */

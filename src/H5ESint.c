@@ -471,7 +471,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
 /*-------------------------------------------------------------------------
  * Function:    H5ES__get_requests
  *
- * Purpose:     Get all requests in an event set
+ * Purpose:     Get all requests in an event set.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -481,7 +481,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__get_requests(H5ES_t *es, hid_t *connector_ids, void **requests, size_t count)
+H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t count)
 {
     H5ES_get_requests_ctx_t ctx;                 /* Callback context */
     herr_t                  ret_value = SUCCEED; /* Return value */
@@ -500,7 +500,7 @@ H5ES__get_requests(H5ES_t *es, hid_t *connector_ids, void **requests, size_t cou
     ctx.i             = 0;
 
     /* Iterate over the events in the set */
-    if (H5ES__list_iterate(&es->active, H5ES__get_requests_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, order, H5ES__get_requests_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
@@ -750,7 +750,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_fa
     ctx.op_failed       = op_failed;
 
     /* Iterate over the events in the set, waiting for them to complete */
-    if (H5ES__list_iterate(&es->active, H5ES__wait_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, H5_ITER_NATIVE, H5ES__wait_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
@@ -858,7 +858,7 @@ H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
     ctx.op_failed        = op_failed;
 
     /* Iterate over the events in the set, attempting to cancel them */
-    if (H5ES__list_iterate(&es->active, H5ES__cancel_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, H5_ITER_NATIVE, H5ES__cancel_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
@@ -972,7 +972,7 @@ H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[], 
     ctx.curr_err_info = &err_info[0];
 
     /* Iterate over the failed events in the set, copying their error info */
-    if (H5ES__list_iterate(&es->failed, H5ES__get_err_info_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->failed, H5_ITER_NATIVE, H5ES__get_err_info_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Set # of failed events cleared from event set's failed list */
@@ -1046,7 +1046,7 @@ H5ES__close(H5ES_t *es)
             "can't close event set while unfinished operations are present (i.e. wait on event set first)")
 
     /* Iterate over the failed events in the set, releasing them */
-    if (H5ES__list_iterate(&es->failed, H5ES__close_failed_cb, (void *)es) < 0)
+    if (H5ES__list_iterate(&es->failed, H5_ITER_NATIVE, H5ES__close_failed_cb, (void *)es) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Release the event set */

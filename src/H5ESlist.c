@@ -135,7 +135,10 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *              each event.
  *
  * Note:        Iteration is safe for deleting the current event.  Modifying
- *              the list in other ways is likely unsafe.
+ *              the list in other ways is likely unsafe.  If order is
+ *              H5_ITER_INC or H5_ITER_NATIVE events are visited starting
+ *              with the oldest, otherwise they are visited starting with
+ *              the newest.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -145,7 +148,8 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *-------------------------------------------------------------------------
  */
 int
-H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
+H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order,
+    H5ES_list_iter_func_t cb, void *ctx)
 {
     H5ES_event_t *ev;                       /* Event in list */
     int           ret_value = H5_ITER_CONT; /* Return value */
@@ -157,12 +161,12 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx)
     HDassert(cb);
 
     /* Iterate over events in list */
-    ev = el->head;
+    ev = (order == H5_ITER_DEC) ? el->tail : el->head;
     while (ev) {
         H5ES_event_t *tmp; /* Temporary event */
 
         /* Get pointer to next node, so it's safe if this one is removed */
-        tmp = ev->next;
+        tmp = (order == H5_ITER_DEC) ? ev->prev : ev->next;
 
         /* Perform iterator callback */
         if ((ret_value = (*cb)(ev, ctx)) != H5_ITER_CONT) {
