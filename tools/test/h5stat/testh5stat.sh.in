@@ -304,7 +304,7 @@ TOOLTEST h5stat_links5.ddl -g -l 40000 h5stat_newgrat.h5
 #     -d --di=15
 TOOLTEST h5stat_err1_dims.ddl -d --dims=-1 h5stat_threshold.h5
 TOOLTEST h5stat_dims1.ddl -gd -m 5 h5stat_threshold.h5
-TOOLTEST h5stat_dims2.ddl -d --di=15 h5stat_threshold.h5
+TOOLTEST h5stat_dims2.ddl -d --dims=15 h5stat_threshold.h5
 #
 # Tests for -a option on h5stat_threshold.h5
 #     -a -2 (incorrect threshold value)

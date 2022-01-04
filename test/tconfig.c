@@ -37,8 +37,9 @@
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
 #define vrfy_macrosize(type, macro, macroname)                                                               \
-    if (sizeof(type) != macro)                                                                               \
-        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname, (int)macro);
+    if (sizeof(type) != (macro))                                                                             \
+        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname,             \
+                      (int)(macro));
 
 /* local routine prototypes */
 void test_config_ctypes(void);
@@ -113,30 +114,14 @@ test_config_ctypes(void)
     vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
-#if H5_SIZEOF_LONG_DOUBLE > 0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
-#endif
 
     /* standard C99 basic types */
-#if H5_SIZEOF_LONG_LONG > 0
     vrfy_cint_type(long long, unsigned long long, H5_SIZEOF_LONG_LONG);
-#endif
-
-#if H5_SIZEOF_INT8_T > 0
     vrfy_cint_type(int8_t, uint8_t, H5_SIZEOF_INT8_T);
-#endif
-
-#if H5_SIZEOF_INT16_T > 0
     vrfy_cint_type(int16_t, uint16_t, H5_SIZEOF_INT16_T);
-#endif
-
-#if H5_SIZEOF_INT32_T > 0
     vrfy_cint_type(int32_t, uint32_t, H5_SIZEOF_INT32_T);
-#endif
-
-#if H5_SIZEOF_INT64_T > 0
     vrfy_cint_type(int64_t, uint64_t, H5_SIZEOF_INT64_T);
-#endif
 
     /* Some vendors have different sizes for the signed and unsigned */
     /* fast8_t.  Need to check them individually. */

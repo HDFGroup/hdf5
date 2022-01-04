@@ -63,7 +63,11 @@ static int test_foreign_scaleattached(const char *filename);
 #define SCALE_4_NAME "scalename_4_"
 
 #define FILENAME "test_ds_"
-#define FILEEXT  ".h5"
+#ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
+#define FILEEXT "_new_ref.h5"
+#else
+#define FILEEXT ".h5"
+#endif
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -75,7 +79,7 @@ main(int argc, char **argv)
     int  nerrors = 0;
     char filename[65];
 
-    if (argc < 2) {
+    if (argc < 2 || !argv[0] || !argv[1]) {
         HDprintf("Usage: gen_test [le | be]\n");
         return 1;
     }

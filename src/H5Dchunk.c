@@ -107,9 +107,9 @@
 /*#define H5D_CHUNK_DEBUG */
 
 /* Flags for the "edge_chunk_state" field below */
-#define H5D_RDCC_DISABLE_FILTERS 0x01u /* Disable filters on this chunk */
+#define H5D_RDCC_DISABLE_FILTERS 0x01U /* Disable filters on this chunk */
 #define H5D_RDCC_NEWLY_DISABLED_FILTERS                                                                      \
-    0x02u /* Filters have been disabled since                                                                \
+    0x02U /* Filters have been disabled since                                                                \
            * the last flush */
 
 /******************/
@@ -245,10 +245,10 @@ typedef struct H5D_chunk_coll_info_t {
 } H5D_chunk_coll_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
-typedef struct H5D_chunk_iter_cb_data_t {
-    H5D_chunk_iter_op_t cb;      /* User defined callback */
+typedef struct H5D_chunk_iter_ud_t {
+    H5D_chunk_iter_op_t op;      /* User defined callback */
     void *              op_data; /* User data for user defined callback */
-} H5D_chunk_iter_cb_data_t;
+} H5D_chunk_iter_ud_t;
 
 /********************/
 /* Local Prototypes */
@@ -1401,6 +1401,19 @@ H5D__chunk_mem_xfree(void *chk, const void *_pline)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D__chunk_mem_xfree() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_mem_free
+ *
+ * Purpose:    Wrapper with H5MM_free_t-compatible signature that just
+ *             calls H5D__chunk_mem_xfree and discards the return value.
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__chunk_mem_free(void *chk, const void *_pline)
+{
+    (void)H5D__chunk_mem_xfree(chk, _pline);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_mem_realloc
@@ -3193,11 +3206,14 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
-    hbool_t              found     = FALSE;   /* In cache? */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5D_rdcc_ent_t *     ent   = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc    = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx   = 0;     /* Index of chunk in cache, if present */
+    hbool_t              found = FALSE; /* In cache? */
+#ifdef H5_HAVE_PARALLEL
+    hbool_t reenable_coll_md_reads = FALSE;
+#endif
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3268,8 +3284,13 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * highly unlikely that users would read the same chunks from all
              * processes.
              */
-            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
-                H5CX_set_coll_metadata_read(FALSE);
+            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
+                if (do_coll_md_reads) {
+                    H5CX_set_coll_metadata_read(FALSE);
+                    reenable_coll_md_reads = TRUE;
+                }
+            }
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
@@ -3312,6 +3333,12 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     }     /* end else */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* Re-enable collective metadata reads if we disabled them */
+    if (reenable_coll_md_reads)
+        H5CX_set_coll_metadata_read(TRUE);
+#endif /* H5_HAVE_PARALLEL */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_lookup() */
 
@@ -4427,7 +4454,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc, (void *)pline,
-                           (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline, &dset->shared->dcpl_cache.fill,
+                           (H5MM_free_t)H5D__chunk_mem_free, (void *)pline, &dset->shared->dcpl_cache.fill,
                            dset->shared->type, dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
@@ -7515,14 +7542,15 @@ done:
 static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
-    int ret_value = 0;
+    const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    int                        ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_STATIC_NOERR
 
-    const H5D_chunk_iter_cb_data_t *data = (H5D_chunk_iter_cb_data_t *)udata;
-
-    ret_value = (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                           chunk_rec->nbytes, data->op_data);
+    /* Check for callback failure and pass along return value */
+    if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
+                                chunk_rec->nbytes, data->op_data)) < 0)
+        HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_iter_cb */
@@ -7541,7 +7569,7 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
+H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
     const H5O_layout_t *layout = NULL;       /* Dataset layout */
     const H5D_rdcc_t *  rdcc   = NULL;       /* Raw data chunk cache */
@@ -7576,15 +7604,65 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
 
     /* If the dataset is not written, return without errors */
     if (H5F_addr_defined(idx_info.storage->idx_addr)) {
-        H5D_chunk_iter_cb_data_t data;
-        data.cb      = cb;
-        data.op_data = op_data;
+        H5D_chunk_iter_ud_t ud;
+
+        /* Set up info for iteration callback */
+        ud.op      = op;
+        ud.op_data = op_data;
 
         /* Iterate over the allocated chunks calling the iterator callback */
-        if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &data) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to iterate over chunks.")
+        if ((ret_value =
+                 (dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
+            HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
     } /* end if H5F_addr_defined */
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__chunk_iter() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_get_offset_copy
+ *
+ * Purpose:     Copies an offset buffer and performs bounds checks on the
+ *              values.
+ *
+ *              This helper function ensures that the offset buffer given
+ *              by the user is suitable for use with the rest of the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy)
+{
+    unsigned u;
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dset);
+    HDassert(offset);
+    HDassert(offset_copy);
+
+    /* The library's chunking code requires the offset to terminate with a zero.
+     * So transfer the offset array to an internal offset array that we
+     * can properly terminate (handled via the memset call).
+     */
+    HDmemset(offset_copy, 0, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
+
+    for (u = 0; u < dset->shared->ndims; u++) {
+        /* Make sure the offset doesn't exceed the dataset's dimensions */
+        if (offset[u] > dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "offset exceeds dimensions of dataset")
+
+        /* Make sure the offset fall right on a chunk's boundary */
+        if (offset[u] % dset->shared->layout.u.chunk.dim[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "offset doesn't fall on chunks's boundary")
+
+        offset_copy[u] = offset[u];
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_get_offset_copy() */

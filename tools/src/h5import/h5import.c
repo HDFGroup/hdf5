@@ -467,14 +467,12 @@ readIntegerData(FILE *strm, struct Input *in)
     H5DT_INT16  temp16;
     H5DT_INT32 *in32;
     H5DT_INT32  temp32;
-#ifdef H5_SIZEOF_LONG_LONG
     H5DT_INT64 *in64;
     H5DT_INT64  temp64;
     char        buffer[256];
-#endif
-    hsize_t len = 1;
-    hsize_t i;
-    int     j;
+    hsize_t     len = 1;
+    hsize_t     i;
+    int         j;
 
     const char *err1 = "Unable to get integer value from file.\n";
     const char *err2 = "Unrecognized input class type.\n";
@@ -589,7 +587,6 @@ readIntegerData(FILE *strm, struct Input *in)
             }
             break;
 
-#ifdef H5_SIZEOF_LONG_LONG
         case 64:
             in64 = (H5DT_INT64 *)in->data;
             switch (in->inputClass) {
@@ -626,7 +623,6 @@ readIntegerData(FILE *strm, struct Input *in)
                     return (-1);
             }
             break;
-#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
         default:
             (void)HDfprintf(stderr, "%s", err3);
@@ -643,17 +639,15 @@ readUIntegerData(FILE *strm, struct Input *in)
     H5DT_UINT16  temp16;
     H5DT_UINT32 *in32;
     H5DT_UINT32  temp32;
-#ifdef H5_SIZEOF_LONG_LONG
     H5DT_UINT64 *in64;
     H5DT_UINT64  temp64;
     char         buffer[256];
-#endif
-    hsize_t     len = 1;
-    hsize_t     i;
-    int         j;
-    const char *err1 = "Unable to get unsigned integer value from file.\n";
-    const char *err2 = "Unrecognized input class type.\n";
-    const char *err3 = "Invalid input size.\n";
+    hsize_t      len = 1;
+    hsize_t      i;
+    int          j;
+    const char * err1 = "Unable to get unsigned integer value from file.\n";
+    const char * err2 = "Unrecognized input class type.\n";
+    const char * err3 = "Invalid input size.\n";
 
     for (j = 0; j < in->rank; j++)
         len *= in->sizeOfDimension[j];
@@ -760,7 +754,6 @@ readUIntegerData(FILE *strm, struct Input *in)
             }
             break;
 
-#ifdef H5_SIZEOF_LONG_LONG
         case 64:
             in64 = (H5DT_UINT64 *)in->data;
             switch (in->inputClass) {
@@ -797,7 +790,6 @@ readUIntegerData(FILE *strm, struct Input *in)
                     return (-1);
             }
             break;
-#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
         default:
             (void)HDfprintf(stderr, "%s", err3);
@@ -2457,9 +2449,6 @@ validateConfigurationParameters(struct Input *in)
     const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
     const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
     const char *err5  = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
-#ifndef H5_SIZEOF_LONG_LONG
-    const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
-#endif
 
     /* for class STR other parameters are ignored */
     if (in->inputClass == 5) /* STR */
@@ -2505,13 +2494,6 @@ validateConfigurationParameters(struct Input *in)
             return (-1);
         }
 
-#ifndef H5_SIZEOF_LONG_LONG
-    if (in->inputSize == 64 &&
-        (in->inputClass == 0 || in->inputClass == 4 || in->inputClass == 6 || in->inputClass == 7)) {
-        (void)HDfprintf(stderr, "%s", err6);
-        return -1;
-    }
-#endif
     return (0);
 }
 
@@ -3250,7 +3232,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#if H5_SIZEOF_LONG_DOUBLE != 0
     else if (!HDstrcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
         in->inputSize                      = H5_SIZEOF_LONG_DOUBLE;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3263,7 +3244,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#endif
     else if (!HDstrcmp(buffer, "H5T_TIME: not yet implemented")) {
         kindex = -1;
     }
@@ -3771,6 +3751,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 static int
 getExternalFilename(struct Input *in, FILE *strm)
 {
+    size_t      temp_len;
     char        temp[255];
     const char *err1 = "Unable to get 'string' value.\n";
 
@@ -3779,8 +3760,10 @@ getExternalFilename(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    in->externFilename = (char *)HDmalloc((size_t)(HDstrlen(temp) + 1) * sizeof(char));
-    (void)HDstrncpy(in->externFilename, temp, HDstrlen(temp) + 1);
+    temp_len           = HDstrlen(temp);
+    in->externFilename = (char *)HDmalloc((temp_len + 1) * sizeof(char));
+    (void)HDstrcpy(in->externFilename, temp);
+    in->externFilename[temp_len] = '\0';
     return (0);
 }
 

@@ -11,6 +11,8 @@
     <tab type="user" url="@ref RM" title="Reference Manual" />
     <tab type="user" url="@ref TN" title="Technical Notes" />
     <tab type="user" url="@ref SPEC" title="Specifications" />
+    <tab type="user" url="@ref RFC" title="RFCs" />
+    <tab type="user" url="@ref FTS" title="Full-Text Search" />
     <tab type="user" url="@ref About" title="About" />
   </navindex>
 

@@ -22,16 +22,17 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
-#include "H5ACpublic.h"
-#include "H5Dpublic.h"
-#include "H5Fpublic.h"
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5MMpublic.h"
-#include "H5Tpublic.h"
-#include "H5Zpublic.h"
+#include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5Dpublic.h"  /* Datasets                                 */
+#include "H5Fpublic.h"  /* Files                                    */
+#include "H5FDpublic.h" /* File drivers                             */
+#include "H5Ipublic.h"  /* ID management                            */
+#include "H5Lpublic.h"  /* Links                                    */
+#include "H5MMpublic.h" /* Memory management                        */
+#include "H5Opublic.h"  /* Object headers                           */
+#include "H5Spublic.h"  /* Dataspaces                               */
+#include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5Zpublic.h"  /* Data filters                             */
 
 /*****************/
 /* Public Macros */
@@ -100,7 +101,9 @@
 #define H5P_CRT_ORDER_TRACKED 0x0001
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
-/* Default value for all property list classes */
+/**
+ * Default value of type \ref hid_t for all property list classes
+ */
 #define H5P_DEFAULT 0 /* (hid_t) */
 
 #ifdef __cplusplus
@@ -113,14 +116,23 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 //! <!-- [H5P_cls_create_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! <!-- [H5P_cls_create_func_t_snip] -->
 
 //! <!-- [H5P_cls_copy_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! <!-- [H5P_cls_copy_func_t_snip] -->
 
 //! <!-- [H5P_cls_close_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! <!-- [H5P_cls_close_func_t_snip] -->
 
@@ -159,12 +171,25 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+//! <!-- [H5P_prp_decode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
+//! <!-- [H5P_prp_decode_func_t_snip] -->
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 
 //! <!-- [H5P_prp_compare_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
 
@@ -172,6 +197,9 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 //! <!-- [H5P_iterate_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
@@ -2212,7 +2240,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2220,6 +2248,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \param[in] level Compression level
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_deflate() sets the deflate compression method and the
  *          compression level, \p level, for a dataset or group creation
@@ -5212,9 +5242,37 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
  */
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
+/**
+ * \ingroup FAPL
+ *
+ * \brief Query the capability flags for the VOL connector that will be used
+ *              with this file access property list (FAPL).
+ *
+ * \fapl_id{plist_id}
+ * \param[out]  cap_flags  Flags that indicate the VOL connector capabilities
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vol_cap_flags() queries the current VOL connector information
+ *              for a FAPL to retrieve the capability flags for the VOL
+ *              connector stack, as will be used by a file open or create
+ *              operation that uses this FAPL.
+ *
+ * \note This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *       variable to override the VOL connector set programmatically for the
+ *       FAPL (with H5Pset_vol).
+ *
+ * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
+
 #ifdef H5_HAVE_PARALLEL
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Sets metadata I/O mode for read operations to collective or independent (default)
  *
@@ -5283,7 +5341,7 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
  */
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Retrieves metadata read mode setting
  *
@@ -6247,6 +6305,8 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
  *          in the dataset creation property list \p plist_id. The shuffle
  *          filter de-interlaces a block of data by reordering the bytes.
@@ -6318,6 +6378,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_nbit() sets the N-Bit filter, #H5Z_FILTER_NBIT, in the
  *          dataset creation property list \p plist_id.
  *
@@ -6340,10 +6402,10 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *            <td>byte 0</td>
  *          </tr>
  *          <tr>
- *            <td>????????</td>
- *            <td>????SPPP</td>
- *            <td>PPPPPPPP</td>
- *            <td>PPPP????</td>
+ *            <td> ???????? </td>
+ *            <td> ????SPPP </td>
+ *            <td> PPPPPPPP </td>
+ *            <td> PPPP???? </td>
  *          </tr>
  *          </table>
  *          Note: S - sign bit, P - significant bit, ? - padding bit; For
@@ -6410,6 +6472,8 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *                         non-negative
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_scaleoffset() sets the scale-offset filter,
  *          #H5Z_FILTER_SCALEOFFSET, for a dataset.
@@ -6519,6 +6583,8 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *            data block
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
  *          for a dataset. SZIP is a compression method designed for use with
@@ -7430,10 +7496,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
@@ -8009,6 +8071,44 @@ H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode
 H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause,
                                               uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets a hyperslab file selection for a dataset I/O operation
+ *
+ * \param[in] plist_id Property list identifier
+ * \param[in] rank     Number of dimensions of selection
+ * \param[in] op       Operation to perform on current selection
+ * \param[in] start    Offset of start of hyperslab
+ * \param[in] stride   Hyperslab stride
+ * \param[in] count    Number of blocks included in hyperslab
+ * \param[in] block    Size of block in hyperslab
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_dataset_io_hyperslab_selection() is designed to be used
+ *          in conjunction with using #H5S_PLIST for the file dataspace
+ *          ID when making a call to H5Dread() or H5Dwrite().  When used
+ *          with #H5S_PLIST, the selection created by one or more calls to
+ *          this routine is used for determining which dataset elements to
+ *          access.
+ *
+ *          \p rank is the dimensionality of the selection and determines
+ *          the size of the \p start, \p stride, \p count, and \p block arrays.
+ *          \p rank must be between 1 and #H5S_MAX_RANK, inclusive.
+ *
+ *          The \p op, \p start, \p stride, \p count, and \p block parameters
+ *          behave identically to their behavior for H5Sselect_hyperslab(),
+ *          please see the documentation for that routine for details about
+ *          their use.
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
+                                                    const hsize_t start[], const hsize_t stride[],
+                                                    const hsize_t count[], const hsize_t block[]);
 
 /* Link creation property list (LCPL) routines */
 /**
@@ -9398,9 +9498,6 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
- *
- * \cpp_c_api_note
- *
  */
 
 /* Function prototypes */
@@ -9514,8 +9611,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
-
- * \cpp_c_api_note
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,

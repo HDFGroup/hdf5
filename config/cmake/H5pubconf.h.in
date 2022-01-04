@@ -71,13 +71,13 @@
 /* Define Fortran compiler ID */
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
+/* Define number of valid Fortran INTEGER KINDs (must be defined before F_IKIND)*/
+#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
+
 /* Define valid Fortran INTEGER KINDs */
 #cmakedefine H5_H5CONFIG_F_IKIND @H5_H5CONFIG_F_IKIND@
 
-/* Define number of valid Fortran INTEGER KINDs */
-#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
-
-/* Define number of valid Fortran REAL KINDs */
+/* Define number of valid Fortran REAL KINDs (must be defined before F_RKIND) */
 #cmakedefine H5_H5CONFIG_F_NUM_RKIND @H5_H5CONFIG_F_NUM_RKIND@
 
 /* Define valid Fortran REAL KINDs */
@@ -271,6 +271,9 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 
+/* Define to 1 if you have the <pwd.h> header file. */
+#cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
+
 /* Define to 1 if you have the <quadmath.h> header file. */
 #cmakedefine H5_HAVE_QUADMATH_H @H5_HAVE_QUADMATH_H@
 
@@ -408,6 +411,9 @@
 
 /* Define if the high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
+
+/* Define if new-style references should be used with dimension scales */
+#cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -637,6 +643,12 @@
    PTHREAD_SCOPE_SYSTEM) call. */
 #cmakedefine H5_SYSTEM_SCOPE_THREADS @H5_SYSTEM_SCOPE_THREADS@
 
+/* Define using v1.6 public API symbols by default */
+#cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
+
+/* Define using v1.8 public API symbols by default */
+#cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
+
 /* Define using v1.10 public API symbols by default */
 #cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
 
@@ -645,12 +657,6 @@
 
 /* Define using v1.14 public API symbols by default */
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
-
-/* Define using v1.6 public API symbols by default */
-#cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
-
-/* Define using v1.8 public API symbols by default */
-#cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@

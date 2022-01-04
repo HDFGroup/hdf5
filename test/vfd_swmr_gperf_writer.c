@@ -12,6 +12,12 @@
 
 /* Description of this program:
  * This program checks the performance of group creations for VFD SWMR.
+ * It also has an option to turn on the VFD SWMR logging feature and generates
+ * a log message for group creations. The performance test illustration is in
+ * section I. The log feature illustration is in section II.
+ *
+ * I. Performance tests with options
+ *
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
  * After compiling the program,
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -q
@@ -28,6 +34,18 @@
  *      The groups are created with the earliest file format(old-styled)
  *      The program is run with max_lag = 8, tick_len = 4;
  *      The page buffer size is 16384 bytes. The page size is 8192 bytes.
+ *
+ * II. How to generate log message
+ *
+ *     ./vfd_swmr_gperf_writer -n 100000 -P -L -q
+ * will generate 100000 groups, each group has one attribute.  It also writes the log message
+ *      to file "log-test" under the same directory.
+ *      To turn on the log feature, one just needs to provide the log file path as
+ *      indicated by the line init_vfd_swmr_log(&config, "./log-test") in the main
+ *      function. The init_vfd_swmr_log is defined inside the vfd_swmr_common.c.
+ *      The "log-test" should include something like:
+ *      'EOT_PROCESSING_TIME       : 0.040 s: Writer time is 1 milliseconds'
+ *      The standard output of performance measurement can help check the correctness in the "log-test".
  *
  */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
@@ -63,6 +81,7 @@ typedef struct {
     uint32_t     max_lag;
     uint32_t     tick_len;
     bool         gperf;
+    bool         glog;
     double       min_gc_time;
     double       max_gc_time;
     double       mean_gc_time;
@@ -84,7 +103,7 @@ typedef struct {
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
         .filetype = H5T_NATIVE_UINT32, .asteps = 1, .nsteps = 100, .use_vfd_swmr = true,                     \
         .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_gc_time = 100.,                \
+        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .glog = false, .min_gc_time = 100., \
         .max_gc_time = 0., .mean_gc_time = 0., .total_gc_time = 0., .total_time = 0., .mean_time = 0.,       \
         .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1, .vlstr_test = false, .ps = 4096,           \
         .pbs = 4096, .nglevels = 0                                                                           \
@@ -93,88 +112,91 @@ typedef struct {
 static void
 usage(const char *progname)
 {
-    fprintf(stderr,
-            "usage: ./%s -P -n 1000 -N 5 -q (create 1000 groups, each group has 5 attributes)\n"
-            "Options: \n"
-            " [-P] [-S] [-G] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
-            " [-n ngroups] [-l ng_levels] [-O grp_op_pattern]\n"
-            " [-N num_attrs] [-V] [-b] [-A at_pattern] [-a steps] [-q]\n"
-            "\n"
-            "-P:             carry out the performance test\n"
-            "-S:             do not use VFD SWMR\n"
-            "-G:             old-style type of group\n"
-            "-t tick_len:    length of a tick in tenths of a second.\n"
-            "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
-            "-B pbs:         page Buffer Size in bytes:\n"
-            "                The default value is 4K(4096).\n"
-            "-s ps:          page size used by page aggregation, page buffer and \n"
-            "                the metadata file. \n"
-            "-n ngroups:     the number of groups\n"
-            "-l ng_levels:   the number of level of nested groups.  \n"
-            "                If all the groups are under the root group,  \n"
-            "                this number should be 0.\n"
-            "-N num_attrs:   the number of attributes \n"
-            "-V              use variable length string attributes for performance test\n"
-            "-b:             write data in big-endian byte order\n"
-            "                (For the performance test, -V overwrites -b)\n"
-            "-A at_pattern:  `at_pattern' for different attribute tests\n"
-            "              The value of `at_pattern` is one of the following:\n"
-            "              `compact`              - Attributes added in compact storage\n"
-            "              `dense`                - An attribute added in dense storage\n"
-            "              `compact-del`          - Attributes added and then one\n"
-            "                                       attribute deleted, in compact \n"
-            "              `dense-del`            - Attributes added until the storage\n"
-            "                                       is dense then an attribute deleted\n"
-            "                                       the storge still in dense\n"
-            "              `compact-add-to-dense` - Attributes added first in compact\n"
-            "                                       then in dense storage\n"
-            "              `dense-del-to-compact` - Attributes added until the storage\n"
-            "                                       is dense, then several attributes \n"
-            "                                       deleted, the storage changed to\n"
-            "                                       compact\n"
-            "              `modify`               - An attribute added then modified\n"
-            "              `add-vstr`             - A VL string attribute added\n"
-            "              `remove-vstr`          - A VL string attribute added then\n"
-            "                                       deleted\n"
-            "              `modify-vstr`          - A VL string attribute added then \n"
-            "                                       modified \n"
-            "              `add-ohr-block`        - An attribute is added and this forces\n"
-            "                                       the creation of object header\n"
-            "                                       continuation block \n"
-            "              `del-ohr-block`        - An attribute is added and this forces\n"
-            "                                       the creation of object header\n"
-            "                                       continuation block and then this \n"
-            "                                       attribute is deleted so the \n"
-            "                                       object header continuation block is \n"
-            "                                       removed. \n"
-            "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
-            "              The value of `grp_op_pattern` is one of the following:\n"
-            "              `grp-creation`         - A group is created.\n"
-            "              `grp-deletion`         - An existing group is deleted.\n"
-            "              `grp-move`             - A group is moved to become \n"
-            "                                       another group. \n"
-            "              `grp-ins-links`        - Links are inserted, including\n"
-            "                                       both hard and soft links. \n"
-            "              `grp-del-links`        - Links are deleted, including\n"
-            "                                       both hard ans soft links. \n"
-            "              `grp-compact-t-dense`  - Links are inserted to the group.\n"
-            "                                       The link storage of this group \n"
-            "                                       changed from compact to dense. \n"
-            "                                       The links include both hard and\n"
-            "                                       soft links.                    \n"
-            "              `grp-dense-t-compact`  - Links are inserted to the group\n"
-            "                                       The link storage of this group \n"
-            "                                       changed from compact to dense. \n"
-            "                                       Then several links are deleted.\n"
-            "                                       The link storage changed from  \n"
-            "                                       dense to compact again.        \n"
-            "                                       The links include both hard and\n"
-            "                                       soft links.                    \n"
-            "-a steps:      `steps` between adding attributes\n"
-            "              (Don't recommend to use this option for performance test.)\n"
-            "-q:             silence printouts, few messages\n"
-            "\n",
-            progname);
+    fprintf(
+        stderr,
+        "usage: ./%s -P -n 1000 -N 5 -q (create 1000 groups, each group has 5 attributes)\n"
+        "usage: ./%s -P -L -n 100000 -q (create 100000 groups and generate log message to file 'log-test')\n"
+        "Options: \n"
+        " [-P] [-S] [-G] [-L] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
+        " [-n ngroups] [-l ng_levels] [-O grp_op_pattern]\n"
+        " [-N num_attrs] [-V] [-b] [-A at_pattern] [-a steps] [-q]\n"
+        "\n"
+        "-P:             carry out the performance test\n"
+        "-S:             do not use VFD SWMR\n"
+        "-G:             old-style type of group\n"
+        "-L:             Turn on the logging feature.\n"
+        "-t tick_len:    length of a tick in tenths of a second.\n"
+        "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
+        "-B pbs:         page Buffer Size in bytes:\n"
+        "                The default value is 4K(4096).\n"
+        "-s ps:          page size used by page aggregation, page buffer and \n"
+        "                the metadata file. \n"
+        "-n ngroups:     the number of groups\n"
+        "-l ng_levels:   the number of level of nested groups.  \n"
+        "                If all the groups are under the root group,  \n"
+        "                this number should be 0.\n"
+        "-N num_attrs:   the number of attributes \n"
+        "-V              use variable length string attributes for performance test\n"
+        "-b:             write data in big-endian byte order\n"
+        "                (For the performance test, -V overwrites -b)\n"
+        "-A at_pattern:  `at_pattern' for different attribute tests\n"
+        "              The value of `at_pattern` is one of the following:\n"
+        "              `compact`              - Attributes added in compact storage\n"
+        "              `dense`                - An attribute added in dense storage\n"
+        "              `compact-del`          - Attributes added and then one\n"
+        "                                       attribute deleted, in compact \n"
+        "              `dense-del`            - Attributes added until the storage\n"
+        "                                       is dense then an attribute deleted\n"
+        "                                       the storge still in dense\n"
+        "              `compact-add-to-dense` - Attributes added first in compact\n"
+        "                                       then in dense storage\n"
+        "              `dense-del-to-compact` - Attributes added until the storage\n"
+        "                                       is dense, then several attributes \n"
+        "                                       deleted, the storage changed to\n"
+        "                                       compact\n"
+        "              `modify`               - An attribute added then modified\n"
+        "              `add-vstr`             - A VL string attribute added\n"
+        "              `remove-vstr`          - A VL string attribute added then\n"
+        "                                       deleted\n"
+        "              `modify-vstr`          - A VL string attribute added then \n"
+        "                                       modified \n"
+        "              `add-ohr-block`        - An attribute is added and this forces\n"
+        "                                       the creation of object header\n"
+        "                                       continuation block \n"
+        "              `del-ohr-block`        - An attribute is added and this forces\n"
+        "                                       the creation of object header\n"
+        "                                       continuation block and then this \n"
+        "                                       attribute is deleted so the \n"
+        "                                       object header continuation block is \n"
+        "                                       removed. \n"
+        "-O grp_op_pattern:  `grp_op_pattern' for different group operation tests\n"
+        "              The value of `grp_op_pattern` is one of the following:\n"
+        "              `grp-creation`         - A group is created.\n"
+        "              `grp-deletion`         - An existing group is deleted.\n"
+        "              `grp-move`             - A group is moved to become \n"
+        "                                       another group. \n"
+        "              `grp-ins-links`        - Links are inserted, including\n"
+        "                                       both hard and soft links. \n"
+        "              `grp-del-links`        - Links are deleted, including\n"
+        "                                       both hard ans soft links. \n"
+        "              `grp-compact-t-dense`  - Links are inserted to the group.\n"
+        "                                       The link storage of this group \n"
+        "                                       changed from compact to dense. \n"
+        "                                       The links include both hard and\n"
+        "                                       soft links.                    \n"
+        "              `grp-dense-t-compact`  - Links are inserted to the group\n"
+        "                                       The link storage of this group \n"
+        "                                       changed from compact to dense. \n"
+        "                                       Then several links are deleted.\n"
+        "                                       The link storage changed from  \n"
+        "                                       dense to compact again.        \n"
+        "                                       The links include both hard and\n"
+        "                                       soft links.                    \n"
+        "-a steps:      `steps` between adding attributes\n"
+        "              (Don't recommend to use this option for performance test.)\n"
+        "-q:             silence printouts, few messages\n"
+        "\n",
+        progname, progname);
     exit(EXIT_FAILURE);
 }
 
@@ -203,7 +225,7 @@ state_init(state_t *s, int argc, char **argv)
 
     if (argc == 1)
         usage(s->progname);
-    while ((ch = getopt(argc, argv, "PSGa:bVt:m:B:s:n:qA:N:l:O:")) != -1) {
+    while ((ch = getopt(argc, argv, "PSGLa:bVt:m:B:s:n:qA:N:l:O:")) != -1) {
         switch (ch) {
             case 'P':
                 s->gperf = true;
@@ -213,6 +235,9 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'G':
                 s->old_style_grp = true;
+                break;
+            case 'L':
+                s->glog = true;
                 break;
             case 'a':
             case 'n':
@@ -2761,8 +2786,14 @@ main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, FALSE, 128, "./group-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, TRUE, FALSE, FALSE, 128, "./group-shadow",
+                         NULL);
+
+    /* If the log flag is on, create the log file log-test under the current directory. */
+    if (s.glog == true)
+        init_vfd_swmr_log(&config, "./log-test");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by

@@ -94,6 +94,71 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_es_none
+ *
+ * Purpose:     Tests for passing H5ES_NONE to H5ES routines
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, February 26, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_es_none(void)
+{
+    TESTING("event set H5ES_NONE");
+
+    /* Wait */
+    if (H5ESwait(H5ES_NONE, 0, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    /* Cancel */
+    if (H5EScancel(H5ES_NONE, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    /* Get count */
+    if (H5ESget_count(H5ES_NONE, NULL) < 0)
+        TEST_ERROR;
+
+    /* Get op counter */
+    if (H5ESget_op_counter(H5ES_NONE, NULL) < 0)
+        TEST_ERROR;
+
+    /* Get error status */
+    if (H5ESget_err_status(H5ES_NONE, NULL) < 0)
+        TEST_ERROR;
+
+    /* Get error count */
+    if (H5ESget_err_count(H5ES_NONE, NULL) < 0)
+        TEST_ERROR;
+
+    /* Get error info */
+    if (H5ESget_err_info(H5ES_NONE, 0, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    /* Register insert function */
+    if (H5ESregister_insert_func(H5ES_NONE, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    /* Register complete function */
+    if (H5ESregister_complete_func(H5ES_NONE, NULL, NULL) < 0)
+        TEST_ERROR;
+
+    /* Close */
+    if (H5ESclose(H5ES_NONE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests event sets
@@ -118,6 +183,7 @@ main(void)
 
     /* Tests */
     nerrors += test_es_create();
+    nerrors += test_es_none();
 
     /* Cleanup */
     h5_cleanup(FILENAME, fapl_id);

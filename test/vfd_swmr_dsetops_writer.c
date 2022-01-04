@@ -149,7 +149,7 @@ static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_
 static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which,
                                 bool fileclosed);
 static bool verify_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, hsize_t *stride,
-                        size_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed,
+                        hsize_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed,
                         bool flush_raw_data);
 static bool verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool fileclosed,
                                 bool flush_raw_data);
@@ -1888,8 +1888,9 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, s.flush_raw_data, 128, "./dsetops-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, FALSE, s.flush_raw_data, 128, "./dsetops-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {

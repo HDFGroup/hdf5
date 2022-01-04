@@ -301,23 +301,36 @@ uint64_decode(uint8_t **pp)
         (p) += 8;                                                                                            \
     }
 
+/* clang-format off */
 /* Address-related macros */
-#define H5F_addr_overflow(X, Z)                                                                              \
-    (HADDR_UNDEF == (X) || HADDR_UNDEF == (X) + (haddr_t)(Z) || (X) + (haddr_t)(Z) < (X))
-#define H5F_addr_defined(X) ((X) != HADDR_UNDEF)
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
+                (X)+(haddr_t)(Z)<(X))
+#define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X, Y)  ((X) != HADDR_UNDEF && (X) == (Y))
-#define H5F_addr_ne(X, Y)  (!H5F_addr_eq((X), (Y)))
-#define H5F_addr_lt(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) < (Y))
-#define H5F_addr_le(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) <= (Y))
-#define H5F_addr_gt(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) > (Y))
-#define H5F_addr_ge(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) >= (Y))
-#define H5F_addr_cmp(X, Y) (H5F_addr_eq((X), (Y)) ? 0 : (H5F_addr_lt((X), (Y)) ? -1 : 1))
-#define H5F_addr_pow2(N)   ((haddr_t)1 << (N))
-#define H5F_addr_overlap(O1, L1, O2, L2)                                                                     \
-    (((O1) < (O2) && ((O1) + (L1)) > (O2)) || ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (X)==(Y))
+#define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)<(Y))
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)<=(Y))
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)>(Y))
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)>=(Y))
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
+                (H5F_addr_lt((X), (Y)) ? -1 : 1))
+#define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
+#define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
+                                 ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
@@ -540,18 +553,18 @@ uint64_decode(uint8_t **pp)
 #define H5F_DEFAULT_CSET H5T_CSET_ASCII
 
 /* ========= File Creation properties ============ */
-#define H5F_CRT_USER_BLOCK_NAME        "block_size"  /* Size of the file user block in bytes */
-#define H5F_CRT_SYM_LEAF_NAME          "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
-#define H5F_CRT_SYM_LEAF_DEF           4
-#define H5F_CRT_BTREE_RANK_NAME        "btree_rank"        /* 1/2 rank for btree internal nodes    */
-#define H5F_CRT_ADDR_BYTE_NUM_NAME     "addr_byte_num"     /* Byte number in an address            */
-#define H5F_CRT_OBJ_BYTE_NUM_NAME      "obj_byte_num"      /* Byte number for object size          */
-#define H5F_CRT_SUPER_VERS_NAME        "super_version"     /* Version number of the superblock     */
-#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes" /* Number of shared object header message indexes */
+#define H5F_CRT_USER_BLOCK_NAME    "block_size"  /* Size of the file user block in bytes */
+#define H5F_CRT_SYM_LEAF_NAME      "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_DEF       4
+#define H5F_CRT_BTREE_RANK_NAME    "btree_rank"    /* 1/2 rank for btree internal nodes    */
+#define H5F_CRT_ADDR_BYTE_NUM_NAME "addr_byte_num" /* Byte number in an address            */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME  "obj_byte_num"  /* Byte number for object size          */
+#define H5F_CRT_SUPER_VERS_NAME    "super_version" /* Version number of the superblock     */
+/* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes"
 #define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME                                                                     \
-    "shmsg_message_minsize"                                      /* Minimum size of messages in each index   \
-                                                                  */
+/* Minimum size of messages in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME  "shmsg_message_minsize"
 #define H5F_CRT_SHMSG_LIST_MAX_NAME       "shmsg_list_max"       /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME      "shmsg_btree_min"      /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME  "file_space_strategy"  /* File space handling strategy */
@@ -598,10 +611,10 @@ uint64_decode(uint8_t **pp)
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME                                                                      \
     "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) \
                           */
-#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr"       /* Nullify addresses of free-space managers */
-                                                         /* Private property used only by h5clear */
-#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check"     /* Skip EOF check */
-                                                         /* Private property used only by h5clear */
+#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr" /* Nullify addresses of free-space managers */
+/* Private property used only by h5clear */
+#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check" /* Skip EOF check */
+/* Private property used only by h5clear */
 #define H5F_ACS_USE_MDC_LOGGING_NAME  "use_mdc_logging"  /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME                                                                 \
@@ -634,10 +647,15 @@ uint64_decode(uint8_t **pp)
     {                                                                                                        \
         /* int32_t    version                 = */ 0, /* int32_t    tick_len                = */ 0,          \
             /* int32_t    max_lag                 = */ 0, /* hbool_t    vfd_swmr_writer         = */ FALSE,  \
+            /* hbool_t    maintain_metadata_file         = */ FALSE,                                         \
+            /* hbool_t    generate_updater_files         = */ FALSE,                                         \
             /* hbool_t    flush_raw_data          = */ FALSE, /* int32_t    md_pages_reserved       = */ 0,  \
             /* int32_t    pb_expansion_threshold  = */ 0, /* char       md_file_path[]          = */ "",     \
-            /* char       log_file_path[]         = */ ""                                                    \
+            /* char       updater_file_path[]     = */ "", /* char       log_file_path[]         = */ ""     \
     }
+
+/*  For VFD SWMR testing only: private property to generate checksum for metadata file via callback */
+#define H5F_ACS_GENERATE_MD_CK_CB_NAME "generate md ck callback"
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME "local" /* Whether absolute symlinks local to file. */
@@ -669,13 +687,13 @@ uint64_decode(uint8_t **pp)
 #define HDF5_BTREE_SNODE_IK_DEF 16
 #define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
     32                                  /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+                                           to be 32 for version 0                                            \
+                                           of the superblock and                                             \
+                                           if it is changed, the code                                        \
+                                           must compensate. -QAK                                             \
+                                        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
-                                        /* See format specification on version 1 B-trees */
+/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
@@ -771,6 +789,72 @@ uint64_decode(uint8_t **pp)
 #define H5SM_TABLE_MAGIC "SMTB" /* Shared Message Table */
 #define H5SM_LIST_MAGIC  "SMLI" /* Shared Message List */
 
+/*
+ * VFD SWMR
+ */
+
+/* Updater file header */
+#define H5F_UD_VERSION      0      /* Version of the updater file format */
+#define H5F_UD_HEADER_OFF   0      /* Updater file header offset */
+#define H5F_UD_HEADER_MAGIC "VUDH" /* Updater file header magic */
+#define H5F_SIZEOF_CHKSUM   4      /* Size of checksum */
+
+/* Flags in the updater file header */
+#define CREATE_METADATA_FILE_ONLY_FLAG 0x0001
+#define FINAL_UPDATE_FLAG              0x0002
+
+/* Size of updater file header */
+#define H5F_UD_HEADER_SIZE                                                                                   \
+    (H5_SIZEOF_MAGIC     /* Signature */                                                                     \
+     + 2                 /* Version number */                                                                \
+     + 2                 /* Flags */                                                                         \
+     + 4                 /* Page size */                                                                     \
+     + 8                 /* Sequence number */                                                               \
+     + 8                 /* Tick number */                                                                   \
+     + 8                 /* Change list offset */                                                            \
+     + 8                 /* Change list length */                                                            \
+     + H5F_SIZEOF_CHKSUM /* Updater file header checksum */                                                  \
+    )
+
+#define H5F_UD_CL_MAGIC "VUCL" /* Updater file change list magic */
+
+/* Size of an updater file change list entry */
+#define H5F_UD_CL_ENTRY_SIZE                                                                                 \
+    (4                   /* Updater file page offset */                                                      \
+     + 4                 /* Metadata file page offset */                                                     \
+     + 4                 /* HDF5 file page offset */                                                         \
+     + 4                 /* Length */                                                                        \
+     + H5F_SIZEOF_CHKSUM /* Updater file change list entry checksum */                                       \
+    )
+
+/* Size of updater file change list */
+#define H5F_UD_CL_SIZE(N)         /* N is number of change list entries */                                   \
+    (H5_SIZEOF_MAGIC              /* Signature */                                                            \
+     + 8                          /* Tick num */                                                             \
+     + 4                          /* Metadata file header updater file page offset */                        \
+     + 4                          /* Metadata file header length */                                          \
+     + 4                          /* Metadata file header checksum */                                        \
+     + 4                          /* Metadata file index updater file page offset */                         \
+     + 8                          /* Metadata file index metadata file offset */                             \
+     + 4                          /* Metadata file index length */                                           \
+     + 4                          /* Metadata file index checksum */                                         \
+     + 4                          /* Number of change list entries */                                        \
+     + (N * H5F_UD_CL_ENTRY_SIZE) /* Change list entries */                                                  \
+     + H5F_SIZEOF_CHKSUM          /* Updater file change list checksum */                                    \
+    )
+
+/*
+ *  For VFD SWMR testing only:
+ */
+
+/* Callback routine to generate checksum for metadata file specified by md_path */
+typedef herr_t (*H5F_generate_md_ck_t)(char *md_path, uint64_t updater_seq_num);
+
+/* Structure for "generate checksum callback" private property */
+typedef struct H5F_generate_md_ck_cb_t {
+    H5F_generate_md_ck_t func;
+} H5F_generate_md_ck_cb_t;
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -778,6 +862,7 @@ uint64_decode(uint8_t **pp)
 /* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
 struct H5UC_t;
+struct H5G_loc_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
@@ -840,6 +925,180 @@ typedef enum H5F_prefix_open_t {
     H5F_PREFIX_EFILE = 2  /* External file prefix   */
 } H5F_prefix_open_t;
 
+/*
+ * VFD SWMR
+ */
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct H5F_vfd_swmr_updater_cl_entry_t
+ *
+ *  An array of instances of H5F_vfd_swmr_updater_cl_entry_t of length equal to
+ *  the number of metadata pages and multi-page metadata entries modified in
+ *  the past tick is used to assemble the associated data in preparation for
+ *  writing an updater file.
+ *
+ *  Each entry in this array pertains to a given modified metdata page or
+ *  multi-page metadata entry, and contains the following fields:
+ *
+ *  entry_image_ptr: void pointer to a buffer containing the image of the
+ *      target metadata page or multi-page metadata entry as modified in
+ *      this tick, or NULL if undefined.
+ *
+ *  entry_image_ud_file_page_offset: Page offset of the entry in the
+ *      updater file, or 0 if undefined.
+ *
+ *  entry_image_md_file_page_offset: Page offset of the entry in the
+ *      metadata file, or 0 if undefined.
+ *
+ *  entry_image_h5_file_page_offset: Page offset of the entry in the
+ *      HDF5 file.  In this case, a page offset of zero is valid,
+ *      so we havd no easy marker for an invalid value.  Instead,
+ *      presume that this field is invalid if the entry_image_md_file_page_offset
+ *      is invalid.
+ *
+ *  entry_image_len: The size of the metadata page or multi-page metadata
+ *      entry in bytes.
+ *  entry_image_checksum: Checksum of the entry image.
+ *
+ *----------------------------------------------------------------------------
+ */
+typedef struct H5F_vfd_swmr_updater_cl_entry_t {
+    void *   entry_image_ptr;
+    uint32_t entry_image_ud_file_page_offset;
+    uint32_t entry_image_md_file_page_offset;
+    uint32_t entry_image_h5_file_page_offset;
+    size_t   entry_image_len;
+    uint32_t entry_image_checksum;
+} H5F_vfd_swmr_updater_cl_entry_t;
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct H5F_vfd_swmr_updater_t
+ *
+ *  Instances of this structure are used to assemble the data required to
+ *  write a metadata file updater file.
+ *
+ *  Updater file header related fields:
+ *
+ *  version: Version of the updater file format to be used.  At present this
+ *          must be zero.
+ *
+ *  flags: This field contains any flags to be set in the updater file header.
+ *      Currently defined flags are:
+ *
+ *              0x0001        CREATE_METADATA_FILE_ONLY_FLAG
+ *      If set, the auxiliary process should create the metadata file,
+ *      but leave it empty.  This flag may only be set if sequence_num
+ *      is zero.
+ *
+ *              0x0002        FINAL_UPDATE_FLAG
+ *      If set, the VFD SWMR writer is closing the target file, and this
+ *      updater contains the final set of updates to the metadata file.
+ *      On receipt, the auxiliary process should apply the enclosed
+ *      changes to the metadata file, unlink it, and exit.
+ *
+ *  sequence_num: This field contains the sequence number of this updater file.
+ *      The sequence number of the first updater file must be zero, and
+ *      this sequence number must be increased by one for each new updater
+ *      file.  Note that under some circumstances, the sequence number
+ *      will not match the tick_num.
+ *
+ *  tick_num: Number of the tick for which this updater file is to be generated.
+ *      This value should match that of the index used to fill our this
+ *      structure.
+ *
+ *  header_image_ptr: void pointer to the buffer in which the
+ *      updater file header is constructed.
+ *      This field is NULL if the buffer is undefined.
+ *
+ *  header_image_len: This field contains the length of the updater file
+ *      header in bytes.
+ *
+ *  change_list_image_ptr: void pointer to a buffer containing the on disk image
+ *      of the updater file change list, or NULL if that buffer does not exist.
+ *
+ *  change_list_offset: This field contains the offset in bytes of the change
+ *      list in the updater file.  This will typically be the offset of
+ *      the first byte in the updater file after the header.
+ *
+ *  change_list_len: This field contains the size in bytes of the on disk image
+ *      of the change list in the updater file.
+ *
+ *  Updater File Change List Related Fields:
+ *
+ *  The updater file change list is a section of the updater file that details the
+ *  locations and lengths of all metadata file entries that must be modified for
+ *  this tick.
+ *
+ *  md_file_header_image_ptr: void pointer to a buffer containing the on disk image
+ *      of the metadata file header as updated for tick_num.
+ *
+ *  md_file_header_ud_file_page_offset: This field contains the updater file
+ *           page offset of the metadata file header image.  Note that we do
+ *           not store the metadata file page offset of the metadata file header,
+ *           as it is always written to offset 0 in the metadata file.
+ *
+ *  md_file_header_len: This field contains the size of the metadata file header
+ *           image in bytes.
+ *
+ *  md_file_index_image: void pointer to a buffer containing the on disk image
+ *           of the metadata file index as updated for tick_num.
+ *
+ *  md_file_index_md_file_offset: This field contains the offset of the
+ *           metadata file index in the metadata file in bytes.
+ *
+ *           This value will either be the size of the metadata file header
+ *           (if the metadata file header and index are adjacent), or a page
+ *           aligned value.
+ *
+ *  md_file_index_ud_file_page_offset: This field contains the page offset of the
+ *           metadata file index in the updater file.
+ *
+ *  md_file_index_len: This field contains the size of the metadata file index in
+ *           bytes.
+ *
+ *  num_change_list_entries: This field contains the number of entries in the
+ *           array of H5F_vfd_swmr_updater_cl_ entry_t whose base address
+ *           is stored in the change_list field below.  This value is also the
+ *           number of metadata pages and multi-page metadata entries that have
+ *           been modified in the past tick.
+ *
+ *           If this field is zero, there is no change list, and the change_list
+ *           field below is NULL.
+ *
+ *  change_list: This field contains the base address of a dynamically allocated
+ *          array of H5F_vfd_swmr_updater_cl_entry_t of length num_change_list_entries,
+ *          or NULL if undefined.
+ *
+ *----------------------------------------------------------------------------
+ */
+typedef struct H5F_vfd_swmr_updater_t {
+    /* Updater file header related fields */
+    uint16_t version;
+    uint16_t flags;
+    uint32_t page_size;
+    uint64_t sequence_number;
+    uint64_t tick_num;
+    void *   header_image_ptr;
+    size_t   header_image_len;
+    void *   change_list_image_ptr;
+    uint64_t change_list_offset;
+    size_t   change_list_len;
+    /* Updater file change list related fields */
+    void *                           md_file_header_image_ptr;
+    uint32_t                         md_file_header_image_chksum;
+    uint32_t                         md_file_header_ud_file_page_offset;
+    size_t                           md_file_header_len;
+    void *                           md_file_index_image_ptr;
+    uint32_t                         md_file_index_image_chksum;
+    uint64_t                         md_file_index_md_file_offset;
+    uint32_t                         md_file_index_ud_file_page_offset;
+    size_t                           md_file_index_len;
+    uint32_t                         num_change_list_entries;
+    H5F_vfd_swmr_updater_cl_entry_t *change_list;
+} H5F_vfd_swmr_updater_t;
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -853,7 +1112,6 @@ H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/);
 H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref);
-H5_DLL herr_t H5F_delete(const char *filename, hid_t fapl_id);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -931,7 +1189,12 @@ H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
-/* Functions that check file mounting information */
+/* VFD SWMR functions */
+H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
+
+/* File mounting routines */
+H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
+H5_DLL herr_t  H5F_unmount(const struct H5G_loc_t *loc, const char *name);
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t  H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);
@@ -984,8 +1247,6 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t   H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
-H5_DLL herr_t   H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
@@ -1004,7 +1265,5 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
-
-H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
 
 #endif /* H5Fprivate_H */

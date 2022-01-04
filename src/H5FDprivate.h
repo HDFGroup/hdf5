@@ -168,7 +168,7 @@ typedef struct H5FD_vfd_swmr_idx_entry_t {
     uint64_t hdf5_page_offset;
     uint64_t md_file_page_offset;
     uint32_t length;
-    uint32_t chksum;
+    uint32_t checksum;
     void *   entry_ptr;
     uint64_t tick_of_last_change;
     hbool_t  clean;

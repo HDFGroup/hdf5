@@ -207,8 +207,9 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
     if ((config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(config, 4, 5, FALSE, TRUE, 128, "./rw-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(config, 4, 5, FALSE, TRUE, FALSE, TRUE, 128, "rw-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config)) < 0) {

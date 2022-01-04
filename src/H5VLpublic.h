@@ -116,6 +116,9 @@ typedef enum H5VL_subclass_t {
     H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
     H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
     H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
+                          /* NOTE: if more operations are added, the
+                           * H5VL_opt_vals_g[] array size should be updated.
+                           */
 } H5VL_subclass_t;
 
 /********************/
@@ -353,14 +356,22 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  * \since 1.12.0
  */
 H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);
+/**
+ * \ingroup H5VL
+ * \brief Determines whether an object ID represents a native
+ *        VOL connector object.
+ *
+ * \param[in] obj_id Object identifier
+ * \param[in] is_native Boolean determining whether object is a native
+ *            VOL connector object
+ * \return \herr_t
+ *
+ * \since 1.13.0
+ */
+H5_DLL herr_t H5VLobject_is_native(hid_t obj_id, hbool_t *is_native);
 
 #ifdef __cplusplus
 }
 #endif
-
-/* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h"          /* VOL connector author routines */
-#include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* H5VLpublic_H */

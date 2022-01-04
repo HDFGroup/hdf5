@@ -290,7 +290,7 @@
 #define H5T_INIT_TYPE_SET_SIZE(SIZE)                                                                         \
     {                                                                                                        \
         dt->shared->size          = SIZE;                                                                    \
-        dt->shared->u.atomic.prec = 8 * SIZE;                                                                \
+        dt->shared->u.atomic.prec = 8 * (SIZE);                                                              \
     }
 
 #define H5T_INIT_TYPE_NOSET_SIZE(SIZE)                                                                       \
@@ -327,7 +327,7 @@
             H5_GLUE3(H5T_INIT_TYPE_, GUTS, _CORE)                                                            \
                                                                                                              \
             /* Register result */                                                                            \
-            if ((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                        \
+            if (((GLOBAL) = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                      \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
     }
 
@@ -423,31 +423,29 @@ hid_t H5T_C_S1_g = FAIL;
 
 hid_t H5T_FORTRAN_S1_g = FAIL;
 
-hid_t H5T_NATIVE_SCHAR_g  = FAIL;
-hid_t H5T_NATIVE_UCHAR_g  = FAIL;
-hid_t H5T_NATIVE_SHORT_g  = FAIL;
-hid_t H5T_NATIVE_USHORT_g = FAIL;
-hid_t H5T_NATIVE_INT_g    = FAIL;
-hid_t H5T_NATIVE_UINT_g   = FAIL;
-hid_t H5T_NATIVE_LONG_g   = FAIL;
-hid_t H5T_NATIVE_ULONG_g  = FAIL;
-hid_t H5T_NATIVE_LLONG_g  = FAIL;
-hid_t H5T_NATIVE_ULLONG_g = FAIL;
-hid_t H5T_NATIVE_FLOAT_g  = FAIL;
-hid_t H5T_NATIVE_DOUBLE_g = FAIL;
-#if H5_SIZEOF_LONG_DOUBLE != 0
+hid_t H5T_NATIVE_SCHAR_g   = FAIL;
+hid_t H5T_NATIVE_UCHAR_g   = FAIL;
+hid_t H5T_NATIVE_SHORT_g   = FAIL;
+hid_t H5T_NATIVE_USHORT_g  = FAIL;
+hid_t H5T_NATIVE_INT_g     = FAIL;
+hid_t H5T_NATIVE_UINT_g    = FAIL;
+hid_t H5T_NATIVE_LONG_g    = FAIL;
+hid_t H5T_NATIVE_ULONG_g   = FAIL;
+hid_t H5T_NATIVE_LLONG_g   = FAIL;
+hid_t H5T_NATIVE_ULLONG_g  = FAIL;
+hid_t H5T_NATIVE_FLOAT_g   = FAIL;
+hid_t H5T_NATIVE_DOUBLE_g  = FAIL;
 hid_t H5T_NATIVE_LDOUBLE_g = FAIL;
-#endif
-hid_t H5T_NATIVE_B8_g     = FAIL;
-hid_t H5T_NATIVE_B16_g    = FAIL;
-hid_t H5T_NATIVE_B32_g    = FAIL;
-hid_t H5T_NATIVE_B64_g    = FAIL;
-hid_t H5T_NATIVE_OPAQUE_g = FAIL;
-hid_t H5T_NATIVE_HADDR_g  = FAIL;
-hid_t H5T_NATIVE_HSIZE_g  = FAIL;
-hid_t H5T_NATIVE_HSSIZE_g = FAIL;
-hid_t H5T_NATIVE_HERR_g   = FAIL;
-hid_t H5T_NATIVE_HBOOL_g  = FAIL;
+hid_t H5T_NATIVE_B8_g      = FAIL;
+hid_t H5T_NATIVE_B16_g     = FAIL;
+hid_t H5T_NATIVE_B32_g     = FAIL;
+hid_t H5T_NATIVE_B64_g     = FAIL;
+hid_t H5T_NATIVE_OPAQUE_g  = FAIL;
+hid_t H5T_NATIVE_HADDR_g   = FAIL;
+hid_t H5T_NATIVE_HSIZE_g   = FAIL;
+hid_t H5T_NATIVE_HSSIZE_g  = FAIL;
+hid_t H5T_NATIVE_HERR_g    = FAIL;
+hid_t H5T_NATIVE_HBOOL_g   = FAIL;
 
 hid_t H5T_NATIVE_INT8_g        = FAIL;
 hid_t H5T_NATIVE_UINT8_g       = FAIL;
@@ -483,21 +481,19 @@ hid_t H5T_NATIVE_UINT_FAST64_g  = FAIL;
  * datatype or C structures, which are different from the alignments for memory
  * address below this group of variables.
  */
-size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_SHORT_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_USHORT_COMP_ALIGN_g = 0;
-size_t H5T_NATIVE_INT_COMP_ALIGN_g    = 0;
-size_t H5T_NATIVE_UINT_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_LONG_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_ULONG_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_LLONG_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g = 0;
-size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g = 0;
-#if H5_SIZEOF_LONG_DOUBLE != 0
+size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_SHORT_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_USHORT_COMP_ALIGN_g  = 0;
+size_t H5T_NATIVE_INT_COMP_ALIGN_g     = 0;
+size_t H5T_NATIVE_UINT_COMP_ALIGN_g    = 0;
+size_t H5T_NATIVE_LONG_COMP_ALIGN_g    = 0;
+size_t H5T_NATIVE_ULONG_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_LLONG_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g  = 0;
+size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g   = 0;
+size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g  = 0;
 size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g = 0;
-#endif
 
 size_t H5T_POINTER_COMP_ALIGN_g     = 0;
 size_t H5T_HVL_COMP_ALIGN_g         = 0;
@@ -509,21 +505,19 @@ size_t H5T_REF_COMP_ALIGN_g         = 0;
  * Alignment constraints for native types. These are initialized at run time
  * in H5Tinit.c
  */
-size_t H5T_NATIVE_SCHAR_ALIGN_g  = 0;
-size_t H5T_NATIVE_UCHAR_ALIGN_g  = 0;
-size_t H5T_NATIVE_SHORT_ALIGN_g  = 0;
-size_t H5T_NATIVE_USHORT_ALIGN_g = 0;
-size_t H5T_NATIVE_INT_ALIGN_g    = 0;
-size_t H5T_NATIVE_UINT_ALIGN_g   = 0;
-size_t H5T_NATIVE_LONG_ALIGN_g   = 0;
-size_t H5T_NATIVE_ULONG_ALIGN_g  = 0;
-size_t H5T_NATIVE_LLONG_ALIGN_g  = 0;
-size_t H5T_NATIVE_ULLONG_ALIGN_g = 0;
-size_t H5T_NATIVE_FLOAT_ALIGN_g  = 0;
-size_t H5T_NATIVE_DOUBLE_ALIGN_g = 0;
-#if H5_SIZEOF_LONG_DOUBLE != 0
+size_t H5T_NATIVE_SCHAR_ALIGN_g   = 0;
+size_t H5T_NATIVE_UCHAR_ALIGN_g   = 0;
+size_t H5T_NATIVE_SHORT_ALIGN_g   = 0;
+size_t H5T_NATIVE_USHORT_ALIGN_g  = 0;
+size_t H5T_NATIVE_INT_ALIGN_g     = 0;
+size_t H5T_NATIVE_UINT_ALIGN_g    = 0;
+size_t H5T_NATIVE_LONG_ALIGN_g    = 0;
+size_t H5T_NATIVE_ULONG_ALIGN_g   = 0;
+size_t H5T_NATIVE_LLONG_ALIGN_g   = 0;
+size_t H5T_NATIVE_ULLONG_ALIGN_g  = 0;
+size_t H5T_NATIVE_FLOAT_ALIGN_g   = 0;
+size_t H5T_NATIVE_DOUBLE_ALIGN_g  = 0;
 size_t H5T_NATIVE_LDOUBLE_ALIGN_g = 0;
-#endif
 
 /*
  * Alignment constraints for C9x types. These are initialized at run time in
@@ -560,8 +554,8 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 
 /* Useful floating-point values for conversion routines */
 /* (+/- Inf for all floating-point types) */
-float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0f;
-float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0f;
+float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0F;
+float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0F;
 double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
 double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
 
@@ -760,42 +754,40 @@ DESCRIPTION
 herr_t
 H5T__init_package(void)
 {
-    H5T_t *native_schar  = NULL; /* Datatype structure for native signed char */
-    H5T_t *native_uchar  = NULL; /* Datatype structure for native unsigned char */
-    H5T_t *native_short  = NULL; /* Datatype structure for native short */
-    H5T_t *native_ushort = NULL; /* Datatype structure for native unsigned short */
-    H5T_t *native_int    = NULL; /* Datatype structure for native int */
-    H5T_t *native_uint   = NULL; /* Datatype structure for native unsigned int */
-    H5T_t *native_long   = NULL; /* Datatype structure for native long */
-    H5T_t *native_ulong  = NULL; /* Datatype structure for native unsigned long */
-    H5T_t *native_llong  = NULL; /* Datatype structure for native long long */
-    H5T_t *native_ullong = NULL; /* Datatype structure for native unsigned long long */
-    H5T_t *native_float  = NULL; /* Datatype structure for native float */
-    H5T_t *native_double = NULL; /* Datatype structure for native double */
-#if H5_SIZEOF_LONG_DOUBLE != 0
-    H5T_t *native_ldouble = NULL; /* Datatype structure for native long double */
-#endif
-    H5T_t * std_u8le  = NULL; /* Datatype structure for unsigned 8-bit little-endian integer */
-    H5T_t * std_u8be  = NULL; /* Datatype structure for unsigned 8-bit big-endian integer */
-    H5T_t * std_u16le = NULL; /* Datatype structure for unsigned 16-bit little-endian integer */
-    H5T_t * std_u16be = NULL; /* Datatype structure for unsigned 16-bit big-endian integer */
-    H5T_t * std_u32le = NULL; /* Datatype structure for unsigned 32-bit little-endian integer */
-    H5T_t * std_u32be = NULL; /* Datatype structure for unsigned 32-bit big-endian integer */
-    H5T_t * std_u64le = NULL; /* Datatype structure for unsigned 64-bit little-endian integer */
-    H5T_t * std_u64be = NULL; /* Datatype structure for unsigned 64-bit big-endian integer */
-    H5T_t * dt        = NULL;
-    H5T_t * fixedpt   = NULL; /* Datatype structure for native int */
-    H5T_t * floatpt   = NULL; /* Datatype structure for native float */
-    H5T_t * string    = NULL; /* Datatype structure for C string */
-    H5T_t * bitfield  = NULL; /* Datatype structure for bitfield */
-    H5T_t * compound  = NULL; /* Datatype structure for compound objects */
-    H5T_t * enum_type = NULL; /* Datatype structure for enum objects */
-    H5T_t * vlen      = NULL; /* Datatype structure for vlen objects */
-    H5T_t * array     = NULL; /* Datatype structure for array objects */
-    H5T_t * objref    = NULL; /* Datatype structure for deprecated reference objects */
-    H5T_t * regref    = NULL; /* Datatype structure for deprecated region references */
-    H5T_t * ref       = NULL; /* Datatype structure for opaque references */
-    hsize_t dim[1]    = {1};  /* Dimension info for array datatype */
+    H5T_t * native_schar   = NULL; /* Datatype structure for native signed char */
+    H5T_t * native_uchar   = NULL; /* Datatype structure for native unsigned char */
+    H5T_t * native_short   = NULL; /* Datatype structure for native short */
+    H5T_t * native_ushort  = NULL; /* Datatype structure for native unsigned short */
+    H5T_t * native_int     = NULL; /* Datatype structure for native int */
+    H5T_t * native_uint    = NULL; /* Datatype structure for native unsigned int */
+    H5T_t * native_long    = NULL; /* Datatype structure for native long */
+    H5T_t * native_ulong   = NULL; /* Datatype structure for native unsigned long */
+    H5T_t * native_llong   = NULL; /* Datatype structure for native long long */
+    H5T_t * native_ullong  = NULL; /* Datatype structure for native unsigned long long */
+    H5T_t * native_float   = NULL; /* Datatype structure for native float */
+    H5T_t * native_double  = NULL; /* Datatype structure for native double */
+    H5T_t * native_ldouble = NULL; /* Datatype structure for native long double */
+    H5T_t * std_u8le       = NULL; /* Datatype structure for unsigned 8-bit little-endian integer */
+    H5T_t * std_u8be       = NULL; /* Datatype structure for unsigned 8-bit big-endian integer */
+    H5T_t * std_u16le      = NULL; /* Datatype structure for unsigned 16-bit little-endian integer */
+    H5T_t * std_u16be      = NULL; /* Datatype structure for unsigned 16-bit big-endian integer */
+    H5T_t * std_u32le      = NULL; /* Datatype structure for unsigned 32-bit little-endian integer */
+    H5T_t * std_u32be      = NULL; /* Datatype structure for unsigned 32-bit big-endian integer */
+    H5T_t * std_u64le      = NULL; /* Datatype structure for unsigned 64-bit little-endian integer */
+    H5T_t * std_u64be      = NULL; /* Datatype structure for unsigned 64-bit big-endian integer */
+    H5T_t * dt             = NULL;
+    H5T_t * fixedpt        = NULL; /* Datatype structure for native int */
+    H5T_t * floatpt        = NULL; /* Datatype structure for native float */
+    H5T_t * string         = NULL; /* Datatype structure for C string */
+    H5T_t * bitfield       = NULL; /* Datatype structure for bitfield */
+    H5T_t * compound       = NULL; /* Datatype structure for compound objects */
+    H5T_t * enum_type      = NULL; /* Datatype structure for enum objects */
+    H5T_t * vlen           = NULL; /* Datatype structure for vlen objects */
+    H5T_t * array          = NULL; /* Datatype structure for array objects */
+    H5T_t * objref         = NULL; /* Datatype structure for deprecated reference objects */
+    H5T_t * regref         = NULL; /* Datatype structure for deprecated region references */
+    H5T_t * ref            = NULL; /* Datatype structure for opaque references */
+    hsize_t dim[1]         = {1};  /* Dimension info for array datatype */
     herr_t  status;
     hbool_t copied_dtype =
         TRUE; /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
@@ -843,10 +835,8 @@ H5T__init_package(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
     if (NULL == (native_double = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-#if H5_SIZEOF_LONG_DOUBLE != 0
     if (NULL == (native_ldouble = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object")
-#endif
 
     /*------------------------------------------------------------
      * Derived native types
@@ -1116,7 +1106,6 @@ H5T__init_package(void)
         H5T__register_int(H5T_PERS_HARD, "flt_dbl", native_float, native_double, H5T__conv_float_double);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_flt", native_double, native_float, H5T__conv_double_float);
-#if H5_SIZEOF_LONG_DOUBLE != 0
     status |=
         H5T__register_int(H5T_PERS_HARD, "flt_ldbl", native_float, native_ldouble, H5T__conv_float_ldouble);
     status |=
@@ -1125,7 +1114,6 @@ H5T__init_package(void)
         H5T__register_int(H5T_PERS_HARD, "ldbl_flt", native_ldouble, native_float, H5T__conv_ldouble_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "ldbl_dbl", native_ldouble, native_double, H5T__conv_ldouble_double);
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
     /* from long long */
     status |=
@@ -1663,31 +1651,29 @@ H5T_top_term_package(void)
 
             H5T_FORTRAN_S1_g = FAIL;
 
-            H5T_NATIVE_SCHAR_g  = FAIL;
-            H5T_NATIVE_UCHAR_g  = FAIL;
-            H5T_NATIVE_SHORT_g  = FAIL;
-            H5T_NATIVE_USHORT_g = FAIL;
-            H5T_NATIVE_INT_g    = FAIL;
-            H5T_NATIVE_UINT_g   = FAIL;
-            H5T_NATIVE_LONG_g   = FAIL;
-            H5T_NATIVE_ULONG_g  = FAIL;
-            H5T_NATIVE_LLONG_g  = FAIL;
-            H5T_NATIVE_ULLONG_g = FAIL;
-            H5T_NATIVE_FLOAT_g  = FAIL;
-            H5T_NATIVE_DOUBLE_g = FAIL;
-#if H5_SIZEOF_LONG_DOUBLE != 0
+            H5T_NATIVE_SCHAR_g   = FAIL;
+            H5T_NATIVE_UCHAR_g   = FAIL;
+            H5T_NATIVE_SHORT_g   = FAIL;
+            H5T_NATIVE_USHORT_g  = FAIL;
+            H5T_NATIVE_INT_g     = FAIL;
+            H5T_NATIVE_UINT_g    = FAIL;
+            H5T_NATIVE_LONG_g    = FAIL;
+            H5T_NATIVE_ULONG_g   = FAIL;
+            H5T_NATIVE_LLONG_g   = FAIL;
+            H5T_NATIVE_ULLONG_g  = FAIL;
+            H5T_NATIVE_FLOAT_g   = FAIL;
+            H5T_NATIVE_DOUBLE_g  = FAIL;
             H5T_NATIVE_LDOUBLE_g = FAIL;
-#endif
-            H5T_NATIVE_B8_g     = FAIL;
-            H5T_NATIVE_B16_g    = FAIL;
-            H5T_NATIVE_B32_g    = FAIL;
-            H5T_NATIVE_B64_g    = FAIL;
-            H5T_NATIVE_OPAQUE_g = FAIL;
-            H5T_NATIVE_HADDR_g  = FAIL;
-            H5T_NATIVE_HSIZE_g  = FAIL;
-            H5T_NATIVE_HSSIZE_g = FAIL;
-            H5T_NATIVE_HERR_g   = FAIL;
-            H5T_NATIVE_HBOOL_g  = FAIL;
+            H5T_NATIVE_B8_g      = FAIL;
+            H5T_NATIVE_B16_g     = FAIL;
+            H5T_NATIVE_B32_g     = FAIL;
+            H5T_NATIVE_B64_g     = FAIL;
+            H5T_NATIVE_OPAQUE_g  = FAIL;
+            H5T_NATIVE_HADDR_g   = FAIL;
+            H5T_NATIVE_HSIZE_g   = FAIL;
+            H5T_NATIVE_HSSIZE_g  = FAIL;
+            H5T_NATIVE_HERR_g    = FAIL;
+            H5T_NATIVE_HBOOL_g   = FAIL;
 
             H5T_NATIVE_INT8_g        = FAIL;
             H5T_NATIVE_UINT8_g       = FAIL;
@@ -1892,19 +1878,24 @@ H5Tcopy(hid_t obj_id)
             break;
 
         case H5I_DATASET: {
-            H5VL_object_t *vol_obj = NULL; /* Dataset structure */
+            H5VL_object_t *         vol_obj;     /* Object for obj_id */
+            H5VL_dataset_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
             /* The argument is a dataset handle */
             if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
 
+            /* Set up VOL callback arguments */
+            vol_cb_args.op_type               = H5VL_DATASET_GET_TYPE;
+            vol_cb_args.args.get_type.type_id = H5I_INVALID_HID;
+
             /* Get the datatype from the dataset
              * NOTE: This will have to be closed after we're done with it.
              */
-            if (H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                                 &dset_tid) < 0)
+            if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
                             "unable to get datatype from the dataset")
+            dset_tid = vol_cb_args.args.get_type.type_id;
 
             /* Unwrap the type ID */
             if (NULL == (dt = (H5T_t *)H5I_object(dset_tid)))

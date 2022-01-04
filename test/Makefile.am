@@ -55,6 +55,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_vlstr_reader$(EXEEXT) vfd_swmr_vlstr_writer$(EXEEXT) \
     vfd_swmr_zoo_reader$(EXEEXT) vfd_swmr_zoo_writer$(EXEEXT) \
     vfd_swmr_gperf_reader$(EXEEXT) vfd_swmr_gperf_writer$(EXEEXT) \
+    vfd_swmr_gfail_reader$(EXEEXT) vfd_swmr_gfail_writer$(EXEEXT) \
+    vfd_swmr_indep_wr_p0$(EXEEXT) vfd_swmr_indep_wr_p1$(EXEEXT) \
     vds_env$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
@@ -113,6 +115,8 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
     vfd_swmr_attrdset_reader vfd_swmr_attrdset_writer \
     vfd_swmr_gperf_reader vfd_swmr_gperf_writer \
+    vfd_swmr_gfail_reader vfd_swmr_gfail_writer \
+    vfd_swmr_indep_wr_p0 vfd_swmr_indep_wr_p1 \
 	vfd_swmr_check_compat \
     vfd_swmr_dsetchks_reader vfd_swmr_dsetchks_writer \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
@@ -181,6 +185,10 @@ vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
 vfd_swmr_group_reader_SOURCES=vfd_swmr_group_writer.c
 vfd_swmr_gperf_reader_SOURCES=vfd_swmr_gperf_writer.c
+vfd_swmr_gfail_reader_SOURCES=vfd_swmr_gfail_writer.c
+vfd_swmr_indep_wr_p0_SOURCES=vfd_swmr_indep_rw_writer.c
+vfd_swmr_indep_wr_p1_SOURCES=vfd_swmr_indep_rw_writer.c
+
 vfd_swmr_dsetops_reader_SOURCES=vfd_swmr_dsetops_writer.c
 
 vfd_swmr_attrdset_writer_SOURCES=vfd_swmr_attrdset_writer.c
@@ -213,7 +221,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     zero_chunk.h5 chunk_single.h5 swmr_non_latest.h5 \
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
     storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
-    alloc_0sized.h5 \
+    alloc_0sized.h5 h5s_block.h5 h5s_plist.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \

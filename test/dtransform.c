@@ -32,30 +32,30 @@ hid_t dset_id_int_chunk   = -1;
 hid_t dset_id_float_chunk = -1;
 
 const float windchillFfloat[ROWS][COLS] = {
-    {36.0f, 31.0f, 25.0f, 19.0f, 13.0f, 7.0f, 1.0f, -5.0f, -11.0f, -16.0f, -22.0f, -28.0f, -34.0f, -40.0f,
-     -46.0f, -52.0f, -57.0f, -63.0f},
-    {34.0f, 27.0f, 21.0f, 15.0f, 9.0f, 3.0f, -4.0f, -10.0f, -16.0f, -22.0f, -28.0f, -35.0f, -41.0f, -47.0f,
-     -53.0f, -59.0f, -66.0f, -72.0f},
-    {32.0f, 25.0f, 19.0f, 13.0f, 6.0f, 0.0f, -7.0f, -13.0f, -19.0f, -26.0f, -32.0f, -39.0f, -45.0f, -51.0f,
-     -58.0f, -64.0f, -71.0f, -77.0f},
-    {30.0f, 24.0f, 17.0f, 11.0f, 4.0f, -2.0f, -9.0f, -15.0f, -22.0f, -29.0f, -35.0f, -42.0f, -48.0f, -55.0f,
-     -61.0f, -68.0f, -74.0f, -81.0f},
-    {29.0f, 23.0f, 16.0f, 9.0f, 3.0f, -4.0f, -11.0f, -17.0f, -24.0f, -31.0f, -37.0f, -44.0f, -51.0f, -58.0f,
-     -64.0f, -71.0f, -78.0f, -84.0f},
-    {28.0f, 22.0f, 15.0f, 8.0f, 1.0f, -5.0f, -12.0f, -19.0f, -26.0f, -33.0f, -39.0f, -46.0f, -53.0f, -60.0f,
-     -67.0f, -73.0f, -80.0f, -87.0f},
-    {28.0f, 21.0f, 14.0f, 7.0f, 0.0f, -7.0f, -14.0f, -21.0f, -27.0f, -34.0f, -41.0f, -48.0f, -55.0f, -62.0f,
-     -69.0f, -76.0f, -82.0f, -89.0f},
-    {27.0f, 20.0f, 13.0f, 6.0f, -1.0f, -8.0f, -15.0f, -22.0f, -29.0f, -36.0f, -43.0f, -50.0f, -57.0f, -64.0f,
-     -71.0f, -78.0f, -84.0f, -91.0f},
-    {26.0f, 19.0f, 12.0f, 5.0f, -2.0f, -9.0f, -16.0f, -23.0f, -30.0f, -37.0f, -44.0f, -51.0f, -58.0f, -65.0f,
-     -72.0f, -79.0f, -86.0f, -93.0f},
-    {26.0f, 19.0f, 12.0f, 4.0f, -3.0f, -10.0f, -17.0f, -24.0f, -31.0f, -38.0f, -45.0f, -52.0f, -60.0f, -67.0f,
-     -74.0f, -81.0f, -88.0f, -95.0f},
-    {25.0f, 18.0f, 11.0f, 4.0f, -3.0f, -11.0f, -18.0f, -25.0f, -32.0f, -39.0f, -46.0f, -54.0f, -61.0f, -68.0f,
-     -75.0f, -82.0f, -89.0f, -97.0f},
-    {25.0f, 17.0f, 10.0f, 3.0f, -4.0f, -11.0f, -19.0f, -26.0f, -33.0f, -40.0f, -48.0f, -55.0f, -62.0f, -69.0f,
-     -76.0f, -84.0f, -91.0f, -98.0f}};
+    {36.0F, 31.0F, 25.0F, 19.0F, 13.0F, 7.0F, 1.0F, -5.0F, -11.0F, -16.0F, -22.0F, -28.0F, -34.0F, -40.0F,
+     -46.0F, -52.0F, -57.0F, -63.0F},
+    {34.0F, 27.0F, 21.0F, 15.0F, 9.0F, 3.0F, -4.0F, -10.0F, -16.0F, -22.0F, -28.0F, -35.0F, -41.0F, -47.0F,
+     -53.0F, -59.0F, -66.0F, -72.0F},
+    {32.0F, 25.0F, 19.0F, 13.0F, 6.0F, 0.0F, -7.0F, -13.0F, -19.0F, -26.0F, -32.0F, -39.0F, -45.0F, -51.0F,
+     -58.0F, -64.0F, -71.0F, -77.0F},
+    {30.0F, 24.0F, 17.0F, 11.0F, 4.0F, -2.0F, -9.0F, -15.0F, -22.0F, -29.0F, -35.0F, -42.0F, -48.0F, -55.0F,
+     -61.0F, -68.0F, -74.0F, -81.0F},
+    {29.0F, 23.0F, 16.0F, 9.0F, 3.0F, -4.0F, -11.0F, -17.0F, -24.0F, -31.0F, -37.0F, -44.0F, -51.0F, -58.0F,
+     -64.0F, -71.0F, -78.0F, -84.0F},
+    {28.0F, 22.0F, 15.0F, 8.0F, 1.0F, -5.0F, -12.0F, -19.0F, -26.0F, -33.0F, -39.0F, -46.0F, -53.0F, -60.0F,
+     -67.0F, -73.0F, -80.0F, -87.0F},
+    {28.0F, 21.0F, 14.0F, 7.0F, 0.0F, -7.0F, -14.0F, -21.0F, -27.0F, -34.0F, -41.0F, -48.0F, -55.0F, -62.0F,
+     -69.0F, -76.0F, -82.0F, -89.0F},
+    {27.0F, 20.0F, 13.0F, 6.0F, -1.0F, -8.0F, -15.0F, -22.0F, -29.0F, -36.0F, -43.0F, -50.0F, -57.0F, -64.0F,
+     -71.0F, -78.0F, -84.0F, -91.0F},
+    {26.0F, 19.0F, 12.0F, 5.0F, -2.0F, -9.0F, -16.0F, -23.0F, -30.0F, -37.0F, -44.0F, -51.0F, -58.0F, -65.0F,
+     -72.0F, -79.0F, -86.0F, -93.0F},
+    {26.0F, 19.0F, 12.0F, 4.0F, -3.0F, -10.0F, -17.0F, -24.0F, -31.0F, -38.0F, -45.0F, -52.0F, -60.0F, -67.0F,
+     -74.0F, -81.0F, -88.0F, -95.0F},
+    {25.0F, 18.0F, 11.0F, 4.0F, -3.0F, -11.0F, -18.0F, -25.0F, -32.0F, -39.0F, -46.0F, -54.0F, -61.0F, -68.0F,
+     -75.0F, -82.0F, -89.0F, -97.0F},
+    {25.0F, 17.0F, 10.0F, 3.0F, -4.0F, -11.0F, -19.0F, -26.0F, -33.0F, -40.0F, -48.0F, -55.0F, -62.0F, -69.0F,
+     -76.0F, -84.0F, -91.0F, -98.0F}};
 
 const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22, 28, 34, 40, 46, 52, 57, 63},
                                        {34, 27, 21, 15, 9, 3, 4, 10, 16, 22, 28, 35, 41, 47, 53, 59, 66, 1},
@@ -77,9 +77,9 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         for (i = 0; i < ROWS; i++)                                                                           \
             for (j = 0; j < COLS; j++) {                                                                     \
                 if (!((((VAR1)[i][j] >= (TYPE)((VAR2)[i][j])) &&                                             \
-                       (((VAR1)[i][j] - TOL) < (TYPE)((VAR2)[i][j]))) ||                                     \
+                       (((VAR1)[i][j] - (TOL)) < (TYPE)((VAR2)[i][j]))) ||                                   \
                       (((VAR1)[i][j] <= (TYPE)((VAR2)[i][j])) &&                                             \
-                       (((VAR1)[i][j] + TOL) > (TYPE)((VAR2)[i][j]))))) {                                    \
+                       (((VAR1)[i][j] + (TOL)) > (TYPE)((VAR2)[i][j]))))) {                                  \
                     H5_FAILED();                                                                             \
                     HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
                     goto error;                                                                              \
@@ -94,8 +94,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                                                                                                              \
         for (i = 0; i < ROWS; i++)                                                                           \
             for (j = 0; j < COLS; j++) {                                                                     \
-                if (!(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + TOL)) &&                                        \
-                      ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - TOL)))) {                                       \
+                if (!(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + (TOL))) &&                                      \
+                      ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - (TOL))))) {                                     \
                     H5_FAILED();                                                                             \
                     HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
                     goto error;                                                                              \
@@ -357,9 +357,7 @@ main(void)
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, float, H5T_NATIVE_FLOAT, "float", windchillFfloat, 1);
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, double, H5T_NATIVE_DOUBLE, "double", windchillFfloat, 1);
-#if H5_SIZEOF_LONG_DOUBLE != 0
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, long double, H5T_NATIVE_LDOUBLE, "ldouble", windchillFfloat, 1);
-#endif
 
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, char, H5T_NATIVE_CHAR, "char", transformData, 0);
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned char, H5T_NATIVE_UCHAR, "uchar", transformData, 0);
@@ -374,9 +372,7 @@ main(void)
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, float, H5T_NATIVE_FLOAT, "float", windchillFfloat, 1);
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, double, H5T_NATIVE_DOUBLE, "double", windchillFfloat, 1);
-#if H5_SIZEOF_LONG_DOUBLE != 0
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, long double, H5T_NATIVE_LDOUBLE, "ldouble", windchillFfloat, 1);
-#endif
 
     if (test_copy(dxpl_id_c_to_f_copy, dxpl_id_polynomial_copy) < 0)
         TEST_ERROR;
@@ -540,19 +536,19 @@ test_poly(const hid_t dxpl_id_polynomial)
 
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
-            windchillC          = (int)((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
-            polyflres[row][col] = ((2.0f + (float)windchillC) * (((float)windchillC - 8.0f) / 2.0f));
+            windchillC          = (int)((5.0F / 9.0F) * (windchillFfloat[row][col] - 32));
+            polyflres[row][col] = ((2.0F + (float)windchillC) * (((float)windchillC - 8.0F) / 2.0F));
         }
 
     TESTING("data transform, polynomial transform (int->float)")
     if (H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread) < 0)
         TEST_ERROR
 
-    COMPARE(float, polyflread, polyflres, 2.0f)
+    COMPARE(float, polyflread, polyflres, 2.0F)
 
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
-            windchillC          = (int)((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
+            windchillC          = (int)((5.0F / 9.0F) * (windchillFfloat[row][col] - 32));
             polyflres[row][col] = (float)((2 + windchillC) * ((windchillC - 8) / 2));
         }
 
@@ -582,6 +578,7 @@ test_specials(hid_t file)
     const char *special4 = "-x";
     const char *special5 = "+x";
     const char *special6 = "2e+1*x";
+    const char *special7 = "x";
 
     TESTING("data transform of some special cases")
 
@@ -729,6 +726,32 @@ test_specials(hid_t file)
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR
 
+    /*-----------------------------
+     * Operation 7: x
+     * This operation will be
+     * treated if no function has
+     * been specified.
+     *----------------------------*/
+    if (H5Pset_data_transform(dxpl_id, special7) < 0)
+        TEST_ERROR;
+
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col];
+
+    if ((dset_id = H5Dcreate2(file, "/special7", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+
+    COMPARE_INT(read_buf, data_res)
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
     if (H5Pclose(dxpl_id) < 0)
         TEST_ERROR
     if (H5Sclose(dataspace) < 0)
@@ -752,7 +775,7 @@ test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy)
 
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
-            windchillC          = (int)((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
+            windchillC          = (int)((5.0F / 9.0F) * (windchillFfloat[row][col] - 32));
             polyflres[row][col] = (float)((2 + windchillC) * ((windchillC - 8) / 2));
         }
 
@@ -786,7 +809,7 @@ test_trivial(const hid_t dxpl_id_simple)
         TEST_ERROR
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
-            if ((windchillFfloatread[row][col] - 4.8f) > FLOAT_TOL)
+            if ((windchillFfloatread[row][col] - 4.8F) > FLOAT_TOL)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n");
         }
 
@@ -843,7 +866,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     for (row = 0; row < ROWS; row++)
         for (col = 0; col < COLS; col++) {
-            if ((windchillFfloatread[row][col] - 4.8f) > FLOAT_TOL)
+            if ((windchillFfloatread[row][col] - 4.8F) > FLOAT_TOL)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 

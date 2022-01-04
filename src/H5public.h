@@ -56,8 +56,12 @@
 
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
+#ifndef MPICH_SKIP_MPICXX
 #define MPICH_SKIP_MPICXX 1
-#define OMPI_SKIP_MPICXX  1
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX 1
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
@@ -79,15 +83,15 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 0
+#define H5_VERS_RELEASE 1
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE ""
+#define H5_VERS_SUBRELEASE "1"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.0"
+#define H5_VERS_INFO "HDF5 library version: 1.13.1-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -168,8 +172,9 @@
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
- * The negative failure value is most commonly -1, but don't bet on it.  The
- * proper way to detect failure is something like:
+ * The negative failure value is most commonly -1, but don't bet on it.
+ *
+ * The proper way to detect failure is something like:
  * \code
  * if((dset = H5Dopen2(file, name)) < 0)
  *    fprintf(stderr, "unable to open the requested dataset\n");
@@ -178,11 +183,17 @@
 typedef int herr_t;
 
 /**
- * Boolean type.  Successful return values are zero (false) or positive
- * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return #htri_t however return zero
- * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a #htri_t function is:
+ * C99-style Boolean type. Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.
+ * \attention Boolean functions cannot fail.
+ */
+#include <stdbool.h>
+typedef bool hbool_t;
+/**
+ * Three-valued Boolean type. Functions that return #htri_t however return zero
+ * (false), positive (true), or negative (failure).
+ *
+ * The proper way to test for truth from a #htri_t function is:
  * \code
  * if ((retval = H5Tcommitted(type)) > 0) {
  *     printf("data type is committed\n");
@@ -193,8 +204,7 @@ typedef int herr_t;
  * }
  * \endcode
  */
-typedef bool hbool_t;
-typedef int  htri_t;
+typedef int htri_t;
 
 /* The signed version of size_t
  *
@@ -281,9 +291,9 @@ typedef enum {
 /* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
-#define H5_ITER_ERROR (-1)
-#define H5_ITER_CONT  (0)
-#define H5_ITER_STOP  (1)
+#define H5_ITER_ERROR (-1) /**< Error, stop iteration */
+#define H5_ITER_CONT  (0)  /**< Continue iteration */
+#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
 
 //! <!-- [H5_index_t_snip] -->
 /**
