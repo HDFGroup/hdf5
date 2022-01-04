@@ -149,12 +149,16 @@ if [ $rc -ne 0 ] ; then
 fi
 
 all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
-all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrdset"
+all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small"
 
-# For exhaustive run, add: os_groups_attrs, os_groups_ops, os_groups_seg, dsetops, dsetchks,independ_wr
+# For exhaustive run, add: 
+#   attrdset, dsetops, dsetchks,
+#   os_groups_attrs, os_groups_ops, os_groups_seg, independ_wr,
+#   gfail_entry_length, gfail_checksum, gfail_page_size, gfail_index_space
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg dsetops dsetchks independ_wr"
-    all_tests="${all_tests} gfail_entry_length gfail_page_size"
+    all_tests="${all_tests} attrdset dsetops dsetchks"
+    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg independ_wr"
+    all_tests="${all_tests} gfail_entry_length gfail_checksum gfail_page_size gfail_index_space"
 fi
 
 tests=${all_tests}
@@ -1453,6 +1457,70 @@ fi
 
 ###############################################################################
 #
+# "gfail_checksum" test
+#
+# Only for exhaustive run
+#
+# Verify that meaningful message about increasing max_lag is printed when
+# incorrect metadata checksum error is enountered when loading the cache entry.
+#
+# Note that there will be messages from the error stack printed out for this test.
+# This is expected.
+#
+# (See issue #2 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_checksum:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -n 420000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_checksum_writer \
+	    ../vfd_swmr_gfail_writer -q -m 50 -t 10 -n 4000000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -n 420000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_checksum_reader \
+	    ../vfd_swmr_gfail_reader -q -m 50 -t 10 -n 4000000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+    if [ $(cat vfd_swmr_gfail_checksum_reader.rc) -ne 0 ]; then
+        grep "suggest to increase the value of max_lag" vfd_swmr_gfail_checksum_reader.out >/dev/null 2>&1
+        if test $? -ne 0; then
+            echo reader had error
+	        nerrors=$((nerrors + 1))
+        fi
+    fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_checksum_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_checksum_writer.{out,rc}
+	rm -f vfd_swmr_gfail_checksum_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
 # "gfail_page_size" test
 #
 # Only for exhaustive run
@@ -1505,6 +1573,62 @@ if [ ${do_gfail_page_size:-no} = yes ]; then
 	# Clean up output files
 	rm -f vfd_swmr_gfail_page_size_writer.{out,rc}
 	rm -f vfd_swmr_gfail_page_size_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "gfail_index_space" test
+#
+# Only for exhaustive run
+#
+# Verify that the failure is fixed when there is not enough space to copy the index.
+# (See issue #4 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_index_space:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 50 -t 10 -n 1000000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_index_space_writer \
+	    ../vfd_swmr_gfail_writer -q -m 50 -t 10 -n 1000000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 50 -t 10 -n 1000000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_index_space_reader  \
+	    ../vfd_swmr_gfail_reader -m 50 -t 10 -n 1000000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_gfail_index_space_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_index_space_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_index_space_writer.{out,rc}
+	rm -f vfd_swmr_gfail_index_space_reader.*.{out,rc}
 fi
 
 ###############################################################################
