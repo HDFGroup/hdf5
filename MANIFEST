@@ -3048,6 +3048,11 @@
 ./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
+# VFD SWMR utilities
+./utils/vfd_swmr/README.md
+./utils/vfd_swmr/Makefile.am
+./utils/vfd_swmr/aux_process.c
+
 # high level libraries
 ./hl/Makefile.am
 ./hl/examples/Makefile.am
