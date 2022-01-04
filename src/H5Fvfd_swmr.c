@@ -1160,7 +1160,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
      *    call, do nothing and exit.
      *
      *    Also retrieve the current number of entries in the index
-     *    so as to detect the need to allocate more space for the 
+     *    so as to detect the need to allocate more space for the
      *    index.
      */
     if (H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, &tmp_tick_num, &vfd_entries, NULL) < 0)
@@ -1214,7 +1214,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 
         /* Check if more space is needed for the index */
         if (shared->mdf_idx_len < vfd_entries) {
-            uint32_t                  inc_mdf_idx_len;
+            uint32_t                   inc_mdf_idx_len;
             H5FD_vfd_swmr_idx_entry_t *new_idx;
             H5FD_vfd_swmr_idx_entry_t *old_idx;
 
@@ -1227,15 +1227,15 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 
             /* Allocate more space for shared->mdf_idx and shared->old_mdf_idx */
             new_idx = H5MM_realloc(shared->mdf_idx, inc_mdf_idx_len * sizeof(shared->mdf_idx[0]));
-            if(new_idx == NULL)
+            if (new_idx == NULL)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "new index null after H5MM_realloc()")
-            shared->mdf_idx = new_idx;
+            shared->mdf_idx     = new_idx;
             shared->mdf_idx_len = inc_mdf_idx_len;
 
             old_idx = H5MM_realloc(shared->old_mdf_idx, inc_mdf_idx_len * sizeof(shared->old_mdf_idx[0]));
-            if(old_idx == NULL)
+            if (old_idx == NULL)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "old index null after H5MM_realloc()")
-            shared->old_mdf_idx = old_idx;
+            shared->old_mdf_idx     = old_idx;
             shared->old_mdf_idx_len = inc_mdf_idx_len;
         }
 
@@ -1957,7 +1957,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      */
     H5MM_memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
-    old_writer_index_offset = shared->writer_index_offset;
+    old_writer_index_offset     = shared->writer_index_offset;
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len         = new_mdf_idx_len;
@@ -1974,8 +1974,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      * trade-off for simplicity.
      */
     /* Fix: use the saved old_writer_index_offset not the current one */
-    if (shadow_range_defer_free(shared, old_writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) ==
-        -1) {
+    if (shadow_range_defer_free(shared, old_writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) == -1) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "could not schedule index reclamation");
     }
 done:
