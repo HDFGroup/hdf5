@@ -1205,7 +1205,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
     /* prepare parameters to pass to compress/decompress functions */
     p.size      = cd_values[H5Z_SCALEOFFSET_PARM_SIZE];
-    p.mem_order = H5T_native_order_g;
+    p.mem_order = (unsigned)H5T_native_order_g;
 
     /* input; decompress */
     if (flags & H5Z_FLAG_REVERSE) {
