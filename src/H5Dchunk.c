@@ -2232,7 +2232,6 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             /* Set the chunk's scaled coordinates */
             H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             chunk_info->scaled[fm->f_ndims] = 0;
-            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if (H5SL_insert(fm->sel_chunks, chunk_info, &chunk_info->index) < 0) {
