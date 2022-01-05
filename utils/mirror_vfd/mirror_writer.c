@@ -763,7 +763,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 
     /* Allocate the buffer once -- re-use between loops.
      */
-    buf = (char *)HDmalloc(sizeof(char) * (unsigned long)H5FD_MIRROR_DATA_BUFFER_MAX);
+    buf = (char *)HDmalloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
     if (NULL == buf) {
         mirror_log(session->loginfo, V_ERR, "can't allocate databuffer");
         reply_error(session, "can't allocate buffer for receiving data");
@@ -788,7 +788,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
      */
     sum_bytes_written = 0;
     do {
-        nbytes_in_packet = HDread(session->sockfd, buf, (unsigned long)H5FD_MIRROR_DATA_BUFFER_MAX);
+        nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX);
         if (-1 == nbytes_in_packet) {
             mirror_log(session->loginfo, V_ERR, "can't read into databuffer");
             reply_error(session, "can't read data buffer");
