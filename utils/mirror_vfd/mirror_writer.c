@@ -868,7 +868,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     mirror_log(session->loginfo, V_INFO, "received %zd bytes", read_ret);
     if (HEXDUMP_XMITS) {
         mirror_log(session->loginfo, V_ALL, "```", read_ret);
-        mirror_log_bytes(session->loginfo, V_ALL, (size_t)read_ret, (const unsigned char *)comm->raw);
+        mirror_log_bytes(session->loginfo, V_ALL, read_ret, (const unsigned char *)comm->raw);
         mirror_log(session->loginfo, V_ALL, "```");
     } /* end if hexdump transmissions received */
 
