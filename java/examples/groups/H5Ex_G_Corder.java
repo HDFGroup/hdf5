@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /************************************************************
     Creating a file with creation properties and traverse the
-    groups in alpabetical and creation order.
+    groups in alphabetical and creation order.
  ************************************************************/
 
 package examples.groups;

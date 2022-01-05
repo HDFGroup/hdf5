@@ -921,7 +921,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    /* If everything is fine, start monitoring the datset */
+    /* If everything is fine, start monitoring the dataset */
     if (h5tools_getstatus() != EXIT_FAILURE)
         if (monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);

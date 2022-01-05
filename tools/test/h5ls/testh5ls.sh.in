@@ -164,7 +164,7 @@ $SRC_H5LS_TESTFILES/tdset_idx.ls
 
 # RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
 if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
-    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Serial Exit Code is not passed back to shell correctly."
     echo "***Warning*** Exit code checking is skipped."
     h5haveexitcode=no
 fi
@@ -230,7 +230,7 @@ TESTING() {
 # the `nerrors' global variable and (if $verbose is set) display up to $NLINS
 # lines of the actual output from the tool test.  The actual output is not
 # removed if $HDF5_NOCLEANUP has a non-zero value.
-# Arguemnts:
+# Arguments:
 # $1 -- actual output filename to use
 # $2 and on -- argument for the h5ls tool
 TOOLTEST() {

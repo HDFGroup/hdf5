@@ -579,7 +579,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show mpi write statics */
+    /* show mpi write statistics */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(3);
@@ -645,7 +645,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
         if (pio_debug_level >= 3) {
             /* output all of the times for all iterations */
             print_indent(3);
@@ -904,7 +904,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
     int    i;
     minmax total_mm;
 
-    total_mm.sum = 0.0f;
+    total_mm.sum = 0.0;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;
     total_mm.num = count;

@@ -244,7 +244,7 @@ do_pio(parameters param)
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
             HDfprintf(stderr,
                       "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "trasfer buffer size (%zu)\n",
+                      "transfer buffer size (%zu)\n",
                       (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
         }
@@ -253,7 +253,7 @@ do_pio(parameters param)
         if (((size_t)snbytes % buf_size) != 0) {
             HDfprintf(stderr,
                       "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "trasfer buffer size (%zu)\n",
+                      "transfer buffer size (%zu)\n",
                       (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
         }
@@ -1183,7 +1183,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform write */
@@ -1320,7 +1320,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform write */
@@ -2154,7 +2154,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform collective read */
@@ -2291,7 +2291,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform read */

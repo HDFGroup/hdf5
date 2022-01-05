@@ -591,7 +591,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     TESTING("object with unknown header message & 'shareable' flag set");
 
-    /* Open the dataset with the unknown header message, adn "shareable" flag */
+    /* Open the dataset with the unknown header message, and "shareable" flag */
     if ((did = H5Dopen2(loc_bogus, "Dataset5", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
     if (H5Dclose(did) < 0)
@@ -1096,13 +1096,13 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
     /* IDs for non-minimized file open */
     hid_t file_f_id   = -1; /* lower 'f' for standard file setting */
     hid_t dset_f_x_id = -1; /* 'x' for default */
-    hid_t dset_f_N_id = -1; /* 'N' for explcit non-minimized dset */
+    hid_t dset_f_N_id = -1; /* 'N' for explicit non-minimized dset */
     hid_t dset_f_Y_id = -1; /* 'Y' for minimized dset */
 
     /* IDs for minimized file open */
     hid_t file_F_id   = -1; /* upper 'F' for minimized file setting */
     hid_t dset_F_x_id = -1; /* 'x' for default */
-    hid_t dset_F_N_id = -1; /* 'N' for explcit non-minimized dset */
+    hid_t dset_F_N_id = -1; /* 'N' for explicit non-minimized dset */
     hid_t dset_F_Y_id = -1; /* 'Y' for minimized dset */
 
     char filename_a[512] = "";

@@ -1149,7 +1149,7 @@ done:
 /* -------------------------------------------------------------------------
  * Function:    H5FD__mirror_fapl_get
  *
- * Purpose:     Get the file access propety list which could be used to create
+ * Purpose:     Get the file access property list which could be used to create
  *              an identical file.
  *
  * Return:      Success: pointer to the new file access property list value.

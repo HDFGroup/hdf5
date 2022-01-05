@@ -114,7 +114,7 @@
  * disk (source) and in memory (destination).
  * <p>
  * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore, multidimensional
- * arrays are definitely <i>not</i> layed out contiguously in memory. It would be infeasible to declare a separate
+ * arrays are definitely <i>not</i> laid out contiguously in memory. It would be infeasible to declare a separate
  * routine for every combination of number type and dimensionality. For that reason, the
  *  <a href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
  * data array at run time, and to convert to and from a contiguous array of bytes in synchronized static native C order.

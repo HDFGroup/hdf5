@@ -753,7 +753,7 @@ test_move(hid_t fapl)
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Moving an object across files should't have been possible");
+        HDputs("    Moving an object across files shouldn't have been possible");
         TEST_ERROR
     } /* end if */
 
@@ -1835,7 +1835,7 @@ test_mount_after_unmount(hid_t fapl)
     if (HDstrcmp(objname, "/X/M/Y") != 0)
         TEST_ERROR
 
-    /* Rename object in file #3 that is "disconnected" from name hiearchy */
+    /* Rename object in file #3 that is "disconnected" from name hierarchy */
     /* (It is "disconnected" because it's parent file has been unmounted) */
     if (H5Lmove(gidAMX, "M/Y", gidAMX, "M/Z", H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR

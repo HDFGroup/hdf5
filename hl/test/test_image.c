@@ -219,7 +219,7 @@ test_simple(void)
      *-------------------------------------------------------------------------
      */
 
-    HL_TESTING2("pallete functions");
+    HL_TESTING2("palette functions");
 
     if (H5IMget_npalettes(fid, IMAGE1_NAME, &npals) < 0)
         goto out;
@@ -422,7 +422,7 @@ test_data(void)
 
     /*-------------------------------------------------------------------------
      * palette #4. blue-red
-     * make a palette whith blue to red colors
+     * make a palette with blue to red colors
      *-------------------------------------------------------------------------
      */
     for (i = 0, n = 0; i < 256 * 3; i += 3, n++) {

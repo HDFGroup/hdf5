@@ -1464,7 +1464,7 @@ test_table(hid_t fid, int do_write)
 
     HL_TESTING2("getting field info");
 
-    /* alocate */
+    /* allocate */
     names_out = (char **)HDmalloc(sizeof(char *) * (size_t)NFIELDS);
     for (i = 0; i < NFIELDS; i++) {
         names_out[i] = (char *)HDmalloc(sizeof(char) * 255);

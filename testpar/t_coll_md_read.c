@@ -351,7 +351,7 @@ test_multi_chunk_io_addrmap_issue(void)
  * ranks must exceed or equal 10000. In other words, each MPI rank must be
  * responsible for 10000 or more unique chunks.
  *
- * Condition 3: This test will currently only be reliably reproducable for 2 or 3
+ * Condition 3: This test will currently only be reliably reproducible for 2 or 3
  * MPI ranks. The threshold value calculated reduces to a constant 100 / mpi_size,
  * and is compared against a default value of 30%.
  *

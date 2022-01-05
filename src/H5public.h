@@ -46,7 +46,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is available
  * on Windows, though it doesn't necessarily contain all the POSIX types
  * we need for HDF5 (e.g. ssize_t).
  */
@@ -296,15 +296,16 @@ typedef uint64_t hsize_t;
  * should be discouraged in new code.
  */
 typedef int64_t hssize_t;
-#define PRIdHSIZE          PRId64
-#define PRIiHSIZE          PRIi64
-#define PRIoHSIZE          PRIo64
-#define PRIuHSIZE          PRIu64
-#define PRIxHSIZE          PRIx64
-#define PRIXHSIZE          PRIX64
-#define H5_SIZEOF_HSIZE_T  8
-#define H5_SIZEOF_HSSIZE_T 8
-#define HSIZE_UNDEF        UINT64_MAX
+#define PRIdHSIZE           PRId64
+#define PRIiHSIZE           PRIi64
+#define PRIoHSIZE           PRIo64
+#define PRIuHSIZE           PRIu64
+#define PRIxHSIZE           PRIx64
+#define PRIXHSIZE           PRIX64
+#define H5_SIZEOF_HSIZE_T   8
+#define H5_SIZEOF_HSSIZE_T  8
+#define H5_PRINTF_HSIZE_FMT "%" PRIuHSIZE
+#define HSIZE_UNDEF         UINT64_MAX
 
 /**
  * The address of an object in the file.

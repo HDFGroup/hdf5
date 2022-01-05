@@ -89,7 +89,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_DTYPE_ID,                              /* message id number		*/
     "datatype",                                /* message name for debugging	*/
     sizeof(H5T_t),                             /* native message size		*/
-    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are sharable?       */
+    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are shareable?       */
     H5O__dtype_shared_decode,                  /* decode message		*/
     H5O__dtype_shared_encode,                  /* encode message		*/
     H5O__dtype_copy,                           /* copy the native value	*/

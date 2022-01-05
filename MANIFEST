@@ -39,6 +39,7 @@
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/codespell.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -1351,8 +1352,10 @@
 ./test/testlinks_env.sh.in
 ./test/testmeta.c
 ./test/test_mirror.sh.in
+./test/testswmr.pwsh.in
 ./test/testswmr.sh.in
 ./test/testvds_env.sh.in
+./test/testvdsswmr.pwsh.in
 ./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
