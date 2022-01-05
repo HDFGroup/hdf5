@@ -618,7 +618,7 @@ gen_region_ref(hid_t loc_id)
         goto out;
     }
 
-    /* create normal dataset which is refered */
+    /* create normal dataset which is referred */
     oid2 = H5Dcreate2(loc_id, REG_REF_DS2, H5T_STD_I8LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid2 < 0) {
         HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);

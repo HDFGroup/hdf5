@@ -1992,7 +1992,7 @@ extern H5_api_t H5_g;
 #define H5_API_LOCK
 #define H5_API_UNLOCK
 
-/* disable cancelability (sequential version) */
+/* disable cancellability (sequential version) */
 #define H5_API_UNSET_CANCEL
 #define H5_API_SET_CANCEL
 

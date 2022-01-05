@@ -262,7 +262,7 @@ test_sec2(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * Currently it should be around 2 KB.
@@ -458,7 +458,7 @@ test_core(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -605,7 +605,7 @@ test_core(void)
             } /* end if */
 
     /* Check file size API.
-     * There is no garantee the size of metadata in file is constant.
+     * There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -1209,7 +1209,7 @@ error:
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
  *              of the v1.6 library.  Then tools/misc/h5repart.c was
- *              used to concantenated.  The command was "h5repart -m 5k
+ *              used to concatenated.  The command was "h5repart -m 5k
  *              family_file%05d.h5 family_v16_%05d.h5".
  *
  * Return:      Success:        0
@@ -1477,7 +1477,7 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
- * Purpose:     Tests the file handle interface for MUTLI driver
+ * Purpose:     Tests the file handle interface for MULTI driver
  *
  * Return:      SUCCEED/FAIL
  *
@@ -2632,7 +2632,7 @@ done:
  * Function:    driver_is_splitter_compatible
  *
  * Purpose:     Determine whether the driver set in the FAPL ID is compatible
- *              with the Splitter VFD -- specificially, Write-Only channel.
+ *              with the Splitter VFD -- specifically, Write-Only channel.
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3205,7 +3205,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3225,7 +3225,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3256,7 +3256,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3287,7 +3287,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");

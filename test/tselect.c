@@ -1879,7 +1879,7 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t H5_ATTR
     uint16_t        expected_value; /* Expected value in dataset */
     unsigned        i, j, k, l, m;  /* Local index variables */
     size_t          s;              /* Local index variable */
-    hbool_t         mis_match;      /* Flag to indicate mis-match in expected value */
+    hbool_t         mis_match;      /* Flag to indicate mismatch in expected value */
 
     HDassert(cube_buf);
     HDassert(cube_size > 0);
@@ -2357,7 +2357,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
 
     /* Now write the contents of the in memory small cube to slices of
      * the on disk cube.  After each write, read the on disk cube
-     * into memeory, and verify that it contains the expected
+     * into memory, and verify that it contains the expected
      * data.  Verify that H5Sselect_shape_same() returns true on
      * the memory and file selections.
      */
@@ -2742,7 +2742,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
         i++;
     } while ((i <= 1) && (0 >= sel_offset));
 
-    /* Wierdness alert:
+    /* Weirdness alert:
      *
      * Some how, it seems that selections can extend beyond the
      * boundaries of the target dataspace -- hence the following
@@ -3401,7 +3401,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 
     /* Now write checker board selections of the entries in memory
      * small cube to slices of the on disk cube.  After each write,
-     * read the on disk large cube * into memeory, and verify that
+     * read the on disk large cube * into memory, and verify that
      * it contains the expected * data.  Verify that
      * H5Sselect_shape_same() returns true on the memory and file
      * selections.
@@ -5256,7 +5256,7 @@ test_select_hyper_union_stagger(void)
     error = H5Fclose(file_id);
     CHECK(error, FAIL, "H5Fclose");
 
-    /* Initialize intput buffer */
+    /* Initialize input buffer */
     HDmemset(data_out, 0, 7 * 7 * sizeof(int));
 
     /* Open file */
@@ -11251,7 +11251,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
     } /* end if */
 
-    /* Wierdness alert:
+    /* Weirdness alert:
      *
      * Some how, it seems that selections can extend beyond the
      * boundaries of the target dataspace -- hence the following
@@ -11346,7 +11346,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
     } /* end if */
 
-    /* Wierdness alert:
+    /* Weirdness alert:
      *
      * Again, it seems that selections can extend beyond the
      * boundaries of the target dataspace -- hence the following
@@ -12126,7 +12126,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     MESSAGE(7, ("Testing functionality to rebuild 2-D hyperslab selection\n"));
     /* Create 2-D dataspace */
@@ -12218,7 +12218,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     MESSAGE(7, ("Testing functionality to rebuild 3-D hyperslab selection\n"));
 
@@ -12320,7 +12320,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     MESSAGE(7, ("Testing functionality to rebuild 4-D hyperslab selection\n"));
 
@@ -12439,7 +12439,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     MESSAGE(7, ("Testing functionality to rebuild 5-D hyperslab selection\n"));
 
@@ -12568,7 +12568,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     /* We use 5-D to test a special case with
        rebuilding routine TRUE, FALSE and TRUE */
@@ -12615,7 +12615,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     /* Adding some selections to make it real irregular */
     start5[3]  = 1;
@@ -12643,7 +12643,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     /* Add more selections to make it regular again */
     start5[3]  = 5;
@@ -12671,7 +12671,7 @@ test_space_rebuild(void)
         ret = FAIL;
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     }
-    /* No need to do shape comparision */
+    /* No need to do shape comparison */
 
     H5Sclose(sid_reg1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -12977,7 +12977,7 @@ test_space_update_diminfo(void)
         CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
     } /* end if */
 
-    /* Add block parially overlapping first, with OR */
+    /* Add block partially overlapping first, with OR */
     start1[0] = 4;
     count1[0] = 1;
     block1[0] = 2;
@@ -13022,7 +13022,7 @@ test_space_update_diminfo(void)
         CHECK(ret, FAIL, "H5S_hyper_update_diminfo");
     } /* end if */
 
-    /* Add equally sized block parially overlapping current, with XOR */
+    /* Add equally sized block partially overlapping current, with XOR */
     start1[0] = 3;
     count1[0] = 1;
     block1[0] = 5;
@@ -13056,7 +13056,7 @@ test_space_update_diminfo(void)
         CHECK(ret, FAIL, "H5S_hyper_rebuild");
     } /* end if */
 
-    /* Add differently sized block parially overlapping current, with XOR */
+    /* Add differently sized block partially overlapping current, with XOR */
     start1[0] = 4;
     count1[0] = 1;
     block1[0] = 5;
@@ -14232,7 +14232,7 @@ test_hyper_regular(void)
 **
 ****************************************************************/
 static void
-test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t enpoints, hssize_t enblocks, hsize_t *eblock1,
+test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t enblocks, hsize_t *eblock1,
                        hsize_t *eblock2)
 {
     hid_t        lim_sid;
@@ -14257,7 +14257,7 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t enpoints, hssize_t enb
     /* Check number of elements */
     npoints = H5Sget_select_npoints(lim_sid);
     CHECK(npoints, FAIL, "H5Sget_select_npoints");
-    VERIFY(npoints, enpoints, "H5Sget_select_npoints");
+    VERIFY(npoints, endpoints, "H5Sget_select_npoints");
 
     /* Get selection type */
     sel_type = H5Sget_select_type(lim_sid);

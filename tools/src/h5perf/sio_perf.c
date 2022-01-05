@@ -427,7 +427,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show sys write statics */
+    /* show sys write statistics */
 #if 0
     if (sio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -473,7 +473,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
 #if 0
         if (sio_debug_level >= 3) {
             /* output all of the times for all iterations */
@@ -1278,7 +1278,7 @@ usage(const char *prog)
     HDprintf("\n");
     HDprintf("      Example: 2K,2K,3K\n");
     HDprintf("\n");
-    HDprintf("      The example defines an object (dataset, tranfer buffer) with three\n");
+    HDprintf("      The example defines an object (dataset, transfer buffer) with three\n");
     HDprintf("      dimensions. Be aware that as the number of dimensions increases, the\n");
     HDprintf("      the total size of the object increases exponentially.\n");
     HDprintf("\n");

@@ -156,7 +156,7 @@ Usage: $PROGNAME [all] [checkout] [ftp <URL> [diff] [test] [srcdir] [release] [h
               "snapshot srcdir" is equivalent to "snapshot srcdir all"
               "snapshot srcdir checkout" is equivalent to "snapshot checkout"
     srcdirname <dir>:
-              Use <dir> as the srcdir testing directory if srcdir is choosen.
+              Use <dir> as the srcdir testing directory if srcdir is chosen.
               If <dir> starts with '-', it is append to the default name
               E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx
               [Default is hostname]
@@ -422,7 +422,7 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    cmd=""
             EXEC_CMD_ARG="$@"
-	    # exit the parsing while loop since all arguments have been consummed.
+	    # exit the parsing while loop since all arguments have been consumed.
 	    break
             ;;
 	check-vfd)
@@ -455,7 +455,7 @@ while [ $# -gt 0 ] ; do
 	    OP_CONFIGURE="$OP_CONFIGURE $1"
 	    ;;
 	*)
-	    echo "Unkown option $1"
+	    echo "Unknown option $1"
 	    errcode=1
 	    cmd="help"
 	    break
@@ -623,7 +623,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	fi
     fi
 
-    # if diff is choosen, exit 0 if no significant differences are found.
+    # if diff is chosen, exit 0 if no significant differences are found.
     # otherwise, exit 1.  This includes cases of other failures.
     if [ -n "$cmddiff" ]; then
 	if [ $snapshot = no ]; then
@@ -799,7 +799,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     # Replace the previous version with the current version.
     # Should check if the errcode of the release process but there
     # are other failures after release was done (e.g. h5vers or git failures)
-    # that should allow the replacement to occure.
+    # that should allow the replacement to occur.
     rm -rf ${PREVIOUS}
     mv ${CURRENT} ${PREVIOUS}
 fi #Release snapshot

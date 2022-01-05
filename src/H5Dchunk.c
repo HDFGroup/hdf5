@@ -260,7 +260,7 @@ typedef struct H5D_chunk_iter_ud_t {
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
@@ -977,7 +977,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
             if (!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
-            /* Inital 'power2up' values for scaled dimensions */
+            /* Initial 'power2up' values for scaled dimensions */
             rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
@@ -1070,7 +1070,7 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  */
 static herr_t
 H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;       /* Local pointer to dataset info */
     hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
@@ -2268,7 +2268,6 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             /* Set the chunk's scaled coordinates */
             H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             chunk_info->scaled[fm->f_ndims] = 0;
-            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if (H5SL_insert(fm->sel_chunks, chunk_info, &chunk_info->index) < 0) {
@@ -2650,7 +2649,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                      (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Check for non-existant chunk & skip it if appropriate */
+            /* Check for non-existent chunk & skip it if appropriate */
             if (H5F_addr_defined(udata.chunk_block.offset)) {
                 /* Add chunk to list for selection I/O */
                 chunk_mem_spaces[num_chunks]  = chunk_info->mspace;
@@ -4002,7 +4001,7 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
      * traversing the list when pointer pN reaches wN percent of the original
      * list.  In other words, preemption method N gets to consider entries in
      * approximate least recently used order w0 percent before method N+1
-     * where 100% means tha method N will run to completion before method N+1
+     * where 100% means the method N will run to completion before method N+1
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
@@ -5607,7 +5606,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* The number of bytes accessed in the chunk */
     /* (i.e. the bytes replaced with fill values) */
-    H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, uint32_t);
+    H5_CHECK_OVERFLOW(sel_nelmts, hsize_t, uint32_t);
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
@@ -6352,7 +6351,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
     const H5O_pline_t *pline    = udata->pline;    /* I/O pipeline for applying filters */
 
-    /* needed for commpressed variable length data */
+    /* needed for compressed variable length data */
     hbool_t  must_filter = FALSE;      /* Whether chunk must be filtered during copy */
     size_t   nbytes;                   /* Size of chunk in file (in bytes) */
     H5Z_cb_t filter_cb;                /* Filter failure callback struct */
@@ -7912,7 +7911,7 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
- * Purpose:     Iterate over all the chunks in the dataset with given callbak.
+ * Purpose:     Iterate over all the chunks in the dataset with given callback.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative

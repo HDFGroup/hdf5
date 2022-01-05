@@ -106,7 +106,7 @@ test_split_comm_access(void)
 
         /* delete the test file */
         if (sub_mpi_rank == 0) {
-            mrc = MPI_File_delete((char *)filename, info);
+            mrc = MPI_File_delete(filename, info);
             /*VRFY((mrc==MPI_SUCCESS), ""); */
         }
     }
@@ -179,7 +179,7 @@ test_page_buffer_access(void)
 
     data = (int *)HDmalloc(sizeof(int) * (size_t)num_elements);
 
-    /* intialize all the elements to have a value of -1 */
+    /* initialize all the elements to have a value of -1 */
     for (i = 0; i < num_elements; i++)
         data[i] = -1;
     if (MAINPROCESS) {

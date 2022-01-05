@@ -152,7 +152,7 @@ main(void)
             wdata[j] = 10 * (i + 1);
 
         /*
-         * Open the source files and datasets. Appen data to each dataset and
+         * Open the source files and datasets. Append data to each dataset and
          * close all resources.
          */
 

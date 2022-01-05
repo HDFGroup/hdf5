@@ -129,7 +129,7 @@ CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 
-## Check for non-standard extenstion quadmath.h
+## Check for non-standard extension quadmath.h
 
 CHECK_INCLUDE_FILES(quadmath.h C_HAVE_QUADMATH)
 if (${C_HAVE_QUADMATH})
@@ -547,7 +547,7 @@ if (WINDOWS)
         message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
       endif ()
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing C SOURCE FILE Test InitOnceExecuteOnce succeded with the following output:\n"
+        "Performing C SOURCE FILE Test InitOnceExecuteOnce succeeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${HAVE_IOEO}\n")
     else ()
