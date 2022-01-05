@@ -2801,8 +2801,21 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #ifdef H5_HAVE_PARALLEL
                                              coll_access,
 #endif /* H5_HAVE_PARALLEL */
-                                             type, addr, udata)))
+                                             type, addr, udata))) {
+            /* Print out meaningful message for VFD SWMR reader */
+            if(f->shared->vfd_swmr && !f->shared->vfd_swmr_writer) {
+                uint64_t                   tmp_tick_num = 0;
+
+                if (H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, TRUE, &tmp_tick_num, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, NULL, "error in retrieving tick_num from driver");
+
+                if (tmp_tick_num >= f->shared->tick_num + f->shared->vfd_swmr_config.max_lag)
+                    HDONE_ERROR(H5E_FILE, H5E_SYSTEM, NULL,
+                      "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
+            }
+
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
+        }
 
         entry_ptr = (H5C_cache_entry_t *)thing;
         cache_ptr->entries_loaded_counter++;

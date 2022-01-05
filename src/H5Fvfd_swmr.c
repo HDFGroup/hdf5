@@ -169,7 +169,7 @@ H5FL_DEFINE(eot_queue_entry_t);
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  Vailin Choi -- 11/??/18
+ * Programmer:  Vailin Choi -- 10/??/18
  *
  * Changes:     None.
  *
@@ -251,6 +251,21 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
     else { /* VFD SWMR reader  */
 
         HDassert(!shared->vfd_swmr_config.writer);
+
+        HDassert(shared->fs_page_size > 0);
+        /* This is a bug uncovered by issue #3 of the group test failures.
+         *  See Kent's documentation "Designed to Fail Tests and Issues".
+         *  The file opening process in H5F__new() initializes the cache copy of
+         *  page_size via H5AC_create().  However, later on H5F__super_read()
+         *  may change page size due to non-default setting of
+         *  'free-space manager info' in superblock extension.
+         *  Fix: set the cache copy of page_size again if different from
+         *  f->shared->fs_page_size.
+         */
+        if (shared->cache) {
+            if (H5AC_set_vfd_swmr_reader(shared->cache, TRUE, shared->fs_page_size) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set page size in cache for VFD SWMR reader");
+        }
 
         shared->vfd_swmr_writer = FALSE;
         shared->max_jump_ticks  = 0;
@@ -1121,6 +1136,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
     uint32_t                   tmp_mdf_idx_len;
     uint32_t                   tmp_mdf_idx_entries_used;
     uint32_t                   mdf_idx_entries_used;
+    uint32_t                   vfd_entries;
     H5F_shared_t *             shared = f->shared;
     struct {
         uint64_t pgno;
@@ -1142,8 +1158,12 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
      *
      *    If the tick reported has not increased since the last
      *    call, do nothing and exit.
+     *
+     *    Also retrieve the current number of entries in the index
+     *    so as to detect the need to allocate more space for the
+     *    index.
      */
-    if (H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, &tmp_tick_num, NULL, NULL) < 0)
+    if (H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, &tmp_tick_num, &vfd_entries, NULL) < 0)
 
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "error in retrieving tick_num from driver")
 
@@ -1157,7 +1177,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
      *               */
     if (!entering_api && tmp_tick_num >= shared->tick_num + shared->vfd_swmr_config.max_lag) {
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL,
-                    "Reader's API time exceeds max_lag of ticks, may increase the value of max_lag.");
+                    "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
     }
 #if 0 /* Kent */
     /* The original code */
@@ -1191,6 +1211,33 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
         /* if shared->mdf_idx is NULL, allocate an index */
         if (shared->mdf_idx == NULL && H5F__vfd_swmr_create_index(shared) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate metadata file index");
+
+        /* Check if more space is needed for the index */
+        if (shared->mdf_idx_len < vfd_entries) {
+            uint32_t                   inc_mdf_idx_len;
+            H5FD_vfd_swmr_idx_entry_t *new_idx;
+            H5FD_vfd_swmr_idx_entry_t *old_idx;
+
+            HDassert(shared->old_mdf_idx_len <= shared->mdf_idx_len);
+
+            /* Determine the size needed for the index */
+            inc_mdf_idx_len = shared->mdf_idx_len * 2;
+            while (vfd_entries > inc_mdf_idx_len)
+                inc_mdf_idx_len *= 2;
+
+            /* Allocate more space for shared->mdf_idx and shared->old_mdf_idx */
+            new_idx = H5MM_realloc(shared->mdf_idx, inc_mdf_idx_len * sizeof(shared->mdf_idx[0]));
+            if (new_idx == NULL)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "new index null after H5MM_realloc()")
+            shared->mdf_idx     = new_idx;
+            shared->mdf_idx_len = inc_mdf_idx_len;
+
+            old_idx = H5MM_realloc(shared->old_mdf_idx, inc_mdf_idx_len * sizeof(shared->old_mdf_idx[0]));
+            if (old_idx == NULL)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "old index null after H5MM_realloc()")
+            shared->old_mdf_idx     = old_idx;
+            shared->old_mdf_idx_len = inc_mdf_idx_len;
+        }
 
         mdf_idx_entries_used = shared->mdf_idx_len;
 
@@ -1258,6 +1305,14 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 #if 0 /*Kent*/
                     HDassert(oent->length == nent->length);
 #endif
+                    /* This is a bug uncovered by issue #1 of the
+                     * group test failures.  See Kent's documentation
+                     * "Designed to Fail Tests and Issues".
+                     * nent->length can be <, =, > to oent->length.
+                     * Fix: HDassert the 1st two cases: < and =.
+                     * John will address the > case.
+                     */
+                    HDassert(nent->length <= oent->length);
 
                     /* the page has been altered -- evict it and
                      * any contained metadata cache entries.
@@ -1864,6 +1919,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     H5F_shared_t *             shared    = f->shared;
     H5FD_vfd_swmr_idx_entry_t *ret_value = NULL;
     haddr_t                    idx_addr;
+    haddr_t                    old_writer_index_offset;
     hsize_t                    idx_size;
     H5FD_vfd_swmr_idx_entry_t *new_mdf_idx = NULL, *old_mdf_idx;
     uint32_t                   new_mdf_idx_len, old_mdf_idx_len;
@@ -1901,6 +1957,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      */
     H5MM_memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
+    old_writer_index_offset     = shared->writer_index_offset;
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len         = new_mdf_idx_len;
@@ -1916,8 +1973,8 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      * past what is strictly necessary, but it seems like a reasonable
      * trade-off for simplicity.
      */
-    if (shadow_range_defer_free(shared, shared->writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) ==
-        -1) {
+    /* Fix: use the saved old_writer_index_offset not the current one */
+    if (shadow_range_defer_free(shared, old_writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) == -1) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "could not schedule index reclamation");
     }
 done:
