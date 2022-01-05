@@ -895,7 +895,7 @@ H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Function:    H5HF__cache_iblock_verify_chksum
  *
  * Purpose:     Verify the computed checksum of the data structure is the
- *              same as the stored chksum.
+ *              same as the stored checksum.
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative

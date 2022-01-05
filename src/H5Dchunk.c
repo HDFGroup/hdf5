@@ -2259,7 +2259,6 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             /* Set the chunk's scaled coordinates */
             H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             chunk_info->scaled[fm->f_ndims] = 0;
-            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if (H5SL_insert(fm->sel_chunks, chunk_info, &chunk_info->index) < 0) {
@@ -5221,7 +5220,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* The number of bytes accessed in the chunk */
     /* (i.e. the bytes replaced with fill values) */
-    H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, uint32_t);
+    H5_CHECK_OVERFLOW(sel_nelmts, hsize_t, uint32_t);
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
