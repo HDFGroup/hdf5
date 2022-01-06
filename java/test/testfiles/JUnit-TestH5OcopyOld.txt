@@ -3,9 +3,8 @@ JUnit version 4.11
 .testH5OcopyNullRef
 .testH5OcopyRefsDatasettodiffFile
 .testH5OcopyRefsAttr
-.testH5OcopyInvalidRef
 
 Time:  XXXX
 
-OK (5 tests)
+OK (4 tests)
 
