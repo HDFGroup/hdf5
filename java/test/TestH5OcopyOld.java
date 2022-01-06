@@ -30,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-public class TestH5Ocopy {
+public class TestH5OcopyOld {
     @Rule public TestName testname = new TestName();
     private static final String FILENAME = "testRefsattribute.h5";
     private static final int DIM_X = 4;
