@@ -3523,6 +3523,7 @@
 ./java/test/testfiles/JUnit-TestH5Obasic.txt
 ./java/test/testfiles/JUnit-TestH5Ocreate.txt
 ./java/test/testfiles/JUnit-TestH5Ocopy.txt
+./java/test/testfiles/JUnit-TestH5OcopyOld.txt
 ./java/test/testfiles/JUnit-TestH5P.txt
 ./java/test/testfiles/JUnit-TestH5PData.txt
 ./java/test/testfiles/JUnit-TestH5Pfapl.txt
@@ -3566,6 +3567,7 @@
 ./java/test/TestH5Obasic.java
 ./java/test/TestH5Ocreate.java
 ./java/test/TestH5Ocopy.java
+./java/test/TestH5OcopyOld.java
 ./java/test/TestH5P.java
 ./java/test/TestH5PData.java
 ./java/test/TestH5Pfapl.java
