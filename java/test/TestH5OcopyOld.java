@@ -358,40 +358,41 @@ public class TestH5OcopyOld {
         }
     }
 
-    @Test(expected = HDF5LibraryException.class)
-    public void testH5OcopyInvalidRef() throws Throwable {
-        final long _pid_ = HDF5Constants.H5P_DEFAULT;
-        long sid = HDF5Constants.H5I_INVALID_HID;
-        long did = HDF5Constants.H5I_INVALID_HID;
-        long aid = HDF5Constants.H5I_INVALID_HID;
-
-        try {
-            sid = H5.H5Screate_simple(1, new long[] {1}, null);
-            assertTrue("testH5OcopyInvalidRef.H5Screate_simple: ", sid >= 0);
-            did = H5.H5Dcreate(H5fid, "Dataset_with_invalid_Ref", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
-            assertTrue("testH5OcopyInvalidRef.H5Dcreate: ", did > 0);
-            aid = H5.H5Acreate(did, "Invalid_Ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
-            assertTrue("testH5OcopyInvalidRef.H5Acreate: ", aid > 0);
-            H5.H5Awrite(aid, HDF5Constants.H5T_STD_REF_OBJ, new long[]{-1});
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        finally {
-            try {H5.H5Dclose(did);} catch (Exception exx) {}
-            try {H5.H5Aclose(aid);} catch (Exception exx) {}
-            try {H5.H5Sclose(sid);} catch (Exception exx) {}
-        }
-
-        long ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
-        assertTrue("testH5OcopyInvalidRef.H5Pcreate: ", ocp_plist_id >= 0);
-        H5.H5Pset_copy_object(ocp_plist_id, HDF5Constants.H5O_COPY_EXPAND_REFERENCE_FLAG);
-        try {
-            H5.H5Ocopy(H5fid, "/Dataset_with_invalid_Ref", H5fid, "/Dataset_with_invalid_Ref_cp", ocp_plist_id, _pid_);
-        }
-        finally {
-            try {H5.H5Pclose(ocp_plist_id);} catch (Exception exx) {}
-        }
-    }
+//    @Ignore because of JIRA HDF5-9547
+//    @Test(expected = HDF5LibraryException.class)
+//    public void testH5OcopyInvalidRef() throws Throwable {
+//        final long _pid_ = HDF5Constants.H5P_DEFAULT;
+//        long sid = HDF5Constants.H5I_INVALID_HID;
+//        long did = HDF5Constants.H5I_INVALID_HID;
+//        long aid = HDF5Constants.H5I_INVALID_HID;
+//
+//        try {
+//            sid = H5.H5Screate_simple(1, new long[] {1}, null);
+//            assertTrue("testH5OcopyInvalidRef.H5Screate_simple: ", sid >= 0);
+//            did = H5.H5Dcreate(H5fid, "Dataset_with_invalid_Ref", HDF5Constants.H5T_NATIVE_INT, sid, _pid_, _pid_, _pid_);
+//            assertTrue("testH5OcopyInvalidRef.H5Dcreate: ", did > 0);
+//            aid = H5.H5Acreate(did, "Invalid_Ref", HDF5Constants.H5T_STD_REF_OBJ, sid, _pid_, _pid_);
+//            assertTrue("testH5OcopyInvalidRef.H5Acreate: ", aid > 0);
+//            H5.H5Awrite(aid, HDF5Constants.H5T_STD_REF_OBJ, new long[]{-1});
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        finally {
+//            try {H5.H5Dclose(did);} catch (Exception exx) {}
+//            try {H5.H5Aclose(aid);} catch (Exception exx) {}
+//            try {H5.H5Sclose(sid);} catch (Exception exx) {}
+//        }
+//
+//        long ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
+//        assertTrue("testH5OcopyInvalidRef.H5Pcreate: ", ocp_plist_id >= 0);
+//        H5.H5Pset_copy_object(ocp_plist_id, HDF5Constants.H5O_COPY_EXPAND_REFERENCE_FLAG);
+//        try {
+//            H5.H5Ocopy(H5fid, "/Dataset_with_invalid_Ref", H5fid, "/Dataset_with_invalid_Ref_cp", ocp_plist_id, _pid_);
+//        }
+//        finally {
+//            try {H5.H5Pclose(ocp_plist_id);} catch (Exception exx) {}
+//        }
+//    }
 
 }
