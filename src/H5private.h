@@ -2145,7 +2145,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         else if (TAILQ_EMPTY(&eot_queue_g))                                                                  \
             ; /* Nothing to do. */                                                                           \
         else if (H5F_vfd_swmr_process_eot_queue(true) < 0) {                                                 \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "error processing EOT queue")                            \
+            /* Report error instead of "err" */                                                              \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FALSE, "error processing EOT queue")                          \
         }                                                                                                    \
     } while (0)
 
@@ -2160,7 +2161,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         else if (TAILQ_EMPTY(&eot_queue_g))                                                                  \
             ; /* Nothing to do. */                                                                           \
         else if (H5F_vfd_swmr_process_eot_queue(false) < 0) {                                                \
-            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, err, "error processing EOT queue")                            \
+            /* Report error instead of "err" */                                                              \
+            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, FALSE, "error processing EOT queue")                          \
         }                                                                                                    \
     } while (0)
 
