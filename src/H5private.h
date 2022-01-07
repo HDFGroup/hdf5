@@ -63,15 +63,14 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#include <sys/types.h>
+#endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
 #endif
-#include <sys/types.h>
-#include <unistd.h>
-#endif
-#ifdef _POSIX_VERSION
+#ifdef H5_HAVE_WAITPID
 #include <sys/wait.h>
-#include <pwd.h>
 #endif
 
 /*
