@@ -303,7 +303,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsprintf(prefix, "%d:", mpi_rank);
+        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))

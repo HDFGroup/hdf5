@@ -174,9 +174,9 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     } /* end else */
 
     /* Floating point types should display full precision */
-    sprintf(fmt_float, "%%1.%dg", FLT_DIG);
+    snprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
     info.fmt_float = fmt_float;
-    sprintf(fmt_double, "%%1.%dg", DBL_DIG);
+    snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
 
     info.dset_format     = "DSET-%s ";

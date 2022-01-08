@@ -934,7 +934,7 @@ mkfilenames(char *prefix)
                "Need to adjust the code to accommodate the large size.\n");
     }
     for (i = 0; i < n; i++) {
-        sprintf(testfiles[i], "%s/ParaEg%d.h5", prefix, i);
+        snprintf(testfiles[i], PATH_MAX, "%s/ParaEg%d.h5", prefix, i);
     }
     return (0);
 }

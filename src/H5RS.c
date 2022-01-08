@@ -350,7 +350,7 @@ done:
  */
 /* Disable warning for "format not a string literal" here -QAK */
 /*
- *      This pragma only needs to surround the sprintf() calls with
+ *      This pragma only needs to surround the snprintf() calls with
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
