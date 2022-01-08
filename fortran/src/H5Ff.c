@@ -591,7 +591,7 @@ h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
     /*
      * Call H5Fget_name function
      */
-    if ((size_c = H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen)) < 0)
+    if ((size_c = H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen + 1)) < 0)
         HGOTO_DONE(FAIL);
 
     /*
