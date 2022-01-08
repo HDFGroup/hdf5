@@ -223,9 +223,7 @@ set (LINUX_LFS 0)
 set (HDF_EXTRA_C_FLAGS)
 set (HDF_EXTRA_FLAGS)
 if (MINGW OR NOT WINDOWS)
-  # Might want to check explicitly for Linux and possibly Cygwin
-  # instead of checking for not Solaris or Darwin.
-  if (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	# Linux Specific flags
 	# This was originally defined as _POSIX_SOURCE which was updated to
 	# _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
