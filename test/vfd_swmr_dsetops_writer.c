@@ -24,7 +24,7 @@
  *      -- Regular hyperslab writes
  *      -- Raw data modifications
  */
-/* 
+/*
  * Modifications for testing references
  *
  *  -O option for object reference
@@ -34,7 +34,7 @@
  *              --Store the dataset references via H5Rcreate_object() and save
  *                them in the object reference dataset
  *      --Reader:
- *          When opening the datasets via open_dsets(): 
+ *          When opening the datasets via open_dsets():
  *              --Open the object reference dataset
  *              --Retrieve the object references from the dataset
  *              --Open the dataset object via H5Ropen_object()
@@ -42,7 +42,7 @@
  *  -R option for region reference
  *      Writer:
  *          --When creating the datasets via create_dsets():
- *              --Create a region reference dataset 
+ *              --Create a region reference dataset
  *          --When writing to the datasets via write_dset():
  *              --Store the dataset selections via H5Rcreate_region() and save
  *                them in the region reference dataset
@@ -105,23 +105,23 @@ typedef struct {
 
 /* Structure to hold info for different dataset types */
 typedef struct {
-    hid_t compact_did;  /* ID for compact dataset */
-    hid_t contig_did;   /* ID for contiguous dataset */
-    hid_t single_did;   /* ID for chunked dataset: single index */
-    hid_t implicit_did; /* ID for chunked dataset: implicit index */
-    hid_t fa_did;       /* ID for chunked dataset: fixed array index  */
-    hid_t ea_did;       /* ID for chunked dataset: extensible array index */
-    hid_t bt2_did;      /* ID for chunked dataset: version 2 btree index */
-    hid_t compact_sid;  /* Dataspace ID for compact dataset */
-    hid_t contig_sid;   /* Dataspace ID for contiguous dataset */
-    hid_t single_sid;   /* Dataspace ID for chunked dataset */
-    hid_t implicit_sid; /* Dataspace ID for chunked dataset */
-    hid_t fa_sid;       /* Dataspace ID for chunked dataset */
-    hid_t ea_sid;       /* Dataspace ID for chunked dataset */
-    hid_t bt2_sid;      /* Dataspace ID for chunked dataset */
-    hid_t obj_did;      /* ID for object reference dataset */
-    hid_t reg_did;      /* ID for region reference dataset */
-    H5R_ref_t *reg_buf; /* Buffer for holding the region references */
+    hid_t      compact_did;  /* ID for compact dataset */
+    hid_t      contig_did;   /* ID for contiguous dataset */
+    hid_t      single_did;   /* ID for chunked dataset: single index */
+    hid_t      implicit_did; /* ID for chunked dataset: implicit index */
+    hid_t      fa_did;       /* ID for chunked dataset: fixed array index  */
+    hid_t      ea_did;       /* ID for chunked dataset: extensible array index */
+    hid_t      bt2_did;      /* ID for chunked dataset: version 2 btree index */
+    hid_t      compact_sid;  /* Dataspace ID for compact dataset */
+    hid_t      contig_sid;   /* Dataspace ID for contiguous dataset */
+    hid_t      single_sid;   /* Dataspace ID for chunked dataset */
+    hid_t      implicit_sid; /* Dataspace ID for chunked dataset */
+    hid_t      fa_sid;       /* Dataspace ID for chunked dataset */
+    hid_t      ea_sid;       /* Dataspace ID for chunked dataset */
+    hid_t      bt2_sid;      /* Dataspace ID for chunked dataset */
+    hid_t      obj_did;      /* ID for object reference dataset */
+    hid_t      reg_did;      /* ID for region reference dataset */
+    H5R_ref_t *reg_buf;      /* Buffer for holding the region references */
 } dsets_state_t;
 
 /* Initializations for dsets_state_t */
@@ -132,8 +132,8 @@ typedef struct {
         .contig_sid = H5I_INVALID_HID, .single_did = H5I_INVALID_HID, .single_sid = H5I_INVALID_HID,         \
         .implicit_did = H5I_INVALID_HID, .implicit_sid = H5I_INVALID_HID, .fa_did = H5I_INVALID_HID,         \
         .fa_sid = H5I_INVALID_HID, .ea_did = H5I_INVALID_HID, .ea_sid = H5I_INVALID_HID,                     \
-        .bt2_did = H5I_INVALID_HID, .bt2_sid = H5I_INVALID_HID,                                              \
-        .obj_did = H5I_INVALID_HID, .reg_did = H5I_INVALID_HID, .reg_buf = NULL                              \
+        .bt2_did = H5I_INVALID_HID, .bt2_sid = H5I_INVALID_HID, .obj_did = H5I_INVALID_HID,                  \
+        .reg_did = H5I_INVALID_HID, .reg_buf = NULL                                                          \
     }
 
 /* Structure to hold info for named pipes */
@@ -176,7 +176,8 @@ static bool dsets_action(unsigned action, const state_t *s, const dsets_state_t 
 static bool dset_setup(unsigned action, unsigned which, const state_t *s, hsize_t *start, hsize_t *stride,
                        hsize_t *count, hsize_t *block, hid_t *mem_sid, unsigned int **buf);
 static bool write_dset(const state_t *s, const char *name, hid_t did, hid_t sid, hid_t mem_sid,
-    hsize_t *start, hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *buf, H5R_ref_t *reg_buf);
+                       hsize_t *start, hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *buf,
+                       H5R_ref_t *reg_buf);
 static bool write_dset_compact(const state_t *s, const dsets_state_t *ds);
 
 static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
@@ -203,11 +204,10 @@ static const hid_t badhid = H5I_INVALID_HID;
 #define DSET_EA_NAME       "chunked_ea"
 #define DSET_BT2_NAME      "chunked_bt2"
 
-#define DSET_OBJ_REF_NAME  "obj_ref_dset"   /* Object reference dataset */
-#define DSET_REG_REF_NAME  "reg_ref_dset"   /* Region reference dataset */
-#define OBJ_REF_DIMS        7               /* Dimension size for object reference dataset */
-#define REG_REF_DIMS        6               /* Dimension size for region reference dataset */
-
+#define DSET_OBJ_REF_NAME "obj_ref_dset" /* Object reference dataset */
+#define DSET_REG_REF_NAME "reg_ref_dset" /* Region reference dataset */
+#define OBJ_REF_DIMS      7              /* Dimension size for object reference dataset */
+#define REG_REF_DIMS      6              /* Dimension size for region reference dataset */
 
 /* Action for writes */
 #define SEQ_WRITE    1 /* Sequential write */
@@ -407,14 +407,14 @@ state_init(state_t *s, int argc, char **argv)
     }
 
     /* Object reference applies to either compact or contiguous or chunked datasets */
-    if(s->obj_ref && !(s->compact || s->contig || s->chunked)) {
+    if (s->obj_ref && !(s->compact || s->contig || s->chunked)) {
         HDprintf("Enable object reference without compact/contig/chunked dataset\n");
         usage(s->progname);
         goto error;
     }
 
     /* Region reference applies to either contiguous or chunked datasets */
-    if(s->reg_ref && !(s->contig || s->chunked)) {
+    if (s->reg_ref && !(s->contig || s->chunked)) {
         HDprintf("Enable region reference without contig/chunked dataset\n");
         usage(s->progname);
         goto error;
@@ -477,13 +477,13 @@ error:
 static bool
 create_dsets(const state_t *s, dsets_state_t *ds)
 {
-    hid_t dcpl = badhid;
-    hid_t dtid = badhid;
-    unsigned i;
-    H5R_ref_t *obj_buf = NULL;          /* Buffer for object references */
-    hid_t sid = badhid;
-    hsize_t obj_dims = OBJ_REF_DIMS;    /* Dimension for object reference dataset */
-    hsize_t reg_dims = REG_REF_DIMS;    /* Dimension for region reference dataset */
+    hid_t      dcpl = badhid;
+    hid_t      dtid = badhid;
+    unsigned   i;
+    H5R_ref_t *obj_buf  = NULL; /* Buffer for object references */
+    hid_t      sid      = badhid;
+    hsize_t    obj_dims = OBJ_REF_DIMS; /* Dimension for object reference dataset */
+    hsize_t    reg_dims = REG_REF_DIMS; /* Dimension for region reference dataset */
 
     *ds = DSETS_INITIALIZER;
 
@@ -556,8 +556,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the contiguous dataset with DEFAULT datatype */
-        if ((ds->contig_did = H5Dcreate2(s->file, DSET_CONTIG_NAME, s->filetype, ds->contig_sid, H5P_DEFAULT, dcpl,
-                                         H5P_DEFAULT)) < 0) {
+        if ((ds->contig_did = H5Dcreate2(s->file, DSET_CONTIG_NAME, s->filetype, ds->contig_sid, H5P_DEFAULT,
+                                         dcpl, H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 contiguous dataset failed\n");
             TEST_ERROR;
         }
@@ -605,8 +605,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the chunked dataset (single index) with the default datatype */
-        if ((ds->single_did = H5Dcreate2(s->file, DSET_SINGLE_NAME, s->filetype, ds->single_sid, H5P_DEFAULT, dcpl,
-                                         H5P_DEFAULT)) < 0) {
+        if ((ds->single_did = H5Dcreate2(s->file, DSET_SINGLE_NAME, s->filetype, ds->single_sid, H5P_DEFAULT,
+                                         dcpl, H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 chunked dataset:single index failed\n");
             TEST_ERROR;
         }
@@ -630,8 +630,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the chunked dataset (implicit index) with the default datatype */
-        if ((ds->implicit_did = H5Dcreate2(s->file, DSET_IMPLICIT_NAME, s->filetype, ds->implicit_sid, H5P_DEFAULT,
-                                           dcpl, H5P_DEFAULT)) < 0) {
+        if ((ds->implicit_did = H5Dcreate2(s->file, DSET_IMPLICIT_NAME, s->filetype, ds->implicit_sid,
+                                           H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 chunked dataset:implicit index failed\n");
             TEST_ERROR;
         }
@@ -663,8 +663,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the chunked dataset (fixed array index) with the default datatype */
-        if ((ds->fa_did =
-                 H5Dcreate2(s->file, DSET_FA_NAME, s->filetype, ds->fa_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        if ((ds->fa_did = H5Dcreate2(s->file, DSET_FA_NAME, s->filetype, ds->fa_sid, H5P_DEFAULT, dcpl,
+                                     H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreaet2 chunked dataset: fa index failed\n");
             TEST_ERROR;
         }
@@ -679,8 +679,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the chunked dataset (extensible array index) with the default datatype */
-        if ((ds->ea_did =
-                 H5Dcreate2(s->file, DSET_EA_NAME, s->filetype, ds->ea_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        if ((ds->ea_did = H5Dcreate2(s->file, DSET_EA_NAME, s->filetype, ds->ea_sid, H5P_DEFAULT, dcpl,
+                                     H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 chunked dataset: ea index failed\n");
             TEST_ERROR;
         }
@@ -695,8 +695,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
 
         /* Create the chunked dataset (btree2 index) with the default datatype */
-        if ((ds->bt2_did =
-                 H5Dcreate2(s->file, DSET_BT2_NAME, s->filetype, ds->bt2_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+        if ((ds->bt2_did = H5Dcreate2(s->file, DSET_BT2_NAME, s->filetype, ds->bt2_sid, H5P_DEFAULT, dcpl,
+                                      H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 chunked dataset: bt2 index failed\n");
             TEST_ERROR;
         }
@@ -714,95 +714,97 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
     /* If object reference is enabled: */
     /* create the object reference dataset and the references to the dataset objects */
-    if(s->obj_ref) {
-        if((obj_buf = HDcalloc(sizeof(H5R_ref_t), OBJ_REF_DIMS)) == NULL) {
+    if (s->obj_ref) {
+        if ((obj_buf = HDcalloc(sizeof(H5R_ref_t), OBJ_REF_DIMS)) == NULL) {
             HDprintf("HDcalloc failed\n");
             TEST_ERROR;
         }
-        if((sid = H5Screate_simple(1, &obj_dims, NULL)) < 0) {
+        if ((sid = H5Screate_simple(1, &obj_dims, NULL)) < 0) {
             HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
-        if((ds->obj_did = H5Dcreate2(s->file, DSET_OBJ_REF_NAME, H5T_STD_REF, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        if ((ds->obj_did = H5Dcreate2(s->file, DSET_OBJ_REF_NAME, H5T_STD_REF, sid, H5P_DEFAULT, H5P_DEFAULT,
+                                      H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 object reference dataset failed\n");
             TEST_ERROR;
         }
 
-        if(s->compact)
-            if(H5Rcreate_object(s->file, DSET_COMPACT_NAME, H5P_DEFAULT, &obj_buf[0]) < 0) {
+        if (s->compact)
+            if (H5Rcreate_object(s->file, DSET_COMPACT_NAME, H5P_DEFAULT, &obj_buf[0]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
-        if(s->contig)
-            if(H5Rcreate_object(s->file, DSET_CONTIG_NAME, H5P_DEFAULT, &obj_buf[1]) < 0) {
+        if (s->contig)
+            if (H5Rcreate_object(s->file, DSET_CONTIG_NAME, H5P_DEFAULT, &obj_buf[1]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
-        if(s->chunked) {
-            if(H5Rcreate_object(s->file, DSET_SINGLE_NAME, H5P_DEFAULT, &obj_buf[2]) < 0) {
+        if (s->chunked) {
+            if (H5Rcreate_object(s->file, DSET_SINGLE_NAME, H5P_DEFAULT, &obj_buf[2]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
 
-            if(H5Rcreate_object(s->file, DSET_IMPLICIT_NAME, H5P_DEFAULT, &obj_buf[3]) < 0) {
+            if (H5Rcreate_object(s->file, DSET_IMPLICIT_NAME, H5P_DEFAULT, &obj_buf[3]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
-            if(H5Rcreate_object(s->file, DSET_FA_NAME, H5P_DEFAULT, &obj_buf[4]) < 0) {
+            if (H5Rcreate_object(s->file, DSET_FA_NAME, H5P_DEFAULT, &obj_buf[4]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
-            if(H5Rcreate_object(s->file, DSET_EA_NAME, H5P_DEFAULT, &obj_buf[5]) < 0) {
+            if (H5Rcreate_object(s->file, DSET_EA_NAME, H5P_DEFAULT, &obj_buf[5]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
-            if(H5Rcreate_object(s->file, DSET_BT2_NAME, H5P_DEFAULT, &obj_buf[6]) < 0) {
+            if (H5Rcreate_object(s->file, DSET_BT2_NAME, H5P_DEFAULT, &obj_buf[6]) < 0) {
                 HDprintf("H5Rcreate_object failed\n");
                 TEST_ERROR;
             }
         }
 
         /* Write the object references to the reference dataset */
-        if(H5Dwrite(ds->obj_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf) < 0) {
+        if (H5Dwrite(ds->obj_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf) < 0) {
             HDprintf("H5Dwrite object reference dataset failed\n");
             TEST_ERROR;
         }
 
         /* Destroy the references */
         for (i = 0; i < OBJ_REF_DIMS; i++)
-            if(H5Rdestroy(&obj_buf[i]) < 0) {
+            if (H5Rdestroy(&obj_buf[i]) < 0) {
                 HDprintf("H5Rdestroy object reference failed\n");
                 TEST_ERROR;
             }
 
-        if(H5Sclose(sid) < 0) {
+        if (H5Sclose(sid) < 0) {
             HDprintf("H5Sclose \n");
             TEST_ERROR;
         }
 
-        if(obj_buf)     
+        if (obj_buf)
             HDfree(obj_buf);
     }
 
     /* If region reference is enabled: */
     /* create the region reference dataset and allocate the buffer for holding the references */
-    if(s->reg_ref) {
-        if((sid = H5Screate_simple(1, &reg_dims, NULL)) < 0) {
+    if (s->reg_ref) {
+        if ((sid = H5Screate_simple(1, &reg_dims, NULL)) < 0) {
             HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
-        if((ds->reg_did = H5Dcreate2(s->file, DSET_REG_REF_NAME, H5T_STD_REF, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        if ((ds->reg_did = H5Dcreate2(s->file, DSET_REG_REF_NAME, H5T_STD_REF, sid, H5P_DEFAULT, H5P_DEFAULT,
+                                      H5P_DEFAULT)) < 0) {
             HDprintf("H5Dcreate2 failed\n");
             TEST_ERROR;
         }
 
-        if(H5Sclose(sid) < 0) {
+        if (H5Sclose(sid) < 0) {
             HDprintf("H5Sclose failed\n");
             TEST_ERROR;
         }
 
-        if((ds->reg_buf = HDcalloc(sizeof(H5R_ref_t), REG_REF_DIMS)) == NULL) {
+        if ((ds->reg_buf = HDcalloc(sizeof(H5R_ref_t), REG_REF_DIMS)) == NULL) {
             HDprintf("HDcalloc failed\n");
             TEST_ERROR;
         }
@@ -835,9 +837,9 @@ error:
     }
     H5E_END_TRY;
 
-    if(obj_buf)
+    if (obj_buf)
         HDfree(obj_buf);
-    if(ds->reg_buf)
+    if (ds->reg_buf)
         HDfree(ds->reg_buf);
 
     return false;
@@ -850,31 +852,31 @@ error:
 static bool
 open_dsets(const state_t *s, dsets_state_t *ds)
 {
-    H5R_ref_t *obj_buf = NULL;  /* Buffer for holding object references */
-    unsigned i;
+    H5R_ref_t *obj_buf = NULL; /* Buffer for holding object references */
+    unsigned   i;
 
     *ds = DSETS_INITIALIZER;
 
     /* If object reference is specified: */
     /* open the object reference dataset and retrieve the dataset object references */
-    if(s->obj_ref) {
-        if((ds->obj_did = H5Dopen2(s->file, DSET_OBJ_REF_NAME, H5P_DEFAULT)) < 0) {
+    if (s->obj_ref) {
+        if ((ds->obj_did = H5Dopen2(s->file, DSET_OBJ_REF_NAME, H5P_DEFAULT)) < 0) {
             HDprintf("HDopen2 object reference dataset failed\n");
             TEST_ERROR;
         }
 
-        if(H5Drefresh(ds->obj_did) < 0) {
+        if (H5Drefresh(ds->obj_did) < 0) {
             HDprintf("HDrefresh failed\n");
             TEST_ERROR;
         }
 
-        if((obj_buf = HDcalloc(sizeof(H5R_ref_t), OBJ_REF_DIMS)) == NULL) {
+        if ((obj_buf = HDcalloc(sizeof(H5R_ref_t), OBJ_REF_DIMS)) == NULL) {
             HDprintf("HDcalloc failed\n");
             TEST_ERROR;
         }
 
         /* Obtain the object references */
-        if(H5Dread(ds->obj_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf) < 0) {
+        if (H5Dread(ds->obj_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf) < 0) {
             HDprintf("HDread failed\n");
             TEST_ERROR;
         }
@@ -882,22 +884,22 @@ open_dsets(const state_t *s, dsets_state_t *ds)
 
     /* If region reference is specified: */
     /* open the region reference dataset and allocate buffer for holding the region references */
-    if(s->reg_ref) {
-        if((ds->reg_did = H5Dopen2(s->file, DSET_REG_REF_NAME, H5P_DEFAULT)) < 0) {
+    if (s->reg_ref) {
+        if ((ds->reg_did = H5Dopen2(s->file, DSET_REG_REF_NAME, H5P_DEFAULT)) < 0) {
             HDprintf("HDopen2 region reference dataset failed\n");
             TEST_ERROR;
         }
 
         /* Allocate the buffer for holding the region references */
-        if((ds->reg_buf = HDcalloc(sizeof(H5R_ref_t), REG_REF_DIMS)) == NULL) {
+        if ((ds->reg_buf = HDcalloc(sizeof(H5R_ref_t), REG_REF_DIMS)) == NULL) {
             HDprintf("HDcalloc failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->compact) {
-        if (!open_dset_real(s, &ds->compact_did, &ds->compact_sid, DSET_COMPACT_NAME, 
-                s->obj_ref?&obj_buf[0]:NULL)) {
+        if (!open_dset_real(s, &ds->compact_did, &ds->compact_sid, DSET_COMPACT_NAME,
+                            s->obj_ref ? &obj_buf[0] : NULL)) {
             HDprintf("open_dset_real() for compact dataset failed\n");
             TEST_ERROR;
         }
@@ -905,8 +907,8 @@ open_dsets(const state_t *s, dsets_state_t *ds)
 
     if (s->contig) {
 
-        if (!open_dset_real(s, &ds->contig_did, &ds->contig_sid, DSET_CONTIG_NAME, 
-                s->obj_ref?&obj_buf[1]:NULL)) {
+        if (!open_dset_real(s, &ds->contig_did, &ds->contig_sid, DSET_CONTIG_NAME,
+                            s->obj_ref ? &obj_buf[1] : NULL)) {
             HDprintf("open_dset_real() for contiguous dataset failed\n");
             TEST_ERROR;
         }
@@ -914,46 +916,43 @@ open_dsets(const state_t *s, dsets_state_t *ds)
 
     if (s->chunked) {
 
-        if (!open_dset_real(s, &ds->single_did, &ds->single_sid, DSET_SINGLE_NAME, 
-            s->obj_ref?&obj_buf[2]:NULL)) {
+        if (!open_dset_real(s, &ds->single_did, &ds->single_sid, DSET_SINGLE_NAME,
+                            s->obj_ref ? &obj_buf[2] : NULL)) {
             HDprintf("open_dset_real() for chunked dataset: single index failed\n");
             TEST_ERROR;
         }
 
-        if (!open_dset_real(s, &ds->implicit_did, &ds->implicit_sid, DSET_IMPLICIT_NAME, 
-                s->obj_ref?&obj_buf[3]:NULL)) {
+        if (!open_dset_real(s, &ds->implicit_did, &ds->implicit_sid, DSET_IMPLICIT_NAME,
+                            s->obj_ref ? &obj_buf[3] : NULL)) {
             HDprintf("open_dset_real() for chunked dataset: implicit index failed\n");
             TEST_ERROR;
         }
 
-        if (!open_dset_real(s, &ds->fa_did, &ds->fa_sid, DSET_FA_NAME, 
-                s->obj_ref?&obj_buf[4]:NULL)) {
+        if (!open_dset_real(s, &ds->fa_did, &ds->fa_sid, DSET_FA_NAME, s->obj_ref ? &obj_buf[4] : NULL)) {
             HDprintf("open_dset_real() for chunked dataset: fa index failed\n");
             TEST_ERROR;
         }
 
-        if (!open_dset_real(s, &ds->ea_did, &ds->ea_sid, DSET_EA_NAME, 
-                s->obj_ref?&obj_buf[5]:NULL)) {
+        if (!open_dset_real(s, &ds->ea_did, &ds->ea_sid, DSET_EA_NAME, s->obj_ref ? &obj_buf[5] : NULL)) {
             HDprintf("open_dset_real() for chunked dataset: ea index failed\n");
             TEST_ERROR;
         }
 
-        if (!open_dset_real(s, &ds->bt2_did, &ds->bt2_sid, DSET_BT2_NAME, 
-                s->obj_ref?&obj_buf[6]:NULL)) {
+        if (!open_dset_real(s, &ds->bt2_did, &ds->bt2_sid, DSET_BT2_NAME, s->obj_ref ? &obj_buf[6] : NULL)) {
             HDprintf("open_dset_real() for chunked dataset: bt2 index failed\n");
             TEST_ERROR;
         }
     }
 
     /* Destroy the object references */
-    if(s->obj_ref) {
+    if (s->obj_ref) {
         for (i = 0; i < OBJ_REF_DIMS; i++)
-            if(H5Rdestroy(&obj_buf[i]) < 0) {
+            if (H5Rdestroy(&obj_buf[i]) < 0) {
                 HDprintf("H5Rdestroy object references\n");
                 TEST_ERROR;
             }
 
-        if(obj_buf) 
+        if (obj_buf)
             HDfree(obj_buf);
     }
 
@@ -961,17 +960,17 @@ open_dsets(const state_t *s, dsets_state_t *ds)
 
 error:
     H5E_BEGIN_TRY
-    { 
+    {
         H5Dclose(ds->obj_did);
         H5Dclose(ds->reg_did);
     }
     H5E_END_TRY;
 
-    if(obj_buf)
+    if (obj_buf)
         HDfree(obj_buf);
-    if(ds->reg_buf)
+    if (ds->reg_buf)
         HDfree(ds->reg_buf);
-        
+
     return false;
 
 } /* open_dsets() */
@@ -987,15 +986,18 @@ open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char *name, H5R_r
 
     /* If object reference is enabled, obtain the dataset object ID
         via H5Ropen_object(). */
-    if(s->obj_ref) {
-        H5E_BEGIN_TRY {
+    if (s->obj_ref) {
+        H5E_BEGIN_TRY
+        {
             *did = H5Ropen_object(obj_buf, H5P_DEFAULT, H5P_DEFAULT);
-        } H5E_END_TRY;
-        if(*did < 0) {
+        }
+        H5E_END_TRY;
+        if (*did < 0) {
             HDprintf("H5Ropen_object failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         HDassert(obj_buf == NULL);
 
         if ((*did = H5Dopen2(s->file, name, H5P_DEFAULT)) < 0) {
@@ -1076,7 +1078,7 @@ close_dsets(dsets_state_t *ds)
         TEST_ERROR;
     }
 
-    if(ds->reg_buf) {
+    if (ds->reg_buf) {
         HDfree(ds->reg_buf);
         ds->reg_buf = NULL;
     }
@@ -1246,7 +1248,7 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
     hsize_t       block[2];
     hid_t         mem_sid;
     unsigned int *wbuf = NULL;
-    unsigned i;
+    unsigned      i;
 
     /* Set up selection, dataspace and data buffer according to the specified action */
     if (!dset_setup(action, which, s, start, stride, count, block, &mem_sid, &wbuf)) {
@@ -1254,61 +1256,58 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
         TEST_ERROR;
     }
 
-
     /* Write to the contiguous dataset */
     if (s->contig) {
 
-        if (!write_dset(s, DSET_CONTIG_NAME, ds->contig_did, ds->contig_sid, mem_sid,
-                start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[0]:NULL)) {
+        if (!write_dset(s, DSET_CONTIG_NAME, ds->contig_did, ds->contig_sid, mem_sid, start, stride, count,
+                        block, wbuf, s->reg_ref ? &ds->reg_buf[0] : NULL)) {
             HDprintf("H5Dwrite to contiguous dataset failed\n");
             TEST_ERROR;
         }
-
     }
 
     /* Write to the 5 chunked datasets */
     if (s->chunked) {
 
-        if (!write_dset(s, DSET_SINGLE_NAME, ds->single_did, ds->single_sid, mem_sid,
-            start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[1]:NULL)) {
+        if (!write_dset(s, DSET_SINGLE_NAME, ds->single_did, ds->single_sid, mem_sid, start, stride, count,
+                        block, wbuf, s->reg_ref ? &ds->reg_buf[1] : NULL)) {
             HDprintf("H5Dwrite to chunked dataset: single index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!write_dset(s, DSET_IMPLICIT_NAME, ds->implicit_did, ds->implicit_sid, mem_sid,
-                start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[2]:NULL)) {
+        if (!write_dset(s, DSET_IMPLICIT_NAME, ds->implicit_did, ds->implicit_sid, mem_sid, start, stride,
+                        count, block, wbuf, s->reg_ref ? &ds->reg_buf[2] : NULL)) {
             HDprintf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!write_dset(s, DSET_FA_NAME, ds->fa_did, ds->fa_sid, mem_sid,
-                start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[3]:NULL)) {
+        if (!write_dset(s, DSET_FA_NAME, ds->fa_did, ds->fa_sid, mem_sid, start, stride, count, block, wbuf,
+                        s->reg_ref ? &ds->reg_buf[3] : NULL)) {
             HDprintf("H5Dwrite to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!write_dset(s, DSET_EA_NAME, ds->ea_did, ds->ea_sid, mem_sid,
-                start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[4]:NULL)) {
+        if (!write_dset(s, DSET_EA_NAME, ds->ea_did, ds->ea_sid, mem_sid, start, stride, count, block, wbuf,
+                        s->reg_ref ? &ds->reg_buf[4] : NULL)) {
             HDprintf("H5Dwrite to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!write_dset(s, DSET_BT2_NAME, ds->bt2_did, ds->bt2_sid, mem_sid,
-                start, stride, count, block, wbuf, s->reg_ref?&ds->reg_buf[5]:NULL)) {
+        if (!write_dset(s, DSET_BT2_NAME, ds->bt2_did, ds->bt2_sid, mem_sid, start, stride, count, block,
+                        wbuf, s->reg_ref ? &ds->reg_buf[5] : NULL)) {
             HDprintf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
     }
 
-
     /* If region reference is enabled, store the region references to the reference dataset */
-    if(s->reg_ref) {
-        if(H5Dwrite(ds->reg_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ds->reg_buf) < 0) {
+    if (s->reg_ref) {
+        if (H5Dwrite(ds->reg_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ds->reg_buf) < 0) {
             HDprintf("H5Dwrite failed\n");
             TEST_ERROR;
         }
         for (i = 0; i < 6; i++)
-            if(H5Rdestroy(&ds->reg_buf[i]) < 0) {
+            if (H5Rdestroy(&ds->reg_buf[i]) < 0) {
                 HDprintf("H5Rdestroy failed\n");
                 TEST_ERROR;
             }
@@ -1316,7 +1315,6 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
 
     if (wbuf)
         HDfree(wbuf);
-
 
     return true;
 
@@ -1415,8 +1413,8 @@ error:
  * Make the selection and then write to the dataset.
  */
 static bool
-write_dset(const state_t *s, const char *name, hid_t did, hid_t sid, hid_t mem_sid, 
-    hsize_t *start, hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *buf, H5R_ref_t *reg_buf)
+write_dset(const state_t *s, const char *name, hid_t did, hid_t sid, hid_t mem_sid, hsize_t *start,
+           hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *buf, H5R_ref_t *reg_buf)
 {
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0) {
         HDprintf("H5Sselect to dataset failed\n");
@@ -1429,9 +1427,9 @@ write_dset(const state_t *s, const char *name, hid_t did, hid_t sid, hid_t mem_s
     }
 
     /* If region reference is enabled, store the region reference to the reference buffer */
-    if(s->reg_ref) {
+    if (s->reg_ref) {
         HDassert(reg_buf != NULL);
-        if(H5Rcreate_region(s->file, name, sid, H5P_DEFAULT, reg_buf) < 0) {
+        if (H5Rcreate_region(s->file, name, sid, H5P_DEFAULT, reg_buf) < 0) {
             HDprintf("H5Rcreate_region failed\n");
             TEST_ERROR;
         }
@@ -1676,15 +1674,15 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     hsize_t       block[2];
     hid_t         mem_sid;
     unsigned int *vbuf = NULL;
-    unsigned i;
+    unsigned      i;
 
     /* If region reference is enabled, obtain the region references from the reference dataset */
-    if(s->reg_ref) {
-        if(H5Drefresh(ds->reg_did) < 0) {
+    if (s->reg_ref) {
+        if (H5Drefresh(ds->reg_did) < 0) {
             HDprintf("H5Drefresh region reference dataset failed\n");
             TEST_ERROR;
         }
-        if(H5Dread(ds->reg_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ds->reg_buf) < 0) {
+        if (H5Dread(ds->reg_did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ds->reg_buf) < 0) {
             HDprintf("H5Dread failed\n");
             TEST_ERROR;
         }
@@ -1700,7 +1698,7 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     if (s->contig) {
 
         if (!verify_dset(ds->contig_did, s->filetype, ds->contig_sid, mem_sid, start, stride, count, block,
-                         vbuf, fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[0]:NULL)) {
+                         vbuf, fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[0] : NULL)) {
             HDprintf("verify_dset() to contiguous dataset failed\n");
             TEST_ERROR;
         }
@@ -1710,31 +1708,31 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     if (s->chunked) {
 
         if (!verify_dset(ds->single_did, s->filetype, ds->single_sid, mem_sid, start, stride, count, block,
-                         vbuf, fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[1]:NULL)) {
+                         vbuf, fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[1] : NULL)) {
             HDprintf("verify_dset() to chunked dataset: single index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_dset(ds->implicit_did, s->filetype, ds->implicit_sid, mem_sid, start, stride, count,
-                         block, vbuf, fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[2]:NULL)) {
+                         block, vbuf, fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[2] : NULL)) {
             HDprintf("verify_dset() to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_dset(ds->fa_did, s->filetype, ds->fa_sid, mem_sid, start, stride, count, block, vbuf,
-                         fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[3]:NULL)) {
+                         fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[3] : NULL)) {
             HDprintf("verify_dset() to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_dset(ds->ea_did, s->filetype, ds->ea_sid, mem_sid, start, stride, count, block, vbuf,
-                         fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[4]:NULL)) {
+                         fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[4] : NULL)) {
             HDprintf("verify_dset() to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_dset(ds->bt2_did, s->filetype, ds->bt2_sid, mem_sid, start, stride, count, block, vbuf,
-                         fileclosed, s->flush_raw_data, s->reg_ref?&ds->reg_buf[5]:NULL)) {
+                         fileclosed, s->flush_raw_data, s->reg_ref ? &ds->reg_buf[5] : NULL)) {
             HDprintf("verify_dset() to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
@@ -1743,9 +1741,9 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     if (vbuf)
         HDfree(vbuf);
 
-    if(s->reg_ref) {
+    if (s->reg_ref) {
         for (i = 0; i < 6; i++)
-            if(H5Rdestroy(&ds->reg_buf[i]) < 0) {
+            if (H5Rdestroy(&ds->reg_buf[i]) < 0) {
                 HDprintf("H5Rdestroy failed\n");
                 TEST_ERROR;
             }
@@ -1766,9 +1764,8 @@ error:
  * `vbuf` contains the data expected from the read.
  */
 static bool
-verify_dset(hid_t did, hid_t tid, hid_t sid, hid_t mem_sid, hsize_t *start, hsize_t *stride,
-            hsize_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed, bool flush_raw_data,
-            H5R_ref_t *reg_buf)
+verify_dset(hid_t did, hid_t tid, hid_t sid, hid_t mem_sid, hsize_t *start, hsize_t *stride, hsize_t *count,
+            hsize_t *block, unsigned int *vbuf, bool fileclosed, bool flush_raw_data, H5R_ref_t *reg_buf)
 {
     unsigned int *rbuf = NULL;
     unsigned      i;
@@ -1786,20 +1783,22 @@ verify_dset(hid_t did, hid_t tid, hid_t sid, hid_t mem_sid, hsize_t *start, hsiz
     }
 
     /* If region reference is enabled, obtain the dataset selection from the reference buffer */
-    if(reg_buf != NULL) { /* Imply region reference is enabled */
+    if (reg_buf != NULL) { /* Imply region reference is enabled */
         hid_t temp_sid = badhid;
- 
-        H5E_BEGIN_TRY {
-            temp_sid = H5Ropen_region(reg_buf, H5P_DEFAULT, H5P_DEFAULT);
-        } H5E_END_TRY;
 
-        if(temp_sid < 0) {
+        H5E_BEGIN_TRY
+        {
+            temp_sid = H5Ropen_region(reg_buf, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+
+        if (temp_sid < 0) {
             HDprintf("H5Ropen_region failed\n");
             TEST_ERROR;
         }
         sid = temp_sid;
-
-    } else {
+    }
+    else {
         /* Make the selection the file dataspace */
         if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0) {
             HDprintf("H5Sselect_hyperslab failed\n");
