@@ -2206,9 +2206,9 @@ static void
 ph5diff_gather_diffs(void)
 {
     int mpi_rank, mpi_size;
-    int total_bytes  = 0, total_diff_count = 0;
-    int k, my_size   = (int)((local_diff_total > 0) ? (int)local_diff_total + rank_diff_count : 0);
-    int send_offset  = 0;
+    int total_bytes = 0, total_diff_count = 0;
+    int k, my_size = (int)((local_diff_total > 0) ? (int)local_diff_total + rank_diff_count : 0);
+    int send_offset     = 0;
     int local_counts[2] = {(int)my_size, rank_diff_count};
 
     int * recvcounts = NULL;
@@ -2254,7 +2254,7 @@ ph5diff_gather_diffs(void)
     }
     /*------------------------------------------------------------
      *  RECVTUPLES:
-     *  Each tuple contains: 
+     *  Each tuple contains:
      *    0: size (in bytes) of the diff message
      *    1: Number of diff messages packed into the diff message
      *
@@ -2270,23 +2270,24 @@ ph5diff_gather_diffs(void)
      */
     if (mpi_rank == 0) {
         int prevdisp = 0;
-		int prevrecv = 0;
-        next = (int *)recvtuples;
-        displs[0] = 0;
+        int prevrecv = 0;
+        next         = (int *)recvtuples;
+        displs[0]    = 0;
         for (k = 0; k < mpi_size; k++) {
             recvcounts[k] = next[0];     /* tuple[k,0] (length of diff text) */
             total_diff_count += next[1]; /* tuple[k,1] (number of diffs (always 1 or more)) */
             total_bytes += recvcounts[k];
             displs[k] = prevdisp + prevrecv;
-			prevdisp = displs[k];
-			prevrecv = recvcounts[k];
+            prevdisp  = displs[k];
+            prevrecv  = recvcounts[k];
             next += 2;
         }
         if (total_bytes > 0) {
-           recvbuf = (char *)malloc((size_t)(total_bytes));
-           memset(recvbuf, 0, (size_t)total_bytes);
+            recvbuf = (char *)malloc((size_t)(total_bytes));
+            memset(recvbuf, 0, (size_t)total_bytes);
         }
-		else recvbuf = (char *)calloc((size_t)mpi_size,1);
+        else
+            recvbuf = (char *)calloc((size_t)mpi_size, 1);
     }
 
     MPI_Gatherv(sendbuf, my_size, MPI_CHAR, recvbuf, recvcounts, displs, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -2295,17 +2296,17 @@ ph5diff_gather_diffs(void)
      * for the next MPI_Gatherv operation...
      */
     if (mpi_rank == 0) {
-        next          = (int *)recvtuples;
-        displs        = (int *)realloc(displs, (size_t)((size_t)total_diff_count * sizeof(int)));
-        recvcounts    = (int *)realloc(recvcounts, (size_t)((size_t)total_diff_count * sizeof(int)));
-        indices       = (int *)malloc((size_t)total_diff_count * sizeof(int));
+        next       = (int *)recvtuples;
+        displs     = (int *)realloc(displs, (size_t)((size_t)total_diff_count * sizeof(int)));
+        recvcounts = (int *)realloc(recvcounts, (size_t)((size_t)total_diff_count * sizeof(int)));
+        indices    = (int *)malloc((size_t)total_diff_count * sizeof(int));
         memset(indices, 0, ((size_t)total_diff_count * sizeof(int)));
         displs[0]     = 0;
         recvcounts[0] = rank_diff_count;
         next += 2;
         for (k = 1; k < mpi_size; k++) {
             recvcounts[k] = next[1];
-            displs[k] = displs[k - 1] + recvcounts[k - 1];
+            displs[k]     = displs[k - 1] + recvcounts[k - 1];
             next += 2;
         }
     }
@@ -2316,13 +2317,13 @@ ph5diff_gather_diffs(void)
      *  rank specific sendbuf message consists of 1 or more object
      *  differences, the root needs to extract each diff string in
      *  the order it would have been printed by the serial version
-     *  (h5diff).  
+     *  (h5diff).
      *  To aid that process, each MPI rank sends 1 or more
      *  count values to the root which further describe the sub
      *  components of their previously sent diff message.
      *  We also reference the original tuples which tell us
      *  whether an MPI rank contains any diff text to print
-     *  even though EVERY rank has an initial diff allocation 
+     *  even though EVERY rank has an initial diff allocation
      *  (index 0).   In many/most cases these index 0 instances
      *  don't contain any diff text that requires printing.
      *------------------------------------------------------------
@@ -2331,18 +2332,18 @@ ph5diff_gather_diffs(void)
     MPI_Gatherv(rankIDs, rank_diff_count, MPI_INT, indices, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
 
     if (mpi_rank == 0) {
-        int nexti = 0;
-        int *nextTuple = recvtuples;
-        char * nextdiff  = recvbuf;
+        int           nexti        = 0;
+        int *         nextTuple    = recvtuples;
+        char *        nextdiff     = recvbuf;
         print_objs_t *ordered_objs = (print_objs_t *)HDcalloc((size_t)total_diff_count, sizeof(print_objs_t));
         for (k = 0; k < total_diff_count; k++) {
             ordered_objs[k].obj_idx   = indices[k];
-			ordered_objs[k].obj_len   = nextTuple[0];
+            ordered_objs[k].obj_len   = nextTuple[0];
             ordered_objs[k].obj_diffs = nextdiff;
             if (++nexti == nextTuple[1]) {
                 nextTuple += 2;
-				nexti = 0;
-			}
+                nexti = 0;
+            }
             if (ordered_objs[k].obj_len > 0) {
                 size_t len = strlen(nextdiff) + 1;
                 nextdiff += len;
@@ -2350,7 +2351,7 @@ ph5diff_gather_diffs(void)
         }
         qsort(ordered_objs, (size_t)total_diff_count, sizeof(print_objs_t), compare_objIDs);
         for (k = 0; k < total_diff_count; k++) {
-            if (ordered_objs[k].obj_len > 0) 
+            if (ordered_objs[k].obj_len > 0)
                 printf("%s", ordered_objs[k].obj_diffs);
         }
         HDfree(ordered_objs);
@@ -2439,7 +2440,7 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
         if (g_Parallel) {
             char *           outbuff  = NULL;
             diff_instance_t *new_diff = NULL;
-			int previous = ((rank_diff_count > 0) ? rank_diff_count -1 : 0);
+            int              previous = ((rank_diff_count > 0) ? rank_diff_count - 1 : 0);
             if (rank_diffs == NULL) {
                 rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
             }
@@ -2449,15 +2450,15 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
                 outbuff = (char *)malloc(OUTBUFF_SIZE);
                 HDassert((outbuff != NULL));
                 memset(outbuff, 0, OUTBUFF_SIZE);
-                new_diff->obj_idx       = 0;
-                new_diff->outbuff_size  = OUTBUFF_SIZE;
-                new_diff->outbuffoffset = 0;
-                new_diff->baseOffset    = 0;
-                new_diff->outbuff       = outbuff;
+                new_diff->obj_idx             = 0;
+                new_diff->outbuff_size        = OUTBUFF_SIZE;
+                new_diff->outbuffoffset       = 0;
+                new_diff->baseOffset          = 0;
+                new_diff->outbuff             = outbuff;
                 rank_diffs[rank_diff_count++] = new_diff;
             }
-			else 
-				new_diff = rank_diffs[previous];
+            else
+                new_diff = rank_diffs[previous];
 
             current_diff = new_diff;
         }
@@ -3159,7 +3160,7 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
             if (mod_rank == mpi_rank) {
                 char *           outbuff  = NULL;
                 diff_instance_t *new_diff = NULL;
-                int previous = ((rank_diff_count > 0) ? rank_diff_count -1 : 0);
+                int              previous = ((rank_diff_count > 0) ? rank_diff_count - 1 : 0);
 
                 if (rank_diffs == NULL) {
                     rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
@@ -3181,7 +3182,7 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
                     }
                     rank_diffs[rank_diff_count++] = new_diff;
                 }
-                else 
+                else
                     new_diff = rank_diffs[previous];
 
                 my_diffs = new_diff;
