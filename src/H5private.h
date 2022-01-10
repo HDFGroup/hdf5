@@ -44,10 +44,12 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
 #endif
-#include <unistd.h>
+#ifdef H5_HAVE_WAITPID
 #include <sys/wait.h>
 #endif
 
