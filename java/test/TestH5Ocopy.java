@@ -201,6 +201,13 @@ public class TestH5Ocopy {
 
         try {
             try {
+                dset_data[0] = H5.H5Rcreate_object(H5fid, "/G1", HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("testH5OcopyRefsDatasettodiffFile: H5Rcreate_object " + err);
+            }
+            try {
                 dset_data[1] = H5.H5Rcreate_object(H5fid, "DS2", HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
@@ -229,6 +236,7 @@ public class TestH5Ocopy {
             ex.printStackTrace();
         }
         finally {
+            try {H5.H5Rdestroy(dset_data[0]);} catch (Exception ex) {}
             try {H5.H5Rdestroy(dset_data[1]);} catch (Exception ex) {}
         }
 
