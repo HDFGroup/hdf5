@@ -42,6 +42,7 @@ struct diffs_found {
 
 typedef struct ph5diff_print_objs {
     int   obj_idx;
+    int   obj_len;
     char *obj_diffs;
 } print_objs_t;
 

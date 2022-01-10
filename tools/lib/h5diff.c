@@ -2206,9 +2206,9 @@ static void
 ph5diff_gather_diffs(void)
 {
     int mpi_rank, mpi_size;
-    int total_bytes = 0, total_diff_count = 0;
-    int k, my_size                        = (int)local_diff_total + rank_diff_count;
-    int send_offset     = 0;
+    int total_bytes  = 0, total_diff_count = 0;
+    int k, my_size   = (int)((local_diff_total > 0) ? (int)local_diff_total + rank_diff_count : 0);
+    int send_offset  = 0;
     int local_counts[2] = {(int)my_size, rank_diff_count};
 
     int * recvcounts = NULL;
@@ -2216,6 +2216,7 @@ ph5diff_gather_diffs(void)
     int * rankIDs    = NULL;
     int * displs     = NULL;
     int * indices    = NULL;
+    int * next       = NULL;
     char *sendbuf    = NULL;
     char *recvbuf    = NULL;
 
@@ -2232,14 +2233,17 @@ ph5diff_gather_diffs(void)
 
     /* Maybe create a contiguous buffer to send to the root */
     if (rank_diff_count > 1) {
+        int len;
         rankIDs = (int *)malloc((size_t)((size_t)rank_diff_count * sizeof(int)));
         sendbuf = (char *)malloc((size_t)((size_t)local_diff_total + (size_t)rank_diff_count));
+        memset(sendbuf, 0, local_diff_total + (size_t)rank_diff_count);
         for (k = 0; k < rank_diff_count; k++) {
-            int len = (int)rank_diffs[k]->outbuffoffset;
-            strncpy(&sendbuf[send_offset], rank_diffs[k]->outbuff, (size_t)len);
-            send_offset += len;
-            sendbuf[send_offset++] = 0; /* Null terminiate the text */
-            rankIDs[k]             = rank_diffs[k]->obj_idx;
+            if ((len = (int)rank_diffs[k]->outbuffoffset) > 0) {
+                strncpy(&sendbuf[send_offset], rank_diffs[k]->outbuff, (size_t)len);
+                send_offset += len;
+                sendbuf[send_offset++] = 0; /* Null terminiate the text */
+            }
+            rankIDs[k] = rank_diffs[k]->obj_idx;
         }
     }
     else if (rank_diff_count > 0) {
@@ -2248,25 +2252,41 @@ ph5diff_gather_diffs(void)
         /* If ONLY a single outbuff, then use it rather than malloc and copy */
         sendbuf = rank_diffs[0]->outbuff;
     }
-
+    /*------------------------------------------------------------
+     *  RECVTUPLES:
+     *  Each tuple contains: 
+     *    0: size (in bytes) of the diff message
+     *    1: Number of diff messages packed into the diff message
+     *
+     *  +-------+-------+-------~+-------+
+     *  | rank0 | rank0 | rank0 ~  rankN |
+     *  +-------+-------+-------~+-------+
+     *  | 0  1    2  3    4  5     ...   |
+     *  +-------+-------+-------~+-------+
+     *
+     *  We utilize the size portion from each tuple to flag
+     *  valid object IDs
+     *------------------------------------------------------------
+     */
     if (mpi_rank == 0) {
-        int *next = (int *)recvtuples;
-
-        displs[0]        = 0;
-        total_bytes      = next[0]; /* tuple[0] */
-        total_diff_count = next[1]; /* tuple[1] */
-        recvcounts[0]    = total_bytes;
-        next += 2;
-
-        for (k = 1; k < mpi_size; k++) {
-            recvcounts[k] = next[0];     /* tuple[0] */
-            total_diff_count += next[1]; /* tuple[1] */
+        int prevdisp = 0;
+		int prevrecv = 0;
+        next = (int *)recvtuples;
+        displs[0] = 0;
+        for (k = 0; k < mpi_size; k++) {
+            recvcounts[k] = next[0];     /* tuple[k,0] (length of diff text) */
+            total_diff_count += next[1]; /* tuple[k,1] (number of diffs (always 1 or more)) */
             total_bytes += recvcounts[k];
-            displs[k] = displs[k - 1] + recvcounts[k - 1];
-
+            displs[k] = prevdisp + prevrecv;
+			prevdisp = displs[k];
+			prevrecv = recvcounts[k];
             next += 2;
         }
-        recvbuf = (char *)malloc((size_t)(total_bytes));
+        if (total_bytes > 0) {
+           recvbuf = (char *)malloc((size_t)(total_bytes));
+           memset(recvbuf, 0, (size_t)total_bytes);
+        }
+		else recvbuf = (char *)calloc((size_t)mpi_size,1);
     }
 
     MPI_Gatherv(sendbuf, my_size, MPI_CHAR, recvbuf, recvcounts, displs, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -2275,36 +2295,63 @@ ph5diff_gather_diffs(void)
      * for the next MPI_Gatherv operation...
      */
     if (mpi_rank == 0) {
-        int *next     = (int *)recvtuples;
+        next          = (int *)recvtuples;
         displs        = (int *)realloc(displs, (size_t)((size_t)total_diff_count * sizeof(int)));
         recvcounts    = (int *)realloc(recvcounts, (size_t)((size_t)total_diff_count * sizeof(int)));
         indices       = (int *)malloc((size_t)total_diff_count * sizeof(int));
+        memset(indices, 0, ((size_t)total_diff_count * sizeof(int)));
         displs[0]     = 0;
         recvcounts[0] = rank_diff_count;
-
         next += 2;
         for (k = 1; k < mpi_size; k++) {
             recvcounts[k] = next[1];
-            displs[k]     = displs[k - 1] + recvcounts[k - 1];
+            displs[k] = displs[k - 1] + recvcounts[k - 1];
             next += 2;
         }
     }
 
+    /*------------------------------------------------------------
+     *  At this point, the root has received all of the diff messages
+     *  from the MPI ranks into a single 'recvbuf'.  Since each
+     *  rank specific sendbuf message consists of 1 or more object
+     *  differences, the root needs to extract each diff string in
+     *  the order it would have been printed by the serial version
+     *  (h5diff).  
+     *  To aid that process, each MPI rank sends 1 or more
+     *  count values to the root which further describe the sub
+     *  components of their previously sent diff message.
+     *  We also reference the original tuples which tell us
+     *  whether an MPI rank contains any diff text to print
+     *  even though EVERY rank has an initial diff allocation 
+     *  (index 0).   In many/most cases these index 0 instances
+     *  don't contain any diff text that requires printing.
+     *------------------------------------------------------------
+     */
+
     MPI_Gatherv(rankIDs, rank_diff_count, MPI_INT, indices, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
 
     if (mpi_rank == 0) {
-        char *        next         = recvbuf;
+        int nexti = 0;
+        int *nextTuple = recvtuples;
+        char * nextdiff  = recvbuf;
         print_objs_t *ordered_objs = (print_objs_t *)HDcalloc((size_t)total_diff_count, sizeof(print_objs_t));
         for (k = 0; k < total_diff_count; k++) {
-            size_t len;
-            len                       = strlen(next);
             ordered_objs[k].obj_idx   = indices[k];
-            ordered_objs[k].obj_diffs = next;
-            next += (len + 1);
+			ordered_objs[k].obj_len   = nextTuple[0];
+            ordered_objs[k].obj_diffs = nextdiff;
+            if (++nexti == nextTuple[1]) {
+                nextTuple += 2;
+				nexti = 0;
+			}
+            if (ordered_objs[k].obj_len > 0) {
+                size_t len = strlen(nextdiff) + 1;
+                nextdiff += len;
+            }
         }
         qsort(ordered_objs, (size_t)total_diff_count, sizeof(print_objs_t), compare_objIDs);
         for (k = 0; k < total_diff_count; k++) {
-            printf("%s", ordered_objs[k].obj_diffs);
+            if (ordered_objs[k].obj_len > 0) 
+                printf("%s", ordered_objs[k].obj_diffs);
         }
         HDfree(ordered_objs);
     }
@@ -2388,29 +2435,36 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
         /*------------------------------------------------------
          * print the list
          */
+
+        if (g_Parallel) {
+            char *           outbuff  = NULL;
+            diff_instance_t *new_diff = NULL;
+			int previous = ((rank_diff_count > 0) ? rank_diff_count -1 : 0);
+            if (rank_diffs == NULL) {
+                rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
+            }
+            if ((rank_diff_count == 0) || (rank_diffs[previous]->outbuffoffset > 0)) {
+                new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
+                HDassert((new_diff != NULL));
+                outbuff = (char *)malloc(OUTBUFF_SIZE);
+                HDassert((outbuff != NULL));
+                memset(outbuff, 0, OUTBUFF_SIZE);
+                new_diff->obj_idx       = 0;
+                new_diff->outbuff_size  = OUTBUFF_SIZE;
+                new_diff->outbuffoffset = 0;
+                new_diff->baseOffset    = 0;
+                new_diff->outbuff       = outbuff;
+                rank_diffs[rank_diff_count++] = new_diff;
+            }
+			else 
+				new_diff = rank_diffs[previous];
+
+            current_diff = new_diff;
+        }
+
         if (opts->mode_verbose) {
             unsigned u;
-
-#if defined(H5_HAVE_PARALLEL)
             if (g_nID == 0) {
-                if (g_Parallel) {
-                    char *           outbuff  = NULL;
-                    diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
-                    HDassert((new_diff != NULL));
-                    outbuff = (char *)malloc(OUTBUFF_SIZE);
-                    HDassert((outbuff != NULL));
-                    new_diff->obj_idx       = 0;
-                    new_diff->outbuff_size  = OUTBUFF_SIZE;
-                    new_diff->outbuffoffset = 0;
-                    new_diff->outbuff       = outbuff;
-                    if (rank_diff_count == 0) {
-                        rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
-                        rank_diffs[rank_diff_count++] = new_diff;
-                    }
-                    current_diff = new_diff;
-                }
-#endif
-
                 if (opts->mode_verbose_level > 2) {
                     parallel_print("file1: %s\n", fname1);
                     parallel_print("file2: %s\n", fname2);
@@ -2430,10 +2484,8 @@ ph5diff(const char *fname1, const char *fname2, const char *objname1, const char
                     parallel_print("%5c %6c    %-15s\n", c1, c2, match_list->objs[u].name);
                 } /* end for */
                 parallel_print("\n");
-#if defined(H5_HAVE_PARALLEL)
             }
-#endif
-        } /* end if */
+        } /* end if (opts->mode_verbose) */
     }
 
     H5TOOLS_DEBUG("diff_match next - errstat:%d", opts->err_stat);
@@ -3106,27 +3158,37 @@ pdiff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id
             mod_rank = diff_count % mpi_size;
             if (mod_rank == mpi_rank) {
                 char *           outbuff  = NULL;
-                diff_instance_t *new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
-                HDassert((new_diff != NULL));
-                outbuff = (char *)malloc(OUTBUFF_SIZE);
-                HDassert((outbuff != NULL));
-                new_diff->obj_idx       = diff_count;
-                new_diff->outbuff_size  = OUTBUFF_SIZE;
-                new_diff->outbuffoffset = 0;
-                new_diff->outbuff       = outbuff;
+                diff_instance_t *new_diff = NULL;
+                int previous = ((rank_diff_count > 0) ? rank_diff_count -1 : 0);
 
-                if (rank_diff_count == 0) {
+                if (rank_diffs == NULL) {
                     rank_diffs = (diff_instance_t **)calloc(DIFF_COUNT, sizeof(void *));
                 }
-                else if (rank_diff_count == diff_count_limit) {
-                    diff_count_limit += DIFF_COUNT;
-                    rank_diffs = (diff_instance_t **)realloc(rank_diffs, (size_t)diff_count_limit);
+
+                if ((rank_diff_count == 0) || (rank_diffs[previous]->outbuffoffset > 0)) {
+                    new_diff = (diff_instance_t *)malloc(sizeof(diff_instance_t));
+                    HDassert((new_diff != NULL));
+                    outbuff = (char *)malloc(OUTBUFF_SIZE);
+                    HDassert((outbuff != NULL));
+                    new_diff->obj_idx       = diff_count;
+                    new_diff->outbuff_size  = OUTBUFF_SIZE;
+                    new_diff->outbuffoffset = 0;
+                    new_diff->baseOffset    = 0;
+                    new_diff->outbuff       = outbuff;
+                    if (rank_diff_count == diff_count_limit) {
+                        diff_count_limit += DIFF_COUNT;
+                        rank_diffs = (diff_instance_t **)realloc(rank_diffs, (size_t)diff_count_limit);
+                    }
+                    rank_diffs[rank_diff_count++] = new_diff;
                 }
-                rank_diffs[rank_diff_count++] = new_diff;
-                my_diffs                      = new_diff;
+                else 
+                    new_diff = rank_diffs[previous];
+
+                my_diffs = new_diff;
                 /* Add a previous outbuff (length) into the accumulated total for this rank */
                 if (current_diff)
                     local_diff_total += current_diff->outbuffoffset;
+
                 /* Assign a new diff to be the current (working) outbuff */
                 current_diff = new_diff;
                 nfound += diff(file1_id, obj1_fullpath, file2_id, obj2_fullpath, opts, &argdata);
