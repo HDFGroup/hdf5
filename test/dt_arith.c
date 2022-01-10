@@ -79,7 +79,7 @@ typedef enum dtype_t {
  * be allowed to continue (cf. Posix signals) so in order to recover from a
  * SIGFPE we run tests that might generate one in a child process.
  */
-#ifdef H5_HAVE_UNISTD_H
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #define HANDLE_SIGFPE
 #endif
 
