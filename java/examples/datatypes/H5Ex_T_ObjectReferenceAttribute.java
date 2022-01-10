@@ -286,7 +286,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
             try {
                 if (dataset_id >= 0) {
                     object_id = H5.H5Ropen_object(dset_data[indx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                    object_type = H5.H5Rget_obj_type(dataset_id, HDF5Constants.H5R_OBJECT, dset_data[indx]);
+                    object_type = H5.H5Rget_obj_type3(dset_data[indx], HDF5Constants.H5R_OBJECT);
                 }
                 String obj_name = null;
                 if (object_type >= 0) {
@@ -316,6 +316,8 @@ public class H5Ex_T_ObjectReferenceAttribute {
             }
             finally {
                 try {H5.H5Oclose(object_id);} catch (Exception ex) {}
+                try {H5.H5Rdestroy(dset_data[1]);} catch (Exception ex) {}
+                try {H5.H5Rdestroy(dset_data[0]);} catch (Exception ex) {}
             }
         }
 
