@@ -583,7 +583,7 @@ h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
     int_f   ret_value = 0; /* Return value */
 
     /*
-     * Allocate buffer to hold name of an attribute
+     * Allocate buffer to hold name of file
      */
     if (NULL == (c_buf = (char *)HDmalloc((size_t)*buflen + 1)))
         HGOTO_DONE(FAIL);
