@@ -85,7 +85,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
         // Create dataset with a scalar dataspace.
         try {
             dataspace_id = H5.H5Screate(HDF5Constants.H5S_SCALAR);
-            if (dataspace_id >= 0) {
+            if ((file_id >= 0) && (dataspace_id >= 0)) {
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME2, HDF5Constants.H5T_STD_I32LE, dataspace_id,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 if (dataset_id >= 0)
@@ -197,7 +197,6 @@ public class H5Ex_T_ObjectReferenceAttribute {
             e.printStackTrace();
         }
 
-        // Terminate access to the data space.
         try {
             if (dataspace_id >= 0)
                 H5.H5Sclose(dataspace_id);
@@ -229,129 +228,96 @@ public class H5Ex_T_ObjectReferenceAttribute {
         // Open an existing file.
         try {
             file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        // Open an existing dataset.
-        try {
-            if (file_id >= 0)
-                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (dataset_id >= 0)
-                attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Get dataspace and allocate memory for read buffer.
-        try {
-            if (attribute_id >= 0)
-                dataspace_id = H5.H5Aget_space(attribute_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (dataspace_id >= 0)
-                H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Read data.
-        try {
-            if (attribute_id >= 0)
-                H5.H5Aread(attribute_id, HDF5Constants.H5T_STD_REF, dset_data);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Output the data to the screen.
-        for (int indx = 0; indx < dims[0]; indx++) {
-            System.out.println(ATTRIBUTENAME + "[" + indx + "]:");
-            System.out.print("  ->");
-            // Open the referenced object, get its name and type.
+            // Open an existing dataset.
             try {
-                if (dataset_id >= 0) {
-                    object_id = H5.H5Ropen_object(dset_data[indx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                    object_type = H5.H5Rget_obj_type(dataset_id, HDF5Constants.H5R_OBJECT, dset_data[indx]);
-                }
-                String obj_name = null;
-                if (object_type >= 0) {
-                    // Get the length of the name and retrieve the name.
-                    obj_name = H5.H5Iget_name(object_id);
-                }
-                if ((object_id >= 0) && (object_type >= -1)) {
-                    switch (H5G_obj.get(object_type)) {
-                    case H5G_GROUP:
-                        System.out.print("H5G_GROUP");
-                        break;
-                    case H5G_DATASET:
-                        System.out.print("H5G_DATASET");
-                        break;
-                    case H5G_TYPE:
-                        System.out.print("H5G_TYPE");
-                        break;
-                    default:
-                        System.out.print("UNHANDLED");
+                dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
+    
+                try {
+                    attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
+                            HDF5Constants.H5P_DEFAULT);
+        
+                    // Get dataspace and allocate memory for read buffer.
+                    try {
+                        dataspace_id = H5.H5Aget_space(attribute_id);
+                        H5.H5Sget_simple_extent_dims(dataspace_id, dims, null);
+        
+                        // Read data.
+                        H5.H5Aread(attribute_id, HDF5Constants.H5T_STD_REF, dset_data);
+        
+                        // Output the data to the screen.
+                        for (int indx = 0; indx < dims[0]; indx++) {
+                            System.out.println(ATTRIBUTENAME + "[" + indx + "]:");
+                            System.out.print("  ->");
+                            // Open the referenced object, get its name and type.
+                            try {
+                                object_id = H5.H5Ropen_object(dset_data[indx], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                try {
+                                    object_type = H5.H5Rget_obj_type3(dset_data[indx], HDF5Constants.H5R_OBJECT);
+                                    String obj_name = null;
+                                    if (object_type >= 0) {
+                                        // Get the name.
+                                        obj_name = H5.H5Iget_name(object_id);
+                                    }
+                                    if ((object_id >= 0) && (object_type >= -1)) {
+                                        switch (H5G_obj.get(object_type)) {
+                                        case H5G_GROUP:
+                                            System.out.print("H5G_GROUP");
+                                            break;
+                                        case H5G_DATASET:
+                                            System.out.print("H5G_DATASET");
+                                            break;
+                                        case H5G_TYPE:
+                                            System.out.print("H5G_TYPE");
+                                            break;
+                                        default:
+                                            System.out.print("UNHANDLED");
+                                        }
+                                    }
+                                    // Print the name.
+                                    System.out.println(": " + obj_name);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                finally {
+                                    try {H5.H5Oclose(object_id);} catch (Exception e) {}
+                                }
+                            }
+                            catch (Exception e5) {
+                                e5.printStackTrace();
+                            }
+                            finally {
+                                try {H5.H5Rdestroy(dset_data[indx]);} catch (Exception e5) {}
+                            }
+                        } // end for
+                    }
+                    catch (Exception e4) {
+                        e4.printStackTrace();
+                    }
+                    finally {
+                        try {H5.H5Sclose(dataspace_id);} catch (Exception e3) {}
                     }
                 }
-                // Print the name.
-                System.out.println(": " + obj_name);
+                catch (Exception e3) {
+                    e3.printStackTrace();
+                }
+                finally {
+                    try {H5.H5Aclose(attribute_id);} catch (Exception e4) {}
+                }
             }
-            catch (Exception e) {
-                e.printStackTrace();
+            catch (Exception e2) {
+                e2.printStackTrace();
             }
             finally {
-                try {H5.H5Oclose(object_id);} catch (Exception ex) {}
+                try {H5.H5Dclose(dataset_id);} catch (Exception e2) {}
             }
         }
-
-        // End access to the dataset and release resources used by it.
-        try {
-            if (attribute_id >= 0)
-                H5.H5Aclose(attribute_id);
+        catch (Exception e1) {
+            e1.printStackTrace();
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (dataset_id >= 0)
-                H5.H5Dclose(dataset_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Terminate access to the data space.
-        try {
-            if (dataspace_id >= 0)
-                H5.H5Sclose(dataspace_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Close the file.
-        try {
-            if (file_id >= 0)
-                H5.H5Fclose(file_id);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        finally {
+            try {H5.H5Fclose(file_id);} catch (Exception e1) {}
         }
     }
 
