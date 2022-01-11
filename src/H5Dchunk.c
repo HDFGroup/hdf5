@@ -2734,7 +2734,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                      (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Check for non-existant chunk & skip it if appropriate */
+            /* Check for non-existent chunk & skip it if appropriate */
             if (H5F_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint ||
                 !skip_missing_chunks) {
                 H5D_io_info_t *chk_io_info;  /* Pointer to I/O info object for this chunk */
