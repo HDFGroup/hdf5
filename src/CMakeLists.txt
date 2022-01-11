@@ -1078,9 +1078,9 @@ if (HDF5_BATCH_H5DETECT)
   )
   add_custom_command (
       OUTPUT     gen_SRCS.stamp1
+      BYPRODUCTS H5Tinit.c
       COMMAND    ${HDF5_BATCH_CMD}
       ARGS       ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
-      BYPRODUCTS H5Tinit.c gen_SRCS.stamp1
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E echo "Executed batch command to create H5Tinit.c"
       COMMAND    ${CMAKE_COMMAND}
@@ -1094,22 +1094,30 @@ if (HDF5_BATCH_H5DETECT)
   set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
 else ()
   add_custom_command (
-      OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c
+      OUTPUT     gen_SRCS.stamp1
+      BYPRODUCTS H5Tinit.c
       COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5detect>
       ARGS       H5Tinit.c
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E touch gen_SRCS.stamp1
       DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
       COMMENT    "Create H5Tinit.c"
   )
+  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   if (BUILD_SHARED_LIBS)
     add_custom_command (
-        OUTPUT     ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c
+        OUTPUT     shared/shared_gen_SRCS.stamp1
+        BYPRODUCTS shared/H5Tinit.c
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
-        DEPENDS H5detect "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
+        ARGS       -E copy_if_different H5Tinit.c shared/H5Tinit.c
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E touch shared/shared_gen_SRCS.stamp1
+        DEPENDS H5detect gen_SRCS.stamp1
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
         COMMENT    "Copy H5Tinit.c to shared folder"
     )
+    set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c PROPERTIES GENERATED TRUE)
   endif ()
 endif ()
 
@@ -1142,19 +1150,26 @@ endif ()
 
 #### execute the H5make_libsettings program
 add_custom_command (
-    OUTPUT     "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c"
+    OUTPUT     gen_SRCS.stamp2
+    BYPRODUCTS H5lib_settings.c
     COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5make_libsettings>
     ARGS       H5lib_settings.c
+    COMMAND    ${CMAKE_COMMAND}
+    ARGS       -E touch gen_SRCS.stamp2
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_SRC_BINARY_DIR}
     COMMENT    "Create H5lib_settings.c"
 )
+set_source_files_properties (${HDF5_SRC_BINARY_DIR}/H5lib_settings.c PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS)
   add_custom_command (
-      OUTPUT     "${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c"
+      OUTPUT     shared/shared_gen_SRCS.stamp2
+      BYPRODUCTS shared/H5lib_settings.c
       COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c" "${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c"
-      DEPENDS H5make_libsettings "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c"
+      ARGS       -E copy_if_different H5lib_settings.c shared/H5lib_settings.c
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E touch shared/shared_gen_SRCS.stamp2
+      DEPENDS H5make_libsettings gen_SRCS.stamp2
       WORKING_DIRECTORY ${HDF5_SRC_BINARY_DIR}
       COMMENT    "Copy H5lib_settings.c to shared folder"
   )
