@@ -2610,7 +2610,6 @@ main(void)
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
         nerrors -= test_xmit_encode_decode();
-        nerrors -= test_on_disk_zoo();
         nerrors -= test_create_and_close();
         nerrors -= test_basic_dataset_write();
         nerrors -= test_chunked_dataset_write();
