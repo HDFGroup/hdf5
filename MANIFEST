@@ -3011,6 +3011,9 @@
 ./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
+# Subfiling VFD utilities
+./utils/subfiling_vfd/h5fuse.sh
+
 # test utilities
 ./utils/test/Makefile.am
 ./utils/test/swmr_check_compat_vfd.c
