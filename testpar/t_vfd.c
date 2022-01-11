@@ -390,7 +390,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
         *fapl_id_ptr = fapl_id;
         *dxpl_id_ptr = dxpl_id;
     }
-    else { /* tidy up from failure as posible  */
+    else { /* tidy up from failure as possible  */
 
         if (lf)
             H5FDclose(lf);
@@ -526,7 +526,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
  *                 Verify that read_fi_buf contains zeros for all
  *                 indices less than mpi_rank * INTS_PER_RANK, or
  *                 greater than or equal to (mpi_rank + 1) * INTS_PER_RANK.
- *                 For all other indicies, read_fi_buf should equal
+ *                 For all other indices, read_fi_buf should equal
  *                 increasing_fi_buf.
  *
  *              5) Barrier
@@ -644,7 +644,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
      *    Verify that read_fi_buf contains zeros for all
      *    indices less than mpi_rank * INTS_PER_RANK, or
      *    greater than or equal to (mpi_rank + 1) * INTS_PER_RANK.
-     *    For all other indicies, read_fi_buf should equal
+     *    For all other indices, read_fi_buf should equal
      *    increasing_fi_buf.
      */
     if (pass) {
@@ -772,7 +772,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *               8) Verify that read_fi_buf contains zeros for all
  *                  indices less than mpi_rank * INTS_PER_RANK, or
  *                  greater than or equal to (mpi_rank + 1) * INTS_PER_RANK.
- *                  For all other indicies, read_fi_buf should equal
+ *                  For all other indices, read_fi_buf should equal
  *                  decreasing_fi_buf.
  *
  *               9) Barrier
@@ -971,7 +971,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     /* 8) Verify that read_fi_buf contains zeros for all
      *    indices less than mpi_rank * INTS_PER_RANK, or
      *    greater than or equal to (mpi_rank + 1) * INTS_PER_RANK.
-     *    For all other indicies, read_fi_buf should equal
+     *    For all other indices, read_fi_buf should equal
      *    decreasing_fi_buf.
      */
 
@@ -2156,7 +2156,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  *              2) Write the entire increasing_fi_buf to the file, with
  *                 exactly one buffer per vector per rank.  Use either
- *                 independant or collective I/O as specified.
+ *                 independent or collective I/O as specified.
  *
  *              3) Barrier
  *
@@ -2241,7 +2241,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 2) Write the entire increasing_fi_buf to the file, with
      *    exactly one buffer per vector per rank.  Use either
-     *    independant or collective I/O as specified.
+     *    independent or collective I/O as specified.
      */
 
     if (pass) {
@@ -2346,7 +2346,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *                 the eoa.
  *
  *              2) Write the odd blocks of the increasing_fi_buf to the file,
- *                 with the odd ranks writting the odd blocks, and the even
+ *                 with the odd ranks writing the odd blocks, and the even
  *                 ranks writing an empty vector.
  *
  *                 Here, a "block" of the increasing_fi_buf is a sequence
@@ -2354,7 +2354,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *                 and with start index a multiple of INTS_PER_RANK.
  *
  *              3) Write the even blocks of the negative_fi_buf to the file,
- *                 with the even ranks writting the even blocks, and the odd
+ *                 with the even ranks writing the even blocks, and the odd
  *                 ranks writing an empty vector.
  *
  *              4) Barrier
@@ -2439,7 +2439,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 2) Write the odd blocks of the increasing_fi_buf to the file,
-     *    with the odd ranks writting the odd blocks, and the even
+     *    with the odd ranks writing the odd blocks, and the even
      *    ranks writing an empty vector.
      *
      *    Here, a "block" of the increasing_fi_buf is a sequence
@@ -2476,7 +2476,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 3) Write the even blocks of the negative_fi_buf to the file,
-     *    with the even ranks writting the even blocks, and the odd
+     *    with the even ranks writing the even blocks, and the odd
      *    ranks writing an empty vector.
      */
     if (pass) {
@@ -3952,7 +3952,7 @@ main(int argc, char **argv)
 
     if (!pass) {
 
-        HDprintf("\nAllocation and initialze of file image buffers failed.  Test aborted.\n");
+        HDprintf("\nAllocation and initialize of file image buffers failed.  Test aborted.\n");
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

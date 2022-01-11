@@ -58,7 +58,7 @@
  *
  * This is done by allocating an array of H5FD_vsrt_tmp_t of length
  * count, loading it with the contents of the addrs[] array and the
- * associated indicies, and then sorting it.
+ * associated indices, and then sorting it.
  *
  * This sorted array of H5FD_vsrt_tmp_t is then used to populate sorted
  * versions of the types[], addrs[], sizes[] and bufs[] vectors.

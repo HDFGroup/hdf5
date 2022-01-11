@@ -2020,7 +2020,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
          * and thus there is no point in setting up an MPI derived type, as
-         * (to the best of my knowlege) MPI I/O doesn't have support for
+         * (to the best of my knowledge) MPI I/O doesn't have support for
          * non-contiguous I/O in independent mode.
          *
          * Thus we have to read in each element of the vector in a separate
@@ -2055,7 +2055,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             size_i = (int)size; /* todo: fix potential for overflow */
 
-            /* Check if we acutally need to do I/O */
+            /* Check if we actually need to do I/O */
             if (addrs[i] < max_addr) {
                 /* Portably initialize MPI status variable */
                 HDmemset(&mpi_stat, 0, sizeof(mpi_stat));
@@ -2460,7 +2460,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         /* The write is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
          * and thus there is no point in setting up an MPI derived type, as
-         * (to the best of my knowlege) MPI I/O doesn't have support for
+         * (to the best of my knowledge) MPI I/O doesn't have support for
          * non-contiguous I/O in independent mode.
          *
          * Thus we have to write out each element of the vector in a separate
