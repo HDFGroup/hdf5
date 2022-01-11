@@ -4041,7 +4041,7 @@ error:
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4142,7 +4142,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
  *              count. Count is presumed to be a power of 2, and at
  *              least 2.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4207,7 +4207,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             if (i == fix_point + 1) {
 
-                /* set the sentinals that indicate that all remaining
+                /* set the sentinels that indicate that all remaining
                  * types and sizes are the same as the previous value.
                  */
                 types[i] = H5FD_MEM_NOLIST;
@@ -4273,7 +4273,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4328,7 +4328,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4767,7 +4767,7 @@ test_vector_io(const char *vfd_name)
         TEST_ERROR;
 
     /* Write the contents of a vector as several vector writes, then
-     * read it back in idividual reads.
+     * read it back in individual reads.
      */
     if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
                          &(write_bufs_2[0])) < 0)
@@ -5120,7 +5120,7 @@ test_selection_io(const char *vfd_name)
     int        i2;                                                  /* index                        */
     int        j2;                                                  /* index                        */
     hid_t      mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
-    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vecotr */
+    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
     hsize_t    dims1[1]       = {SEL_IO_DIM0 * SEL_IO_DIM1};        /* 1D dataspace dimensions */
     hsize_t    dims2[2]       = {SEL_IO_DIM0, SEL_IO_DIM1};         /* 1D dataspace dimensions */
     hsize_t    start[2];                                            /* start for hyperslab          */
