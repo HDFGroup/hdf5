@@ -506,8 +506,8 @@ test_es_get_requests(void)
     count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
-    requests[0] = NULL;
-    requests[1] = NULL;
+    requests[0]      = NULL;
+    requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, requests, &count) < 0)
         TEST_ERROR
     if (count != 2)
