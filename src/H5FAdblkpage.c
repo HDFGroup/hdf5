@@ -147,7 +147,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: Called, addr = " H5_PRINTF_HADDR_FMT "\n", FUNC, addr);
+    HDfprintf(stderr, "%s: Called, addr = %" PRIuHADDR "\n", FUNC, addr);
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */

@@ -123,7 +123,7 @@ H5FS__sinfo_new(H5F_t *f, H5FS_t *fspace)
     HDassert(f);
     HDassert(fspace);
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: fspace->addr = " H5_PRINTF_HADDR_FMT "\n", FUNC, fspace->addr);
+    HDfprintf(stderr, "%s: fspace->addr = %" PRIuHADDR "\n", FUNC, fspace->addr);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Allocate the free space header */
@@ -136,8 +136,7 @@ H5FS__sinfo_new(H5F_t *f, H5FS_t *fspace)
     sinfo->sect_off_size    = (fspace->max_sect_addr + 7) / 8;
     sinfo->sect_len_size    = H5VM_limit_enc_size((uint64_t)fspace->max_sect_size);
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: fspace->max_sect_size = " H5_PRINTF_HSIZE_FMT "\n", FUNC,
-              fspace->max_sect_size);
+    HDfprintf(stderr, "%s: fspace->max_sect_size = %" PRIuHSIZE "\n", FUNC, fspace->max_sect_size);
     HDfprintf(stderr, "%s: fspace->max_sect_addr = %u\n", FUNC, fspace->max_sect_addr);
     HDfprintf(stderr, "%s: sinfo->nbins = %u\n", FUNC, sinfo->nbins);
     HDfprintf(stderr, "%s: sinfo->sect_off_size = %u, sinfo->sect_len_size = %u\n", FUNC,
@@ -202,13 +201,11 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
 
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr,
-              "%s: Called, fspace->addr = " H5_PRINTF_HADDR_FMT
-              ", fspace->sinfo = %p, fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n",
+              "%s: Called, fspace->addr = %" PRIuHADDR ", fspace->sinfo = %p, fspace->sect_addr = %" PRIuHADDR
+              "\n",
               FUNC, fspace->addr, (void *)fspace->sinfo, fspace->sect_addr);
-    HDfprintf(stderr,
-              "%s: fspace->alloc_sect_size = " H5_PRINTF_HSIZE_FMT
-              ", fspace->sect_size = " H5_PRINTF_HSIZE_FMT "\n",
-              FUNC, fspace->alloc_sect_size, fspace->sect_size);
+    HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
+            FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -256,9 +253,8 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
             HDassert(H5F_addr_defined(fspace->addr));
 
 #ifdef H5FS_SINFO_DEBUG
-            HDfprintf(stderr,
-                      "%s: Reading in existing sections, fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n",
-                      FUNC, fspace->sect_addr);
+            HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %" PRIuHADDR "\n",
+                    FUNC, fspace->sect_addr);
 #endif /* H5FS_SINFO_DEBUG */
             /* Protect the free space sections */
             cache_udata.f      = f;
@@ -296,13 +292,11 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
 done:
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr,
-              "%s: Leaving, fspace->addr = " H5_PRINTF_HADDR_FMT
-              ", fspace->sinfo = %p, fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n",
+              "%s: Leaving, fspace->addr = %" PRIuHADDR
+              ", fspace->sinfo = %p, fspace->sect_addr = %" PRIuHADDR "\n",
               FUNC, fspace->addr, (void *)fspace->sinfo, fspace->sect_addr);
-    HDfprintf(stderr,
-              "%s: fspace->alloc_sect_size = " H5_PRINTF_HSIZE_FMT
-              ", fspace->sect_size = " H5_PRINTF_HSIZE_FMT "\n",
-              FUNC, fspace->alloc_sect_size, fspace->sect_size);
+    HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
+            FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sinfo_lock() */
@@ -342,17 +336,15 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
     FUNC_ENTER_STATIC
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr,
-              "%s: Called, modified = %d, fspace->addr = " H5_PRINTF_HADDR_FMT
-              ", fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n",
+              "%s: Called, modified = %d, fspace->addr = %" PRIuHADDR ", fspace->sect_addr = %" PRIuHADDR
+              "\n",
               FUNC, modified, fspace->addr, fspace->sect_addr);
     HDfprintf(
         stderr,
         "%s: fspace->sinfo_lock_count = %u, fspace->sinfo_modified = %d, fspace->sinfo_protected = %d\n",
         FUNC, fspace->sinfo_lock_count, fspace->sinfo_modified, fspace->sinfo_protected);
-    HDfprintf(stderr,
-              "%s: fspace->alloc_sect_size = " H5_PRINTF_HSIZE_FMT
-              ", fspace->sect_size = " H5_PRINTF_HSIZE_FMT "\n",
-              FUNC, fspace->alloc_sect_size, fspace->sect_size);
+    HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
+            FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -504,8 +496,8 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
 
 #ifdef H5FS_SINFO_DEBUG
             HDfprintf(stderr,
-                      "%s: Freeing section info on disk, old_sect_addr = " H5_PRINTF_HADDR_FMT
-                      ", old_alloc_sect_size = " H5_PRINTF_HSIZE_FMT "\n",
+                      "%s: Freeing section info on disk, old_sect_addr = %" PRIuHADDR
+                      ", old_alloc_sect_size = %" PRIuHSIZE "\n",
                       FUNC, old_sect_addr, old_alloc_sect_size);
 #endif /* H5FS_SINFO_DEBUG */
             /* Release space for section info in file */
@@ -1358,8 +1350,8 @@ H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flag
     FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: *sect = {" H5_PRINTF_HADDR_FMT ", " H5_PRINTF_HSIZE_FMT ", %u, %s}\n", FUNC,
-              sect->addr, sect->size, sect->type,
+    HDfprintf(stderr, "%s: *sect = {%" PRIuHADDR ", %" PRIuHSIZE ", %u, %s}\n", FUNC, sect->addr,
+              sect->size, sect->type,
               (sect->state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* H5FS_SINFO_DEBUG */
 
@@ -1400,7 +1392,7 @@ H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flag
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space section into skip list")
 
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: fspace->tot_space = " H5_PRINTF_HSIZE_FMT "\n", FUNC, fspace->tot_space);
+    HDfprintf(stderr, "%s: fspace->tot_space = %" PRIuHSIZE "\n", FUNC, fspace->tot_space);
 #endif /* H5FS_SINFO_DEBUG */
     /* Mark free space sections as changed */
     /* (if adding sections while deserializing sections, don't set the flag) */
@@ -1445,10 +1437,8 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
     FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr,
-              "%s: addr = " H5_PRINTF_HADDR_FMT ", size = " H5_PRINTF_HSIZE_FMT
-              ", extra_requested = " H5_PRINTF_HSIZE_FMT "\n",
-              FUNC, addr, size, extra_requested);
+    HDfprintf(stderr, "%s: addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", extra_requested = %" PRIuHSIZE "\n",
+            FUNC, addr, size, extra_requested);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -1460,12 +1450,10 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
 
     /* Check for any sections on free space list */
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: fspace->tot_sect_count = " H5_PRINTF_HSIZE_FMT "\n", FUNC,
-              fspace->tot_sect_count);
-    HDfprintf(stderr, "%s: fspace->serial_sect_count = " H5_PRINTF_HSIZE_FMT "\n", FUNC,
+    HDfprintf(stderr, "%s: fspace->tot_sect_count = %" PRIuHSIZE "\n", FUNC, fspace->tot_sect_count);
+    HDfprintf(stderr, "%s: fspace->serial_sect_count = %" PRIuHSIZE "\n", FUNC,
               fspace->serial_sect_count);
-    HDfprintf(stderr, "%s: fspace->ghost_sect_count = " H5_PRINTF_HSIZE_FMT "\n", FUNC,
-              fspace->ghost_sect_count);
+    HDfprintf(stderr, "%s: fspace->ghost_sect_count = %" PRIuHSIZE "\n", FUNC, fspace->ghost_sect_count);
 #endif /* H5FS_SINFO_DEBUG */
     if (fspace->tot_sect_count > 0) {
         H5FS_section_info_t *sect; /* Temporary free space section */
