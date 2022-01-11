@@ -516,6 +516,13 @@ New Features
 
     Library:
     --------
+    - Add a new public function, H5ESget_requests()
+
+      This function allows the user to retrieve request pointers from an event
+      set. It is intended for use primarily by VOL plug in developers.
+
+      (NAF - 2022/01/11)
+
     - Adds new file driver-level memory copy operation for
       "ctl" callback and updates compact dataset I/O routines
       to utilize it
