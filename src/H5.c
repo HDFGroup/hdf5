@@ -149,7 +149,6 @@ H5_init_library(void)
     char * env_use_select_io = NULL;
     herr_t ret_value         = SUCCEED;
 
-
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Run the library initialization routine, if it hasn't already run */
