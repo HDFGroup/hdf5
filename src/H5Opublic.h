@@ -510,7 +510,7 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *        location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \param[in] fields Flags specifying the fields to include in \p oinfo
  * \lapl_id
@@ -1834,7 +1834,7 @@ H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo);
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \lapl_id
  *
@@ -1960,7 +1960,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \param[in] fields Flags specifying the fields to include in \p oinfo
  * \lapl_id

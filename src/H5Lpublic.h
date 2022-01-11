@@ -580,7 +580,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          name includes either a relative path or an absolute path to the
  *          target link, intermediate steps along the path must be verified
  *          before the existence of the target link can be safely checked. If
- *          the path is not verified and an intermediate element of the path
+ *          the path is not verified, and an intermediate element of the path
  *          does not exist, H5Lexists() will fail. The example in the next
  *          paragraph illustrates one step-by-step method for verifying the
  *          existence of a link with a relative or absolute path.
@@ -620,13 +620,13 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          H5Lexists() with arguments \c file, \c "/", and \c lapl
  *          returns a positive value; in other words,
  *          \Code{H5Lexists(file, "/", lapl)} returns a positive value.
- *          In HDF5 version 1.8.16, this function returns 0.</li>
+ *          In the HDF5 1.8 release, this function returns 0.</li>
  *       <li>Let \c root denote a valid HDF5 group identifier that refers to the
  *          root group of an HDF5 file, and let \c lapl denote a valid link
  *          access property list identifier. A call to H5Lexists() with
  *          arguments c root, \c "/", and \c lapl returns a positive value;
  *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a positive
- *          value. In HDF5 version 1.8.16, this function returns 0.</li>
+ *          value. In the HDF5 1.8 release, this function returns 0.</li>
  *       </ol>
  *       Note that the function accepts link names and path names. This is
  *       potentially misleading to callers, and we plan to separate the
