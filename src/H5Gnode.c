@@ -1210,7 +1210,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             &(sn->entry[i]);             /* Convenience variable to refer to current source group entry */
         H5O_link_t          lnk;         /* Link to insert */
         const char *        name;        /* Name of source object */
-        H5G_entry_t         tmp_src_ent; /* Temperary copy. Change will not affect the cache */
+        H5G_entry_t         tmp_src_ent; /* Temporary copy. Change will not affect the cache */
         H5O_type_t          obj_type = H5O_TYPE_UNKNOWN; /* Target object type */
         H5G_copy_file_ud_t *cpy_udata;                   /* Copy file udata */
         H5G_obj_create_t    gcrt_info;                   /* Group creation info */

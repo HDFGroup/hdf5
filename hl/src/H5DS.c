@@ -88,7 +88,7 @@ H5DSset_scale(hid_t dsid, const char *dimname)
         return FAIL;
 
     /*-------------------------------------------------------------------------
-     * check if the dataset is a dataset wich has references to dimension scales
+     * check if the dataset is a dataset which has references to dimension scales
      *-------------------------------------------------------------------------
      */
 
@@ -1189,7 +1189,7 @@ out:
             dsbuf = NULL;
         }
         if (buf) {
-            /* Failure occured before H5Treclaim was called;
+            /* Failure occurred before H5Treclaim was called;
                free the pointers allocated when we read data in */
             for (i = 0; i < rank; i++) {
                 if (buf[i].p)

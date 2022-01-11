@@ -246,7 +246,7 @@
  * opcodes. (known op codes should be handled as
  * appropriate.)
  *
- * If this flag is set for an uknown op code, that
+ * If this flag is set for an unknown op code, that
  * op code should be passed to the next VFD down
  * the VFD stack en-route to the terminal VFD.
  * If that VFD does not support the ctl call, the

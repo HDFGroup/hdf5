@@ -1556,6 +1556,7 @@ H5T_top_term_package(void)
         H5T_g.nsoft  = 0;
         H5T_g.asoft  = 0;
 
+
         n++;
     } /* end if */
 
@@ -4226,7 +4227,7 @@ done:
  *
  * Return:    Success:    non-negative
  *
- *            Failure:    nagative
+ *            Failure:    negative
  *
  * Programmer:    Robb Matzke
  *              Tuesday, December 22, 1998

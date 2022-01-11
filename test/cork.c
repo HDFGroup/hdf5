@@ -101,7 +101,7 @@ verify_old_dset_cork(void)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data bufer (pointers to fake 2D array) */
+    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
     int *       buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
@@ -513,7 +513,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data bufer (pointers to fake 2D array) */
+    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
     int *       buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */

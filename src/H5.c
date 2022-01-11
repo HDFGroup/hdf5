@@ -158,8 +158,6 @@ H5_init_library(void)
      */
     H5_INIT_GLOBAL = TRUE;
 
-    FUNC_ENTER_NOAPI(FAIL)
-
 #ifdef H5_HAVE_PARALLEL
     {
         int mpi_initialized;

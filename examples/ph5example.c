@@ -30,7 +30,7 @@
  * for parallel I/O and there is no standard pathname for parallel file
  * systems.  In some cases, the parallel file name may even needs some
  * parallel file type prefix such as: "pfs:/GF/...".  Therefore, this
- * example requires an explicite parallel file prefix.  See the usage
+ * example requires an explicit parallel file prefix.  See the usage
  * for more detail.
  */
 
@@ -898,7 +898,7 @@ usage(void)
 {
     printf("Usage: testphdf5 [-f <prefix>] [-r] [-w] [-v]\n");
     printf("\t-f\tfile prefix for parallel test files.\n");
-    printf("\t  \te.g. pfs:/PFS/myname\n");
+    printf("\t  \t e.g. pfs:/PFS/myname\n");
     printf("\t  \tcan be set via $" PARAPREFIX ".\n");
     printf("\t  \tDefault is current directory.\n");
     printf("\t-c\tno cleanup\n");
