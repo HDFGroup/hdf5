@@ -58,7 +58,9 @@ set_filter(hid_t dcpl_id)
      * Check if 'deflate' filter is available
      */
     filter_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE);
-    if (filter_avail) {
+    if (filter_avail < 0)
+        return;
+    else if (filter_avail) {
         /*
          * Set 'deflate' filter with reasonable
          * compression level on DCPL
