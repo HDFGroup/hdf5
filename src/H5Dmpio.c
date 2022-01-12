@@ -3020,7 +3020,6 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
         H5D_chunk_ud_t    udata;
         H5SL_node_t *     chunk_node;
         hsize_t           select_npoints;
-        hssize_t          chunk_npoints;
 
         if (NULL == (local_info_array = H5MM_malloc(num_chunks_selected * sizeof(*local_info_array))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate local io info array buffer")
@@ -3041,8 +3040,8 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
             local_info_array[i].new_owner      = mpi_rank;
             local_info_array[i].buf            = NULL;
 
-            select_npoints              = H5S_GET_SELECT_NPOINTS(chunk_info->mspace);
-            local_info_array[i].io_size = (size_t)select_npoints * type_info->src_type_size;
+            select_npoints              = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
+            local_info_array[i].io_size = (size_t)select_npoints * type_info->dst_type_size;
 
             if (io_info->op_type == H5D_IO_OP_READ)
                 local_info_array[i].need_read = TRUE;
@@ -3711,7 +3710,6 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     H5D_io_info_t     coll_io_info;
     H5Z_EDC_t         err_detect; /* Error detection info */
     H5Z_cb_t          filter_cb;  /* I/O filter callback function */
-    hssize_t          extent_npoints;
     hsize_t           file_chunk_size = 0;
     hsize_t           iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
     size_t            i;
@@ -3739,18 +3737,14 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     if (H5CX_get_filter_cb(&filter_cb) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
-    if (chunk_list_num_entries) {
-        /* Retrieve number of elements in chunk */
-        if ((extent_npoints = H5S_GET_EXTENT_NPOINTS(chunk_list[0].chunk_info->fspace)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-        file_chunk_size = (hsize_t)extent_npoints * type_info->dst_type_size;
-    }
+    /* Set size of full chunks in dataset */
+    file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
 
     /*
-     * Allocate memory buffers for all owned chunks. Chunk data buffers are of the
-     * largest size between the chunk's current filtered size and the chunk's true
+     * Allocate memory buffers for all chunks being read. Chunk data buffers are of
+     * the largest size between the chunk's current filtered size and the chunk's true
      * size, as calculated by the number of elements in the chunk's file space extent
-     * times the datatype size. This tries to ensure that:
+     * multiplied by the datatype size. This tries to ensure that:
      *
      *  * If we're reading the chunk and the filter normally reduces the chunk size,
      *    the unfiltering operation won't need to grow the buffer.
@@ -3845,7 +3839,6 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     H5D_io_info_t     coll_io_info;
     H5Z_EDC_t         err_detect; /* Error detection info */
     H5Z_cb_t          filter_cb;  /* I/O filter callback function */
-    hssize_t          extent_npoints;
     hsize_t           file_chunk_size = 0;
     hsize_t           iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
     hbool_t           sel_iter_init = FALSE;
@@ -3876,18 +3869,15 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     if (H5CX_get_filter_cb(&filter_cb) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
-    if (chunk_list_num_entries) {
-        /* Retrieve number of elements in chunk */
-        if ((extent_npoints = H5S_GET_EXTENT_NPOINTS(chunk_list[0].chunk_info->fspace)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-        file_chunk_size = (hsize_t)extent_npoints * type_info->dst_type_size;
-    }
+    /* Set size of full chunks in dataset */
+    file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
 
     /*
      * Allocate memory buffers for all owned chunks. Chunk data buffers are of the
      * largest size between the chunk's current filtered size and the chunk's true
      * size, as calculated by the number of elements in the chunk's file space extent
-     * times the datatype size. This tries to ensure that:
+     * multiplied by the datatype size (accounting for partial edge chunks). This
+     * tries to ensure that:
      *
      *  * If we're fully overwriting the chunk and the filter normally reduces the
      *    chunk size, we simply have the exact buffer size required to hold the
