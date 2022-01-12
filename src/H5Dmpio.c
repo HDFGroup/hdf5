@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"  /* Error handling    */
 #include "H5Fprivate.h"  /* File access       */
 #include "H5FDprivate.h" /* File drivers      */
+#include "H5FLprivate.h" /* Free Lists        */
 #include "H5Iprivate.h"  /* IDs               */
 #include "H5MMprivate.h" /* Memory management */
 #include "H5Oprivate.h"  /* Object headers    */
@@ -372,6 +373,9 @@ static herr_t H5D__mpio_debug_init(void);
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Declare extern free list to manage the H5S_sel_iter_t struct */
+H5FL_EXTERN(H5S_sel_iter_t);
 
 #ifdef H5Dmpio_DEBUG
 
@@ -3393,7 +3397,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
     H5CX_set_libver_bounds(NULL);
 
     /* Allocate a selection iterator for iterating over chunk dataspaces */
-    if (NULL == (mem_iter = H5MM_malloc(sizeof(*mem_iter))))
+    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dataspace selection iterator")
 
     if (*chunk_list_num_entries) {
@@ -3559,7 +3563,7 @@ done:
     if (mem_iter) {
         if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release dataspace selection iterator")
-        H5MM_free(mem_iter);
+        mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
     }
 
 #ifdef H5Dmpio_DEBUG
@@ -3942,7 +3946,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't finish collective filtered chunk read")
 
     /* Allocate iterator for memory selection */
-    if (NULL == (sel_iter = H5MM_malloc(sizeof(H5S_sel_iter_t))))
+    if (NULL == (sel_iter = H5FL_MALLOC(H5S_sel_iter_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
     /*
@@ -4042,7 +4046,7 @@ done:
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
-        H5MM_free(sel_iter);
+        sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
     if (dataspace)
         if (H5S_close(dataspace) < 0)
