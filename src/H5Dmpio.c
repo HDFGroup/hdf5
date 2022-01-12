@@ -1666,13 +1666,6 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
      */
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
 
-    /* Enable collective metadata reads if not already enabled. The collective
-     * re-insertion of modified chunks into the chunk index does not scale well
-     * without reading metadata collectively and it should be safe to enable
-     * them here because it is required that these dataset writes be collective.
-     */
-    H5CX_set_coll_metadata_read(TRUE);
-
     /* Build a list of selected chunks in the collective io operation */
     if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, type_info, fm, &chunk_list,
                                                      &chunk_list_num_entries, mpi_rank) < 0)
@@ -2103,13 +2096,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
      * Multi chunk I/O does not break to independent, so can set right away
      */
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
-
-    /* Enable collective metadata reads if not already enabled. The collective
-     * re-insertion of modified chunks into the chunk index does not scale well
-     * without reading metadata collectively and it should be safe to enable
-     * them here because it is required that these dataset writes be collective.
-     */
-    H5CX_set_coll_metadata_read(TRUE);
 
     /* Build a list of selected chunks in the collective IO operation */
     if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, type_info, fm, &chunk_list,
