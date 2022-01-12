@@ -2505,8 +2505,8 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
     addr2 = entry2->fspace_info.chunk_new.offset;
 
     if (!H5F_addr_defined(addr1) && !H5F_addr_defined(addr2)) {
-        hsize_t chunk_idx1 = entry1->chunk_info->index;
-        hsize_t chunk_idx2 = entry2->chunk_info->index;
+        hsize_t chunk_idx1 = entry1->index_info.chunk_idx;
+        hsize_t chunk_idx2 = entry2->index_info.chunk_idx;
 
         ret_value = (chunk_idx1 > chunk_idx2) - (chunk_idx1 < chunk_idx2);
     }
@@ -3056,17 +3056,26 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                  * number of chunk points selected during chunk redistribution should suffice for
                  * implementing this case - JTH.
                  */
-                if ((chunk_npoints = H5S_GET_EXTENT_NPOINTS(chunk_info->fspace)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "chunk file dataspace is invalid")
                 local_info_array[i].need_read =
-                    (local_info_array[i].io_size >= (hsize_t)chunk_npoints * type_info->dst_type_size);
+                        local_info_array[i].io_size < (size_t)io_info->dset->shared->layout.u.chunk.size;
             }
 
             /* Initialize the chunk's shared info */
             local_info_array[i].fspace_info.chunk_current = udata.chunk_block;
             local_info_array[i].fspace_info.chunk_new     = udata.chunk_block;
 
-            local_info_array[i].index_info.chunk_idx   = chunk_info->index;
+            /*
+             * Extensible arrays may calculate a chunk's index a little differently
+             * than normal when the dataset's unlimited dimension is not the
+             * slowest-changing dimension, so set the index here based on what the
+             * extensible array code calculated instead of what was calculated
+             * in the chunk file mapping.
+             */
+            if (io_info->dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_EARRAY)
+                local_info_array[i].index_info.chunk_idx = udata.chunk_idx;
+            else
+                local_info_array[i].index_info.chunk_idx = chunk_info->index;
+
             local_info_array[i].index_info.filter_mask = udata.filter_mask;
             local_info_array[i].index_info.need_insert = FALSE;
 
@@ -4276,9 +4285,43 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
                 chunk_ud.common.scaled = scaled_coords;
 
                 /* Calculate scaled coordinates for the chunk */
-                H5VM_array_calc_pre(chunk_ud.chunk_idx, io_info->dset->shared->ndims,
-                                    io_info->dset->shared->layout.u.chunk.down_chunks, scaled_coords);
+                if (idx_info->layout->idx_type == H5D_CHUNK_IDX_EARRAY &&
+                        idx_info->layout->u.earray.unlim_dim > 0) {
+                    /*
+                     * Extensible arrays where the unlimited dimension is not
+                     * the slowest-changing dimension "swizzle" the coordinates
+                     * to move the unlimited dimension value to offset 0. Therefore,
+                     * we use the "swizzled" down chunks to calculate the "swizzled"
+                     * scaled coordinates and then we undo the "swizzle" operation.
+                     */
+                    H5VM_array_calc_pre(chunk_ud.chunk_idx, io_info->dset->shared->ndims,
+                                        idx_info->layout->u.earray.swizzled_down_chunks, scaled_coords);
+
+                    H5VM_unswizzle_coords(hsize_t, scaled_coords, idx_info->layout->u.earray.unlim_dim);
+                }
+                else {
+                    H5VM_array_calc_pre(chunk_ud.chunk_idx, io_info->dset->shared->ndims,
+                                        io_info->dset->shared->layout.u.chunk.down_chunks, scaled_coords);
+                }
+
                 scaled_coords[io_info->dset->shared->ndims] = 0;
+
+#ifndef NDEBUG
+                /*
+                 * If a matching local chunk entry is found, compare
+                 * the calculated scaled coordinates against the chunk's
+                 * actual scaled coordinates to make sure they match.
+                 */
+                for (size_t dbg_idx = 0; dbg_idx < chunk_list_num_entries; dbg_idx++) {
+                    if (coll_entry->index_info.chunk_idx == chunk_list[dbg_idx].index_info.chunk_idx) {
+                        hbool_t coords_match = !HDmemcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
+                                io_info->dset->shared->ndims * sizeof(hsize_t));
+
+                        HDassert(coords_match && "Calculated scaled coordinates for chunk didn't match chunk's actual scaled coordinates!");
+                        break;
+                    }
+                }
+#endif
 
                 if ((idx_info->storage->ops->insert)(idx_info, &chunk_ud, io_info->dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL,
@@ -4824,8 +4867,11 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
 
             for (i = 0, chunk_count = 0; i < num_entries; i++) {
                 if (op_type == H5D_IO_OP_READ) {
-                    /* If chunk is being fully overwritten, don't add it to the
-                     * list of addresses being read
+                    /*
+                     * If this is a read operation that is occurring as
+                     * part of a dataset write (read-modify-write cycle),
+                     * don't add the chunk to the list of addresses being
+                     * read if the chunk is being fully overwritten
                      */
                     if (!chunk_list[i].need_read)
                         continue;
