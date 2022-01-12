@@ -339,6 +339,8 @@ main(int argc, char **argv)
     H5Pclose(fapl_id);
     H5Fclose(file_id);
 
+    printf("PHDF5 example finished with no errors\n");
+
     /*
      * ------------------------------------
      * Cleanup created HDF5 file and finish
