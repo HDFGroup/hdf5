@@ -97,6 +97,42 @@ typedef struct {
 #define WRITE_SHARED_FILTERED_CHUNKS_NROWS        (WRITE_SHARED_FILTERED_CHUNKS_CH_NROWS * DIM0_SCALE_FACTOR)
 #define WRITE_SHARED_FILTERED_CHUNKS_NCOLS        (WRITE_SHARED_FILTERED_CHUNKS_CH_NCOLS * DIM1_SCALE_FACTOR)
 
+/* Defines for the unshared filtered chunks w/ single unlim. dimension write test */
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME "unshared_filtered_chunks_single_unlim_dim_write"
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NROWS     (WRITE_UNSHARED_ONE_UNLIM_DIM_NROWS / mpi_size)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NCOLS     (WRITE_UNSHARED_ONE_UNLIM_DIM_NCOLS / mpi_size)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the shared filtered chunks w/ single unlim. dimension write test */
+#define WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME "shared_filtered_chunks_single_unlim_dim_write"
+#define WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_SHARED_ONE_UNLIM_DIM_CH_NROWS     (mpi_size)
+#define WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS     (mpi_size)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NROWS        (WRITE_SHARED_ONE_UNLIM_DIM_CH_NROWS * DIM0_SCALE_FACTOR)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NCOLS        (WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS * DIM1_SCALE_FACTOR)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the unshared filtered chunks w/ two unlim. dimension write test */
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME "unshared_filtered_chunks_two_unlim_dim_write"
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NCOLS        (DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NROWS     (DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NCOLS     (DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the shared filtered chunks w/ two unlim. dimension write test */
+#define WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME "shared_filtered_chunks_two_unlim_dim_write"
+#define WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_SHARED_TWO_UNLIM_DIM_CH_NROWS     (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS     (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NROWS        (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NCOLS        (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS       5
+
 /* Defines for the filtered chunks write test where a process has no selection */
 #define WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME "single_no_selection_filtered_chunks_write"
 #define WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS 2
