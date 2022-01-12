@@ -2094,11 +2094,11 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
              (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
+    HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
               aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
               aux_ptr->unprotect_dirty_bytes_updates, aux_ptr->insert_dirty_bytes,
-              aux_ptr->insert_dirty_bytes_updates, aux_ptr->rename_dirty_bytes,
-              aux_ptr->rename_dirty_bytes_updates);
+              aux_ptr->insert_dirty_bytes_updates, aux_ptr->move_dirty_bytes,
+              aux_ptr->move_dirty_bytes_updates);
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
     /* clear collective access flag on half of the entries in the
@@ -2162,8 +2162,8 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
     aux_ptr->unprotect_dirty_bytes_updates = 0;
     aux_ptr->insert_dirty_bytes            = 0;
     aux_ptr->insert_dirty_bytes_updates    = 0;
-    aux_ptr->rename_dirty_bytes            = 0;
-    aux_ptr->rename_dirty_bytes_updates    = 0;
+    aux_ptr->move_dirty_bytes              = 0;
+    aux_ptr->move_dirty_bytes_updates      = 0;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
 done:
