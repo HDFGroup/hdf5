@@ -307,7 +307,7 @@ generate_f32le(hbool_t external)
     /* Generate values */
     for (i = 0, k = 0, n = 0; (hsize_t)i < dims[0]; i++) {
         for (j = 0; (hsize_t)j < dims[1]; j++, k++, n++) {
-            wdata[k] = n * 801.1f * ((k % 5 == 1) ? (-1) : (1));
+            wdata[k] = n * 801.1F * ((k % 5 == 1) ? (-1) : (1));
         }
     }
 

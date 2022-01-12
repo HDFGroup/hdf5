@@ -2635,7 +2635,7 @@ test_compound_13(void)
     HDmemset(&data_out, 0, sizeof(data_out));
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = (unsigned char)u;
-    data_out.y = 99.99f;
+    data_out.y = 99.99F;
 
     /* Set latest_format in access property list to enable the latest
      * compound datatype format.
