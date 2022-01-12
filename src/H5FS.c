@@ -143,7 +143,7 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
     /* Set the return value */
     ret_value = fspace;
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: fspace = %p, fspace->addr = " H5_PRINTF_HADDR_FMT "\n", __func__, (void *)fspace,
+    HDfprintf(stderr, "%s: fspace = %p, fspace->addr = %" PRIuHADDR "\n", __func__, (void *)fspace,
               fspace->addr);
 #endif /* H5FS_DEBUG */
 
@@ -181,8 +181,8 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
 
     FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: Opening free space manager, fs_addr = " H5_PRINTF_HADDR_FMT ", nclasses = %Zu\n",
-              __func__, fs_addr, nclasses);
+    HDfprintf(stderr, "%s: Opening free space manager, fs_addr = %" PRIuHADDR ", nclasses = %Zu\n", __func__,
+              fs_addr, nclasses);
 #endif /* H5FS_DEBUG */
 
     /* Check arguments. */
@@ -202,10 +202,9 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
         (fspace = (H5FS_t *)H5AC_protect(f, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n", __func__, fspace->sect_addr);
-    HDfprintf(stderr, "%s: fspace->sect_size = " H5_PRINTF_HSIZE_FMT "\n", __func__, fspace->sect_size);
-    HDfprintf(stderr, "%s: fspace->alloc_sect_size = " H5_PRINTF_HSIZE_FMT "\n", __func__,
-              fspace->alloc_sect_size);
+    HDfprintf(stderr, "%s: fspace->sect_addr = %" PRIuHADDR "\n", __func__, fspace->sect_addr);
+    HDfprintf(stderr, "%s: fspace->sect_size = %" PRIuHSIZE "\n", __func__, fspace->sect_size);
+    HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE "\n", __func__, fspace->alloc_sect_size);
     HDfprintf(stderr, "%s: fspace->sinfo = %p\n", __func__, (void *)fspace->sinfo);
     HDfprintf(stderr, "%s: fspace->rc = %u\n", __func__, fspace->rc);
 #endif /* H5FS_DEBUG */
@@ -250,8 +249,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
     FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: Deleting free space manager, fs_addr = " H5_PRINTF_HADDR_FMT "\n", __func__,
-              fs_addr);
+    HDfprintf(stderr, "%s: Deleting free space manager, fs_addr = %" PRIuHADDR "\n", __func__, fs_addr);
 #endif /* H5FS_DEBUG */
 
     /* Check arguments. */
@@ -321,7 +319,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
     /* Delete serialized section storage, if there are any */
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: fspace->sect_addr = " H5_PRINTF_HADDR_FMT "\n", __func__, fspace->sect_addr);
+    HDfprintf(stderr, "%s: fspace->sect_addr = %" PRIuHADDR "\n", __func__, fspace->sect_addr);
 #endif /* H5FS_DEBUG */
     if (fspace->serial_sect_count > 0) {
         unsigned sinfo_status = 0; /* Free space section info's status in the metadata cache */
@@ -407,8 +405,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
     HDassert(f);
     HDassert(fspace);
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr,
-              "%s: Entering, fspace = %p, fspace->addr = " H5_PRINTF_HADDR_FMT ", fspace->sinfo = %p\n",
+    HDfprintf(stderr, "%s: Entering, fspace = %p, fspace->addr = %" PRIuHADDR ", fspace->sinfo = %p\n",
               __func__, (void *)fspace, fspace->addr, (void *)fspace->sinfo);
 #endif /* H5FS_DEBUG */
 
@@ -417,13 +414,11 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
     if (fspace->sinfo) {
 #ifdef H5FS_DEBUG
         HDfprintf(stderr,
-                  "%s: fspace->tot_sect_count = " H5_PRINTF_HSIZE_FMT
-                  ", fspace->serial_sect_count = " H5_PRINTF_HSIZE_FMT
-                  ", fspace->sect_addr = " H5_PRINTF_HADDR_FMT ", fspace->rc = %u\n",
+                  "%s: fspace->tot_sect_count = %" PRIuHSIZE ", fspace->serial_sect_count = %" PRIuHSIZE
+                  ", fspace->sect_addr = %" PRIuHADDR ", fspace->rc = %u\n",
                   __func__, fspace->tot_sect_count, fspace->serial_sect_count, fspace->sect_addr, fspace->rc);
         HDfprintf(stderr,
-                  "%s: fspace->alloc_sect_size = " H5_PRINTF_HSIZE_FMT
-                  ", fspace->sect_size = " H5_PRINTF_HSIZE_FMT "\n",
+                  "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
                   __func__, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_DEBUG */
         /* If there are sections to serialize, update them */
@@ -715,8 +710,8 @@ H5FS__incr(H5FS_t *fspace)
 
     FUNC_ENTER_PACKAGE
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: Entering, fpace->addr = " H5_PRINTF_HADDR_FMT ", fspace->rc = %u\n", __func__,
-              fspace->addr, fspace->rc);
+    HDfprintf(stderr, "%s: Entering, fpace->addr = %" PRIuHADDR ", fspace->rc = %u\n", __func__, fspace->addr,
+              fspace->rc);
 #endif /* H5FS_DEBUG */
 
     /*
@@ -755,8 +750,8 @@ H5FS__decr(H5FS_t *fspace)
 
     FUNC_ENTER_PACKAGE
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: Entering, fpace->addr = " H5_PRINTF_HADDR_FMT ", fspace->rc = %u\n", __func__,
-              fspace->addr, fspace->rc);
+    HDfprintf(stderr, "%s: Entering, fpace->addr = %" PRIuHADDR ", fspace->rc = %u\n", __func__, fspace->addr,
+              fspace->rc);
 #endif /* H5FS_DEBUG */
 
     /*

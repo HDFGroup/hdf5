@@ -1248,7 +1248,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5FD_class_t cls = HDva_arg(ap, H5FD_class_t);
 
-                            H5RS_asprintf_cat(rs, "{'%s', " H5_PRINTF_HADDR_FMT ", ", cls.name, cls.maxaddr);
+                            H5RS_asprintf_cat(rs, "{'%s', %" PRIuHADDR ", ", cls.name, cls.maxaddr);
                             H5_trace_args_close_degree(rs, cls.fc_degree);
                             H5RS_acat(rs, ", ...}");
                         } /* end block */
