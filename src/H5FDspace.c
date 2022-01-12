@@ -148,7 +148,7 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 
     FUNC_ENTER_PACKAGE
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: type = %u, size = " H5_PRINTF_HSIZE_FMT "\n", __func__, (unsigned)type, size);
+    HDfprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)type, size);
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* check args */
@@ -211,7 +211,7 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 
 done:
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: ret_value = " H5_PRINTF_HADDR_FMT "\n", __func__, ret_value);
+    HDfprintf(stderr, "%s: ret_value = %" PRIuHADDR "\n", __func__, ret_value);
 #endif /* H5FD_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__alloc_real() */
@@ -287,8 +287,8 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     HDassert(size > 0);
 
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: type = %u, addr = " H5_PRINTF_HADDR_FMT ", size = " H5_PRINTF_HSIZE_FMT "\n",
-              __func__, (unsigned)type, addr, size);
+    HDfprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__,
+              (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* Sanity checking */
@@ -318,11 +318,11 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 
         eoa = file->cls->get_eoa(file, type);
 #ifdef H5FD_ALLOC_DEBUG
-        HDfprintf(stderr, "%s: eoa = " H5_PRINTF_HADDR_FMT "\n", __func__, eoa);
+        HDfprintf(stderr, "%s: eoa = %" PRIuHADDR "\n", __func__, eoa);
 #endif /* H5FD_ALLOC_DEBUG */
         if (eoa == (addr + size)) {
 #ifdef H5FD_ALLOC_DEBUG
-            HDfprintf(stderr, "%s: Reducing file size to = " H5_PRINTF_HADDR_FMT "\n", __func__, addr);
+            HDfprintf(stderr, "%s: Reducing file size to = %" PRIuHADDR "\n", __func__, addr);
 #endif /* H5FD_ALLOC_DEBUG */
             if (file->cls->set_eoa(file, type, addr) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "set end of space allocation request failed")
@@ -331,9 +331,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     else {
         /* leak memory */
 #ifdef H5FD_ALLOC_DEBUG
-        HDfprintf(stderr,
-                  "%s: LEAKED MEMORY!!! type = %u, addr = " H5_PRINTF_HADDR_FMT
-                  ", size = " H5_PRINTF_HSIZE_FMT "\n",
+        HDfprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
                   __func__, (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
     }  /* end else */
