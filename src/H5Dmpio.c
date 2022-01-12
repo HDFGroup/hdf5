@@ -3056,7 +3056,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                  * implementing this case - JTH.
                  */
                 local_info_array[i].need_read =
-                        local_info_array[i].io_size < (size_t)io_info->dset->shared->layout.u.chunk.size;
+                    local_info_array[i].io_size < (size_t)io_info->dset->shared->layout.u.chunk.size;
             }
 
             /* Initialize the chunk's shared info */
@@ -4276,7 +4276,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
 
                 /* Calculate scaled coordinates for the chunk */
                 if (idx_info->layout->idx_type == H5D_CHUNK_IDX_EARRAY &&
-                        idx_info->layout->u.earray.unlim_dim > 0) {
+                    idx_info->layout->u.earray.unlim_dim > 0) {
                     /*
                      * Extensible arrays where the unlimited dimension is not
                      * the slowest-changing dimension "swizzle" the coordinates
@@ -4304,10 +4304,12 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
                  */
                 for (size_t dbg_idx = 0; dbg_idx < chunk_list_num_entries; dbg_idx++) {
                     if (coll_entry->index_info.chunk_idx == chunk_list[dbg_idx].index_info.chunk_idx) {
-                        hbool_t coords_match = !HDmemcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
-                                io_info->dset->shared->ndims * sizeof(hsize_t));
+                        hbool_t coords_match =
+                            !HDmemcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
+                                      io_info->dset->shared->ndims * sizeof(hsize_t));
 
-                        HDassert(coords_match && "Calculated scaled coordinates for chunk didn't match chunk's actual scaled coordinates!");
+                        HDassert(coords_match && "Calculated scaled coordinates for chunk didn't match "
+                                                 "chunk's actual scaled coordinates!");
                         break;
                     }
                 }
@@ -4696,7 +4698,7 @@ H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype
     displacements[3] = (MPI_Aint)((size_t)chunk_block_type_size +
                                   offsetof(H5D_filtered_collective_io_index_info_t, need_insert));
     types[0]         = chunk_block_type;
-    types[1]         = H5_MPI_HSIZE_T;
+    types[1]         = HSIZE_AS_MPI_TYPE;
     types[2]         = MPI_UNSIGNED;
     types[3]         = MPI_C_BOOL;
     if (MPI_SUCCESS !=

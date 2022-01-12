@@ -567,7 +567,7 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
     displacements[0] = offsetof(H5F_block_t, offset);
     displacements[1] = offsetof(H5F_block_t, length);
     types[0]         = HADDR_AS_MPI_TYPE;
-    types[1]         = H5_MPI_HSIZE_T;
+    types[1]         = HSIZE_AS_MPI_TYPE;
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)

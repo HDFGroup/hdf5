@@ -61,14 +61,18 @@ static void test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z
                                                    hid_t fapl_id, hid_t dxpl_id);
 static void test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
                                                 hid_t fapl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                                    hid_t fapl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                                 hid_t fapl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                                   hid_t fapl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                                hid_t fapl_id, hid_t dxpl_id);
+static void test_write_filtered_dataset_single_unlim_dim_no_overlap(const char * parent_group,
+                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
+                                                                    hid_t dxpl_id);
+static void test_write_filtered_dataset_single_unlim_dim_overlap(const char * parent_group,
+                                                                 H5Z_filter_t filter_id, hid_t fapl_id,
+                                                                 hid_t dxpl_id);
+static void test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char * parent_group,
+                                                                   H5Z_filter_t filter_id, hid_t fapl_id,
+                                                                   hid_t dxpl_id);
+static void test_write_filtered_dataset_multi_unlim_dim_overlap(const char * parent_group,
+                                                                H5Z_filter_t filter_id, hid_t fapl_id,
+                                                                hid_t dxpl_id);
 static void test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
                                                             hid_t fapl_id, hid_t dxpl_id);
 static void test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id,
@@ -810,7 +814,8 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
             HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                     block[1]);
             HDfflush(stdout);
         }
 
@@ -953,7 +958,8 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
             HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                     block[1]);
             HDfflush(stdout);
         }
 
@@ -1107,7 +1113,8 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
             HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                     block[1]);
             HDfflush(stdout);
         }
 
@@ -1264,7 +1271,8 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
             HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                      ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                     block[1]);
             HDfflush(stdout);
         }
 
