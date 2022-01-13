@@ -192,12 +192,12 @@ java/examples/testfiles/examples.intro.H5_CreateGroup.txt -text
 java/examples/testfiles/examples.intro.H5_CreateGroupAbsoluteRelative.txt -text
 java/examples/testfiles/examples.intro.H5_CreateGroupDataset.txt -text
 java/examples/testfiles/examples.intro.H5_ReadWrite.txt -text
-java/lib/ext/slf4j-nop-1.7.25.jar -text svneol=unset#application/zip
-java/lib/ext/slf4j-simple-1.7.25.jar -text svneol=unset#application/zip
+java/lib/ext/slf4j-nop-1.7.33.jar -text svneol=unset#application/zip
+java/lib/ext/slf4j-simple-1.7.33.jar -text svneol=unset#application/zip
 java/lib/hamcrest-core.jar -text svneol=unset#application/java-archive
 java/lib/junit.jar -text svneol=unset#application/java-archive
 java/lib/simplelogger.properties -text
-java/lib/slf4j-api-1.7.25.jar -text svneol=unset#application/zip
+java/lib/slf4j-api-1.7.33.jar -text svneol=unset#application/zip
 java/src/CMakeLists.txt -text
 java/src/Makefile.am -text
 java/src/hdf/CMakeLists.txt -text
