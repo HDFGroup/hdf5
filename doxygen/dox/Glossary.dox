@@ -256,7 +256,7 @@ and an HDF5 path name in that file.</DD>
 <DL>
   <DT>Link</DT>
   <DD>
-    <P>An named, uni-directional association between a source and a
+    <P>A named, uni-directional association between a source and a
     destination. In HDF5, the source is always the HDF5 group that hosts the
     link in its link collection.</P>
     <P>There are several ways to specify a link's destination:</P>
@@ -292,7 +292,7 @@ and an HDF5 path name in that file.</DD>
     different groups. It would then be a "member" of a given group with
     multiplicity greater than one and be a member of multiple groups.</P>
     <P> It is the link that is a member of the group's link collection and not
-    link's destination.</P>
+    the link destination.</P>
   </DD>
 </DL>
 

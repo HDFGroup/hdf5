@@ -122,7 +122,7 @@ extern "C" {
  * \param[in] create_data User pointer to any class creation data required
  * \return \herr_t
  *
- * \details This is function is called when a new property list of the class
+ * \details This function is called when a new property list of the class
  *          with which this function was registered is being created.  The
  *          function is called after any registered parent create function is
  *          called for each property value.
@@ -146,7 +146,7 @@ typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
  * \param[in] copy_data User pointer to any copy data required
  * \return \herr_t
  *
- * \details This is function is called when an existing property list of this
+ * \details This function is called when an existing property list of this
  *          class is copied. The copy callback function is called after any
  *          registered parent copy callback function is called for each property
  *          value.
@@ -169,7 +169,7 @@ typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void
  * \param[in] close_data User pointer to any close data required
  * \return \herr_t
  *
- * \details This is function is called when a property list of the class
+ * \details This function is called when a property list of the class
  *          with which this function was registered is being closed.  The
  *          function is called after any registered parent close function is
  *          called for each property value.
@@ -277,7 +277,7 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
  * \param[in,out] iter_data The user context passed to H5Piterate()
  * \return \herr_t_iter
  *
- * \details This is function is called for each property encountered when
+ * \details This function is called for each property encountered when
  *          iterating over a property list or property list class
  *          via H5Piterate().
  *
