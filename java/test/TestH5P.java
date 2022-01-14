@@ -1173,12 +1173,12 @@ public class TestH5P {
             strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
             assertTrue("strategy(default): "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_FSM_AGGR);
             assertTrue("persist(default): "+persist[0], persist[0] == false);
-            assertTrue("theshold(default): "+threshold[0], threshold[0] == 1);
+            assertTrue("threshold(default): "+threshold[0], threshold[0] == 1);
             H5.H5Pset_file_space_strategy(fcpl_id, HDF5Constants.H5F_FSPACE_STRATEGY_PAGE, true, 1);
             strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
             assertTrue("strategy: "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_PAGE);
             assertTrue("persist: "+persist[0], persist[0] == true);
-            assertTrue("theshold: "+threshold[0], threshold[0] == 1);
+            assertTrue("threshold: "+threshold[0], threshold[0] == 1);
         }
         catch (Throwable err) {
             err.printStackTrace();
