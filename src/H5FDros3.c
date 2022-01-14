@@ -370,7 +370,7 @@ H5FD__ros3_term(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
+H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 {
     H5P_genplist_t *plist     = NULL; /* Property list pointer */
     herr_t          ret_value = FAIL;
@@ -391,7 +391,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     if (FAIL == H5FD__ros3_validate_config(fa))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config")
 
-    ret_value = H5P_set_driver(plist, H5FD_ROS3, (void *)fa, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
