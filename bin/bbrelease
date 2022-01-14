@@ -320,9 +320,9 @@ ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
 
-# Update README.txt and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/RELEASE.txt with release information in
 # line 1.
-for f in README.txt release_docs/RELEASE.txt; do
+for f in README.md release_docs/RELEASE.txt; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f

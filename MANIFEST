@@ -28,7 +28,7 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./README.txt
+./README.md
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
