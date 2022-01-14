@@ -239,10 +239,14 @@ typedef struct H5D_chunk_file_iter_ud_t {
 
 #ifdef H5_HAVE_PARALLEL
 /* information to construct a collective I/O operation for filling chunks */
-typedef struct H5D_chunk_coll_info_t {
-    size_t   num_io; /* Number of write operations */
-    haddr_t *addr;   /* array of the file addresses of the write operation */
-} H5D_chunk_coll_info_t;
+typedef struct H5D_chunk_coll_fill_info_t {
+    size_t num_chunks; /* Number of chunks in the write operation */
+    struct chunk_coll_fill_info {
+        haddr_t addr;           /* File address of the chunk */
+        size_t  chunk_size;     /* Size of the chunk in the file */
+        hbool_t unfiltered_partial_chunk;
+    } *chunk_info;
+} H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
 typedef struct H5D_chunk_iter_ud_t {
@@ -306,8 +310,6 @@ static herr_t   H5D__chunk_mem_cb(void *elem, const H5T_t *type, unsigned ndims,
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
 static herr_t   H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t   H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush);
-static hbool_t  H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims, const uint32_t *chunk_dims,
-                                                 const hsize_t *chunk_scaled, const hsize_t *dset_dims);
 static void *   H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t relax,
                                 hbool_t prev_unfilt_chunk);
 static herr_t   H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata, hbool_t dirty,
@@ -315,9 +317,9 @@ static herr_t   H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_
 static herr_t   H5D__chunk_cache_prune(const H5D_t *dset, size_t size);
 static herr_t   H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk);
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
-                                         size_t chunk_size, const void *fill_buf);
-static int    H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
+static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_fill_info,
+                                         const void *fill_buf, const void *partial_chunk_fill_buf);
+static int    H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Debugging helper routine callback */
@@ -4320,7 +4322,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
     hbool_t blocks_written = FALSE; /* Flag to indicate that chunk was actually written */
     hbool_t using_mpi =
         FALSE; /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
-    H5D_chunk_coll_info_t chunk_info; /* chunk address information for doing I/O */
+    H5D_chunk_coll_fill_info_t chunk_fill_info; /* chunk address information for doing I/O */
 #endif                                /* H5_HAVE_PARALLEL */
     hbool_t             carry; /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     unsigned            space_ndims;                     /* Dataset's space rank */
@@ -4368,8 +4370,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
         using_mpi = TRUE;
 
         /* init chunk info stuff for collective I/O */
-        chunk_info.num_io = 0;
-        chunk_info.addr   = NULL;
+        chunk_fill_info.num_chunks = 0;
+        chunk_fill_info.chunk_info = NULL;
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -4641,19 +4643,24 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                 if (using_mpi) {
                     /* collect all chunk addresses to be written to
                        write collectively at the end */
-                    /* allocate/resize address array if no more space left */
-                    /* Note that if we add support for parallel filters we must
-                     * also store an array of chunk sizes and pass it to the
-                     * apporpriate collective write function */
-                    if (0 == chunk_info.num_io % 1024)
-                        if (NULL == (chunk_info.addr = (haddr_t *)H5MM_realloc(
-                                         chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                                        "memory allocation failed for chunk addresses")
 
-                    /* Store the chunk's address for later */
-                    chunk_info.addr[chunk_info.num_io] = udata.chunk_block.offset;
-                    chunk_info.num_io++;
+                    /* allocate/resize chunk info array if no more space left */
+                    if (0 == chunk_fill_info.num_chunks % 1024) {
+                        void *tmp_realloc;
+
+                        if (NULL == (tmp_realloc = H5MM_realloc(chunk_fill_info.chunk_info,
+                                (chunk_fill_info.num_chunks + 1024) * sizeof(struct chunk_coll_fill_info))))
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for chunk fill info")
+
+                        chunk_fill_info.chunk_info = tmp_realloc;
+                    }
+
+                    /* Store info about the chunk for later */
+                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].addr = udata.chunk_block.offset;
+                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size = chunk_size;
+                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].unfiltered_partial_chunk = (*fill_buf == unfilt_fill_buf);
+                    chunk_fill_info.num_chunks++;
 
                     /* Indicate that blocks will be written */
                     blocks_written = TRUE;
@@ -4726,7 +4733,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
 #ifdef H5_HAVE_PARALLEL
     /* do final collective I/O */
     if (using_mpi && blocks_written)
-        if (H5D__chunk_collective_fill(dset, &chunk_info, chunk_size, fb_info.fill_buf) < 0)
+        if (H5D__chunk_collective_fill(dset, &chunk_fill_info, fb_info.fill_buf, unfilt_fill_buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -4742,8 +4749,8 @@ done:
     unfilt_fill_buf = H5D__chunk_mem_xfree(unfilt_fill_buf, &def_pline);
 
 #ifdef H5_HAVE_PARALLEL
-    if (using_mpi && chunk_info.addr)
-        H5MM_free(chunk_info.addr);
+    if (using_mpi && chunk_fill_info.chunk_info)
+        H5MM_free(chunk_fill_info.chunk_info);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4937,26 +4944,34 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info, size_t chunk_size,
-                           const void *fill_buf)
+H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_fill_info,
+                           const void *fill_buf, const void *partial_chunk_fill_buf)
 {
-    MPI_Comm         mpi_comm = MPI_COMM_NULL;    /* MPI communicator for file */
-    int              mpi_rank = (-1);             /* This process's rank  */
-    int              mpi_size = (-1);             /* MPI Comm size  */
-    int              mpi_code;                    /* MPI return code */
-    size_t           num_blocks;                  /* Number of blocks between processes. */
-    size_t           leftover_blocks;             /* Number of leftover blocks to handle */
-    int              blocks, leftover, block_len; /* converted to int for MPI */
+    MPI_Comm         mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
+    int              mpi_rank = (-1);          /* This process's rank  */
+    int              mpi_size = (-1);          /* MPI Comm size  */
+    int              mpi_code;                 /* MPI return code */
+    size_t           num_blocks;               /* Number of blocks between processes. */
+    size_t           leftover_blocks;          /* Number of leftover blocks to handle */
+    int              blocks, leftover;         /* converted to int for MPI */
     MPI_Aint *       chunk_disp_array = NULL;
+    MPI_Aint *       block_disps      = NULL;
     int *            block_lens       = NULL;
     MPI_Datatype     mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     hbool_t          have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
-    hbool_t          need_addr_sort = FALSE;
-    int              i;                   /* Local index variable */
+    hbool_t          need_sort = FALSE;
+    size_t           i;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
+
+    /*
+     * If a separate fill buffer is provided for partial chunks, ensure
+     * that the "don't filter partial edge chunks" flag is set.
+     */
+    if (partial_chunk_fill_buf)
+        HDassert(dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
     /* Get the MPI communicator */
     if (MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(dset->oloc.file)))
@@ -4973,39 +4988,88 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     /* Distribute evenly the number of blocks between processes. */
     if (mpi_size == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
-    num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
+    num_blocks = (size_t)(chunk_fill_info->num_chunks / (size_t)mpi_size); /* value should be the same on all procs */
 
     /* After evenly distributing the blocks between processes, are there any
      * leftover blocks for each individual process (round-robin)?
      */
-    leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
+    leftover_blocks = (size_t)(chunk_fill_info->num_chunks % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */
     H5_CHECKED_ASSIGN(blocks, int, num_blocks, size_t);
     H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
-    H5_CHECKED_ASSIGN(block_len, int, chunk_size, size_t);
 
     /* Check if we have any chunks to write on this rank */
     if (num_blocks > 0 || (leftover && leftover > mpi_rank)) {
+        MPI_Aint partial_fill_buf_disp = 0;
+        hbool_t  all_same_block_len = TRUE;
+
         /* Allocate buffers */
-        /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-        if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
         if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
-        for (i = 0; i < blocks; i++) {
-            /* store the chunk address as an MPI_Aint */
-            chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + (mpi_rank * blocks)]);
+        if (partial_chunk_fill_buf) {
+            MPI_Aint fill_buf_addr;
+            MPI_Aint partial_fill_buf_addr;
 
-            /* MSC - should not need this if MPI_type_create_hindexed_block is working */
-            block_lens[i] = block_len;
+            /* Calculate the displacement between the fill buffer and partial chunk fill buffer */
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(fill_buf, &fill_buf_addr)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(partial_chunk_fill_buf, &partial_fill_buf_addr)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 
-            /* Make sure that the addresses in the datatype are
-             * monotonically non-decreasing
+#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+            partial_fill_buf_disp = MPI_Aint_diff(partial_fill_buf_addr, fill_buf_addr);
+#else
+            partial_fill_buf_disp = partial_fill_buf_addr - fill_buf_addr;
+#endif
+
+            /*
+             * Allocate all-zero block displacements array. If a block's displacement
+             * is left as zero, that block will be written to from the regular fill
+             * buffer. If a block represents an unfiltered partial edge chunk, its
+             * displacement will be set so that the block is written to from the
+             * unfiltered fill buffer.
              */
-            if (i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
-                need_addr_sort = TRUE;
+            if (NULL == (block_disps = (MPI_Aint *)H5MM_calloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate block displacements buffer")
+        }
+
+        /*
+         * Perform initial scan of chunk info list to:
+         *  - make sure that chunk addresses are monotonically non-decreasing
+         *  - check if all blocks have the same length
+         */
+        for (i = 1; i < chunk_fill_info->num_chunks; i++) {
+            if (chunk_fill_info->chunk_info[i].addr < chunk_fill_info->chunk_info[i - 1].addr)
+                need_sort = TRUE;
+
+            if (chunk_fill_info->chunk_info[i].chunk_size != chunk_fill_info->chunk_info[i - 1].chunk_size)
+                all_same_block_len = FALSE;
+        }
+
+        if (need_sort)
+            HDqsort(chunk_fill_info->chunk_info, chunk_fill_info->num_chunks,
+                    sizeof(struct chunk_coll_fill_info), H5D__chunk_cmp_coll_fill_info);
+
+        /* Allocate buffer for block lengths if necessary */
+        if (!all_same_block_len)
+            if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
+
+        for (i = 0; i < (size_t)blocks; i++) {
+            size_t idx = i + (size_t)(mpi_rank * blocks);
+
+            /* store the chunk address as an MPI_Aint */
+            chunk_disp_array[i] = (MPI_Aint)(chunk_fill_info->chunk_info[idx].addr);
+
+            if (!all_same_block_len)
+                H5_CHECKED_ASSIGN(block_lens[i], int, chunk_fill_info->chunk_info[idx].chunk_size, size_t);
+
+            if (chunk_fill_info->chunk_info[idx].unfiltered_partial_chunk) {
+                HDassert(partial_chunk_fill_buf);
+                block_disps[i] = partial_fill_buf_disp;
+            }
         } /* end for */
 
         /* Calculate if there are any leftover blocks after evenly
@@ -5013,32 +5077,66 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
          * to processes 0 -> leftover.
          */
         if (leftover && leftover > mpi_rank) {
-            chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[(blocks * mpi_size) + mpi_rank];
-            if (blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
-                need_addr_sort = TRUE;
-            block_lens[blocks] = block_len;
+            chunk_disp_array[blocks] = (MPI_Aint)chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].addr;
+
+            if (!all_same_block_len)
+                H5_CHECKED_ASSIGN(block_lens[blocks], int, chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].chunk_size, size_t);
+
+            if (chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].unfiltered_partial_chunk) {
+                HDassert(partial_chunk_fill_buf);
+                block_disps[blocks] = partial_fill_buf_disp;
+            }
+
             blocks++;
         }
 
-        /* Ensure that the blocks are sorted in monotonically non-decreasing
-         * order of offset in the file.
-         */
-        if (need_addr_sort)
-            HDqsort(chunk_disp_array, (size_t)blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+        /* Create file and memory types for the write operation */
+        if (all_same_block_len) {
+            int block_len;
 
-        /* MSC - should use this if MPI_type_create_hindexed block is working:
-         * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE,
-         * &file_type);
-         */
-        mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
-        if (mpi_code != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+            H5_CHECKED_ASSIGN(block_len, int, chunk_fill_info->chunk_info[0].chunk_size, size_t);
+
+            mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
+            if (mpi_code != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
+
+            if (partial_chunk_fill_buf) {
+                /*
+                 * If filters are disabled for partial edge chunks, those chunks could
+                 * potentially have the same block length as the other chunks, but still
+                 * need to be written to using the unfiltered fill buffer. Use an hindexed
+                 * block type rather than an hvector.
+                 */
+                mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, block_disps, MPI_BYTE, &mem_type);
+                if (mpi_code != MPI_SUCCESS)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
+            }
+            else {
+                mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
+                if (mpi_code != MPI_SUCCESS)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+            }
+        }
+        else {
+            /*
+             * Currently, different block lengths implies that there are partial
+             * edge chunks and the "don't filter partial edge chunks" flag is set.
+             */
+            HDassert(partial_chunk_fill_buf);
+            HDassert(block_lens);
+            HDassert(block_disps);
+
+            mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
+            if (mpi_code != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+
+            mpi_code = MPI_Type_create_hindexed(blocks, block_lens, block_disps, MPI_BYTE, &mem_type);
+            if (mpi_code != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+        }
+
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-
-        mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
-        if (mpi_code != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
     } /* end if */
@@ -5081,39 +5179,25 @@ done:
         if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
+    H5MM_xfree(block_disps);
     H5MM_xfree(block_lens);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_fill() */
 
 static int
-H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
+H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
 {
-    MPI_Aint _addr1 = (MPI_Aint)0, _addr2 = (MPI_Aint)0;
-    int      ret_value = 0;
+    const struct chunk_coll_fill_info *entry1;
+    const struct chunk_coll_fill_info *entry2;
 
     FUNC_ENTER_STATIC_NOERR
 
-    _addr1 = *((const MPI_Aint *)addr1);
-    _addr2 = *((const MPI_Aint *)addr2);
+    entry1 = (const struct chunk_coll_fill_info *)_entry1;
+    entry2 = (const struct chunk_coll_fill_info *)_entry2;
 
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
-    {
-        MPI_Aint diff = MPI_Aint_diff(_addr1, _addr2);
-
-        if (diff < (MPI_Aint)0)
-            ret_value = -1;
-        else if (diff > (MPI_Aint)0)
-            ret_value = 1;
-        else
-            ret_value = 0;
-    }
-#else
-    ret_value = (_addr1 > _addr2) - (_addr1 < _addr2);
-#endif
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_cmp_addr() */
+    FUNC_LEAVE_NOAPI(H5F_addr_cmp(entry1->addr, entry2->addr))
+} /* end H5D__chunk_cmp_coll_fill_info() */
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
@@ -6827,7 +6911,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+hbool_t
 H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims, const uint32_t *chunk_dims, const hsize_t scaled[],
                                  const hsize_t *dset_dims)
 {

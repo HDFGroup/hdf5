@@ -193,6 +193,11 @@ typedef struct H5D_filtered_collective_io_index_info_t {
  *             of the chunk that are not selected. During reads, this field should always be
  *             true.
  *
+ * skip_filter_pline - A flag which determines whether to skip calls to the filter pipeline
+ *                     for this chunk. This flag is mostly useful for correct handling of
+ *                     partial edge chunks when the "don't filter partial edge chunks" flag
+ *                     is set on the dataset's DCPL.
+ *
  * io_size - The total size of I/O to this chunk. This field is an accumulation of the size of
  *           I/O to the chunk from each MPI rank which has the chunk selected and is used to
  *           determine the value for the previous `full_overwrite` flag.
@@ -237,6 +242,7 @@ typedef struct H5D_filtered_collective_io_info_t {
 
     H5D_chunk_info_t *chunk_info;
     hbool_t           need_read;
+    hbool_t           skip_filter_pline;
     size_t            io_size;
     size_t            chunk_buf_size;
     int               orig_owner;
@@ -2997,6 +3003,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                                              size_t *num_entries, int mpi_rank)
 {
     H5D_filtered_collective_io_info_t *local_info_array = NULL;
+    hbool_t                            filter_partial_edge_chunks;
     size_t                             num_chunks_selected;
     size_t                             i;
     herr_t                             ret_value = SUCCEED;
@@ -3020,6 +3027,9 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
         H5D_chunk_ud_t    udata;
         H5SL_node_t *     chunk_node;
         hsize_t           select_npoints;
+
+        /* Determine whether partial edge chunks should be filtered */
+        filter_partial_edge_chunks = !(io_info->dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
         if (NULL == (local_info_array = H5MM_malloc(num_chunks_selected * sizeof(*local_info_array))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate local io info array buffer")
@@ -3057,6 +3067,18 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                  */
                 local_info_array[i].need_read =
                     local_info_array[i].io_size < (size_t)io_info->dset->shared->layout.u.chunk.size;
+            }
+
+            local_info_array[i].skip_filter_pline = FALSE;
+            if (!filter_partial_edge_chunks) {
+                /*
+                 * If this is a partial edge chunk and the "don't filter partial edge
+                 * chunks" flag is set, make sure not to apply filters to the chunk.
+                 */
+                if (H5D__chunk_is_partial_edge_chunk(io_info->dset->shared->ndims,
+                                                     io_info->dset->shared->layout.u.chunk.dim,
+                                                     chunk_info->scaled, io_info->dset->shared->curr_dims))
+                    local_info_array[i].skip_filter_pline = TRUE;
             }
 
             /* Initialize the chunk's shared info */
@@ -3763,7 +3785,10 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         }
 
         /* Set chunk's new length for eventual filter pipeline calls */
-        chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+        if (chunk_list[i].skip_filter_pline)
+            chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
+        else
+            chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
     }
 
     /*
@@ -3786,11 +3811,13 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         chunk_info = chunk_list[i].chunk_info;
 
         /* Unfilter the chunk */
-        if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
-                         &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
-                         (size_t *)&chunk_list[i].fspace_info.chunk_new.length, &chunk_list[i].chunk_buf_size,
-                         &chunk_list[i].buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
+        if (!chunk_list[i].skip_filter_pline) {
+            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
+                             &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
+                             (size_t *)&chunk_list[i].fspace_info.chunk_new.length, &chunk_list[i].chunk_buf_size,
+                             &chunk_list[i].buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "couldn't unfilter chunk for modifying")
+        }
 
         /* Scatter the chunk data to the read buffer */
         iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
@@ -3909,7 +3936,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                 if (!base_read_buf)
                     base_read_buf = chunk_list[i].buf;
 
-                chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+                if (chunk_list[i].skip_filter_pline)
+                    chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
+                else
+                    chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
             }
             else
                 chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
@@ -3945,7 +3975,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
             /* If this chunk wasn't being fully overwritten, we read it from
              * the file, so we need to unfilter it
              */
-            if (chunk_list[i].need_read) {
+            if (chunk_list[i].need_read && !chunk_list[i].skip_filter_pline) {
                 if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
                                  &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                                  (size_t *)&chunk_list[i].fspace_info.chunk_new.length,
@@ -4003,11 +4033,13 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
             }
 
             /* Finally, filter the chunk */
-            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, 0,
-                             &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
-                             (size_t *)&chunk_list[i].fspace_info.chunk_new.length,
-                             &chunk_list[i].chunk_buf_size, &chunk_list[i].buf) < 0)
-                HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
+            if (!chunk_list[i].skip_filter_pline) {
+                if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, 0,
+                                 &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
+                                 (size_t *)&chunk_list[i].fspace_info.chunk_new.length,
+                                 &chunk_list[i].chunk_buf_size, &chunk_list[i].buf) < 0)
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
+            }
 
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
