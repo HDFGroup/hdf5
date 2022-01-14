@@ -91,9 +91,9 @@ typedef enum H5D_alloc_time_t {
 typedef enum H5D_space_status_t {
     H5D_SPACE_STATUS_ERROR          = -1, /**< Error */
     H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,  /**< Space has not been allocated for this dataset. */
-    H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been allocated for this dataset. */
-    H5D_SPACE_STATUS_ALLOCATED = 2 /**< Space has been partially allocated for this dataset. (Used only for
-                                      datasets with chunked storage.) */
+    H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been partially allocated for this dataset.
+                                               (Used only for datasets with chunked storage.) */
+    H5D_SPACE_STATUS_ALLOCATED = 2        /**< Space has been allocated for this dataset. */
 } H5D_space_status_t;
 //! <!-- [H5D_space_status_t_snip] -->
 
