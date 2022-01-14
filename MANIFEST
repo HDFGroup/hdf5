@@ -3628,7 +3628,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
-./config/cmake/README.txt.cmake.in
+./config/cmake/README.md.cmake.in
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake
