@@ -36,7 +36,7 @@ jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
 hdf5_javadir = $(libdir)
 
 pkgpath = hdf/hdf5lib
-CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.33.jar:$$CLASSPATH
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
