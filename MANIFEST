@@ -28,7 +28,7 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./README.txt
+./README.md
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
@@ -223,6 +223,7 @@
 ./doxygen/dox/DDLBNF112.dox
 ./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
+./doxygen/dox/Glossary.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
 ./doxygen/dox/Overview.dox
@@ -289,6 +290,7 @@
 ./doxygen/img/FF-IH_FileGroup.gif
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
+./doxygen/img/HDF5.png
 ./doxygen/img/HDFG-logo.png
 ./doxygen/img/IOFlow.gif
 ./doxygen/img/IOFlow2.gif
@@ -3628,7 +3630,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
-./config/cmake/README.txt.cmake.in
+./config/cmake/README.md.cmake.in
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake
