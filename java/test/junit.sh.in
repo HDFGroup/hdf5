@@ -66,8 +66,8 @@ $top_builddir/java/src/jni/.libs/libhdf5_java.*
 LIST_JAR_TESTFILES="
 $HDFLIB_HOME/hamcrest-core.jar
 $HDFLIB_HOME/junit.jar
-$HDFLIB_HOME/slf4j-api-1.7.25.jar
-$HDFLIB_HOME/ext/slf4j-simple-1.7.25.jar
+$HDFLIB_HOME/slf4j-api-1.7.33.jar
+$HDFLIB_HOME/ext/slf4j-simple-1.7.33.jar
 "
 LIST_JAR_FILES="
 $top_builddir/java/src/$JARFILE
@@ -294,7 +294,7 @@ JAVAEXEFLAGS=@H5_JAVAFLAGS@
 COPY_LIBFILES_TO_BLDLIBDIR
 COPY_DATAFILES_TO_BLDDIR
 
-CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/junit.jar:"$BLDLIBDIR"/hamcrest-core.jar:"$BLDLIBDIR"/slf4j-api-1.7.25.jar:"$BLDLIBDIR"/slf4j-simple-1.7.25.jar:"$TESTJARFILE""
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$BLDLIBDIR"/junit.jar:"$BLDLIBDIR"/hamcrest-core.jar:"$BLDLIBDIR"/slf4j-api-1.7.33.jar:"$BLDLIBDIR"/slf4j-simple-1.7.33.jar:"$TESTJARFILE""
 
 TEST=/usr/bin/test
 if [ ! -x /usr/bin/test ]
