@@ -39,6 +39,7 @@ set (HDF5_JAVA_TEST_SOURCES
     TestH5Oparams
     TestH5Obasic
     TestH5Ocreate
+    TestH5OcopyOld
     TestH5Ocopy
     TestH5PL
     TestH5VL
