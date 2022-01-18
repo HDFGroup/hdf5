@@ -497,7 +497,7 @@ H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void
     /* Set up context for iterator callbacks */
     ctx.connector_ids = connector_ids;
     ctx.requests      = requests;
-    ctx.array_len         = array_len;
+    ctx.array_len     = array_len;
     ctx.i             = 0;
 
     /* Iterate over the events in the set */
