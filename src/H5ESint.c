@@ -54,7 +54,7 @@
 typedef struct H5ES_get_requests_ctx_t {
     hid_t *connector_ids; /* Output buffer for list of connector IDs that match the above requests */
     void **requests;      /* Output buffer for list of requests in event set */
-    size_t count;         /* Length of the above output buffers */
+    size_t array_len;     /* Length of the above output buffers */
     size_t i;             /* Number of elements filled in output buffers */
 } H5ES_get_requests_ctx_t;
 
@@ -452,7 +452,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
     /* Sanity check */
     HDassert(ev);
     HDassert(ctx);
-    HDassert(ctx->i < ctx->count);
+    HDassert(ctx->i < ctx->array_len);
 
     /* Get the connector ID for the event */
     if (ctx->connector_ids)
@@ -463,7 +463,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
         ctx->requests[ctx->i] = ev->request->data;
 
     /* Check if we've run out of room in the arrays */
-    if (++ctx->i == ctx->count)
+    if (++ctx->i == ctx->array_len)
         ret_value = H5_ITER_STOP;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -482,7 +482,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t count)
+H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len)
 {
     H5ES_get_requests_ctx_t ctx;                 /* Callback context */
     herr_t                  ret_value = SUCCEED; /* Return value */
@@ -491,13 +491,13 @@ H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void
 
     /* Sanity check */
     HDassert(es);
-    HDassert(count > 0);
+    HDassert(array_len > 0);
     HDassert(requests || connector_ids);
 
     /* Set up context for iterator callbacks */
     ctx.connector_ids = connector_ids;
     ctx.requests      = requests;
-    ctx.count         = count;
+    ctx.array_len         = array_len;
     ctx.i             = 0;
 
     /* Iterate over the events in the set */

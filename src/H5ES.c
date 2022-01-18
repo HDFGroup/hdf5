@@ -263,7 +263,7 @@ done:
  */
 herr_t
 H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void **requests,
-                 size_t *count /*out*/)
+                 size_t array_len, size_t *count /*out*/)
 {
     H5ES_t *es;                  /* Event set */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -278,8 +278,8 @@ H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Call internal routine */
-    if (count && *count > 0 && (requests || connector_ids))
-        if (H5ES__get_requests(es, order, connector_ids, requests, *count) < 0)
+    if (array_len > 0 && (requests || connector_ids))
+        if (H5ES__get_requests(es, order, connector_ids, requests, array_len) < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get requests")
 
     /* Retrieve the count, if non-NULL */
