@@ -280,7 +280,7 @@ hg_time_get_current(hg_time_t *tv)
         mach_timebase_info_data_t timebase_info;
 
         (void)mach_timebase_info(&timebase_info);
-        monotonic_timebase_factor = timebase_info.numer / timebase_info.denom;
+        monotonic_timebase_factor = timebase_info.number / timebase_info.denom;
     }
     monotonic_nsec = (mach_absolute_time() * monotonic_timebase_factor);
     tv->tv_sec     = (long)(monotonic_nsec / 1000000000);

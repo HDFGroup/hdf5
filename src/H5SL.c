@@ -311,7 +311,7 @@
     {                                                                                                        \
         H5SL_node_t *_last  = X;             /* Lowest node in the current gap */                            \
         H5SL_node_t *_llast = X;             /* Lowest node in the previous gap */                           \
-        H5SL_node_t *_next  = NULL;          /* Highest node in the currect gap */                           \
+        H5SL_node_t *_next  = NULL;          /* Highest node in the current gap */                           \
         H5SL_node_t *_drop  = NULL;          /* Low node of the gap to drop into */                          \
         H5SL_node_t *_ldrop = NULL;          /* Low node of gap before the one to drop into */               \
         H5SL_node_t *_head  = SLIST->header; /* Head of the skip list */                                     \

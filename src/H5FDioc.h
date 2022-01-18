@@ -64,7 +64,7 @@ typedef struct config_common_t {
     uint32_t        magic;                                  /* set to H5FD_SUBFILING_FAPL_T_MAGIC */
     uint32_t        version;                                /* set to H5FD_CURR_SUBFILING_FAPL_T_VERSION */
     int32_t         stripe_count;                           /* How many io concentrators */
-    int64_t         stripe_depth;                           /* Max # of bytes in contigious IO to an IOC */
+    int64_t         stripe_depth;                           /* Max # of bytes in contiguous IO to an IOC */
     ioc_selection_t ioc_selection;                          /* Method to select IO Concentrators */
     hid_t           ioc_fapl_id;                            /* The hid_t value of the stacked VFD  */
     int64_t         context_id;                             /* The value used to lookup an IOC context */

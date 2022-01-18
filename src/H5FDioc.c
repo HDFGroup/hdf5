@@ -201,7 +201,7 @@ H5FD__init_package(void)
 #endif /* JRM */
 
 #if 0  /* JRM */
-  HDfprintf(stdout, "H5FD_ioc_init() IOC registerd.  id = %lld \n", (int64_t)H5FD_IOC_g);
+  HDfprintf(stdout, "H5FD_ioc_init() IOC registered.  id = %lld \n", (int64_t)H5FD_IOC_g);
 #endif /* JRM */
 
     if (H5I_INVALID_HID == H5FD_IOC_g)

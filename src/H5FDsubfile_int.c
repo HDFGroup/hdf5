@@ -214,7 +214,7 @@ int sf_open_file_count = 0;
  * Function:    Public/Client set_verbose_flag
  *
  * Purpose:     For debugging purposes, I allow a verbose setting to
- *              have printing of relevent information into an IOC specific
+ *              have printing of relevant information into an IOC specific
  *              file that is opened as a result of enabling the flag
  *              and closed when the verbose setting is disabled.
  *
@@ -349,7 +349,7 @@ record_fid_to_subfile(uint64_t fid, hid_t subfile_context_id, int *next_index)
  *              inode values, these being constant for all processes
  *              opening the shared file.  The inode value is utilized
  *              as a key value and is associated with the sf_context
- *              which we recieve as one of the input arguments.
+ *              which we receive as one of the input arguments.
  *
  *              IO Concentrator threads will be initialized on MPI ranks
  *              which have been identified via application toplogy
@@ -1468,7 +1468,7 @@ done:
  *              storage arrays can be stack based rather than explicitly
  *              allocated and freed.
  *
- *              The Internal function is resposible for sending all IOC
+ *              The Internal function is responsible for sending all IOC
  *              instances, the (sub)file open requests.
  *
  *              Prior to calling the internal open function, we initialize
@@ -1498,7 +1498,7 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     char *           option_arg  = get_ioc_selection_criteria(&ioc_selection);
 
     HDassert(config_info);
-    /* Check to see who is calling ths function::
+    /* Check to see who is calling the function::
      * We only allow the ioc or subfiling VFDs
      */
     if ((config_info->magic != H5FD_IOC_FAPL_T_MAGIC) &&

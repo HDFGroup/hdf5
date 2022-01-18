@@ -405,7 +405,7 @@ NA_PUBLIC na_return_t NA_Msg_init_unexpected(na_class_t *na_class, void *buf, na
  * receive to be posted at the destination before sending the message and the
  * destination is allowed to drop the message without notification. However,
  * in general, NA plugins are encouraged to remain reliable to avoid unnecessary
- * timeouts and cancelations.
+ * timeouts and cancellations.
  *
  * Users must manually create an operation ID through NA_Op_create() and pass
  * it through op_id for future use and prevent multiple ID creation.
