@@ -308,8 +308,12 @@ H5FD_ros3_init(void)
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
+    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
         H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_ROS3_g) {
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
+        }
+    }
 
 #if ROS3_STATS
     /* pre-compute statsbin boundaries
@@ -358,7 +362,7 @@ H5FD__ros3_term(void)
  * Function:    H5Pset_fapl_ros3
  *
  * Purpose:     Modify the file access property list to use the H5FD_ROS3
- *              driver defined in this source file.  All driver specfic
+ *              driver defined in this source file.  All driver specific
  *              properties are passed in as a pointer to a suitably
  *              initialized instance of H5FD_ros3_fapl_t
  *
@@ -401,16 +405,16 @@ done:
  * Function:    H5FD__ros3_validate_config()
  *
  * Purpose:     Test to see if the supplied instance of H5FD_ros3_fapl_t
- *              contains internally consistant data.  Return SUCCEED if so,
+ *              contains internally consistent data.  Return SUCCEED if so,
  *              and FAIL otherwise.
  *
- *              Note the difference between internally consistant and
+ *              Note the difference between internally consistent and
  *              correct.  As we will have to try to access the target
  *              object to determine whether the supplied data is correct,
- *              we will settle for internal consistancy at this point
+ *              we will settle for internal consistency at this point
  *
  * Return:      SUCCEED if instance of H5FD_ros3_fapl_t contains internally
- *              consistant data, FAIL otherwise.
+ *              consistent data, FAIL otherwise.
  *
  * Programmer:  Jacob Smith
  *              9/10/17

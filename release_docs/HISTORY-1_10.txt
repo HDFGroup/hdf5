@@ -161,7 +161,7 @@ New Features
             YES                   NO          Default to STATIC
             NO                    YES         Default to SHARED
             NO                    NO          Default to SHARED
-      The defaults can be overriden by setting the config option
+      The defaults can be overridden by setting the config option
          HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
       (ADB - 2020/07/09, HDFFV-11116)
@@ -610,7 +610,7 @@ Bug Fixes since HDF5-1.10.6 release
     - h5diff fixed a command line parsing error.
 
       h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparison was used.
 
       (ADB - 2020/07/20, HDFFV-10897)
 
@@ -618,7 +618,7 @@ Bug Fixes since HDF5-1.10.6 release
 
       h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
       Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
-      from comparision.
+      from comparison.
 
       (ADB - 2020/07/20, HDFFV-5935)
 
@@ -1434,7 +1434,7 @@ Known Problems
     and thus does not suffer from the 32 bit size limitation described here.
     OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
-    report data verfication errors before eventually aborting.
+    report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
     resolved these isses and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
@@ -1636,7 +1636,7 @@ New Features
 
       (DER - 2019/02/03, HDFFV-10696)
 
-    - Add ability to minimze dataset object headers.
+    - Add ability to minimize dataset object headers.
 
       Creation of many, very small datasets resulted in extensive file bloat
       due to extra space in the dataset object headers -- this space is
@@ -2137,7 +2137,7 @@ Known Problems
     and thus does not suffer from the 32 bit size limitation described here.
     OpenMPI releases prior to v3.1.3 appear to have other datatype issues however,
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
-    report data verfication errors before eventually aborting.
+    report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
     resolved these isses and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
@@ -2865,7 +2865,7 @@ Bug Fixes since HDF5-1.10.2 release
 
       When the function is called with the 'allgather' parameter set
       to a non-true value, the function will receive data from all MPI
-      ranks and gather it to the single rank specied by the 'root'
+      ranks and gather it to the single rank specified by the 'root'
       parameter. However, the bug in the function caused memory for
       the received data to be allocated on all MPI ranks, not just the
       singular rank specified as the receiver. In some circumstances,
@@ -3431,11 +3431,11 @@ New Features
       file driver in HDF5 by previously having called H5Pset_fapl_mpio().
 
       HDF5 parallel file operations which do not employ multiple ranks
-      e.g. specifiying MPI_COMM_SELF (whose MPI_Comm_size == 1)
+      e.g. specifying MPI_COMM_SELF (whose MPI_Comm_size == 1)
       as opposed to MPI_COMM_WORLD, will not be affected by this
       optimization.  Conversely, parallel file operations on subgroups
       of MPI_COMM_WORLD are allowed to be run in parallel with each
-      subgroup operating as an independant collection of processes.
+      subgroup operating as an independent collection of processes.
 
       (RAW - 2017/10/10, HDFFV-10294)
 
@@ -3574,7 +3574,7 @@ New Features
       (ADB - 2017/12/20)
 
     - The H5I_REFERENCE value in the H5I_type_t enum (defined in H5Ipublic.h)
-      has been marked as deprectated.
+      has been marked as deprecated.
 
       JNI code which refers to this value will be removed in a future
       major version of the library. The code will remain unchanged in the
@@ -3895,7 +3895,7 @@ Bug Fixes since HDF5-1.10.1 release
 
       Use of this VFD feature flag was not in line with the documentation in
       the public H5FDpublic.h file. In particular, it was being used as a
-      proxy for determining if SWMR I/O is allowed. This is unecessary as we
+      proxy for determining if SWMR I/O is allowed. This is unnecessary as we
       already have a feature flag for this (H5FD_SUPPORTS_SWMR_IO).
 
       (DER - 2017/05/31, HDFFV-10214)
@@ -4796,7 +4796,7 @@ Bug Fixes since HDF5-1.10.0-patch1 release
       files to ensure that the library fails gracefully in these cases:
 
       * Writing to a corrupted file that has an object message which is
-        incorrectly marked as sharable on disk results in a buffer overflow /
+        incorrectly marked as shareable on disk results in a buffer overflow /
         invalid write instead of a clean error message.
 
       * Decoding data from a corrupted file with a dataset encoded with the
@@ -5258,7 +5258,7 @@ This release supports the following features:
       identically to the 1.8 library with the --with-default-api-version=v18
       configure flag. This allows existing code to be compiled with the 1.10
       library without requiring immediate changes to the application source
-      code. For addtional configuration options and other details, see
+      code. For additional configuration options and other details, see
       "API Compatibility Macros in HDF5" at
       https://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html.
 
@@ -5342,7 +5342,7 @@ This release supports the following features:
 
     Library
     --------
-    - Concurrent Access to HDF5 Files - Single Writer/ Multple Reader (SWMR)
+    - Concurrent Access to HDF5 Files - Single Writer/ Multiple Reader (SWMR)
 
       The Single Writer/ Multiple Reader or SWMR feature enables users to
       read data concurrently while writing it. Communications between the
@@ -5970,7 +5970,7 @@ This release supports the following features:
       identically to the 1.8 library with the --with-default-api-version=v18
       configure flag. This allows existing code to be compiled with the 1.10
       library without requiring immediate changes to the application source
-      code. For addtional configuration options and other details, see
+      code. For additional configuration options and other details, see
       "API Compatibility Macros in HDF5" at
       https://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html.
 
@@ -6054,7 +6054,7 @@ This release supports the following features:
 
     Library
     --------
-    - Concurrent Access to HDF5 Files - Single Writer/ Multple Reader (SWMR)
+    - Concurrent Access to HDF5 Files - Single Writer/ Multiple Reader (SWMR)
 
       The Single Writer/ Multiple Reader or SWMR feature enables users to
       read data concurrently while writing it. Communications between the

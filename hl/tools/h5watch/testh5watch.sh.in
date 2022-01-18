@@ -72,10 +72,6 @@ fi
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
 test -d ../testfiles || mkdir ../testfiles
 
 # Print a line-line message left justified in a field of 70 characters

@@ -300,7 +300,7 @@ extern "C" {
  *          caller may derive new datatypes, dataspaces, and creation and
  *          access properties from the old ones and reuse them in calls to
  *          create additional datasets.  Once created, the dataset can be
- *          read from or written to. Reading data from a datatset that was
+ *          read from or written to. Reading data from a dataset that was
  *          not previously written, the HDF5 library will return default
  *          or user-defined fill values.
  *

@@ -556,7 +556,7 @@ New Features
                       void **output);
 
       This newly-added "ctl" callback allows Virtual File
-      Drivers to intercept and handle arbitary operations
+      Drivers to intercept and handle arbitrary operations
       identified by an operation code. Its parameters are
       as follows:
 
@@ -1324,7 +1324,7 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Fixed CMake C++ compiler flags
 
-      A recent refactoring of the C++ configure files accidently removed the
+      A recent refactoring of the C++ configure files accidentally removed the
       file that executed the enable_language command for C++ needed by the
       HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
       including adding support for windows platforms.

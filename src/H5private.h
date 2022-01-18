@@ -44,10 +44,12 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
 #endif
-#include <unistd.h>
+#ifdef H5_HAVE_WAITPID
 #include <sys/wait.h>
 #endif
 
@@ -1992,7 +1994,7 @@ extern H5_api_t H5_g;
 #define H5_API_LOCK
 #define H5_API_UNLOCK
 
-/* disable cancelability (sequential version) */
+/* disable cancellability (sequential version) */
 #define H5_API_UNSET_CANCEL
 #define H5_API_SET_CANCEL
 
@@ -2006,7 +2008,7 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
-/* Extern global to determine if we shoudl use selection I/O if available (this
+/* Extern global to determine if we should use selection I/O if available (this
  * variable should be removed once selection I/O performs as well as the
  * previous scalar I/O implementation */
 extern hbool_t H5_use_selection_io_g;

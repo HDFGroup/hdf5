@@ -72,7 +72,7 @@ CONTAINS
      INTEGER(HID_T) :: dt4_id      ! Memory datatype identifier (for real field)
      INTEGER(HID_T) :: dt5_id      ! Memory datatype identifier
      INTEGER(HID_T) :: membtype_id ! Datatype identifier
-     INTEGER(HID_T) :: plist_id    ! Dataset trasfer property
+     INTEGER(HID_T) :: plist_id    ! Dataset transfer property
 
 
      INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/dimsize/) ! Dataset dimensions
@@ -98,7 +98,7 @@ CONTAINS
      INTEGER :: class ! Datatype class
      INTEGER :: num_members ! Number of members in the compound datatype
      CHARACTER(LEN=256) :: member_name
-     INTEGER :: len ! Lenght of the name of the compound datatype member
+     INTEGER :: len ! Length of the name of the compound datatype member
      INTEGER :: member_index ! index of the field
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
      INTEGER :: array_dims_range = 3
@@ -219,9 +219,9 @@ CONTAINS
      CALL h5tcreate_f(H5T_COMPOUND_F, type_size, dtype_id, error)
      CALL check("h5tcreate_f", error, total_error)
      !
-     ! Insert memebers
+     ! Insert members
      !
-     ! CHARACTER*2 memeber
+     ! CHARACTER*2 member
      !
      offset = 0
      CALL h5tinsert_f(dtype_id, "char_field", offset, dt5_id, error)
@@ -229,13 +229,13 @@ CONTAINS
      !
      ! INTEGER member
      !
-     offset = offset + type_sizec ! Offset of the second memeber is 2
+     offset = offset + type_sizec ! Offset of the second member is 2
      CALL h5tinsert_f(dtype_id, "integer_field", offset, H5T_NATIVE_INTEGER, error)
      CALL check("h5tinsert_f", error, total_error)
      !
      ! DOUBLE PRECISION member
      !
-     offset = offset + type_sizei  ! Offset of the third memeber is 6
+     offset = offset + type_sizei  ! Offset of the third member is 6
      CALL h5tinsert_f(dtype_id, "double_field", offset, H5T_NATIVE_DOUBLE, error)
      CALL check("h5tinsert_f", error, total_error)
      !
@@ -416,7 +416,7 @@ CONTAINS
          CALL h5tequal_f(membtype_id, H5T_NATIVE_INTEGER, flag, error)
           CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
-                write(*,*) "Wrong member type returned for integer memebr"
+                write(*,*) "Wrong member type returned for integer member"
                 total_error = total_error + 1
              endif
          CALL h5tget_member_class_f(dtype_id, i-1, class, error)
@@ -435,7 +435,7 @@ CONTAINS
          CALL h5tequal_f(membtype_id, H5T_NATIVE_DOUBLE, flag, error)
           CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
-                write(*,*) "Wrong member type returned for double precision memebr"
+                write(*,*) "Wrong member type returned for double precision member"
                 total_error = total_error + 1
              endif
          CALL h5tget_member_class_f(dtype_id, i-1, class, error)
@@ -454,7 +454,7 @@ CONTAINS
          CALL h5tequal_f(membtype_id, H5T_NATIVE_REAL, flag, error)
           CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
-                write(*,*) "Wrong member type returned for real memebr"
+                write(*,*) "Wrong member type returned for real member"
                 total_error = total_error + 1
              endif
          CALL h5tget_member_class_f(dtype_id, i-1, class, error)

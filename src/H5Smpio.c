@@ -1145,7 +1145,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
         /* If this is the fastest changing dimension, it is the base case for derived datatype. */
         span = spans->head;
         if (NULL == span->down) {
-            hbool_t large_block = FALSE; /* Wether the block length is larger than 32 bit integer */
+            hbool_t large_block = FALSE; /* Whether the block length is larger than 32 bit integer */
 
             outercount = 0;
             while (span) {

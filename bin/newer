@@ -19,7 +19,7 @@
 # Created Date: 2005/07/06
 # Modification:
 #    Albert Cheng 2005/8/30
-#    Changed from two arguments to mulitple arguments.
+#    Changed from two arguments to multiple arguments.
 
 if test $# -lt 2; then
     exit 1

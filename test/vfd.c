@@ -262,7 +262,7 @@ test_sec2(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * Currently it should be around 2 KB.
@@ -458,7 +458,7 @@ test_core(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -605,7 +605,7 @@ test_core(void)
             } /* end if */
 
     /* Check file size API.
-     * There is no garantee the size of metadata in file is constant.
+     * There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -1209,7 +1209,7 @@ error:
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
  *              of the v1.6 library.  Then tools/misc/h5repart.c was
- *              used to concantenated.  The command was "h5repart -m 5k
+ *              used to concatenated.  The command was "h5repart -m 5k
  *              family_file%05d.h5 family_v16_%05d.h5".
  *
  * Return:      Success:        0
@@ -1477,7 +1477,7 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
- * Purpose:     Tests the file handle interface for MUTLI driver
+ * Purpose:     Tests the file handle interface for MULTI driver
  *
  * Return:      SUCCEED/FAIL
  *
@@ -2632,7 +2632,7 @@ done:
  * Function:    driver_is_splitter_compatible
  *
  * Purpose:     Determine whether the driver set in the FAPL ID is compatible
- *              with the Splitter VFD -- specificially, Write-Only channel.
+ *              with the Splitter VFD -- specifically, Write-Only channel.
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3205,7 +3205,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3225,7 +3225,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3256,7 +3256,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3287,7 +3287,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -4041,7 +4041,7 @@ error:
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4142,7 +4142,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
  *              count. Count is presumed to be a power of 2, and at
  *              least 2.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4207,7 +4207,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             if (i == fix_point + 1) {
 
-                /* set the sentinals that indicate that all remaining
+                /* set the sentinels that indicate that all remaining
                  * types and sizes are the same as the previous value.
                  */
                 types[i] = H5FD_MEM_NOLIST;
@@ -4273,7 +4273,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4328,7 +4328,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if sucessful, and FALSE if any errors
+ * Return:      Return TRUE if successful, and FALSE if any errors
  *              are encountered.
  *
  * Programmer:  John Mainzer
@@ -4767,7 +4767,7 @@ test_vector_io(const char *vfd_name)
         TEST_ERROR;
 
     /* Write the contents of a vector as several vector writes, then
-     * read it back in idividual reads.
+     * read it back in individual reads.
      */
     if (H5FDwrite_vector(lf, H5P_DEFAULT, 1, &(types_2[0]), &(addrs_2[0]), &(sizes_2[0]),
                          &(write_bufs_2[0])) < 0)
@@ -5120,7 +5120,7 @@ test_selection_io(const char *vfd_name)
     int        i2;                                                  /* index                        */
     int        j2;                                                  /* index                        */
     hid_t      mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
-    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vecotr */
+    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
     hsize_t    dims1[1]       = {SEL_IO_DIM0 * SEL_IO_DIM1};        /* 1D dataspace dimensions */
     hsize_t    dims2[2]       = {SEL_IO_DIM0, SEL_IO_DIM1};         /* 1D dataspace dimensions */
     hsize_t    start[2];                                            /* start for hyperslab          */
