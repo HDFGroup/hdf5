@@ -148,7 +148,7 @@ public class TestH5Plist {
             }
             assertTrue("H5Pequal cid2", status >= 0);
 
-            // Make certain false postives aren't being returned
+            // Make certain false positives aren't being returned
             try {
                 status = H5.H5Pequal(cid2, HDF5Constants.H5P_FILE_CREATE);
             }
@@ -295,7 +295,7 @@ public class TestH5Plist {
         }
         assertTrue("H5Pget_nprops: "+nprops, nprops==0);
 
-        // Check the existance of the first property (should fail)
+        // Check the existence of the first property (should fail)
         try {
             status = H5.H5Pexist(plist_class_id, PROP1_NAME);
         }
@@ -326,7 +326,7 @@ public class TestH5Plist {
         catch (Throwable err) {
         }
 
-        // Check the existance of the first property
+        // Check the existence of the first property
         try {
             status = H5.H5Pexist(plist_class_id, PROP1_NAME);
         }
@@ -377,7 +377,7 @@ public class TestH5Plist {
         catch (Throwable err) {
         }
 
-        // Check the existance of the second property
+        // Check the existence of the second property
         try {
             status = H5.H5Pexist(plist_class_id, PROP2_NAME);
         }
@@ -418,7 +418,7 @@ public class TestH5Plist {
             fail("H5Pregister2 plist_class_id: "+PROP3_NAME + err);
         }
 
-        // Check the existance of the third property
+        // Check the existence of the third property
         try {
             status = H5.H5Pexist(plist_class_id, PROP3_NAME);
         }
