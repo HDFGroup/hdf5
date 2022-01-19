@@ -1887,7 +1887,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     hid_t    fid = H5I_INVALID_HID;                          /* File ID */
     hid_t    fapl;                                           /* File access property list */
-    hid_t    gid  = H5I_INVALID_HID;                         /* Groupd ID */
+    hid_t    gid  = H5I_INVALID_HID;                         /* Group ID */
     hid_t    did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
     hid_t    tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
     hid_t    sid  = H5I_INVALID_HID;                         /* Dataspace ID */

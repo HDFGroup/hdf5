@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 /**
- * Get the curent host ID (generate a new one if none exists).
+ * Get the current host ID (generate a new one if none exists).
  *
  * \param id [IN/OUT]           pointer to SM host ID
  *

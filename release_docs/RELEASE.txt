@@ -1118,7 +1118,7 @@ Bug Fixes since HDF5-1.12.0 release
       dimension sizes.
 
       The problem was fixed by ensuring that decoding the dimension sizes
-      and max values will not go beyong the end of the buffer.
+      and max values will not go beyond the end of the buffer.
 
       (BMR - 2021/05/12, HDFFV-11223)
 
@@ -1452,7 +1452,7 @@ Bug Fixes since HDF5-1.12.0 release
     - h5diff fixed a command line parsing error.
 
       h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparison was used.
 
       (ADB - 2020/07/20, HDFFV-10897)
 

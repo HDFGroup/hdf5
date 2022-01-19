@@ -53,7 +53,7 @@ uint64_t total_bytes   = 0;
 /* global flags which indicate whether we need
  * to capture tool outputs into a file...
  * Related to this is whether the stderr should
- * be logged seperately.
+ * be logged separately.
  */
 #define BUFT_SIZE 131072
 /* FIXME: 'buft_max' should probably be configurable.. */
@@ -1469,7 +1469,7 @@ main(int argc, const char *argv[])
     /* As we move forward, we might allow the HDF5 tool to be     */
     /* queried for an acceptable set set of runtime arguments.    */
     /* This could be just a simple string to allow getopt_long    */
-    /* to be invoked on the remaing command line arguments.       */
+    /* to be invoked on the remaining command line arguments.       */
     /**************************************************************/
 
     int *path_indices = NULL;
@@ -1635,7 +1635,7 @@ main(int argc, const char *argv[])
     if (outputname != NULL) {
         if (!text) {
             if (rank == 0) {
-                puts("ouput capture needs to be a text formated file");
+                puts("output capture needs to be a text formatted file");
             }
         }
         else {

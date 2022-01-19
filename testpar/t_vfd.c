@@ -357,7 +357,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't create ioc fapl.";
             }
 
-#if 1 /* JRM */ /* this is temporary -- rework for programatic control later */
+#if 1 /* JRM */ /* this is temporary -- rework for programmatic control later */
             memset(&ioc_config, 0, sizeof(ioc_config));
             memset(&subfiling_conf, 0, sizeof(subfiling_conf));
 
@@ -407,7 +407,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #endif /* JRM */
             }
 
-            /* Now we can set the SUBFILING fapl befor returning. */
+            /* Now we can set the SUBFILING fapl before returning. */
             if ((pass) && (H5Pset_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
 
                 pass         = FALSE;

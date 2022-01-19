@@ -1122,7 +1122,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
     } /* nelmts */
 
-    /* Free refrences */
+    /* Free references */
     if (is_new_ref) {
         if (H5Treclaim(tid, sid, H5P_DEFAULT, ndsbuf) < 0)
             goto out;
@@ -1633,7 +1633,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     if (H5DSwith_new_ref(did, &is_new_ref) < 0)
         return FAIL;
 
-    /* get the number of scales assotiated with this DIM */
+    /* get the number of scales associated with this DIM */
     if ((nscales = H5DSget_num_scales(did, dim)) < 0)
         return FAIL;
 
