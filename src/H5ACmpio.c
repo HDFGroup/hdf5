@@ -1139,7 +1139,7 @@ done:
  *
  *		While the list of candidate cache entries is prepared
  *		elsewhere, this function is the main routine for distributing
- *		and applying the list.  It must be run simultaniously on
+ *		and applying the list.  It must be run simultaneously on
  *		all processes that have the relevant file open.  To ensure
  *		proper synchronization, there is a barrier at the beginning
  *		of this function.
@@ -1318,7 +1318,7 @@ done:
  *
  *		This function is the main routine for handling this
  *		notification procedure.  It must be called
- *		simultaniously on all processes that have the relevant
+ *		simultaneously on all processes that have the relevant
  *		file open.  To this end, it is called only during a
  *		sync point, with a barrier prior to the call.
  *
@@ -2118,11 +2118,11 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
              (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
+    HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
               aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
               aux_ptr->unprotect_dirty_bytes_updates, aux_ptr->insert_dirty_bytes,
-              aux_ptr->insert_dirty_bytes_updates, aux_ptr->rename_dirty_bytes,
-              aux_ptr->rename_dirty_bytes_updates);
+              aux_ptr->insert_dirty_bytes_updates, aux_ptr->move_dirty_bytes,
+              aux_ptr->move_dirty_bytes_updates);
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
     /* clear collective access flag on half of the entries in the
@@ -2186,8 +2186,8 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
     aux_ptr->unprotect_dirty_bytes_updates = 0;
     aux_ptr->insert_dirty_bytes            = 0;
     aux_ptr->insert_dirty_bytes_updates    = 0;
-    aux_ptr->rename_dirty_bytes            = 0;
-    aux_ptr->rename_dirty_bytes_updates    = 0;
+    aux_ptr->move_dirty_bytes              = 0;
+    aux_ptr->move_dirty_bytes_updates      = 0;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
 done:

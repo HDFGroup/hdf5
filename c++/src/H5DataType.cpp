@@ -927,7 +927,7 @@ DataType::p_opentype(const H5Location &loc, const char *dtype_name) const
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
 ///             object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
+//              The underlying reference counting in the C library ensures
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
@@ -983,7 +983,7 @@ DataType::close()
 //              - Replaced decRefCount with close() to let the C library
 //                handle the reference counting - BMR, Jun 1, 2006
 //              - Added the use of H5CPP_EXITED to terminate the HDF5 library
-//                and elimiate previous memory leaks.  See comments in the
+//                and eliminate previous memory leaks.  See comments in the
 //                header file "H5PredType.h" for details. - BMR, Mar 30, 2012
 //              - Major re-implementation of the global constants was done
 //                to avoid relying on the order of the creation and deletion

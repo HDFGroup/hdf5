@@ -81,6 +81,8 @@ typedef int (*H5ES_list_iter_func_t)(H5ES_event_t *ev, void *ctx);
 H5_DLL H5ES_t *H5ES__create(void);
 H5_DLL herr_t  H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token);
 H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_failed);
+H5_DLL herr_t  H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests,
+                                  size_t array_len);
 H5_DLL herr_t  H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed);
 H5_DLL herr_t  H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
                                   size_t *num_cleared);
@@ -88,7 +90,8 @@ H5_DLL herr_t  H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info
 /* Event list operations */
 H5_DLL void   H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev);
 H5_DLL size_t H5ES__list_count(const H5ES_event_list_t *el);
-H5_DLL int    H5ES__list_iterate(H5ES_event_list_t *el, H5ES_list_iter_func_t cb, void *ctx);
+H5_DLL int    H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_func_t cb,
+                                 void *ctx);
 H5_DLL void   H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev);
 
 /* Event operations */

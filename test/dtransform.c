@@ -465,7 +465,7 @@ init_test(hid_t file_id)
     if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)
         TEST_ERROR
 
-    TESTING("Intializing test...")
+    TESTING("Initializing test...")
 
     if ((dset_id_int = H5Dcreate2(file_id, "/default_int", H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0)

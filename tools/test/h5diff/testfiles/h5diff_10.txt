@@ -129,7 +129,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
          This option can be used repeatedly to exclude multiple paths.
 
  Modes of output:
-  Default mode: print the number of differences found and where they occured
+  Default mode: print the number of differences found and where they occurred
   -r Report mode: print the above plus the differences
   -v Verbose mode: print the above plus a list of objects and warnings
   -q Quiet mode: do not print output

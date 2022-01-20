@@ -628,7 +628,7 @@ main(void)
     SKIPPED();
 #endif
 
-    TESTING("    addding shuffle filter");
+    TESTING("    adding shuffle filter");
 
     /*-------------------------------------------------------------------------
      * test an individual object option
@@ -657,7 +657,7 @@ main(void)
      *-------------------------------------------------------------------------
      */
 
-    TESTING("    addding shuffle filter to all");
+    TESTING("    adding shuffle filter to all");
 
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -1602,17 +1602,17 @@ main(void)
     }
 
     /*-------------------------------------------------------------------------
-     * test file with aligment
+     * test file with alignment
      *-------------------------------------------------------------------------
      */
-    TESTING("    file with aligment");
+    TESTING("    file with alignment");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
 
-    /* add the options for aligment */
+    /* add the options for alignment */
     pack_options.alignment = 1;
     pack_options.threshold = 1;
 
@@ -1623,7 +1623,7 @@ main(void)
     if (h5repack_verify(FNAME8, FNAME8OUT, &pack_options) <= 0)
         GOERROR;
 
-    /* verify aligment */
+    /* verify alignment */
     {
         hsize_t threshold;
         hsize_t alignment;
@@ -2455,14 +2455,15 @@ make_szip(hid_t loc_id)
     unsigned szip_pixels_per_block = 8;
     hsize_t  dims[RANK]            = {DIM1, DIM2};
     hsize_t  chunk_dims[RANK]      = {CDIM1, CDIM2};
-    int **   buf                   = NULL;
     int      szip_can_encode       = 0;
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2486,7 +2487,7 @@ make_szip(hid_t loc_id)
         /* set szip data */
         if (H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
-        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf[0]) < 0)
+        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf) < 0)
             goto error;
     }
     else
@@ -2529,15 +2530,16 @@ make_deflate(hid_t loc_id)
     hid_t      sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t    dims[RANK]       = {DIM1, DIM2};
     hsize_t    chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **     buf              = NULL;
     hobj_ref_t bufref[1]; /* reference */
     hsize_t    dims1r[1] = {1};
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2557,7 +2559,7 @@ make_deflate(hid_t loc_id)
     /* set deflate data */
     if (H5Pset_deflate(dcpl, 9) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf) < 0)
         goto error;
 
     /* create a reference to the dataset, test second seeep of file for references */
@@ -2608,13 +2610,14 @@ make_shuffle(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2634,7 +2637,7 @@ make_shuffle(hid_t loc_id)
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -2677,13 +2680,14 @@ make_fletcher32(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2706,7 +2710,7 @@ make_fletcher32(hid_t loc_id)
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -2752,13 +2756,14 @@ make_nbit(hid_t loc_id)
     hid_t   dxpl             = H5P_DEFAULT;
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2791,7 +2796,7 @@ make_nbit(hid_t loc_id)
         goto error;
     if ((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
-    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf[0]) < 0)
+    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
         goto error;
     H5Dclose(dsid);
 
@@ -2799,7 +2804,7 @@ make_nbit(hid_t loc_id)
         goto error;
     if ((dsid = H5Dcreate2(loc_id, "dset_int31", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
-    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf[0]) < 0)
+    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
         goto error;
     H5Dclose(dsid);
 
@@ -2853,13 +2858,14 @@ make_scaleoffset(hid_t loc_id)
     hid_t   dxpl             = H5P_DEFAULT;
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -2890,12 +2896,12 @@ make_scaleoffset(hid_t loc_id)
         goto error;
     if ((dsid = H5Dcreate2(loc_id, "dset_scaleoffset", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
-    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf[0]) < 0)
+    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
         goto error;
     H5Dclose(dsid);
     if ((dsid = H5Dcreate2(loc_id, "dset_none", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
-    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf[0]) < 0)
+    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
         goto error;
     H5Tclose(dtid);
     H5Dclose(dsid);
@@ -2952,16 +2958,17 @@ make_all_filters(hid_t loc_id)
 #endif /* H5_HAVE_FILTER_SZIP */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
 #if defined(H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /* create a space */
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -3011,7 +3018,7 @@ make_all_filters(hid_t loc_id)
         goto error;
 #endif
 
-    if (make_dset(loc_id, "dset_all", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_all", sid, dcpl, buf) < 0)
         goto error;
 
     /* remove the filters from the dcpl */
@@ -3020,7 +3027,7 @@ make_all_filters(hid_t loc_id)
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf) < 0)
         goto error;
 
         /* Make sure encoding is enabled */
@@ -3032,7 +3039,7 @@ make_all_filters(hid_t loc_id)
         /* set szip data */
         if (H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
-        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf[0]) < 0)
+        if (make_dset(loc_id, "dset_szip", sid, dcpl, buf) < 0)
             goto error;
     }
     else {
@@ -3046,7 +3053,7 @@ make_all_filters(hid_t loc_id)
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_shuffle", sid, dcpl, buf) < 0)
         goto error;
 
 #if defined(H5_HAVE_FILTER_DEFLATE)
@@ -3056,7 +3063,7 @@ make_all_filters(hid_t loc_id)
     /* set deflate data */
     if (H5Pset_deflate(dcpl, 1) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_deflate", sid, dcpl, buf) < 0)
         goto error;
 #endif
 
@@ -3072,7 +3079,7 @@ make_all_filters(hid_t loc_id)
         goto error;
     if ((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
-    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf[0]) < 0)
+    if (H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, dxpl, buf) < 0)
         goto error;
 
     /* close */
@@ -3217,15 +3224,16 @@ make_layout(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
     int     i;
     char    name[16];
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
+    struct {
+        int arr[DIM1][DIM2];
+    } *buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, DIM1, DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf, int);
 
     /*-------------------------------------------------------------------------
      * make several dataset with no filters
@@ -3233,7 +3241,7 @@ make_layout(hid_t loc_id)
      */
     for (i = 0; i < 4; i++) {
         HDsprintf(name, "dset%d", i + 1);
-        if (write_dset(loc_id, RANK, dims, name, H5T_NATIVE_INT, buf[0]) < 0)
+        if (write_dset(loc_id, RANK, dims, name, H5T_NATIVE_INT, buf) < 0)
             goto error;
     }
 
@@ -3254,7 +3262,7 @@ make_layout(hid_t loc_id)
      */
     if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_compact", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_compact", sid, dcpl, buf) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -3263,7 +3271,7 @@ make_layout(hid_t loc_id)
      */
     if (H5Pset_layout(dcpl, H5D_CONTIGUOUS) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_contiguous", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_contiguous", sid, dcpl, buf) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -3272,7 +3280,7 @@ make_layout(hid_t loc_id)
      */
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         goto error;
-    if (make_dset(loc_id, "dset_chunk", sid, dcpl, buf[0]) < 0)
+    if (make_dset(loc_id, "dset_chunk", sid, dcpl, buf) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -3329,13 +3337,13 @@ make_layout2(hid_t loc_id)
     hsize_t s_dims[RANK]     = {S_DIM1, S_DIM2};         /* Dataspace (< 1 k) */
     hsize_t chunk_dims[RANK] = {S_DIM1 / 2, S_DIM2 / 2}; /* Dimension sizes for chunks */
 
-    int **s_buf = NULL; /* Temporary buffer */
-
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(s_buf, int, S_DIM1, S_DIM2);
+    struct {
+        int arr[S_DIM1][S_DIM2];
+    } *s_buf = malloc(sizeof(*s_buf));
     if (NULL == s_buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(s_buf, int, S_DIM1, S_DIM2);
+    H5TEST_FILL_2D_HEAP_ARRAY(s_buf, int);
 
     /* Create dataspaces */
     if ((s_sid = H5Screate_simple(RANK, s_dims, NULL)) < 0)
@@ -3346,7 +3354,7 @@ make_layout2(hid_t loc_id)
         goto error;
     if (H5Pset_layout(contig_dcpl, H5D_CONTIGUOUS) < 0)
         goto error;
-    if (make_dset(loc_id, CONTIG_S, s_sid, contig_dcpl, s_buf[0]) < 0)
+    if (make_dset(loc_id, CONTIG_S, s_sid, contig_dcpl, s_buf) < 0)
         goto error;
 
     /* Create chunked datasets */
@@ -3354,7 +3362,7 @@ make_layout2(hid_t loc_id)
         goto error;
     if (H5Pset_chunk(chunked_dcpl, RANK, chunk_dims) < 0)
         goto error;
-    if (make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf[0]) < 0)
+    if (make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf) < 0)
         goto error;
 
     ret_value = 0;
@@ -3408,19 +3416,21 @@ make_layout3(hid_t loc_id)
     hsize_t chunk_dims1[RANK] = {DIM1_L3 * 2, 5};
     hsize_t chunk_dims2[RANK] = {SDIM1_L3 + 2, SDIM2_L3 / 2};
     hsize_t chunk_dims3[RANK] = {SDIM1_L3 - 2, SDIM2_L3 / 2};
-    int **  buf1              = NULL;
-    int **  buf2              = NULL;
 
-    /* Create and fill arrays */
-    H5TEST_ALLOCATE_2D_ARRAY(buf1, int, DIM1_L3, DIM2_L3);
-    if (NULL == buf1)
-        goto error;
-    H5TEST_FILL_2D_ARRAY(buf1, int, DIM1_L3, DIM2_L3);
+    /* Create arrays */
+    struct {
+        int arr[DIM1_L3][DIM2_L3];
+    } *buf1 = malloc(sizeof(*buf1));
+    struct {
+        int arr[SDIM1_L3][SDIM2_L3];
+    } *buf2 = malloc(sizeof(*buf2));
 
-    H5TEST_ALLOCATE_2D_ARRAY(buf2, int, SDIM1_L3, SDIM2_L3);
-    if (NULL == buf2)
+    if (NULL == buf1 || NULL == buf2)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf2, int, SDIM1_L3, SDIM2_L3);
+
+    /* Fill arrays */
+    H5TEST_FILL_2D_HEAP_ARRAY(buf1, int);
+    H5TEST_FILL_2D_HEAP_ARRAY(buf2, int);
 
     /*-------------------------------------------------------------------------
      * make chunked dataset with
@@ -3438,7 +3448,7 @@ make_layout3(hid_t loc_id)
 
     if (H5Pset_chunk(dcpl1, RANK, chunk_dims1) < 0)
         goto error;
-    if (make_dset(loc_id, "chunk_unlimit1", sid1, dcpl1, buf1[0]) < 0)
+    if (make_dset(loc_id, "chunk_unlimit1", sid1, dcpl1, buf1) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -3459,7 +3469,7 @@ make_layout3(hid_t loc_id)
     if (H5Pset_chunk(dcpl2, RANK, chunk_dims2) < 0)
         goto error;
 
-    if (make_dset(loc_id, "chunk_unlimit2", sid2, dcpl2, buf2[0]) < 0)
+    if (make_dset(loc_id, "chunk_unlimit2", sid2, dcpl2, buf2) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -3476,7 +3486,7 @@ make_layout3(hid_t loc_id)
     if (H5Pset_chunk(dcpl3, RANK, chunk_dims3) < 0)
         goto error;
 
-    if (make_dset(loc_id, "chunk_unlimit3", sid2, dcpl3, buf2[0]) < 0)
+    if (make_dset(loc_id, "chunk_unlimit3", sid2, dcpl3, buf2) < 0)
         goto error;
 
     /*-------------------------------------------------------------------------
@@ -6337,7 +6347,7 @@ gen_refered_objs(hid_t loc_id)
         goto out;
     }
 
-    /* create normal dataset which is refered */
+    /* create normal dataset which is referred */
     did2 = H5Dcreate2(loc_id, NAME_OBJ_DS2, H5T_STD_I8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did2 < 0) {
         HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
@@ -6377,7 +6387,7 @@ out:
  *  Generate object references to objects (dataset,group and named datatype)
  *
  * Note:
- *  copied from h5copygentest.c and upate to create named datatype
+ *  copied from h5copygentest.c and update to create named datatype
  *
  * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/

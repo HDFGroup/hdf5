@@ -29,6 +29,7 @@
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5PLprivate.h" /* Plugins                                  */
 #include "H5SLprivate.h" /* Skip lists                               */
 #include "H5Tprivate.h"  /* Datatypes                                */
 
@@ -145,6 +146,8 @@ H5_init_library(void)
     size_t i;
     herr_t ret_value = SUCCEED;
 
+    FUNC_ENTER_NOAPI(FAIL)
+
     /* Run the library initialization routine, if it hasn't already run */
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED)
@@ -153,8 +156,6 @@ H5_init_library(void)
      * possible re-entrancy.
      */
     H5_INIT_GLOBAL = TRUE;
-
-    FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5_HAVE_PARALLEL
     {
@@ -273,6 +274,7 @@ H5_init_library(void)
     ,   {H5AC_init, "metadata caching"}
     ,   {H5L_init, "link"}
     ,   {H5S_init, "dataspace"}
+    ,   {H5PL_init, "plugins"}
     /* Finish initializing interfaces that depend on the interfaces above */
     ,   {H5P_init_phase2, "property list"}
     ,   {H5VL_init_phase2, "VOL"}

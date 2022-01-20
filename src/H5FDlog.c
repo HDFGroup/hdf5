@@ -243,7 +243,7 @@ H5FD_log_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
@@ -260,7 +260,6 @@ H5FD_log_init(void)
     /* Set return value */
     ret_value = H5FD_LOG_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_init() */
 
@@ -1544,7 +1543,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr,
                   (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
-        /* Check if this is the first write into a "default" section, grabbed by the metadata agregation
+        /* Check if this is the first write into a "default" section, grabbed by the metadata aggregation
          * algorithm */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {

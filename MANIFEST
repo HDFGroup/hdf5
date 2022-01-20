@@ -28,7 +28,7 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./README.txt
+./README.md
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
@@ -39,6 +39,7 @@
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/codespell.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -202,6 +203,10 @@
 ./config/intel-warnings/win-general
 ./config/intel-warnings/ifort-general
 
+./config/cmake/FindMFU.cmake
+./config/cmake/FindDTCMP.cmake
+./config/cmake/FindCIRCLE.cmake
+
 ./config/site-specific/BlankForm
 
 ./doc/branches-explained.md
@@ -216,11 +221,11 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
-./doxygen/dox/FileFormatSpec.dox
+./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
+./doxygen/dox/Glossary.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
-./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
 ./doxygen/dox/RFC.dox
@@ -236,9 +241,12 @@
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
+./doxygen/examples/DebuggingHDF5Applications.html
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/Filters.html
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/H5.format.1.0.html
@@ -267,6 +275,7 @@
 ./doxygen/examples/H5Z_examples.c
 ./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
+./doxygen/examples/IOFlow.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
 ./doxygen/examples/TableSpec.html
@@ -281,7 +290,11 @@
 ./doxygen/img/FF-IH_FileGroup.gif
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
+./doxygen/img/HDF5.png
 ./doxygen/img/HDFG-logo.png
+./doxygen/img/IOFlow.gif
+./doxygen/img/IOFlow2.gif
+./doxygen/img/IOFlow3.gif
 ./doxygen/img/PaletteExample1.gif
 ./doxygen/img/Palettes.fm.anc.gif
 ./doxygen/img/ftv2node.png
@@ -1341,8 +1354,10 @@
 ./test/testlinks_env.sh.in
 ./test/testmeta.c
 ./test/test_mirror.sh.in
+./test/testswmr.pwsh.in
 ./test/testswmr.sh.in
 ./test/testvds_env.sh.in
+./test/testvdsswmr.pwsh.in
 ./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
@@ -2995,6 +3010,22 @@
 ./utils/test/Makefile.am
 ./utils/test/swmr_check_compat_vfd.c
 
+# parallel tools (h5dwalk) and tests
+./utils/tools/CMakeLists.txt
+./utils/tools/Makefile.am
+./utils/tools/h5dwalk/CMakeLists.txt
+./utils/tools/h5dwalk/Makefile.am
+./utils/tools/h5dwalk/h5dwalk.1
+./utils/tools/h5dwalk/h5dwalk.c
+./utils/tools/test/CMakeLists.txt
+./utils/tools/test/Makefile.am
+./utils/tools/test/h5dwalk/CMakeLists.txt
+./utils/tools/test/h5dwalk/CMakeTests.cmake
+./utils/tools/test/h5dwalk/Makefile.am
+./utils/tools/test/h5dwalk/copy_demo_files.sh.in
+./utils/tools/test/h5dwalk/help.h5dwalk
+./utils/tools/test/h5dwalk/testh5dwalk.sh.in
+
 # high level libraries
 ./hl/Makefile.am
 ./hl/examples/Makefile.am
@@ -3293,6 +3324,7 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_prp_set_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/package-info.java
 
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5BtreeException.java
@@ -3318,6 +3350,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5ReferenceException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java
+./java/src/hdf/hdf5lib/exceptions/package-info.java
 
 ./java/src/hdf/hdf5lib/structs/H5_ih_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5A_info_t.java
@@ -3332,12 +3365,14 @@
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_token_t.java
+./java/src/hdf/hdf5lib/structs/package-info.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
 ./java/src/hdf/hdf5lib/HDF5GroupInfo.java
 ./java/src/hdf/hdf5lib/HDFArray.java
 ./java/src/hdf/hdf5lib/HDFNativeData.java
+./java/src/hdf/hdf5lib/package-info.java
 
 ./java/examples/Makefile.am
 ./java/examples/CMakeLists.txt
@@ -3490,6 +3525,7 @@
 ./java/test/testfiles/JUnit-TestH5Obasic.txt
 ./java/test/testfiles/JUnit-TestH5Ocreate.txt
 ./java/test/testfiles/JUnit-TestH5Ocopy.txt
+./java/test/testfiles/JUnit-TestH5OcopyOld.txt
 ./java/test/testfiles/JUnit-TestH5P.txt
 ./java/test/testfiles/JUnit-TestH5PData.txt
 ./java/test/testfiles/JUnit-TestH5Pfapl.txt
@@ -3533,6 +3569,7 @@
 ./java/test/TestH5Obasic.java
 ./java/test/TestH5Ocreate.java
 ./java/test/TestH5Ocopy.java
+./java/test/TestH5OcopyOld.java
 ./java/test/TestH5P.java
 ./java/test/TestH5PData.java
 ./java/test/TestH5Pfapl.java
@@ -3555,9 +3592,9 @@
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
 ./java/lib/simplelogger.properties
-./java/lib/slf4j-api-1.7.25.jar
-./java/lib/ext/slf4j-nop-1.7.25.jar
-./java/lib/ext/slf4j-simple-1.7.25.jar
+./java/lib/slf4j-api-1.7.33.jar
+./java/lib/ext/slf4j-nop-1.7.33.jar
+./java/lib/ext/slf4j-simple-1.7.33.jar
 
 # CMake-specific Files
 ./config/toolchain/build32.cmake
@@ -3593,7 +3630,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
-./config/cmake/README.txt.cmake.in
+./config/cmake/README.md.cmake.in
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake

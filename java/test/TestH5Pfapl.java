@@ -892,7 +892,7 @@ public class TestH5Pfapl {
         try {
             H5.H5Pset_fapl_multi(fapl_id, member_map, member_fapl, member_name, member_addr, true);
             long driver_type = H5.H5Pget_driver(fapl_id);
-            assertTrue("H5Pget_driver: muti = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
+            assertTrue("H5Pget_driver: multi = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -932,7 +932,7 @@ public class TestH5Pfapl {
         try {
             H5.H5Pset_fapl_multi(fapl_id, member_map, member_fapl, member_name, member_addr, true);
             long driver_type = H5.H5Pget_driver(fapl_id);
-            assertTrue("H5Pget_driver: muti = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
+            assertTrue("H5Pget_driver: multi = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1001,7 +1001,7 @@ public class TestH5Pfapl {
         try {
             H5.H5Pset_fapl_multi(fapl_id, member_map, member_fapl, member_name, member_addr, true);
             long driver_type = H5.H5Pget_driver(fapl_id);
-            assertTrue("H5Pget_driver: muti = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
+            assertTrue("H5Pget_driver: multi = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1223,7 +1223,7 @@ public class TestH5Pfapl {
         try {
             H5.H5Pset_fapl_multi(fapl_id, member_map, member_fapl, member_name, member_addr, true);
             long driver_type = H5.H5Pget_driver(fapl_id);
-            assertTrue("H5Pget_driver: muti = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
+            assertTrue("H5Pget_driver: multi = "+ driver_type, HDF5Constants.H5FD_MULTI==driver_type);
         }
         catch (Throwable err) {
             err.printStackTrace();

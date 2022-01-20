@@ -215,7 +215,7 @@ test_mpio_gb_file(char *filename)
      * sizes.
      */
     if (MAINPROCESS) { /* only process 0 needs to check it*/
-        HDprintf("MPI_Offset is %s %d bytes integeral type\n", is_signed ? "signed" : "unsigned",
+        HDprintf("MPI_Offset is %s %d bytes integral type\n", is_signed ? "signed" : "unsigned",
                  (int)sizeof(MPI_Offset));
         if (sizeof_mpi_offset <= 4 && is_signed) {
             HDprintf("Skipped 2GB range test "
@@ -400,7 +400,7 @@ finish:
  * MPI-IO Test: One writes, Many reads.
  * Verify if only one process writes some data and then all other
  * processes can read them back correctly. This tests if the
- * underlaying parallel I/O and file system supports parallel I/O
+ * underlying parallel I/O and file system supports parallel I/O
  * correctly.
  *
  * Algorithm: Only one process (e.g., process 0) writes some data.

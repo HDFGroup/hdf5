@@ -33,7 +33,7 @@
  *
  * Modifications: July 2004
  *  Introduced the four modes:
- *   Normal mode: print the number of differences found and where they occured
+ *   Normal mode: print the number of differences found and where they occurred
  *   Report mode: print the above plus the differences
  *   Verbose mode: print the above plus a list of objects and warnings
  *   Quiet mode: do not print output

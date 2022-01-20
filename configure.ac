@@ -23,7 +23,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.0-7], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.1-1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -390,7 +390,7 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
-  # Comma separated lists of sanitize options wil be entered intact in
+  # Comma separated lists of sanitize options will be entered intact in
   # one -fsanitize=<list> flag.  Space separated lists will be entered in
   # separate -fsanitize=<item> flags.
   # NOTE: No sanity checking done here!
@@ -599,7 +599,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
 
   ## --------------------------------------------------------------------
-  ## Fortran source extention
+  ## Fortran source extension
   ##
   AC_FC_SRCEXT([f90])
 
@@ -823,11 +823,14 @@ AC_LANG_POP(C++)
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
 
-## The high-level library is enabled unless the build mode is clean.
+## The high-level library and high-level tools are enabled unless the build mode
+## is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
   HDF5_HL=no
+  HDF5_HL_TOOLS=no
 else
   HDF5_HL=yes
+  HDF5_HL_TOOLS=yes
 fi
 
 ## high-level library directories (set when needed, blank until then)
@@ -892,7 +895,7 @@ if test "X-$DIMENSION_SCALES_WITH_NEW_REF" = X- ; then
   DIMENSION_SCALES_WITH_NEW_REF=no
 fi
 
-case "X-$DIMENSION_SCALES_WITH_NEW_REF" in 
+case "X-$DIMENSION_SCALES_WITH_NEW_REF" in
   X-yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE([DIMENSION_SCALES_WITH_NEW_REF], [1],
@@ -1119,6 +1122,12 @@ else
   AC_MSG_RESULT([no])
 fi
 
+## These need to be exposed for some tests.
+AC_SUBST([H5_UTILS_TEST_BUILDDIR])
+H5_UTILS_TEST_BUILDDIR='utils/test'
+AC_SUBST([H5_TEST_BUILDDIR])
+H5_TEST_BUILDDIR='test'
+
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
 ##
@@ -1193,6 +1202,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
   AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
   AC_SUBST([DOXYGEN_STRIP_FROM_PATH])
+  AC_SUBST([DOXYGEN_STRIP_FROM_INC_PATH])
   AC_SUBST([DOXYGEN_PREDEFINED])
 
 # SRCDIR Environment variables used inside doxygen macro for the source location:
@@ -1200,7 +1210,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
-  DOXYGEN_PROJECT_BRIEF='C-API Reference'
+  DOXYGEN_PROJECT_BRIEF=''
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
@@ -1210,12 +1220,13 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
   DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
-  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/FF-IH_FileGroup.gif $(SRCDIR)/doxygen/img/FF-IH_FileObject.gif $(SRCDIR)/doxygen/img/FileFormatSpecChunkDiagram.jpg $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png $(SRCDIR)/doxygen/img/HDFG-logo.png $(SRCDIR)/doxygen/img/IOFlow2.gif $(SRCDIR)/doxygen/img/IOFlow3.gif $(SRCDIR)/doxygen/img/IOFlow.gif $(SRCDIR)/doxygen/img/PaletteExample1.gif $(SRCDIR)/doxygen/img/Palettes.fm.anc.gif'
   DOXYGEN_TAG_FILE=hdf5.tag
   DOXYGEN_SERVER_BASED_SEARCH=NO
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
+  DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
@@ -1572,6 +1583,7 @@ case "X-$withval" in
     ;;
 esac
 
+
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
@@ -1680,6 +1692,7 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
@@ -1764,7 +1777,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
-  AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
+  LL_PATH="$LD_LIBRARY_PATH"
 
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_RUN_IFELSE(
@@ -3030,6 +3043,138 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+## Build parallel tools if parallel tools, parallel, and build tools options
+## are all enabled.
+##
+AC_SUBST([PARALLEL_TOOLS])
+
+## Default is no parallel tools
+PARALLEL_TOOLS=no
+
+AC_MSG_CHECKING([parallel tools])
+AC_ARG_ENABLE([parallel-tools],
+              [AS_HELP_STRING([--enable-parallel-tools],
+                              [Enable building parallel tools.
+                              [default=no]])],
+              [PARALLEL_TOOLS=$enableval])
+
+if test "X${PARALLEL_TOOLS}" = "Xyes"; then
+  if test "X${HDF5_TOOLS}" != "Xyes"; then
+    AC_MSG_ERROR([--enable-tools is required for --enable-parallel-tools])
+  fi
+  if test "X${PARALLEL}" != "Xyes"; then
+    AC_MSG_ERROR([--enable-parallel is required for --enable-parallel-tools])
+  fi
+fi
+
+case "X-$PARALLEL_TOOLS" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+  ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+  ;;
+  *)
+  ;;
+esac
+
+if test "X${PARALLEL_TOOLS}" = "Xyes"; then
+  ## Is the mpiFileUtils library (libmfu) required and available?
+  ##
+  AC_SUBST([H5DWALK_LDFLAGS])
+  AC_SUBST([H5DWALK_LIBS])
+  AC_SUBST([H5DWALK_CPPFLAGS])
+
+  H5DWALK_LDFLAGS="${H5DWALK_LDFLAGS}"
+
+  ## Default is not present
+  HAVE_LIBMFU=no
+
+  AC_ARG_WITH([libmfu],
+              [AS_HELP_STRING([--with-libmfu=DIR],
+                              [Use the libmfu library [default=no]])],,
+              [withval=no])
+
+  case "X-$withval" in
+    X-yes)
+      HAVE_LIBMFU="yes"
+      AC_CHECK_HEADERS([mfu.h],, [unset HAVE_LIBMFU])
+      if test "x$HAVE_LIBMFU" = "xyes"; then
+        AC_CHECK_LIB([mfu], [mfu_init], [H5DWALK_LIBS="-lmfu"], [unset HAVE_LIBMFU])
+      fi
+      if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find libmfu library])
+      fi
+      ;;
+    X-|X-no|X-none)
+      HAVE_LIBMFU="no"
+      AC_MSG_CHECKING([for libmfu library])
+      AC_MSG_RESULT([suppressed])
+      ;;
+    *)
+      HAVE_LIBMFU="yes"
+      case "$withval" in
+        *,*)
+          libmfu_inc="`echo $withval |cut -f1 -d,`"
+          libmfu_lib="`echo $withval |cut -f2 -d, -s`"
+          ;;
+        *)
+          if test -n "$withval"; then
+            libmfu_inc="$withval/include"
+            libmfu_lib="$withval/lib64"
+            libcircle_lib="$withval/lib"
+          fi
+          ;;
+      esac
+
+      saved_CPPFLAGS="$CPPFLAGS"
+      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+      saved_LDFLAGS="$LDFLAGS"
+      saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+  ## For these checks we need the libmfu locations added to CPPFLAGS,
+  ## AM_CPPFLAGS, LDFLAGS, and AM_LDFLAGS.  The third param should set them
+  ## back to these saved values.  If the checks pass, then normally these four
+  ## flag variables would be updated, but in this case we put the changes in
+  ## variables specific to H5DWALK since they aren't used elsewhere.
+    if test -n "$libmfu_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libmfu_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libmfu_inc"
+    fi
+
+    if test -n "$libmfu_lib"; then
+      LDFLAGS="$LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+    fi
+
+    if test "x$HAVE_LIBMFU" = "xyes"; then
+      AC_CHECK_LIB([mfu], [mfu_init],[H5DWALK_LIBS="-lmfu"], [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+      if test -n "$HAVE_LIBMFU"; then
+        AC_CHECK_HEADERS([mfu.h],[H5DWALK_CPPFLAGS="-I$libmfu_inc"],[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+      fi
+    fi
+
+    if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find libmfu library])
+    else
+      H5DWALK_LDFLAGS="-L$libmfu_lib -L$libcircle_lib"
+    fi
+
+    if test -z  "$LD_LIBRARY_PATH"; then
+      export LD_LIBRARY_PATH="$libmfu_lib:$libcircle_lib"
+    else
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$libmfu_lib:$libcircle_lib"
+    fi
+
+    LL_PATH="$LD_LIBRARY_PATH"
+    ;;
+  esac
+fi
+
+##
+AM_CONDITIONAL([PARALLEL_TOOLS_CONDITIONAL], [test "X$HAVE_LIBMFU" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if the map API is enabled by --enable-map-api
 ##
 AC_SUBST([MAP_API])
@@ -3340,7 +3485,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Decide whether the data accuracy has higher priority during data
-## conversions.  If not, some hard conversions will still be prefered even
+## conversions.  If not, some hard conversions will still be preferred even
 ## though the data may be wrong (for example, some compilers don't
 ## support denormalized floating values) to maximize speed.
 ##
@@ -3354,7 +3499,7 @@ AC_ARG_ENABLE([dconv-accuracy],
 if test "$DATA_ACCURACY" = "yes"; then
   AC_MSG_RESULT([yes])
   AC_DEFINE([WANT_DATA_ACCURACY], [1],
-            [Data accuracy is prefered to speed during data conversions])
+            [Data accuracy is preferred to speed during data conversions])
 else
   AC_MSG_RESULT([no])
 fi
@@ -3530,8 +3675,8 @@ fi
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
-## HDF5 version from the first line of the README.txt file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+## HDF5 version from the first line of the README.md file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
 AC_SUBST([H5_VERSION])
 
 ## Configuration date
@@ -4035,6 +4180,12 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  utils/Makefile
                  utils/mirror_vfd/Makefile
                  utils/test/Makefile
+                 utils/tools/Makefile
+                 utils/tools/h5dwalk/Makefile
+                 utils/tools/test/Makefile
+                 utils/tools/test/h5dwalk/Makefile
+                 utils/tools/test/h5dwalk/copy_demo_files.sh
+                 utils/tools/test/h5dwalk/testh5dwalk.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

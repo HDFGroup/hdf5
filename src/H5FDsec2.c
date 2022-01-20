@@ -203,7 +203,7 @@ H5FD_sec2_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
@@ -220,7 +220,6 @@ H5FD_sec2_init(void)
     /* Set return value */
     ret_value = H5FD_SEC2_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_sec2_init() */
 
@@ -1081,7 +1080,6 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     /* Sanity checks */
     HDassert(file);
-    HDassert(H5FD_SEC2 == file->pub.driver_id);
 
     switch (op_code) {
         /* Unknown op code */

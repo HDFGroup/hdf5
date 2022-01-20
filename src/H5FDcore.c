@@ -461,7 +461,7 @@ H5FD_core_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
@@ -478,7 +478,6 @@ H5FD_core_init(void)
     /* Set return value */
     ret_value = H5FD_CORE_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_init() */
 
@@ -1523,7 +1522,7 @@ done:
  *              Addendum -- 12/2/11
  *              For file images opened with the core file driver, it is
  *              necessary that we avoid reallocating the core file driver's
- *              buffer uneccessarily.
+ *              buffer unnecessarily.
  *
  *              To this end, I have made the following functional changes
  *              to this function.

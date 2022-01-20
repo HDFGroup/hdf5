@@ -283,7 +283,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'q':
-                /* use quiet mode; supress the message "0 differences found" */
+                /* use quiet mode; suppress the message "0 differences found" */
                 opts->mode_quiet = 1;
                 break;
 
@@ -834,7 +834,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
-                   "  Default mode: print the number of differences found and where they occured\n");
+                   "  Default mode: print the number of differences found and where they occurred\n");
     PRINTVALSTREAM(rawoutstream, "  -r Report mode: print the above plus the differences\n");
     PRINTVALSTREAM(rawoutstream, "  -v Verbose mode: print the above plus a list of objects and warnings\n");
     PRINTVALSTREAM(rawoutstream, "  -q Quiet mode: do not print output\n");

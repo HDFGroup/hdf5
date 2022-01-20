@@ -64,8 +64,7 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
 static herr_t  H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                    H5D_chunk_map_t *cm);
+                                    hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
 static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                    size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
@@ -81,13 +80,24 @@ static herr_t  H5D__compact_dest(H5D_t *dset);
 /*********************/
 
 /* Compact storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {
-    {H5D__compact_construct, NULL, H5D__compact_is_space_alloc, NULL, H5D__compact_io_init, H5D__contig_read,
-     H5D__contig_write,
+const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
+    H5D__compact_construct,      /* construct */
+    NULL,                        /* init */
+    H5D__compact_is_space_alloc, /* is_space_alloc */
+    NULL,                        /* is_data_cached */
+    H5D__compact_io_init,        /* io_init */
+    H5D__contig_read,            /* ser_read */
+    H5D__contig_write,           /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-     NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-     H5D__compact_readvv, H5D__compact_writevv, H5D__compact_flush, NULL, H5D__compact_dest}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    H5D__compact_readvv,  /* readvv */
+    H5D__compact_writevv, /* writevv */
+    H5D__compact_flush,   /* flush */
+    NULL,                 /* io_term */
+    H5D__compact_dest     /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -238,8 +248,8 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  */
 static herr_t
 H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                     hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
-                     const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
+                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
+                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
     FUNC_ENTER_STATIC_NOERR
 

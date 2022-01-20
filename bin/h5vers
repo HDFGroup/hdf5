@@ -66,7 +66,7 @@ use strict;
 # ./H5public.h or ./src/H5public.h.
 #
 # If the version number is changed (either `-s' or `-i' was used on
-# the command line) then the first line of the README.txt and RELEASE.txt files
+# the command line) then the version line of the README.md and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 # The AC_INIT macro in configure.ac will also change in this case to be
@@ -156,10 +156,10 @@ while ($_ = shift) {
 }
 die "mutually exclusive options given\n" if $set && $inc;
 
-# Determine file to use as H5public.h, README.txt,
+# Determine file to use as H5public.h, README.md,
 # release_docs/RELEASE.txt, configure.ac, windows/src/H5pubconf.h
 # config/lt_vers.am and config/cmake/scripts/HDF5config.cmake. 
-# The README.txt, release_docs/RELEASE.txt, configure.ac, 
+# The README.md, release_docs/RELEASE.txt, configure.ac, 
 # windows/src/H5pubconf.h, config/lt_vers.am and
 # config/cmake/scripts/HDF5config.cmake
 # files are always in the directory above H5public.h
@@ -178,9 +178,9 @@ die "unable to read file: $LT_VERS\n" unless -r $file;
 my $HDF5CONFIGCMAKE = $file;
 $HDF5CONFIGCMAKE =~ s/[^\/]*$/..\/config\/cmake\/scripts\/HDF5config.cmake/;
 die "unable to read file: $HDF5CONFIGCMAKE\n" unless -r $file;
-# README.txt
+# README.md
 my $README = $file;
-$README =~ s/[^\/]*$/..\/README.txt/;
+$README =~ s/[^\/]*$/..\/README.md/;
 die "unable to read file: $README\n" unless -r $file;
 # release_docs/RELEASE.txt
 my $RELEASE = $file;
@@ -303,7 +303,7 @@ if ($LT_VERS && $version_increased) {
 #  close FILE;
 }
 
-# Update the README.txt file
+# Update the README.md file
 if ($README) {
   open FILE, $README or die "$README: $!\n";
   my @contents = <FILE>;

@@ -1,8 +1,8 @@
-HDF5 version 1.13.0-7 currently under development
+HDF5 version 1.13.1-1 currently under development
 
-------------------------------------------------------------------------------
-Please refer to the release_docs/INSTALL file for installation instructions.
-------------------------------------------------------------------------------
+![HDF5 Logo](doxygen/img/HDF5.png)
+
+*Please refer to the release_docs/INSTALL file for installation instructions.*
 
 THE HDF GROUP
 ---------------
@@ -13,17 +13,19 @@ de facto standard in scientific and research communities.
 
 More information about The HDF Group, the HDF5 Community and the HDF5 software
 project, tools and services can be found at the Group's website.
-
-    https://www.hdfgroup.org/
+    
+   https://www.hdfgroup.org/
 
 
 DOCUMENTATION
 -------------
 This release is fully functional for the API described in the documentation.
-    https://portal.hdfgroup.org/display/HDF5/The+HDF5+API
+    
+   https://portal.hdfgroup.org/display/HDF5/The+HDF5+API
 
 Full Documentation and Programming Resources for this release can be found at
-    https://portal.hdfgroup.org/display/HDF5
+
+   https://portal.hdfgroup.org/display/HDF5
 
 See the RELEASE.txt file in the release_docs/ directory for information specific
 to the features and updates included in this release of the library.
@@ -42,7 +44,7 @@ HELP AND SUPPORT
 ----------------
 Information regarding Help Desk and Support services is available at
 
-    https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
 
 
 
@@ -51,14 +53,14 @@ FORUM and NEWS
 The following public forums are provided for public announcements and discussions
 of interest to the general HDF5 Community.
 
-    Homepage of the Forum
-        https://forum.hdfgroup.org
+   - Homepage of the Forum
+   https://forum.hdfgroup.org
 
-    News and Announcement
-        https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group
+   - News and Announcement
+   https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group
 
-    HDF5 and HDF4 Topics
-        https://forum.hdfgroup.org/c/hdf5
+   - HDF5 and HDF4 Topics
+   https://forum.hdfgroup.org/c/hdf5
 
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
@@ -70,11 +72,14 @@ use and configuration
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
-    https://gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/snapshots/
+    
+   https://gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/snapshots/
 
 Source packages for current and previous releases are located at:
-    https://portal.hdfgroup.org/display/support/Downloads
+    
+   https://portal.hdfgroup.org/display/support/Downloads
 
 Development code is available at our Github location:
-    https://github.com/HDFGroup/hdf5.git
+    
+   https://github.com/HDFGroup/hdf5.git
 

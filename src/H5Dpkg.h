@@ -123,13 +123,12 @@ typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage
 typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
 typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
                                             const H5D_type_info_t *type_info, hsize_t nelmts,
-                                            const H5S_t *file_space, const H5S_t *mem_space,
-                                            struct H5D_chunk_map_t *cm);
+                                            H5S_t *file_space, H5S_t *mem_space, struct H5D_chunk_map_t *cm);
 typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                         hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                         hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                          struct H5D_chunk_map_t *fm);
 typedef herr_t (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                          hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                          hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                           struct H5D_chunk_map_t *fm);
 typedef ssize_t (*H5D_layout_readvv_func_t)(const struct H5D_io_info_t *io_info, size_t dset_max_nseq,
                                             size_t *dset_curr_seq, size_t dset_len_arr[],
@@ -170,10 +169,10 @@ typedef struct H5D_layout_ops_t {
 /* Function pointers for either multiple or single block I/O access */
 typedef herr_t (*H5D_io_single_read_func_t)(const struct H5D_io_info_t *io_info,
                                             const H5D_type_info_t *type_info, hsize_t nelmts,
-                                            const H5S_t *file_space, const H5S_t *mem_space);
+                                            H5S_t *file_space, H5S_t *mem_space);
 typedef herr_t (*H5D_io_single_write_func_t)(const struct H5D_io_info_t *io_info,
                                              const H5D_type_info_t *type_info, hsize_t nelmts,
-                                             const H5S_t *file_space, const H5S_t *mem_space);
+                                             H5S_t *file_space, H5S_t *mem_space);
 
 /* Typedef for raw data I/O framework info */
 typedef struct H5D_io_ops_t {
@@ -346,10 +345,10 @@ typedef struct H5D_chunk_map_t {
     H5O_layout_t *layout; /* Dataset layout information*/
     hsize_t       nelmts; /* Number of elements selected in file & memory dataspaces */
 
-    const H5S_t *file_space; /* Pointer to the file dataspace */
-    unsigned     f_ndims;    /* Number of dimensions for file dataspace */
+    H5S_t *  file_space; /* Pointer to the file dataspace */
+    unsigned f_ndims;    /* Number of dimensions for file dataspace */
 
-    const H5S_t *  mem_space;   /* Pointer to the memory dataspace */
+    H5S_t *        mem_space;   /* Pointer to the memory dataspace */
     H5S_t *        mchunk_tmpl; /* Dataspace template for new memory chunks */
     H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
     unsigned       m_ndims;     /* Number of dimensions for memory dataspace */
@@ -434,7 +433,7 @@ typedef struct H5D_rdcdc_t {
 
 /*
  * A dataset is made of two layers, an H5D_t struct that is unique to
- * each instance of an opened datset, and a shared struct that is only
+ * each instance of an opened dataset, and a shared struct that is only
  * created once for a given dataset.  Thus, if a dataset is opened twice,
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
@@ -581,25 +580,25 @@ H5_DLL herr_t  H5D__refresh(H5D_t *dataset, hid_t dset_id);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 
 /* Internal I/O routines */
-H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space,
+H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space,
                         void *buf /*out*/);
-H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space,
+H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space,
                          const void *buf);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                               const H5S_t *file_space, const H5S_t *mem_space);
+                               H5S_t *file_space, H5S_t *mem_space);
 H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+                                hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
 /* Functions that perform scatter-gather serial I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
                               void *_tgath_buf /*out*/);
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+                                 hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                  hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+                                  hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
 /* Functions that operate on dataset's layout information */
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);
@@ -617,9 +616,9 @@ H5_DLL hbool_t H5D__contig_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__contig_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__contig_fill(const H5D_io_info_t *io_info);
 H5_DLL herr_t  H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 H5_DLL herr_t  H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 H5_DLL herr_t  H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f_dst,
                                 H5O_storage_contig_t *storage_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info);
 H5_DLL herr_t  H5D__contig_delete(H5F_t *f, const H5O_storage_t *store);
@@ -686,7 +685,7 @@ H5_DLL herr_t  H5D__efl_bh_info(H5F_t *f, H5O_efl_t *efl, hsize_t *heap_size);
 
 /* Functions that perform fill value operations on datasets */
 H5_DLL herr_t H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type,
-                        const H5S_t *space);
+                        H5S_t *space);
 H5_DLL herr_t H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocate_t alloc_func,
                              void *alloc_info, H5MM_free_t free_func, void *free_info, const H5O_fill_t *fill,
                              const H5T_t *dset_type, hid_t dset_type_id, size_t nelmts, size_t min_buf_size);
@@ -702,26 +701,26 @@ H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 #endif /*H5S_DEBUG*/
 /* MPI-IO function to read, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+                                    hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
 /* MPI-IO function to write, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+                                     hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
 /* MPI-IO functions to handle contiguous collective IO */
 H5_DLL herr_t H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                          hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                          hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                           H5D_chunk_map_t *fm);
 H5_DLL herr_t H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                           hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                           hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                            H5D_chunk_map_t *fm);
 
 /* MPI-IO functions to handle chunked collective IO */
 H5_DLL herr_t H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                         hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                         hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                          H5D_chunk_map_t *fm);
 H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                          hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                                          hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                           H5D_chunk_map_t *fm);
 
 /* MPI-IO function to check if a direct I/O transfer is possible between

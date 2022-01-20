@@ -39,7 +39,7 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR   The name of the directory where the releas(es) should be
+   -d DIR   The name of the directory where the release(es) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
@@ -60,7 +60,7 @@ for compressing the resulting tar archive (if none are given then
     cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh
                    command file and all other CMake files needed to build HDF5 source
                    using CMake on unix machines.
-    cmake-zip   -- convert all text files to DOS style and create a zip file inluding cmake
+    cmake-zip   -- convert all text files to DOS style and create a zip file including cmake
                    scripts and .bat files to build HDF5 source using CMake on Windows.
     hpc-cmake-tgz
                 -- create a tar file using the gzip default level with a build-unix.sh
@@ -512,7 +512,7 @@ if [ "X$methods" = "X" ]; then
     methods="tar"
 fi
 
-# Create the temporay work directory.
+# Create the temporary work directory.
 if mkdir $tmpdir; then
     echo "temporary work directory for release.  "\
          "Can be deleted after release completes." > $tmpdir/README
@@ -572,9 +572,9 @@ ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
 
-# Update README.txt and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/RELEASE.txt with release information in
 # line 1.
-for f in README.txt release_docs/RELEASE.txt; do
+for f in README.md release_docs/RELEASE.txt; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f
