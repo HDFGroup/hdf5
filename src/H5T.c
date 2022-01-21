@@ -4499,7 +4499,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
         HGOTO_DONE(1);
 
     /* Build an index for each type so the names are sorted */
-    if(NULL == cmpd1->idx_name) {
+    if ((idx1 = cmpd1->idx_name) == NULL) {
         cmpd1->idx_name = (unsigned *)H5MM_malloc(cmpd1->nmembs * sizeof(unsigned));
         if(NULL == (idx1 = cmpd1->idx_name))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
@@ -4522,10 +4522,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
             }
         }
     }
-    else {
-            idx1 = cmpd1->idx_name;
-    }
-    if(sh2->type == H5T_COMPOUND && NULL == cmpd2->idx_name) {
+    if ((idx2 = cmpd2->idx_name) == NULL) {
         cmpd2->idx_name = (unsigned *)H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
         if(NULL == (idx2 = cmpd2->idx_name))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
@@ -4547,9 +4544,6 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
                     }
             }
         } /* end if */
-    }
-    else {
-        idx2 = cmpd2->idx_name;
     }
 
 #ifdef H5T_DEBUG
