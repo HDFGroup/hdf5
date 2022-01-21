@@ -842,11 +842,12 @@ test_compound_2(void)
         }
     }
 
+    CHECK_NMEMBS(nmembs, st, dt)
+
     /* Release resources */
     HDfree(buf);
     HDfree(bkg);
     HDfree(orig);
-    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
 
@@ -1096,11 +1097,12 @@ test_compound_4(void)
         }
     }
 
+    CHECK_NMEMBS(nmembs, st, dt)
+
     /* Release resources */
     HDfree(buf);
     HDfree(bkg);
     HDfree(orig);
-    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
 
