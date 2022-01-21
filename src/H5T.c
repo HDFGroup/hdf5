@@ -4553,57 +4553,57 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
             /* Build an index for each type so the names are sorted */
             if(NULL == dt1->shared->u.compnd.idx_name) {
-				dt1->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned));
-				if(NULL == (idx1 = dt1->shared->u.compnd.idx_name))
-					HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
-            for (u = 0; u < dt1->shared->u.compnd.nmembs; u++)
-					idx1[u] = u;
-				if(dt1->shared->u.compnd.nmembs > 1) {
-                int i;
+                dt1->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned));
+                if(NULL == (idx1 = dt1->shared->u.compnd.idx_name))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+                for (u = 0; u < dt1->shared->u.compnd.nmembs; u++)
+                    idx1[u] = u;
+                if(dt1->shared->u.compnd.nmembs > 1) {
+                    int i;
 
-                for (i = (int)dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                    int j;
+                    for (i = (int)dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                        int j;
 
-                    for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
-                                     dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
-                            unsigned tmp_idx = idx1[j];
-                            idx1[j]          = idx1[j + 1];
-                            idx1[j + 1]      = tmp_idx;
-                            swapped          = TRUE;
-                        }
+                        for (j = 0, swapped = FALSE; j < i; j++)
+                            if (HDstrcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
+                                         dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
+                                unsigned tmp_idx = idx1[j];
+                                idx1[j]          = idx1[j + 1];
+                                idx1[j + 1]      = tmp_idx;
+                                swapped          = TRUE;
+                            }
+                    }
                 }
-				}
-			}
-			else {
-				idx1 = dt1->shared->u.compnd.idx_name;
-			}
-			if(dt2->shared->type == H5T_COMPOUND && NULL == dt2->shared->u.compnd.idx_name) {
-				dt2->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned));
-				if(NULL == (idx2 = dt2->shared->u.compnd.idx_name))
-					HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
-				for(u = 0; u < dt2->shared->u.compnd.nmembs; u++)
-					idx2[u] = u;
-				if(dt2->shared->u.compnd.nmembs > 1) {
-					int i;
+            }
+            else {
+                    idx1 = dt1->shared->u.compnd.idx_name;
+            }
+            if(dt2->shared->type == H5T_COMPOUND && NULL == dt2->shared->u.compnd.idx_name) {
+                dt2->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned));
+                if(NULL == (idx2 = dt2->shared->u.compnd.idx_name))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+                for(u = 0; u < dt2->shared->u.compnd.nmembs; u++)
+                        idx2[u] = u;
+                if(dt2->shared->u.compnd.nmembs > 1) {
+                    int i;
 
-                for (i = (int)dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                    int j;
+                    for (i = (int)dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                        int j;
 
-                    for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(dt2->shared->u.compnd.memb[idx2[j]].name,
-                                     dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
-                            unsigned tmp_idx = idx2[j];
-                            idx2[j]          = idx2[j + 1];
-                            idx2[j + 1]      = tmp_idx;
-                            swapped          = TRUE;
-                        }
-                }
-            } /* end if */
-		}
-		else {
-			idx2 = dt2->shared->u.compnd.idx_name;
-		}
+                        for (j = 0, swapped = FALSE; j < i; j++)
+                            if (HDstrcmp(dt2->shared->u.compnd.memb[idx2[j]].name,
+                                         dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
+                                unsigned tmp_idx = idx2[j];
+                                idx2[j]          = idx2[j + 1];
+                                idx2[j + 1]      = tmp_idx;
+                                swapped          = TRUE;
+                            }
+                    }
+                } /* end if */
+            }
+            else {
+                idx2 = dt2->shared->u.compnd.idx_name;
+            }
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
