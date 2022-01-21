@@ -4494,7 +4494,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 {
     int       ret_value = 0;
     int       tmp;
-    size_t *idx1 = NULL, *idx2 = NULL;
+    size_t *idx1, *idx2;
     size_t  u;
     H5T_compnd_t * const cmpd1 = &sh1->u.compnd, *cmpd2 = &sh2->u.compnd;
 
