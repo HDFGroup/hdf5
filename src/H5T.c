@@ -4511,7 +4511,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     if ((idx2 = cmpd2->idx_name) == NULL) {
         cmpd2->idx_name = (unsigned *)H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
         if(NULL == (idx2 = cmpd2->idx_name))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
         for(u = 0; u < cmpd2->nmembs; u++)
                 idx2[u] = u;
         if(cmpd2->nmembs > 1) {
