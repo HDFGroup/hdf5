@@ -4530,11 +4530,11 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
 #ifdef H5T_DEBUG
     /* I don't quite trust the code above yet :-)  --RPM */
-    for (u = 0; u < cmpd1->nmembs - 1; u++) {
-        HDassert(HDstrcmp(cmpd1->memb[idx1[u]].name,
-                          cmpd1->memb[idx1[u + 1]].name));
-        HDassert(HDstrcmp(cmpd2->memb[idx2[u]].name,
-                          cmpd2->memb[idx2[u + 1]].name));
+    for (u = 1; u < cmpd1->nmembs; u++) {
+        HDassert(HDstrcmp(cmpd1->memb[idx1[u - 1]].name,
+                          cmpd1->memb[idx1[u]].name) < 0);
+        HDassert(HDstrcmp(cmpd2->memb[idx2[u - 1]].name,
+                          cmpd2->memb[idx2[u]].name) < 0);
     }
 #endif
 
