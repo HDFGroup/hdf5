@@ -461,13 +461,13 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Lengthen member array if necessary */
     if (pcmpd->nmembs >= pcmpd->nalloc) {
-        unsigned     na = MAX(1, pcmpd->nalloc * 2);
-        H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(pcmpd->memb, na * sizeof(H5T_cmemb_t));
+        unsigned     na = MAX(1, pcmpd->nalloc * 2);    // XXX overflow risk
+        H5T_cmemb_t *memb = H5MM_realloc(pcmpd->memb, na * sizeof(memb[0]));
 
-        if (!x)
+        if (memb == NULL)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
         pcmpd->nalloc = na;
-        pcmpd->memb   = x;
+        pcmpd->memb   = memb;
     } /* end if */
 
     /* Add member to end of member array */
