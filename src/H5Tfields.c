@@ -293,15 +293,21 @@ H5T__sort_value(const H5T_t *dt, int *map)
 
     /* Use a bubble sort because we can short circuit */
     if (H5T_COMPOUND == dt->shared->type) {
-        if (H5T_SORT_VALUE != dt->shared->u.compnd.sorted) {
-            dt->shared->u.compnd.sorted = H5T_SORT_VALUE;
-            nmembs                      = dt->shared->u.compnd.nmembs;
+
+        H5T_compnd_t * const cmpd = &dt->shared->u.compnd;
+
+        /* Invalidate cached member-name order. */
+        cmpd->idx_name = H5MM_xfree(cmpd->idx_name);
+
+        if (H5T_SORT_VALUE != cmpd->sorted) {
+            cmpd->sorted = H5T_SORT_VALUE;
+            nmembs                      = cmpd->nmembs;
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (dt->shared->u.compnd.memb[j].offset > dt->shared->u.compnd.memb[j + 1].offset) {
-                        H5T_cmemb_t tmp                  = dt->shared->u.compnd.memb[j];
-                        dt->shared->u.compnd.memb[j]     = dt->shared->u.compnd.memb[j + 1];
-                        dt->shared->u.compnd.memb[j + 1] = tmp;
+                    if (cmpd->memb[j].offset > cmpd->memb[j + 1].offset) {
+                        H5T_cmemb_t tmp                  = cmpd->memb[j];
+                        cmpd->memb[j]     = cmpd->memb[j + 1];
+                        cmpd->memb[j + 1] = tmp;
                         if (map) {
                             int x = map[j];
 
@@ -315,7 +321,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
-                HDassert(dt->shared->u.compnd.memb[i].offset < dt->shared->u.compnd.memb[i + 1].offset);
+                HDassert(cmpd->memb[i].offset < cmpd->memb[i + 1].offset);
 #endif
         } /* end if */
     }
