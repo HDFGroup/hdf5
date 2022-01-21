@@ -4601,10 +4601,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     for (u = 0; u < en1->nmembs; u++)
         idx1[u] = u;
     if (en1->nmembs > 1) {
-        int i;
-        for (i = (int)en1->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-            int j;
-
+        size_t i, j;
+        for (i = en1->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
             for (j = 0, swapped = FALSE; j < i; j++)
                 if (HDstrcmp(en1->name[idx1[j]],
                              en1->name[idx1[j + 1]]) > 0) {
@@ -4618,11 +4616,9 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     for (u = 0; u < en2->nmembs; u++)
         idx2[u] = u;
     if (en2->nmembs > 1) {
-        int i;
+        size_t i, j;
 
-        for (i = (int)en2->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-            int j;
-
+        for (i = en2->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
             for (j = 0, swapped = FALSE; j < i; j++)
                 if (HDstrcmp(en2->name[idx2[j]],
                              en2->name[idx2[j + 1]]) > 0) {
@@ -4636,11 +4632,11 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
 #ifdef H5T_DEBUG
     /* I don't quite trust the code above yet :-)  --RPM */
-    for (u = 0; u < en1->nmembs - 1; u++) {
+    for (u = 1; u < en1->nmembs; u++) {
         HDassert(
-            HDstrcmp(en1->name[idx1[u]], en1->name[idx1[u + 1]]));
+            HDstrcmp(en1->name[idx1[u - 1]], en1->name[idx1[u]]) < 0);
         HDassert(
-            HDstrcmp(en2->name[idx2[u]], en2->name[idx2[u + 1]]));
+            HDstrcmp(en2->name[idx2[u - 1]], en2->name[idx2[u]]) < 0);
     }
 #endif
 
