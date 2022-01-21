@@ -466,6 +466,10 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
         if (memb == NULL)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+        if (pcmpd->idx_name != NULL)
+            pcmpd->idx_name = H5MM_xfree(pcmpd->idx_name);
+
         pcmpd->nalloc = na;
         pcmpd->memb   = memb;
     } /* end if */
