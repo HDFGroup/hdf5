@@ -781,11 +781,11 @@ test_compound_2(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = HDmalloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = HDmalloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
