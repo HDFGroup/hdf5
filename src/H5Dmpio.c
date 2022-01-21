@@ -3728,14 +3728,19 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
                                          size_t chunk_list_num_entries, const H5D_io_info_t *io_info,
                                          const H5D_type_info_t *type_info, int mpi_rank)
 {
-    H5D_chunk_info_t *chunk_info = NULL;
-    H5D_io_info_t     coll_io_info;
-    H5Z_EDC_t         err_detect; /* Error detection info */
-    H5Z_cb_t          filter_cb;  /* I/O filter callback function */
-    hsize_t           file_chunk_size = 0;
-    hsize_t           iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
-    size_t            i;
-    herr_t            ret_value = SUCCEED;
+    H5D_fill_buf_info_t fb_info;
+    H5D_chunk_info_t *  chunk_info = NULL;
+    H5D_io_info_t       coll_io_info;
+    H5Z_EDC_t           err_detect; /* Error detection info */
+    H5Z_cb_t            filter_cb;  /* I/O filter callback function */
+    hsize_t             file_chunk_size = 0;
+    hsize_t             iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
+    hbool_t             should_fill  = FALSE;
+    hbool_t             fb_info_init = FALSE;
+    size_t              i;
+    H5S_t *             fill_space    = NULL;
+    void *              base_read_buf = NULL;
+    herr_t              ret_value     = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -3752,15 +3757,45 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
     /* Initialize temporary I/O info */
     coll_io_info = *io_info;
+    coll_io_info.u.rbuf = NULL;
 
-    /* Retrieve filter settings from API context */
-    if (H5CX_get_err_detect(&err_detect) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info")
-    if (H5CX_get_filter_cb(&filter_cb) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
+    if (chunk_list_num_entries) {
+        /* Retrieve filter settings from API context */
+        if (H5CX_get_err_detect(&err_detect) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info")
+        if (H5CX_get_filter_cb(&filter_cb) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
-    /* Set size of full chunks in dataset */
-    file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
+        /* Set size of full chunks in dataset */
+        file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
+
+        /* Determine if fill values should be "read" for unallocated chunks */
+        should_fill = (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC)
+                || ( (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET) &&
+                        io_info->dset->shared->dcpl_cache.fill.fill_defined);
+
+        if (should_fill) {
+            hsize_t chunk_dims[H5S_MAX_RANK];
+
+            HDassert(io_info->dset->shared->ndims == io_info->dset->shared->layout.u.chunk.ndims - 1);
+            for (i = 0; i < io_info->dset->shared->layout.u.chunk.ndims - 1; i++)
+                chunk_dims[i] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[i];
+
+            /* Get a dataspace for filling chunk memory buffers */
+            if (NULL == (fill_space = H5S_create_simple(io_info->dset->shared->layout.u.chunk.ndims - 1,
+                    chunk_dims, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace")
+
+            /* Initialize fill value buffer */
+            if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
+                    (void *)&io_info->dset->shared->dcpl_cache.pline, (H5MM_free_t)H5D__chunk_mem_free,
+                    (void *)&io_info->dset->shared->dcpl_cache.pline, &io_info->dset->shared->dcpl_cache.fill,
+                    io_info->dset->shared->type, io_info->dset->shared->type_id, 0, file_chunk_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
+
+            fb_info_init = TRUE;
+        }
+    }
 
     /*
      * Allocate memory buffers for all chunks being read. Chunk data buffers are of
@@ -3776,6 +3811,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
      *    chunk size would of course be bad.
      */
     for (i = 0; i < chunk_list_num_entries; i++) {
+        HDassert(chunk_list[i].need_read);
+
         chunk_list[i].chunk_buf_size = MAX(chunk_list[i].fspace_info.chunk_current.length, file_chunk_size);
 
         if (NULL == (chunk_list[i].buf = H5MM_malloc(chunk_list[i].chunk_buf_size))) {
@@ -3784,19 +3821,44 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
             break;
         }
 
-        /* Set chunk's new length for eventual filter pipeline calls */
-        if (chunk_list[i].skip_filter_pline)
+        /*
+         * Check if chunk is currently allocated. If not, don't try to
+         * read it from the file. Instead, just fill the chunk buffer
+         * with the fill value if necessary.
+         */
+        if (H5F_addr_defined(chunk_list[i].fspace_info.chunk_current.offset)) {
+            /* Set first read buffer */
+            if (!base_read_buf)
+                base_read_buf = chunk_list[i].buf;
+
+            /* Set chunk's new length for eventual filter pipeline calls */
+            if (chunk_list[i].skip_filter_pline)
+                chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
+            else
+                chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+        }
+        else {
+            chunk_list[i].need_read = FALSE;
+
+            /* Set chunk's new length for eventual filter pipeline calls */
             chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
-        else
-            chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+
+            if (should_fill) {
+                /* Write fill value to memory buffer */
+                HDassert(fb_info.fill_buf);
+                if (H5D__fill(fb_info.fill_buf, io_info->dset->shared->type, chunk_list[i].buf,
+                        type_info->mem_type, fill_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't fill chunk buffer with fill value")
+            }
+        }
     }
 
     /*
      * Override the read buffer to point to the address of
      * the first chunk data buffer being read into
      */
-    if (chunk_list_num_entries)
-        coll_io_info.u.rbuf = chunk_list[0].buf;
+    if (base_read_buf)
+        coll_io_info.u.rbuf = base_read_buf;
 
     /* Perform collective chunk read */
     if (H5D__mpio_collective_filtered_chunk_common_io(chunk_list, chunk_list_num_entries, &coll_io_info,
@@ -3810,8 +3872,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     for (i = 0; i < chunk_list_num_entries; i++) {
         chunk_info = chunk_list[i].chunk_info;
 
-        /* Unfilter the chunk */
-        if (!chunk_list[i].skip_filter_pline) {
+        /* Unfilter the chunk, unless we didn't read it from the file */
+        if (chunk_list[i].need_read && !chunk_list[i].skip_filter_pline) {
             if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
                              &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_list[i].fspace_info.chunk_new.length, &chunk_list[i].chunk_buf_size,
@@ -3835,6 +3897,12 @@ done:
             chunk_list[i].buf = NULL;
         }
     }
+
+    /* Release the fill buffer info, if it's been initialized */
+    if (fb_info_init && H5D__fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+    if (fill_space && (H5S_close(fill_space) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -3861,19 +3929,23 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                                            size_t chunk_list_num_entries, const H5D_io_info_t *io_info,
                                            const H5D_type_info_t *type_info, int mpi_rank)
 {
-    H5D_chunk_info_t *chunk_info = NULL;
-    H5S_sel_iter_t *  sel_iter   = NULL; /* Dataspace selection iterator for H5D__scatter_mem */
-    H5D_io_info_t     coll_io_info;
-    H5Z_EDC_t         err_detect; /* Error detection info */
-    H5Z_cb_t          filter_cb;  /* I/O filter callback function */
-    hsize_t           file_chunk_size = 0;
-    hsize_t           iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
-    hbool_t           sel_iter_init = FALSE;
-    size_t            i, j;
-    H5S_t *           dataspace     = NULL;
-    void *            base_read_buf = NULL;
-    int               mpi_code;
-    herr_t            ret_value = SUCCEED;
+    H5D_fill_buf_info_t fb_info;
+    H5D_chunk_info_t *  chunk_info = NULL;
+    H5S_sel_iter_t *    sel_iter   = NULL; /* Dataspace selection iterator for H5D__scatter_mem */
+    H5D_io_info_t       coll_io_info;
+    H5Z_EDC_t           err_detect; /* Error detection info */
+    H5Z_cb_t            filter_cb;  /* I/O filter callback function */
+    hsize_t             file_chunk_size = 0;
+    hsize_t             iter_nelmts; /* Number of points to iterate over for the chunk IO operation */
+    hbool_t             should_fill   = FALSE;
+    hbool_t             fb_info_init  = FALSE;
+    hbool_t             sel_iter_init = FALSE;
+    size_t              i, j;
+    H5S_t *             dataspace     = NULL;
+    H5S_t *             fill_space    = NULL;
+    void *              base_read_buf = NULL;
+    int                 mpi_code;
+    herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -3890,21 +3962,49 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     coll_io_info         = *io_info;
     coll_io_info.op_type = H5D_IO_OP_READ;
 
-    /* Retrieve filter settings from API context */
-    if (H5CX_get_err_detect(&err_detect) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info")
-    if (H5CX_get_filter_cb(&filter_cb) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
+    if (chunk_list_num_entries) {
+        /* Retrieve filter settings from API context */
+        if (H5CX_get_err_detect(&err_detect) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info")
+        if (H5CX_get_filter_cb(&filter_cb) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
-    /* Set size of full chunks in dataset */
-    file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
+        /* Set size of full chunks in dataset */
+        file_chunk_size = io_info->dset->shared->layout.u.chunk.size;
+
+        /* Determine if fill values should be written to chunks */
+        should_fill = (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC)
+                || ( (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET) &&
+                        io_info->dset->shared->dcpl_cache.fill.fill_defined);
+
+        if (should_fill) {
+            hsize_t chunk_dims[H5S_MAX_RANK];
+
+            HDassert(io_info->dset->shared->ndims == io_info->dset->shared->layout.u.chunk.ndims - 1);
+            for (i = 0; i < io_info->dset->shared->layout.u.chunk.ndims - 1; i++)
+                chunk_dims[i] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[i];
+
+            /* Get a dataspace for filling chunk memory buffers */
+            if (NULL == (fill_space = H5S_create_simple(io_info->dset->shared->layout.u.chunk.ndims - 1,
+                    chunk_dims, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace")
+
+            /* Initialize fill value buffer */
+            if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
+                    (void *)&io_info->dset->shared->dcpl_cache.pline, (H5MM_free_t)H5D__chunk_mem_free,
+                    (void *)&io_info->dset->shared->dcpl_cache.pline, &io_info->dset->shared->dcpl_cache.fill,
+                    io_info->dset->shared->type, io_info->dset->shared->type_id, 0, file_chunk_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
+
+            fb_info_init = TRUE;
+        }
+    }
 
     /*
      * Allocate memory buffers for all owned chunks. Chunk data buffers are of the
      * largest size between the chunk's current filtered size and the chunk's true
      * size, as calculated by the number of elements in the chunk's file space extent
-     * multiplied by the datatype size (accounting for partial edge chunks). This
-     * tries to ensure that:
+     * multiplied by the datatype size. This tries to ensure that:
      *
      *  * If we're fully overwriting the chunk and the filter normally reduces the
      *    chunk size, we simply have the exact buffer size required to hold the
@@ -3932,14 +4032,36 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
             /* Set chunk's new length for eventual filter pipeline calls */
             if (chunk_list[i].need_read) {
-                /* Set first read buffer */
-                if (!base_read_buf)
-                    base_read_buf = chunk_list[i].buf;
+                /*
+                 * Check if chunk is currently allocated. If not, don't try to
+                 * read it from the file. Instead, just fill the chunk buffer
+                 * with the fill value if fill values are to be written.
+                 */
+                if (H5F_addr_defined(chunk_list[i].fspace_info.chunk_current.offset)) {
+                    /* Set first read buffer */
+                    if (!base_read_buf)
+                        base_read_buf = chunk_list[i].buf;
 
-                if (chunk_list[i].skip_filter_pline)
+                    /* Set chunk's new length for eventual filter pipeline calls */
+                    if (chunk_list[i].skip_filter_pline)
+                        chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
+                    else
+                        chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+                }
+                else {
+                    chunk_list[i].need_read = FALSE;
+
+                    /* Set chunk's new length for eventual filter pipeline calls */
                     chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
-                else
-                    chunk_list[i].fspace_info.chunk_new.length = chunk_list[i].fspace_info.chunk_current.length;
+
+                    if (should_fill) {
+                        /* Write fill value to memory buffer */
+                        HDassert(fb_info.fill_buf);
+                        if (H5D__fill(fb_info.fill_buf, io_info->dset->shared->type, chunk_list[i].buf,
+                                type_info->mem_type, fill_space) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't fill chunk buffer with fill value")
+                    }
+                }
             }
             else
                 chunk_list[i].fspace_info.chunk_new.length = file_chunk_size;
@@ -4065,9 +4187,14 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
-    if (dataspace)
-        if (H5S_close(dataspace) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+    if (dataspace && (H5S_close(dataspace) < 0))
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+    if (fill_space && (H5S_close(fill_space) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space")
+
+    /* Release the fill buffer info, if it's been initialized */
+    if (fb_info_init && H5D__fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
 
     /* On failure, try to free all resources used by entries in the chunk list */
     if (ret_value < 0) {
@@ -4923,10 +5050,12 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                  * the first chunk entry
                  */
                 if (op_type == H5D_IO_OP_READ) {
+                    HDassert(H5F_addr_defined(chunk_list[i].fspace_info.chunk_current.offset));
                     file_offset_array[chunk_count] =
                         (MPI_Aint)(chunk_list[i].fspace_info.chunk_current.offset - base_offset);
                 }
                 else {
+                    HDassert(H5F_addr_defined(chunk_list[i].fspace_info.chunk_new.offset));
                     file_offset_array[chunk_count] =
                         (MPI_Aint)(chunk_list[i].fspace_info.chunk_new.offset - base_offset);
                 }
