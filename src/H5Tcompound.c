@@ -459,7 +459,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     if ((offset + total_size) > psh->size)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type")
 
-    /* Increase member array if necessary */
+    /* Lengthen member array if necessary */
     if (pcmpd->nmembs >= pcmpd->nalloc) {
         unsigned     na = MAX(1, pcmpd->nalloc * 2);
         H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(pcmpd->memb, na * sizeof(H5T_cmemb_t));
