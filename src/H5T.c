@@ -4586,13 +4586,12 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     if (superset) {
         if (en1->nmembs > en2->nmembs)
             HGOTO_DONE(1);
-    } /* end if */
-    else {
+    } else {
         if (en1->nmembs < en2->nmembs)
             HGOTO_DONE(-1);
         if (en1->nmembs > en2->nmembs)
             HGOTO_DONE(1);
-    } /* end else */
+    }
 
     /* Build an index for each type so the names are sorted */
     if (NULL == (idx1 = H5MM_malloc(en1->nmembs * sizeof(idx1[0]))) ||
@@ -4668,8 +4667,7 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
             /* Leave, if we couldn't find match */
             if (cmp)
                 HGOTO_DONE(-1);
-        } /* end if */
-        else {
+        } else {
             /* Check for exact member name match when not doing
              * "superset" comparison
              */
@@ -4679,7 +4677,7 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
             /* Set index value appropriately */
             idx = u;
-        } /* end else */
+        }
 
         tmp = HDmemcmp((uint8_t *)en1->value + idx1[u] * base_size,
                        (uint8_t *)en2->value + idx2[idx] * base_size, base_size);
