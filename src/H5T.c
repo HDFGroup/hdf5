@@ -3331,7 +3331,7 @@ H5T__create(H5T_class_t type, size_t size)
             if (type == H5T_COMPOUND) {
                 dt->shared->u.compnd.packed    = FALSE; /* Start out unpacked */
                 dt->shared->u.compnd.memb_size = 0;
-                dt->shared->u.compnd.idx_name=NULL;
+                dt->shared->u.compnd.idx_name = NULL;
             } /* end if */
             else if (type == H5T_OPAQUE)
                 /* Initialize the tag in case it's not set later.  A null tag will
