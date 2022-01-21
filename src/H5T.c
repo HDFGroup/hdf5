@@ -1549,10 +1549,10 @@ H5T_top_term_package(void)
         } /* end for */
 
         /* Clear conversion tables */
-        H5T_g.path   = (H5T_path_t **)H5MM_xfree(H5T_g.path);
+        H5T_g.path   = H5MM_xfree(H5T_g.path);
         H5T_g.npaths = 0;
         H5T_g.apaths = 0;
-        H5T_g.soft   = (H5T_soft_t *)H5MM_xfree(H5T_g.soft);
+        H5T_g.soft   = H5MM_xfree(H5T_g.soft);
         H5T_g.nsoft  = 0;
         H5T_g.asoft  = 0;
 
@@ -4012,43 +4012,42 @@ H5T__free(H5T_t *dt)
 {
     unsigned i;
     herr_t   ret_value = SUCCEED; /* Return value */
+    H5T_shared_t *sh = dt->shared;
 
     FUNC_ENTER_PACKAGE
-
-    HDassert(dt && dt->shared);
 
     /* Free the ID to name info */
     H5G_name_free(&(dt->path));
 
     /* Don't free locked datatypes */
-    if (H5T_STATE_IMMUTABLE == dt->shared->state)
+    if (H5T_STATE_IMMUTABLE == sh->state)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype")
 
     /* Close the datatype */
-    switch (dt->shared->type) {
+    switch (sh->type) {
         case H5T_COMPOUND:
-            for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-                dt->shared->u.compnd.memb[i].name = (char *)H5MM_xfree(dt->shared->u.compnd.memb[i].name);
-                (void)H5T_close_real(dt->shared->u.compnd.memb[i].type);
+            for (i = 0; i < sh->u.compnd.nmembs; i++) {
+                sh->u.compnd.memb[i].name = H5MM_xfree(sh->u.compnd.memb[i].name);
+                (void)H5T_close_real(sh->u.compnd.memb[i].type);
             }
-            dt->shared->u.compnd.memb   = (H5T_cmemb_t *)H5MM_xfree(dt->shared->u.compnd.memb);
-            dt->shared->u.compnd.nmembs = 0;
-            if (dt->shared->u.compnd.idx_name!=NULL) {
-				dt->shared->u.compnd.idx_name = (unsigned *)H5MM_xfree(dt->shared->u.compnd.idx_name);
-				dt->shared->u.compnd.idx_name = NULL;
-			}
+            sh->u.compnd.memb   = H5MM_xfree(sh->u.compnd.memb);
+            sh->u.compnd.nmembs = 0;
+            if (sh->u.compnd.idx_name != NULL) {
+                sh->u.compnd.idx_name =
+                    H5MM_xfree(sh->u.compnd.idx_name);
+            }
             break;
 
         case H5T_ENUM:
-            for (i = 0; i < dt->shared->u.enumer.nmembs; i++)
-                dt->shared->u.enumer.name[i] = (char *)H5MM_xfree(dt->shared->u.enumer.name[i]);
-            dt->shared->u.enumer.name   = (char **)H5MM_xfree(dt->shared->u.enumer.name);
-            dt->shared->u.enumer.value  = (uint8_t *)H5MM_xfree(dt->shared->u.enumer.value);
-            dt->shared->u.enumer.nmembs = 0;
+            for (i = 0; i < sh->u.enumer.nmembs; i++)
+                sh->u.enumer.name[i] = H5MM_xfree(sh->u.enumer.name[i]);
+            sh->u.enumer.name   = H5MM_xfree(sh->u.enumer.name);
+            sh->u.enumer.value  = H5MM_xfree(sh->u.enumer.value);
+            sh->u.enumer.nmembs = 0;
             break;
 
         case H5T_OPAQUE:
-            dt->shared->u.opaque.tag = (char *)H5MM_xfree(dt->shared->u.opaque.tag);
+            sh->u.opaque.tag = H5MM_xfree(sh->u.opaque.tag);
             break;
 
         case H5T_NO_CLASS:
@@ -4064,18 +4063,18 @@ H5T__free(H5T_t *dt)
         default:
             break;
     } /* end switch */
-    dt->shared->type = H5T_NO_CLASS;
+    sh->type = H5T_NO_CLASS;
 
     /* Close the parent */
-    HDassert(dt->shared->parent != dt);
-    if (dt->shared->parent && H5T_close_real(dt->shared->parent) < 0)
+    HDassert(sh->parent != dt);
+    if (sh->parent && H5T_close_real(sh->parent) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
-    dt->shared->parent = NULL;
+    sh->parent = NULL;
 
     /* Close the owned VOL object */
-    if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+    if (sh->owned_vol_obj && H5VL_free_object(sh->owned_vol_obj) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
-    dt->shared->owned_vol_obj = NULL;
+    sh->owned_vol_obj = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
