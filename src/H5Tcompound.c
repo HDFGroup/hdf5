@@ -467,9 +467,6 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
         if (memb == NULL)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-        if (pcmpd->idx_name != NULL)
-            pcmpd->idx_name = H5MM_xfree(pcmpd->idx_name);
-
         pcmpd->nalloc = na;
         pcmpd->memb   = memb;
     } /* end if */
@@ -484,6 +481,9 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     pcmpd->sorted = H5T_SORT_NONE;
     pcmpd->nmembs++;
     pcmpd->memb_size += total_size;
+
+    /* Invalidate cached member-name order. */
+    pcmpd->idx_name = H5MM_xfree(pcmpd->idx_name);
 
     /* It should not be possible to get this far if the type is already packed
      * - the new member would overlap something */
