@@ -4546,10 +4546,8 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     for (u = 0; u < cmpd1->nmembs; u++) {
         tmp = HDstrcmp(cmpd1->memb[idx1[u]].name,
                        cmpd2->memb[idx2[u]].name);
-        if (tmp < 0)
-            HGOTO_DONE(-1);
-        if (tmp > 0)
-            HGOTO_DONE(1);
+        if (tmp != 0)
+            HGOTO_DONE(tmp);
 
         if (cmpd1->memb[idx1[u]].offset < cmpd2->memb[idx2[u]].offset)
             HGOTO_DONE(-1);
