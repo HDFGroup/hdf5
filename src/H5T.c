@@ -3621,11 +3621,13 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
                 /* Copy sorting index */
                 if (ncmpd->idx_name != NULL) {
-                    if(NULL == (ncmpd->idx_name = H5MM_malloc(ncmpd->nalloc * sizeof(H5T_cmemb_t))))
+                    ncmpd->idx_name =
+                        H5MM_malloc(ncmpd->nalloc * sizeof(ncmpd->idx_name[0]));
+                    if (NULL == ncmpd->idx_name)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
                     H5MM_memcpy(ncmpd->idx_name, ocmpd->idx_name,
-                    ncmpd->nmembs * sizeof(unsigned));
+                        ncmpd->nmembs * sizeof(ncmpd->idx_name[0]));
                 }
             }
             break;
