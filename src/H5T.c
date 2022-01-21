@@ -4516,6 +4516,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
         bubblesort_indices_by_name(cmpd1, idx1);
         cmpd1->idx_name = idx1;
     }
+
     if ((idx2 = cmpd2->idx_name) == NULL) {
         idx2 = H5MM_malloc(cmpd2->nmembs * sizeof(cmpd2->idx_name[0]));
         if (NULL == idx2)
