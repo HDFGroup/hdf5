@@ -4561,13 +4561,149 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
         tmp = H5T_cmp(cmpd1->memb[idx1[u]].type,
                       cmpd2->memb[idx2[u]].type, superset);
+        if (tmp != 0)
+            HGOTO_DONE(tmp);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/* Compare two enumeration datatypes. */
+static int
+enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
+{
+    hbool_t   swapped;
+    int       ret_value = 0;
+    int       tmp;
+    unsigned *idx1 = NULL, *idx2 = NULL;
+    unsigned  u;
+    size_t    base_size;
+    H5T_enum_t * const en1 = &sh1->u.enumer, *en2 = &sh2->u.enumer;
+
+    FUNC_ENTER_NOAPI(0)
+
+    /* If we are doing a "superset" comparison, dt2 is allowed to have
+     * more members than dt1
+     */
+    if (superset) {
+        if (en1->nmembs > en2->nmembs)
+            HGOTO_DONE(1);
+    } /* end if */
+    else {
+        if (en1->nmembs < en2->nmembs)
+            HGOTO_DONE(-1);
+        if (en1->nmembs > en2->nmembs)
+            HGOTO_DONE(1);
+    } /* end else */
+
+    /* Build an index for each type so the names are sorted */
+    if (NULL == (idx1 = (unsigned *)H5MM_malloc(en1->nmembs * sizeof(unsigned))) ||
+        NULL == (idx2 = (unsigned *)H5MM_malloc(en2->nmembs * sizeof(unsigned))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
+    for (u = 0; u < en1->nmembs; u++)
+        idx1[u] = u;
+    if (en1->nmembs > 1) {
+        int i;
+        for (i = (int)en1->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+            int j;
+
+            for (j = 0, swapped = FALSE; j < i; j++)
+                if (HDstrcmp(en1->name[idx1[j]],
+                             en1->name[idx1[j + 1]]) > 0) {
+                    unsigned tmp_idx = idx1[j];
+                    idx1[j]          = idx1[j + 1];
+                    idx1[j + 1]      = tmp_idx;
+                    swapped          = TRUE;
+                }
+        }
+    }
+    for (u = 0; u < en2->nmembs; u++)
+        idx2[u] = u;
+    if (en2->nmembs > 1) {
+        int i;
+
+        for (i = (int)en2->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+            int j;
+
+            for (j = 0, swapped = FALSE; j < i; j++)
+                if (HDstrcmp(en2->name[idx2[j]],
+                             en2->name[idx2[j + 1]]) > 0) {
+                    unsigned tmp_idx = idx2[j];
+                    idx2[j]          = idx2[j + 1];
+                    idx2[j + 1]      = tmp_idx;
+                    swapped          = TRUE;
+                }
+        }
+    }
+
+#ifdef H5T_DEBUG
+    /* I don't quite trust the code above yet :-)  --RPM */
+    for (u = 0; u < en1->nmembs - 1; u++) {
+        HDassert(
+            HDstrcmp(en1->name[idx1[u]], en1->name[idx1[u + 1]]));
+        HDassert(
+            HDstrcmp(en2->name[idx2[u]], en2->name[idx2[u + 1]]));
+    }
+#endif
+
+    /* Compare the members */
+    base_size = sh1->parent->shared->size;
+    for (u = 0; u < en1->nmembs; u++) {
+        unsigned idx = 0;
+
+        if (superset) {
+            unsigned lt  = 0, rt; /* Final, left & right key indices */
+            int      cmp = 1;     /* Key comparison value */
+
+            /* If a superset is allowed, dt2 may have more members
+             * than dt1, so binary search for matching member name in
+             * dt2
+             */
+            rt = en2->nmembs;
+
+            while (lt < rt && cmp) {
+                idx = (lt + rt) / 2;
+
+                /* compare */
+                if ((cmp = HDstrcmp(en1->name[idx1[u]],
+                                    en2->name[idx2[idx]])) < 0)
+                    rt = idx;
+                else
+                    lt = idx + 1;
+            }
+            /* Leave, if we couldn't find match */
+            if (cmp)
+                HGOTO_DONE(-1);
+        } /* end if */
+        else {
+            /* Check for exact member name match when not doing
+             * "superset" comparison
+             */
+            tmp = HDstrcmp(en1->name[idx1[u]], en2->name[idx2[u]]);
+            if (tmp < 0)
+                HGOTO_DONE(-1);
+            if (tmp > 0)
+                HGOTO_DONE(1);
+
+            /* Set index value appropriately */
+            idx = u;
+        } /* end else */
+
+        tmp = HDmemcmp((uint8_t *)en1->value + idx1[u] * base_size,
+                       (uint8_t *)en2->value + idx2[idx] * base_size, base_size);
         if (tmp < 0)
             HGOTO_DONE(-1);
         if (tmp > 0)
             HGOTO_DONE(1);
     }
-
 done:
+
+    if (idx1 != NULL)
+        idx1 = H5MM_xfree(idx1);
+    if (idx2 != NULL)
+        idx2 = H5MM_xfree(idx2);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -4591,15 +4727,12 @@ done:
 int
 H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
 {
-    unsigned *idx1 = NULL, *idx2 = NULL;
     H5T_shared_t *sh1, *sh2;
-    size_t    base_size;
-    hbool_t   swapped;
     unsigned  u;
     int       tmp;
     int       ret_value = 0;
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     sh1 = dt1->shared;
     sh2 = dt2->shared;
@@ -4626,126 +4759,7 @@ H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
         case H5T_COMPOUND:
             HGOTO_DONE(compound_cmp(sh1, sh2, superset));
         case H5T_ENUM:
-            /*
-             * Enumeration data types...
-             */
-
-            /* If we are doing a "superset" comparison, dt2 is allowed to have
-             * more members than dt1
-             */
-            if (superset) {
-                if (sh1->u.enumer.nmembs > sh2->u.enumer.nmembs)
-                    HGOTO_DONE(1);
-            } /* end if */
-            else {
-                if (sh1->u.enumer.nmembs < sh2->u.enumer.nmembs)
-                    HGOTO_DONE(-1);
-                if (sh1->u.enumer.nmembs > sh2->u.enumer.nmembs)
-                    HGOTO_DONE(1);
-            } /* end else */
-
-            /* Build an index for each type so the names are sorted */
-            if (NULL == (idx1 = (unsigned *)H5MM_malloc(sh1->u.enumer.nmembs * sizeof(unsigned))) ||
-                NULL == (idx2 = (unsigned *)H5MM_malloc(sh2->u.enumer.nmembs * sizeof(unsigned))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
-            for (u = 0; u < sh1->u.enumer.nmembs; u++)
-                idx1[u] = u;
-            if (sh1->u.enumer.nmembs > 1) {
-                int i;
-                for (i = (int)sh1->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                    int j;
-
-                    for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(sh1->u.enumer.name[idx1[j]],
-                                     sh1->u.enumer.name[idx1[j + 1]]) > 0) {
-                            unsigned tmp_idx = idx1[j];
-                            idx1[j]          = idx1[j + 1];
-                            idx1[j + 1]      = tmp_idx;
-                            swapped          = TRUE;
-                        }
-                }
-            }
-            for (u = 0; u < sh2->u.enumer.nmembs; u++)
-                idx2[u] = u;
-            if (sh2->u.enumer.nmembs > 1) {
-                int i;
-
-                for (i = (int)sh2->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                    int j;
-
-                    for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(sh2->u.enumer.name[idx2[j]],
-                                     sh2->u.enumer.name[idx2[j + 1]]) > 0) {
-                            unsigned tmp_idx = idx2[j];
-                            idx2[j]          = idx2[j + 1];
-                            idx2[j + 1]      = tmp_idx;
-                            swapped          = TRUE;
-                        }
-                }
-            }
-
-#ifdef H5T_DEBUG
-            /* I don't quite trust the code above yet :-)  --RPM */
-            for (u = 0; u < sh1->u.enumer.nmembs - 1; u++) {
-                HDassert(
-                    HDstrcmp(sh1->u.enumer.name[idx1[u]], sh1->u.enumer.name[idx1[u + 1]]));
-                HDassert(
-                    HDstrcmp(sh2->u.enumer.name[idx2[u]], sh2->u.enumer.name[idx2[u + 1]]));
-            }
-#endif
-
-            /* Compare the members */
-            base_size = sh1->parent->shared->size;
-            for (u = 0; u < sh1->u.enumer.nmembs; u++) {
-                unsigned idx = 0;
-
-                if (superset) {
-                    unsigned lt  = 0, rt; /* Final, left & right key indices */
-                    int      cmp = 1;     /* Key comparison value */
-
-                    /* If a superset is allowed, dt2 may have more members
-                     * than dt1, so binary search for matching member name in
-                     * dt2
-                     */
-                    rt = sh2->u.enumer.nmembs;
-
-                    while (lt < rt && cmp) {
-                        idx = (lt + rt) / 2;
-
-                        /* compare */
-                        if ((cmp = HDstrcmp(sh1->u.enumer.name[idx1[u]],
-                                            sh2->u.enumer.name[idx2[idx]])) < 0)
-                            rt = idx;
-                        else
-                            lt = idx + 1;
-                    }
-                    /* Leave, if we couldn't find match */
-                    if (cmp)
-                        HGOTO_DONE(-1);
-                } /* end if */
-                else {
-                    /* Check for exact member name match when not doing
-                     * "superset" comparison
-                     */
-                    tmp = HDstrcmp(sh1->u.enumer.name[idx1[u]], sh2->u.enumer.name[idx2[u]]);
-                    if (tmp < 0)
-                        HGOTO_DONE(-1);
-                    if (tmp > 0)
-                        HGOTO_DONE(1);
-
-                    /* Set index value appropriately */
-                    idx = u;
-                } /* end else */
-
-                tmp = HDmemcmp((uint8_t *)sh1->u.enumer.value + idx1[u] * base_size,
-                               (uint8_t *)sh2->u.enumer.value + idx2[idx] * base_size, base_size);
-                if (tmp < 0)
-                    HGOTO_DONE(-1);
-                if (tmp > 0)
-                    HGOTO_DONE(1);
-            }
-            break;
-
+            HGOTO_DONE(enum_cmp(sh1, sh2, superset));
         case H5T_VLEN:
             HDassert(sh1->u.vlen.type > H5T_VLEN_BADTYPE &&
                      sh1->u.vlen.type < H5T_VLEN_MAXTYPE);
