@@ -260,7 +260,7 @@ typedef struct H5T_compnd_t {
     hbool_t      packed;    /*are members packed together?       */
     H5T_cmemb_t *memb;      /*array of struct members	     */
     size_t       memb_size; /*total of all member sizes          */
-    unsigned 	*idx_name;	/*index to sort members by name		*/
+    size_t 	*idx_name;	/*index to sort members by name		*/
 } H5T_compnd_t;
 
 /* An enumeration datatype */

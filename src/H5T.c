@@ -4466,15 +4466,36 @@ H5T_get_force_conv(const H5T_t *dt)
     FUNC_LEAVE_NOAPI(dt->shared->force_conv)
 } /* end H5T_get_force_conv() */
 
+static void
+bubblesort_indices_by_name(H5T_compnd_t *cmpd, size_t *idx)
+{
+    hbool_t   swapped;
+    size_t i, j;
+
+    if (cmpd->nmembs < 2)
+        return;
+
+    for (i = cmpd->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
+        for (j = 0, swapped = FALSE; j < i; j++) {
+            if (HDstrcmp(cmpd->memb[idx[j]].name,
+                         cmpd->memb[idx[j + 1]].name) > 0) {
+                size_t tmp = idx[j];
+                idx[j]          = idx[j + 1];
+                idx[j + 1]      = tmp;
+                swapped          = TRUE;
+            }
+        }
+    }
+}
+
 /* Compare two compound datatypes. */
 static int
 compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 {
     int       ret_value = 0;
-    hbool_t   swapped;
     int       tmp;
-    unsigned *idx1 = NULL, *idx2 = NULL;
-    unsigned  u;
+    size_t *idx1 = NULL, *idx2 = NULL;
+    size_t  u;
     H5T_compnd_t * const cmpd1 = &sh1->u.compnd, *cmpd2 = &sh2->u.compnd;
 
     FUNC_ENTER_NOAPI(0)
@@ -4486,50 +4507,24 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
     /* Build an index for each type so the names are sorted */
     if ((idx1 = cmpd1->idx_name) == NULL) {
-        cmpd1->idx_name = H5MM_malloc(cmpd1->nmembs * sizeof(unsigned));
-        if(NULL == (idx1 = cmpd1->idx_name))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+        idx1 = H5MM_malloc(cmpd1->nmembs * sizeof(cmpd1->idx_name[0]));
+        if (NULL == idx1)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
         for (u = 0; u < cmpd1->nmembs; u++)
             idx1[u] = u;
-        if(cmpd1->nmembs > 1) {
-            int i;
 
-            for (i = (int)cmpd1->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                int j;
-
-                for (j = 0, swapped = FALSE; j < i; j++)
-                    if (HDstrcmp(cmpd1->memb[idx1[j]].name,
-                                 cmpd1->memb[idx1[j + 1]].name) > 0) {
-                        unsigned tmp_idx = idx1[j];
-                        idx1[j]          = idx1[j + 1];
-                        idx1[j + 1]      = tmp_idx;
-                        swapped          = TRUE;
-                    }
-            }
-        }
+        bubblesort_indices_by_name(cmpd1, idx1);
+        cmpd1->idx_name = idx1;
     }
     if ((idx2 = cmpd2->idx_name) == NULL) {
-        cmpd2->idx_name = H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
-        if(NULL == (idx2 = cmpd2->idx_name))
+        idx2 = H5MM_malloc(cmpd2->nmembs * sizeof(cmpd2->idx_name[0]));
+        if (NULL == idx2)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
         for(u = 0; u < cmpd2->nmembs; u++)
-                idx2[u] = u;
-        if(cmpd2->nmembs > 1) {
-            int i;
+            idx2[u] = u;
 
-            for (i = (int)cmpd2->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                int j;
-
-                for (j = 0, swapped = FALSE; j < i; j++)
-                    if (HDstrcmp(cmpd2->memb[idx2[j]].name,
-                                 cmpd2->memb[idx2[j + 1]].name) > 0) {
-                        unsigned tmp_idx = idx2[j];
-                        idx2[j]          = idx2[j + 1];
-                        idx2[j + 1]      = tmp_idx;
-                        swapped          = TRUE;
-                    }
-            }
-        } /* end if */
+        bubblesort_indices_by_name(cmpd2, idx2);
+        cmpd2->idx_name = idx2;
     }
 
 #ifdef H5T_DEBUG
