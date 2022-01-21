@@ -3414,9 +3414,6 @@ done:
  * Note:      Common code for both H5T_copy and H5T_copy_reopen, as part of
  *            the const-correct datatype copying routines.
  *
- * Programmer:  David Young
- *              January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -3468,9 +3465,6 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:  David Young
- *              January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -3495,9 +3489,6 @@ done:
  *
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3526,9 +3517,6 @@ done:
  *            Failure:    negative
  *
  * Note:      Common code for both H5T_copy and H5T_copy_reopen.
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3812,9 +3800,6 @@ done:
  *
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
