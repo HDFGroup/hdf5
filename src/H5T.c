@@ -4682,10 +4682,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
              * "superset" comparison
              */
             tmp = HDstrcmp(en1->name[idx1[u]], en2->name[idx2[u]]);
-            if (tmp < 0)
-                HGOTO_DONE(-1);
-            if (tmp > 0)
-                HGOTO_DONE(1);
+            if (tmp != 0)
+                HGOTO_DONE(tmp);
 
             /* Set index value appropriately */
             idx = u;
@@ -4693,10 +4691,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
         tmp = HDmemcmp((uint8_t *)en1->value + idx1[u] * base_size,
                        (uint8_t *)en2->value + idx2[idx] * base_size, base_size);
-        if (tmp < 0)
-            HGOTO_DONE(-1);
-        if (tmp > 0)
-            HGOTO_DONE(1);
+        if (tmp != 0)
+            HGOTO_DONE(tmp);
     }
 done:
 
@@ -4814,10 +4810,8 @@ H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
             }
 
             tmp = H5T_cmp(sh1->parent, sh2->parent, superset);
-            if (tmp < 0)
-                HGOTO_DONE(-1);
-            if (tmp > 0)
-                HGOTO_DONE(1);
+            if (tmp != 0)
+                HGOTO_DONE(tmp);
             break;
 
         case H5T_NO_CLASS:
