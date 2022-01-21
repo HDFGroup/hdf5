@@ -403,15 +403,20 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
     /* Use a bubble sort because we can short circuit */
     if (H5T_COMPOUND == sh->type) {
         if (H5T_SORT_NAME != sh->u.compnd.sorted) {
-            sh->u.compnd.sorted = H5T_SORT_NAME;
-            nmembs                      = sh->u.compnd.nmembs;
+            H5T_compnd_t *cmpd = &sh->u.compnd;
+
+            /* Invalidate cached member-name order. */
+            cmpd->idx_name = H5MM_xfree(cmpd->idx_name);
+
+            cmpd->sorted = H5T_SORT_NAME;
+            nmembs                      = cmpd->nmembs;
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(sh->u.compnd.memb[j].name, sh->u.compnd.memb[j + 1].name) >
+                    if (HDstrcmp(cmpd->memb[j].name, cmpd->memb[j + 1].name) >
                         0) {
-                        H5T_cmemb_t tmp                  = sh->u.compnd.memb[j];
-                        sh->u.compnd.memb[j]     = sh->u.compnd.memb[j + 1];
-                        sh->u.compnd.memb[j + 1] = tmp;
+                        H5T_cmemb_t tmp                  = cmpd->memb[j];
+                        cmpd->memb[j]     = cmpd->memb[j + 1];
+                        cmpd->memb[j + 1] = tmp;
                         swapped                          = TRUE;
                         if (map) {
                             size_t x      = map[j];
@@ -424,7 +429,7 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++) {
-                HDassert(HDstrcmp(sh->u.compnd.memb[i].name, sh->u.compnd.memb[i + 1].name) <
+                HDassert(HDstrcmp(cmpd->memb[i].name, cmpd->memb[i + 1].name) <
                          0);
             }
 #endif
