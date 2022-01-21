@@ -4479,6 +4479,120 @@ H5T_get_force_conv(const H5T_t *dt)
     FUNC_LEAVE_NOAPI(dt->shared->force_conv)
 } /* end H5T_get_force_conv() */
 
+/* Compare two compound datatypes. */
+static int
+compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
+{
+    int       ret_value = 0;
+    hbool_t   swapped;
+    int       tmp;
+    unsigned *idx1 = NULL, *idx2 = NULL;
+    unsigned  u;
+    H5T_compnd_t * const cmpd1 = &sh1->u.compnd, *cmpd2 = &sh2->u.compnd;
+
+    FUNC_ENTER_NOAPI(0)
+
+    if (cmpd1->nmembs < cmpd2->nmembs)
+        HGOTO_DONE(-1);
+    if (cmpd1->nmembs > cmpd2->nmembs)
+        HGOTO_DONE(1);
+
+    /* Build an index for each type so the names are sorted */
+    if(NULL == cmpd1->idx_name) {
+        cmpd1->idx_name = (unsigned *)H5MM_malloc(cmpd1->nmembs * sizeof(unsigned));
+        if(NULL == (idx1 = cmpd1->idx_name))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+        for (u = 0; u < cmpd1->nmembs; u++)
+            idx1[u] = u;
+        if(cmpd1->nmembs > 1) {
+            int i;
+
+            for (i = (int)cmpd1->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                int j;
+
+                for (j = 0, swapped = FALSE; j < i; j++)
+                    if (HDstrcmp(cmpd1->memb[idx1[j]].name,
+                                 cmpd1->memb[idx1[j + 1]].name) > 0) {
+                        unsigned tmp_idx = idx1[j];
+                        idx1[j]          = idx1[j + 1];
+                        idx1[j + 1]      = tmp_idx;
+                        swapped          = TRUE;
+                    }
+            }
+        }
+    }
+    else {
+            idx1 = cmpd1->idx_name;
+    }
+    if(sh2->type == H5T_COMPOUND && NULL == cmpd2->idx_name) {
+        cmpd2->idx_name = (unsigned *)H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
+        if(NULL == (idx2 = cmpd2->idx_name))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+        for(u = 0; u < cmpd2->nmembs; u++)
+                idx2[u] = u;
+        if(cmpd2->nmembs > 1) {
+            int i;
+
+            for (i = (int)cmpd2->nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                int j;
+
+                for (j = 0, swapped = FALSE; j < i; j++)
+                    if (HDstrcmp(cmpd2->memb[idx2[j]].name,
+                                 cmpd2->memb[idx2[j + 1]].name) > 0) {
+                        unsigned tmp_idx = idx2[j];
+                        idx2[j]          = idx2[j + 1];
+                        idx2[j + 1]      = tmp_idx;
+                        swapped          = TRUE;
+                    }
+            }
+        } /* end if */
+    }
+    else {
+        idx2 = cmpd2->idx_name;
+    }
+
+#ifdef H5T_DEBUG
+    /* I don't quite trust the code above yet :-)  --RPM */
+    for (u = 0; u < cmpd1->nmembs - 1; u++) {
+        HDassert(HDstrcmp(cmpd1->memb[idx1[u]].name,
+                          cmpd1->memb[idx1[u + 1]].name));
+        HDassert(HDstrcmp(cmpd2->memb[idx2[u]].name,
+                          cmpd2->memb[idx2[u + 1]].name));
+    }
+#endif
+
+    /* Compare the members */
+    for (u = 0; u < cmpd1->nmembs; u++) {
+        tmp = HDstrcmp(cmpd1->memb[idx1[u]].name,
+                       cmpd2->memb[idx2[u]].name);
+        if (tmp < 0)
+            HGOTO_DONE(-1);
+        if (tmp > 0)
+            HGOTO_DONE(1);
+
+        if (cmpd1->memb[idx1[u]].offset < cmpd2->memb[idx2[u]].offset)
+            HGOTO_DONE(-1);
+        if (cmpd1->memb[idx1[u]].offset > cmpd2->memb[idx2[u]].offset)
+            HGOTO_DONE(1);
+
+        if (cmpd1->memb[idx1[u]].size < cmpd2->memb[idx2[u]].size)
+            HGOTO_DONE(-1);
+        if (cmpd1->memb[idx1[u]].size > cmpd2->memb[idx2[u]].size)
+            HGOTO_DONE(1);
+
+        tmp = H5T_cmp(cmpd1->memb[idx1[u]].type,
+                      cmpd2->memb[idx2[u]].type, superset);
+        if (tmp < 0)
+            HGOTO_DONE(-1);
+        if (tmp > 0)
+            HGOTO_DONE(1);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_cmp
  *
@@ -4496,9 +4610,10 @@ H5T_get_force_conv(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 int
-H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
+H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
 {
     unsigned *idx1 = NULL, *idx2 = NULL;
+    H5T_shared_t *sh1, *sh2;
     size_t    base_size;
     hbool_t   swapped;
     unsigned  u;
@@ -4507,142 +4622,30 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
     FUNC_ENTER_NOAPI(0)
 
-    /* Sanity check */
-    HDassert(dt1);
-    HDassert(dt2);
+    sh1 = dt1->shared;
+    sh2 = dt2->shared;
 
-    /* the easy case */
-    if (dt1 == dt2)
+    if (dt1 == dt2) // numerically identical types
         HGOTO_DONE(0);
 
-    HDassert(dt1->shared);
-    HDassert(dt2->shared);
+    if (sh1->type != sh2->type)
+        HGOTO_DONE((sh1->type < sh2->type) ? -1 : 1);
 
-    /* compare */
-    if (dt1->shared->type < dt2->shared->type)
+    if (sh1->size != sh2->size)
+        HGOTO_DONE((sh1->size < sh2->size) ? -1 : 1);
+
+    if (sh1->parent != NULL && sh2->parent == NULL)
         HGOTO_DONE(-1);
-    if (dt1->shared->type > dt2->shared->type)
+    if (sh1->parent == NULL && sh2->parent != NULL)
         HGOTO_DONE(1);
+    if (sh1->parent != NULL) {
+        if ((tmp = H5T_cmp(sh1->parent, sh2->parent, superset)) != 0)
+            HGOTO_DONE(tmp);
+    }
 
-    if (dt1->shared->size < dt2->shared->size)
-        HGOTO_DONE(-1);
-    if (dt1->shared->size > dt2->shared->size)
-        HGOTO_DONE(1);
-
-    if (dt1->shared->parent && !dt2->shared->parent)
-        HGOTO_DONE(-1);
-    if (!dt1->shared->parent && dt2->shared->parent)
-        HGOTO_DONE(1);
-    if (dt1->shared->parent) {
-        tmp = H5T_cmp(dt1->shared->parent, dt2->shared->parent, superset);
-        if (tmp < 0)
-            HGOTO_DONE(-1);
-        if (tmp > 0)
-            HGOTO_DONE(1);
-    } /* end if */
-
-    switch (dt1->shared->type) {
+    switch (sh1->type) {
         case H5T_COMPOUND:
-            /*
-             * Compound data types...
-             */
-            if (dt1->shared->u.compnd.nmembs < dt2->shared->u.compnd.nmembs)
-                HGOTO_DONE(-1);
-            if (dt1->shared->u.compnd.nmembs > dt2->shared->u.compnd.nmembs)
-                HGOTO_DONE(1);
-
-            /* Build an index for each type so the names are sorted */
-            if(NULL == dt1->shared->u.compnd.idx_name) {
-                dt1->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned));
-                if(NULL == (idx1 = dt1->shared->u.compnd.idx_name))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
-                for (u = 0; u < dt1->shared->u.compnd.nmembs; u++)
-                    idx1[u] = u;
-                if(dt1->shared->u.compnd.nmembs > 1) {
-                    int i;
-
-                    for (i = (int)dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                        int j;
-
-                        for (j = 0, swapped = FALSE; j < i; j++)
-                            if (HDstrcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
-                                         dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
-                                unsigned tmp_idx = idx1[j];
-                                idx1[j]          = idx1[j + 1];
-                                idx1[j + 1]      = tmp_idx;
-                                swapped          = TRUE;
-                            }
-                    }
-                }
-            }
-            else {
-                    idx1 = dt1->shared->u.compnd.idx_name;
-            }
-            if(dt2->shared->type == H5T_COMPOUND && NULL == dt2->shared->u.compnd.idx_name) {
-                dt2->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned));
-                if(NULL == (idx2 = dt2->shared->u.compnd.idx_name))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
-                for(u = 0; u < dt2->shared->u.compnd.nmembs; u++)
-                        idx2[u] = u;
-                if(dt2->shared->u.compnd.nmembs > 1) {
-                    int i;
-
-                    for (i = (int)dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
-                        int j;
-
-                        for (j = 0, swapped = FALSE; j < i; j++)
-                            if (HDstrcmp(dt2->shared->u.compnd.memb[idx2[j]].name,
-                                         dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
-                                unsigned tmp_idx = idx2[j];
-                                idx2[j]          = idx2[j + 1];
-                                idx2[j + 1]      = tmp_idx;
-                                swapped          = TRUE;
-                            }
-                    }
-                } /* end if */
-            }
-            else {
-                idx2 = dt2->shared->u.compnd.idx_name;
-            }
-
-#ifdef H5T_DEBUG
-            /* I don't quite trust the code above yet :-)  --RPM */
-            for (u = 0; u < dt1->shared->u.compnd.nmembs - 1; u++) {
-                HDassert(HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
-                                  dt1->shared->u.compnd.memb[idx1[u + 1]].name));
-                HDassert(HDstrcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
-                                  dt2->shared->u.compnd.memb[idx2[u + 1]].name));
-            }
-#endif
-
-            /* Compare the members */
-            for (u = 0; u < dt1->shared->u.compnd.nmembs; u++) {
-                tmp = HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
-                               dt2->shared->u.compnd.memb[idx2[u]].name);
-                if (tmp < 0)
-                    HGOTO_DONE(-1);
-                if (tmp > 0)
-                    HGOTO_DONE(1);
-
-                if (dt1->shared->u.compnd.memb[idx1[u]].offset < dt2->shared->u.compnd.memb[idx2[u]].offset)
-                    HGOTO_DONE(-1);
-                if (dt1->shared->u.compnd.memb[idx1[u]].offset > dt2->shared->u.compnd.memb[idx2[u]].offset)
-                    HGOTO_DONE(1);
-
-                if (dt1->shared->u.compnd.memb[idx1[u]].size < dt2->shared->u.compnd.memb[idx2[u]].size)
-                    HGOTO_DONE(-1);
-                if (dt1->shared->u.compnd.memb[idx1[u]].size > dt2->shared->u.compnd.memb[idx2[u]].size)
-                    HGOTO_DONE(1);
-
-                tmp = H5T_cmp(dt1->shared->u.compnd.memb[idx1[u]].type,
-                              dt2->shared->u.compnd.memb[idx2[u]].type, superset);
-                if (tmp < 0)
-                    HGOTO_DONE(-1);
-                if (tmp > 0)
-                    HGOTO_DONE(1);
-            }
-            break;
-
+            HGOTO_DONE(compound_cmp(sh1, sh2, superset));
         case H5T_ENUM:
             /*
              * Enumeration data types...
@@ -4652,30 +4655,30 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
              * more members than dt1
              */
             if (superset) {
-                if (dt1->shared->u.enumer.nmembs > dt2->shared->u.enumer.nmembs)
+                if (sh1->u.enumer.nmembs > sh2->u.enumer.nmembs)
                     HGOTO_DONE(1);
             } /* end if */
             else {
-                if (dt1->shared->u.enumer.nmembs < dt2->shared->u.enumer.nmembs)
+                if (sh1->u.enumer.nmembs < sh2->u.enumer.nmembs)
                     HGOTO_DONE(-1);
-                if (dt1->shared->u.enumer.nmembs > dt2->shared->u.enumer.nmembs)
+                if (sh1->u.enumer.nmembs > sh2->u.enumer.nmembs)
                     HGOTO_DONE(1);
             } /* end else */
 
             /* Build an index for each type so the names are sorted */
-            if (NULL == (idx1 = (unsigned *)H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))) ||
-                NULL == (idx2 = (unsigned *)H5MM_malloc(dt2->shared->u.enumer.nmembs * sizeof(unsigned))))
+            if (NULL == (idx1 = (unsigned *)H5MM_malloc(sh1->u.enumer.nmembs * sizeof(unsigned))) ||
+                NULL == (idx2 = (unsigned *)H5MM_malloc(sh2->u.enumer.nmembs * sizeof(unsigned))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
-            for (u = 0; u < dt1->shared->u.enumer.nmembs; u++)
+            for (u = 0; u < sh1->u.enumer.nmembs; u++)
                 idx1[u] = u;
-            if (dt1->shared->u.enumer.nmembs > 1) {
+            if (sh1->u.enumer.nmembs > 1) {
                 int i;
-                for (i = (int)dt1->shared->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                for (i = (int)sh1->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
                     int j;
 
                     for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(dt1->shared->u.enumer.name[idx1[j]],
-                                     dt1->shared->u.enumer.name[idx1[j + 1]]) > 0) {
+                        if (HDstrcmp(sh1->u.enumer.name[idx1[j]],
+                                     sh1->u.enumer.name[idx1[j + 1]]) > 0) {
                             unsigned tmp_idx = idx1[j];
                             idx1[j]          = idx1[j + 1];
                             idx1[j + 1]      = tmp_idx;
@@ -4683,17 +4686,17 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                         }
                 }
             }
-            for (u = 0; u < dt2->shared->u.enumer.nmembs; u++)
+            for (u = 0; u < sh2->u.enumer.nmembs; u++)
                 idx2[u] = u;
-            if (dt2->shared->u.enumer.nmembs > 1) {
+            if (sh2->u.enumer.nmembs > 1) {
                 int i;
 
-                for (i = (int)dt2->shared->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                for (i = (int)sh2->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
                     int j;
 
                     for (j = 0, swapped = FALSE; j < i; j++)
-                        if (HDstrcmp(dt2->shared->u.enumer.name[idx2[j]],
-                                     dt2->shared->u.enumer.name[idx2[j + 1]]) > 0) {
+                        if (HDstrcmp(sh2->u.enumer.name[idx2[j]],
+                                     sh2->u.enumer.name[idx2[j + 1]]) > 0) {
                             unsigned tmp_idx = idx2[j];
                             idx2[j]          = idx2[j + 1];
                             idx2[j + 1]      = tmp_idx;
@@ -4704,17 +4707,17 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
-            for (u = 0; u < dt1->shared->u.enumer.nmembs - 1; u++) {
+            for (u = 0; u < sh1->u.enumer.nmembs - 1; u++) {
                 HDassert(
-                    HDstrcmp(dt1->shared->u.enumer.name[idx1[u]], dt1->shared->u.enumer.name[idx1[u + 1]]));
+                    HDstrcmp(sh1->u.enumer.name[idx1[u]], sh1->u.enumer.name[idx1[u + 1]]));
                 HDassert(
-                    HDstrcmp(dt2->shared->u.enumer.name[idx2[u]], dt2->shared->u.enumer.name[idx2[u + 1]]));
+                    HDstrcmp(sh2->u.enumer.name[idx2[u]], sh2->u.enumer.name[idx2[u + 1]]));
             }
 #endif
 
             /* Compare the members */
-            base_size = dt1->shared->parent->shared->size;
-            for (u = 0; u < dt1->shared->u.enumer.nmembs; u++) {
+            base_size = sh1->parent->shared->size;
+            for (u = 0; u < sh1->u.enumer.nmembs; u++) {
                 unsigned idx = 0;
 
                 if (superset) {
@@ -4725,14 +4728,14 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                      * than dt1, so binary search for matching member name in
                      * dt2
                      */
-                    rt = dt2->shared->u.enumer.nmembs;
+                    rt = sh2->u.enumer.nmembs;
 
                     while (lt < rt && cmp) {
                         idx = (lt + rt) / 2;
 
                         /* compare */
-                        if ((cmp = HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
-                                            dt2->shared->u.enumer.name[idx2[idx]])) < 0)
+                        if ((cmp = HDstrcmp(sh1->u.enumer.name[idx1[u]],
+                                            sh2->u.enumer.name[idx2[idx]])) < 0)
                             rt = idx;
                         else
                             lt = idx + 1;
@@ -4745,7 +4748,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     /* Check for exact member name match when not doing
                      * "superset" comparison
                      */
-                    tmp = HDstrcmp(dt1->shared->u.enumer.name[idx1[u]], dt2->shared->u.enumer.name[idx2[u]]);
+                    tmp = HDstrcmp(sh1->u.enumer.name[idx1[u]], sh2->u.enumer.name[idx2[u]]);
                     if (tmp < 0)
                         HGOTO_DONE(-1);
                     if (tmp > 0)
@@ -4755,8 +4758,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     idx = u;
                 } /* end else */
 
-                tmp = HDmemcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
-                               (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
+                tmp = HDmemcmp((uint8_t *)sh1->u.enumer.value + idx1[u] * base_size,
+                               (uint8_t *)sh2->u.enumer.value + idx2[idx] * base_size, base_size);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
                 if (tmp > 0)
@@ -4765,59 +4768,59 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             break;
 
         case H5T_VLEN:
-            HDassert(dt1->shared->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     dt1->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
-            HDassert(dt2->shared->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     dt2->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
-            HDassert(dt1->shared->u.vlen.loc >= H5T_LOC_BADLOC && dt1->shared->u.vlen.loc < H5T_LOC_MAXLOC);
-            HDassert(dt2->shared->u.vlen.loc >= H5T_LOC_BADLOC && dt2->shared->u.vlen.loc < H5T_LOC_MAXLOC);
+            HDassert(sh1->u.vlen.type > H5T_VLEN_BADTYPE &&
+                     sh1->u.vlen.type < H5T_VLEN_MAXTYPE);
+            HDassert(sh2->u.vlen.type > H5T_VLEN_BADTYPE &&
+                     sh2->u.vlen.type < H5T_VLEN_MAXTYPE);
+            HDassert(sh1->u.vlen.loc >= H5T_LOC_BADLOC && sh1->u.vlen.loc < H5T_LOC_MAXLOC);
+            HDassert(sh2->u.vlen.loc >= H5T_LOC_BADLOC && sh2->u.vlen.loc < H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
-            if (dt1->shared->u.vlen.type == H5T_VLEN_SEQUENCE &&
-                dt2->shared->u.vlen.type == H5T_VLEN_STRING) {
+            if (sh1->u.vlen.type == H5T_VLEN_SEQUENCE &&
+                sh2->u.vlen.type == H5T_VLEN_STRING) {
                 HGOTO_DONE(-1);
             }
-            else if (dt1->shared->u.vlen.type == H5T_VLEN_STRING &&
-                     dt2->shared->u.vlen.type == H5T_VLEN_SEQUENCE) {
+            else if (sh1->u.vlen.type == H5T_VLEN_STRING &&
+                     sh2->u.vlen.type == H5T_VLEN_SEQUENCE) {
                 HGOTO_DONE(1);
             }
             /* Arbitrarily sort VL datatypes in memory before disk */
-            if (dt1->shared->u.vlen.loc == H5T_LOC_MEMORY && dt2->shared->u.vlen.loc == H5T_LOC_DISK) {
+            if (sh1->u.vlen.loc == H5T_LOC_MEMORY && sh2->u.vlen.loc == H5T_LOC_DISK) {
                 HGOTO_DONE(-1);
             }
-            else if (dt1->shared->u.vlen.loc == H5T_LOC_DISK && dt2->shared->u.vlen.loc == H5T_LOC_MEMORY) {
+            else if (sh1->u.vlen.loc == H5T_LOC_DISK && sh2->u.vlen.loc == H5T_LOC_MEMORY) {
                 HGOTO_DONE(1);
             }
-            else if (dt1->shared->u.vlen.loc == H5T_LOC_BADLOC && dt2->shared->u.vlen.loc != H5T_LOC_BADLOC) {
+            else if (sh1->u.vlen.loc == H5T_LOC_BADLOC && sh2->u.vlen.loc != H5T_LOC_BADLOC) {
                 HGOTO_DONE(1);
             }
 
             /* Don't allow VL types in different files to compare as equal */
-            if (dt1->shared->u.vlen.file < dt2->shared->u.vlen.file)
+            if (sh1->u.vlen.file < sh2->u.vlen.file)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.vlen.file > dt2->shared->u.vlen.file)
+            if (sh1->u.vlen.file > sh2->u.vlen.file)
                 HGOTO_DONE(1);
             break;
 
         case H5T_OPAQUE:
-            if (dt1->shared->u.opaque.tag && dt2->shared->u.opaque.tag)
-                HGOTO_DONE(HDstrcmp(dt1->shared->u.opaque.tag, dt2->shared->u.opaque.tag));
+            if (sh1->u.opaque.tag && sh2->u.opaque.tag)
+                HGOTO_DONE(HDstrcmp(sh1->u.opaque.tag, sh2->u.opaque.tag));
             break;
 
         case H5T_ARRAY:
-            if (dt1->shared->u.array.ndims < dt2->shared->u.array.ndims)
+            if (sh1->u.array.ndims < sh2->u.array.ndims)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.array.ndims > dt2->shared->u.array.ndims)
+            if (sh1->u.array.ndims > sh2->u.array.ndims)
                 HGOTO_DONE(1);
 
-            for (u = 0; u < dt1->shared->u.array.ndims; u++) {
-                if (dt1->shared->u.array.dim[u] < dt2->shared->u.array.dim[u])
+            for (u = 0; u < sh1->u.array.ndims; u++) {
+                if (sh1->u.array.dim[u] < sh2->u.array.dim[u])
                     HGOTO_DONE(-1);
-                if (dt1->shared->u.array.dim[u] > dt2->shared->u.array.dim[u])
+                if (sh1->u.array.dim[u] > sh2->u.array.dim[u])
                     HGOTO_DONE(1);
             }
 
-            tmp = H5T_cmp(dt1->shared->parent, dt2->shared->parent, superset);
+            tmp = H5T_cmp(sh1->parent, sh2->parent, superset);
             if (tmp < 0)
                 HGOTO_DONE(-1);
             if (tmp > 0)
@@ -4836,78 +4839,78 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             /*
              * Atomic datatypes...
              */
-            if (dt1->shared->u.atomic.order < dt2->shared->u.atomic.order)
+            if (sh1->u.atomic.order < sh2->u.atomic.order)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.atomic.order > dt2->shared->u.atomic.order)
+            if (sh1->u.atomic.order > sh2->u.atomic.order)
                 HGOTO_DONE(1);
 
-            if (dt1->shared->u.atomic.prec < dt2->shared->u.atomic.prec)
+            if (sh1->u.atomic.prec < sh2->u.atomic.prec)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.atomic.prec > dt2->shared->u.atomic.prec)
+            if (sh1->u.atomic.prec > sh2->u.atomic.prec)
                 HGOTO_DONE(1);
 
-            if (dt1->shared->u.atomic.offset < dt2->shared->u.atomic.offset)
+            if (sh1->u.atomic.offset < sh2->u.atomic.offset)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.atomic.offset > dt2->shared->u.atomic.offset)
+            if (sh1->u.atomic.offset > sh2->u.atomic.offset)
                 HGOTO_DONE(1);
 
-            if (dt1->shared->u.atomic.lsb_pad < dt2->shared->u.atomic.lsb_pad)
+            if (sh1->u.atomic.lsb_pad < sh2->u.atomic.lsb_pad)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.atomic.lsb_pad > dt2->shared->u.atomic.lsb_pad)
+            if (sh1->u.atomic.lsb_pad > sh2->u.atomic.lsb_pad)
                 HGOTO_DONE(1);
 
-            if (dt1->shared->u.atomic.msb_pad < dt2->shared->u.atomic.msb_pad)
+            if (sh1->u.atomic.msb_pad < sh2->u.atomic.msb_pad)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.atomic.msb_pad > dt2->shared->u.atomic.msb_pad)
+            if (sh1->u.atomic.msb_pad > sh2->u.atomic.msb_pad)
                 HGOTO_DONE(1);
 
-            switch (dt1->shared->type) {
+            switch (sh1->type) {
                 case H5T_INTEGER:
-                    if (dt1->shared->u.atomic.u.i.sign < dt2->shared->u.atomic.u.i.sign)
+                    if (sh1->u.atomic.u.i.sign < sh2->u.atomic.u.i.sign)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.i.sign > dt2->shared->u.atomic.u.i.sign)
+                    if (sh1->u.atomic.u.i.sign > sh2->u.atomic.u.i.sign)
                         HGOTO_DONE(1);
                     break;
 
                 case H5T_FLOAT:
-                    if (dt1->shared->u.atomic.u.f.sign < dt2->shared->u.atomic.u.f.sign)
+                    if (sh1->u.atomic.u.f.sign < sh2->u.atomic.u.f.sign)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.sign > dt2->shared->u.atomic.u.f.sign)
+                    if (sh1->u.atomic.u.f.sign > sh2->u.atomic.u.f.sign)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.epos < dt2->shared->u.atomic.u.f.epos)
+                    if (sh1->u.atomic.u.f.epos < sh2->u.atomic.u.f.epos)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.epos > dt2->shared->u.atomic.u.f.epos)
+                    if (sh1->u.atomic.u.f.epos > sh2->u.atomic.u.f.epos)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.esize < dt2->shared->u.atomic.u.f.esize)
+                    if (sh1->u.atomic.u.f.esize < sh2->u.atomic.u.f.esize)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.esize > dt2->shared->u.atomic.u.f.esize)
+                    if (sh1->u.atomic.u.f.esize > sh2->u.atomic.u.f.esize)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.ebias < dt2->shared->u.atomic.u.f.ebias)
+                    if (sh1->u.atomic.u.f.ebias < sh2->u.atomic.u.f.ebias)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.ebias > dt2->shared->u.atomic.u.f.ebias)
+                    if (sh1->u.atomic.u.f.ebias > sh2->u.atomic.u.f.ebias)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.mpos < dt2->shared->u.atomic.u.f.mpos)
+                    if (sh1->u.atomic.u.f.mpos < sh2->u.atomic.u.f.mpos)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.mpos > dt2->shared->u.atomic.u.f.mpos)
+                    if (sh1->u.atomic.u.f.mpos > sh2->u.atomic.u.f.mpos)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.msize < dt2->shared->u.atomic.u.f.msize)
+                    if (sh1->u.atomic.u.f.msize < sh2->u.atomic.u.f.msize)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.msize > dt2->shared->u.atomic.u.f.msize)
+                    if (sh1->u.atomic.u.f.msize > sh2->u.atomic.u.f.msize)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.norm < dt2->shared->u.atomic.u.f.norm)
+                    if (sh1->u.atomic.u.f.norm < sh2->u.atomic.u.f.norm)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.norm > dt2->shared->u.atomic.u.f.norm)
+                    if (sh1->u.atomic.u.f.norm > sh2->u.atomic.u.f.norm)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.f.pad < dt2->shared->u.atomic.u.f.pad)
+                    if (sh1->u.atomic.u.f.pad < sh2->u.atomic.u.f.pad)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.f.pad > dt2->shared->u.atomic.u.f.pad)
+                    if (sh1->u.atomic.u.f.pad > sh2->u.atomic.u.f.pad)
                         HGOTO_DONE(1);
 
                     break;
@@ -4917,14 +4920,14 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     break;
 
                 case H5T_STRING:
-                    if (dt1->shared->u.atomic.u.s.cset < dt2->shared->u.atomic.u.s.cset)
+                    if (sh1->u.atomic.u.s.cset < sh2->u.atomic.u.s.cset)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.s.cset > dt2->shared->u.atomic.u.s.cset)
+                    if (sh1->u.atomic.u.s.cset > sh2->u.atomic.u.s.cset)
                         HGOTO_DONE(1);
 
-                    if (dt1->shared->u.atomic.u.s.pad < dt2->shared->u.atomic.u.s.pad)
+                    if (sh1->u.atomic.u.s.pad < sh2->u.atomic.u.s.pad)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.s.pad > dt2->shared->u.atomic.u.s.pad)
+                    if (sh1->u.atomic.u.s.pad > sh2->u.atomic.u.s.pad)
                         HGOTO_DONE(1);
 
                     break;
@@ -4934,17 +4937,17 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     break;
 
                 case H5T_REFERENCE:
-                    if (dt1->shared->u.atomic.u.r.rtype < dt2->shared->u.atomic.u.r.rtype)
+                    if (sh1->u.atomic.u.r.rtype < sh2->u.atomic.u.r.rtype)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.r.rtype > dt2->shared->u.atomic.u.r.rtype)
+                    if (sh1->u.atomic.u.r.rtype > sh2->u.atomic.u.r.rtype)
                         HGOTO_DONE(1);
-                    if (dt1->shared->u.atomic.u.r.loc < dt2->shared->u.atomic.u.r.loc)
+                    if (sh1->u.atomic.u.r.loc < sh2->u.atomic.u.r.loc)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
+                    if (sh1->u.atomic.u.r.loc > sh2->u.atomic.u.r.loc)
                         HGOTO_DONE(1);
-                    if (dt1->shared->u.atomic.u.r.file < dt2->shared->u.atomic.u.r.file)
+                    if (sh1->u.atomic.u.r.file < sh2->u.atomic.u.r.file)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.r.file > dt2->shared->u.atomic.u.r.file)
+                    if (sh1->u.atomic.u.r.file > sh2->u.atomic.u.r.file)
                         HGOTO_DONE(1);
                     break;
 
@@ -4963,10 +4966,6 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     } /* end switch */
 
 done:
-/*    if (NULL != idx1)
-        H5MM_xfree(idx1);
-    if (NULL != idx2)
-        H5MM_xfree(idx2);*/
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_cmp() */
