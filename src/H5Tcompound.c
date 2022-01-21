@@ -430,73 +430,75 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     size_t   total_size;
     unsigned i;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
+    H5T_shared_t * const msh = member->shared, * const psh = parent->shared;
+    H5T_compnd_t * const pcmpd = &psh->u.compnd;
 
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(parent && H5T_COMPOUND == parent->shared->type);
-    HDassert(H5T_STATE_TRANSIENT == parent->shared->state);
+    HDassert(parent && H5T_COMPOUND == psh->type);
+    HDassert(H5T_STATE_TRANSIENT == psh->state);
     HDassert(member);
     HDassert(name && *name);
 
     /* Does NAME already exist in PARENT? */
-    for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+    for (i = 0; i < pcmpd->nmembs; i++)
+        if (!HDstrcmp(pcmpd->memb[i].name, name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique")
 
     /* Does the new member overlap any existing member ? */
-    total_size = member->shared->size;
-    for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if ((offset <= parent->shared->u.compnd.memb[i].offset &&
-             (offset + total_size) > parent->shared->u.compnd.memb[i].offset) ||
-            (parent->shared->u.compnd.memb[i].offset <= offset &&
-             (parent->shared->u.compnd.memb[i].offset + parent->shared->u.compnd.memb[i].size) > offset))
+    total_size = msh->size;
+    for (i = 0; i < pcmpd->nmembs; i++)
+        if ((offset <= pcmpd->memb[i].offset &&
+             (offset + total_size) > pcmpd->memb[i].offset) ||
+            (pcmpd->memb[i].offset <= offset &&
+             (pcmpd->memb[i].offset + pcmpd->memb[i].size) > offset))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member")
 
     /* Does the new member overlap the end of the compound type? */
-    if ((offset + total_size) > parent->shared->size)
+    if ((offset + total_size) > psh->size)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type")
 
     /* Increase member array if necessary */
-    if (parent->shared->u.compnd.nmembs >= parent->shared->u.compnd.nalloc) {
-        unsigned     na = MAX(1, parent->shared->u.compnd.nalloc * 2);
-        H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(parent->shared->u.compnd.memb, na * sizeof(H5T_cmemb_t));
+    if (pcmpd->nmembs >= pcmpd->nalloc) {
+        unsigned     na = MAX(1, pcmpd->nalloc * 2);
+        H5T_cmemb_t *x = (H5T_cmemb_t *)H5MM_realloc(pcmpd->memb, na * sizeof(H5T_cmemb_t));
 
         if (!x)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
-        parent->shared->u.compnd.nalloc = na;
-        parent->shared->u.compnd.memb   = x;
+        pcmpd->nalloc = na;
+        pcmpd->memb   = x;
     } /* end if */
 
     /* Add member to end of member array */
-    idx                                       = parent->shared->u.compnd.nmembs;
-    parent->shared->u.compnd.memb[idx].name   = H5MM_xstrdup(name);
-    parent->shared->u.compnd.memb[idx].offset = offset;
-    parent->shared->u.compnd.memb[idx].size   = total_size;
-    parent->shared->u.compnd.memb[idx].type   = H5T_copy(member, H5T_COPY_ALL);
+    idx                                       = pcmpd->nmembs;
+    pcmpd->memb[idx].name   = H5MM_xstrdup(name);
+    pcmpd->memb[idx].offset = offset;
+    pcmpd->memb[idx].size   = total_size;
+    pcmpd->memb[idx].type   = H5T_copy(member, H5T_COPY_ALL);
 
-    parent->shared->u.compnd.sorted = H5T_SORT_NONE;
-    parent->shared->u.compnd.nmembs++;
-    parent->shared->u.compnd.memb_size += total_size;
+    pcmpd->sorted = H5T_SORT_NONE;
+    pcmpd->nmembs++;
+    pcmpd->memb_size += total_size;
 
     /* It should not be possible to get this far if the type is already packed
      * - the new member would overlap something */
-    HDassert(!(parent->shared->u.compnd.packed));
+    HDassert(!(pcmpd->packed));
 
     /* Determine if the compound datatype becomes packed */
     H5T__update_packed(parent);
 
     /* Set the "force conversion" flag if the field's datatype indicates */
-    if (member->shared->force_conv == TRUE)
-        parent->shared->force_conv = TRUE;
+    if (msh->force_conv == TRUE)
+        psh->force_conv = TRUE;
 
     /* Check for member having a later version than the parent */
-    if (parent->shared->version < member->shared->version)
+    if (psh->version < msh->version)
         /* Upgrade parent datatype (and all other members also) */
         /* (can't use a partial datatype and later versions of the format are
          *  more efficient, so might as well upgrade all members also... -QAK)
          */
-        if (H5T__upgrade_version(parent, member->shared->version) < 0)
+        if (H5T__upgrade_version(parent, msh->version) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade member encoding version")
 
 done:
