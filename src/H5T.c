@@ -2568,7 +2568,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             size_t      na = MAX(32, 2 * H5T_g.asoft);
             H5T_soft_t *x;
 
-            if (NULL == (x = (H5T_soft_t *)H5MM_realloc(H5T_g.soft, na * sizeof(H5T_soft_t))))
+            if (NULL == (x = H5MM_realloc(H5T_g.soft, na * sizeof(H5T_soft_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             H5T_g.asoft = na;
             H5T_g.soft  = x;
@@ -4486,7 +4486,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
     /* Build an index for each type so the names are sorted */
     if ((idx1 = cmpd1->idx_name) == NULL) {
-        cmpd1->idx_name = (unsigned *)H5MM_malloc(cmpd1->nmembs * sizeof(unsigned));
+        cmpd1->idx_name = H5MM_malloc(cmpd1->nmembs * sizeof(unsigned));
         if(NULL == (idx1 = cmpd1->idx_name))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
         for (u = 0; u < cmpd1->nmembs; u++)
@@ -4509,7 +4509,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
         }
     }
     if ((idx2 = cmpd2->idx_name) == NULL) {
-        cmpd2->idx_name = (unsigned *)H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
+        cmpd2->idx_name = H5MM_malloc(cmpd2->nmembs * sizeof(unsigned));
         if(NULL == (idx2 = cmpd2->idx_name))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
         for(u = 0; u < cmpd2->nmembs; u++)
@@ -4599,8 +4599,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     } /* end else */
 
     /* Build an index for each type so the names are sorted */
-    if (NULL == (idx1 = (unsigned *)H5MM_malloc(en1->nmembs * sizeof(unsigned))) ||
-        NULL == (idx2 = (unsigned *)H5MM_malloc(en2->nmembs * sizeof(unsigned))))
+    if (NULL == (idx1 = H5MM_malloc(en1->nmembs * sizeof(idx1[0]))) ||
+        NULL == (idx2 = H5MM_malloc(en2->nmembs * sizeof(idx2[0]))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
     for (u = 0; u < en1->nmembs; u++)
         idx1[u] = u;
@@ -5061,7 +5061,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
      * Make sure the first entry in the table is the no-op conversion path.
      */
     if (0 == H5T_g.npaths) {
-        if (NULL == (H5T_g.path = (H5T_path_t **)H5MM_malloc(128 * sizeof(H5T_path_t *))))
+        if (NULL == (H5T_g.path = H5MM_malloc(128 * sizeof(H5T_path_t *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                         "memory allocation failed for type conversion path table")
         H5T_g.apaths = 128;
@@ -5289,7 +5289,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
             size_t       na = MAX(128, 2 * H5T_g.apaths);
             H5T_path_t **x;
 
-            if (NULL == (x = (H5T_path_t **)H5MM_realloc(H5T_g.path, na * sizeof(H5T_path_t *))))
+            if (NULL == (x = H5MM_realloc(H5T_g.path, na * sizeof(H5T_path_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             H5T_g.apaths = na;
             H5T_g.path   = x;
