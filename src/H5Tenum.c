@@ -508,7 +508,7 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
      * and search on the copied datatype to protect the original order. */
     if (NULL == (copied_dt = H5T_copy(dt, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
-    if (H5T__sort_name(copied_dt, NULL) < 0)
+    if (H5T__sort_name(copied_dt->shared, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
 
     lt = 0;
