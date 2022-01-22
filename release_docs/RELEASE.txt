@@ -1083,6 +1083,18 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/11/23, HDFFV-11286)
 
+    - Fixed several potential MPI deadlocks in library failure conditions
+
+      In the parallel library, there were several places where MPI rank 0
+      could end up skipping past collective MPI operations when some failure
+      occurs in rank 0-specific processing. This would lead to deadlocks
+      where rank 0 completes an operation while other ranks wait in the
+      collective operation. These places have been rewritten to have rank 0
+      push an error and try to cleanup after the failure, then continue to
+      participate in the collective operation to the best of its ability.
+
+      (JTH - 2021/11/09)
+
     - Fixed an issue with collective metadata reads being permanently disabled
       after a dataset chunk lookup operation. This would usually cause a
       mismatched MPI_Bcast and MPI_ERR_TRUNCATE issue in the library for
