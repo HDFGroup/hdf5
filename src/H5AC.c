@@ -1710,9 +1710,14 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
             if (H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
 
-        if (deleted && aux_ptr->mpi_rank == 0)
-            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+        if (deleted && aux_ptr->mpi_rank == 0) {
+            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0) {
+                /* If we fail to log the deleted entry, push an error but still
+                 * participate in a possible sync point ahead
+                 */
+                HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+            }
+        }
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
