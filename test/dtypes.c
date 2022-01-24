@@ -70,8 +70,8 @@
         FAIL_STACK_ERROR                                                                                     \
     if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                                                            \
         H5_FAILED();                                                                                         \
-        HDprintf("    #dtype ids expected: %" PRId64 "; found: %" PRId64 "\n", (NMEMBS),                        \
-                 H5I_nmembers(H5I_DATATYPE));                                                     \
+        HDprintf("    #dtype ids expected: %" PRId64 "; found: %" PRId64 "\n", (NMEMBS),                     \
+                 H5I_nmembers(H5I_DATATYPE));                                                                \
         goto error;                                                                                          \
     }
 

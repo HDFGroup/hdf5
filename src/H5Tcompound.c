@@ -426,12 +426,12 @@ done:
 herr_t
 H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
-    unsigned idx; /* Index of member to insert */
-    size_t   total_size;
-    unsigned i;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
-    H5T_shared_t * const msh = member->shared, * const psh = parent->shared;
-    H5T_compnd_t * const pcmpd = &psh->u.compnd;
+    unsigned            idx; /* Index of member to insert */
+    size_t              total_size;
+    unsigned            i;                   /* Local index variable */
+    herr_t              ret_value = SUCCEED; /* Return value */
+    H5T_shared_t *const msh = member->shared, *const psh = parent->shared;
+    H5T_compnd_t *const pcmpd = &psh->u.compnd;
 
     FUNC_ENTER_PACKAGE
 
@@ -449,10 +449,8 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     /* Does the new member overlap any existing member ? */
     total_size = msh->size;
     for (i = 0; i < pcmpd->nmembs; i++)
-        if ((offset <= pcmpd->memb[i].offset &&
-             (offset + total_size) > pcmpd->memb[i].offset) ||
-            (pcmpd->memb[i].offset <= offset &&
-             (pcmpd->memb[i].offset + pcmpd->memb[i].size) > offset))
+        if ((offset <= pcmpd->memb[i].offset && (offset + total_size) > pcmpd->memb[i].offset) ||
+            (pcmpd->memb[i].offset <= offset && (pcmpd->memb[i].offset + pcmpd->memb[i].size) > offset))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member")
 
     /* Does the new member overlap the end of the compound type? */
@@ -461,7 +459,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Lengthen member array if necessary */
     if (pcmpd->nmembs >= pcmpd->nalloc) {
-        unsigned     na = MAX(1, pcmpd->nalloc * 2);    // XXX overflow risk
+        unsigned     na   = MAX(1, pcmpd->nalloc * 2); // XXX overflow risk
         H5T_cmemb_t *memb = H5MM_realloc(pcmpd->memb, na * sizeof(memb[0]));
 
         if (memb == NULL)
@@ -472,7 +470,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     } /* end if */
 
     /* Add member to end of member array */
-    idx                                       = pcmpd->nmembs;
+    idx                     = pcmpd->nmembs;
     pcmpd->memb[idx].name   = H5MM_xstrdup(name);
     pcmpd->memb[idx].offset = offset;
     pcmpd->memb[idx].size   = total_size;

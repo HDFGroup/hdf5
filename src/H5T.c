@@ -3331,7 +3331,7 @@ H5T__create(H5T_class_t type, size_t size)
             if (type == H5T_COMPOUND) {
                 dt->shared->u.compnd.packed    = FALSE; /* Start out unpacked */
                 dt->shared->u.compnd.memb_size = 0;
-                dt->shared->u.compnd.idx_name = NULL;
+                dt->shared->u.compnd.idx_name  = NULL;
             } /* end if */
             else if (type == H5T_OPAQUE)
                 /* Initialize the tag in case it's not set later.  A null tag will
@@ -3524,11 +3524,11 @@ static herr_t
 H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo, hbool_t set_memory_type,
                    H5T_copy_func_t copyfn)
 {
-    H5T_t *  tmp = NULL;          /* Temporary copy of compound field's datatype */
-    char *   s;                   /* Temporary copy of compound field name / enum value name */
-    unsigned i;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
-    H5T_shared_t * const nsh = new_dt->shared, * const osh = old_dt->shared;
+    H5T_t *             tmp = NULL;          /* Temporary copy of compound field's datatype */
+    char *              s;                   /* Temporary copy of compound field name / enum value name */
+    unsigned            i;                   /* Local index variable */
+    herr_t              ret_value = SUCCEED; /* Return value */
+    H5T_shared_t *const nsh = new_dt->shared, *const osh = old_dt->shared;
 
     FUNC_ENTER_STATIC
 
@@ -3542,8 +3542,8 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
         switch (nsh->type) {
             case H5T_COMPOUND: {
-                H5T_compnd_t * const ncmpd = &nsh->u.compnd, *ocmpd = &osh->u.compnd;
-                ssize_t accum_change = 0; /* Amount of change in the offset of the fields */
+                H5T_compnd_t *const ncmpd = &nsh->u.compnd, *ocmpd = &osh->u.compnd;
+                ssize_t             accum_change = 0; /* Amount of change in the offset of the fields */
 
                 /*
                  * Copy all member fields to new type, then overwrite the
@@ -3552,13 +3552,11 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                  */
                 /* Only malloc if space has been allocated for members - NAF */
                 if (ncmpd->nalloc > 0) {
-                    ncmpd->memb =
-                        H5MM_malloc(ncmpd->nalloc * sizeof(H5T_cmemb_t));
+                    ncmpd->memb = H5MM_malloc(ncmpd->nalloc * sizeof(H5T_cmemb_t));
                     if (NULL == ncmpd->memb)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-                    H5MM_memcpy(ncmpd->memb, ocmpd->memb,
-                                ncmpd->nmembs * sizeof(H5T_cmemb_t));
+                    H5MM_memcpy(ncmpd->memb, ocmpd->memb, ncmpd->nmembs * sizeof(H5T_cmemb_t));
                 } /* end if */
 
                 for (i = 0; i < ncmpd->nmembs; i++) {
@@ -3575,8 +3573,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                     HDassert(tmp != NULL);
 
                     /* Range check against compound member's offset */
-                    if ((accum_change < 0) &&
-                        ((ssize_t)ncmpd->memb[i].offset < accum_change))
+                    if ((accum_change < 0) && ((ssize_t)ncmpd->memb[i].offset < accum_change))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid field size in datatype")
 
                     /* Apply the accumulated size change to the offset of the field */
@@ -3584,8 +3581,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
                     if (ocmpd->sorted != H5T_SORT_VALUE) {
                         for (old_match = -1, j = 0; j < ocmpd->nmembs; j++) {
-                            if (!HDstrcmp(ncmpd->memb[i].name,
-                                          ocmpd->memb[j].name)) {
+                            if (!HDstrcmp(ncmpd->memb[i].name, ocmpd->memb[j].name)) {
                                 old_match = (int)j;
                                 break;
                             } /* end if */
@@ -3599,16 +3595,13 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                         old_match = (int)i;
 
                     /* If the field changed size, add that change to the accumulated size change */
-                    if (ncmpd->memb[i].type->shared->size !=
-                        ocmpd->memb[old_match].type->shared->size) {
+                    if (ncmpd->memb[i].type->shared->size != ocmpd->memb[old_match].type->shared->size) {
                         /* Adjust the size of the member */
-                        ncmpd->memb[i].size =
-                            (ocmpd->memb[old_match].size * tmp->shared->size) /
-                            ocmpd->memb[old_match].type->shared->size;
+                        ncmpd->memb[i].size = (ocmpd->memb[old_match].size * tmp->shared->size) /
+                                              ocmpd->memb[old_match].type->shared->size;
 
-                        accum_change +=
-                            (ssize_t)(ncmpd->memb[i].type->shared->size -
-                                      ocmpd->memb[old_match].type->shared->size);
+                        accum_change += (ssize_t)(ncmpd->memb[i].type->shared->size -
+                                                  ocmpd->memb[old_match].type->shared->size);
                     } /* end if */
                 }     /* end for */
 
@@ -3621,16 +3614,13 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
                 /* Copy sorting index */
                 if (ncmpd->idx_name != NULL) {
-                    ncmpd->idx_name =
-                        H5MM_malloc(ncmpd->nalloc * sizeof(ncmpd->idx_name[0]));
+                    ncmpd->idx_name = H5MM_malloc(ncmpd->nalloc * sizeof(ncmpd->idx_name[0]));
                     if (NULL == ncmpd->idx_name)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-                    H5MM_memcpy(ncmpd->idx_name, ocmpd->idx_name,
-                        ncmpd->nmembs * sizeof(ncmpd->idx_name[0]));
+                    H5MM_memcpy(ncmpd->idx_name, ocmpd->idx_name, ncmpd->nmembs * sizeof(ncmpd->idx_name[0]));
                 }
-            }
-            break;
+            } break;
 
             case H5T_ENUM:
                 /*
@@ -3638,15 +3628,12 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                  * of each new member with copied values. That is, H5T_copy() is a
                  * deep copy.
                  */
-                if (NULL == (nsh->u.enumer.name =
-                                 H5MM_malloc(nsh->u.enumer.nalloc * sizeof(char *))))
+                if (NULL == (nsh->u.enumer.name = H5MM_malloc(nsh->u.enumer.nalloc * sizeof(char *))))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "enam name array memory allocation failed")
-                if (NULL == (nsh->u.enumer.value =
-                                 H5MM_malloc(nsh->u.enumer.nalloc * nsh->size)))
+                if (NULL == (nsh->u.enumer.value = H5MM_malloc(nsh->u.enumer.nalloc * nsh->size)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                                 "enam value array memory allocation failed")
-                H5MM_memcpy(nsh->u.enumer.value, osh->u.enumer.value,
-                            nsh->u.enumer.nmembs * nsh->size);
+                H5MM_memcpy(nsh->u.enumer.value, osh->u.enumer.value, nsh->u.enumer.nmembs * nsh->size);
                 for (i = 0; i < nsh->u.enumer.nmembs; i++) {
                     if (NULL == (s = H5MM_xstrdup(osh->u.enumer.name[i])))
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
@@ -4012,9 +3999,9 @@ done:
 herr_t
 H5T__free(H5T_t *dt)
 {
-    unsigned i;
-    herr_t   ret_value = SUCCEED; /* Return value */
-    H5T_shared_t *sh = dt->shared;
+    unsigned      i;
+    herr_t        ret_value = SUCCEED; /* Return value */
+    H5T_shared_t *sh        = dt->shared;
 
     FUNC_ENTER_PACKAGE
 
@@ -4035,8 +4022,7 @@ H5T__free(H5T_t *dt)
             sh->u.compnd.memb   = H5MM_xfree(sh->u.compnd.memb);
             sh->u.compnd.nmembs = 0;
             if (sh->u.compnd.idx_name != NULL) {
-                sh->u.compnd.idx_name =
-                    H5MM_xfree(sh->u.compnd.idx_name);
+                sh->u.compnd.idx_name = H5MM_xfree(sh->u.compnd.idx_name);
             }
             break;
 
@@ -4469,20 +4455,19 @@ H5T_get_force_conv(const H5T_t *dt)
 static void
 bubblesort_indices_by_name(H5T_compnd_t *cmpd, size_t *idx)
 {
-    hbool_t   swapped;
-    size_t i, j;
+    hbool_t swapped;
+    size_t  i, j;
 
     if (cmpd->nmembs < 2)
         return;
 
     for (i = cmpd->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
         for (j = 0, swapped = FALSE; j < i; j++) {
-            if (HDstrcmp(cmpd->memb[idx[j]].name,
-                         cmpd->memb[idx[j + 1]].name) > 0) {
+            if (HDstrcmp(cmpd->memb[idx[j]].name, cmpd->memb[idx[j + 1]].name) > 0) {
                 size_t tmp = idx[j];
-                idx[j]          = idx[j + 1];
-                idx[j + 1]      = tmp;
-                swapped          = TRUE;
+                idx[j]     = idx[j + 1];
+                idx[j + 1] = tmp;
+                swapped    = TRUE;
             }
         }
     }
@@ -4490,13 +4475,13 @@ bubblesort_indices_by_name(H5T_compnd_t *cmpd, size_t *idx)
 
 /* Compare two compound datatypes. */
 static int
-compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
+compound_cmp(H5T_shared_t *const sh1, H5T_shared_t *const sh2, bool superset)
 {
-    int       ret_value = 0;
-    int       tmp;
-    size_t *idx1, *idx2;
-    size_t  u;
-    H5T_compnd_t * const cmpd1 = &sh1->u.compnd, *cmpd2 = &sh2->u.compnd;
+    int                 ret_value = 0;
+    int                 tmp;
+    size_t *            idx1, *idx2;
+    size_t              u;
+    H5T_compnd_t *const cmpd1 = &sh1->u.compnd, *cmpd2 = &sh2->u.compnd;
 
     FUNC_ENTER_NOAPI(0)
 
@@ -4521,7 +4506,7 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
         idx2 = H5MM_malloc(cmpd2->nmembs * sizeof(cmpd2->idx_name[0]));
         if (NULL == idx2)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
-        for(u = 0; u < cmpd2->nmembs; u++)
+        for (u = 0; u < cmpd2->nmembs; u++)
             idx2[u] = u;
 
         bubblesort_indices_by_name(cmpd2, idx2);
@@ -4531,17 +4516,14 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 #ifdef H5T_DEBUG
     /* I don't quite trust the code above yet :-)  --RPM */
     for (u = 1; u < cmpd1->nmembs; u++) {
-        HDassert(HDstrcmp(cmpd1->memb[idx1[u - 1]].name,
-                          cmpd1->memb[idx1[u]].name) < 0);
-        HDassert(HDstrcmp(cmpd2->memb[idx2[u - 1]].name,
-                          cmpd2->memb[idx2[u]].name) < 0);
+        HDassert(HDstrcmp(cmpd1->memb[idx1[u - 1]].name, cmpd1->memb[idx1[u]].name) < 0);
+        HDassert(HDstrcmp(cmpd2->memb[idx2[u - 1]].name, cmpd2->memb[idx2[u]].name) < 0);
     }
 #endif
 
     /* Compare the members */
     for (u = 0; u < cmpd1->nmembs; u++) {
-        const H5T_cmemb_t * const m1 = &cmpd1->memb[idx1[u]],
-                          * const m2 = &cmpd2->memb[idx2[u]];
+        const H5T_cmemb_t *const m1 = &cmpd1->memb[idx1[u]], *const m2 = &cmpd2->memb[idx2[u]];
 
         if ((tmp = HDstrcmp(m1->name, m2->name)) != 0)
             HGOTO_DONE(tmp);
@@ -4567,15 +4549,15 @@ done:
 
 /* Compare two enumeration datatypes. */
 static int
-enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
+enum_cmp(H5T_shared_t *const sh1, H5T_shared_t *const sh2, bool superset)
 {
-    hbool_t   swapped;
-    int       ret_value = 0;
-    int       tmp;
-    unsigned *idx1 = NULL, *idx2 = NULL;
-    unsigned  u;
-    size_t    base_size;
-    H5T_enum_t * const en1 = &sh1->u.enumer, *en2 = &sh2->u.enumer;
+    hbool_t           swapped;
+    int               ret_value = 0;
+    int               tmp;
+    unsigned *        idx1 = NULL, *idx2 = NULL;
+    unsigned          u;
+    size_t            base_size;
+    H5T_enum_t *const en1 = &sh1->u.enumer, *en2 = &sh2->u.enumer;
 
     FUNC_ENTER_NOAPI(0)
 
@@ -4585,7 +4567,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
     if (superset) {
         if (en1->nmembs > en2->nmembs)
             HGOTO_DONE(1);
-    } else {
+    }
+    else {
         if (en1->nmembs < en2->nmembs)
             HGOTO_DONE(-1);
         if (en1->nmembs > en2->nmembs)
@@ -4602,8 +4585,7 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
         size_t i, j;
         for (i = en1->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
             for (j = 0, swapped = FALSE; j < i; j++)
-                if (HDstrcmp(en1->name[idx1[j]],
-                             en1->name[idx1[j + 1]]) > 0) {
+                if (HDstrcmp(en1->name[idx1[j]], en1->name[idx1[j + 1]]) > 0) {
                     unsigned tmp_idx = idx1[j];
                     idx1[j]          = idx1[j + 1];
                     idx1[j + 1]      = tmp_idx;
@@ -4618,8 +4600,7 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
         for (i = en2->nmembs - 1, swapped = TRUE; swapped && i > 0; --i) {
             for (j = 0, swapped = FALSE; j < i; j++)
-                if (HDstrcmp(en2->name[idx2[j]],
-                             en2->name[idx2[j + 1]]) > 0) {
+                if (HDstrcmp(en2->name[idx2[j]], en2->name[idx2[j + 1]]) > 0) {
                     unsigned tmp_idx = idx2[j];
                     idx2[j]          = idx2[j + 1];
                     idx2[j + 1]      = tmp_idx;
@@ -4631,10 +4612,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 #ifdef H5T_DEBUG
     /* I don't quite trust the code above yet :-)  --RPM */
     for (u = 1; u < en1->nmembs; u++) {
-        HDassert(
-            HDstrcmp(en1->name[idx1[u - 1]], en1->name[idx1[u]]) < 0);
-        HDassert(
-            HDstrcmp(en2->name[idx2[u - 1]], en2->name[idx2[u]]) < 0);
+        HDassert(HDstrcmp(en1->name[idx1[u - 1]], en1->name[idx1[u]]) < 0);
+        HDassert(HDstrcmp(en2->name[idx2[u - 1]], en2->name[idx2[u]]) < 0);
     }
 #endif
 
@@ -4657,8 +4636,7 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
                 idx = (lt + rt) / 2;
 
                 /* compare */
-                if ((cmp = HDstrcmp(en1->name[idx1[u]],
-                                    en2->name[idx2[idx]])) < 0)
+                if ((cmp = HDstrcmp(en1->name[idx1[u]], en2->name[idx2[idx]])) < 0)
                     rt = idx;
                 else
                     lt = idx + 1;
@@ -4666,7 +4644,8 @@ enum_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
             /* Leave, if we couldn't find match */
             if (cmp)
                 HGOTO_DONE(-1);
-        } else {
+        }
+        else {
             /* Check for exact member name match when not doing
              * "superset" comparison
              */
@@ -4710,12 +4689,12 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
+H5T_cmp(const H5T_t *const dt1, const H5T_t *const dt2, hbool_t superset)
 {
     H5T_shared_t *sh1, *sh2;
-    unsigned  u;
-    int       tmp;
-    int       ret_value = 0;
+    unsigned      u;
+    int           tmp;
+    int           ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -4746,20 +4725,16 @@ H5T_cmp(const H5T_t * const dt1, const H5T_t * const dt2, hbool_t superset)
         case H5T_ENUM:
             HGOTO_DONE(enum_cmp(sh1, sh2, superset));
         case H5T_VLEN:
-            HDassert(sh1->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     sh1->u.vlen.type < H5T_VLEN_MAXTYPE);
-            HDassert(sh2->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     sh2->u.vlen.type < H5T_VLEN_MAXTYPE);
+            HDassert(sh1->u.vlen.type > H5T_VLEN_BADTYPE && sh1->u.vlen.type < H5T_VLEN_MAXTYPE);
+            HDassert(sh2->u.vlen.type > H5T_VLEN_BADTYPE && sh2->u.vlen.type < H5T_VLEN_MAXTYPE);
             HDassert(sh1->u.vlen.loc >= H5T_LOC_BADLOC && sh1->u.vlen.loc < H5T_LOC_MAXLOC);
             HDassert(sh2->u.vlen.loc >= H5T_LOC_BADLOC && sh2->u.vlen.loc < H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
-            if (sh1->u.vlen.type == H5T_VLEN_SEQUENCE &&
-                sh2->u.vlen.type == H5T_VLEN_STRING) {
+            if (sh1->u.vlen.type == H5T_VLEN_SEQUENCE && sh2->u.vlen.type == H5T_VLEN_STRING) {
                 HGOTO_DONE(-1);
             }
-            else if (sh1->u.vlen.type == H5T_VLEN_STRING &&
-                     sh2->u.vlen.type == H5T_VLEN_SEQUENCE) {
+            else if (sh1->u.vlen.type == H5T_VLEN_STRING && sh2->u.vlen.type == H5T_VLEN_SEQUENCE) {
                 HGOTO_DONE(1);
             }
             /* Arbitrarily sort VL datatypes in memory before disk */

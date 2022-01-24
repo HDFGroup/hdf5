@@ -294,18 +294,18 @@ H5T__sort_value(const H5T_t *dt, int *map)
     /* Use a bubble sort because we can short circuit */
     if (H5T_COMPOUND == dt->shared->type) {
 
-        H5T_compnd_t * const cmpd = &dt->shared->u.compnd;
+        H5T_compnd_t *const cmpd = &dt->shared->u.compnd;
 
         /* Invalidate cached member-name order. */
         cmpd->idx_name = H5MM_xfree(cmpd->idx_name);
 
         if (H5T_SORT_VALUE != cmpd->sorted) {
             cmpd->sorted = H5T_SORT_VALUE;
-            nmembs                      = cmpd->nmembs;
+            nmembs       = cmpd->nmembs;
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
                     if (cmpd->memb[j].offset > cmpd->memb[j + 1].offset) {
-                        H5T_cmemb_t tmp                  = cmpd->memb[j];
+                        H5T_cmemb_t tmp   = cmpd->memb[j];
                         cmpd->memb[j]     = cmpd->memb[j + 1];
                         cmpd->memb[j + 1] = tmp;
                         if (map) {
@@ -407,17 +407,16 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
             cmpd->idx_name = H5MM_xfree(cmpd->idx_name);
 
             cmpd->sorted = H5T_SORT_NAME;
-            nmembs                      = cmpd->nmembs;
+            nmembs       = cmpd->nmembs;
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(cmpd->memb[j].name, cmpd->memb[j + 1].name) >
-                        0) {
-                        H5T_cmemb_t tmp                  = cmpd->memb[j];
+                    if (HDstrcmp(cmpd->memb[j].name, cmpd->memb[j + 1].name) > 0) {
+                        H5T_cmemb_t tmp   = cmpd->memb[j];
                         cmpd->memb[j]     = cmpd->memb[j + 1];
                         cmpd->memb[j + 1] = tmp;
-                        swapped                          = TRUE;
+                        swapped           = TRUE;
                         if (map) {
-                            size_t x      = map[j];
+                            size_t x   = map[j];
                             map[j]     = map[j + 1];
                             map[j + 1] = x;
                         }
@@ -427,8 +426,7 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++) {
-                HDassert(HDstrcmp(cmpd->memb[i].name, cmpd->memb[i + 1].name) <
-                         0);
+                HDassert(HDstrcmp(cmpd->memb[i].name, cmpd->memb[i + 1].name) < 0);
             }
 #endif
         }
@@ -436,14 +434,14 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
     else if (H5T_ENUM == sh->type) {
         if (H5T_SORT_NAME != sh->u.enumer.sorted) {
             sh->u.enumer.sorted = H5T_SORT_NAME;
-            nmembs                      = sh->u.enumer.nmembs;
-            size                        = sh->size;
+            nmembs              = sh->u.enumer.nmembs;
+            size                = sh->size;
             HDassert(size <= sizeof(tbuf));
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
                     if (HDstrcmp(sh->u.enumer.name[j], sh->u.enumer.name[j + 1]) > 0) {
                         /* Swap names */
-                        char *tmp                        = sh->u.enumer.name[j];
+                        char *tmp                = sh->u.enumer.name[j];
                         sh->u.enumer.name[j]     = sh->u.enumer.name[j + 1];
                         sh->u.enumer.name[j + 1] = tmp;
 
@@ -455,7 +453,7 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
 
                         /* Swap map */
                         if (map) {
-                            size_t x      = map[j];
+                            size_t x   = map[j];
                             map[j]     = map[j + 1];
                             map[j + 1] = x;
                         }
