@@ -396,8 +396,6 @@ H5T__sort_name(H5T_shared_t *sh, size_t *map)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check args */
-    HDassert(dt);
     HDassert(H5T_COMPOUND == sh->type || H5T_ENUM == sh->type);
 
     /* Use a bubble sort because we can short circuit */
