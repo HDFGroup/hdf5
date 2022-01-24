@@ -414,14 +414,14 @@ UD_hard_create(const char *link_name, hid_t loc_group, const void *udata, size_t
 
     token = *((H5O_token_t *)udata);
 
-    //! [H5Open_by_token_snip]
+    //! [H5Oopen_by_token_snip]
 
     /* Open the object this link points to so that we can increment
      * its reference count. This also ensures that the token passed
      * in points to a real object (although this check is not perfect!) */
     target_obj = H5Oopen_by_token(loc_group, token);
 
-    //! [H5Open_by_token_snip]
+    //! [H5Oopen_by_token_snip]
 
     if (target_obj < 0) {
         ret_value = -1;
