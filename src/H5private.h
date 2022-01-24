@@ -576,7 +576,7 @@ typedef off_t       h5_stat_size_t;
 #define HDoff_t off_t
 #endif
 
-#/* Redefine all the POSIX and C functions.  We should never see an
+/* Redefine all the POSIX and C functions.  We should never see an
  * undecorated POSIX or C function (or any other non-HDF5 function)
  * in the source.
  */
