@@ -4540,24 +4540,23 @@ compound_cmp(H5T_shared_t * const sh1, H5T_shared_t * const sh2, bool superset)
 
     /* Compare the members */
     for (u = 0; u < cmpd1->nmembs; u++) {
-        tmp = HDstrcmp(cmpd1->memb[idx1[u]].name,
-                       cmpd2->memb[idx2[u]].name);
-        if (tmp != 0)
+        const H5T_cmemb_t * const m1 = &cmpd1->memb[idx1[u]],
+                          * const m2 = &cmpd2->memb[idx2[u]];
+
+        if ((tmp = HDstrcmp(m1->name, m2->name)) != 0)
             HGOTO_DONE(tmp);
 
-        if (cmpd1->memb[idx1[u]].offset < cmpd2->memb[idx2[u]].offset)
+        if (m1->offset < m2->offset)
             HGOTO_DONE(-1);
-        if (cmpd1->memb[idx1[u]].offset > cmpd2->memb[idx2[u]].offset)
+        if (m1->offset > m2->offset)
             HGOTO_DONE(1);
 
-        if (cmpd1->memb[idx1[u]].size < cmpd2->memb[idx2[u]].size)
+        if (m1->size < m2->size)
             HGOTO_DONE(-1);
-        if (cmpd1->memb[idx1[u]].size > cmpd2->memb[idx2[u]].size)
+        if (m1->size > m2->size)
             HGOTO_DONE(1);
 
-        tmp = H5T_cmp(cmpd1->memb[idx1[u]].type,
-                      cmpd2->memb[idx2[u]].type, superset);
-        if (tmp != 0)
+        if ((tmp = H5T_cmp(m1->type, m2->type, superset)) != 0)
             HGOTO_DONE(tmp);
     }
 
