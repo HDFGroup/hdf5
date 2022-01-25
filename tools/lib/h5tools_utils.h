@@ -88,7 +88,7 @@ typedef struct long_options {
                            * this gets returned from get_option   */
 } long_options;
 
-H5TOOLS_DLL int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+H5TOOLS_DLL int get_option(int argc, char **argv, const char *opt, const struct long_options *l_opt);
 /*
  * end get_option section
  */

@@ -56,7 +56,7 @@ usage(const char *prog)
  */
 
 static void
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     int opt;
 
