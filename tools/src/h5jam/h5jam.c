@@ -22,7 +22,7 @@
 herr_t  write_pad(int ofile, hsize_t old_where, hsize_t *new_where);
 hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
-void    parse_command_line(int, const char *[]);
+void    parse_command_line(int, char *[]);
 
 int   do_clobber  = FALSE;
 char *output_file = NULL;
@@ -104,7 +104,7 @@ leave(int ret)
  */
 
 void
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     int opt = FALSE;
 

@@ -476,7 +476,7 @@ struct h5_long_options {
                                  */
 };
 
-extern int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+extern int H5_get_option(int argc, char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

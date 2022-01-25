@@ -51,7 +51,7 @@ static herr_t process_cmpd_fields(hid_t fid, char *dsetname);
 static herr_t check_dataset(hid_t fid, char *dsetname);
 static void   leave(int ret);
 static void   usage(const char *prog);
-static void   parse_command_line(int argc, const char *argv[]);
+static void   parse_command_line(int argc, char *argv[]);
 
 /*
  * Command-line options: The user can only specify long-named parameters.
@@ -665,7 +665,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static void
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     int opt; /* Command line option */
     int tmp;

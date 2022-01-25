@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 void usage(void);
-void parse_command_line(int argc, const char *argv[], const char **fname1, const char **fname2,
+void parse_command_line(int argc, char *argv[], const char **fname1, const char **fname2,
                         const char **objname1, const char **objname2, diff_opt_t *opts);
 void h5diff_exit(int status);
 void print_info(diff_opt_t *opts);
