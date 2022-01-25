@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts that cat the 
+      libhdf5-settings to the standard output.
+
+      (ADB - 2022/01/25)
+
     - CMake will now run the PowerShell script tests in test/ by default
       on Windows.
 
