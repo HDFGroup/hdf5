@@ -387,6 +387,25 @@
 #define HSSIZET_MAX ((hssize_t)LLONG_MAX)
 #define HSSIZET_MIN (~(HSSIZET_MAX))
 
+#ifdef H5_HAVE_PARALLEL
+
+/* Define a type for safely sending size_t values with MPI */
+#if SIZE_MAX == UCHAR_MAX
+   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG_LONG
+#else
+   #error "no suitable MPI type for size_t"
+#endif
+
+#endif /* H5_HAVE_PARALLEL */
+
 /*
  * Types and max sizes for POSIX I/O.
  * OS X (Darwin) is odd since the max I/O size does not match the types.

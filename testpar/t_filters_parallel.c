@@ -56,6 +56,7 @@ typedef struct filter_options_t {
  * how many chunks have been written to in a dataset
  */
 typedef enum num_chunks_written_t {
+    DATASET_JUST_CREATED,
     NO_CHUNKS_WRITTEN,
     SOME_CHUNKS_WRITTEN,
     ALL_CHUNKS_WRITTEN
@@ -354,6 +355,18 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                     VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED)
                             || (space_status == H5D_SPACE_STATUS_PART_ALLOCATED),
                             "verified space allocation status");
+                else if (chunks_written == NO_CHUNKS_WRITTEN)
+                    /*
+                     * A special case where we wrote to a dataset that
+                     * uses late space allocation, but the write was
+                     * either a no-op (no selection in the dataset
+                     * from any rank) or something caused the write to
+                     * fail late in the process of performing the actual
+                     * write. In either case, space should still have
+                     * been allocated.
+                     */
+                    VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED,
+                            "verified space allocation status");
                 else
                     VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED,
                             "verified space allocation status");
@@ -450,7 +463,7 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -605,7 +618,7 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -751,7 +764,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -912,7 +925,7 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1063,7 +1076,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1217,7 +1230,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1372,7 +1385,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1539,7 +1552,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1711,7 +1724,7 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1874,7 +1887,7 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1996,7 +2009,7 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2145,7 +2158,7 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2316,7 +2329,7 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -2483,7 +2496,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2646,7 +2659,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2808,7 +2821,7 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3000,7 +3013,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3181,7 +3194,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3388,7 +3401,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3587,7 +3600,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3768,7 +3781,7 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3968,7 +3981,7 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -4169,7 +4182,7 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -4392,7 +4405,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -4602,7 +4615,7 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -4749,7 +4762,7 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -4973,7 +4986,7 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -5194,7 +5207,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -5413,7 +5426,7 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -5639,7 +5652,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -5860,7 +5873,7 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -6102,7 +6115,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -6335,7 +6348,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -6570,7 +6583,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -6812,7 +6825,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -6996,7 +7009,7 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7132,7 +7145,7 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7303,7 +7316,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7450,7 +7463,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7523,7 +7536,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7649,7 +7662,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7722,7 +7735,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7868,7 +7881,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -8027,7 +8040,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -8236,7 +8249,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -8461,7 +8474,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
