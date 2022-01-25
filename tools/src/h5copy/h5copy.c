@@ -212,7 +212,7 @@ parse_flag(const char *s_flag, unsigned *flag)
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t              fid_src = H5I_INVALID_HID;
     hid_t              fid_dst = H5I_INVALID_HID;

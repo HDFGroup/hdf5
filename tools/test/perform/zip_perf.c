@@ -489,7 +489,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;

@@ -750,7 +750,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char **argv)
+main(int argc, char **argv)
 {
     pack_opt_t options; /*the global options */
     int        parse_ret;
