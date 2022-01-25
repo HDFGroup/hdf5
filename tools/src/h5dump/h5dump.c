@@ -816,7 +816,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;

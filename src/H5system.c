@@ -1081,7 +1081,7 @@ const char *H5_optarg;     /* Flag argument (or value)               */
  *-------------------------------------------------------------------------
  */
 int
-H5_get_option(int argc, const char **argv, const char *opts, const struct h5_long_options *l_opts)
+H5_get_option(int argc, char **argv, const char *opts, const struct h5_long_options *l_opts)
 {
     static int sp      = 1;   /* character index in current token */
     int        optchar = '?'; /* option character passed back to user */

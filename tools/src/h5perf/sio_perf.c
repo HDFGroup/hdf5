@@ -164,7 +164,7 @@ typedef struct {
 
 /* local functions */
 static hsize_t         parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, const char *argv[]);
+static struct options *parse_command_line(int argc, char *argv[]);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -817,7 +817,7 @@ report_parameters(struct options *opts)
  *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     int             opt;
     struct options *cl_opts;

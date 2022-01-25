@@ -2641,7 +2641,7 @@ struct h5_long_options {
                                  */
 };
 
-H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+H5_DLL int H5_get_option(int argc, char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
