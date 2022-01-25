@@ -224,7 +224,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     char *   fname = NULL;            /* File name */
     hid_t    fapl  = H5I_INVALID_HID; /* File access property list */

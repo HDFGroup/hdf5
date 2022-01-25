@@ -1298,7 +1298,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t             fid     = H5I_INVALID_HID;
     hid_t             gid     = H5I_INVALID_HID;

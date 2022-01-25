@@ -2640,7 +2640,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t              file_id = H5I_INVALID_HID;
     char *             fname = NULL, *oname = NULL, *x = NULL;
