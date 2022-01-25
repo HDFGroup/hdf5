@@ -1322,7 +1322,7 @@ process_input_file(char *inputname, int myrank, int size)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int i;
     int rc = 0;
@@ -1352,7 +1352,7 @@ main(int argc, const char *argv[])
     if (env_var) {
 		int enable = HDatoi(env_var);
 		if (enable) {
-			
+
 		}
     }
 #endif

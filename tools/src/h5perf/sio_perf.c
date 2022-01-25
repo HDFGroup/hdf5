@@ -185,7 +185,7 @@ static void report_parameters(struct options *opts);
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;

@@ -790,7 +790,7 @@ catch_signal(int H5_ATTR_UNUSED signo)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     char  drivername[50]; /* VFD name */
     char *fname = NULL;   /* File name */
