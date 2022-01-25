@@ -206,8 +206,8 @@ parse_subset_params(const char *dset)
  */
 
 void
-parse_command_line(int argc, char *argv[], const char **fname1, const char **fname2,
-                   const char **objname1, const char **objname2, diff_opt_t *opts)
+parse_command_line(int argc, char *argv[], const char **fname1, const char **fname2, const char **objname1,
+                   const char **objname2, diff_opt_t *opts)
 {
     int                       i;
     int                       opt;
