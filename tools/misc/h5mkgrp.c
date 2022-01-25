@@ -203,7 +203,7 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t  fid     = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t  lcpl_id = H5I_INVALID_HID; /* Link creation property list ID */

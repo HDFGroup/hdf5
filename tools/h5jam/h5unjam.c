@@ -176,7 +176,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t     ifile = H5I_INVALID_HID;
     hid_t     plist = H5I_INVALID_HID;

@@ -1588,7 +1588,7 @@ print_statistics(const char *name, const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     iter_t            iter;
     const char *      fname   = NULL;

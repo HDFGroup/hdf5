@@ -44,7 +44,7 @@ static void ph5diff_worker(int);
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int         nID      = 0;
     const char *fname1   = NULL;

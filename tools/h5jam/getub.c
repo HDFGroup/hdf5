@@ -77,7 +77,7 @@ parse_command_line(int argc, const char *argv[])
 } /* end parse_command_line() */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int      fd = H5I_INVALID_HID;
     unsigned size;

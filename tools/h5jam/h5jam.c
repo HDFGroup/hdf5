@@ -153,7 +153,7 @@ parse_command_line(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int       ufid  = -1;
     int       h5fid = -1;
