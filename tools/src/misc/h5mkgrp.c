@@ -112,7 +112,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
+parse_command_line(int argc, char *argv[], mkgrp_opt_t *options)
 {
     int    opt;        /* Option from command line */
     size_t curr_group; /* Current group name to copy */

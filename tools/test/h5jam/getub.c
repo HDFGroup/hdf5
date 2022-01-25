@@ -15,7 +15,7 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-void parse_command_line(int argc, const char *argv[]);
+void parse_command_line(int argc, char *argv[]);
 
 /* Name of tool */
 #define PROGRAM_NAME "getub"
@@ -52,7 +52,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 void
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, char *argv[])
 {
     int opt;
 

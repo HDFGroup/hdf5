@@ -18,7 +18,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5repack"
 
-static int  parse_command_line(int argc, const char **argv, pack_opt_t *options);
+static int  parse_command_line(int argc, char **argv, pack_opt_t *options);
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
@@ -456,7 +456,7 @@ set_sort_order(const char *form)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv, pack_opt_t *options)
+parse_command_line(int argc, char **argv, pack_opt_t *options)
 {
     int bound, opt;
     int ret_value = 0;

@@ -824,7 +824,7 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, char *argv[], struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
