@@ -837,7 +837,7 @@ parse_command_line(int argc, char *argv[], struct handler_t **hand_ret)
     struct handler_t *hand = NULL;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());

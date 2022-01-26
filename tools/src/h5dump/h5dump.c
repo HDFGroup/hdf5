@@ -848,7 +848,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
             case 'R':
