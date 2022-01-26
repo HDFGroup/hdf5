@@ -1198,7 +1198,7 @@ parse_start:
                         default:
                             goto end_collect;
                     }
-                } while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF);
+                } while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF);
 
 end_collect:
                 last_was_dset = FALSE;
