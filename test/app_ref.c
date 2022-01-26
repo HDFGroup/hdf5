@@ -69,10 +69,8 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 {
     int i, n;
 
-    const char *string = " ID reference count: ";
     for (i = 0; i < T_NUMCLASSES; i++) {
-        HDfprintf(stderr, "%s%s", IDNAME[i], string);
-        n = (int)(strlen(IDNAME[i]) + strlen(string));
+        HDfprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
         HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
