@@ -33,7 +33,7 @@
 #define H5_NFILTERS_IMPL                                                                                     \
     8 /* Number of currently implemented filters + one to                                                    \
          accommodate for user-define filters + one                                                           \
-         to accomodate datasets whithout any filters */
+         to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
@@ -831,7 +831,7 @@ parse_command_line(int argc, char *argv[], struct handler_t **hand_ret)
     struct handler_t *hand = NULL;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());

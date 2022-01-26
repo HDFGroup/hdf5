@@ -821,7 +821,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
             case 'R':
@@ -1168,7 +1168,7 @@ parse_start:
                         default:
                             goto end_collect;
                     }
-                } while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF);
+                } while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF);
 
 end_collect:
                 last_was_dset = FALSE;
@@ -1435,7 +1435,7 @@ main(int argc, char *argv[])
         dset_table  = table_list.tables[0].dset_table;
         type_table  = table_list.tables[0].type_table;
 
-        /* does there exist unamed committed datatype */
+        /* does there exist unnamed committed datatype */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 unamedtype = 1;

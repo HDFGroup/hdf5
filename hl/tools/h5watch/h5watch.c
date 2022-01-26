@@ -677,7 +677,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case '?':
             case 'h': /* --help */
@@ -921,7 +921,7 @@ main(int argc, char *argv[])
         }
     }
 
-    /* If everything is fine, start monitoring the datset */
+    /* If everything is fine, start monitoring the dataset */
     if (h5tools_getstatus() != EXIT_FAILURE)
         if (monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);

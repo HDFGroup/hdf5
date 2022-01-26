@@ -348,7 +348,7 @@ read_info(const char *filename, pack_opt_t *options)
             goto done;
         }
 
-        /* find begining of info */
+        /* find beginning of info */
         i = 0;
         c = '0';
         while (c != ' ') {
@@ -462,7 +462,7 @@ parse_command_line(int argc, char **argv, pack_opt_t *options)
     int ret_value = 0;
 
     /* parse command line options */
-    while (EOF != (opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts))) {
+    while (EOF != (opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts))) {
         switch ((char)opt) {
 
             /* -i for backward compatibility */
