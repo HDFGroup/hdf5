@@ -83,6 +83,12 @@
 #define H5D_CHUNK_SELECT_REG 1
 
 /*
+ * Threshold value for redistributing shared filtered chunks
+ * on all MPI ranks, or just MPI rank 0
+ */
+#define H5D_CHUNK_REDISTRIBUTE_THRES ((size_t) ((25 * H5_MB) / sizeof(H5D_chunk_redistribute_info_t)))
+
+/*
  * Macro to initialize a H5D_chk_idx_info_t
  * structure, given a pointer to a H5D_io_info_t
  * structure
@@ -310,9 +316,10 @@ static herr_t H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_in
                                                   size_t chunk_list_num_entries, const H5D_io_info_t *io_info,
                                                   const H5D_chunk_map_t *fm, int mpi_rank, int mpi_size,
                                                   size_t **rank_chunks_assigned_map);
-static herr_t H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk_list,
-                                                      size_t *num_chunks_assigned_map, const H5D_io_info_t *io_info,
-                                                      const H5D_chunk_map_t *fm, int mpi_rank, int mpi_size);
+static herr_t H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chunk_list,
+                                                       size_t *num_chunks_assigned_map, hbool_t all_ranks_involved,
+                                                       const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
+                                                       int mpi_rank, int mpi_size);
 static herr_t H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk_list,
                                                       size_t *chunk_list_num_entries, H5D_io_info_t *io_info,
                                                       const H5D_type_info_t *type_info, int mpi_rank,
@@ -2061,7 +2068,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     hbool_t                            mem_type_is_derived  = FALSE;
     hbool_t                            file_type_is_derived = FALSE;
     hbool_t                            have_chunk_to_process;
-    size_t *                           rank_chunks_assigned_map = NULL;
     size_t                             chunk_list_num_entries;
     size_t                             i;
     size_t                             max_num_chunks;
@@ -2139,8 +2145,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
          */
         if (mpi_size > 1) {
             if (H5D__mpio_redistribute_shared_chunks(chunk_list, chunk_list_num_entries,
-                                                     io_info, fm, mpi_rank, mpi_size,
-                                                     &rank_chunks_assigned_map) < 0)
+                                                     io_info, fm, mpi_rank, mpi_size, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks")
 
             /* Send chunk modification data */
@@ -2148,9 +2153,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                                                         type_info, mpi_rank, mpi_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                             "unable to send chunk modification data between MPI ranks")
-
-            /* Make sure the local chunk list was updated correctly */
-            HDassert(chunk_list_num_entries == rank_chunks_assigned_map[mpi_rank]);
         }
 
         /* Iterate over the max number of chunks among all ranks, as this rank could
@@ -2253,9 +2255,6 @@ done:
 
         H5MM_free(chunk_list);
     } /* end if */
-
-    if (rank_chunks_assigned_map)
-        H5MM_free(rank_chunks_assigned_map);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -3188,7 +3187,8 @@ H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_info_t *chunk_li
                                      const H5D_chunk_map_t *fm, int mpi_rank, int mpi_size,
                                      size_t **rank_chunks_assigned_map)
 {
-    size_t *num_chunks_map = NULL;
+    hbool_t redistribute_on_all_ranks;
+    size_t *num_chunks_map       = NULL;
     size_t  coll_chunk_list_size = 0;
     size_t  i;
     int     mpi_code;
@@ -3200,7 +3200,6 @@ H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_info_t *chunk_li
     HDassert(io_info);
     HDassert(fm);
     HDassert(mpi_size > 1); /* No chunk sharing is possible for MPI Comm size of 1 */
-    HDassert(rank_chunks_assigned_map);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -3223,15 +3222,41 @@ H5D__mpio_redistribute_shared_chunks(H5D_filtered_collective_io_info_t *chunk_li
     for (i = 0; i < (size_t)mpi_size; i++)
         coll_chunk_list_size += num_chunks_map[i];
 
-    /* Relatively large number of chunks. Redistribute on rank 0 only */
-    if (H5D__mpio_redistribute_shared_chunks_p0(chunk_list, num_chunks_map, io_info,
-                                                fm, mpi_rank, mpi_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREDISTRIBUTE, FAIL, "can't redistribute shared chunks on rank 0")
+    /*
+     * Determine whether we should perform chunk redistribution on all
+     * ranks or just rank 0. For a relatively small number of chunks,
+     * we redistribute on all ranks to cut down on MPI communication
+     * overhead. For a larger number of chunks, we redistribute on
+     * rank 0 only to cut down on memory usage.
+     */
+    redistribute_on_all_ranks = coll_chunk_list_size < H5D_CHUNK_REDISTRIBUTE_THRES;
 
-    *rank_chunks_assigned_map = num_chunks_map;
+    if (H5D__mpio_redistribute_shared_chunks_int(chunk_list, num_chunks_map, redistribute_on_all_ranks,
+                                                 io_info, fm, mpi_rank, mpi_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREDISTRIBUTE, FAIL, "can't redistribute shared chunks")
+
+    /*
+     * If the caller provided a pointer for the mapping from
+     * rank value -> number of chunks assigned, return that
+     * mapping here.
+     */
+    if (rank_chunks_assigned_map) {
+        /*
+         * If we performed chunk redistribution on rank 0 only, distribute
+         * the rank value -> number of chunks assigned mapping back to all
+         * ranks.
+         */
+        if (!redistribute_on_all_ranks) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(num_chunks_map, mpi_size, H5_SIZE_T_AS_MPI_TYPE,
+                                                     0, io_info->comm)))
+                HMPI_GOTO_ERROR(FAIL, "couldn't broadcast chunk mapping to other ranks", mpi_code)
+        }
+
+        *rank_chunks_assigned_map = num_chunks_map;
+    }
 
 done:
-    if (ret_value < 0) {
+    if (!rank_chunks_assigned_map || (ret_value < 0)) {
         num_chunks_map = H5MM_xfree(num_chunks_map);
     }
 
@@ -3244,46 +3269,61 @@ done:
 } /* end H5D__mpio_redistribute_shared_chunks() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__mpio_redistribute_shared_chunks_p0
+ * Function:    H5D__mpio_redistribute_shared_chunks_int
  *
  * Purpose:     Routine to perform redistribution of shared chunks during
- *              parallel writes to datasets with filters applied. This
- *              implementation has MPI rank 0 do all of the chunk
- *              redistribution, which adds a bit of MPI communication
- *              overhead, but should reduce total memory usage as only rank
- *              0 needs to keep a copy of the total chunk list across all
- *              ranks. To this end, this strategy is employed when the
- *              number of chunks being written to is relatively large.
+ *              parallel writes to datasets with filters applied.
  *
- *              This implementation follows this 2-phase process:
+ *              If `all_ranks_involved` is TRUE, chunk redistribution
+ *              occurs on all MPI ranks. This is usually done when there
+ *              is a relatively small number of chunks involved in order to
+ *              cut down on MPI communication overhead while increasing
+ *              total memory usage a bit.
  *
- *              - All MPI ranks send their list of selected chunks to rank
- *                0, then rank 0 sorts this new list in order of chunk
+ *              If `all_ranks_involved` is FALSE, only rank 0 will perform
+ *              chunk redistribution. This is usually done when there is
+ *              a relatively large number of chunks involved in order to
+ *              cut down on total memory usage at the cost of increased
+ *              overhead from MPI communication.
+ *
+ *              This implementation is as follows:
+ *
+ *              - All MPI ranks send their list of selected chunks to the
+ *                ranks involved in chunk redistribution. Then, the
+ *                involved ranks sort this new list in order of chunk
  *                index.
  *
- *              - Rank 0 scans the list looking for matching runs of chunk
- *                index values (corresponding to a shared chunk which
- *                has been selected by more than one rank in the I/O
- *                operation) and for each shared chunk, it redistributes
- *                the chunk to the MPI rank writing to the chunk which
- *                currently has the least amount of chunks assigned to it.
- *                It does this by modifying the "new_owner" field in each
- *                of the list entries corresponding to that chunk. Rank 0
- *                then re-sorts the list in order of previous owner so that
- *                each rank will get back the array that they contributed
- *                to the redistribution operation, with the "new_owner"
- *                field of each chunk they are modifying having possibly
- *                been modified. Rank 0 finally scatters each segment of
- *                the list back to its corresponding rank.
+ *              - The involved ranks scan the list looking for matching
+ *                runs of chunk index values (corresponding to a shared
+ *                chunk which has been selected by more than one rank in
+ *                the I/O operation) and for each shared chunk,
+ *                redistribute the chunk to the MPI rank writing to the
+ *                chunk which currently has the least amount of chunks
+ *                assigned to it. This is done by modifying the "new_owner"
+ *                field in each of the list entries corresponding to that
+ *                chunk. The involved ranks then re-sort the list in order
+ *                of original chunk owner so that each rank's section of
+ *                contributed chunks is contiguous in the collective chunk
+ *                list.
+ *
+ *              - If chunk redistribution occurred on all ranks, each rank
+ *                scans through the collective chunk list to find their
+ *                contributed section of chunks and uses that to update
+ *                their local chunk list with the newly-updated "new_owner"
+ *                and "num_writers" fields. If chunk redistribution
+ *                occurred only on rank 0, an MPI_Scatterv operation will
+ *                be used to scatter the segments of the collective chunk
+ *                list from rank 0 back to the corresponding ranks.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk_list,
-                                        size_t *num_chunks_assigned_map, const H5D_io_info_t *io_info,
-                                        const H5D_chunk_map_t *fm, int mpi_rank, int mpi_size)
+H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chunk_list,
+                                         size_t *num_chunks_assigned_map, hbool_t all_ranks_involved,
+                                         const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
+                                         int mpi_rank, int mpi_size)
 {
     MPI_Datatype struct_type;
     MPI_Datatype packed_type;
@@ -3291,12 +3331,10 @@ H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk
     hbool_t      packed_type_derived = FALSE;
     size_t       i;
     size_t       coll_chunk_list_num_entries = 0;
-    void *       coll_chunk_list         = NULL;
-    int *        recv_counts_disps_array = NULL;
-    int *        rank_info               = NULL;
-    int *        send_counts_ptr         = NULL;
-    int *        displacements_ptr       = NULL;
-    int *        num_chunks_assigned_ptr = NULL;
+    void *       coll_chunk_list             = NULL;
+    int *        counts_disps_array          = NULL;
+    int *        counts_ptr                  = NULL;
+    int *        displacements_ptr           = NULL;
     int          num_chunks_int;
     int          mpi_code;
     herr_t       ret_value = SUCCEED;
@@ -3311,7 +3349,7 @@ H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
-    H5D_MPIO_TIME_START(mpi_rank, "Redistribute shared chunks (p0 only)");
+    H5D_MPIO_TIME_START(mpi_rank, "Redistribute shared chunks (internal)");
 #endif
 
     /*
@@ -3322,11 +3360,11 @@ H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk
 
     /*
      * Phase 1 - Participate in collective gathering of every rank's
-     * list of chunks to rank 0 to allow it to perform the redistribution
+     * list of chunks to the ranks which are performing the redistribution
      * operation.
      */
 
-    if (mpi_rank == 0) {
+    if (all_ranks_involved || (mpi_rank == 0)) {
         /*
          * Allocate array to store the receive counts of each rank, as well as
          * the displacements into the final array where each rank will place
@@ -3334,22 +3372,24 @@ H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk
          * (in rank order), while the latter half contains the displacements
          * (also in rank order).
          */
-        if (NULL == (recv_counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*recv_counts_disps_array)))) {
+        if (NULL == (counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(*counts_disps_array)))) {
             /* Push an error, but still participate in collective gather operation */
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                         "couldn't allocate receive counts and displacements array")
         }
         else {
             /* Set the receive counts from the assigned chunks map */
+            counts_ptr = counts_disps_array;
+
             for (i = 0; i < (size_t)mpi_size; i++)
-                H5_CHECKED_ASSIGN(recv_counts_disps_array[i], int, num_chunks_assigned_map[i], size_t);
+                H5_CHECKED_ASSIGN(counts_ptr[i], int, num_chunks_assigned_map[i], size_t);
 
             /* Set the displacements into the receive buffer for the gather operation */
-            displacements_ptr = &recv_counts_disps_array[mpi_size];
+            displacements_ptr = &counts_disps_array[mpi_size];
 
             *displacements_ptr = 0;
             for (i = 1; i < (size_t)mpi_size; i++)
-                displacements_ptr[i] = displacements_ptr[i - 1] + recv_counts_disps_array[i - 1];
+                displacements_ptr[i] = displacements_ptr[i - 1] + counts_ptr[i - 1];
         }
     }
 
@@ -3363,149 +3403,142 @@ H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *chunk
                     "can't create derived datatypes for chunk redistribution info")
 
     /* Perform gather operation */
-    if (H5_mpio_gatherv_alloc(chunk_list, num_chunks_int, struct_type, recv_counts_disps_array,
-                              &recv_counts_disps_array[mpi_size], packed_type, FALSE, 0,
-                              io_info->comm, mpi_rank, mpi_size, &coll_chunk_list,
+    if (H5_mpio_gatherv_alloc(chunk_list, num_chunks_int, struct_type, counts_ptr,
+                              displacements_ptr, packed_type, all_ranks_involved,
+                              0, io_info->comm, mpi_rank, mpi_size, &coll_chunk_list,
                               &coll_chunk_list_num_entries) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk redistribution info to rank 0")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk redistribution info to involved ranks")
 
     /*
-     * Phase 2 - Rank 0 now redistributes any shared chunks to new
+     * If all ranks are redistributing shared chunks, we no
+     * longer need the receive counts and displacements array
+     */
+    if (all_ranks_involved) {
+        counts_disps_array = H5MM_xfree(counts_disps_array);
+    }
+
+    /*
+     * Phase 2 - Involved ranks now redistribute any shared chunks to new
      * owners as necessary.
      */
 
-    if (mpi_rank == 0) {
+    if (all_ranks_involved || (mpi_rank == 0)) {
+        H5D_chunk_redistribute_info_t *chunk_entry;
+        hsize_t                        curr_chunk_idx;
+        size_t                         set_begin_index;
+        int                            num_writers;
+        int                            new_chunk_owner;
+
+        /* Clear the mapping from rank value -> number of assigned chunks */
+        HDmemset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
+
         /* Sort collective chunk list according to chunk index */
         HDqsort(coll_chunk_list, coll_chunk_list_num_entries,
                 sizeof(H5D_chunk_redistribute_info_t),
                 H5D__cmp_chunk_redistribute_info);
 
-        /* Allocate an array to hold info about other ranks for rank 0's bookkeeping.
-         * This array contains the amount of data to send back to each rank, the
-         * displacements in the total array for each rank's piece of contributed data
-         * and the number of chunks assigned to a particular rank. It can be visualized
-         * as three consecutive arrays in one, with each sub-array ordered by increasing
-         * MPI rank value, e.g.:
-         *
-         * [send_count0][...][send_countN][displacement0][...][displacementN][num_chunks0][...][num_chunksN]
-         */
-        if (NULL == (rank_info = H5MM_calloc(3 * (size_t)mpi_size * sizeof(*rank_info)))) {
-            /* Push an error, but still participate in following collective Scatterv call */
-            HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                        "unable to allocate MPI rank info bookkeeping array")
-        }
-        else {
-            H5D_chunk_redistribute_info_t *chunk_entry;
-            hsize_t                        curr_chunk_idx;
-            size_t                         set_begin_index;
-            int                            num_writers;
-            int                            new_chunk_owner;
+        /* Process all chunks in the collective chunk list */
+        chunk_entry = &((H5D_chunk_redistribute_info_t *)coll_chunk_list)[0];
+        for (i = 0; i < coll_chunk_list_num_entries;) {
+            /* Set chunk's initial new owner to its original owner */
+            new_chunk_owner = chunk_entry->orig_owner;
 
-            /* Setup indexing into rank info bookkeeping array */
-            send_counts_ptr         = &rank_info[0];
-            displacements_ptr       = &rank_info[mpi_size];
-            num_chunks_assigned_ptr = &rank_info[2 * mpi_size];
+            /*
+             * Set the current chunk index so we know when we've processed
+             * all duplicate entries for a particular shared chunk
+             */
+            curr_chunk_idx = chunk_entry->chunk_idx;
 
-            /* Process all chunks in the collective chunk list */
-            chunk_entry = &((H5D_chunk_redistribute_info_t *)coll_chunk_list)[0];
-            for (i = 0; i < coll_chunk_list_num_entries;) {
-                /* Set chunk's initial new owner to its original owner */
-                new_chunk_owner = chunk_entry->orig_owner;
+            /* Reset the initial number of writers to this chunk */
+            num_writers = 0;
 
+            /* Set index for the beginning of this section of duplicate chunk entries */
+            set_begin_index = i;
+
+            /*
+             * Process each chunk entry in the set for the current
+             * (possibly shared) chunk
+             */
+            do {
                 /*
-                 * Set the current chunk index so we know when we've processed
-                 * all duplicate entries for a particular shared chunk
+                 * The new owner of the chunk is determined by the rank
+                 * writing to the chunk which currently has the least amount
+                 * of chunks assigned to it
                  */
-                curr_chunk_idx = chunk_entry->chunk_idx;
+                if (num_chunks_assigned_map[chunk_entry->orig_owner] <
+                    num_chunks_assigned_map[new_chunk_owner])
+                    new_chunk_owner = chunk_entry->orig_owner;
 
-                /* Reset the initial number of writers to this chunk */
-                num_writers = 0;
+                /* Update the number of writers to this particular chunk */
+                num_writers++;
 
-                /* Set index for the beginning of this section of duplicate chunk entries */
-                set_begin_index = i;
+                chunk_entry++;
+            } while (++i < coll_chunk_list_num_entries &&
+                    chunk_entry->chunk_idx == curr_chunk_idx);
 
-                /*
-                 * Process each chunk entry in the set for the current
-                 * (possibly shared) chunk
-                 */
-                do {
-                    /*
-                     * The new owner of the chunk is determined by the rank
-                     * writing to the chunk which currently has the least amount
-                     * of chunks assigned to it
-                     */
-                    if (num_chunks_assigned_ptr[chunk_entry->orig_owner] <
-                        num_chunks_assigned_ptr[new_chunk_owner])
-                        new_chunk_owner = chunk_entry->orig_owner;
+            /* We should never have more writers to a chunk than the number of MPI ranks */
+            HDassert(num_writers <= mpi_size);
 
-                    /* Update the amount of data being sent back to the rank that owns this chunk entry */
-                    send_counts_ptr[chunk_entry->orig_owner]++;
+            /* Set all processed chunk entries' "new_owner" and "num_writers" fields */
+            for (; set_begin_index < i; set_begin_index++) {
+                H5D_chunk_redistribute_info_t *entry;
 
-                    /* Update the number of writers to this particular chunk */
-                    num_writers++;
+                entry = &((H5D_chunk_redistribute_info_t *)coll_chunk_list)[set_begin_index];
 
-                    chunk_entry++;
-                } while (++i < coll_chunk_list_num_entries &&
-                        chunk_entry->chunk_idx == curr_chunk_idx);
-
-                /* We should never have more writers to a chunk than the number of MPI ranks */
-                HDassert(num_writers <= mpi_size);
-
-                /* Set all processed chunk entries' "new_owner" and "num_writers" fields */
-                for (; set_begin_index < i; set_begin_index++) {
-                    H5D_chunk_redistribute_info_t *entry;
-
-                    entry = &((H5D_chunk_redistribute_info_t *)coll_chunk_list)[set_begin_index];
-
-                    entry->new_owner   = new_chunk_owner;
-                    entry->num_writers = num_writers;
-                }
-
-                /* Update the number of chunks assigned to the MPI rank that now owns this chunk */
-                num_chunks_assigned_ptr[new_chunk_owner]++;
+                entry->new_owner   = new_chunk_owner;
+                entry->num_writers = num_writers;
             }
 
-            /* Update the mapping from rank number -> number of assigned chunks */
-            for (i = 0; i < (size_t)mpi_size; i++)
-                num_chunks_assigned_map[i] = (size_t)num_chunks_assigned_ptr[i];
-
-            /*
-             * Re-sort the collective chunk list in order of previous owner so
-             * that each original owner of a chunk entry gets that entry back,
-             * with the possibly newly-modified "new_owner" and "num_writers"
-             * fields.
-             */
-            HDqsort(coll_chunk_list, coll_chunk_list_num_entries,
-                    sizeof(H5D_chunk_redistribute_info_t),
-                    H5D__cmp_chunk_redistribute_info_orig_owner);
-
-            /*
-             * Setup displacements for MPI_Scatterv to scatter each
-             * rank's contributed piece of the array back to them
-             */
-            displacements_ptr[0] = 0;
-            for (i = 1; i < (size_t)mpi_size; i++)
-                displacements_ptr[i] = displacements_ptr[i - 1] + send_counts_ptr[i - 1];
+            /* Update the number of chunks assigned to the MPI rank that now owns this chunk */
+            num_chunks_assigned_map[new_chunk_owner]++;
         }
+
+        /*
+         * Re-sort the collective chunk list in order of original chunk owner
+         * so that each rank's section of contributed chunks is contiguous in
+         * the collective chunk list.
+         */
+        HDqsort(coll_chunk_list, coll_chunk_list_num_entries,
+                sizeof(H5D_chunk_redistribute_info_t),
+                H5D__cmp_chunk_redistribute_info_orig_owner);
     }
 
-    /* Scatter the segments of the collective chunk list back to each rank */
-    if (MPI_SUCCESS !=
-        (mpi_code = MPI_Scatterv(coll_chunk_list, send_counts_ptr, displacements_ptr, packed_type,
-                                 chunk_list, num_chunks_int, struct_type, 0, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "unable to scatter shared chunks info buffer", mpi_code)
+    if (all_ranks_involved) {
+        /*
+         * If redistribution occurred on all ranks, search for the section
+         * in the collective chunk list corresponding to this rank's locally
+         * selected chunks and update the local list after redistribution.
+         */
+        for (i = 0; i < coll_chunk_list_num_entries; i++)
+            if (mpi_rank == ((H5D_chunk_redistribute_info_t *)coll_chunk_list)[i].orig_owner)
+                break;
 
-    /* Distribute rank number -> assigned chunks mapping back to all ranks */
-    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(num_chunks_assigned_map, mpi_size, H5_SIZE_T_AS_MPI_TYPE,
-                                             0, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "couldn't broadcast chunk mapping to other ranks", mpi_code)
+        for (size_t j = 0; j < (size_t)num_chunks_int; j++) {
+            H5D_chunk_redistribute_info_t *coll_entry;
+
+            coll_entry = &((H5D_chunk_redistribute_info_t *)coll_chunk_list)[i++];
+
+            chunk_list[j].new_owner   = coll_entry->new_owner;
+            chunk_list[j].num_writers = coll_entry->num_writers;
+        }
+    }
+    else {
+        /*
+         * If redistribution occurred only on rank 0, scatter the segments
+         * of the collective chunk list back to each rank so that their
+         * local chunk lists get updated
+         */
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Scatterv(coll_chunk_list, counts_ptr, displacements_ptr, packed_type,
+                                     chunk_list, num_chunks_int, struct_type, 0, io_info->comm)))
+            HMPI_GOTO_ERROR(FAIL, "unable to scatter shared chunks info buffer", mpi_code)
+    }
 
 #ifdef H5Dmpio_DEBUG
     H5D__mpio_dump_collective_filtered_chunk_list(chunk_list, num_chunks_assigned_map[mpi_rank], mpi_rank);
 #endif
 
 done:
-    H5MM_free(rank_info);
     H5MM_free(coll_chunk_list);
 
     if (struct_type_derived) {
@@ -3517,7 +3550,7 @@ done:
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     }
 
-    H5MM_free(recv_counts_disps_array);
+    H5MM_free(counts_disps_array);
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -3525,7 +3558,7 @@ done:
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mpio_redistribute_shared_chunks_p0() */
+} /* end H5D__mpio_redistribute_shared_chunks_int() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_share_chunk_modification_data
