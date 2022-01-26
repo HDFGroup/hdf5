@@ -857,7 +857,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
                 cl_opts->h5_alignment = parse_size_directive(H5_optarg);
