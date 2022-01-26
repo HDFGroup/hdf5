@@ -182,7 +182,7 @@ if (HDF5_PACK_EXAMPLES)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Configure the README.txt file for the binary package
+# Configure the README.md file for the binary package
 #-----------------------------------------------------------------------------
 HDF_README_PROPERTIES(HDF5_BUILD_FORTRAN)
 

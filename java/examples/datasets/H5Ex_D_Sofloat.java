@@ -21,6 +21,9 @@
  ************************************************************/
 package examples.datasets;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,8 +126,9 @@ public class H5Ex_D_Sofloat {
             }
 
         // Print the maximum value.
-        System.out.println("Maximum value in write buffer is: " + max);
-        System.out.println("Minimum value in write buffer is: " + min);
+        DecimalFormat df = new DecimalFormat("#,##0.000000", new DecimalFormatSymbols(Locale.US));
+        System.out.println("Maximum value in write buffer is: " + df.format(max));
+        System.out.println("Minimum value in write buffer is: " + df.format(min));
 
         // Create a new file using the default properties.
         try {
@@ -308,8 +312,9 @@ public class H5Ex_D_Sofloat {
             }
 
         // Print the maximum value.
-        System.out.println("Maximum value in " + DATASETNAME + " is: " + max);
-        System.out.println("Minimum value in " + DATASETNAME + " is: " + min);
+        DecimalFormat df = new DecimalFormat("#,##0.000000", new DecimalFormatSymbols(Locale.US));
+        System.out.println("Maximum value in " + DATASETNAME + " is: " + df.format(max));
+        System.out.println("Minimum value in " + DATASETNAME + " is: " + df.format(min));
 
         // End access to the dataset and release resources used by it.
         try {
