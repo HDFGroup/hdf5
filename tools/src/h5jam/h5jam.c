@@ -22,7 +22,7 @@
 herr_t  write_pad(int ofile, hsize_t old_where, hsize_t *new_where);
 hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
-void    parse_command_line(int, const char *[]);
+void    parse_command_line(int, char *[]);
 
 int   do_clobber  = FALSE;
 char *output_file = NULL;
@@ -109,7 +109,7 @@ parse_command_line(int argc, char *argv[])
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
                 output_file = HDstrdup(H5_optarg);
@@ -358,7 +358,7 @@ done:
  * Purpose:     Copy part of the input file to output.
  *      infid: fd of file to read
  *      outfid: fd of file to write
- *      startin: offset of where to read from infid
+ *      starting: offset of where to read from infid
  *      startout: offset of where to write to outfid
  *      limit: bytes to read/write
  *
@@ -373,7 +373,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hsize_t
-copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout, ssize_t limit)
+copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssize_t limit)
 {
     char      buf[1024];
     h5_stat_t sbuf;
@@ -386,9 +386,9 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout, ssiz
     ssize_t   toend;
     ssize_t   fromend;
 
-    if (startin > startout) {
+    if (starting > startout) {
         /* this case is prohibited */
-        error_msg("copy_some_to_file: panic: startin > startout?\n");
+        error_msg("copy_some_to_file: panic: starting > startout?\n");
         exit(EXIT_FAILURE);
     } /* end if */
 
@@ -409,7 +409,7 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout, ssiz
         return 0;
 
     toend   = (ssize_t)startout + howmuch;
-    fromend = (ssize_t)startin + howmuch;
+    fromend = (ssize_t)starting + howmuch;
 
     if (howmuch > 512) {
         to   = toend - 512;

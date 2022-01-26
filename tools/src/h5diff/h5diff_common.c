@@ -232,7 +232,7 @@ parse_command_line(int argc, char *argv[], const char **fname1, const char **fna
     exclude_attr_head = NULL;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             default:
                 usage();
@@ -277,7 +277,7 @@ parse_command_line(int argc, char *argv[], const char **fname1, const char **fna
                 break;
 
             case 'q':
-                /* use quiet mode; supress the message "0 differences found" */
+                /* use quiet mode; suppress the message "0 differences found" */
                 opts->mode_quiet = 1;
                 break;
 

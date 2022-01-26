@@ -242,7 +242,7 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'd':
                 oname_dst = HDstrdup(H5_optarg);

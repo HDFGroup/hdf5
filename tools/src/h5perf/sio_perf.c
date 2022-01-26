@@ -427,7 +427,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show sys write statics */
+    /* show sys write statistics */
 #if 0
     if (sio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -473,7 +473,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
 #if 0
         if (sio_debug_level >= 3) {
             /* output all of the times for all iterations */
@@ -857,7 +857,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
                 cl_opts->h5_alignment = parse_size_directive(H5_optarg);

@@ -140,7 +140,7 @@ parse_command_line(int argc, char *argv[], mkgrp_opt_t *options)
     HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* Parse command line options */
-    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             /* Display 'help' */
             case 'h':

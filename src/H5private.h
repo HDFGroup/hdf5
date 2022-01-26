@@ -2045,7 +2045,7 @@ extern H5_api_t H5_g;
 #define H5_API_LOCK
 #define H5_API_UNLOCK
 
-/* disable cancelability (sequential version) */
+/* disable cancellability (sequential version) */
 #define H5_API_UNSET_CANCEL
 #define H5_API_SET_CANCEL
 
@@ -2641,7 +2641,8 @@ struct h5_long_options {
                                  */
 };
 
-H5_DLL int H5_get_option(int argc, const char* const *argv, const char *opt, const struct h5_long_options *l_opt);
+H5_DLL int H5_get_option(int argc, const char *const *argv, const char *opt,
+                         const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
