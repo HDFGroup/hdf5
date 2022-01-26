@@ -528,7 +528,7 @@ parse_command_line(int argc, char **argv, pack_opt_t *options)
     HDmemset(&out_vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* parse command line options */
-    while (EOF != (opt = H5_get_option(argc, argv, s_opts, l_opts))) {
+    while (EOF != (opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts))) {
         switch ((char)opt) {
 
             /* -i for backward compatibility */

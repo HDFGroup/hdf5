@@ -1392,7 +1392,7 @@ main(int argc, char *argv[])
     mfu_pred *pred_head = NULL;
 
     while (!tool_selected) {
-        opt = H5_get_option(argc, argv, s_opts, l_opts);
+        opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts);
         switch ((char)opt) {
             default:
                 usage();

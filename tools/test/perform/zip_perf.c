@@ -500,7 +500,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':

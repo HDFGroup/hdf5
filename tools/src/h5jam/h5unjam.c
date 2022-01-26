@@ -97,7 +97,7 @@ parse_command_line(int argc, char *argv[])
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char* const *)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
                 output_file = HDstrdup(H5_optarg);
