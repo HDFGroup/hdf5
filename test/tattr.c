@@ -2807,7 +2807,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     /* Delete last attribute */
     ret = H5Adelete(dataset, attrname);
     CHECK(ret, FAIL, "H5Adelete");
-    
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
