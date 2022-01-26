@@ -945,7 +945,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     /* Delete old attribute from dense storage */
     if (H5A__dense_remove(f, ainfo, old_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
-        
+
     /* Insert renamed attribute back into dense storage */
     /* (Possibly making it shared) */
     if (H5A__dense_insert(f, ainfo, attr_copy) < 0)
