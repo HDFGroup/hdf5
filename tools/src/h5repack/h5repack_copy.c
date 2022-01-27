@@ -1166,27 +1166,26 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
 
 #ifdef H5_HAVE_PARALLEL
         if (g_Parallel) {
-            if ((tiCount = select_objs_by_rank(fidin, travt, &travt_indices)) > 0) {
-                /* When running parallel processes, all object creations need to be done
-                 * either collectively, or by a single rank (usually this will be MPI rank 0).
-                 * Note that most object types, e.g. groups, datatypes, and links are
-                 * relatively "low cost" and therefore would not benefit from applying
-                 * parallelism.  As a result, these object types are simply copied by
-                 * by the MPI rank 0. Datasets on the hand, should make up the majority
-                 * of the file space in an HDF5 file.  As a result, though we allow
-                 * the actual dataset creations to occur from rank 0, the data coping
-                 * can be run in parallel.
-                 */
-                if (pcreate_new_objects(fnameout, fcpl, fidin, &fidout, travt, options) < 0)
-                    H5TOOLS_GOTO_ERROR((-1), "pcreate_new_objects from <%s> into <%s>", fnamein, fnameout);
+            tiCount = select_objs_by_rank(fidin, travt, &travt_indices);
+            /* When running parallel processes, all object creations need to be done
+             * either collectively, or by a single rank (usually this will be MPI rank 0).
+             * Note that most object types, e.g. groups, datatypes, and links are
+             * relatively "low cost" and therefore would not benefit from applying
+             * parallelism.  As a result, these object types are simply copied by
+             * by the MPI rank 0. Datasets on the hand, should make up the majority
+             * of the file space in an HDF5 file.  As a result, though we allow
+             * the actual dataset creations to occur from rank 0, the data coping
+             * can be run in parallel.
+             */
+            if (pcreate_new_objects(fnameout, fcpl, fidin, &fidout, travt, options) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "pcreate_new_objects from <%s> into <%s>", fnamein, fnameout);
 
-                if (pcopy_objects(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
-                    H5TOOLS_GOTO_ERROR((-1), "pcopy_objects from <%s> could not copy data to <%s>", fnamein,
-                                       fnameout);
-                if (pcopy_refobjs(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
-                    H5TOOLS_GOTO_ERROR((-1), "pcopy_refobjs from <%s> could not copy data to <%s>", fnamein,
-                                       fnameout);
-            }
+            if (pcopy_objects(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "pcopy_objects from <%s> could not copy data to <%s>", fnamein,
+                                   fnameout);
+            if (pcopy_refobjs(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "pcopy_refobjs from <%s> could not copy data to <%s>", fnamein,
+                                   fnameout);
         }
         else
 #endif
@@ -1223,11 +1222,17 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
         H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
     if (H5Gclose(grp_in) < 0)
         H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
-    if (H5Fclose(fidout) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
-    if (H5Fclose(fidin) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
 
+    if (fidout != H5I_INVALID_HID) {
+        if (H5Fclose(fidout) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+        fidout = H5I_INVALID_HID;
+    }
+    if (fidin != H5I_INVALID_HID) {
+        if (H5Fclose(fidin) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+        fidin = H5I_INVALID_HID;
+    }
     /*-------------------------------------------------------------------------
      * NOTE: The userblock MUST be written out AFTER the file is closed or
      * the file locking will cause failures on Windows, where file locks
