@@ -183,7 +183,6 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
     else if (g_nID == 0)
         HDprintf(FORMAT_OBJ, "dset", travt->objs[index].name);
 
-
     if (!use_h5ocopy) {
         int j;
 
@@ -326,7 +325,7 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                 } /* end if retry dataset create */
             }
         }
-    } /* NOT use_h5ocopy */
+    }      /* NOT use_h5ocopy */
     else { /* use_h5ocopy */
         if (!is_named) {
             if (options->use_native == 1)
@@ -383,10 +382,10 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
 #if 0
     hid_t fidout    = H5I_INVALID_HID;
 #else
-    hid_t fidout    = *_fidout;
+    hid_t fidout = *_fidout;
 #endif
-    int   ret_value = 0;
-    int   g_ret     = 0;
+    int ret_value = 0;
+    int g_ret     = 0;
 
     /*-------------------------------------------------------------------------
      * create the output file
