@@ -79,7 +79,7 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
     hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
     hsize_t nelmts;             /* number of elements in dataset */
     hsize_t size_dset;
-
+    double  write_time = 0.0;
     hbool_t use_h5ocopy;
     htri_t  is_named;
 
@@ -93,19 +93,6 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
     // unsigned u;
 
     int ret_value = 0;
-
-#if 0
-    /* check if filters were requested for individual objects */
-    if (options->op_tbl->objs) {
-        for (u = 0; u < options->op_tbl->nelems; u++) {
-            if (HDstrcmp(travt->objs[index].name, options->op_tbl->objs[u].path) == 0)
-                for (ifil = 0; ifil < options->op_tbl->objs[ifil].nfilters; ifil++) {
-                    if (options->op_tbl->objs[u].filter[ifil].filtn > 0)
-                        req_filter = 1;
-                }
-        }
-    }
-#endif
 
     /* check if layout change requested individual object */
     if (options->layout_g != H5D_LAYOUT_ERROR) {
@@ -191,6 +178,12 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
      */
     *_use_h5ocopy = use_h5ocopy;
 
+    if (options->verbose == 2)
+        HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[index].name);
+    else if (g_nID == 0)
+        HDprintf(FORMAT_OBJ, "dset", travt->objs[index].name);
+
+
     if (!use_h5ocopy) {
         int j;
 
@@ -264,10 +257,7 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
              *-------------------------------------------------------------------------
              */
             if (H5T_REFERENCE != H5Tget_class(wtype_id)) {
-#if 0
-                /* get the storage size of the input dataset */
-                dsize_in = H5Dget_storage_size(dset_in);
-#endif
+
                 /* check for small size datasets (less than 1k) except
                  * changing to COMPACT. For the reference, COMPACT is limited
                  * by size 64K by library.
@@ -321,6 +311,7 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                  */
                 dset_out = H5Dcreate2(fidout, travt->objs[index].name, wtype_id, f_space_id, H5P_DEFAULT,
                                       dcpl_out, H5P_DEFAULT);
+
                 if (dset_out == H5I_INVALID_HID) {
                     H5TOOLS_INFO("H5Dcreate2 failed");
                     if (options->verbose > 0)
@@ -335,9 +326,8 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                 } /* end if retry dataset create */
             }
         }
-    }
-    else {
-
+    } /* NOT use_h5ocopy */
+    else { /* use_h5ocopy */
         if (!is_named) {
             if (options->use_native == 1)
                 wtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT);
@@ -348,10 +338,9 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
         if ((dset_out = H5Dcreate2(fidout, travt->objs[index].name, wtype_id, f_space_id, H5P_DEFAULT,
                                    dcpl_in, H5P_DEFAULT)) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Dcreate2 failed");
-
-        H5Dclose(dset_out);
     }
 
+    H5Dclose(dset_in);
 done:
     /* Finalize (link) the stack of named datatypes (if any) first
      * because of reference counting */
@@ -391,7 +380,11 @@ static int
 pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidout, trav_table_t *travt,
                     pack_opt_t *options)
 {
+#if 0
     hid_t fidout    = H5I_INVALID_HID;
+#else
+    hid_t fidout    = *_fidout;
+#endif
     int   ret_value = 0;
     int   g_ret     = 0;
 
@@ -415,9 +408,10 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
             HDprintf("-----------------------------------------\n");
         }
 
-        if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
-            H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
-
+        if (fidout == H5I_INVALID_HID) {
+            if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+        }
         /* object creations */
         if (travt->objs) {
             size_t i;
@@ -680,6 +674,8 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
                         H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
                     if (H5T_REFERENCE == H5Tget_class(ftype_id))
                         is_ref = 1;
+
+                    H5Dclose(dset_in); /* No longer needed for this function. */
                     /*-------------------------------------------------------------------------
                      * check if we should use H5Ocopy or not
                      * if there is a request for filters/layout, we read/write the object
@@ -1139,11 +1135,13 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      * create the output file
      *-------------------------------------------------------------------------
      */
-    if (options->verbose > 0)
-        HDprintf("Making new file ...\n");
+    if (g_nID == 0) {
+        if (options->verbose > 0)
+            HDprintf("Making new file ...\n");
 
-    if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+        if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+    }
 
     /*-------------------------------------------------------------------------
      * get list of objects
@@ -1695,11 +1693,13 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                         if (H5Dclose(dset_out) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                         dset_out = H5I_INVALID_HID;
-                        if (options->verbose == 2)
-                            HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[obj_i].name);
-                        else if (g_nID == 0)
-                            HDprintf(FORMAT_OBJ, "dset", travt->objs[obj_i].name);
 
+                        if (!g_Parallel) {
+                            if (options->verbose == 2)
+                                HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[obj_i].name);
+                            else if (g_nID == 0)
+                                HDprintf(FORMAT_OBJ, "dset", travt->objs[obj_i].name);
+                        }
                     } /* end whether we have request for filter/chunking */
 
                     break;
