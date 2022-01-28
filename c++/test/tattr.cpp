@@ -93,7 +93,7 @@ struct attr4_struct {
 
 const H5std_string ATTR5_NAME("Attr5");
 const int          ATTR5_RANK = 0;
-float              attr_data5 = (float)-5.123; // Test data for 5th attribute
+float              attr_data5 = -5.123F; // Test data for 5th attribute
 
 /* Info for another attribute */
 const H5std_string ATTR1A_NAME("Attr1_a");
