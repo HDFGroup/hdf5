@@ -534,14 +534,14 @@ get_fill_size(const fheap_test_param_t *tparam)
 static int
 begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *keep_ids, size_t *fill_size)
 {
-    char *test_desc; /* Test description */
+    char *      test_desc; /* Test description */
     const char *del_str = get_del_string(tparam);
 
     /*
      * Test filling & removing all (small) objects from root direct block of absolute heap
      */
     size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
-    test_desc = H5MM_malloc(test_desc_len);
+    test_desc            = H5MM_malloc(test_desc_len);
     (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
     TESTING(test_desc);
     H5MM_xfree(test_desc);
@@ -8347,8 +8347,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     size_t             obj_size;                     /* Size of object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc =
-        "inserting object that is too large for starting block, then remove all objects";
+    const char *base_desc = "inserting object that is too large for starting block, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
