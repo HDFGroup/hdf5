@@ -941,18 +941,22 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__cmp_offset() */
 
-#define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign)                                             \
-    {                                                                                                        \
-        .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g, .hidp = &H5T_NATIVE_##tag##_g,                            \
-        .alignment = (const char *)&alignments.tag.x - (const char *)&alignments.tag, .size = sizeof(type),  \
-        .atomic = {                                                                                          \
-            .offset   = 0,                                                                                   \
-            .prec     = (precision != 0) ? precision : (sizeof(type) * 8),                                   \
-            .lsb_pad  = H5T_PAD_ZERO,                                                                        \
-            .msb_pad  = H5T_PAD_ZERO,                                                                        \
-            .u.i.sign = has_sign ? H5T_SGN_2 : H5T_SGN_NONE                                                  \
-        }                                                                                                    \
-    }
+/* clang-format off */
+#define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign) {  \
+  .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g                         \
+, .alignment = (const char *)&alignments.tag.x -                    \
+               (const char *)&alignments.tag                        \
+, .hidp = &H5T_NATIVE_##tag##_g                                     \
+, .size = sizeof(type)                                              \
+, .atomic = {                                                       \
+      .offset   = 0                                                 \
+    , .prec     = (precision != 0) ? precision : (sizeof(type) * 8) \
+    , .lsb_pad  = H5T_PAD_ZERO                                      \
+    , .msb_pad  = H5T_PAD_ZERO                                      \
+    , .u.i.sign = has_sign ? H5T_SGN_2 : H5T_SGN_NONE               \
+    }                                                               \
+}
+/* clang-format on */
 
 static const struct {
     struct {
