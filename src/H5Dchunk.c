@@ -6773,10 +6773,10 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
             miss_rate = 0.0;
         }
         if (miss_rate > 100) {
-            HDsprintf(ascii, "%7d%%", (int)(miss_rate + 0.5));
+            HDsnprintf(ascii, sizeof(ascii), "%7d%%", (int)(miss_rate + 0.5));
         }
         else {
-            HDsprintf(ascii, "%7.2f%%", miss_rate);
+            HDsnprintf(ascii, sizeof(ascii), "%7.2f%%", miss_rate);
         }
 
         HDfprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n", "raw data chunks", rdcc->stats.nhits,

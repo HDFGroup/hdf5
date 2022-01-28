@@ -2299,7 +2299,7 @@ for hdf5_cv_printf_ll in ll l L q unknown; do
         ],[[
             char *s = malloc(128);
             long long x = (long long)1048576 * (long long)1048576;
-            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
             exit(strcmp(s,"1099511627776"));
         ]])]
    , [break],,[continue])

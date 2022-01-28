@@ -660,7 +660,7 @@ main(void)
     hid_t fapl = H5P_DEFAULT;
     int   i;
 
-    sprintf(filename, "%s.h5", FILENAME[0]);
+    snprintf(filename, sizeof(filename), "%s.h5", FILENAME[0]);
 
     create_file(fapl);
     test_direct_write_uncompressed_data(fapl);
