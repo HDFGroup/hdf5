@@ -426,7 +426,7 @@ main(void)
         if ((my_fapl = H5Pcopy(fapl2)) < 0)
             goto error;
         /* Create the file */
-        HDsprintf(fname, "%s%s", new_format ? "latest_" : "", FILENAME[0]);
+        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[0]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;
@@ -451,7 +451,7 @@ main(void)
             goto error;
 
         /* Create the file */
-        HDsprintf(fname, "%s%s", new_format ? "latest_" : "", FILENAME[1]);
+        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[1]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;

@@ -109,7 +109,7 @@ test_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -246,7 +246,7 @@ test_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -418,7 +418,7 @@ test_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -582,7 +582,7 @@ test_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1144,7 +1144,7 @@ testfl_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1281,7 +1281,7 @@ testfl_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1453,7 +1453,7 @@ testfl_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1617,7 +1617,7 @@ testfl_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsprintf(msg, "The number of packets in the packet table must be %u\n", NRECORDS);
+    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */

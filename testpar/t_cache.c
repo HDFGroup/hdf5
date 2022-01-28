@@ -6482,7 +6482,7 @@ trace_file_check(int metadata_write_strategy)
         } /* end if */
 
         if (nerrors == 0) {
-            HDsprintf(trace_file_name, "t_cache_trace.txt.%d", (int)file_mpi_rank);
+            HDsnprintf(trace_file_name, sizeof(trace_file_name), "t_cache_trace.txt.%d", (int)file_mpi_rank);
 
             if ((trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL) {
 
