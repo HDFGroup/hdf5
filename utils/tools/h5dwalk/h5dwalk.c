@@ -1322,7 +1322,7 @@ process_input_file(char *inputname, int myrank, int size)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int i;
     int rc = 0;
@@ -1352,7 +1352,7 @@ main(int argc, const char *argv[])
     if (env_var) {
 		int enable = HDatoi(env_var);
 		if (enable) {
-			
+
 		}
     }
 #endif
@@ -1392,7 +1392,7 @@ main(int argc, const char *argv[])
     mfu_pred *pred_head = NULL;
 
     while (!tool_selected) {
-        opt = H5_get_option(argc, argv, s_opts, l_opts);
+        opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts);
         switch ((char)opt) {
             default:
                 usage();
