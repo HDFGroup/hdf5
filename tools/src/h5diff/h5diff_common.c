@@ -200,7 +200,7 @@ parse_subset_params(const char *dset)
  */
 
 void
-parse_command_line(int argc, char *argv[], const char **fname1, const char **fname2, const char **objname1,
+parse_command_line(int argc, const char *const *argv, const char **fname1, const char **fname2, const char **objname1,
                    const char **objname2, diff_opt_t *opts)
 {
     int                       i;
@@ -232,7 +232,7 @@ parse_command_line(int argc, char *argv[], const char **fname1, const char **fna
     exclude_attr_head = NULL;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             default:
                 usage();

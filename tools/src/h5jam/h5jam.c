@@ -22,7 +22,7 @@
 herr_t  write_pad(int ofile, hsize_t old_where, hsize_t *new_where);
 hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
-void    parse_command_line(int, char *[]);
+void    parse_command_line(int, const char *const *);
 
 int   do_clobber  = FALSE;
 char *output_file = NULL;
@@ -104,12 +104,12 @@ leave(int ret)
  */
 
 void
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
                 output_file = HDstrdup(H5_optarg);
@@ -174,7 +174,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    parse_command_line(argc, argv);
+    parse_command_line(argc, (const char *const *)argv);
 
     /* enable error reporting if command line option */
     h5tools_error_report();

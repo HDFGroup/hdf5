@@ -830,14 +830,14 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, const char *const *argv, struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
     struct handler_t *hand = NULL;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -1693,7 +1693,7 @@ main(int argc, char *argv[])
 
     HDmemset(&iter, 0, sizeof(iter));
 
-    if (parse_command_line(argc, argv, &hand) < 0)
+    if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
     /* enable error reporting if command line option */
