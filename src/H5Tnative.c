@@ -941,44 +941,42 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__cmp_offset() */
 
-#define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign)  {     \
-      .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g                         \
-    , .hidp = &H5T_NATIVE_##tag##_g                                     \
-    , .alignment = (const char *)&alignments.tag.x -                    \
-                   (const char *)&alignments.tag                        \
-    , .size = sizeof(type)                                              \
-    , .atomic = {                                                       \
-        .offset = 0                                                     \
-      , .prec = (precision != 0) ? precision : (sizeof(type) * 8)       \
-      , .lsb_pad = H5T_PAD_ZERO                                         \
-      , .msb_pad = H5T_PAD_ZERO                                         \
-      , .u.i.sign = has_sign ? H5T_SGN_2 : H5T_SGN_NONE                 \
-    }                                                                   \
-}
+#define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign)                                             \
+    {                                                                                                        \
+        .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g, .hidp = &H5T_NATIVE_##tag##_g,                            \
+        .alignment = (const char *)&alignments.tag.x - (const char *)&alignments.tag, .size = sizeof(type),  \
+        .atomic = {                                                                                          \
+            .offset   = 0,                                                                                   \
+            .prec     = (precision != 0) ? precision : (sizeof(type) * 8),                                   \
+            .lsb_pad  = H5T_PAD_ZERO,                                                                        \
+            .msb_pad  = H5T_PAD_ZERO,                                                                        \
+            .u.i.sign = has_sign ? H5T_SGN_2 : H5T_SGN_NONE                                                  \
+        }                                                                                                    \
+    }
 
 static const struct {
     struct {
-        char c;
+        char        c;
         signed char x;
     } SCHAR;
     struct {
-        char c;
+        char          c;
         unsigned char x;
     } UCHAR;
     struct {
-        char c;
+        char  c;
         short x;
     } SHORT;
     struct {
-        char c;
+        char           c;
         unsigned short x;
     } USHORT;
     struct {
         char c;
-        int x;
+        int  x;
     } INT;
     struct {
-        char c;
+        char         c;
         unsigned int x;
     } UINT;
     struct {
@@ -986,111 +984,111 @@ static const struct {
         long x;
     } LONG;
     struct {
-        char c;
+        char          c;
         unsigned long x;
     } ULONG;
     struct {
-        char c;
+        char      c;
         long long x;
     } LLONG;
     struct {
-        char c;
+        char               c;
         unsigned long long x;
     } ULLONG;
     struct {
-        char c;
+        char   c;
         int8_t x;
     } INT8;
     struct {
-        char c;
+        char    c;
         uint8_t x;
     } UINT8;
     struct {
-        char c;
+        char         c;
         int_least8_t x;
     } INT_LEAST8;
     struct {
-        char c;
+        char          c;
         uint_least8_t x;
     } UINT_LEAST8;
     struct {
-        char c;
+        char        c;
         int_fast8_t x;
     } INT_FAST8;
     struct {
-        char c;
+        char         c;
         uint_fast8_t x;
     } UINT_FAST8;
     struct {
-        char c;
+        char    c;
         int16_t x;
     } INT16;
     struct {
-        char c;
+        char     c;
         uint16_t x;
     } UINT16;
     struct {
-        char c;
+        char          c;
         int_least16_t x;
     } INT_LEAST16;
     struct {
-        char c;
+        char           c;
         uint_least16_t x;
     } UINT_LEAST16;
     struct {
-        char c;
+        char         c;
         int_fast16_t x;
     } INT_FAST16;
     struct {
-        char c;
+        char          c;
         uint_fast16_t x;
     } UINT_FAST16;
     struct {
-        char c;
+        char    c;
         int32_t x;
     } INT32;
     struct {
-        char c;
+        char     c;
         uint32_t x;
     } UINT32;
     struct {
-        char c;
+        char          c;
         int_least32_t x;
     } INT_LEAST32;
     struct {
-        char c;
+        char           c;
         uint_least32_t x;
     } UINT_LEAST32;
     struct {
-        char c;
+        char         c;
         int_fast32_t x;
     } INT_FAST32;
     struct {
-        char c;
+        char          c;
         uint_fast32_t x;
     } UINT_FAST32;
     struct {
-        char c;
+        char    c;
         int64_t x;
     } INT64;
     struct {
-        char c;
+        char     c;
         uint64_t x;
     } UINT64;
     struct {
-        char c;
+        char          c;
         int_least64_t x;
     } INT_LEAST64;
     struct {
-        char c;
+        char           c;
         uint_least64_t x;
     } UINT_LEAST64;
     struct {
-        char c;
+        char         c;
         int_fast64_t x;
     } INT_FAST64;
     struct {
-        char c;
+        char          c;
         uint_fast64_t x;
     } UINT_FAST64;
 } alignments;
@@ -1100,7 +1098,7 @@ get_host_byte_order(void)
 {
     static const union {
         uint64_t u64;
-        char byte[8];
+        char     byte[8];
     } endian_exemplar = {.byte = {1}};
 
     return (endian_exemplar.u64 == 1) ? H5T_ORDER_LE : H5T_ORDER_BE;
@@ -1113,16 +1111,16 @@ herr_t
 H5T__init_native_int(void)
 {
     typedef struct {
-        size_t *alignmentp;
-        size_t alignment;
-        hid_t *hidp;
-        size_t size;
+        size_t *     alignmentp;
+        size_t       alignment;
+        hid_t *      hidp;
+        size_t       size;
         H5T_atomic_t atomic;
     } native_int_t;
 
     typedef struct {
         const native_int_t *table;
-        size_t nelmts;
+        size_t              nelmts;
     } native_int_table_t;
 
     /* clang-format off */
@@ -1179,26 +1177,26 @@ H5T__init_native_int(void)
     };
     /* clang-format on */
 
-    size_t i, j;
+    size_t      i, j;
     H5T_order_t byte_order = get_host_byte_order();
 
     for (i = 0; i < NELMTS(table_table); i++) {
-        const native_int_t *table = table_table[i].table;
-        size_t nelmts = table_table[i].nelmts;
+        const native_int_t *table  = table_table[i].table;
+        size_t              nelmts = table_table[i].nelmts;
         for (j = 0; j < nelmts; j++) {
             H5T_t *dt;
 
             if (NULL == (dt = H5T__alloc()))
                 return FAIL;
 
-            dt->shared->state = H5T_STATE_IMMUTABLE;
-            dt->shared->type = H5T_INTEGER;
-            dt->shared->size = table[j].size;
-            dt->shared->u.atomic = table[j].atomic;
+            dt->shared->state          = H5T_STATE_IMMUTABLE;
+            dt->shared->type           = H5T_INTEGER;
+            dt->shared->size           = table[j].size;
+            dt->shared->u.atomic       = table[j].atomic;
             dt->shared->u.atomic.order = byte_order;
-            *table[j].alignmentp = table[j].alignment;
+            *table[j].alignmentp       = table[j].alignment;
 
-            if((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
                 return FAIL;
         }
     }
