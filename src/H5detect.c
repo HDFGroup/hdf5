@@ -49,11 +49,6 @@ static const char *FileHeader = "\n\
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
-/* Disable warning about cast increasing the alignment of the target type,
- * that's _exactly_ what this code is probing.  -QAK
- */
-H5_GCC_CLANG_DIAG_OFF("cast-align")
-
 #if defined(__has_attribute)
 #if __has_attribute(no_sanitize_address)
 #define HDF_NO_UBSAN __attribute__((no_sanitize_address))
@@ -65,30 +60,6 @@ H5_GCC_CLANG_DIAG_OFF("cast-align")
 #endif
 
 #define MAXDETECT 64
-
-/* The ALIGNMENT test code may generate the SIGBUS, SIGSEGV, or SIGILL signals.
- * We use setjmp/longjmp in the signal handlers for recovery. But setjmp/longjmp
- * do not necessary restore the signal blocking status while sigsetjmp/siglongjmp
- * do. If sigsetjmp/siglongjmp are not supported, need to use sigprocmask to
- * unblock the signal before doing longjmp.
- */
-/* Define H5SETJMP/H5LONGJMP depending on if sigsetjmp/siglongjmp are */
-/* supported. */
-#if defined(H5_HAVE_SIGSETJMP) && defined(H5_HAVE_SIGLONGJMP)
-/* Always save blocked signals to be restored by siglongjmp. */
-#define H5JMP_BUF           sigjmp_buf
-#define H5SETJMP(buf)       HDsigsetjmp(buf, 1)
-#define H5LONGJMP(buf, val) HDsiglongjmp(buf, val)
-#define H5HAVE_SIGJMP       /* sigsetjmp/siglongjmp are supported. */
-#else
-#define H5JMP_BUF           jmp_buf
-#define H5SETJMP(buf)       HDsetjmp(buf)
-#define H5LONGJMP(buf, val) HDlongjmp(buf, val)
-#endif
-
-/* ALIGNMENT and signal-handling status codes */
-#define STA_NoALIGNMENT     0x0001 /* No ALIGNMENT Test */
-#define STA_NoHandlerVerify 0x0002 /* No signal handler Tests */
 
 /*
  * This structure holds information about a type that
