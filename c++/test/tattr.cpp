@@ -1782,7 +1782,7 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
         unsigned attr_num;
         for (attr_num = 0; attr_num < max_compact; attr_num++) {
             // Create attribute
-            sprintf(attr_name, "attr %02u", attr_num);
+            snprintf(attr_name, sizeof(attr_name), "attr %02u", attr_num);
             Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
             // Write data to the attribute
@@ -1794,7 +1794,7 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
         { // Add one more attribute, to push into "dense" storage
 
             // Create another attribute
-            sprintf(attr_name, "attr %02u", attr_num);
+            snprintf(attr_name, sizeof(attr_name), "attr %02u", attr_num);
             Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
             // Write data to the attribute
@@ -1804,7 +1804,7 @@ test_attr_dense_create(FileCreatPropList &fcpl, FileAccPropList &fapl)
         // Attempt to add attribute again, which should fail
         try {
             // Create another attribute
-            sprintf(attr_name, "attr %02u", attr_num);
+            snprintf(attr_name, sizeof(attr_name), "attr %02u", attr_num);
             Attribute attr = dataset.createAttribute(attr_name, PredType::NATIVE_UINT, ds_space);
 
             // continuation here, that means no exception has been thrown

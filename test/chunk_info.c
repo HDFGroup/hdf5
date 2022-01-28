@@ -421,7 +421,7 @@ verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsi
     /* Ensure the correct chunk indexing scheme is used */
     if (idx_type != exp_idx_type) {
         char msg[256];
-        HDsprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
+        HDsnprintf(msg, sizeof(msg), "Should be using %s.\n", index_type_str(idx_type));
         FAIL_PUTS_ERROR(msg);
     }
 
