@@ -205,11 +205,14 @@ precision(detected_t *d)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    DETECT_I
+ * Function:    DETECT_I/DETECT_BYTE
  *
- * Purpose:     This macro takes a type like `int' and a base name like
+ * Purpose:     These macro takes a type like `int' and a base name like
  *              `nati' and detects the byte order.  The VAR is used to
  *              construct the names of the C variables defined.
+ *
+ *              DETECT_I is used for types that are larger than one byte,
+ *              DETECT_BYTE is used for types that are exactly one byte.
  *
  * Return:      void
  *
@@ -244,8 +247,17 @@ precision(detected_t *d)
         }                                                                                                    \
     }
 
+#define DETECT_BYTE(TYPE, VAR, INFO)                                                                         \
+    {                                                                                                        \
+        HDcompile_assert(sizeof(TYPE) == 1);                                                                 \
+                                                                                                             \
+        DETECT_I_BYTE_CORE(TYPE, VAR, INFO, int)                                                             \
+    }
+
 #define DETECT_I(TYPE, VAR, INFO)                                                                            \
     {                                                                                                        \
+        HDcompile_assert(sizeof(TYPE) > 1);                                                                  \
+                                                                                                             \
         DETECT_I_BYTE_CORE(TYPE, VAR, INFO, TYPE)                                                            \
     }
 
@@ -1220,9 +1232,9 @@ bit.\n";
 static void HDF_NO_UBSAN
 detect_C89_integers(void)
 {
-    DETECT_I(signed char, SCHAR, d_g[nd_g]);
+    DETECT_BYTE(signed char, SCHAR, d_g[nd_g]);
     nd_g++;
-    DETECT_I(unsigned char, UCHAR, d_g[nd_g]);
+    DETECT_BYTE(unsigned char, UCHAR, d_g[nd_g]);
     nd_g++;
     DETECT_I(short, SHORT, d_g[nd_g]);
     nd_g++;
@@ -1266,17 +1278,17 @@ detect_C89_floats(void)
 static void HDF_NO_UBSAN
 detect_C99_integers8(void)
 {
-    DETECT_I(int8_t, INT8, d_g[nd_g]);
+    DETECT_BYTE(int8_t, INT8, d_g[nd_g]);
     nd_g++;
-    DETECT_I(uint8_t, UINT8, d_g[nd_g]);
+    DETECT_BYTE(uint8_t, UINT8, d_g[nd_g]);
     nd_g++;
-    DETECT_I(int_least8_t, INT_LEAST8, d_g[nd_g]);
+    DETECT_BYTE(int_least8_t, INT_LEAST8, d_g[nd_g]);
     nd_g++;
-    DETECT_I(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
+    DETECT_BYTE(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
     nd_g++;
-    DETECT_I(int_fast8_t, INT_FAST8, d_g[nd_g]);
+    DETECT_BYTE(int_fast8_t, INT_FAST8, d_g[nd_g]);
     nd_g++;
-    DETECT_I(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
+    DETECT_BYTE(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
     nd_g++;
 }
 

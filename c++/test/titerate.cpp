@@ -160,7 +160,7 @@ test_iter_group(FileAccPropList &fapl)
         DataSpace filespace;
 
         for (int i = 0; i < NDATASETS; i++) {
-            sprintf(name, "Dataset %d", i);
+            snprintf(name, sizeof(name), "Dataset %d", i);
 
             // Create a dataset in the file
             DataSet dataset = file.createDataSet(name, datatype, filespace);
