@@ -182,7 +182,7 @@ size_t
 h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf, size_t out_buf_offset)
 {
     unsigned char *ucptr = NULL;
-    static char    fmt_llong[8], fmt_ullong[8];
+    char           fmt_llong[8], fmt_ullong[8];
     H5T_class_t    tclass      = H5T_NO_CLASS;
     const char     delimiter[] = " ," H5_COMPOUND_BEGIN_INDICATOR H5_COMPOUND_END_INDICATOR
         H5_ARRAY_BEGIN_INDICATOR H5_ARRAY_END_INDICATOR H5_VLEN_BEGIN_INDICATOR H5_VLEN_END_INDICATOR;
@@ -759,7 +759,7 @@ size_t
 h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf, int expand_data)
 {
     unsigned char *ucptr = (unsigned char *)in_buf;
-    static char    fmt_llong[8], fmt_ullong[8];
+    char           fmt_llong[8], fmt_ullong[8];
     H5T_class_t    tclass   = H5T_NO_CLASS;
     size_t         typeSize = 0;
     H5T_sign_t     nsign    = H5T_SGN_ERROR;

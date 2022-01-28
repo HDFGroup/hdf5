@@ -2317,7 +2317,7 @@ verify_clean(void)
 void
 verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_entry_status expected[])
 {
-    static char msg[256];
+    char        msg[256];
     int         i;
 
     i = 0;
