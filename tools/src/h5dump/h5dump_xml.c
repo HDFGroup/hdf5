@@ -600,7 +600,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                     ref_path_table_gen_fake(str, &obj_token);
 
                     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                    HDsprintf(outstr, "xid_%s", obj_tok_str);
+                    HDsnprintf(outstr, outlen, "xid_%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     return 0;
@@ -615,7 +615,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 ref_path_table_gen_fake(str, &obj_token);
 
                 H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                HDsprintf(outstr, "xid_%s", obj_tok_str);
+                HDsnprintf(outstr, outlen, "xid_%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 return 0;
@@ -627,7 +627,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     }
 
     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-    HDsprintf(outstr, "xid_%s", obj_tok_str);
+    HDsnprintf(outstr, outlen, "xid_%s", obj_tok_str);
     H5free_memory(obj_tok_str);
 
     return 0;
@@ -2802,7 +2802,7 @@ xml_dump_group(hid_t gid, const char *name)
                             type = H5Dget_type(dset);
 
                             H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                            HDsprintf(type_name, "#%s", obj_tok_str);
+                            HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                             H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
@@ -2895,7 +2895,7 @@ xml_dump_group(hid_t gid, const char *name)
                     type = H5Dget_type(dset);
 
                     H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                    HDsprintf(type_name, "#%s", obj_tok_str);
+                    HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);

@@ -1083,7 +1083,7 @@ test_misc6(void)
     /* Loop through adding attributes to each dataset */
     for (u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        HDsprintf(attr_name, "Attr#%u", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "Attr#%u", u);
 
         /* Open the file */
         loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -3034,7 +3034,7 @@ test_misc18(void)
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for (u = 0; u < 10; u++) {
         /* Set up attribute name */
-        HDsprintf(attr_name, "Attr %u", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "Attr %u", u);
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate2(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -5504,7 +5504,7 @@ test_misc30(void)
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
-            HDsprintf(gname, "/g0/group%d", i);
+            HDsnprintf(gname, sizeof(gname), "/g0/group%d", i);
             gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(gid, FAIL, "H5Gcreate2");
 

@@ -477,7 +477,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -766,7 +766,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 
         while ( ( pass ) && ( i <= max_dset ) )
         {
-            HDsprintf(dset_name, "/dset%03d", i);
+            HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
 
         if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -1334,7 +1334,7 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1707,7 +1707,7 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
 
     show_progress = (show_progress && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1840,7 +1840,7 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2208,7 +2208,7 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
     hid_t       dset_id      = -1;
     hid_t       filespace_id = -1;
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2460,7 +2460,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
