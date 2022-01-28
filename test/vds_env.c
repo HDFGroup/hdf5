@@ -346,7 +346,7 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
+            HDsnprintf(msg, sizeof(msg), "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
                       high_string);
             HDputs(msg);
 

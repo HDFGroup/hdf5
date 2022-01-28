@@ -565,8 +565,9 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
      */
     del_str = get_del_string(tparam);
     HDassert(del_str);
-    test_desc = (char *)H5MM_malloc(HDstrlen(del_str) + HDstrlen(base_desc));
-    HDsprintf(test_desc, base_desc, del_str);
+    size_t test_desc_len = HDstrlen(del_str) + HDstrlen(base_desc);
+    test_desc = (char *)H5MM_malloc(test_desc_len);
+    HDsnprintf(test_desc, test_desc_len, base_desc, del_str);
     TESTING(test_desc);
     H5MM_xfree(del_str);
     H5MM_xfree(test_desc);
