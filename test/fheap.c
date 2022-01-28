@@ -531,13 +531,6 @@ get_fill_size(const fheap_test_param_t *tparam)
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      test_desc in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *keep_ids, size_t *fill_size)
 {
@@ -563,7 +556,6 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
     /* Success */
     return (0);
 } /* end begin_test() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:  reopen_file
