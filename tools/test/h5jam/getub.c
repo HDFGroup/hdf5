@@ -15,7 +15,7 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-void parse_command_line(int argc, char *argv[]);
+void parse_command_line(int argc, const char *const *argv);
 
 /* Name of tool */
 #define PROGRAM_NAME "getub"
@@ -52,12 +52,12 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 void
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'c':
                 nbytes = HDstrdup(H5_optarg);
@@ -91,7 +91,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    parse_command_line(argc, argv);
+    parse_command_line(argc, (const char *const *)argv);
 
     if (NULL == nbytes) {
         /* missing arg */

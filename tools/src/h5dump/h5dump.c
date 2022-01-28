@@ -828,7 +828,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;
@@ -848,7 +848,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
             case 'R':
@@ -1198,7 +1198,7 @@ parse_start:
                         default:
                             goto end_collect;
                     }
-                } while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF);
+                } while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF);
 
 end_collect:
                 last_was_dset = FALSE;
@@ -1349,7 +1349,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    if ((hand = parse_command_line(argc, argv)) == NULL) {
+    if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;
     }
 

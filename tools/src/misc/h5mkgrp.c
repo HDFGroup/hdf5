@@ -131,7 +131,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, char *argv[], mkgrp_opt_t *options)
+parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 {
     int                opt;        /* Option from command line */
     size_t             curr_group; /* Current group name to copy */
@@ -152,7 +152,7 @@ parse_command_line(int argc, char *argv[], mkgrp_opt_t *options)
     HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             /* Display 'help' */
             case 'h':
@@ -303,7 +303,7 @@ main(int argc, char *argv[])
     }
 
     /* Parse command line */
-    if (parse_command_line(argc, argv, &params_g) < 0) {
+    if (parse_command_line(argc, (const char *const *)argv, &params_g) < 0) {
         error_msg("unable to parse command line arguments\n");
         leave(EXIT_FAILURE);
     }
