@@ -2543,15 +2543,16 @@ main(void)
                     /* Test first element in data block */
                     nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    HDsnprintf(test_str, sizeof(test_str), "setting first element of array's data block #%llu",
-                              (unsigned long long)ndblks);
+                    HDsnprintf(test_str, sizeof(test_str),
+                               "setting first element of array's data block #%llu",
+                               (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
                     HDsnprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
-                              (unsigned long long)ndblks);
+                               (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Increment data block being tested */

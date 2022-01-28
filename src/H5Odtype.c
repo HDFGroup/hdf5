@@ -1805,7 +1805,8 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
 
             case H5T_CSET_ERROR:
             default:
-                HDsnprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(dt->shared->u.atomic.u.s.cset));
+                HDsnprintf(buf, sizeof(buf), "Unknown character set: %d",
+                           (int)(dt->shared->u.atomic.u.s.cset));
                 s = buf;
                 break;
         } /* end switch */
@@ -1843,7 +1844,8 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
 
             case H5T_STR_ERROR:
             default:
-                HDsnprintf(buf, sizeof(buf), "Unknown string padding: %d", (int)(dt->shared->u.atomic.u.s.pad));
+                HDsnprintf(buf, sizeof(buf), "Unknown string padding: %d",
+                           (int)(dt->shared->u.atomic.u.s.pad));
                 s = buf;
                 break;
         } /* end switch */

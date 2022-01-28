@@ -1071,12 +1071,12 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             if ((log_instance > 0) || processing_inputfile) {
                 if (processing_inputfile)
                     log_instance = current_input_index;
-                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
-                          thisapp, log_instance);
+                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d",
+                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
             }
             else {
-                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
-                          thisapp);
+                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log",
+                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
             }
         }
         else {
@@ -1085,9 +1085,11 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 if (processing_inputfile)
                     log_instance = current_input_index;
                 if (txtlog[log_len - 1] == '/')
-                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp,
+                               log_instance);
                 else
-                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp,
+                               log_instance);
             }
             else {
                 if (txtlog[log_len - 1] == '/')

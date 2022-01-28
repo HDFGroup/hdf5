@@ -6586,7 +6586,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         if (order == H5_ITER_INC)
                             HDsnprintf(attrname, sizeof(attrname), "attr %02u", (u + 1));
                         else
-                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((max_compact * 2) - (u + 2)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - (u + 2)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6699,7 +6700,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         if (order == H5_ITER_INC)
                             HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 1));
                         else
-                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((max_compact * 2) - ((u * 2) + 2)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - ((u * 2) + 2)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6751,7 +6753,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         if (order == H5_ITER_INC)
                             HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 3));
                         else
-                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((max_compact * 2) - ((u * 2) + 4)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - ((u * 2) + 4)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */

@@ -110,7 +110,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 
         /* allocate name buffer for image i */
         size_t filenamelength = sizeof(char) * 32;
-        filename[i] = (char *)HDmalloc(filenamelength);
+        filename[i]           = (char *)HDmalloc(filenamelength);
         if (!filename[i])
             FAIL_PUTS_ERROR("HDmalloc() failed");
 

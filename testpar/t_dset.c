@@ -3699,10 +3699,12 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Test values */
     HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message), "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
     HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message), "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */
@@ -3939,10 +3941,12 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
     /* Test values */
     HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message), "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_local_read == (uint32_t)no_collective_cause_local_expected), message);
     HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message), "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_read == (uint32_t)no_collective_cause_global_expected), message);
 
     /* Release some resources */

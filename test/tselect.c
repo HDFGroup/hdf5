@@ -10862,13 +10862,15 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
     HDassert(edge_size > 0);
     HDassert(edge_size <= 1000);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n", test_num);
+    HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n",
+               test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    HDsnprintf(test_desc_1, sizeof(test_desc_1), "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n", small_rank,
-              large_rank, offset, (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2],
-              (int)dim_selected[3], (int)dim_selected[4]);
+    HDsnprintf(test_desc_1, sizeof(test_desc_1),
+               "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n", small_rank, large_rank, offset,
+               (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3],
+               (int)dim_selected[4]);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11120,15 +11122,16 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
     HDassert(dims_selected >= 0);
     HDassert(dims_selected <= large_rank);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
+    HDsnprintf(test_desc_0, sizeof(test_desc_0),
+               "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     HDsnprintf(test_desc_1, sizeof(test_desc_1),
-              "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n",
-              small_rank, large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
-              (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-              dims_selected);
+               "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n",
+               small_rank, large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
+               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
+               dims_selected);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11664,15 +11667,16 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
     HDassert(dims_selected >= 0);
     HDassert(dims_selected <= large_rank);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n",
-              test_num);
+    HDsnprintf(test_desc_0, sizeof(test_desc_0),
+               "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    HDsnprintf(test_desc_1, sizeof(test_desc_1), "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n",
-              small_rank, large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0],
-              (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-              dims_selected);
+    HDsnprintf(test_desc_1, sizeof(test_desc_1),
+               "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
+               large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0],
+               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
+               dims_selected);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */

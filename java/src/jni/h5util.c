@@ -1164,7 +1164,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         if (NULL == (this_str = (char *)HDmalloc(this_len)))
                                             H5_OUT_OF_MEMORY_ERROR(
                                                 ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                        if (HDsnprintf(this_str, this_len, "%lu:%s", oi.fileno, token_str) < 0)
+                                        if (HDsnprintf(this_str, this_len, "%lu:%s", oi.fileno, token_str) <
+                                            0)
                                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
 
                                         H5free_memory(token_str);
@@ -1531,7 +1532,8 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
             for (j = 0; j < ndims; j++) {
                 tmp_str[0] = '\0';
 
-                if (HDsnprintf(tmp_str, sizeof(tmp_str), "%s%lu", j ? "," : "(", (unsigned long)ptdata[i * 2 * ndims + j]) < 0)
+                if (HDsnprintf(tmp_str, sizeof(tmp_str), "%s%lu", j ? "," : "(",
+                               (unsigned long)ptdata[i * 2 * ndims + j]) < 0)
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsnprintf failure");
 
                 if (!h5str_append(str, tmp_str))
@@ -1542,7 +1544,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
                 tmp_str[0] = '\0';
 
                 if (HDsnprintf(tmp_str, sizeof(tmp_str), "%s%lu", j ? "," : ")-(",
-                              (unsigned long)ptdata[i * 2 * ndims + j + ndims]) < 0)
+                               (unsigned long)ptdata[i * 2 * ndims + j + ndims]) < 0)
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: HDsnprintf failure");
 
                 if (!h5str_append(str, tmp_str))
@@ -1708,7 +1710,8 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
             for (j = 0; j < ndims; j++) {
                 tmp_str[0] = '\0';
 
-                if (HDsnprintf(tmp_str, sizeof(tmp_str), "%s%lu", j ? "," : "(", (unsigned long)(ptdata[i * ndims + j])) < 0)
+                if (HDsnprintf(tmp_str, sizeof(tmp_str), "%s%lu", j ? "," : "(",
+                               (unsigned long)(ptdata[i * ndims + j])) < 0)
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: HDsnprintf failure");
 
                 if (!h5str_append(str, tmp_str))
