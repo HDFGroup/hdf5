@@ -51,7 +51,7 @@ static herr_t process_cmpd_fields(hid_t fid, char *dsetname);
 static herr_t check_dataset(hid_t fid, char *dsetname);
 static void   leave(int ret);
 static void   usage(const char *prog);
-static void   parse_command_line(int argc, char *argv[]);
+static void   parse_command_line(int argc, const char *const *argv);
 
 /*
  * Command-line options: The user can only specify long-named parameters.
@@ -665,7 +665,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static void
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt; /* Command line option */
     int tmp;
@@ -677,7 +677,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case '?':
             case 'h': /* --help */
@@ -819,7 +819,7 @@ main(int argc, char *argv[])
     }
 
     /* parse command line options */
-    parse_command_line(argc, argv);
+    parse_command_line(argc, (const char *const *)argv);
 
     if (argc <= H5_optind) {
         error_msg("missing dataset name\n");

@@ -56,12 +56,12 @@ usage(const char *prog)
  */
 
 static void
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    parse_command_line(argc, argv);
+    parse_command_line(argc, (const char *const *)argv);
 
     /* enable error reporting if command line option */
     h5tools_error_report();

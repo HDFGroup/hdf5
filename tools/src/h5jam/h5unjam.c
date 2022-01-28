@@ -92,12 +92,12 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
                 output_file = HDstrdup(H5_optarg);
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib  */
     h5tools_init();
 
-    if (EXIT_FAILURE == parse_command_line(argc, argv))
+    if (EXIT_FAILURE == parse_command_line(argc, (const char *const *)argv))
         goto done;
 
     /* enable error reporting if command line option */

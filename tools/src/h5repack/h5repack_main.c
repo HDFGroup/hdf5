@@ -18,7 +18,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5repack"
 
-static int  parse_command_line(int argc, char **argv, pack_opt_t *options);
+static int  parse_command_line(int argc, const char *const *argv, pack_opt_t *options);
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
@@ -456,13 +456,13 @@ set_sort_order(const char *form)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, char **argv, pack_opt_t *options)
+parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 {
     int bound, opt;
     int ret_value = 0;
 
     /* parse command line options */
-    while (EOF != (opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts))) {
+    while (EOF != (opt = H5_get_option(argc, argv, s_opts, l_opts))) {
         switch ((char)opt) {
 
             /* -i for backward compatibility */
@@ -780,7 +780,7 @@ main(int argc, char **argv)
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    parse_ret = parse_command_line(argc, argv, &options);
+    parse_ret = parse_command_line(argc, (const char *const *)argv, &options);
     if (parse_ret < 0) {
         HDprintf("Error occurred while parsing command-line options\n");
         h5tools_setstatus(EXIT_FAILURE);
