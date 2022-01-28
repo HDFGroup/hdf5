@@ -944,8 +944,8 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
 /* clang-format off */
 #define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign) {  \
   .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g                         \
-, .alignment = (const char *)&alignments.tag.x -                    \
-               (const char *)&alignments.tag                        \
+, .alignment = offsetof(alignments_t, tag.x) -                      \
+               offsetof(alignments_t, tag)                          \
 , .hidp = &H5T_NATIVE_##tag##_g                                     \
 , .size = sizeof(type)                                              \
 , .atomic = {                                                       \
@@ -957,145 +957,6 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
     }                                                               \
 }
 /* clang-format on */
-
-static const struct {
-    struct {
-        char        c;
-        signed char x;
-    } SCHAR;
-    struct {
-        char          c;
-        unsigned char x;
-    } UCHAR;
-    struct {
-        char  c;
-        short x;
-    } SHORT;
-    struct {
-        char           c;
-        unsigned short x;
-    } USHORT;
-    struct {
-        char c;
-        int  x;
-    } INT;
-    struct {
-        char         c;
-        unsigned int x;
-    } UINT;
-    struct {
-        char c;
-        long x;
-    } LONG;
-    struct {
-        char          c;
-        unsigned long x;
-    } ULONG;
-    struct {
-        char      c;
-        long long x;
-    } LLONG;
-    struct {
-        char               c;
-        unsigned long long x;
-    } ULLONG;
-    struct {
-        char   c;
-        int8_t x;
-    } INT8;
-    struct {
-        char    c;
-        uint8_t x;
-    } UINT8;
-    struct {
-        char         c;
-        int_least8_t x;
-    } INT_LEAST8;
-    struct {
-        char          c;
-        uint_least8_t x;
-    } UINT_LEAST8;
-    struct {
-        char        c;
-        int_fast8_t x;
-    } INT_FAST8;
-    struct {
-        char         c;
-        uint_fast8_t x;
-    } UINT_FAST8;
-    struct {
-        char    c;
-        int16_t x;
-    } INT16;
-    struct {
-        char     c;
-        uint16_t x;
-    } UINT16;
-    struct {
-        char          c;
-        int_least16_t x;
-    } INT_LEAST16;
-    struct {
-        char           c;
-        uint_least16_t x;
-    } UINT_LEAST16;
-    struct {
-        char         c;
-        int_fast16_t x;
-    } INT_FAST16;
-    struct {
-        char          c;
-        uint_fast16_t x;
-    } UINT_FAST16;
-    struct {
-        char    c;
-        int32_t x;
-    } INT32;
-    struct {
-        char     c;
-        uint32_t x;
-    } UINT32;
-    struct {
-        char          c;
-        int_least32_t x;
-    } INT_LEAST32;
-    struct {
-        char           c;
-        uint_least32_t x;
-    } UINT_LEAST32;
-    struct {
-        char         c;
-        int_fast32_t x;
-    } INT_FAST32;
-    struct {
-        char          c;
-        uint_fast32_t x;
-    } UINT_FAST32;
-    struct {
-        char    c;
-        int64_t x;
-    } INT64;
-    struct {
-        char     c;
-        uint64_t x;
-    } UINT64;
-    struct {
-        char          c;
-        int_least64_t x;
-    } INT_LEAST64;
-    struct {
-        char           c;
-        uint_least64_t x;
-    } UINT_LEAST64;
-    struct {
-        char         c;
-        int_fast64_t x;
-    } INT_FAST64;
-    struct {
-        char          c;
-        uint_fast64_t x;
-    } UINT_FAST64;
-} alignments;
 
 static H5T_order_t
 get_host_byte_order(void)
@@ -1114,6 +975,145 @@ get_host_byte_order(void)
 herr_t
 H5T__init_native_int(void)
 {
+    typedef struct {
+        struct {
+            char        c;
+            signed char x;
+        } SCHAR;
+        struct {
+            char          c;
+            unsigned char x;
+        } UCHAR;
+        struct {
+            char  c;
+            short x;
+        } SHORT;
+        struct {
+            char           c;
+            unsigned short x;
+        } USHORT;
+        struct {
+            char c;
+            int  x;
+        } INT;
+        struct {
+            char         c;
+            unsigned int x;
+        } UINT;
+        struct {
+            char c;
+            long x;
+        } LONG;
+        struct {
+            char          c;
+            unsigned long x;
+        } ULONG;
+        struct {
+            char      c;
+            long long x;
+        } LLONG;
+        struct {
+            char               c;
+            unsigned long long x;
+        } ULLONG;
+        struct {
+            char   c;
+            int8_t x;
+        } INT8;
+        struct {
+            char    c;
+            uint8_t x;
+        } UINT8;
+        struct {
+            char         c;
+            int_least8_t x;
+        } INT_LEAST8;
+        struct {
+            char          c;
+            uint_least8_t x;
+        } UINT_LEAST8;
+        struct {
+            char        c;
+            int_fast8_t x;
+        } INT_FAST8;
+        struct {
+            char         c;
+            uint_fast8_t x;
+        } UINT_FAST8;
+        struct {
+            char    c;
+            int16_t x;
+        } INT16;
+        struct {
+            char     c;
+            uint16_t x;
+        } UINT16;
+        struct {
+            char          c;
+            int_least16_t x;
+        } INT_LEAST16;
+        struct {
+            char           c;
+            uint_least16_t x;
+        } UINT_LEAST16;
+        struct {
+            char         c;
+            int_fast16_t x;
+        } INT_FAST16;
+        struct {
+            char          c;
+            uint_fast16_t x;
+        } UINT_FAST16;
+        struct {
+            char    c;
+            int32_t x;
+        } INT32;
+        struct {
+            char     c;
+            uint32_t x;
+        } UINT32;
+        struct {
+            char          c;
+            int_least32_t x;
+        } INT_LEAST32;
+        struct {
+            char           c;
+            uint_least32_t x;
+        } UINT_LEAST32;
+        struct {
+            char         c;
+            int_fast32_t x;
+        } INT_FAST32;
+        struct {
+            char          c;
+            uint_fast32_t x;
+        } UINT_FAST32;
+        struct {
+            char    c;
+            int64_t x;
+        } INT64;
+        struct {
+            char     c;
+            uint64_t x;
+        } UINT64;
+        struct {
+            char          c;
+            int_least64_t x;
+        } INT_LEAST64;
+        struct {
+            char           c;
+            uint_least64_t x;
+        } UINT_LEAST64;
+        struct {
+            char         c;
+            int_fast64_t x;
+        } INT_FAST64;
+        struct {
+            char          c;
+            uint_fast64_t x;
+        } UINT_FAST64;
+    } alignments_t;
+
     typedef struct {
         size_t *     alignmentp;
         size_t       alignment;
