@@ -134,23 +134,9 @@ static unsigned int imp_bit(unsigned int, int *, void *, void *, const unsigned 
 static unsigned int find_bias(unsigned int, unsigned int, int *, void *);
 static void         precision(detected_t *);
 static void         print_header(void);
-static void         detect_C89_integers(void);
 static void         detect_C89_floats(void);
-static void         detect_C99_integers(void);
 static void         detect_C99_floats(void);
-static void         detect_C99_integers8(void);
-static void         detect_C99_integers16(void);
-static void         detect_C99_integers32(void);
-static void         detect_C99_integers64(void);
 static void         detect_alignments(void);
-static unsigned int align_g[]                = {1, 2, 4, 8, 16};
-static int          align_status_g           = 0; /* ALIGNMENT Signal Status */
-static int          sigbus_handler_called_g  = 0; /* how many times called */
-static int          sigsegv_handler_called_g = 0; /* how many times called */
-static int          sigill_handler_called_g  = 0; /* how many times called */
-static int          signal_handler_tested_g  = 0; /* how many times tested */
-static int          verify_signal_handlers(int signum, void (*handler)(int));
-static H5JMP_BUF    jbuf_g;
 
 /*-------------------------------------------------------------------------
  * Function:    precision
@@ -203,63 +189,6 @@ precision(detected_t *d)
         d->precision = d->msize + d->esize + 1;
     }
 }
-
-/*-------------------------------------------------------------------------
- * Function:    DETECT_I/DETECT_BYTE
- *
- * Purpose:     These macro takes a type like `int' and a base name like
- *              `nati' and detects the byte order.  The VAR is used to
- *              construct the names of the C variables defined.
- *
- *              DETECT_I is used for types that are larger than one byte,
- *              DETECT_BYTE is used for types that are exactly one byte.
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
- */
-#define DETECT_I_BYTE_CORE(TYPE, VAR, INFO, DETECT_TYPE)                                                     \
-    {                                                                                                        \
-        DETECT_TYPE    _v;                                                                                   \
-        int            _i, _j;                                                                               \
-        unsigned char *_x;                                                                                   \
-                                                                                                             \
-        HDmemset(&INFO, 0, sizeof(INFO));                                                                    \
-        INFO.varname = #VAR;                                                                                 \
-        INFO.size    = sizeof(TYPE);                                                                         \
-                                                                                                             \
-        for (_i = sizeof(DETECT_TYPE), _v = 0; _i > 0; --_i)                                                 \
-            _v = (DETECT_TYPE)((DETECT_TYPE)(_v << 8) + (DETECT_TYPE)_i);                                    \
-                                                                                                             \
-        for (_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(DETECT_TYPE); _i++) {                    \
-            _j = (*_x++) - 1;                                                                                \
-            HDassert(_j < (signed)sizeof(DETECT_TYPE));                                                      \
-            INFO.perm[_i] = _j;                                                                              \
-        } /* end for */                                                                                      \
-                                                                                                             \
-        INFO.sign = ('U' != *(#VAR));                                                                        \
-        precision(&(INFO));                                                                                  \
-        ALIGNMENT(TYPE, INFO);                                                                               \
-        if (!HDstrcmp(INFO.varname, "SCHAR") || !HDstrcmp(INFO.varname, "SHORT") ||                          \
-            !HDstrcmp(INFO.varname, "INT") || !HDstrcmp(INFO.varname, "LONG") ||                             \
-            !HDstrcmp(INFO.varname, "LLONG")) {                                                              \
-            COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
-        }                                                                                                    \
-    }
-
-#define DETECT_BYTE(TYPE, VAR, INFO)                                                                         \
-    {                                                                                                        \
-        HDcompile_assert(sizeof(TYPE) == 1);                                                                 \
-                                                                                                             \
-        DETECT_I_BYTE_CORE(TYPE, VAR, INFO, int)                                                             \
-    }
-
-#define DETECT_I(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
-        HDcompile_assert(sizeof(TYPE) > 1);                                                                  \
-                                                                                                             \
-        DETECT_I_BYTE_CORE(TYPE, VAR, INFO, TYPE)                                                            \
-    }
 
 /*-------------------------------------------------------------------------
  * Function:    DETECT_F
@@ -351,7 +280,6 @@ precision(detected_t *d)
         _v1       = (TYPE)1.0L;                                                                              \
         INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                       \
         precision(&(INFO));                                                                                  \
-        ALIGNMENT(TYPE, INFO);                                                                               \
         if (!HDstrcmp(INFO.varname, "FLOAT") || !HDstrcmp(INFO.varname, "DOUBLE") ||                         \
             !HDstrcmp(INFO.varname, "LDOUBLE")) {                                                            \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
@@ -383,140 +311,6 @@ precision(detected_t *d)
                                                                                                              \
         COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));                                        \
     }
-
-#define ALIGNMENT(TYPE, INFO)                                                                                \
-    {                                                                                                        \
-        char *volatile _buf    = NULL;                                                                       \
-        TYPE            _val   = 1, _val2;                                                                   \
-        volatile size_t _ano   = 0;                                                                          \
-        void (*_handler)(int)  = HDsignal(SIGBUS, sigbus_handler);                                           \
-        void (*_handler2)(int) = HDsignal(SIGSEGV, sigsegv_handler);                                         \
-        void (*_handler3)(int) = HDsignal(SIGILL, sigill_handler);                                           \
-                                                                                                             \
-        _buf = (char *)HDmalloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                \
-        if (H5SETJMP(jbuf_g))                                                                                \
-            _ano++;                                                                                          \
-        if (_ano < NELMTS(align_g)) {                                                                        \
-            *((TYPE *)(_buf + align_g[_ano])) = _val;  /*possible SIGBUS or SEGSEGV*/                        \
-            _val2 = *((TYPE *)(_buf + align_g[_ano])); /*possible SIGBUS or SEGSEGV*/                        \
-            /* Cray Check: This section helps detect alignment on Cray's */                                  \
-            /*              vector machines (like the SV1) which mask off */                                 \
-            /*              pointer values when pointing to non-word aligned */                              \
-            /*              locations with pointers that are supposed to be */                               \
-            /*              word aligned. -QAK */                                                            \
-            HDmemset(_buf, 0xff, sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                               \
-            /*How to handle VAX types?*/                                                                     \
-            if (INFO.perm[0]) /* Big-Endian */                                                               \
-                HDmemcpy(_buf + align_g[_ano] + (INFO.size - ((INFO.offset + INFO.precision) / 8)),          \
-                         ((char *)&_val) + (INFO.size - ((INFO.offset + INFO.precision) / 8)),               \
-                         (size_t)(INFO.precision / 8));                                                      \
-            else /* Little-Endian */                                                                         \
-                HDmemcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
-                         (size_t)(INFO.precision / 8));                                                      \
-            _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
-            H5_GCC_CLANG_DIAG_OFF("float-equal")                                                             \
-            if (_val != _val2)                                                                               \
-                H5LONGJMP(jbuf_g, 1);                                                                        \
-            H5_GCC_CLANG_DIAG_ON("float-equal")                                                              \
-            /* End Cray Check */                                                                             \
-            (INFO.align) = align_g[_ano];                                                                    \
-        }                                                                                                    \
-        else {                                                                                               \
-            (INFO.align) = 0;                                                                                \
-            fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);                                \
-        }                                                                                                    \
-        HDfree(_buf);                                                                                        \
-        HDsignal(SIGBUS, _handler);   /*restore original handler*/                                           \
-        HDsignal(SIGSEGV, _handler2); /*restore original handler*/                                           \
-        HDsignal(SIGILL, _handler3);  /*restore original handler*/                                           \
-    }
-
-/*-------------------------------------------------------------------------
- * Function:    sigsegv_handler
- *
- * Purpose:     Handler for SIGSEGV. We use signal() instead of sigaction()
- *              because it's more portable to non-Posix systems. Although
- *              it's not nearly as nice to work with, it does the job for
- *              this simple stuff.
- *
- * Return:      Returns via H5LONGJMP to jbuf_g.
- *-------------------------------------------------------------------------
- */
-static void
-sigsegv_handler(int H5_ATTR_UNUSED signo)
-{
-#if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
-    /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
-    /* supported. */
-    sigset_t set;
-
-    HDsigemptyset(&set);
-    HDsigaddset(&set, SIGSEGV);
-    HDsigprocmask(SIG_UNBLOCK, &set, NULL);
-#endif
-
-    sigsegv_handler_called_g++;
-    HDsignal(SIGSEGV, sigsegv_handler);
-    H5LONGJMP(jbuf_g, SIGSEGV);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    sigbus_handler
- *
- * Purpose:     Handler for SIGBUS. We use signal() instead of sigaction()
- *              because it's more portable to non-Posix systems. Although
- *              it's not nearly as nice to work with, it does the job for
- *              this simple stuff.
- *
- * Return:      Returns via H5LONGJMP to jbuf_g.
- *-------------------------------------------------------------------------
- */
-static void
-sigbus_handler(int H5_ATTR_UNUSED signo)
-{
-#if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
-    /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
-    /* supported. */
-    sigset_t set;
-
-    HDsigemptyset(&set);
-    HDsigaddset(&set, SIGBUS);
-    HDsigprocmask(SIG_UNBLOCK, &set, NULL);
-#endif
-
-    sigbus_handler_called_g++;
-    HDsignal(SIGBUS, sigbus_handler);
-    H5LONGJMP(jbuf_g, SIGBUS);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    sigill_handler
- *
- * Purpose:     Handler for SIGILL. We use signal() instead of sigaction()
- *              because it's more portable to non-Posix systems. Although
- *              it's not nearly as nice to work with, it does the job for
- *              this simple stuff.
- *
- * Return:      Returns via H5LONGJMP to jbuf_g.
- *-------------------------------------------------------------------------
- */
-static void
-sigill_handler(int H5_ATTR_UNUSED signo)
-{
-#if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
-    /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
-    /* supported. */
-    sigset_t set;
-
-    HDsigemptyset(&set);
-    HDsigaddset(&set, SIGILL);
-    HDsigprocmask(SIG_UNBLOCK, &set, NULL);
-#endif
-
-    sigill_handler_called_g++;
-    HDsignal(SIGILL, sigill_handler);
-    H5LONGJMP(jbuf_g, SIGILL);
-}
 
 /*-------------------------------------------------------------------------
  * Function:    print_results
@@ -700,15 +494,13 @@ H5T__init_native(void)\n\
     if((H5T_NATIVE_%s_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, \"can't register ID for built-in datatype\")\n",
                 d[i].varname);
-        fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
-                (unsigned long)(d[i].align));
 
         /* Variables for alignment of compound datatype */
         if (!HDstrcmp(d[i].varname, "SCHAR") || !HDstrcmp(d[i].varname, "SHORT") ||
             !HDstrcmp(d[i].varname, "INT") || !HDstrcmp(d[i].varname, "LONG") ||
             !HDstrcmp(d[i].varname, "LLONG") || !HDstrcmp(d[i].varname, "FLOAT") ||
             !HDstrcmp(d[i].varname, "DOUBLE") || !HDstrcmp(d[i].varname, "LDOUBLE")) {
-            fprintf(rawoutstream, "    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n", d[i].varname,
+            fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }
     }
@@ -730,7 +522,7 @@ H5T__init_native(void)\n\
     /* Structure alignment for pointers, vlen and reference types */
     fprintf(rawoutstream, "\n    /* Structure alignment for pointers, vlen and reference types */\n");
     for (j = 0; j < na; j++)
-        fprintf(rawoutstream, "    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name,
+        fprintf(rawoutstream, "    H5T_%s_ALIGN_g = %lu;\n", misc_align[j].name,
                 (unsigned long)(misc_align[j].comp_align));
 
     fprintf(rawoutstream, "\
@@ -745,42 +537,6 @@ done:\n\
 \n\
     FUNC_LEAVE_NOAPI(ret_value);\n} /* end H5T__init_native() */\n");
 
-    /* Print the ALIGNMENT and signal-handling status as comments */
-    fprintf(rawoutstream, "\n"
-                          "/****************************************/\n"
-                          "/* ALIGNMENT and signal-handling status */\n"
-                          "/****************************************/\n");
-    if (align_status_g & STA_NoALIGNMENT)
-        fprintf(rawoutstream, "/* ALIGNAMENT test is not available */\n");
-    if (align_status_g & STA_NoHandlerVerify)
-        fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
-        /* The following is available in H5pubconf.h. Printing them here for */
-        /* convenience. */
-#ifdef H5_HAVE_SIGSETJMP
-    fprintf(rawoutstream, "/* sigsetjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* sigsetjmp() support: no */\n");
-#endif
-#ifdef H5_HAVE_SIGLONGJMP
-    fprintf(rawoutstream, "/* siglongjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* siglongjmp() support: no */\n");
-#endif
-#ifdef H5_HAVE_SIGPROCMASK
-    fprintf(rawoutstream, "/* sigprocmask() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* sigprocmask() support: no */\n");
-#endif
-
-    /* Print the statistics of signal handlers called for debugging */
-    fprintf(rawoutstream, "\n"
-                          "/******************************/\n"
-                          "/* signal handlers statistics */\n"
-                          "/******************************/\n");
-    fprintf(rawoutstream, "/* signal_handlers tested: %d times */\n", signal_handler_tested_g);
-    fprintf(rawoutstream, "/* sigbus_handler called: %d times */\n", sigbus_handler_called_g);
-    fprintf(rawoutstream, "/* sigsegv_handler called: %d times */\n", sigsegv_handler_called_g);
-    fprintf(rawoutstream, "/* sigill_handler called: %d times */\n", sigill_handler_called_g);
 } /* end print_results() */
 
 /*-------------------------------------------------------------------------
@@ -1222,35 +978,6 @@ bit.\n";
 }
 
 /*-------------------------------------------------------------------------
- * Function:    detect_C89_integers
- *
- * Purpose:     Detect C89 integer types
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C89_integers(void)
-{
-    DETECT_BYTE(signed char, SCHAR, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(unsigned char, UCHAR, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(short, SHORT, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned short, USHORT, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int, INT, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned int, UINT, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(long, LONG, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned long, ULONG, d_g[nd_g]);
-    nd_g++;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    detect_C89_floats
  *
  * Purpose:     Detect C89 floating point types
@@ -1265,131 +992,6 @@ detect_C89_floats(void)
     nd_g++;
     DETECT_F(double, DOUBLE, d_g[nd_g]);
     nd_g++;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    detect_C99_integers8
- *
- * Purpose:     Detect C99 8 bit integer types
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C99_integers8(void)
-{
-    DETECT_BYTE(int8_t, INT8, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(uint8_t, UINT8, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(int_least8_t, INT_LEAST8, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(int_fast8_t, INT_FAST8, d_g[nd_g]);
-    nd_g++;
-    DETECT_BYTE(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
-    nd_g++;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    detect_C99_integers16
- *
- * Purpose:     Detect C99 16 bit integer types
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C99_integers16(void)
-{
-    DETECT_I(int16_t, INT16, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint16_t, UINT16, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_least16_t, INT_LEAST16, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_least16_t, UINT_LEAST16, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_fast16_t, INT_FAST16, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_fast16_t, UINT_FAST16, d_g[nd_g]);
-    nd_g++;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    detect_C99_integers32
- *
- * Purpose:     Detect C99 32 bit integer types
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C99_integers32(void)
-{
-    DETECT_I(int32_t, INT32, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint32_t, UINT32, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_least32_t, INT_LEAST32, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_least32_t, UINT_LEAST32, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_fast32_t, INT_FAST32, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_fast32_t, UINT_FAST32, d_g[nd_g]);
-    nd_g++;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    detect_C99_integers64
- *
- * Purpose:     Detect C99 64 bit integer types
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C99_integers64(void)
-{
-    DETECT_I(int64_t, INT64, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint64_t, UINT64, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_least64_t, INT_LEAST64, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_least64_t, UINT_LEAST64, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(int_fast64_t, INT_FAST64, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(uint_fast64_t, UINT_FAST64, d_g[nd_g]);
-    nd_g++;
-
-    DETECT_I(long long, LLONG, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned long long, ULLONG, d_g[nd_g]);
-    nd_g++;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    detect_C99_integers
- *
- * Purpose:     Detect C99 integer types
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_C99_integers(void)
-{
-    /* break it down to more subroutines so that each module subroutine */
-    /* is smaller and takes less time to compile with optimization on.  */
-    detect_C99_integers8();
-    detect_C99_integers16();
-    detect_C99_integers32();
-    detect_C99_integers64();
 }
 
 /*-------------------------------------------------------------------------
@@ -1442,63 +1044,6 @@ detect_alignments(void)
     na_g++;
 }
 
-/* Verify the signal handler for signal signum works correctly multiple times.
- * One possible cause of failure is that the signal handling is blocked or
- * changed to SIG_DFL after H5LONGJMP.
- * Return  0 for success, -1 for failure.
- */
-static int
-verify_signal_handlers(int signum, void (*handler)(int))
-{
-#if defined(__has_feature) /* Clang */
-#if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
-    /* Under the address and thread sanitizers, don't raise any signals. */
-    return 0;
-#endif
-#elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__) /* GCC */
-    return 0;
-#endif
-    void (*save_handler)(int) = HDsignal(signum, handler);
-    volatile int i, val;
-    int          ntries     = 5;
-    volatile int nfailures  = 0;
-    volatile int nsuccesses = 0;
-
-    for (i = 0; i < ntries; i++) {
-        val = H5SETJMP(jbuf_g);
-        if (val == 0) {
-            /* send self the signal to trigger the handler */
-            signal_handler_tested_g++;
-            HDraise(signum);
-            /* Should not reach here. Record error. */
-            nfailures++;
-        }
-        else {
-            if (val == signum) {
-                /* return from signum handler. Record a success. */
-                nsuccesses++;
-            }
-            else {
-                fprintf(stderr, "Unknown return value (%d) from H5SETJMP", val);
-                nfailures++;
-            }
-        }
-    }
-    /* restore save handler, check results and report failures */
-    HDsignal(signum, save_handler);
-    if (nfailures > 0 || nsuccesses != ntries) {
-        fprintf(stderr,
-                "verify_signal_handlers for signal %d did %d tries. "
-                "Found %d failures and %d successes\n",
-                signum, ntries, nfailures, nsuccesses);
-        return -1;
-    }
-    else {
-        /* all succeeded */
-        return 0;
-    }
-}
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1527,24 +1072,7 @@ main(int argc, char *argv[])
     if (!rawoutstream)
         rawoutstream = stdout;
 
-    /* verify the SIGBUS and SIGSEGV handlers work properly */
-    if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
-        fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigbus_handler", SIGBUS);
-    }
-    if (verify_signal_handlers(SIGSEGV, sigsegv_handler) != 0) {
-        fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigsegv_handler", SIGSEGV);
-    }
-    if (verify_signal_handlers(SIGILL, sigill_handler) != 0) {
-        fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigill_handler", SIGILL);
-    }
-
     print_header();
-
-    /* C89 integer types */
-    detect_C89_integers();
-
-    /* C99 integer types */
-    detect_C99_integers();
 
     /* C89 floating point types */
     detect_C89_floats();

@@ -473,35 +473,21 @@ hid_t H5T_NATIVE_INT_FAST64_g   = FAIL;
 hid_t H5T_NATIVE_UINT_FAST64_g  = FAIL;
 
 /*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c.  These alignments are mainly for offsets in HDF5 compound
- * datatype or C structures, which are different from the alignments for memory
- * address below this group of variables.
+ * Alignment constraints for HDF5 types.  Accessing objects of these
+ * types with improper alignment invokes C undefined behavior, so the
+ * library lays out objects with correct alignment, always.
+ *
+ * A value of N indicates that the data must be aligned on an address
+ * ADDR such that 0 == ADDR mod N. When N=1 no alignment is required;
+ * N=0 implies that alignment constraints were not calculated.  These
+ * values are used for structure alignment.
  */
-size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_SHORT_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_USHORT_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_INT_COMP_ALIGN_g     = 0;
-size_t H5T_NATIVE_UINT_COMP_ALIGN_g    = 0;
-size_t H5T_NATIVE_LONG_COMP_ALIGN_g    = 0;
-size_t H5T_NATIVE_ULONG_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_LLONG_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g = 0;
+size_t H5T_POINTER_ALIGN_g     = 0;
+size_t H5T_HVL_ALIGN_g         = 0;
+size_t H5T_HOBJREF_ALIGN_g     = 0;
+size_t H5T_HDSETREGREF_ALIGN_g = 0;
+size_t H5T_REF_ALIGN_g         = 0;
 
-size_t H5T_POINTER_COMP_ALIGN_g     = 0;
-size_t H5T_HVL_COMP_ALIGN_g         = 0;
-size_t H5T_HOBJREF_COMP_ALIGN_g     = 0;
-size_t H5T_HDSETREGREF_COMP_ALIGN_g = 0;
-size_t H5T_REF_COMP_ALIGN_g         = 0;
-
-/*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c
- */
 size_t H5T_NATIVE_SCHAR_ALIGN_g   = 0;
 size_t H5T_NATIVE_UCHAR_ALIGN_g   = 0;
 size_t H5T_NATIVE_SHORT_ALIGN_g   = 0;
@@ -776,6 +762,9 @@ H5T_init(void)
      */
     if (H5T__init_native() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    if (H5T__init_native_int() < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize integers")
 
     /* Get the atomic datatype structures needed by the initialization code below */
     if (NULL == (native_schar = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g)))
