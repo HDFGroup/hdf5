@@ -873,7 +873,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;
@@ -1349,7 +1349,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    if ((hand = parse_command_line(argc, argv)) == NULL) {
+    if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;
     }
 
@@ -1497,7 +1497,7 @@ main(int argc, char *argv[])
         dset_table  = table_list.tables[0].dset_table;
         type_table  = table_list.tables[0].type_table;
 
-        /* does there exist unamed committed datatype */
+        /* does there exist unnamed committed datatype */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 unamedtype = 1;
