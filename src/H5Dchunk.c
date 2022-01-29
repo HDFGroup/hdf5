@@ -3153,7 +3153,9 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     unsigned             idx   = 0;     /* Index of chunk in cache, if present */
     hbool_t              found = FALSE; /* In cache? */
 #ifdef H5_HAVE_PARALLEL
-    hbool_t reenable_coll_md_reads = FALSE;
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 restore_md_reads_state = FALSE;
 #endif
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3227,11 +3229,10 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * processes.
              */
             if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
-                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
-                if (do_coll_md_reads) {
-                    H5CX_set_coll_metadata_read(FALSE);
-                    reenable_coll_md_reads = TRUE;
-                }
+                md_reads_file_flag    = H5P_FORCE_FALSE;
+                md_reads_context_flag = FALSE;
+                H5F_set_coll_metadata_reads(idx_info.f, &md_reads_file_flag, &md_reads_context_flag);
+                restore_md_reads_state = TRUE;
             }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -3277,8 +3278,8 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
 done:
 #ifdef H5_HAVE_PARALLEL
     /* Re-enable collective metadata reads if we disabled them */
-    if (reenable_coll_md_reads)
-        H5CX_set_coll_metadata_read(TRUE);
+    if (restore_md_reads_state)
+        H5F_set_coll_metadata_reads(dset->oloc.file, &md_reads_file_flag, &md_reads_context_flag);
 #endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(ret_value)

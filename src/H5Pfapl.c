@@ -4762,15 +4762,14 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
  * Function:    H5Pset_all_coll_metadata_ops
  *
  * Purpose:    Tell the library whether the metadata read operations will
- *        be done collectively (1) or not (0). Default is independent.
- *        With collective mode, the library will optimize access to
- *        metadata operations on the file.
+ *             be done collectively (1) or not (0). Default is independent.
+ *             With collective mode, the library will optimize access to
+ *             metadata operations on the file.
  *
  * Note:    This routine accepts file access property lists, link
- *        access property lists, attribute access property lists,
- *        dataset access property lists, group access property lists,
- *        named datatype access property lists,
- *        and dataset transfer property lists.
+ *          access property lists, attribute access property lists,
+ *          dataset access property lists, group access property lists
+ *          and named datatype access property lists.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -4790,7 +4789,7 @@ H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
     H5TRACE2("e", "ib", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    /* (Dataset, group, attribute, and named datype  access property lists
+    /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
     if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
@@ -4821,10 +4820,9 @@ done:
  * Purpose:    Gets information about collective metadata read mode.
  *
  * Note:    This routine accepts file access property lists, link
- *        access property lists, attribute access property lists,
- *        dataset access property lists, group access property lists,
- *        named datatype access property lists,
- *        and dataset transfer property lists.
+ *          access property lists, attribute access property lists,
+ *          dataset access property lists, group access property lists,
+ *          and named datatype access property lists.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -4842,7 +4840,7 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
     H5TRACE2("e", "i*b", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    /* (Dataset, group, attribute, and named datype  access property lists
+    /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
     if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
