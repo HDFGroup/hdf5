@@ -32,7 +32,7 @@
 
 #define NAME_BUF_SIZE 2048
 /*
- *  Alternative formating for data dumped by H5LS
+ *  Alternative formatting for data dumped by H5LS
  *
  *  This table only affects H5LS output.
  */
@@ -2640,7 +2640,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t              file_id = H5I_INVALID_HID;
     char *             fname = NULL, *oname = NULL, *x = NULL;
