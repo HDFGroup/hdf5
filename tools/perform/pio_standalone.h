@@ -493,7 +493,7 @@ typedef struct long_options {
                            * this gets returned from get_option   */
 } long_options;
 
-extern int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+extern int get_option(int argc, char **argv, const char *opt, const struct long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

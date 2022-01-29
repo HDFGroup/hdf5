@@ -176,7 +176,7 @@ help_ref_msg(FILE *output)
  *-------------------------------------------------------------------------
  */
 int
-get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
+get_option(int argc, char **argv, const char *opts, const struct long_options *l_opts)
 {
     static int sp      = 1;   /* character index in current token */
     int        opt_opt = '?'; /* option character passed back to user */
