@@ -1150,7 +1150,7 @@ done:
  * Purpose:     Sanity checks and sets up collective operations.
  *
  * Note:        Should be called for all API routines that modify file
- *              file metadata but don't pass in an access property list.
+ *              metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
  *

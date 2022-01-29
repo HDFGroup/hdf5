@@ -31,11 +31,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* File access				*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
+#include "H5private.h"   /* Generic Functions                               */
+#include "H5CXprivate.h" /* API Contexts                                    */
+#include "H5Eprivate.h"  /* Error handling                                  */
+#include "H5Fpkg.h"      /* File access                                     */
+#include "H5FDprivate.h" /* File drivers                                    */
+#include "H5Iprivate.h"  /* IDs                                             */
 
 /****************/
 /* Local Macros */
@@ -328,4 +329,125 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_retrieve_comm */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_coll_metadata_reads
+ *
+ * Purpose:     Determines whether collective metadata reads should be
+ *              performed. This routine is meant to be the single source of
+ *              truth for the collective metadata reads status, as it
+ *              coordinates between the file-global flag and the flag set
+ *              for the current operation in the current API context.
+ *
+ * Return:      TRUE/FALSE (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_coll_metadata_reads(const H5F_t *file)
+{
+    H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
+    hbool_t                 ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file && file->shared);
+
+    /* Retrieve the file-global flag */
+    file_flag = H5F_COLL_MD_READ(file);
+
+    /* If file flag is set to H5P_FORCE_FALSE, exit early
+     * with FALSE, since collective metadata reads have
+     * been explicitly disabled somewhere in the library.
+     */
+    if (H5P_FORCE_FALSE == file_flag)
+        ret_value = FALSE;
+    else {
+        /* If file flag is set to H5P_USER_TRUE, ignore
+         * any settings in the API context. A file-global
+         * setting of H5P_USER_TRUE for collective metadata
+         * reads should ignore any settings on an Access
+         * Property List for an individual operation.
+         */
+        if (H5P_USER_TRUE == file_flag)
+            ret_value = TRUE;
+        else {
+            /* Get the collective metadata reads flag from
+             * the current API context.
+             */
+            ret_value = H5CX_get_coll_metadata_read();
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_coll_metadata_reads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_coll_metadata_reads
+ *
+ * Purpose:     Used to temporarily modify the collective metadata reads
+ *              status. This is useful for cases where either:
+ *
+ *              * Collective metadata reads are enabled, but need to be
+ *                disabled for an operation about to occur that may trigger
+ *                an independent metadata read (such as only rank 0 doing
+ *                something)
+ *
+ *              * Metadata reads are currently independent, but it is
+ *                guaranteed that the application has maintained
+ *                collectivity at the interface level (e.g., an operation
+ *                that modifies metadata is being performed). In this case,
+ *                it should be safe to enable collective metadata reads,
+ *                barring any internal library issues that may occur
+ *
+ *              After completion, the `file_flag` parameter will be set to
+ *              the previous value of the file-global collective metadata
+ *              reads flag. The `context_flag` parameter will be set to the
+ *              previous value of the API context's collective metadata
+ *              reads flag. Another call to this routine should be made to
+ *              restore these values (see below warning).
+ *
+ * !! WARNING !!
+ *              It is dangerous to modify the collective metadata reads
+ *              status, as this can cause crashes, hangs and corruption in
+ *              the HDF5 file when improperly done. Therefore, the
+ *              `file_flag` and `context_flag` parameters are both
+ *              mandatory, and it is assumed that the caller will guarantee
+ *              these settings are restored with another call to this
+ *              routine once the bracketed operation is complete.
+ * !! WARNING !!
+ *
+ * Return:      Nothing
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag)
+{
+    H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
+    hbool_t                 prev_context_flag = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file && file->shared);
+    HDassert(file_flag);
+    HDassert(context_flag);
+
+    /* Save old state */
+    prev_file_flag    = H5F_COLL_MD_READ(file);
+    prev_context_flag = H5CX_get_coll_metadata_read();
+
+    /* Set new desired state */
+    if (prev_file_flag != *file_flag) {
+        H5F_COLL_MD_READ(file) = *file_flag;
+        *file_flag             = prev_file_flag;
+    }
+    if (prev_context_flag != *context_flag) {
+        H5CX_set_coll_metadata_read(*context_flag);
+        *context_flag = prev_context_flag;
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_set_coll_metadata_reads() */
+
 #endif /* H5_HAVE_PARALLEL */

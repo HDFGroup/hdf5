@@ -34,11 +34,9 @@
 
 #define MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS 2
 
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_NO_SEL_PROCESS (mpi_rank == mpi_size - 1)
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME   "linked_chunk_io_sort_chunk_issue"
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_Y_DIM_SCALE    20000
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE     1
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS           1
+#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM 10000
+#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME    "linked_chunk_io_sort_chunk_issue"
+#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS            1
 
 /*
  * A test for issue HDFFV-10501. A parallel hang was reported which occurred
@@ -340,21 +338,34 @@ test_multi_chunk_io_addrmap_issue(void)
  * collective metadata reads being made only by process 0 in H5D__sort_chunk().
  *
  * NOTE: Due to the way that the threshold value which pertains to this test
- * is currently calculated within HDF5, there are several conditions that this
- * test must maintain. Refer to the function H5D__sort_chunk in H5Dmpio.c for
- * a better idea of why.
+ * is currently calculated within HDF5, the following two conditions must be
+ * true to trigger the issue:
  *
- * Condition 1: We need to make sure that the test always selects every single
- * chunk in the dataset. It is fine if the selection is split up among multiple
- * ranks, but their combined selection must cover the whole dataset.
+ * Condition 1: A certain threshold ratio must be met in order to have HDF5
+ * obtain all chunk addresses collectively inside H5D__sort_chunk(). This is
+ * given by the following:
  *
- * Condition 2: The number of chunks in the dataset divided by the number of MPI
- * ranks must exceed or equal 10000. In other words, each MPI rank must be
- * responsible for 10000 or more unique chunks.
+ *     (sum_chunk * 100) / (dataset_nchunks * mpi_size) >= 30%
  *
- * Condition 3: This test will currently only be reliably reproducable for 2 or 3
- * MPI ranks. The threshold value calculated reduces to a constant 100 / mpi_size,
- * and is compared against a default value of 30%.
+ * where:
+ *     * `sum_chunk` is the combined sum of the number of chunks selected in
+ *       the dataset by all ranks (chunks selected by more than one rank count
+ *       individually toward the sum for each rank selecting that chunk)
+ *     * `dataset_nchunks` is the number of chunks in the dataset (selected
+ *       or not)
+ *     * `mpi_size` is the size of the MPI Communicator
+ *
+ * Condition 2: `sum_chunk` divided by `mpi_size` must exceed or equal a certain
+ * threshold (as of this writing, 10000).
+ *
+ * To satisfy both these conditions, we #define a macro,
+ * LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM, which corresponds to the
+ * value of the H5D_ALL_CHUNK_ADDR_THRES_COL_NUM macro in H5Dmpio.c (the
+ * 10000 threshold from condition 2). We then create a dataset of that many
+ * chunks and have each MPI rank write to and read from a piece of every single
+ * chunk in the dataset. This ensures chunk utilization is the max possible
+ * and exceeds our 30% target ratio, while always exactly matching the numeric
+ * chunk threshold value of condition 2.
  *
  * Failure in this test may either cause a hang, or, due to how the MPI calls
  * pertaining to this issue might mistakenly match up, may cause an MPI error
@@ -376,10 +387,9 @@ void
 test_link_chunk_io_sort_chunk_issue(void)
 {
     const char *filename;
-    hsize_t *   dataset_dims = NULL;
-    hsize_t     max_dataset_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
-    hsize_t     sel_dims[1];
-    hsize_t     chunk_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS] = {LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS};
+    hsize_t     dataset_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+    hsize_t     sel_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
+    hsize_t     chunk_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
     hsize_t     start[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
     hsize_t     stride[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
     hsize_t     count[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
@@ -413,14 +423,13 @@ test_link_chunk_io_sort_chunk_issue(void)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    dataset_dims = HDmalloc(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS * sizeof(*dataset_dims));
-    VRFY((dataset_dims != NULL), "malloc succeeded");
+    /*
+     * Create a one-dimensional dataset of exactly LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM
+     * chunks, where every rank writes to a piece of every single chunk to keep utilization high.
+     */
+    dataset_dims[0] = (hsize_t)mpi_size * (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
 
-    dataset_dims[0] = (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE * (hsize_t)mpi_size *
-                      (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_Y_DIM_SCALE;
-    max_dataset_dims[0] = H5S_UNLIMITED;
-
-    fspace_id = H5Screate_simple(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, dataset_dims, max_dataset_dims);
+    fspace_id = H5Screate_simple(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, dataset_dims, NULL);
     VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
     /*
@@ -428,6 +437,9 @@ test_link_chunk_io_sort_chunk_issue(void)
      */
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
+
+    /* Chunk size is equal to MPI size since each rank writes to a piece of every chunk */
+    chunk_dims[0] = (hsize_t)mpi_size;
 
     VRFY((H5Pset_chunk(dcpl_id, LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, chunk_dims) >= 0),
          "H5Pset_chunk succeeded");
@@ -438,23 +450,21 @@ test_link_chunk_io_sort_chunk_issue(void)
 
     /*
      * Setup hyperslab selection to split the dataset among the ranks.
-     *
-     * The ranks will write rows across the dataset.
      */
-    stride[0] = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE;
-    count[0]  = (dataset_dims[0] / LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) / (hsize_t)mpi_size;
-    start[0]  = count[0] * (hsize_t)mpi_rank;
-    block[0]  = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE;
+    start[0]  = (hsize_t)mpi_rank;
+    stride[0] = (hsize_t)mpi_size;
+    count[0]  = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM;
+    block[0]  = 1;
 
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    sel_dims[0] = count[0] * (LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE);
+    sel_dims[0] = count[0];
 
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    data = HDcalloc(1, count[0] * (LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) * sizeof(int));
+    data = HDcalloc(1, count[0] * sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -477,32 +487,24 @@ test_link_chunk_io_sort_chunk_issue(void)
     VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    read_buf = HDmalloc(count[0] * (LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) * sizeof(int));
+    read_buf = HDmalloc(count[0] * sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    sel_dims[0] = count[0] * (LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE);
+    sel_dims[0] = count[0];
 
     VRFY((H5Sclose(mspace_id) >= 0), "H5Sclose succeeded");
 
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    read_buf = HDrealloc(read_buf, count[0] * (LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) * sizeof(int));
-    VRFY((read_buf != NULL), "realloc succeeded");
-
     /*
      * Finally have each rank read their section of data back from the dataset.
      */
     VRFY((H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl_id, read_buf) >= 0),
          "H5Dread succeeded");
-
-    if (dataset_dims) {
-        HDfree(dataset_dims);
-        dataset_dims = NULL;
-    }
 
     if (data) {
         HDfree(data);
