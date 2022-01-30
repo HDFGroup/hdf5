@@ -22,7 +22,7 @@ include $(top_srcdir)/config/lt_vers.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src \
          -I$(top_srcdir)/fortran/src -I$(top_builddir)/fortran/src
-AM_FCFLAGS+=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
+AM_FCFLAGS+=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(FC_MODINC)$(fmoddir)
 
 # Our main target, the high-level fortran library
 lib_LTLIBRARIES=libhdf5hl_fortran.la
@@ -78,13 +78,13 @@ clean-local:
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(fmoddir)/. ; \
 	fi
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  if test -f "$(fmoddir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(fmoddir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(fmoddir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi
 	$(RM) $(DESTDIR)$(libdir)/libhdf5_hl_fortran*
