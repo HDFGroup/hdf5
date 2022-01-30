@@ -612,6 +612,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
 
+  ## Allow setting the fortran module install dir
+  AC_ARG_WITH([fmoddir],
+    [AS_HELP_STRING([--with-fmoddir=DIR], [Fortran module install directory])],
+    [fmoddir=$withval],
+    [fmoddir="\${includedir}"])
+  AC_SUBST([fmoddir], [$fmoddir])
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
