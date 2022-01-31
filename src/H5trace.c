@@ -4023,7 +4023,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
+                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
                 H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)

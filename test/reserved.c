@@ -71,7 +71,7 @@ rsrv_heap(void)
         }
         H5E_END_TRY
 
-        HDsprintf(dset_name, "Dset %d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i);
 
         H5E_BEGIN_TRY
         {
@@ -115,7 +115,7 @@ rsrv_heap(void)
     if (H5open() < 0)
         TEST_ERROR;
 
-    HDsprintf(dset_name, "Dset %d", i - 2);
+    HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i - 2);
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
@@ -218,7 +218,7 @@ rsrv_ohdr(void)
     } /* end for */
 
     for (i = 0; i < 2000; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
         H5E_BEGIN_TRY
         {
             aid     = H5Screate_simple(2, dims, NULL);
