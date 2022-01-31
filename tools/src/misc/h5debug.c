@@ -640,7 +640,7 @@ main(int argc, char *argv[])
     }
     else if (!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-         * Debug an extensible aray header.
+         * Debug an extensible array header.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
@@ -661,7 +661,7 @@ main(int argc, char *argv[])
     }
     else if (!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-         * Debug an extensible aray index block.
+         * Debug an extensible array index block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
@@ -682,7 +682,7 @@ main(int argc, char *argv[])
     }
     else if (!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-         * Debug an extensible aray super block.
+         * Debug an extensible array super block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
@@ -702,7 +702,7 @@ main(int argc, char *argv[])
     }
     else if (!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-         * Debug an extensible aray data block.
+         * Debug an extensible array data block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);

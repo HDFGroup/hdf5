@@ -489,7 +489,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;
@@ -500,7 +500,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':
@@ -551,7 +551,7 @@ main(int argc, const char *argv[])
     }
 
     if (min_buf_size > max_buf_size)
-        error("minmum buffer size (%d) exceeds maximum buffer size (%d)", min_buf_size, max_buf_size);
+        error("minimum buffer size (%d) exceeds maximum buffer size (%d)", min_buf_size, max_buf_size);
 
     HDfprintf(stdout, "Filesize: %ld\n", file_size);
 

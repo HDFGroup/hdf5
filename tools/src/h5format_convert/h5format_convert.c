@@ -94,7 +94,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv)
+parse_command_line(int argc, const char *const *argv)
 {
     int opt;
 
@@ -383,7 +383,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t fid = H5I_INVALID_HID;
 
@@ -394,7 +394,7 @@ main(int argc, const char *argv[])
     h5tools_init();
 
     /* Parse command line options */
-    if (parse_command_line(argc, argv) < 0)
+    if (parse_command_line(argc, (const char *const *)argv) < 0)
         goto done;
     else if (verbose_g)
         HDfprintf(stdout, "Process command line options\n");

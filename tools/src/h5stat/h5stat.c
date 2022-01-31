@@ -33,7 +33,7 @@
 #define H5_NFILTERS_IMPL                                                                                     \
     8 /* Number of currently implemented filters + one to                                                    \
          accommodate for user-define filters + one                                                           \
-         to accomodate datasets whithout any filters */
+         to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
@@ -824,7 +824,7 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, const char *const *argv, struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
@@ -1671,7 +1671,7 @@ print_statistics(const char *name, const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     iter_t            iter;
     const char *      fname   = NULL;
@@ -1687,7 +1687,7 @@ main(int argc, const char *argv[])
 
     HDmemset(&iter, 0, sizeof(iter));
 
-    if (parse_command_line(argc, argv, &hand) < 0)
+    if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
     /* enable error reporting if command line option */
