@@ -164,7 +164,7 @@ typedef struct {
 
 /* local functions */
 static hsize_t         parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, const char *argv[]);
+static struct options *parse_command_line(int argc, const char *const *argv);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -185,7 +185,7 @@ static void report_parameters(struct options *opts);
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
@@ -197,7 +197,7 @@ main(int argc, const char *argv[])
 
     output = stdout;
 
-    opts = parse_command_line(argc, argv);
+    opts = parse_command_line(argc, (const char *const *)argv);
 
     if (!opts) {
         exit_value = EXIT_FAILURE;
@@ -427,7 +427,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show sys write statics */
+    /* show sys write statistics */
 #if 0
     if (sio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -473,7 +473,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
 #if 0
         if (sio_debug_level >= 3) {
             /* output all of the times for all iterations */
@@ -817,7 +817,7 @@ report_parameters(struct options *opts)
  *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int             opt;
     struct options *cl_opts;

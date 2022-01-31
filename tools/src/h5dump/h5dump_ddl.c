@@ -829,7 +829,7 @@ dump_group(hid_t gid, const char *name)
     if (!HDstrcmp(name, "/") && unamedtype) {
         unsigned u; /* Local index variable */
 
-        /* dump unamed type in root group */
+        /* dump unnamed type in root group */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 char *obj_tok_str = NULL;
@@ -1283,7 +1283,7 @@ dump_fcontents(hid_t fid)
 {
     PRINTSTREAM(rawoutstream, "%s %s\n", FILE_CONTENTS, BEGIN);
 
-    /* special case of unamed types in root group */
+    /* special case of unnamed types in root group */
     if (unamedtype) {
         unsigned u;
 
@@ -1960,7 +1960,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, int pe,
             if (!type_table->objs[idx].recorded) {
                 char *obj_tok_str = NULL;
 
-                /* unamed datatype */
+                /* unnamed datatype */
                 H5Otoken_to_str(fid, &type_table->objs[idx].obj_token, &obj_tok_str);
                 HDsprintf(name, "/#%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
