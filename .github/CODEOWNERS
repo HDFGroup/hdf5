@@ -7,36 +7,36 @@
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
 # will be requested to review.
-*.cmake           @byrnHDF @derobins
-CMakeLists.txt    @byrnHDF @derobins
-CMakeTests.*      @byrnHDF @derobins
+*.cmake           @byrnHDF @ChristopherHogan @gnuoyd @derobins
+CMakeLists.txt    @byrnHDF @ChristopherHogan @gnuoyd @derobins
+CMakeTests.*      @byrnHDF @ChristopherHogan @gnuoyd @derobins
 
-/bin/             @lrknox @derobins
+/bin/             @lrknox @ChristopherHogan @gnuoyd @derobins
 
-/c++/             @bmribler @byrnHDF @derobins
+/c++/             @bmribler @byrnHDF @ChristopherHogan @gnuoyd @derobins
 
-/config/          @lrknox @derobins @byrnHDF
+/config/          @lrknox @byrnHDF @ChristopherHogan @gnuoyd @derobins
 
-/doc/             @gnuoyd @jrmainzer
+/doc/             @ChristopherHogan @gnuoyd @jrmainzer
 
-/examples/        @lrknox @derobins @bmribler
+/examples/        @lrknox @bmribler @ChristopherHogan @gnuoyd @derobins
 
 /fortran/         @brtnfld @epourmal
 
-/hl/              @bmribler @byrnHDF @derobins
+/hl/              @bmribler @byrnHDF @ChristopherHogan @gnuoyd @derobins
 
 /java/            @jhendersonHDF @byrnHDF
 
-/m4/              @lrknox @derobins
+/m4/              @lrknox @ChristopherHogan @gnuoyd @derobins
 
 /release_docs/    @lrknox @bmribler @byrnHDF
 
-/src/             @jhendersonHDF @derobins @fortnern @soumagne @vchoi-hdfgroup @jrmainzer
+/src/             @jhendersonHDF @fortnern @soumagne @vchoi-hdfgroup @ChristopherHogan @gnuoyd @derobins @jrmainzer
 
-/test/            @jhendersonHDF @derobins @fortnern @soumagne @vchoi-hdfgroup @jrmainzer
+/test/            @jhendersonHDF @fortnern @soumagne @vchoi-hdfgroup @ChristopherHogan @gnuoyd @derobins @jrmainzer
 
-/testpar/         @jhendersonHDF @rawarren @jrmainzer
+/testpar/         @jhendersonHDF @ChristopherHogan @gnuoyd @jrmainzer
 
-/tools/           @byrnHDF @bmribler @derobins
+/tools/           @byrnHDF @bmribler @ChristopherHogan @gnuoyd @derobins
 
-/utils/           @lrknox @byrnHDF @derobins
+/utils/           @lrknox @byrnHDF @ChristopherHogan @gnuoyd @derobins
