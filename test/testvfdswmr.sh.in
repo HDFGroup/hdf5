@@ -1095,6 +1095,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
         # first dimension (up to 25 1x16x16)
         #
 
+        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+        # VDS across multiple files (-M option), the program also skips for future support.
+        if [[ $options == *"-M"* ]]; then
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+
 	echo launch vfd_swmr_bigset_writer many small, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
 	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
@@ -1107,9 +1117,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
 	# Wait for the reader to finish before signalling the
 	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
-	# the .h5 file.
+	# the .h5 file. Also wait for the auxiliary process to finish.
+        wait $pid_aux_proc
 	wait $pid_reader
 	wait $pid_writer
+
+	# Collect exit code of the auxiliary process
+	if [ $(cat aux_process.rc) -ne 0 ]; then
+		echo the auxiliary process had error
+		nerrors=$((nerrors + 1))
+	fi
 
 	# Collect exit code of the reader
 	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
@@ -1126,6 +1143,8 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
 	# Clean up output files
 	rm -f vfd_swmr_bigset_writer.{out,rc}
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+        rm -f aux_process.{out,rc}
+        rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 # bigset test for bigger chunks
@@ -1149,6 +1168,17 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 		continue
 	fi
 	echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
+
+        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+        # VDS across multiple files (-M option), the program also skips for future support.
+        if [[ $options == *"-M"* ]]; then
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
 	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
 	pid_writer=$!
@@ -1160,9 +1190,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 	# Wait for the reader to finish before signalling the
 	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
-	# the .h5 file.
+	# the .h5 file. Also wait for the auxiliary process to finish.
+        wait $pid_aux_proc
 	wait $pid_reader
 	wait $pid_writer
+
+	# Collect exit code of the auxiliary process
+	if [ $(cat aux_process.rc) -ne 0 ]; then
+		echo the auxiliary process had error
+		nerrors=$((nerrors + 1))
+	fi
 
 	# Collect exit code of the reader
 	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
@@ -1179,6 +1216,8 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 	# Clean up output files
 	rm -f vfd_swmr_bigset_writer.{out,rc}
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+        rm -f aux_process.{out,rc}
+        rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 ###############################################################################
