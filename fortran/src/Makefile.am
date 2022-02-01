@@ -22,7 +22,7 @@ include $(top_srcdir)/config/lt_vers.am
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
 AM_CPPFLAGS+=-I$(top_srcdir)/src
-AM_FCFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src $(FC_MODINC)$(fmoddir)
+AM_FCFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src $(F9XMODFLAG)$(fmoddir)
 
 AM_FCLIBS=$(LIBHDF5)
 
