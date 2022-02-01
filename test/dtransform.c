@@ -438,7 +438,7 @@ init_test(hid_t file_id)
     const char *f_to_c = "(5/9.0)*(x-32)";
     /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit
      * into uchar */
-    const char *utrans = "((x/4+25)*3";
+    const char *utrans = "(x/4+25)*3";
 
     hid_t   dataspace      = -1;
     hid_t   dxpl_id_f_to_c = -1;
