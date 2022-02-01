@@ -124,7 +124,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
          * fit into uchar */                                                                                 \
-        const char *utrans = "(x/4+25)*3";                                                                \
+        const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t       dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset, dset_nn, dt_nn;                         \
         H5T_order_t order;                                                                                   \
@@ -213,7 +213,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
          * fit into uchar */                                                                                 \
-        const char *utrans = "(x/4+25)*3";                                                                \
+        const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t   dataspace, dxpl_id_f_to_c, dxpl_id_utrans, cparms, memspace, dset_chunk, filespace;          \
         hsize_t dim[2]    = {ROWS, COLS};                                                                    \
