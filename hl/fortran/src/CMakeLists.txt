@@ -249,7 +249,7 @@ if (NOT ONLY_SHARED_LIBS)
       FILES
           ${mod_files}
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/static
+          ${HDF5_INSTALL_STATIC_FMOD_DIR}
       COMPONENT
           fortheaders
   )
@@ -258,7 +258,7 @@ if (NOT ONLY_SHARED_LIBS)
         FILES
             ${mod_files}
         DESTINATION
-            ${HDF5_INSTALL_INCLUDE_DIR}
+            ${HDF5_INSTALL_FMOD_DIR}
         COMPONENT
             fortheaders
     )
@@ -277,7 +277,7 @@ if (BUILD_SHARED_LIBS)
       FILES
           ${modsh_files}
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/shared
+          ${HDF5_INSTALL_SHARED_FMOD_DIR}
       COMPONENT
           fortheaders
   )
