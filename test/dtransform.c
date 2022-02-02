@@ -122,8 +122,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     {                                                                                                        \
         TYPE        array[ROWS][COLS];                                                                       \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
-        /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
-         * fit into uchar */                                                                                 \
+        /* utrans is a transform for char types: numbers  are restricted from -128 to 127 fit into char */   \
         const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t       dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset, dset_nn, dt_nn;                         \
@@ -211,8 +210,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     {                                                                                                        \
         TYPE        array[ROWS][COLS];                                                                       \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
-        /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
-         * fit into uchar */                                                                                 \
+        /* utrans is a transform for char types: numbers  are restricted from -128 to 127 fit into char */   \
         const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t   dataspace, dxpl_id_f_to_c, dxpl_id_utrans, cparms, memspace, dset_chunk, filespace;          \
@@ -436,8 +434,7 @@ static int
 init_test(hid_t file_id)
 {
     const char *f_to_c = "(5/9.0)*(x-32)";
-    /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit
-     * into uchar */
+    /* utrans is a transform for char types: numbers  are restricted from -128 to 127 fit into char */
     const char *utrans = "(x/4+25)*3";
 
     hid_t   dataspace      = -1;
