@@ -1766,7 +1766,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1799,7 +1799,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1834,7 +1834,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1867,7 +1867,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1902,7 +1902,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order, with compound first */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1935,7 +1935,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsprintf(name, "%05d", i);
+            HDsnprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR

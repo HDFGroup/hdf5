@@ -306,7 +306,7 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
     while ((pass) && (u < nlinks)) {
         char linkname[16];
 
-        HDsprintf(linkname, "%u", u);
+        HDsnprintf(linkname, sizeof(linkname), "%u", u);
 
         if (0 == (u % 3)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
@@ -474,7 +474,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         char        linkname[16];
         htri_t      link_exists;
 
-        HDsprintf(linkname, "%u", u);
+        HDsnprintf(linkname, sizeof(linkname), "%u", u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
@@ -715,7 +715,7 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
     while ((pass) && (u < nlinks)) {
         char linkname[16];
 
-        HDsprintf(linkname, "%u", u);
+        HDsnprintf(linkname, sizeof(linkname), "%u", u);
 
         if (0 == (u % 3)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
@@ -883,7 +883,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         char        linkname[16];
         htri_t      link_exists;
 
-        HDsprintf(linkname, "%u", u);
+        HDsnprintf(linkname, sizeof(linkname), "%u", u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
@@ -1321,7 +1321,7 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
     while ((pass) && (u < nlinks)) {
         char linkname[32];
 
-        HDsprintf(linkname, "ln%d_%u", proc_num, u);
+        HDsnprintf(linkname, sizeof(linkname), "ln%d_%u", proc_num, u);
 
         if (0 == (u % 2)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
@@ -1479,7 +1479,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         char        linkname[32];
         htri_t      link_exists;
 
-        HDsprintf(linkname, "ln%d_%u", proc_num, u);
+        HDsnprintf(linkname, sizeof(linkname), "ln%d_%u", proc_num, u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
@@ -3056,26 +3056,26 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
 
     /* Add & verify an empty "new style" group */
     if (pass) {
-        HDsprintf(full_path, "%s/A", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ns_grp_0(fid, full_path);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/A", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_0(fid, full_path);
     }
 
     /* Add & verify a compact "new style" group (3 link messages) */
     if (pass) {
-        HDsprintf(full_path, "%s/B", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ns_grp_c(fid, full_path, 3);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/B", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_c(fid, full_path, 3);
     }
@@ -3084,26 +3084,26 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * fractal heap)
      */
     if (pass) {
-        HDsprintf(full_path, "%s/C", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ns_grp_d(fid, full_path, 300);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/C", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_d(fid, full_path, 300);
     }
 
     /* Add & verify an empty "old style" group to file */
     if (pass) {
-        HDsprintf(full_path, "%s/D", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         os_grp_0(fid, full_path);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/D", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_os_grp_0(fid, full_path);
     }
@@ -3112,13 +3112,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * local heap) to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/E", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         os_grp_n(fid, full_path, proc_num, 300);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/E", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_os_grp_n(fid, full_path, proc_num, 300);
     }
@@ -3127,13 +3127,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/F", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_ctg_i(fid, full_path, FALSE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/F", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_i(fid, full_path, FALSE);
     }
@@ -3142,13 +3142,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/G", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_ctg_i(fid, full_path, TRUE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/G", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_i(fid, full_path, TRUE);
     }
@@ -3157,13 +3157,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/H", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_chk_i(fid, full_path, FALSE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/H", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_chk_i(fid, full_path, FALSE);
     }
@@ -3172,13 +3172,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/I", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_chk_i(fid, full_path, TRUE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/I", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_chk_i(fid, full_path, TRUE);
     }
@@ -3187,13 +3187,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/J", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_cpt_i(fid, full_path, FALSE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/J", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_cpt_i(fid, full_path, FALSE);
     }
@@ -3202,13 +3202,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/K", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_cpt_i(fid, full_path, TRUE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/K", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_cpt_i(fid, full_path, TRUE);
     }
@@ -3217,13 +3217,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * (but no data) to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/L", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_ctg_v(fid, full_path, FALSE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/L", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_v(fid, full_path, FALSE);
     }
@@ -3232,13 +3232,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
      * (and data) to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/M", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         ds_ctg_v(fid, full_path, TRUE);
     }
 
     if (pass) {
-        HDsprintf(full_path, "%s/M", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_v(fid, full_path, TRUE);
     }
@@ -3281,14 +3281,14 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
 
     /* validate an empty "new style" group */
     if (pass) {
-        HDsprintf(full_path, "%s/A", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_0(fid, full_path);
     }
 
     /* validate a compact "new style" group (3 link messages) */
     if (pass) {
-        HDsprintf(full_path, "%s/B", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_c(fid, full_path, 3);
     }
@@ -3297,14 +3297,14 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * fractal heap)
      */
     if (pass) {
-        HDsprintf(full_path, "%s/C", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ns_grp_d(fid, full_path, 300);
     }
 
     /* validate an empty "old style" group in file */
     if (pass) {
-        HDsprintf(full_path, "%s/D", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_os_grp_0(fid, full_path);
     }
@@ -3313,7 +3313,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * local heap)
      */
     if (pass) {
-        HDsprintf(full_path, "%s/E", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_os_grp_n(fid, full_path, proc_num, 300);
     }
@@ -3322,7 +3322,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file.
      */
     if (pass) {
-        HDsprintf(full_path, "%s/F", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_i(fid, full_path, FALSE);
     }
@@ -3331,7 +3331,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file.
      */
     if (pass) {
-        HDsprintf(full_path, "%s/G", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_i(fid, full_path, TRUE);
     }
@@ -3340,7 +3340,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/H", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_chk_i(fid, full_path, FALSE);
     }
@@ -3349,7 +3349,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/I", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_chk_i(fid, full_path, TRUE);
     }
@@ -3358,7 +3358,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/J", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_cpt_i(fid, full_path, FALSE);
     }
@@ -3367,7 +3367,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * in file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/K", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_cpt_i(fid, full_path, TRUE);
     }
@@ -3376,7 +3376,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * (but no data) to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/L", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_v(fid, full_path, FALSE);
     }
@@ -3385,7 +3385,7 @@ validate_zoo(hid_t fid, const char *base_path, int proc_num)
      * (and data) to file
      */
     if (pass) {
-        HDsprintf(full_path, "%s/M", base_path);
+        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
         HDassert(HDstrlen(full_path) < 1024);
         vrfy_ds_ctg_v(fid, full_path, TRUE);
     }

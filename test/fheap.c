@@ -543,6 +543,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
     size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
     test_desc            = H5MM_malloc(test_desc_len);
     (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
+
     TESTING(test_desc);
     H5MM_xfree(test_desc);
 

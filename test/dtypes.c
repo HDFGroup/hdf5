@@ -4969,7 +4969,7 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    HDsprintf(s, "Testing random string conversion speed");
+    HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5184,14 +5184,14 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    HDsprintf(s, "Testing random enum conversion O(N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
-    HDsprintf(s, "Testing random enum conversion O(N log N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
