@@ -81,7 +81,7 @@ create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
     if ((top_gid = H5Gcreate2(fid, "top_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         STACK_ERROR
     for (i = 0; i < NGROUPS; i++) {
-        HDsprintf(group_name, "group%02d", i);
+        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gcreate2(top_gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             STACK_ERROR
         if (H5Gclose(gid) < 0)

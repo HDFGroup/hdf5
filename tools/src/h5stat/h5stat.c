@@ -830,7 +830,7 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, const char *const *argv, struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
@@ -1677,7 +1677,7 @@ print_statistics(const char *name, const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     iter_t            iter;
     const char *      fname   = NULL;
@@ -1693,7 +1693,7 @@ main(int argc, const char *argv[])
 
     HDmemset(&iter, 0, sizeof(iter));
 
-    if (parse_command_line(argc, argv, &hand) < 0)
+    if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
     /* enable error reporting if command line option */
