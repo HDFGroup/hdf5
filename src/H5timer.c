@@ -193,17 +193,17 @@ H5_now_usec(void)
         struct timespec ts;
 
         HDclock_gettime(CLOCK_MONOTONIC, &ts);
-        now = (uint64_t)(ts.tv_sec * (1000 * 1000)) + (uint64_t)(ts.tv_nsec / 1000);
+        now = ((uint64_t)ts.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) + ((uint64_t)ts.tv_nsec / (uint64_t)1000);
     }
 #elif defined(H5_HAVE_GETTIMEOFDAY)
     {
         struct timeval now_tv;
 
         HDgettimeofday(&now_tv, NULL);
-        now = (uint64_t)(now_tv.tv_sec * (1000 * 1000)) + (uint64_t)now_tv.tv_usec;
+        now = ((uint64_t)now_tv.tv_sec * ((uint64_t)1000 * (uint64_t)1000)) + (uint64_t)now_tv.tv_usec;
     }
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now       = (uint64_t)(HDtime(NULL) * (1000 * 1000));
+    now       = ((uint64_t)HDtime(NULL) * ((uint64_t)1000 * (uint64_t)1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);

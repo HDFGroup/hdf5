@@ -345,23 +345,47 @@ test_es_get_requests(void)
 
     /* Get only connector IDs */
     count = 3;
+    connector_ids[0] = H5I_INVALID_HID;
+    connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, NULL, 2, &count) < 0)
         TEST_ERROR
     if (count != 0)
         TEST_ERROR
+    if (connector_ids[0] != H5I_INVALID_HID)
+        TEST_ERROR
+    if (connector_ids[1] != H5I_INVALID_HID)
+        TEST_ERROR
 
     /* Get only requests */
     count = 3;
+    requests[0] = NULL;
+    requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, requests, 2, &count) < 0)
         TEST_ERROR
     if (count != 0)
         TEST_ERROR
+    if (requests[0] != NULL)
+        TEST_ERROR
+    if (requests[1] != NULL)
+        TEST_ERROR
 
     /* Get both */
     count = 3;
+    connector_ids[0] = H5I_INVALID_HID;
+    connector_ids[1] = H5I_INVALID_HID;
+    requests[0] = NULL;
+    requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, requests, 2, &count) < 0)
         TEST_ERROR
     if (count != 0)
+        TEST_ERROR
+    if (connector_ids[0] != H5I_INVALID_HID)
+        TEST_ERROR
+    if (connector_ids[1] != H5I_INVALID_HID)
+        TEST_ERROR
+    if (requests[0] != NULL)
+        TEST_ERROR
+    if (requests[1] != NULL)
         TEST_ERROR
 
     /* Insert event into event set */
