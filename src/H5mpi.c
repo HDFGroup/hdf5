@@ -632,8 +632,8 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
     MPI_Count type_lb;
     MPI_Count type_extent;
 #else
-    int type_lb;
-    int type_extent;
+    MPI_Aint type_lb;
+    MPI_Aint type_extent;
 #endif
     int    mpi_code;
     herr_t ret_value = SUCCEED;
@@ -652,6 +652,9 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
 #endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent(_x) failed", mpi_code)
 
+    if (type_extent < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "MPI recv_type had a negative extent")
+
     /*
      * Calculate the total size of the buffer being
      * returned and allocate it
@@ -659,10 +662,6 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
     if (allgather || (mpi_rank == root)) {
         size_t i;
         size_t buf_size;
-
-#if MPI_VERSION >= 3
-        H5_CHECK_OVERFLOW(type_extent, MPI_Count, size_t);
-#endif
 
         for (i = 0, recv_buf_num_entries = 0; i < (size_t)mpi_size; i++)
             recv_buf_num_entries += (size_t)recv_counts[i];
