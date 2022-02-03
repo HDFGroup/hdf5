@@ -8712,10 +8712,19 @@ main(int argc, char **argv)
     VRFY((H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
          "Set libver bounds succeeded");
 
+    /*
+     * Set up Paged and Persistent Free Space Management
+     */
+    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl_id >= 0), "FCPL creation succeeded");
+
+    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, 1) >= 0),
+            "H5Pset_file_space_strategy succeeded");
+
     VRFY((h5_fixname(FILENAME[0], fapl_id, filenames[0], sizeof(filenames[0])) != NULL),
          "Test file name created");
 
-    file_id = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = H5Fcreate(filenames[0], H5F_ACC_TRUNC, fcpl_id, fapl_id);
     VRFY((file_id >= 0), "Test file creation succeeded");
 
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
