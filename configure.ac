@@ -4240,6 +4240,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/testh5cc.sh
                  bin/h5cc
                  bin/Makefile
+                 config/hdf5.pc
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
