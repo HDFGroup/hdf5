@@ -6617,13 +6617,15 @@ trace_file_check(int metadata_write_strategy)
 static hbool_t
 smoke_check_6(int metadata_write_strategy)
 {
-    hbool_t       success = TRUE;
-    int           i;
-    int           max_nerrors;
-    hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
-    struct mssg_t mssg;
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 success = TRUE;
+    int                     i;
+    int                     max_nerrors;
+    hid_t                   fid       = -1;
+    H5F_t *                 file_ptr  = NULL;
+    H5C_t *                 cache_ptr = NULL;
+    struct mssg_t           mssg;
 
     switch (metadata_write_strategy) {
 
@@ -6679,7 +6681,9 @@ smoke_check_6(int metadata_write_strategy)
         virt_num_data_entries = NUM_DATA_ENTRIES;
 
         /* insert the first half collectively */
-        H5CX_set_coll_metadata_read(TRUE);
+        md_reads_file_flag    = H5P_USER_TRUE;
+        md_reads_context_flag = TRUE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = 0; i < virt_num_data_entries / 2; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6698,9 +6702,13 @@ smoke_check_6(int metadata_write_strategy)
             H5_CHECK_OVERFLOW(cache_ptr->max_cache_size, size_t, double);
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* insert the other half independently */
-        H5CX_set_coll_metadata_read(FALSE);
+        md_reads_file_flag    = H5P_USER_FALSE;
+        md_reads_context_flag = FALSE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = virt_num_data_entries / 2; i < virt_num_data_entries; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6718,6 +6726,8 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* flush the file */
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
@@ -6728,7 +6738,9 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* Protect the first half of the entries collectively */
-        H5CX_set_coll_metadata_read(TRUE);
+        md_reads_file_flag    = H5P_USER_TRUE;
+        md_reads_context_flag = TRUE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6746,9 +6758,13 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* protect the other half independently */
-        H5CX_set_coll_metadata_read(FALSE);
+        md_reads_file_flag    = H5P_USER_FALSE;
+        md_reads_context_flag = FALSE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = virt_num_data_entries / 2; i < virt_num_data_entries; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6766,6 +6782,8 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         for (i = 0; i < (virt_num_data_entries); i++) {
             unlock_entry(file_ptr, i, H5AC__NO_FLAGS_SET);
