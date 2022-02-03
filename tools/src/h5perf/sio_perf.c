@@ -277,7 +277,7 @@ run_test_loop(struct options *opts)
     }
 
     /* print size information */
-    output_report("Transfer Buffer Size (bytes): %d\n", buf_bytes);
+    output_report("Transfer Buffer Size (bytes): %zu\n", buf_bytes);
     output_report("File Size(MB): %.2f\n", ((double)parms.num_bytes) / ONE_MB);
 
     print_indent(0);
