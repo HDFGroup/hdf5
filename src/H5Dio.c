@@ -434,7 +434,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
 
     /* Allocate dataspace and initialize it if it hasn't been. */
     should_alloc_space = dataset->shared->dcpl_cache.efl.nused == 0 &&
-        !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
+                         !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
 
     /*
      * If not using an MPI-based VFD, we only need to allocate

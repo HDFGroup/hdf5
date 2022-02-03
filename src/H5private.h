@@ -391,17 +391,17 @@
 
 /* Define a type for safely sending size_t values with MPI */
 #if SIZE_MAX == UCHAR_MAX
-   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_CHAR
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_CHAR
 #elif SIZE_MAX == USHRT_MAX
-   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_SHORT
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_SHORT
 #elif SIZE_MAX == UINT_MAX
-   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED
 #elif SIZE_MAX == ULONG_MAX
-   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG
 #elif SIZE_MAX == ULLONG_MAX
-   #define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG_LONG
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG_LONG
 #else
-   #error "no suitable MPI type for size_t"
+#error "no suitable MPI type for size_t"
 #endif
 
 #endif /* H5_HAVE_PARALLEL */

@@ -394,11 +394,12 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
          * according to the allocated storage size.
          */
         if (dset->shared->dcpl_cache.pline.nused) {
-            hsize_t n_chunks_total = dset->shared->layout.u.chunk.nchunks;
+            hsize_t n_chunks_total   = dset->shared->layout.u.chunk.nchunks;
             hsize_t n_chunks_written = 0;
 
             if (H5D__get_num_chunks(dset, dset->shared->space, &n_chunks_written) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of written chunks in dataset")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                            "unable to retrieve number of written chunks in dataset")
 
             HDassert(n_chunks_written <= n_chunks_total);
 
@@ -412,7 +413,8 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
         else {
             /* Get the total number of elements in dataset's dataspace */
             if ((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                            "unable to retrieve number of elements in dataspace")
             nelmts = (hsize_t)snelmts;
 
             /* Get the size of the dataset's datatype */

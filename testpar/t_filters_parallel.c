@@ -42,7 +42,8 @@ H5Z_filter_t filterIDs[] = {
 const char *filterNames[] = {"Deflate", "Shuffle", "Fletcher32", "SZIP", "Nbit", "ScaleOffset"};
 
 /* Function pointer typedef for test functions */
-typedef void (*test_func)(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+typedef void (*test_func)(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                          hid_t dxpl_id);
 
 /* Typedef for filter arguments for user-defined filters */
 typedef struct filter_options_t {
@@ -184,8 +185,8 @@ static void test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filt
                                      hid_t dcpl_id, hid_t dxpl_id);
 static void test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
                                            hid_t dcpl_id, hid_t dxpl_id);
-static void test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                             hid_t dcpl_id, hid_t dxpl_id);
+static void test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                             hid_t dxpl_id);
 static void test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
                                       hid_t dcpl_id, hid_t dxpl_id);
 static void test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
@@ -315,8 +316,7 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
     int    nfilters;
     herr_t ret_value = SUCCEED;
 
-    VRFY(((nfilters = H5Pget_nfilters(dcpl_id)) >= 0),
-        "H5Pget_nfilters succeeded");
+    VRFY(((nfilters = H5Pget_nfilters(dcpl_id)) >= 0), "H5Pget_nfilters succeeded");
 
     /*
      * Only verify space allocation status when there are filters
@@ -328,10 +328,8 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
         H5D_space_status_t space_status;
         H5D_alloc_time_t   alloc_time;
 
-        VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0),
-            "H5Pget_alloc_time succeeded");
-        VRFY((H5Dget_space_status(dset_id, &space_status) >= 0),
-            "H5Dget_space_status succeeded");
+        VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0), "H5Pget_alloc_time succeeded");
+        VRFY((H5Dget_space_status(dset_id, &space_status) >= 0), "H5Dget_space_status succeeded");
 
         switch (alloc_time) {
             case H5D_ALLOC_TIME_EARLY:
@@ -339,8 +337,7 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                  * Early space allocation should always result in the
                  * full dataset storage space being allocated.
                  */
-                VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED,
-                        "verified space allocation status");
+                VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED, "verified space allocation status");
                 break;
             case H5D_ALLOC_TIME_LATE:
                 /*
@@ -352,9 +349,9 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                  * written to again.
                  */
                 if (chunks_written == SOME_CHUNKS_WRITTEN || chunks_written == ALL_CHUNKS_WRITTEN)
-                    VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED)
-                            || (space_status == H5D_SPACE_STATUS_PART_ALLOCATED),
-                            "verified space allocation status");
+                    VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED) ||
+                             (space_status == H5D_SPACE_STATUS_PART_ALLOCATED),
+                         "verified space allocation status");
                 else if (chunks_written == NO_CHUNKS_WRITTEN)
                     /*
                      * A special case where we wrote to a dataset that
@@ -365,11 +362,9 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                      * write. In either case, space should still have
                      * been allocated.
                      */
-                    VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED,
-                            "verified space allocation status");
+                    VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED, "verified space allocation status");
                 else
-                    VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED,
-                            "verified space allocation status");
+                    VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED, "verified space allocation status");
                 break;
             case H5D_ALLOC_TIME_DEFAULT:
             case H5D_ALLOC_TIME_INCR:
@@ -382,16 +377,15 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                  */
                 if (chunks_written == SOME_CHUNKS_WRITTEN)
                     VRFY((space_status == H5D_SPACE_STATUS_PART_ALLOCATED),
-                            "verified space allocation status");
+                         "verified space allocation status");
                 else if (chunks_written == ALL_CHUNKS_WRITTEN)
-                    VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED),
-                            "verified space allocation status");
+                    VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED), "verified space allocation status");
                 else
-                    VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED,
-                            "verified space allocation status");
+                    VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED, "verified space allocation status");
                 break;
             default:
-                if (MAINPROCESS) MESG("unknown space allocation time");
+                if (MAINPROCESS)
+                    MESG("unknown space allocation time");
                 MPI_Abort(MPI_COMM_WORLD, 1);
         }
     }
@@ -711,8 +705,8 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
  * and that process only writes to part of a chunk.
  */
 static void
-test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                               hid_t dcpl_id, hid_t dxpl_id)
+test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_filter_t filter_id,
+                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
 {
     C_DATATYPE *data        = NULL;
     C_DATATYPE *read_buf    = NULL;
@@ -744,7 +738,8 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     chunk_dims[0]   = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS;
     chunk_dims[1]   = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS;
     sel_dims[0]     = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS;
-    sel_dims[1]     = (hsize_t)(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NCOLS / WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS);
+    sel_dims[1]     = (hsize_t)(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NCOLS /
+                            WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS);
 
     filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -759,8 +754,8 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -771,9 +766,9 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
      */
-    count[0] = 1;
-    count[1] =
-        (hsize_t)(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NCOLS / WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS);
+    count[0]  = 1;
+    count[1]  = (hsize_t)(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NCOLS /
+                         WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS);
     stride[0] = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS;
     stride[1] = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS;
     block[0]  = (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS;
@@ -810,8 +805,9 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < (size_t)mpi_size; i++) {
-        size_t rank_n_elems = (size_t) (mpi_size * (WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS * WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS));
-        size_t data_idx = i;
+        size_t rank_n_elems = (size_t)(mpi_size * (WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS *
+                                                   WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS));
+        size_t data_idx     = i;
 
         for (size_t j = 0; j < rank_n_elems; j++) {
             if ((j % WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS) == 0) {
@@ -7263,9 +7259,10 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
  *             06/04/2018
  */
 static void
-test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                              hid_t dxpl_id)
 {
-    double *data = NULL;
+    double *data     = NULL;
     double *read_buf = NULL;
     hsize_t dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     hsize_t chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
@@ -7381,7 +7378,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
         }
 
         VRFY((H5Dread(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl_id, read_buf) >= 0),
-                "Dataset read succeeded");
+             "Dataset read succeeded");
 
         VRFY((0 == HDmemcmp(read_buf, data, data_size)), "data verification succeeded");
     }
@@ -7412,10 +7409,11 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
  * full chunk next to the edge chunk.
  */
 static void
-test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                            hid_t dxpl_id)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
+    C_DATATYPE *data     = NULL;
+    C_DATATYPE *read_buf = NULL;
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
@@ -7458,8 +7456,8 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -7477,7 +7475,8 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     block[0]  = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS;
     block[1]  = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
-    start[1]  = (hsize_t) (WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
+    start[1] =
+        (hsize_t)(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -7531,8 +7530,8 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -7550,7 +7549,8 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     block[0]  = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS;
     block[1]  = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
-    start[1]  = (hsize_t) (WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
+    start[1] =
+        (hsize_t)(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -7611,10 +7611,11 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
  * edge chunk and part of the full chunk next to the edge chunk.
  */
 static void
-test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                         hid_t dxpl_id)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
+    C_DATATYPE *data     = NULL;
+    C_DATATYPE *read_buf = NULL;
     hsize_t     dataset_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
@@ -7657,8 +7658,8 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -7669,14 +7670,16 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
      */
-    count[0]  = (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NROWS / WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
+    count[0] =
+        (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NROWS / WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
     count[1]  = 1;
     stride[0] = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS;
     stride[1] = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     block[0]  = (hsize_t)1;
     block[1]  = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     start[0]  = (hsize_t)mpi_rank;
-    start[1]  = (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
+    start[1] =
+        (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -7730,8 +7733,8 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
 
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -7742,14 +7745,16 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     /* Each process defines the dataset selection in memory and writes
      * it to the hyperslab in the file
      */
-    count[0]  = (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NROWS / WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
+    count[0] =
+        (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NROWS / WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS);
     count[1]  = 1;
     stride[0] = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS;
     stride[1] = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     block[0]  = (hsize_t)1;
     block[1]  = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     start[0]  = (hsize_t)mpi_rank;
-    start[1]  = (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
+    start[1] =
+        (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -7810,7 +7815,8 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
  * edge chunk and writes to just a portion of the edge chunk.
  */
 static void
-test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                               hid_t dxpl_id)
 {
     /* TODO */
 }
@@ -7821,8 +7827,8 @@ test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id,
  * unallocated parts of a dataset.
  */
 static void
-test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                 hid_t dcpl_id, hid_t dxpl_id)
+test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                 hid_t dxpl_id)
 {
     C_DATATYPE *data        = NULL;
     C_DATATYPE *read_buf    = NULL;
@@ -7866,8 +7872,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
 
-    VRFY((H5Pset_chunk(plist_id, FILL_VALUES_TEST_DATASET_DIMS, chunk_dims) >= 0),
-         "Chunk size set");
+    VRFY((H5Pset_chunk(plist_id, FILL_VALUES_TEST_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
@@ -7876,8 +7881,8 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     fill_value = FILL_VALUES_TEST_FILL_VAL;
     VRFY((H5Pset_fill_value(plist_id, HDF5_DATATYPE_NAME, &fill_value) >= 0), "Fill Value set");
 
-    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT,
+                         plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -7901,8 +7906,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
         correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -7911,14 +7915,14 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
      * the chunk, as well as for the rest of the dataset that
      * hasn't been written to yet.
      */
-    count[0] = 1;
-    count[1] = 1;
+    count[0]  = 1;
+    count[1]  = 1;
     stride[0] = (hsize_t)FILL_VALUES_TEST_CH_NROWS;
     stride[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS;
-    block[0] = 1;
-    block[1] = (hsize_t)(FILL_VALUES_TEST_CH_NCOLS - 1);
-    start[0] = (hsize_t)mpi_rank;
-    start[1] = 0;
+    block[0]  = 1;
+    block[1]  = (hsize_t)(FILL_VALUES_TEST_CH_NCOLS - 1);
+    start[0]  = (hsize_t)mpi_rank;
+    start[1]  = 0;
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -7970,16 +7974,15 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     VRFY((NULL != displs), "HDcalloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++) {
-        recvcounts[i] = (int) (count[1] * block[1]);
-        displs[i] = (int)(i * dataset_dims[1]);
+        recvcounts[i] = (int)(count[1] * block[1]);
+        displs[i]     = (int)(i * dataset_dims[1]);
     }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI,
-            correct_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
-            "MPI_Allgatherv succeeded");
+    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, correct_buf, recvcounts,
+                                        displs, C_DATATYPE_MPI, comm)),
+         "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8035,8 +8038,8 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_ALLOC) >= 0), "H5Pset_fill_time succeeded");
 
-    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT,
+                         plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Verify space allocation status */
@@ -8051,8 +8054,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
         correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8061,14 +8063,14 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
      * the chunk, as well as for the rest of the dataset that
      * hasn't been written to yet.
      */
-    count[0] = 1;
-    count[1] = 1;
+    count[0]  = 1;
+    count[1]  = 1;
     stride[0] = (hsize_t)FILL_VALUES_TEST_CH_NROWS;
     stride[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS;
-    block[0] = 1;
-    block[1] = (hsize_t)(FILL_VALUES_TEST_CH_NCOLS - 1);
-    start[0] = (hsize_t)mpi_rank;
-    start[1] = 0;
+    block[0]  = 1;
+    block[1]  = (hsize_t)(FILL_VALUES_TEST_CH_NCOLS - 1);
+    start[0]  = (hsize_t)mpi_rank;
+    start[1]  = 0;
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -8104,20 +8106,19 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
          "Dataset read succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++) {
-        recvcounts[i] = (int) (count[1] * block[1]);
-        displs[i] = (int)(i * dataset_dims[1]);
+        recvcounts[i] = (int)(count[1] * block[1]);
+        displs[i]     = (int)(i * dataset_dims[1]);
     }
 
     /*
      * Each MPI rank communicates their written piece of data
      * into each other rank's correctness-checking buffer
      */
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI,
-            correct_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
-            "MPI_Allgatherv succeeded");
+    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, correct_buf, recvcounts,
+                                        displs, C_DATATYPE_MPI, comm)),
+         "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8191,8 +8192,8 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
  * test since the fill value isn't defined.
  */
 static void
-test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                          hid_t dcpl_id, hid_t dxpl_id)
+test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                          hid_t dxpl_id)
 {
     H5D_alloc_time_t alloc_time;
     C_DATATYPE *     data     = NULL;
@@ -8206,13 +8207,13 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     hsize_t          block[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     size_t           i, data_size, read_buf_size;
     hid_t            file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t            group_id   = H5I_INVALID_HID;
-    hid_t            filespace  = H5I_INVALID_HID;
+    hid_t            group_id  = H5I_INVALID_HID;
+    hid_t            filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         HDputs("Testing undefined fill value");
 
-    VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0), "H5Pget_alloc_time succeeed");
+    VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0), "H5Pget_alloc_time succeeded");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -8235,8 +8236,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
 
-    VRFY((H5Pset_chunk(plist_id, FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, chunk_dims) >= 0),
-         "Chunk size set");
+    VRFY((H5Pset_chunk(plist_id, FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
@@ -8282,14 +8282,14 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
      * all ranks, then read the whole dataset. Don't verify
      * anything since there's no fill value defined.
      */
-    count[0] = 1;
-    count[1] = 1;
+    count[0]  = 1;
+    count[1]  = 1;
     stride[0] = (hsize_t)FILL_VALUE_UNDEFINED_TEST_CH_NROWS;
     stride[1] = (hsize_t)FILL_VALUE_UNDEFINED_TEST_CH_NCOLS;
-    block[0] = 1;
-    block[1] = (hsize_t)(FILL_VALUE_UNDEFINED_TEST_CH_NCOLS - 1);
-    start[0] = (hsize_t)mpi_rank;
-    start[1] = 0;
+    block[0]  = 1;
+    block[1]  = (hsize_t)(FILL_VALUE_UNDEFINED_TEST_CH_NCOLS - 1);
+    start[0]  = (hsize_t)mpi_rank;
+    start[1]  = 0;
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -8392,8 +8392,8 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
  * is set as H5D_FILL_TIME_NEVER.
  */
 static void
-test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                     hid_t dcpl_id, hid_t dxpl_id)
+test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                     hid_t dxpl_id)
 {
     C_DATATYPE *data     = NULL;
     C_DATATYPE *read_buf = NULL;
@@ -8455,8 +8455,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
 
-    VRFY((H5Pset_chunk(plist_id, FILL_TIME_NEVER_TEST_DATASET_DIMS, chunk_dims) >= 0),
-         "Chunk size set");
+    VRFY((H5Pset_chunk(plist_id, FILL_TIME_NEVER_TEST_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
@@ -8466,8 +8465,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     VRFY((H5Pset_fill_value(plist_id, HDF5_DATATYPE_NAME, &fill_value) >= 0), "Fill Value set");
 
     /* Set fill time of 'never' */
-    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_NEVER) >= 0),
-            "H5Pset_fill_time succeeded");
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_NEVER) >= 0), "H5Pset_fill_time succeeded");
 
     dset_id = H5Dcreate2(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
                          H5P_DEFAULT, plist_id, H5P_DEFAULT);
@@ -8499,8 +8497,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * values to all be the fill value, so this should be
      * a safe comparison in theory.
      */
-    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8509,14 +8506,14 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * the chunk, as well as for the rest of the dataset that
      * hasn't been written to yet.
      */
-    count[0] = 1;
-    count[1] = 1;
+    count[0]  = 1;
+    count[1]  = 1;
     stride[0] = (hsize_t)FILL_TIME_NEVER_TEST_CH_NROWS;
     stride[1] = (hsize_t)FILL_TIME_NEVER_TEST_CH_NCOLS;
-    block[0] = 1;
-    block[1] = (hsize_t)(FILL_TIME_NEVER_TEST_CH_NCOLS - 1);
-    start[0] = (hsize_t)mpi_rank;
-    start[1] = 0;
+    block[0]  = 1;
+    block[1]  = (hsize_t)(FILL_TIME_NEVER_TEST_CH_NCOLS - 1);
+    start[0]  = (hsize_t)mpi_rank;
+    start[1]  = 0;
 
     if (VERBOSE_MED) {
         HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
@@ -8568,21 +8565,20 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     VRFY((NULL != displs), "HDcalloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++) {
-        recvcounts[i] = (int) (count[1] * block[1]);
-        displs[i] = (int)(i * dataset_dims[1]);
+        recvcounts[i] = (int)(count[1] * block[1]);
+        displs[i]     = (int)(i * dataset_dims[1]);
     }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI,
-            fill_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
-            "MPI_Allgatherv succeeded");
+    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, fill_buf, recvcounts,
+                                        displs, C_DATATYPE_MPI, comm)),
+         "MPI_Allgatherv succeeded");
 
     /*
      * It should be very unlikely for the dataset's random
      * values to all be the fill value, so this should be
      * a safe comparison in theory.
      */
-    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)),
-            "Data verification succeeded");
+    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8719,7 +8715,7 @@ main(int argc, char **argv)
     VRFY((fcpl_id >= 0), "FCPL creation succeeded");
 
     VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, 1) >= 0),
-            "H5Pset_file_space_strategy succeeded");
+         "H5Pset_file_space_strategy succeeded");
 
     VRFY((h5_fixname(FILENAME[0], fapl_id, filenames[0], sizeof(filenames[0])) != NULL),
          "Test file name created");
@@ -8750,7 +8746,8 @@ main(int argc, char **argv)
             H5D_alloc_time_t space_alloc_time;
 
             /* Run tests with all available space allocation times */
-            for (space_alloc_time = H5D_ALLOC_TIME_EARLY; space_alloc_time <= H5D_ALLOC_TIME_INCR; space_alloc_time++) {
+            for (space_alloc_time = H5D_ALLOC_TIME_EARLY; space_alloc_time <= H5D_ALLOC_TIME_INCR;
+                 space_alloc_time++) {
                 const char *alloc_time;
                 unsigned    filter_config;
                 htri_t      filter_avail;
@@ -8772,8 +8769,10 @@ main(int argc, char **argv)
                 }
 
                 if (MAINPROCESS)
-                    HDprintf("== Running tests with filter '%s' using '%s' and '%s' allocation time ==\n\n", filterNames[cur_filter_idx],
-                             H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O" : "Multi-Chunk I/O", alloc_time);
+                    HDprintf("== Running tests with filter '%s' using '%s' and '%s' allocation time ==\n\n",
+                             filterNames[cur_filter_idx],
+                             H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O" : "Multi-Chunk I/O",
+                             alloc_time);
 
                 /* Make sure current filter is available before testing with it */
                 filter_avail = H5Zfilter_avail(cur_filter);
@@ -8813,7 +8812,7 @@ main(int argc, char **argv)
 
                 HDsnprintf(group_name, sizeof(group_name), "%s_%s_%s", filterNames[cur_filter_idx],
                            H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
-                                   alloc_time);
+                           alloc_time);
 
                 group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                 VRFY((group_id >= 0), "H5Gcreate2 succeeded");

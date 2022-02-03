@@ -242,10 +242,10 @@ typedef struct H5D_chunk_file_iter_ud_t {
 typedef struct H5D_chunk_coll_fill_info_t {
     size_t num_chunks; /* Number of chunks in the write operation */
     struct chunk_coll_fill_info {
-        haddr_t addr;           /* File address of the chunk */
-        size_t  chunk_size;     /* Size of the chunk in the file */
+        haddr_t addr;       /* File address of the chunk */
+        size_t  chunk_size; /* Size of the chunk in the file */
         hbool_t unfiltered_partial_chunk;
-    } *chunk_info;
+    } * chunk_info;
 } H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -4320,7 +4320,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
     hbool_t using_mpi =
         FALSE; /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
     H5D_chunk_coll_fill_info_t chunk_fill_info; /* chunk address information for doing I/O */
-#endif                                /* H5_HAVE_PARALLEL */
+#endif                                          /* H5_HAVE_PARALLEL */
     hbool_t             carry; /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     unsigned            space_ndims;                     /* Dataset's space rank */
     const hsize_t *     space_dim;                       /* Dataset's dataspace dimensions */
@@ -4646,7 +4646,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                         void *tmp_realloc;
 
                         if (NULL == (tmp_realloc = H5MM_realloc(chunk_fill_info.chunk_info,
-                                (chunk_fill_info.num_chunks + 1024) * sizeof(struct chunk_coll_fill_info))))
+                                                                (chunk_fill_info.num_chunks + 1024) *
+                                                                    sizeof(struct chunk_coll_fill_info))))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for chunk fill info")
 
@@ -4656,7 +4657,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                     /* Store info about the chunk for later */
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].addr = udata.chunk_block.offset;
                     chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].chunk_size = chunk_size;
-                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].unfiltered_partial_chunk = (*fill_buf == unfilt_fill_buf);
+                    chunk_fill_info.chunk_info[chunk_fill_info.num_chunks].unfiltered_partial_chunk =
+                        (*fill_buf == unfilt_fill_buf);
                     chunk_fill_info.num_chunks++;
 
                     /* Indicate that blocks will be written */
@@ -4957,7 +4959,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     MPI_Datatype     mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     hbool_t          have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
-    hbool_t          need_sort = FALSE;
+    hbool_t          need_sort      = FALSE;
     size_t           i;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -4985,7 +4987,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     /* Distribute evenly the number of blocks between processes. */
     if (mpi_size == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
-    num_blocks = (size_t)(chunk_fill_info->num_chunks / (size_t)mpi_size); /* value should be the same on all procs */
+    num_blocks =
+        (size_t)(chunk_fill_info->num_chunks / (size_t)mpi_size); /* value should be the same on all procs */
 
     /* After evenly distributing the blocks between processes, are there any
      * leftover blocks for each individual process (round-robin)?
@@ -4999,7 +5002,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     /* Check if we have any chunks to write on this rank */
     if (num_blocks > 0 || (leftover && leftover > mpi_rank)) {
         MPI_Aint partial_fill_buf_disp = 0;
-        hbool_t  all_same_block_len = TRUE;
+        hbool_t  all_same_block_len    = TRUE;
 
         /* Allocate buffers */
         if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
@@ -5074,10 +5077,13 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
          * to processes 0 -> leftover.
          */
         if (leftover && leftover > mpi_rank) {
-            chunk_disp_array[blocks] = (MPI_Aint)chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].addr;
+            chunk_disp_array[blocks] =
+                (MPI_Aint)chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].addr;
 
             if (!all_same_block_len)
-                H5_CHECKED_ASSIGN(block_lens[blocks], int, chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].chunk_size, size_t);
+                H5_CHECKED_ASSIGN(block_lens[blocks], int,
+                                  chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].chunk_size,
+                                  size_t);
 
             if (chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].unfiltered_partial_chunk) {
                 HDassert(partial_chunk_fill_buf);
@@ -5093,7 +5099,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
 
             H5_CHECKED_ASSIGN(block_len, int, chunk_fill_info->chunk_info[0].chunk_size, size_t);
 
-            mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
+            mpi_code =
+                MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
             if (mpi_code != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
 
@@ -5104,7 +5111,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
                  * need to be written to using the unfiltered fill buffer. Use an hindexed
                  * block type rather than an hvector.
                  */
-                mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, block_disps, MPI_BYTE, &mem_type);
+                mpi_code =
+                    MPI_Type_create_hindexed_block(blocks, block_len, block_disps, MPI_BYTE, &mem_type);
                 if (mpi_code != MPI_SUCCESS)
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code)
             }
