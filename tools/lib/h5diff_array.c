@@ -3400,11 +3400,11 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
             calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
 
             for (int i = 0; i < opts->rank; i++) {
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld opts->sm_pos=%lld", i, opts->pos[i],
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%" PRIuHSIZE " opts->sm_pos=%" PRIuHSIZE, i, opts->pos[i],
                               opts->sm_pos[i]);
                 opts->pos[i] += (unsigned long)opts->sm_pos[i];
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld", i, opts->pos[i]);
-                parallel_print(HSIZE_T_FORMAT, (unsigned long long)opts->pos[i]);
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%" PRIuHSIZE, i, opts->pos[i]);
+                parallel_print("%" PRIuHSIZE, opts->pos[i]);
                 parallel_print(" ");
             }
             parallel_print("]");
