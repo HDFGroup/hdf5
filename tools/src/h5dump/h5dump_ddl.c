@@ -1318,7 +1318,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
     j = (int)HDstrlen(op_name) - 1;
     /* find the last / */
     while (j >= 0) {
-        if (op_name[j] == '/' && (j == 0 || (j > 0 && op_name[j - 1] != '\\')))
+        if (op_name[j] == '/' && (j == 0 || (op_name[j - 1] != '\\')))
             break;
         j--;
     }
@@ -1541,7 +1541,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
 
     /* find the last / */
     while (j >= 0) {
-        if (attr[j] == '/' && (j == 0 || (j > 0 && attr[j - 1] != '\\')))
+        if (attr[j] == '/' && (j == 0 || (attr[j - 1] != '\\')))
             break;
         j--;
     }
