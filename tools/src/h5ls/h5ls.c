@@ -959,8 +959,9 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             else if (H5T_SGN_NONE == H5Tget_sign(native)) {
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
                  *strangely, unless use another pointer "copy".*/
+                /* XXX haven't I seen (and fixed) this code somewhere else? */
                 copy = value + i * dst_size;
-                h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long *)((void *)copy)));
+                h5tools_str_append(buffer, "%llu", *((unsigned long long *)((void *)copy)));
             }
             else {
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"

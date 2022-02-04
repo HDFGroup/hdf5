@@ -4529,11 +4529,12 @@ xml_print_enum(hid_t type)
                 h5tools_str_append(&buffer, "%02x", value[i * dst_size + j]);
         }
         else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "u",
+            /* XXX haven't I fixed this code somewhere else, before? */
+            h5tools_str_append(&buffer, "%llu",
                                *((unsigned long long *)((void *)(value + i * dst_size))));
         }
         else {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "d",
+            h5tools_str_append(&buffer, "%lld",
                                *((long long *)((void *)(value + i * dst_size))));
         }
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,

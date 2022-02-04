@@ -2836,14 +2836,18 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
         else if (H5T_SGN_NONE == H5Tget_sign(native)) {
             /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
              *strangely, unless use another pointer "copy".*/
+            /* XXX The comment above suggests that we do something
+             * improper here.  Maybe the `long long` alignment was not
+             * respected?
+             */
             copy = value + i * dst_size;
-            h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long *)((void *)copy)));
+            h5tools_str_append(buffer, "%llu", *((unsigned long long *)((void *)copy)));
         }
         else {
             /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
              *strangely, unless use another pointer "copy".*/
             copy = value + i * dst_size;
-            h5tools_str_append(buffer, "%" H5_PRINTF_LL_WIDTH "d", *((long long *)((void *)copy)));
+            h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
         }
 
         h5tools_str_append(buffer, ";");
