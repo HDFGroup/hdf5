@@ -1192,7 +1192,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
         HDfree(dims);
     }
     else
-        h5tools_str_append(buffer, " [SCALAR]\n", rawoutstream);
+        h5tools_str_append(buffer, " [SCALAR]\n");
 
     /* Print parent type */
     h5tools_str_append(buffer, " ");
