@@ -351,7 +351,7 @@ test_iter_group(FileAccPropList &fapl)
  * Purpose      Open an attribute and verify that it has a the correct name
  *-------------------------------------------------------------------------
  */
-const H5std_string FILE_NAME("t9920.h5");
+const H5std_string FILE_NAME("test_member_access.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
 const H5std_string GDATASET_NAME("group dset");
@@ -397,7 +397,7 @@ test_HDFFV_9920()
     hsize_t dims[1]      = {DIM1};
 
     /* Output message about test being performed */
-    SUBTEST("HDFFV-9920");
+    SUBTEST("Member access");
 
     try {
         // Create a new file and a group in it
