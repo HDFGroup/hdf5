@@ -701,7 +701,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case 'a':
                 options->alignment = HDstrtoull(H5_optarg, NULL, 0);
                 if (options->alignment < 1) {
-                    error_msg("invalid alignment size\n", H5_optarg);
+                    error_msg("invalid alignment size `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -721,7 +721,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 else if (!HDstrcmp(strategy, "NONE"))
                     options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
                 else {
-                    error_msg("invalid file space management strategy\n", H5_optarg);
+                    error_msg("invalid file space management strategy `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
