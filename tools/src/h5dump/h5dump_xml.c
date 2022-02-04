@@ -1779,8 +1779,8 @@ xml_dump_dataspace(hid_t space)
                     /* Render the element */
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"UNLIMITED\"/>",
+                                       "<%sDimension  DimSize=\"%" PRIuHSIZE
+                                       "\" MaxDimSize=\"UNLIMITED\"/>",
                                        xmlnsprefix, size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1791,8 +1791,8 @@ xml_dump_dataspace(hid_t space)
                     /* Render the element */
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
+                                       "<%sDimension  DimSize=\"%" PRIuHSIZE
+                                       "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
                                        xmlnsprefix, size[i], size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1803,8 +1803,8 @@ xml_dump_dataspace(hid_t space)
                     /* Render the element */
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
+                                       "<%sDimension  DimSize=\"%" PRIuHSIZE
+                                       "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
                                        xmlnsprefix, size[i], maxsize[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -3897,7 +3897,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" H5_PRINTF_LL_WIDTH "u\" />",
+                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" PRIuHSIZE "\" />",
                                    xmlnsprefix, chsize[i]);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);

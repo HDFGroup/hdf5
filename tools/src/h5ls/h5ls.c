@@ -1899,13 +1899,12 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                             0) {
                             h5tools_str_append(
                                 &buffer,
-                                "        #%03d %10" H5_PRINTF_LL_WIDTH "u %10s %10s ***ERROR*** %s\n", i,
+                                "        #%03d %10" PRIuHSIZE " %10s %10s ***ERROR*** %s\n", i,
                                 total, "", "", i + 1 < nf ? "Following addresses are incorrect" : "");
                         }
                         else if (H5S_UNLIMITED == f_size) {
                             h5tools_str_append(&buffer,
-                                               "        #%03d %10" H5_PRINTF_LL_WIDTH
-                                               "u %10" H5_PRINTF_LL_WIDTH "u %10s ",
+                                               "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10s ",
                                                i, total, (hsize_t)f_offset, "INF");
                             print_string(&buffer, f_name, TRUE);
                         }
