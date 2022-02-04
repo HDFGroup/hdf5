@@ -2696,8 +2696,8 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
                 h5tools_str_append(buffer, "%s %s", h5tools_dump_header_format->dataspacedimbegin,
                                    "H5S_UNLIMITED");
             else
-                h5tools_str_append(buffer, "%s %" PRIuHSIZE,
-                                   h5tools_dump_header_format->dataspacedimbegin, maxsize[0]);
+                h5tools_str_append(buffer, "%s %" PRIuHSIZE, h5tools_dump_header_format->dataspacedimbegin,
+                                   maxsize[0]);
 
             for (i = 1; i < ndims; i++)
                 if (maxsize[i] == H5S_UNLIMITED)

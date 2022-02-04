@@ -79,8 +79,8 @@ static h5tool_format_t ls_dataformat = {
     " ",  /*elmt_suf2 */
 
     "%" PRIuHSIZE, /*idx_n_fmt */
-    ",",            /*idx_sep */
-    "(%s)",         /*idx_fmt */
+    ",",           /*idx_sep */
+    "(%s)",        /*idx_fmt */
 
     65535,
     /*line_ncols */ /*standard default columns */
@@ -1898,14 +1898,13 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                         if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size) <
                             0) {
                             h5tools_str_append(
-                                &buffer,
-                                "        #%03d %10" PRIuHSIZE " %10s %10s ***ERROR*** %s\n", i,
+                                &buffer, "        #%03d %10" PRIuHSIZE " %10s %10s ***ERROR*** %s\n", i,
                                 total, "", "", i + 1 < nf ? "Following addresses are incorrect" : "");
                         }
                         else if (H5S_UNLIMITED == f_size) {
                             h5tools_str_append(&buffer,
-                                               "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10s ",
-                                               i, total, (hsize_t)f_offset, "INF");
+                                               "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10s ", i,
+                                               total, (hsize_t)f_offset, "INF");
                             print_string(&buffer, f_name, TRUE);
                         }
                         else {
@@ -1985,8 +1984,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             case H5T_ARRAY:
             case H5T_NCLASSES:
             default:
-                h5tools_str_append(&buffer,
-                                   "%" PRIuHSIZE " logical byte%s, %" PRIuHSIZE " allocated byte%s",
+                h5tools_str_append(&buffer, "%" PRIuHSIZE " logical byte%s, %" PRIuHSIZE " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
                     utilization = ((double)total * 100.0) / (double)used;

@@ -471,8 +471,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
                 h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", ptdata[u * 2 * ndims + v]);
 
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : ")-(",
-                                   ptdata[u * 2 * ndims + v + ndims]);
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : ")-(", ptdata[u * 2 * ndims + v + ndims]);
 
             h5tools_str_append(str, ")");
         }

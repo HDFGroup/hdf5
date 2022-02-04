@@ -26,8 +26,7 @@ typedef struct h5tools_str_t {
 
 H5TOOLS_DLL void   h5tools_str_close(h5tools_str_t *str);
 H5TOOLS_DLL size_t h5tools_str_len(h5tools_str_t *str);
-H5TOOLS_DLL char * h5tools_str_append(h5tools_str_t *str, const char *fmt, ...)
-    H5_ATTR_FORMAT(printf, 2, 3);
+H5TOOLS_DLL char * h5tools_str_append(h5tools_str_t *str, const char *fmt, ...) H5_ATTR_FORMAT(printf, 2, 3);
 H5TOOLS_DLL char * h5tools_str_reset(h5tools_str_t *str);
 H5TOOLS_DLL char * h5tools_str_trunc(h5tools_str_t *str, size_t size);
 H5TOOLS_DLL char * h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
