@@ -745,11 +745,11 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
 
         /* Start coordinates and opposite corner */
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, loop_indx ? "," : "(",
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, loop_indx ? "," : "(",
                                ptdata[indx * 2 * ndims + loop_indx]);
 
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, loop_indx ? "," : ")-(",
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, loop_indx ? "," : ")-(",
                                ptdata[indx * 2 * ndims + loop_indx + ndims]);
 
         h5tools_str_append(buffer, ")");
@@ -1101,7 +1101,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
                            (unsigned long)indx);
 
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, loop_indx ? "," : "(",
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, loop_indx ? "," : "(",
                                ptdata[indx * ndims + loop_indx]);
 
         h5tools_str_append(buffer, ")");
@@ -2608,7 +2608,7 @@ found_string_type:
                 if (H5Tget_array_dims2(type, dims) >= 0) {
                     /* Print array dimensions */
                     for (i = 0; i < ndims; i++)
-                        h5tools_str_append(buffer, "[" HSIZE_T_FORMAT "]", dims[i]);
+                        h5tools_str_append(buffer, "[%" PRIuHSIZE "]", dims[i]);
 
                     h5tools_str_append(buffer, " ");
                 }
@@ -2683,12 +2683,12 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
 
         case H5S_SIMPLE:
             /* simple dataspace */
-            h5tools_str_append(buffer, "%s %s { %s " HSIZE_T_FORMAT,
+            h5tools_str_append(buffer, "%s %s { %s %" PRIuHSIZE,
                                h5tools_dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
                                h5tools_dump_header_format->dataspacedimbegin, size[0]);
 
             for (i = 1; i < ndims; i++)
-                h5tools_str_append(buffer, ", " HSIZE_T_FORMAT, size[i]);
+                h5tools_str_append(buffer, ", %" PRIuHSIZE, size[i]);
 
             h5tools_str_append(buffer, " %s / ", h5tools_dump_header_format->dataspacedimend);
 
@@ -2696,14 +2696,14 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
                 h5tools_str_append(buffer, "%s %s", h5tools_dump_header_format->dataspacedimbegin,
                                    "H5S_UNLIMITED");
             else
-                h5tools_str_append(buffer, "%s " HSIZE_T_FORMAT,
+                h5tools_str_append(buffer, "%s %" PRIuHSIZE,
                                    h5tools_dump_header_format->dataspacedimbegin, maxsize[0]);
 
             for (i = 1; i < ndims; i++)
                 if (maxsize[i] == H5S_UNLIMITED)
                     h5tools_str_append(buffer, ", %s", "H5S_UNLIMITED");
                 else
-                    h5tools_str_append(buffer, ", " HSIZE_T_FORMAT, maxsize[i]);
+                    h5tools_str_append(buffer, ", %" PRIuHSIZE, maxsize[i]);
 
             h5tools_str_append(buffer, " %s }", h5tools_dump_header_format->dataspacedimend);
             break;
@@ -3174,10 +3174,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             h5tools_str_append(&buffer, "%s ", CHUNKED);
 
             rank = H5Pget_chunk(dcpl_id, (int)NELMTS(chsize), chsize);
-            h5tools_str_append(&buffer, "%s " HSIZE_T_FORMAT, h5tools_dump_header_format->dataspacedimbegin,
+            h5tools_str_append(&buffer, "%s %" PRIuHSIZE, h5tools_dump_header_format->dataspacedimbegin,
                                chsize[0]);
             for (i = 1; i < rank; i++)
-                h5tools_str_append(&buffer, ", " HSIZE_T_FORMAT, chsize[i]);
+                h5tools_str_append(&buffer, ", %" PRIuHSIZE, chsize[i]);
             h5tools_str_append(&buffer, " %s", h5tools_dump_header_format->dataspacedimend);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
@@ -3219,17 +3219,17 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     if (storage_size != 0)
                         ratio = (double)uncomp_size / (double)storage_size;
 
-                    h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT " (%.3f:1 COMPRESSION)", storage_size,
+                    h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE " (%.3f:1 COMPRESSION)", storage_size,
                                        ratio);
                 }
                 else
-                    h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
+                    h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
 
                 H5Sclose(sid);
                 H5Tclose(tid);
             }
             else {
-                h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
+                h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
             }
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
@@ -3247,7 +3247,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             ctx->need_prefix = TRUE;
 
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
+            h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                    (hsize_t)0);
             ctx->indent_level--;
@@ -3283,7 +3283,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     ctx->need_prefix = TRUE;
 
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "FILENAME %s SIZE " HSIZE_T_FORMAT, name, size);
+                    h5tools_str_append(&buffer, "FILENAME %s SIZE %" PRIuHSIZE, name, size);
                     h5tools_str_append(&buffer, " OFFSET %ld", offset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
@@ -3313,7 +3313,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 ctx->need_prefix = TRUE;
 
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
+                h5tools_str_append(&buffer, "SIZE %" PRIuHSIZE, storage_size);
                 h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                        (hsize_t)0);
 
@@ -3909,7 +3909,7 @@ h5tools_print_dims(h5tools_str_t *buffer, hsize_t *s, int dims)
     int i;
 
     for (i = 0; i < dims; i++) {
-        h5tools_str_append(buffer, HSIZE_T_FORMAT, s[i]);
+        h5tools_str_append(buffer, "%" PRIuHSIZE, s[i]);
 
         if (i + 1 != dims)
             h5tools_str_append(buffer, ", ");
@@ -4330,7 +4330,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
     if (string_dataformat.pindex) {
         string_dataformat.idx_fmt   = "(%s): ";
-        string_dataformat.idx_n_fmt = HSIZE_T_FORMAT;
+        string_dataformat.idx_n_fmt = "%" PRIuHSIZE;
         string_dataformat.idx_sep   = ",";
         string_dataformat.line_pre  = "%s";
     }

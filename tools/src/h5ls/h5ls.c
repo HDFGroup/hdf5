@@ -78,7 +78,7 @@ static h5tool_format_t ls_dataformat = {
     ",",  /*elmt_suf1 */
     " ",  /*elmt_suf2 */
 
-    HSIZE_T_FORMAT, /*idx_n_fmt */
+    "%" PRIuHSIZE, /*idx_n_fmt */
     ",",            /*idx_sep */
     "(%s)",         /*idx_fmt */
 
@@ -1185,7 +1185,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print dimensions */
         for (i = 0; i < ndims; i++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, i ? "," : "[", dims[i]);
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, i ? "," : "[", dims[i]);
         h5tools_str_append(buffer, "]");
 
         HDfree(dims);
@@ -1701,7 +1701,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", size[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", size[i]);
                     nelmts *= size[i];
                 }
                 h5tools_str_append(&buffer, "}\n");
@@ -1789,12 +1789,12 @@ dataset_list1(hid_t dset)
     ndims      = H5Sget_simple_extent_dims(space, cur_size, max_size);
     h5tools_str_append(&buffer, " {");
     for (i = 0; i < ndims; i++) {
-        h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", cur_size[i]);
+        h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", cur_size[i]);
         if (max_size[i] == H5S_UNLIMITED) {
             h5tools_str_append(&buffer, "/%s", "Inf");
         }
         else if (max_size[i] != cur_size[i] || verbose_g > 0) {
-            h5tools_str_append(&buffer, "/" HSIZE_T_FORMAT, max_size[i]);
+            h5tools_str_append(&buffer, "/%" PRIuHSIZE, max_size[i]);
         }
     }
     if (space_type == H5S_SCALAR)
@@ -1868,10 +1868,10 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
                 total = H5Tget_size(type);
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", chsize[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", chsize[i]);
                     total *= chsize[i];
                 }
-                h5tools_str_append(&buffer, "} " HSIZE_T_FORMAT " bytes\n", total);
+                h5tools_str_append(&buffer, "} %" PRIuHSIZE " bytes\n", total);
             } break;
             case H5D_COMPACT:
                 break;
@@ -1986,7 +1986,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             case H5T_NCLASSES:
             default:
                 h5tools_str_append(&buffer,
-                                   HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
+                                   "%" PRIuHSIZE " logical byte%s, %" PRIuHSIZE " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
                     utilization = ((double)total * 100.0) / (double)used;

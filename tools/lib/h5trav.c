@@ -856,7 +856,7 @@ trav_attr(hid_t
                     /* simple dataspace */
                     HDprintf(" {");
                     for (i = 0; i < ndims; i++) {
-                        HDprintf("%s" HSIZE_T_FORMAT, i ? ", " : "", size[i]);
+                        HDprintf("%s%" PRIuHSIZE, i ? ", " : "", size[i]);
                     }
                     HDprintf("}\n");
                     break;
