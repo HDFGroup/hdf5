@@ -53,11 +53,6 @@ typedef struct trav_path_op_data_t {
     const char *path;
 } trav_path_op_data_t;
 
-/* format for hsize_t */
-#ifdef H5TRAV_PRINT_SPACE
-#define HSIZE_T_FORMAT "%" H5_PRINTF_LL_WIDTH "u"
-#endif /* H5TRAV_PRINT_SPACE */
-
 /*-------------------------------------------------------------------------
  * local functions
  *-------------------------------------------------------------------------
