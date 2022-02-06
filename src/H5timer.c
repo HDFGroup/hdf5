@@ -292,7 +292,7 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
         if (HDgetrusage(RUSAGE_SELF, &res) < 0)
             return -1;
         times->system = (double)res.ru_stime.tv_sec + ((double)res.ru_stime.tv_usec / 1.0E6);
-        times->user   = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
+        times->user = (double)res.ru_utime.tv_sec + ((double)res.ru_utime.tv_usec / 1.0E6);
     }
 #else
     /* No suitable way to get system/user times */
