@@ -183,31 +183,33 @@ H5_now(void)
  *
  *-------------------------------------------------------------------------
  */
+#if defined(H5_HAVE_CLOCK_GETTIME)
 uint64_t
 H5_now_usec(void)
 {
-    uint64_t now; /* Current time, in microseconds */
+    struct timespec ts;
 
-#if defined(H5_HAVE_CLOCK_GETTIME)
-    {
-        struct timespec ts;
+    HDclock_gettime(CLOCK_MONOTONIC, &ts);
 
-        HDclock_gettime(CLOCK_MONOTONIC, &ts);
-        now = (uint64_t)(ts.tv_sec * (1000 * 1000)) + (uint64_t)(ts.tv_nsec / 1000);
-    }
+    return (uint64_t)ts.tv_sec * 1000L * 1000L + (uint64_t)ts.tv_nsec / 1000;
+}
 #elif defined(H5_HAVE_GETTIMEOFDAY)
-    {
-        struct timeval now_tv;
+uint64_t
+H5_now_usec(void)
+{
+    struct timeval tv;
 
-        HDgettimeofday(&now_tv, NULL);
-        now = (uint64_t)(now_tv.tv_sec * (1000 * 1000)) + (uint64_t)now_tv.tv_usec;
-    }
+    HDgettimeofday(&tv, NULL);
+
+    return (uint64_t)tv.tv_sec * 1000L * 1000L + (uint64_t)tv.tv_usec;
+}
 #else  /* H5_HAVE_GETTIMEOFDAY */
-    now       = (uint64_t)(HDtime(NULL) * (1000 * 1000));
+uint64_t
+H5_now_usec(void)
+{
+    return (uint64_t)HDtime(NULL) * 1000L * 1000L;
+}
 #endif /* H5_HAVE_GETTIMEOFDAY */
-
-    return (now);
-} /* end H5_now_usec() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5_get_time
