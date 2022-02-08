@@ -351,7 +351,7 @@ test_iter_group(FileAccPropList &fapl)
  * Purpose      Open an attribute and verify that it has a the correct name
  *-------------------------------------------------------------------------
  */
-const H5std_string FILE_NAME("titerate.h5");
+const H5std_string FILE_NAME("test_member_access.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
 const H5std_string GDATASET_NAME("group dset");
@@ -396,6 +396,9 @@ test_HDFFV_9920()
     int     attr_data[2] = {100, 200};
     hsize_t dims[1]      = {DIM1};
 
+    /* Output message about test being performed */
+    SUBTEST("Member access");
+
     try {
         // Create a new file and a group in it
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
@@ -425,6 +428,7 @@ test_HDFFV_9920()
         printelems(file, FDATASET_NAME, FATTR_NAME);
         printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
+        PASSED();
     } // end of try block
 
     // Catch all failures for handling in the same way
@@ -473,4 +477,5 @@ extern "C" void
 cleanup_iterate()
 {
     HDremove(FILE_ITERATE.c_str());
+    HDremove(FILE_NAME.c_str());
 } // cleanup_iterate
