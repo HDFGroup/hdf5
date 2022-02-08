@@ -4009,25 +4009,6 @@ AC_ARG_ENABLE([embedded-libinfo],
 
 
 ## ----------------------------------------------------------------------
-## Check if pointer alignments are enforced
-##
-AC_MSG_CHECKING([if alignment restrictions are strictly enforced])
-
-TEST_SRC="`(echo \"#define H5_NO_ALIGNMENT_RESTRICTIONS_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
-
-AC_RUN_IFELSE([
-    AC_LANG_SOURCE([$TEST_SRC])
-    ], [
-    AC_DEFINE([NO_ALIGNMENT_RESTRICTIONS], [1], [Define if we can violate pointer alignment restrictions])
-    AC_MSG_RESULT([no])
-    ], [
-    AC_MSG_RESULT([yes])
-    ], [
-    AC_MSG_RESULT([unknown, assuming yes])
-    ])
-
-
-## ----------------------------------------------------------------------
 ## Restore user's CFLAGS.
 CFLAGS="$saved_user_CFLAGS"
 FCFLAGS="$saved_user_FCFLAGS"
