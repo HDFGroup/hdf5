@@ -1470,10 +1470,6 @@ H5AC_resize_entry(void *thing, size_t new_size)
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
-    /* Resize the entry */
-    if (H5C_resize_entry(thing, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
-
 #ifdef H5_HAVE_PARALLEL
     {
         H5AC_aux_t *aux_ptr;
@@ -1484,6 +1480,10 @@ H5AC_resize_entry(void *thing, size_t new_size)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Resize the entry */
+    if (H5C_resize_entry(thing, new_size) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
 
 done:
     /* If currently logging, generate a message */

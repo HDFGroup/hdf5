@@ -217,6 +217,23 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
+    - Fixed a metadata cache bug when resizing a pinned/protected cache entry
+
+      When resizing a pinned/protected cache entry, the metadata
+      cache code previously would wait until after resizing the
+      entry to attempt to log the newly-dirtied entry. This would
+      cause H5C_resize_entry to mark the entry as dirty and make
+      H5AC_resize_entry think that it doesn't need to add the
+      newly-dirtied entry to the dirty entries skiplist.
+    
+      Thus, a subsequent H5AC__log_moved_entry would think it
+      needs to allocate a new entry for insertion into the dirty
+      entry skip list, since the entry doesn't exist on that list.
+      This causes an assertion failure, as the code to allocate a
+      new entry assumes that the entry is not dirty.
+
+      (JTH - 2022/01/12)
+
     - Unified handling of collective metadata reads to correctly fix old bugs
 
       Due to MPI-related issues occurring in HDF5 from mismanagement of the
