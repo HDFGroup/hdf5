@@ -599,7 +599,7 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
 static void *
 H5T__vlen_mem_str_getptr(void *_vl)
 {
-    char *      s = NULL; /* Pointer to the user's string information */
+    char *s = NULL; /* Pointer to the user's string information */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -676,7 +676,7 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
 static herr_t
 H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf, size_t len)
 {
-    char *s;        /* Pointer to the user's string information */
+    char *s; /* Pointer to the user's string information */
 
     FUNC_ENTER_STATIC_NOERR
 
