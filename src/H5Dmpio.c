@@ -3907,7 +3907,8 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
 
     /* Check if the number of send or receive requests will overflow an int (MPI requirement) */
     if (num_send_requests > INT_MAX || num_msgs_incoming > INT_MAX)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "too many shared chunks in parallel filtered write operation")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
+                    "too many shared chunks in parallel filtered write operation")
 
     H5_CHECK_OVERFLOW(num_send_requests, size_t, int)
     H5_CHECK_OVERFLOW(num_msgs_incoming, size_t, int)

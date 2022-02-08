@@ -105,6 +105,9 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     HDassert(io_info->store);
     HDassert(io_info->u.rbuf);
 
+    if (elmt_size == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
+
     /* Check for only one element in selection */
     if (nelmts == 1) {
         hsize_t single_mem_off;  /* Offset in memory */
@@ -226,8 +229,6 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
 
             /* Decrement number of elements left to process */
             HDassert(((size_t)tmp_file_len % elmt_size) == 0);
-            if (elmt_size == 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "Resulted in division by zero")
             nelmts -= ((size_t)tmp_file_len / elmt_size);
         } /* end while */
     }     /* end else */
@@ -299,6 +300,9 @@ H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, co
     HDassert(dst_space);
     HDassert(src_buf);
     HDassert(src_space);
+
+    if (elmt_size == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
 
     /* Check for only one element in selection */
     if (nelmts == 1) {
@@ -403,8 +407,6 @@ H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, co
 
             /* Decrement number of elements left to process */
             HDassert(((size_t)bytes_copied % elmt_size) == 0);
-            if (elmt_size == 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "Resulted in division by zero")
             nelmts -= ((size_t)bytes_copied / elmt_size);
         }
     }
