@@ -2360,8 +2360,16 @@ H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
             HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
 
         if (mpi_rank == 0) {
-            if (H5D__chunk_addrmap(io_info, total_chunk_addr_array) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            if (H5D__chunk_addrmap(io_info, total_chunk_addr_array) < 0) {
+                size_t u;
+
+                /* Clear total chunk address array */
+                for (u = 0; u < (size_t)fm->layout->u.chunk.nchunks; u++)
+                    total_chunk_addr_array[u] = HADDR_UNDEF;
+
+                /* Push error, but still participate in following MPI_Bcast */
+                HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            }
         } /* end if */
 
         /* Broadcasting the MPI_IO option info. and chunk address info. */
