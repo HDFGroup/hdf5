@@ -1670,6 +1670,18 @@ done:
  *                    index. Then, each rank collectively re-inserts each
  *                    chunk from the gathered array into the chunk index
  *
+ *              TODO: Note that steps D. and F. here are both collective
+ *                    operations that partially share data from the
+ *                    H5D_filtered_collective_io_info_t structure. To
+ *                    try to conserve on memory a bit, the distributed
+ *                    arrays these operations create are discarded after
+ *                    each operation is performed. If memory consumption
+ *                    here proves to not be an issue, the necessary data
+ *                    for both operations could be combined into a single
+ *                    structure so that only one collective MPI operation
+ *                    is needed to carry out both operations, rather than
+ *                    two.
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
@@ -2107,6 +2119,18 @@ done:
  *                    iteration into the chunk index. Then, each rank
  *                    collectively re-inserts each chunk from the
  *                    gathered array into the chunk index
+ *
+ *              TODO: Note that steps E. and G. here are both collective
+ *                    operations that partially share data from the
+ *                    H5D_filtered_collective_io_info_t structure. To
+ *                    try to conserve on memory a bit, the distributed
+ *                    arrays these operations create are discarded after
+ *                    each operation is performed. If memory consumption
+ *                    here proves to not be an issue, the necessary data
+ *                    for both operations could be combined into a single
+ *                    structure so that only one collective MPI operation
+ *                    is needed to carry out both operations, rather than
+ *                    two.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3138,18 +3162,53 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
             select_npoints              = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
             local_info_array[i].io_size = (size_t)select_npoints * type_info->dst_type_size;
 
+            /*
+             * Determine whether this chunk will need to be read from the file. If this is
+             * a read operation, the chunk will be read. If this is a write operation, we
+             * generally need to read a filtered chunk from the file before modifying it,
+             * unless the chunk is being fully overwritten.
+             *
+             * TODO: Currently the full overwrite status of a chunk is only obtained on a
+             * per-rank basis. This means that if the total selection in the chunk, as
+             * determined by the combination of selections of all of the ranks interested in
+             * the chunk, covers the entire chunk, the performance optimization of not reading
+             * the chunk from the file is still valid, but is not applied in the current
+             * implementation.
+             *
+             * To implement this case, a few approaches were considered:
+             *
+             *  - Keep a running total (distributed to each rank) of the number of chunk
+             *    elements selected during chunk redistribution and compare that to the total
+             *    number of elements in the chunk once redistribution is finished
+             *
+             *  - Process all incoming chunk messages before doing I/O (these are currently
+             *    processed AFTER doing I/O), combine the owning rank's selection in a chunk
+             *    with the selections received from other ranks and check to see whether that
+             *    combined selection covers the entire chunk
+             *
+             * The first approach will be dangerous if the application performs an overlapping
+             * write to a chunk, as the number of selected elements can equal or exceed the
+             * number of elements in the chunk without the whole chunk selection being covered.
+             * While it might be considered erroneous for an application to do an overlapping
+             * write, we don't explicitly disallow it.
+             *
+             * The second approach contains a bit of complexity in that part of the chunk
+             * messages will be needed before doing I/O and part will be needed after doing I/O.
+             * Since modification data from chunk messages can't be applied until after any I/O
+             * is performed (otherwise, we'll overwrite any applied modification data), chunk
+             * messages are currently entirely processed after I/O. However, in order to determine
+             * if a chunk is being fully overwritten, we need the dataspace portion of the chunk
+             * messages before doing I/O. The naive way to do this is to process chunk messages
+             * twice, using just the relevant information from the message before and after I/O.
+             * The better way would be to avoid processing chunk messages twice by extracting (and
+             * keeping around) the dataspace portion of the message before I/O and processing the
+             * rest of the chunk message after I/O. Note that the dataspace portion of each chunk
+             * message is used to correctly apply chunk modification data from the message, so
+             * must be kept around both before and after I/O in this case.
+             */
             if (io_info->op_type == H5D_IO_OP_READ)
                 local_info_array[i].need_read = TRUE;
             else {
-                /* Currently the full overwrite status of a chunk is only obtained on a per-rank
-                 * basis. This means that if the total selection in the chunk, as determined by
-                 * the combination of selections of all of the ranks interested in the chunk,
-                 * covers the entire chunk, the performance optimization of not reading the chunk
-                 * from the file is still valid, but is not applied in the current implementation.
-                 * Something like an appropriately placed MPI_Allreduce or a running total of the
-                 * number of chunk points selected during chunk redistribution should suffice for
-                 * implementing this case - JTH.
-                 */
                 local_info_array[i].need_read =
                     local_info_array[i].io_size < (size_t)io_info->dset->shared->layout.u.chunk.size;
             }
