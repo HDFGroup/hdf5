@@ -143,7 +143,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
 # Create imported target szip-static
   if (USE_LIBAEC)
     add_library(${HDF_PACKAGE_NAMESPACE}sz-static STATIC IMPORTED)
-    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}sz-static "sz" STATIC "")
+    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}sz-static "szaec" STATIC "")
     add_dependencies (${HDF_PACKAGE_NAMESPACE}sz-static SZIP)
     add_library(${HDF_PACKAGE_NAMESPACE}aec-static STATIC IMPORTED)
     HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}aec-static "aec" STATIC "")
