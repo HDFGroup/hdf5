@@ -498,7 +498,7 @@ h5dget_storage_size_c(hid_t_f *dset_id, hsize_t_f *size)
     if (c_size != 0) {
         ret_value = 0;
     }
-    *size     = (hsize_t_f)c_size;
+    *size = (hsize_t_f)c_size;
     return ret_value;
 }
 
