@@ -228,11 +228,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
   endif ()
   externalproject_get_property (HDF5_ZLIB BINARY_DIR SOURCE_DIR)
 
-  if (WIN32)
-    set (ZLIB_LIB_NAME "zlib")
-  else ()
-    set (ZLIB_LIB_NAME "z")
-  endif ()
+  set (ZLIB_LIB_NAME "z")
 ##include (${BINARY_DIR}/${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target zlib-static
   add_library(${HDF_PACKAGE_NAMESPACE}zlib-static STATIC IMPORTED)
