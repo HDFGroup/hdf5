@@ -4334,29 +4334,6 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         should_fill = (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC) ||
                       ((io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET) &&
                        io_info->dset->shared->dcpl_cache.fill.fill_defined);
-
-        if (should_fill) {
-            hsize_t chunk_dims[H5S_MAX_RANK];
-
-            HDassert(io_info->dset->shared->ndims == io_info->dset->shared->layout.u.chunk.ndims - 1);
-            for (i = 0; i < io_info->dset->shared->layout.u.chunk.ndims - 1; i++)
-                chunk_dims[i] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[i];
-
-            /* Get a dataspace for filling chunk memory buffers */
-            if (NULL == (fill_space = H5S_create_simple(io_info->dset->shared->layout.u.chunk.ndims - 1,
-                                                        chunk_dims, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace")
-
-            /* Initialize fill value buffer */
-            if (H5D__fill_init(
-                    &fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                    (void *)&io_info->dset->shared->dcpl_cache.pline, (H5MM_free_t)H5D__chunk_mem_free,
-                    (void *)&io_info->dset->shared->dcpl_cache.pline, &io_info->dset->shared->dcpl_cache.fill,
-                    io_info->dset->shared->type, io_info->dset->shared->type_id, 0, file_chunk_size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
-
-            fb_info_init = TRUE;
-        }
     }
 
     /*
@@ -4406,6 +4383,31 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
             chunk_list[i].chunk_new.length = file_chunk_size;
 
             if (should_fill) {
+                /* Initialize fill value buffer if not already initialized */
+                if (!fb_info_init) {
+                    hsize_t chunk_dims[H5S_MAX_RANK];
+
+                    HDassert(io_info->dset->shared->ndims == io_info->dset->shared->layout.u.chunk.ndims - 1);
+                    for (size_t j = 0; j < io_info->dset->shared->layout.u.chunk.ndims - 1; j++)
+                        chunk_dims[j] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[j];
+
+                    /* Get a dataspace for filling chunk memory buffers */
+                    if (NULL == (fill_space = H5S_create_simple(
+                                     io_info->dset->shared->layout.u.chunk.ndims - 1, chunk_dims, NULL)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace")
+
+                    /* Initialize fill value buffer */
+                    if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
+                                       (void *)&io_info->dset->shared->dcpl_cache.pline,
+                                       (H5MM_free_t)H5D__chunk_mem_free,
+                                       (void *)&io_info->dset->shared->dcpl_cache.pline,
+                                       &io_info->dset->shared->dcpl_cache.fill, io_info->dset->shared->type,
+                                       io_info->dset->shared->type_id, 0, file_chunk_size) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
+
+                    fb_info_init = TRUE;
+                }
+
                 /* Write fill value to memory buffer */
                 HDassert(fb_info.fill_buf);
                 if (H5D__fill(fb_info.fill_buf, io_info->dset->shared->type, chunk_list[i].buf,
@@ -4537,29 +4539,6 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
         should_fill = (io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC) ||
                       ((io_info->dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET) &&
                        io_info->dset->shared->dcpl_cache.fill.fill_defined);
-
-        if (should_fill) {
-            hsize_t chunk_dims[H5S_MAX_RANK];
-
-            HDassert(io_info->dset->shared->ndims == io_info->dset->shared->layout.u.chunk.ndims - 1);
-            for (i = 0; i < io_info->dset->shared->layout.u.chunk.ndims - 1; i++)
-                chunk_dims[i] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[i];
-
-            /* Get a dataspace for filling chunk memory buffers */
-            if (NULL == (fill_space = H5S_create_simple(io_info->dset->shared->layout.u.chunk.ndims - 1,
-                                                        chunk_dims, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace")
-
-            /* Initialize fill value buffer */
-            if (H5D__fill_init(
-                    &fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                    (void *)&io_info->dset->shared->dcpl_cache.pline, (H5MM_free_t)H5D__chunk_mem_free,
-                    (void *)&io_info->dset->shared->dcpl_cache.pline, &io_info->dset->shared->dcpl_cache.fill,
-                    io_info->dset->shared->type, io_info->dset->shared->type_id, 0, file_chunk_size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
-
-            fb_info_init = TRUE;
-        }
     }
 
     /*
@@ -4627,6 +4606,34 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                 chunk_list[i].chunk_new.length = file_chunk_size;
 
                 if (should_fill) {
+                    /* Initialize fill value buffer if not already initialized */
+                    if (!fb_info_init) {
+                        hsize_t chunk_dims[H5S_MAX_RANK];
+
+                        HDassert(io_info->dset->shared->ndims ==
+                                 io_info->dset->shared->layout.u.chunk.ndims - 1);
+                        for (size_t j = 0; j < io_info->dset->shared->layout.u.chunk.ndims - 1; j++)
+                            chunk_dims[j] = (hsize_t)io_info->dset->shared->layout.u.chunk.dim[j];
+
+                        /* Get a dataspace for filling chunk memory buffers */
+                        if (NULL == (fill_space = H5S_create_simple(
+                                         io_info->dset->shared->layout.u.chunk.ndims - 1, chunk_dims, NULL)))
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to create chunk fill dataspace")
+
+                        /* Initialize fill value buffer */
+                        if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
+                                           (void *)&io_info->dset->shared->dcpl_cache.pline,
+                                           (H5MM_free_t)H5D__chunk_mem_free,
+                                           (void *)&io_info->dset->shared->dcpl_cache.pline,
+                                           &io_info->dset->shared->dcpl_cache.fill,
+                                           io_info->dset->shared->type, io_info->dset->shared->type_id, 0,
+                                           file_chunk_size) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer")
+
+                        fb_info_init = TRUE;
+                    }
+
                     /* Write fill value to memory buffer */
                     HDassert(fb_info.fill_buf);
                     if (H5D__fill(fb_info.fill_buf, io_info->dset->shared->type, chunk_list[i].buf,
