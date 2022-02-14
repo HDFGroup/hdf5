@@ -204,7 +204,8 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
     mcomp_t        members;
     H5T_class_t    type_class;
 
-    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%" PRIuHSIZE " errstat:%d", opts->rank, opts->hs_nelmts, opts->err_stat);
+    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%" PRIuHSIZE " errstat:%d", opts->rank, opts->hs_nelmts,
+                        opts->err_stat);
     opts->print_header = 1; /* enable print header  */
 
     /* get the size. */
@@ -388,7 +389,8 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             HDmemset(&members, 0, sizeof(mcomp_t));
             get_member_types(opts->m_tid, &members);
             for (i = 0; i < opts->hs_nelmts; i++) {
-                H5TOOLS_DEBUG("opts->pos[%" PRIuHSIZE "]:%" PRIuHSIZE " - nelmts:%" PRIuHSIZE, i, opts->pos[i], opts->hs_nelmts);
+                H5TOOLS_DEBUG("opts->pos[%" PRIuHSIZE "]:%" PRIuHSIZE " - nelmts:%" PRIuHSIZE, i,
+                              opts->pos[i], opts->hs_nelmts);
                 nfound += diff_datum(mem1 + i * size, mem2 + i * size, i, opts, container1_id, container2_id,
                                      &members);
                 if (opts->count_bool && nfound >= opts->count)
@@ -452,7 +454,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
     hsize_t        nfound    = 0; /* differences found */
     diff_err_t     ret_value = opts->err_stat;
 
-    H5TOOLS_START_DEBUG("ph:%d elemtno:%" PRIuHSIZE " - errstat:%d", opts->print_header, elemtno, opts->err_stat);
+    H5TOOLS_START_DEBUG("ph:%d elemtno:%" PRIuHSIZE " - errstat:%d", opts->print_header, elemtno,
+                        opts->err_stat);
 
     type_size  = H5Tget_size(opts->m_tid);
     type_class = H5Tget_class(opts->m_tid);
@@ -702,8 +705,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
             H5TOOLS_DEBUG("H5T_ARRAY ph=%d", opts->print_header);
 
             arr_opts = *opts;
-            H5TOOLS_DEBUG("Check opts: hs_nelmts:%" PRIuHSIZE " to %" PRIuHSIZE " rank:%d to %d", opts->hs_nelmts,
-                          arr_opts.hs_nelmts, opts->rank, arr_opts.rank);
+            H5TOOLS_DEBUG("Check opts: hs_nelmts:%" PRIuHSIZE " to %" PRIuHSIZE " rank:%d to %d",
+                          opts->hs_nelmts, arr_opts.hs_nelmts, opts->rank, arr_opts.rank);
             /* get the array's base datatype for each element */
             arr_opts.m_tid = H5Tget_super(opts->m_tid);
             size           = H5Tget_size(arr_opts.m_tid);
@@ -1051,8 +1054,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                         H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1 failed");
                     if (H5Rdestroy(ref1_buf) < 0)
                         H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1 failed");
-                    H5TOOLS_DEBUG("H5T_REFERENCE - H5T_STD_REF complete nfound:%" PRIuHSIZE " - errstat:%d", nfound,
-                                  ref_opts.err_stat);
+                    H5TOOLS_DEBUG("H5T_REFERENCE - H5T_STD_REF complete nfound:%" PRIuHSIZE " - errstat:%d",
+                                  nfound, ref_opts.err_stat);
                 }
                 /*-------------------------------------------------------------------------
                  * H5T_STD_REF_DSETREG
@@ -3336,8 +3339,8 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
         H5TOOLS_DEBUG("rank=%d", opts->rank);
         if (opts->rank > 0) {
             parallel_print("[ ");
-            H5TOOLS_DEBUG("do calc_acc_pos[%" PRIuHSIZE "] nelmts:%" PRIuHSIZE " - errstat:%d", idx, opts->hs_nelmts,
-                          opts->err_stat);
+            H5TOOLS_DEBUG("do calc_acc_pos[%" PRIuHSIZE "] nelmts:%" PRIuHSIZE " - errstat:%d", idx,
+                          opts->hs_nelmts, opts->err_stat);
             if (opts->sset[0] != NULL) {
                 /* Subsetting is used - calculate total position */
                 hsize_t curr_idx = 0; /* current pos in the selection space for each dimension */
@@ -3364,19 +3367,22 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                         j = opts->rank - i - 1;
                         prev_total_dim_size *= prev_dim_size;
                         dim_size = opts->dims[j];
-                        H5TOOLS_DEBUG("j=%d, dim_size=%" PRIuHSIZE ", prev_dim_size=%" PRIuHSIZE ", total_dim_size=%" PRIuHSIZE ", "
+                        H5TOOLS_DEBUG("j=%d, dim_size=%" PRIuHSIZE ", prev_dim_size=%" PRIuHSIZE
+                                      ", total_dim_size=%" PRIuHSIZE ", "
                                       "prev_total_dim_size=%" PRIuHSIZE,
                                       j, dim_size, prev_dim_size, total_dim_size, prev_total_dim_size);
                         count  = opts->sset[0]->count.data[j];
                         block  = opts->sset[0]->block.data[j];
                         stride = opts->sset[0]->stride.data[j];
-                        H5TOOLS_DEBUG("stride=%" PRIuHSIZE ", count=%" PRIuHSIZE ", block=%" PRIuHSIZE, stride, count, block);
+                        H5TOOLS_DEBUG("stride=%" PRIuHSIZE ", count=%" PRIuHSIZE ", block=%" PRIuHSIZE,
+                                      stride, count, block);
                         tmp = count * block;
                         k0  = curr_idx / tmp;
                         k1  = curr_idx % tmp;
                         curr_pos += k1 * stride * prev_total_dim_size;
-                        H5TOOLS_DEBUG("curr_idx=%" PRIuHSIZE ", k0=%" PRIuHSIZE ", k1=%" PRIuHSIZE ", curr_pos=%" PRIuHSIZE, curr_idx, k0, k1,
-                                      curr_pos);
+                        H5TOOLS_DEBUG("curr_idx=%" PRIuHSIZE ", k0=%" PRIuHSIZE ", k1=%" PRIuHSIZE
+                                      ", curr_pos=%" PRIuHSIZE,
+                                      curr_idx, k0, k1, curr_pos);
                         if (k0 > 0)
                             curr_idx = k0 * total_dim_size;
                         H5TOOLS_DEBUG("curr_idx=%" PRIuHSIZE ", tmp=%" PRIuHSIZE, curr_idx, tmp);
