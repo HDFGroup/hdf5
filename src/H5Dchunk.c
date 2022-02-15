@@ -7211,6 +7211,89 @@ done:
 } /* end H5D__chunk_format_convert() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_index_empty_cb
+ *
+ * Purpose:     Callback function that simply stops iteration and sets the
+ *              `empty` parameter to FALSE if called. If this callback is
+ *              entered, it means that the chunk index contains at least
+ *              one chunk, so is not empty.
+ *
+ * Return:      H5_ITER_STOP
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__chunk_index_empty_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_udata)
+{
+    hbool_t *empty     = (hbool_t *)_udata;
+    int      ret_value = H5_ITER_STOP;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    *empty = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_index_empty_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_index_empty
+ *
+ * Purpose:     Determines whether a chunk index is empty (has no chunks
+ *              inserted into it yet).
+ *
+ * Note:        This routine is meant to be a little more performant than
+ *              just counting the number of chunks in the index. In the
+ *              future, this is probably a callback that the chunk index
+ *              ops structure should provide.
+ *
+ * Return:      Non-negative on Success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__chunk_index_empty(const H5D_t *dset, hbool_t *empty)
+{
+    H5D_chk_idx_info_t idx_info;            /* Chunked index info */
+    H5D_rdcc_ent_t *   ent;                 /* Cache entry  */
+    const H5D_rdcc_t * rdcc      = NULL;    /* Raw data chunk cache */
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    HDassert(dset);
+    HDassert(dset->shared);
+    HDassert(empty);
+
+    rdcc = &(dset->shared->cache.chunk); /* raw data chunk cache */
+    HDassert(rdcc);
+
+    /* Search for cached chunks that haven't been written out */
+    for (ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if (H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Compose chunked index info struct */
+    idx_info.f       = dset->oloc.file;
+    idx_info.pline   = &dset->shared->dcpl_cache.pline;
+    idx_info.layout  = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    *empty = TRUE;
+
+    if (H5F_addr_defined(idx_info.storage->idx_addr)) {
+        /* Iterate over the allocated chunks */
+        if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_index_empty_cb, empty) <
+            0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "unable to retrieve allocated chunk information from index")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+} /* end H5D__chunk_index_empty() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__get_num_chunks_cb
  *
  * Purpose:     Callback function that increments the number of written
