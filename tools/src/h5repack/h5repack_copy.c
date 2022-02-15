@@ -186,8 +186,10 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
     if (!use_h5ocopy) {
         int j;
 
+        /* Dataset is already opened at line 111 - Ray
         if ((dset_in = H5Dopen2(fidin, travt->objs[index].name, H5P_DEFAULT)) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
+         */
         if (f_space_id == H5I_INVALID_HID)
             if ((f_space_id = H5Dget_space(dset_in)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
@@ -308,6 +310,11 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                  * modified dcpl; in that case use the original instead
                  *-------------------------------------------------------------------------
                  */
+
+                /* For later independent writing of data - Ray */
+                if (H5Pset_alloc_time(dcpl_out, H5D_ALLOC_TIME_EARLY) < 0)
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pset_alloc_time failed");
+
                 dset_out = H5Dcreate2(fidout, travt->objs[index].name, wtype_id, f_space_id, H5P_DEFAULT,
                                       dcpl_out, H5P_DEFAULT);
 
@@ -317,6 +324,10 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                         HDprintf(" warning: could not create dataset <%s>. Applying original "
                                  "settings\n",
                                  travt->objs[index].name);
+
+                    /* For later independent writing of data - Ray */
+                    if (H5Pset_alloc_time(dcpl_in, H5D_ALLOC_TIME_EARLY) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pset_alloc_time failed");
 
                     if ((dset_out = H5Dcreate2(fidout, travt->objs[index].name, wtype_id, f_space_id,
                                                H5P_DEFAULT, dcpl_in, H5P_DEFAULT)) < 0)
@@ -334,12 +345,20 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
                 wtype_id = H5Tcopy(ftype_id);
         }
 
+        /* For later independent writing of data - Ray */
+        if (H5Pset_alloc_time(dcpl_in, H5D_ALLOC_TIME_EARLY) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Pset_alloc_time failed");
+
         if ((dset_out = H5Dcreate2(fidout, travt->objs[index].name, wtype_id, f_space_id, H5P_DEFAULT,
                                    dcpl_in, H5P_DEFAULT)) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Dcreate2 failed");
     }
 
-    H5Dclose(dset_in);
+    if (dset_in != H5I_INVALID_HID)
+        H5Dclose(dset_in);
+    if (dset_out != H5I_INVALID_HID)
+        H5Dclose(dset_out); /* Ray */
+
 done:
     /* Finalize (link) the stack of named datatypes (if any) first
      * because of reference counting */
@@ -674,7 +693,12 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
                     if (H5T_REFERENCE == H5Tget_class(ftype_id))
                         is_ref = 1;
 
-                    H5Dclose(dset_in); /* No longer needed for this function. */
+                    /* No longer needed for these functions. */
+                    if (dset_in != H5I_INVALID_HID && H5Dclose(dset_in) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
+                    if (H5Tclose(ftype_id) < 0)
+                        H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
+
                     /*-------------------------------------------------------------------------
                      * check if we should use H5Ocopy or not
                      * if there is a request for filters/layout, we read/write the object
@@ -740,9 +764,16 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
         }     /* for() */
     }         /* if (travt->objs) */
 
+    /* Reopen the file with MPIO - Ray */
+    if (H5Pset_fapl_mpio(options->fout_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+
     /* processes (re)open the output file with RDWR access */
-    if ((fidout = H5Fopen(fnameout, H5F_ACC_RDWR, options->fout_fapl)) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+    // if ((fidout = H5Fopen(fnameout, H5F_ACC_RDWR, options->fout_fapl)) < 0)
+    //    H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
+    if ((fidout = h5tools_fopen(fnameout, H5F_ACC_RDWR, options->fout_fapl,
+                                (options->fout_fapl != H5P_DEFAULT), NULL, (size_t)0)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnameout, H5FOPENERROR);
 
     /* Return the outputput file descriptor */
     *_fidout = fidout;
@@ -825,7 +856,7 @@ check_dataset_sizes(hid_t fidin, trav_table_t *travt)
                 travt->objs[i].use_hyperslab = true;
             if (H5Sclose(f_space_id) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
-            if (H5Dclose(dset_in) < 0)
+            if (dset_in != H5I_INVALID_HID && H5Dclose(dset_in) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
         }
     }
@@ -864,6 +895,7 @@ select_objs_by_rank(hid_t fidin, trav_table_t *orig, int **table_index)
         index = (int *)HDcalloc(orig->nobjs, sizeof(int));
         for (k = 0; k < (int)orig->nobjs; k++) {
             int mod_rank = (int)((int)k % g_nTasks);
+
             if ((orig->objs[k].use_hyperslab) || (mod_rank == (int)g_nID)) {
                 index[count++] = k;
             }
@@ -905,6 +937,18 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     unsigned              crt_order_flags; /* group creation order flag */
     int                   ret_value = 0;
     int                   g_ret;
+
+    /* Create a FAPL and make open call to the input file with MPIO - Ray */
+    if ((options->fin_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "Unable to create fapl for the input file");
+
+        /* open the file with MPIO - Ray */
+#ifdef H5_HAVE_PARALLEL
+/*    if (g_Parallel) {
+        if (H5Pset_fapl_mpio(options->fin_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
+           H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+    }*/
+#endif
 
     if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
                                NULL, (size_t)0)) < 0)
@@ -1179,9 +1223,23 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
             if (pcreate_new_objects(fnameout, fcpl, fidin, &fidout, travt, options) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "pcreate_new_objects from <%s> into <%s>", fnamein, fnameout);
 
+            if (H5Fclose(fidin) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "failed to close the input file");
+
+            /* reopen the file with MPIO - Ray */
+            if (H5Pset_fapl_mpio(options->fin_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
+
+            if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
+                                       (options->fin_fapl != H5P_DEFAULT), NULL, (size_t)0)) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
+
             if (pcopy_objects(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "pcopy_objects from <%s> could not copy data to <%s>", fnamein,
                                    fnameout);
+
+            ptools_barrier();
+
             if (pcopy_refobjs(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "pcopy_refobjs from <%s> could not copy data to <%s>", fnamein,
                                    fnameout);
@@ -1215,8 +1273,11 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     if (H5Pclose(fcpl) < 0)
         H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
     if (H5Pclose(options->fout_fapl) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+        H5TOOLS_GOTO_ERROR((-1), "could not close fapl");
     options->fout_fapl = H5P_DEFAULT;
+    if (H5Pclose(options->fin_fapl) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fapl");
+    options->fin_fapl = H5P_DEFAULT;
     if (H5Pclose(gcpl_in) < 0)
         H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
     if (H5Gclose(grp_in) < 0)
@@ -1314,7 +1375,8 @@ done:
  *      the boundary would be dataset's dims.
  *
  *   The calculation starts from the last dimension (h5dump dims output).
- *-----------------------------------------*/
+ *-----------------------------------------
+ */
 
 int
 get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
@@ -1446,24 +1508,24 @@ int
 pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count,
               pack_opt_t *options)
 {
-    hid_t              dset_in       = H5I_INVALID_HID; /* read dataset ID */
-    hid_t              dset_out      = H5I_INVALID_HID; /* write dataset ID */
-    hid_t              dcpl_in       = H5I_INVALID_HID; /* dataset creation property list ID */
-    hid_t              dcpl_out      = H5I_INVALID_HID; /* dataset creation property list ID */
-    hid_t              f_space_id    = H5I_INVALID_HID; /* file space ID */
-    hid_t              wtype_id      = H5I_INVALID_HID; /* read/write type ID */
-    hid_t              ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
-    hid_t              dxpl_id       = H5P_DEFAULT;     /* dataset transfer property list */
-    named_dt_t *       named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
-    size_t             msize;                           /* size of type */
-    hsize_t            nelmts;                          /* number of elements in dataset */
-    int                rank;                            /* rank of dataset */
-    hsize_t            dims[H5S_MAX_RANK];              /* dimensions of dataset */
-    hsize_t            dsize_in;                        /* input dataset size before filter */
-    void *             buf       = NULL;                /* buffer for raw data */
-    void *             hslab_buf = NULL;                /* hyperslab buffer for raw data */
-    H5_timer_t         timer;                           /* Timer for read/write operations */
-    H5_timevals_t      times;                           /* Elapsed time for each operation */
+    hid_t       dset_in       = H5I_INVALID_HID; /* read dataset ID */
+    hid_t       dset_out      = H5I_INVALID_HID; /* write dataset ID */
+    hid_t       dcpl_in       = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t       dcpl_out      = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t       f_space_id    = H5I_INVALID_HID; /* file space ID */
+    hid_t       wtype_id      = H5I_INVALID_HID; /* read/write type ID */
+    hid_t       ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
+    hid_t       dxpl_id       = H5P_DEFAULT;     /* dataset transfer property list */
+    named_dt_t *named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
+    /* size_t             msize;                           size of type */
+    /* hsize_t            nelmts;                           number of elements in dataset */
+    int                rank;               /* rank of dataset */
+    hsize_t            dims[H5S_MAX_RANK]; /* dimensions of dataset */
+    hsize_t            dsize_in;           /* input dataset size before filter */
+    void *             buf       = NULL;   /* buffer for raw data */
+    void *             hslab_buf = NULL;   /* hyperslab buffer for raw data */
+    H5_timer_t         timer;              /* Timer for read/write operations */
+    H5_timevals_t      times;              /* Elapsed time for each operation */
     static double      read_time  = 0;
     static double      write_time = 0;
     h5tool_link_info_t linkinfo;
@@ -1510,6 +1572,7 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                          * Copy attrs manually
                          *-------------------------------------------------------------------------
                          */
+                        /* Open the dataset independently - Ray */
                         if ((dset_in = H5Dopen2(fidin, travt->objs[obj_i].name, H5P_DEFAULT)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
                         if ((dset_out = H5Dopen2(fidout, travt->objs[obj_i].name, H5P_DEFAULT)) < 0)
@@ -1530,11 +1593,11 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                         dsize_in = H5Dget_storage_size(dset_in);
 
                         if (travt->objs[obj_i].use_hyperslab) {
-                            size_t       p_type_nbytes = msize;  /*size of memory type */
-                            hsize_t      p_nelmts      = nelmts; /*total elements */
-                            hsize_t      elmtno;                 /*counter  */
-                            int          carry;                  /*counter carry value */
-                            unsigned int vl_data = 0;            /*contains VL datatypes */
+                            size_t       p_type_nbytes; /*size of memory type */
+                            hsize_t      p_nelmts;      /*total elements */
+                            hsize_t      elmtno;        /*counter  */
+                            int          carry;         /*counter carry value */
+                            unsigned int vl_data = 0;   /*contains VL datatypes */
 
                             /* hyperslab info */
                             hsize_t hslab_dims[H5S_MAX_RANK]; /*hyperslab dims */
@@ -1602,6 +1665,7 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                             HDmemset(zero, 0, sizeof zero);
 
                             hs_sel_offset[0] = hs_context->hs_offset[0];
+
                             for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts) {
                                 if (rank > 0) {
                                     /* calculate the hyperslab selections.
@@ -1691,10 +1755,10 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                             HDfree(dataBuf);
                         }
 
-                        if (H5Dclose(dset_in) < 0)
+                        if (dset_in != H5I_INVALID_HID && H5Dclose(dset_in) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                         dset_in = H5I_INVALID_HID;
-                        if (H5Dclose(dset_out) < 0)
+                        if (dset_out != H5I_INVALID_HID && H5Dclose(dset_out) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                         dset_out = H5I_INVALID_HID;
 
