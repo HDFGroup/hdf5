@@ -288,22 +288,22 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
                              size_t nbytes_src, H5O_loc_t *dst_oloc, H5G_loc_t *dst_root_loc, void *buf_dst,
                              size_t ref_count, H5O_copy_t *cpy_info)
 {
-    H5T_t *     dt_mem        = NULL;                        /* Memory datatype */
-    H5T_t *     dt_dst        = NULL;                        /* Destination datatype */
-    hid_t       tid_mem       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
-    hid_t       tid_dst       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
-    H5T_path_t *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
-    size_t      i;                                           /* Local index variable */
-    hbool_t     reg_tid_src   = (tid_src == H5I_INVALID_HID);
-    hid_t       dst_loc_id    = H5I_INVALID_HID;
-    void *      conv_buf      = NULL;        /* Buffer for converting data */
-    size_t      conv_buf_size = 0;           /* Buffer size */
-    void *      reclaim_buf   = NULL;        /* Buffer for reclaiming data */
-    H5S_t *     buf_space     = NULL;        /* Dataspace describing buffer */
-    hsize_t     buf_dim[1]    = {ref_count}; /* Dimension for buffer */
-    size_t      token_size    = H5F_SIZEOF_ADDR(src_oloc->file);
+    H5T_t *             dt_mem        = NULL;                        /* Memory datatype */
+    H5T_t *             dt_dst        = NULL;                        /* Destination datatype */
+    hid_t               tid_mem       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
+    hid_t               tid_dst       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
+    H5T_path_t *        tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
+    size_t              i;                                           /* Local index variable */
+    hbool_t             reg_tid_src             = (tid_src == H5I_INVALID_HID);
+    hid_t               dst_loc_id              = H5I_INVALID_HID;
+    void *              conv_buf                = NULL;        /* Buffer for converting data */
+    size_t              conv_buf_size           = 0;           /* Buffer size */
+    void *              reclaim_buf             = NULL;        /* Buffer for reclaiming data */
+    H5S_t *             buf_space               = NULL;        /* Dataspace describing buffer */
+    hsize_t             buf_dim[1]              = {ref_count}; /* Dimension for buffer */
+    size_t              token_size              = H5F_SIZEOF_ADDR(src_oloc->file);
     const unsigned char zeros[H5R_REF_BUF_SIZE] = {0};
-    herr_t      ret_value     = SUCCEED;
+    herr_t              ret_value               = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -354,18 +354,19 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
 
     /* Making equivalent references in the destination file */
     for (i = 0; i < ref_count; i++) {
-        H5R_ref_t *     ref_ptr   = (H5R_ref_t *)conv_buf;
-        H5R_ref_priv_t *ref       = (H5R_ref_priv_t *)&ref_ptr[i];
+        H5R_ref_t *     ref_ptr = (H5R_ref_t *)conv_buf;
+        H5R_ref_priv_t *ref     = (H5R_ref_priv_t *)&ref_ptr[i];
 
         /* Check for null reference - only expand reference if it is not null */
-        if(HDmemcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
-            H5O_token_t     tmp_token = {0};
+        if (HDmemcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
+            H5O_token_t tmp_token = {0};
 
             /* Get src object address */
             if (H5R__get_obj_token(ref, &tmp_token, &token_size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object token")
             if (H5VL_native_token_to_addr(src_oloc->file, H5I_FILE, tmp_token, &src_oloc->addr) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
+                            "can't deserialize object token into address")
 
             /* Attempt to copy object from source to destination file */
             if (H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0)
@@ -380,7 +381,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
             if (H5R__set_loc_id(ref, dst_loc_id, TRUE, FALSE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id")
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Copy into another buffer, to reclaim memory later */
     if (NULL == (reclaim_buf = H5FL_BLK_MALLOC(type_conv, conv_buf_size)))
