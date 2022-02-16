@@ -280,9 +280,16 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
         if (using_mpi) {
             /* Write the chunks out from only one process */
             /* !! Use the internal "independent" DXPL!! -QAK */
-            if (H5_PAR_META_WRITE == mpi_rank)
-                if (H5D__contig_write_one(&ioinfo, offset, size) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
+            if (H5_PAR_META_WRITE == mpi_rank) {
+                if (H5D__contig_write_one(&ioinfo, offset, size) < 0) {
+                    /* If writing fails, push an error and stop writing, but
+                     * still participate in following MPI_Barrier.
+                     */
+                    blocks_written = TRUE;
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
+                    break;
+                }
+            }
 
             /* Indicate that blocks are being written */
             blocks_written = TRUE;

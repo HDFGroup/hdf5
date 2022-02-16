@@ -28,7 +28,7 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./README.txt
+./README.md
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
@@ -40,6 +40,7 @@
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/codespell.yml  _DO_NOT_DISTRIBUTE_
+./.github/FUNDING.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -223,6 +224,7 @@
 ./doxygen/dox/DDLBNF112.dox
 ./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
+./doxygen/dox/Glossary.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
 ./doxygen/dox/Overview.dox
@@ -289,6 +291,7 @@
 ./doxygen/img/FF-IH_FileGroup.gif
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
+./doxygen/img/HDF5.png
 ./doxygen/img/HDFG-logo.png
 ./doxygen/img/IOFlow.gif
 ./doxygen/img/IOFlow2.gif
@@ -3591,9 +3594,9 @@
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
 ./java/lib/simplelogger.properties
-./java/lib/slf4j-api-1.7.25.jar
-./java/lib/ext/slf4j-nop-1.7.25.jar
-./java/lib/ext/slf4j-simple-1.7.25.jar
+./java/lib/slf4j-api-1.7.33.jar
+./java/lib/ext/slf4j-nop-1.7.33.jar
+./java/lib/ext/slf4j-simple-1.7.33.jar
 
 # CMake-specific Files
 ./config/toolchain/build32.cmake
@@ -3629,7 +3632,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
-./config/cmake/README.txt.cmake.in
+./config/cmake/README.md.cmake.in
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake

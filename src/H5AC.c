@@ -303,7 +303,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsprintf(prefix, "%d:", mpi_rank);
+        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1636,9 +1636,14 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
             if (H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
 
-        if (deleted && aux_ptr->mpi_rank == 0)
-            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+        if (deleted && aux_ptr->mpi_rank == 0) {
+            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0) {
+                /* If we fail to log the deleted entry, push an error but still
+                 * participate in a possible sync point ahead
+                 */
+                HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+            }
+        }
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
