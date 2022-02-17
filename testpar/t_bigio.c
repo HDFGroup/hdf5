@@ -1113,7 +1113,9 @@ single_rank_independent_io(void)
         hid_t   dset_id   = -1;
         hid_t   fspace_id = -1;
         hid_t   mspace_id = -1;
-        void *  data      = NULL;
+        herr_t  ret;
+        int *   data      = NULL;
+        uint64_t i;
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY_G((fapl_id >= 0), "H5P_FILE_ACCESS");
@@ -1135,6 +1137,10 @@ single_rank_independent_io(void)
 
         data = malloc(LARGE_DIM * sizeof(int));
 
+        /* Initialize data */
+        for (i = 0; i < LARGE_DIM; i++)
+            data[i] = (int)(i % (uint64_t)DXFER_BIGCOUNT);
+
         if (mpi_rank_g == 0)
             H5Sselect_all(fspace_id);
         else
@@ -1143,7 +1149,24 @@ single_rank_independent_io(void)
         dims[0]   = LARGE_DIM;
         mspace_id = H5Screate_simple(1, dims, NULL);
         VRFY_G((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
+
+        /* Write data */
         H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        VRFY_G((ret >= 0), "H5Dwrite succeeded");
+
+        /* Wipe buffer */
+        HDmemset(data, 0, LARGE_DIM * sizeof(int));
+
+        /* Read data back */
+        H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        VRFY_G((ret >= 0), "H5Dread succeeded");
+
+        /* Verify data */
+        for (i = 0; i < LARGE_DIM; i++)
+            if (data[i] != (int)(i % (uint64_t)DXFER_BIGCOUNT)) {
+                HDfprintf(stderr, "verify failed\n");
+                exit(1);
+            }
 
         free(data);
         H5Sclose(mspace_id);
