@@ -47,12 +47,12 @@ set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++"
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 
-set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
 set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
 
-set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
+set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of HDF5_ZLIB package" FORCE)
 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
 set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
 
@@ -85,12 +85,12 @@ set (BLOSC_TGZ_NAME "c-blosc.tar.gz" CACHE STRING "Use BLOSC from compressed fil
 
 set (BLOSC_PACKAGE_NAME "blosc" CACHE STRING "Name of BLOSC package" FORCE)
 
-set (ZLIB_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/zlib.git" CACHE STRING "Use ZLIB from HDF repo" FORCE)
-set (ZLIB_GIT_BRANCH "master" CACHE STRING "" FORCE)
+set (BLOSC_ZLIB_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/zlib.git" CACHE STRING "Use BLOSC_ZLIB from HDF repo" FORCE)
+set (BLOSC_ZLIB_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
-set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+set (BLOSC_ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use BLOSC_ZLib from compressed file" FORCE)
 
-set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
+set (BLOSC_ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of BLOSC_ZLIB package" FORCE)
 
 #######
 # bzip2
@@ -159,15 +159,15 @@ set (LZF_PACKAGE_NAME "lzf" CACHE STRING "Name of LZF package" FORCE)
 #set (MAFISC_PACKAGE_NAME "mafisc" CACHE STRING "Name of MAFISC package" FORCE)
 
 ######
-# szf
+# sz
 ######
 
-set (SZF_GIT_URL "https://github.com/disheng222/SZ" CACHE STRING "Use SZ from github repository" FORCE)
-set (SZF_GIT_BRANCH "master" CACHE STRING "" FORCE)
+set (SZ_GIT_URL "https://github.com/disheng222/SZ" CACHE STRING "Use SZ filter from github repository" FORCE)
+set (SZ_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
-set (SZF_TGZ_NAME "szf.tar.gz" CACHE STRING "Use SZ from compressed file" FORCE)
+set (SZ_TGZ_NAME "szf.tar.gz" CACHE STRING "Use SZ filter from compressed file" FORCE)
 
-set (SZF_PACKAGE_NAME "szf" CACHE STRING "Name of SZ package" FORCE)
+set (SZ_PACKAGE_NAME "SZ" CACHE STRING "Name of SZ filter package" FORCE)
 
 ######
 # zfp
