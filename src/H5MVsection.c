@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+ * Copyright by Akadio, Inc.                                                 *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,12 +11,14 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *              Tuesday, January  8, 2008
+/*-------------------------------------------------------------------------
  *
- * Purpose:	Free space section callbacks for file.
+ * Created:             H5MVsection.c
  *
+ * Purpose:             Free-space section callbacks for VFD SWMR's metadata
+ *                      file
+ *
+ *-------------------------------------------------------------------------
  */
 
 /****************/
