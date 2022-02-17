@@ -44,8 +44,8 @@ static hsize_t increment          = DEFAULT_INCREMENT;
 /*
  * Command-line options: only publicize long options
  */
-static const char *           s_opts   = "hVsmzi*";
-static struct h5_long_options l_opts[] = {
+static const char *        s_opts   = "hVsmzi*";
+static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},  {"version", no_arg, 'V'},  {"status", no_arg, 's'},
     {"image", no_arg, 'm'}, {"filesize", no_arg, 'z'}, {"increment", optional_arg, 'i'},
     {NULL, 0, '\0'}};
@@ -121,7 +121,7 @@ parse_command_line(int argc, const char *const *argv)
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -147,12 +147,12 @@ parse_command_line(int argc, const char *const *argv)
 
             case 'i':
                 increment_eoa_eof = TRUE;
-                if (H5_optarg != NULL) {
-                    if (HDatoi(H5_optarg) < 0) {
+                if (opt_arg != NULL) {
+                    if (HDatoi(opt_arg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(H5_optarg);
+                    increment = (hsize_t)HDatoi(opt_arg);
                 }
                 break;
 
@@ -164,14 +164,14 @@ parse_command_line(int argc, const char *const *argv)
     }     /* end while */
 
     /* check for file name to be processed */
-    if (argc <= H5_optind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto error;
     } /* end if */
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = HDstrdup(argv[opt_ind]);
 
 done:
     return (0);

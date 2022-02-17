@@ -35,10 +35,10 @@ char *ub_file     = NULL;
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *           s_opts   = "hu:i:o:d:V";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},   {"i", require_arg, 'i'},
-                                          {"u", require_arg, 'u'}, {"o", require_arg, 'o'},
-                                          {"delete", no_arg, 'd'}, {NULL, 0, '\0'}};
+static const char *        s_opts   = "hu:i:o:d:V";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},   {"i", require_arg, 'i'},
+                                       {"u", require_arg, 'u'}, {"o", require_arg, 'o'},
+                                       {"delete", no_arg, 'd'}, {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -97,23 +97,23 @@ parse_command_line(int argc, const char *const *argv)
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
-                output_file = HDstrdup(H5_optarg);
+                output_file = HDstrdup(opt_arg);
                 if (output_file)
                     h5tools_set_data_output_file(output_file, 1);
                 break;
 
             case 'i':
-                input_file = HDstrdup(H5_optarg);
+                input_file = HDstrdup(opt_arg);
                 if (input_file)
                     h5tools_set_input_file(input_file, 1);
                 break;
                 ;
 
             case 'u':
-                ub_file = HDstrdup(H5_optarg);
+                ub_file = HDstrdup(opt_arg);
                 if (ub_file)
                     h5tools_set_output_file(ub_file, 1);
                 else

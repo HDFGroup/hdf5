@@ -129,31 +129,31 @@ static const char *s_opts = "a:A:B:cCd:D:e:F:ghi:Imno:p:P:stT:wx:X:";
 #else
 static const char *s_opts = "a:A:bB:cCd:D:e:F:ghi:Imno:p:P:stT:wx:X:";
 #endif /* 1 */
-static struct h5_long_options l_opts[] = {{"align", require_arg, 'a'},
-                                          {"api", require_arg, 'A'},
+static struct long_options l_opts[] = {{"align", require_arg, 'a'},
+                                       {"api", require_arg, 'A'},
 #if 0
     /* a sighting of the elusive binary option */
     { "binary", no_arg, 'b' },
 #endif /* 0 */
-                                          {"block-size", require_arg, 'B'},
-                                          {"chunk", no_arg, 'c'},
-                                          {"collective", no_arg, 'C'},
-                                          {"debug", require_arg, 'D'},
-                                          {"geometry", no_arg, 'g'},
-                                          {"help", no_arg, 'h'},
-                                          {"interleaved", require_arg, 'I'},
-                                          {"max-num-processes", require_arg, 'P'},
-                                          {"min-num-processes", require_arg, 'p'},
-                                          {"max-xfer-size", require_arg, 'X'},
-                                          {"min-xfer-size", require_arg, 'x'},
-                                          {"num-bytes", require_arg, 'e'},
-                                          {"num-dsets", require_arg, 'd'},
-                                          {"num-files", require_arg, 'F'},
-                                          {"num-iterations", require_arg, 'i'},
-                                          {"output", require_arg, 'o'},
-                                          {"threshold", require_arg, 'T'},
-                                          {"write-only", require_arg, 'w'},
-                                          {NULL, 0, '\0'}};
+                                        {"block-size", require_arg, 'B'},
+                                        {"chunk", no_arg, 'c'},
+                                        {"collective", no_arg, 'C'},
+                                        {"debug", require_arg, 'D'},
+                                        {"geometry", no_arg, 'g'},
+                                        {"help", no_arg, 'h'},
+                                        {"interleaved", require_arg, 'I'},
+                                        {"max-num-processes", require_arg, 'P'},
+                                        {"min-num-processes", require_arg, 'p'},
+                                        {"max-xfer-size", require_arg, 'X'},
+                                        {"min-xfer-size", require_arg, 'x'},
+                                        {"num-bytes", require_arg, 'e'},
+                                        {"num-dsets", require_arg, 'd'},
+                                        {"num-files", require_arg, 'F'},
+                                        {"num-iterations", require_arg, 'i'},
+                                        {"output", require_arg, 'o'},
+                                        {"threshold", require_arg, 'T'},
+                                        {"write-only", require_arg, 'w'},
+                                        {NULL, 0, '\0'}};
 
 struct options {
     long        io_types;      /* bitmask of which I/O types to test   */
@@ -1305,13 +1305,13 @@ parse_command_line(int argc, const char *const *argv)
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
-                cl_opts->h5_alignment = parse_size_directive(H5_optarg);
+                cl_opts->h5_alignment = parse_size_directive(opt_arg);
                 break;
             case 'A': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1351,7 +1351,7 @@ parse_command_line(int argc, const char *const *argv)
             break;
 #endif /* 0 */
             case 'B':
-                cl_opts->blk_size = (size_t)parse_size_directive(H5_optarg);
+                cl_opts->blk_size = (size_t)parse_size_directive(opt_arg);
                 break;
             case 'c':
                 /* Turn on chunked HDF5 dataset creation */
@@ -1361,10 +1361,10 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->collective = 1;
                 break;
             case 'd':
-                cl_opts->num_dsets = atoi(H5_optarg);
+                cl_opts->num_dsets = atoi(opt_arg);
                 break;
             case 'D': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1421,40 +1421,40 @@ parse_command_line(int argc, const char *const *argv)
 
             break;
             case 'e':
-                cl_opts->num_bpp = parse_size_directive(H5_optarg);
+                cl_opts->num_bpp = parse_size_directive(opt_arg);
                 break;
             case 'F':
-                cl_opts->num_files = HDatoi(H5_optarg);
+                cl_opts->num_files = HDatoi(opt_arg);
                 break;
             case 'g':
                 cl_opts->dim2d = 1;
                 break;
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = HDatoi(opt_arg);
                 break;
             case 'I':
                 cl_opts->interleaved = 1;
                 break;
             case 'o':
-                cl_opts->output_file = H5_optarg;
+                cl_opts->output_file = opt_arg;
                 break;
             case 'p':
-                cl_opts->min_num_procs = HDatoi(H5_optarg);
+                cl_opts->min_num_procs = HDatoi(opt_arg);
                 break;
             case 'P':
-                cl_opts->max_num_procs = HDatoi(H5_optarg);
+                cl_opts->max_num_procs = HDatoi(opt_arg);
                 break;
             case 'T':
-                cl_opts->h5_threshold = parse_size_directive(H5_optarg);
+                cl_opts->h5_threshold = parse_size_directive(opt_arg);
                 break;
             case 'w':
                 cl_opts->h5_write_only = TRUE;
                 break;
             case 'x':
-                cl_opts->min_xfer_size = (size_t)parse_size_directive(H5_optarg);
+                cl_opts->min_xfer_size = (size_t)parse_size_directive(opt_arg);
                 break;
             case 'X':
-                cl_opts->max_xfer_size = (size_t)parse_size_directive(H5_optarg);
+                cl_opts->max_xfer_size = (size_t)parse_size_directive(opt_arg);
                 break;
             case 'h':
             case '?':
