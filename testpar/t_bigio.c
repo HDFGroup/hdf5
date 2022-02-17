@@ -1107,14 +1107,14 @@ single_rank_independent_io(void)
         HDprintf("\nSingle Rank Independent I/O\n");
 
     if (MAIN_PROCESS) {
-        hsize_t dims[]    = {LARGE_DIM};
-        hid_t   file_id   = -1;
-        hid_t   fapl_id   = -1;
-        hid_t   dset_id   = -1;
-        hid_t   fspace_id = -1;
-        hid_t   mspace_id = -1;
-        herr_t  ret;
-        int *   data      = NULL;
+        hsize_t  dims[]    = {LARGE_DIM};
+        hid_t    file_id   = -1;
+        hid_t    fapl_id   = -1;
+        hid_t    dset_id   = -1;
+        hid_t    fspace_id = -1;
+        hid_t    mspace_id = -1;
+        herr_t   ret;
+        int *    data = NULL;
         uint64_t i;
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
