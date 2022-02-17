@@ -1264,7 +1264,7 @@ dump_fcontents(hid_t fid)
 {
     PRINTSTREAM(rawoutstream, "%s %s\n", FILE_CONTENTS, BEGIN);
 
-    /* special case of unamed types in root group */
+    /* special case of unnamed types in root group */
     if (unamedtype) {
         unsigned u;
 
@@ -1933,7 +1933,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, int pe,
             char name[128];
 
             if (!type_table->objs[idx].recorded) {
-                /* unamed datatype */
+                /* unnamed datatype */
                 HDsprintf(name, "/#" H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
 
                 if (!HDstrcmp(name, real_name))
