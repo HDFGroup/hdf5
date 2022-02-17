@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+ * Copyright by Akadio, Inc.                                                 *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,14 +11,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              Tuesday, January 8, 2008
+/*-------------------------------------------------------------------------
  *
- * Purpose:     This file contains declarations which are visible only within
- *              the H5MV package.  Source files outside the H5MV package should
- *              include H5MVprivate.h instead.
+ * Created:             H5MVpkg.h
+ *
+ * Purpose:             This file contains declarations which are visible only
+ *                      within the H5MV package.  Source files outside the
+ *                      H5MV package should include H5MVprivate.h instead.
+ *
+ *-------------------------------------------------------------------------
  */
+
 #if !(defined H5MV_FRIEND || defined H5MV_MODULE)
 #error "Do not include this file outside the H5MV package!"
 #endif

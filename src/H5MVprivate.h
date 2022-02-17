@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+ * Copyright by Akadio, Inc.                                                 *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -15,10 +15,11 @@
  *
  * Created:             H5MVprivate.h
  *
- * Purpose:             Private header file for file memory management.
+ * Purpose:             Private header file for VFD SWMR free space mangement
  *
  *-------------------------------------------------------------------------
  */
+
 #ifndef _H5MVprivate_H
 #define _H5MVprivate_H
 

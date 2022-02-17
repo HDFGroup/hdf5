@@ -1,5 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
+ * Copyright by Akadio, Inc.                                                 *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -10,14 +11,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		Saturday, September 12, 2015
+/*-------------------------------------------------------------------------
  *
- * Purpose:	This file contains declarations which define macros for the
- *		H5MV package.  Including this header means that the source file
- *		is part of the H5MV package.
+ * Created:             H5MVmodule.h
+ *
+ * Purpose:             This file contains declarations which define macros for
+ *                      the H5MV package.  Including this header means that the
+ *                      source file is part of the H5MV package.
+ *
+ *-------------------------------------------------------------------------
  */
+
 #ifndef _H5MVmodule_H
 #define _H5MVmodule_H
 
