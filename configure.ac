@@ -3171,6 +3171,30 @@ fi
 AM_CONDITIONAL([MIRROR_VFD_CONDITIONAL], [test "X$MIRROR_VFD" = "Xyes"])
 
 ## ----------------------------------------------------------------------
+## Check whether the auxiliary process for the VFD SWMR should be built.
+##
+AC_SUBST([AUX_PROCESS])
+
+## Default is no auxiliary process
+AUX_PROCESS=no
+
+AC_MSG_CHECKING([if the auxiliary process is enabled])
+
+AC_ARG_ENABLE([aux-process],
+              [AS_HELP_STRING([--enable-aux-process],
+                              [Build the auxiliary process for the VFD SWMR.
+                               [default=no]])],
+              [AUX_PROCESS=$enableval], [AUX_PROCESS=no])
+
+if test "X$AUX_PROCESS" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_AUX_PROCESS], [1],
+            [Define whether the auxiliary process is compiled])
+else
+    AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
 ##
 AC_SUBST([ROS3_VFD])
@@ -4063,6 +4087,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  utils/Makefile
                  utils/mirror_vfd/Makefile
+                 utils/vfd_swmr/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

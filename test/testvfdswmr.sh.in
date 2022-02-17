@@ -1,18 +1,17 @@
 #!/us/bin/env bash
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
-# All rights reserved.
+# Copyright by Akadio, Inc.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://www.hdfgroup.org/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 # Tests for the vfd swmr feature.
-#
+
 ###############################################################################
 # VFD SWMR concurrent tests which are modified from existing swmr concurrent tests.
 # This is copied and modified from testswmr.sh.in
@@ -152,11 +151,11 @@ all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo
 all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small"
 
 # For exhaustive run, add: 
-#   attrdset, dsetops, dsetchks,
+#   attrdset, dsetops, dsetops_ref, dsetchks
 #   os_groups_attrs, os_groups_ops, os_groups_seg, independ_wr,
 #   gfail_entry_length, gfail_checksum, gfail_page_size, gfail_index_space
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    all_tests="${all_tests} attrdset dsetops dsetchks"
+    all_tests="${all_tests} attrdset dsetops dsetops_ref dsetchks"
     all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg independ_wr"
     all_tests="${all_tests} gfail_entry_length gfail_checksum gfail_page_size gfail_index_space"
 fi
@@ -1095,6 +1094,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
         # first dimension (up to 25 1x16x16)
         #
 
+        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+        # VDS across multiple files (-M option), the program also skips for future support.
+        if [[ $options == *"-M"* ]]; then
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+
 	echo launch vfd_swmr_bigset_writer many small, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
 	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
@@ -1107,9 +1116,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
 	# Wait for the reader to finish before signalling the
 	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
-	# the .h5 file.
+	# the .h5 file. Also wait for the auxiliary process to finish.
+        wait $pid_aux_proc
 	wait $pid_reader
 	wait $pid_writer
+
+	# Collect exit code of the auxiliary process
+	if [ $(cat aux_process.rc) -ne 0 ]; then
+		echo the auxiliary process had error
+		nerrors=$((nerrors + 1))
+	fi
 
 	# Collect exit code of the reader
 	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
@@ -1126,6 +1142,8 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
 	# Clean up output files
 	rm -f vfd_swmr_bigset_writer.{out,rc}
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+        rm -f aux_process.{out,rc}
+        rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 # bigset test for bigger chunks
@@ -1149,6 +1167,17 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 		continue
 	fi
 	echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
+
+        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+        # VDS across multiple files (-M option), the program also skips for future support.
+        if [[ $options == *"-M"* ]]; then
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
 	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
 	pid_writer=$!
@@ -1160,9 +1189,16 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 	# Wait for the reader to finish before signalling the
 	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
-	# the .h5 file.
+	# the .h5 file. Also wait for the auxiliary process to finish.
+        wait $pid_aux_proc
 	wait $pid_reader
 	wait $pid_writer
+
+	# Collect exit code of the auxiliary process
+	if [ $(cat aux_process.rc) -ne 0 ]; then
+		echo the auxiliary process had error
+		nerrors=$((nerrors + 1))
+	fi
 
 	# Collect exit code of the reader
 	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
@@ -1179,6 +1215,8 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
 	# Clean up output files
 	rm -f vfd_swmr_bigset_writer.{out,rc}
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+        rm -f aux_process.{out,rc}
+        rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 ###############################################################################
@@ -1284,6 +1322,70 @@ for flush in "" "-U"; do
 
 	    catch_out_err_and_rc vfd_swmr_dsetops_reader \
 	        ../vfd_swmr_dsetops_reader $options $flush &
+	    pid_reader=$!
+
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
+
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
+
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
+
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetops_writer.{out,rc}
+	    rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+    done
+done
+
+###############################################################################
+#
+# "dsetops_ref" test (this is the dsetops test with options added for testing references)
+# --test object (-O) and region (-R) references
+# --test with raw data flush only
+# --test without flush will result in error because the references are not there 
+#   to continue further testing
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+# Loop with 
+for ref in "-O" "-R" "-O -R"; do
+    # Loop with different operations
+    for options in "-p -e 20 -t -g -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
+	    #
+	    #
+	    if [ ${do_dsetops_ref:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetops_writer dsetops, options $options $ref......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	        ../vfd_swmr_dsetops_writer $options $ref &
+	    pid_writer=$!
+
+	    catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	        ../vfd_swmr_dsetops_reader $options $ref &
 	    pid_reader=$!
 
 	    # Wait for the reader to finish before signaling the

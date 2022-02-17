@@ -46,6 +46,14 @@ works thereof, in binary and source code form.
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 
+Limited portions of HDF5 were developed by Akadio, Inc. Akadio's Copyright
+Notice and Licensing Terms can be found here: COPYING_AKADIO file in this
+directory or at 
+http://support.hdfgroup.org/ftp/HDF5/releases/COPYING_AKADIO. 
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
 Limited portions of HDF5 were developed by Lawrence Berkeley National 
 Laboratory (LBNL). LBNL's Copyright Notice and Licensing Terms can be
 found here: COPYING_LBNL_HDF5 file in this directory or at 
