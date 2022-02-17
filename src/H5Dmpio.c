@@ -808,10 +808,6 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     HDassert(type_info);
     HDassert(fm);
 
-    /* Disable collective metadata reads for chunked dataset I/O operations
-     * in order to prevent potential hangs */
-    H5CX_set_coll_metadata_read(FALSE);
-
     /* Check the optional property list for the collective chunk IO optimization option */
     if (H5CX_get_mpio_chunk_opt_mode(&chunk_opt_mode) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
@@ -2306,17 +2302,20 @@ static herr_t
 H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
                 H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk)
 {
-    H5SL_node_t *     chunk_node;            /* Current node in chunk skip list */
-    H5D_chunk_info_t *chunk_info;            /* Current chunking info. of this node. */
-    haddr_t           chunk_addr;            /* Current chunking address of this node */
-    haddr_t *total_chunk_addr_array = NULL;  /* The array of chunk address for the total number of chunk */
-    hbool_t  do_sort                = FALSE; /* Whether the addresses need to be sorted */
-    int      bsearch_coll_chunk_threshold;
-    int      many_chunk_opt = H5D_OBTAIN_ONE_CHUNK_ADDR_IND;
-    int      mpi_size;            /* Number of MPI processes */
-    int      mpi_code;            /* MPI return code */
-    int      i;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    H5SL_node_t *     chunk_node;           /* Current node in chunk skip list */
+    H5D_chunk_info_t *chunk_info;           /* Current chunking info. of this node. */
+    haddr_t           chunk_addr;           /* Current chunking address of this node */
+    haddr_t *total_chunk_addr_array = NULL; /* The array of chunk address for the total number of chunk */
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 restore_md_reads_state = FALSE;
+    hbool_t                 do_sort                = FALSE; /* Whether the addresses need to be sorted */
+    int                     bsearch_coll_chunk_threshold;
+    int                     many_chunk_opt = H5D_OBTAIN_ONE_CHUNK_ADDR_IND;
+    int                     mpi_size;            /* Number of MPI processes */
+    int                     mpi_code;            /* MPI return code */
+    int                     i;                   /* Local index variable */
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2360,8 +2359,41 @@ H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
             HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
 
         if (mpi_rank == 0) {
-            if (H5D__chunk_addrmap(io_info, total_chunk_addr_array) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            herr_t result;
+
+            /*
+             * If enabled, disable collective metadata reads here.
+             * Since the chunk address mapping is done on rank 0
+             * only here, it will cause problems if collective
+             * metadata reads are enabled.
+             */
+            if (H5F_get_coll_metadata_reads(io_info->dset->oloc.file)) {
+                md_reads_file_flag    = H5P_FORCE_FALSE;
+                md_reads_context_flag = FALSE;
+                H5F_set_coll_metadata_reads(io_info->dset->oloc.file, &md_reads_file_flag,
+                                            &md_reads_context_flag);
+                restore_md_reads_state = TRUE;
+            }
+
+            result = H5D__chunk_addrmap(io_info, total_chunk_addr_array);
+
+            /* Ensure that we restore the old collective metadata reads state */
+            if (restore_md_reads_state) {
+                H5F_set_coll_metadata_reads(io_info->dset->oloc.file, &md_reads_file_flag,
+                                            &md_reads_context_flag);
+                restore_md_reads_state = FALSE;
+            }
+
+            if (result < 0) {
+                size_t u;
+
+                /* Clear total chunk address array */
+                for (u = 0; u < (size_t)fm->layout->u.chunk.nchunks; u++)
+                    total_chunk_addr_array[u] = HADDR_UNDEF;
+
+                /* Push error, but still participate in following MPI_Bcast */
+                HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+            }
         } /* end if */
 
         /* Broadcasting the MPI_IO option info. and chunk address info. */
@@ -2416,6 +2448,10 @@ H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     } /* end if */
 
 done:
+    /* Re-enable collective metadata reads if we disabled them */
+    if (restore_md_reads_state)
+        H5F_set_coll_metadata_reads(io_info->dset->oloc.file, &md_reads_file_flag, &md_reads_context_flag);
+
     if (total_chunk_addr_array)
         H5MM_xfree(total_chunk_addr_array);
 
@@ -2463,20 +2499,23 @@ static herr_t
 H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm, uint8_t assign_io_mode[],
                       haddr_t chunk_addr[])
 {
-    size_t            total_chunks;
-    unsigned          percent_nproc_per_chunk, threshold_nproc_per_chunk;
-    uint8_t *         io_mode_info      = NULL;
-    uint8_t *         recv_io_mode_info = NULL;
-    uint8_t *         mergebuf          = NULL;
-    uint8_t *         tempbuf;
-    H5SL_node_t *     chunk_node;
-    H5D_chunk_info_t *chunk_info;
-    int               mpi_size, mpi_rank;
-    MPI_Comm          comm;
-    int               root;
-    size_t            ic;
-    int               mpi_code;
-    herr_t            ret_value = SUCCEED;
+    size_t                  total_chunks;
+    unsigned                percent_nproc_per_chunk, threshold_nproc_per_chunk;
+    uint8_t *               io_mode_info      = NULL;
+    uint8_t *               recv_io_mode_info = NULL;
+    uint8_t *               mergebuf          = NULL;
+    uint8_t *               tempbuf;
+    H5SL_node_t *           chunk_node;
+    H5D_chunk_info_t *      chunk_info;
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 restore_md_reads_state = FALSE;
+    int                     mpi_size, mpi_rank;
+    MPI_Comm                comm;
+    int                     root;
+    size_t                  ic;
+    int                     mpi_code;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -2535,6 +2574,20 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm, uint8_t assig
     if (mpi_rank == root) {
         size_t    nproc;
         unsigned *nproc_per_chunk;
+
+        /*
+         * If enabled, disable collective metadata reads here.
+         * Since the chunk address mapping is done on rank 0
+         * only here, it will cause problems if collective
+         * metadata reads are enabled.
+         */
+        if (H5F_get_coll_metadata_reads(io_info->dset->oloc.file)) {
+            md_reads_file_flag    = H5P_FORCE_FALSE;
+            md_reads_context_flag = FALSE;
+            H5F_set_coll_metadata_reads(io_info->dset->oloc.file, &md_reads_file_flag,
+                                        &md_reads_context_flag);
+            restore_md_reads_state = TRUE;
+        }
 
         /* pre-computing: calculate number of processes and
             regularity of the selection occupied in each chunk */
@@ -2602,6 +2655,10 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm, uint8_t assig
 #endif
 
 done:
+    /* Re-enable collective metadata reads if we disabled them */
+    if (restore_md_reads_state)
+        H5F_set_coll_metadata_reads(io_info->dset->oloc.file, &md_reads_file_flag, &md_reads_context_flag);
+
     if (io_mode_info)
         H5MM_free(io_mode_info);
     if (mergebuf)

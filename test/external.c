@@ -890,8 +890,8 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         char name1[64], name2[64];
 
-        HDsprintf(name1, "extern_%dr.raw", i + 1);
-        HDsprintf(name2, "extern_%dw.raw", i + 1);
+        HDsnprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
+        HDsnprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
         if (!files_have_same_contents(name1, name2))
             FAIL_PUTS_ERROR("   Output differs from expected value.")
     } /* end for */

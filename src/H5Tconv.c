@@ -2753,7 +2753,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         HDassert(domain[1] >= domain[0]);
         length = (unsigned)(domain[1] - domain[0]) + 1;
         if (src->shared->u.enumer.nmembs < 2 ||
-            (double)length / src->shared->u.enumer.nmembs < (double)(1.2f)) {
+            (double)length / src->shared->u.enumer.nmembs < (double)(1.2F)) {
             priv->base   = domain[0];
             priv->length = length;
             if (NULL == (map = (int *)H5MM_malloc(length * sizeof(int))))
