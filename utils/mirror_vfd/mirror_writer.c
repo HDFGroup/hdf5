@@ -788,17 +788,16 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
      */
     sum_bytes_written = 0;
     do {
-        nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX);
-        if (-1 == nbytes_in_packet) {
+        if ((nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX)) < 0) {
             mirror_log(session->loginfo, V_ERR, "can't read into databuffer");
             reply_error(session, "can't read data buffer");
             return -1;
         }
 
-        mirror_log(session->loginfo, V_INFO, "received %zd bytes", nbytes_in_packet);
+        mirror_log(session->loginfo, V_INFO, "received %zd bytes", (size_t)nbytes_in_packet);
         if (HEXDUMP_WRITEDATA) {
             mirror_log(session->loginfo, V_ALL, "DATA:\n```");
-            mirror_log_bytes(session->loginfo, V_ALL, nbytes_in_packet, (const unsigned char *)buf);
+            mirror_log_bytes(session->loginfo, V_ALL, (size_t)nbytes_in_packet, (const unsigned char *)buf);
             mirror_log(session->loginfo, V_ALL, "```");
         }
 
@@ -844,7 +843,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 receive_communique(struct mirror_session *session, struct sock_comm *comm)
 {
-    ssize_t             read_ret = 0;
+    ssize_t              read_ret = 0;
     size_t              decode_ret;
     H5FD_mirror_xmit_t *X = comm->xmit_recd;
 
@@ -859,16 +858,15 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */
 
-    read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX);
-    if (-1 == read_ret) {
+    if ((read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX)) < 0) {
         mirror_log(session->loginfo, V_ERR, "read:%zd", read_ret);
         goto error;
     }
 
-    mirror_log(session->loginfo, V_INFO, "received %zd bytes", read_ret);
+    mirror_log(session->loginfo, V_INFO, "received %zd bytes", (size_t)read_ret);
     if (HEXDUMP_XMITS) {
         mirror_log(session->loginfo, V_ALL, "```", read_ret);
-        mirror_log_bytes(session->loginfo, V_ALL, read_ret, (const unsigned char *)comm->raw);
+        mirror_log_bytes(session->loginfo, V_ALL, (size_t)read_ret, (const unsigned char *)comm->raw);
         mirror_log(session->loginfo, V_ALL, "```");
     } /* end if hexdump transmissions received */
 

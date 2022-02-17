@@ -521,14 +521,13 @@ handle_requests(struct server_run *run)
         /* Read handshake from port connection.
          */
 
-        ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE);
-        if (-1 == ret) {
+        if ((ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0 ) {
             mirror_log(run->loginfo, V_ERR, "read:%d", ret);
             goto error;
         }
         mirror_log(run->loginfo, V_INFO, "received %d bytes", ret);
         mirror_log(run->loginfo, V_ALL, "```");
-        mirror_log_bytes(run->loginfo, V_ALL, ret, (const unsigned char *)mybuf);
+        mirror_log_bytes(run->loginfo, V_ALL, (size_t)ret, (const unsigned char *)mybuf);
         mirror_log(run->loginfo, V_ALL, "```");
 
         /* Respond to handshake message.
