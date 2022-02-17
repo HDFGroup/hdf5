@@ -70,9 +70,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /* Library Private Variables */
 /*****************************/
 
-/* Library incompatible release versions */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 0;
+/* Library incompatible release versions, develop releases are incompatible by design */
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 2;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -975,8 +975,6 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
-    /* Cast relnum to int to avoid warning for unsigned < 0 comparison
-     * in first release versions */
     if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) {
         switch (disable_version_check) {
             case 0:
@@ -1012,9 +1010,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 break;
         } /* end switch */
 
-    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > relnum) */
+    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
 
     /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
+    /* Library develop release versions are incompatible by design */
     if (H5_VERS_RELEASE != relnum) {
         for (unsigned i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++) {
             /* Check for incompatible headers or incompatible library */
