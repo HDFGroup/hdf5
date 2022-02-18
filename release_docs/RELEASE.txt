@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts that cat the 
+      libhdf5-settings to the standard output.
+
+      (ADB - 2022/01/25)
+
     - CMake will now run the PowerShell script tests in test/ by default
       on Windows.
 
@@ -1075,23 +1082,6 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
-    - Fixed a metadata cache bug when resizing a pinned/protected cache entry
-
-      When resizing a pinned/protected cache entry, the metadata
-      cache code previously would wait until after resizing the
-      entry to attempt to log the newly-dirtied entry. This would
-      cause H5C_resize_entry to mark the entry as dirty and make
-      H5AC_resize_entry think that it doesn't need to add the
-      newly-dirtied entry to the dirty entries skiplist.
-    
-      Thus, a subsequent H5AC__log_moved_entry would think it
-      needs to allocate a new entry for insertion into the dirty
-      entry skip list, since the entry doesn't exist on that list.
-      This causes an assertion failure, as the code to allocate a
-      new entry assumes that the entry is not dirty.
-
-      (JTH - 2022/01/12)
-
     - Fixed an H5Pget_filter_by_id1/2() assert w/ out of range filter IDs
 
       Both H5Pget_filter_by_id1 and 2 did not range check the filter ID, which
