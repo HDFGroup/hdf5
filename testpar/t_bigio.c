@@ -1103,7 +1103,6 @@ dataset_big_read(void)
 static void
 single_rank_independent_io(void)
 {
-#if HDF5_BIG_SELECTION_IO_WORKS
     if (mpi_rank_g == 0)
         HDprintf("\nSingle Rank Independent I/O\n");
 
@@ -1179,7 +1178,6 @@ single_rank_independent_io(void)
         HDremove(FILENAME[1]);
     }
     MPI_Barrier(MPI_COMM_WORLD);
-#endif
 }
 
 /*
