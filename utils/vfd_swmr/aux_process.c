@@ -43,17 +43,12 @@
  */
 #define UD_HEADER_LEN 48
 
-/* The length for the top fields of the change list in the updater file is 48 bytes, with the breakdown as below:
- *     signature:                                          4
- *     tick number:                                        8
- *     page offset for metadata file header in updater:    4
- *     length for metadata file header:                    4
- *     checksum for metadata file header:                  4
- *     page offset for metadata file index in updater:     4 
- *     offset for metadata file index in metadata file:    8 
- *     length for metadata file index:                     4
- *     checksum for metadata file index:                   4
- *     number of change list entries:                      4
+/* The length for the top fields of the change list in the updater file is 48 bytes, with the breakdown as
+ * below: signature:                                          4 tick number: 8 page offset for metadata file
+ * header in updater:    4 length for metadata file header:                    4 checksum for metadata file
+ * header:                  4 page offset for metadata file index in updater:     4 offset for metadata file
+ * index in metadata file:    8 length for metadata file index:                     4 checksum for metadata
+ * file index:                   4 number of change list entries:                      4
  */
 #define UD_CL_TOP_LEN 48
 
@@ -63,10 +58,11 @@
  *     page offset in HDF5 file:                           4
  *     length:                                             4
  *     checksum:                                           4
- */ 
+ */
 #define CL_ENTRY_LEN 20
 
-/* These decoding macros are borrowed directly from the HDF5 library for making this program stand-alone in the future */
+/* These decoding macros are borrowed directly from the HDF5 library for making this program stand-alone in
+ * the future */
 #define UINT16DECODE(p, i)                                                                                   \
     {                                                                                                        \
         (i) = (uint16_t)(*(p)&0xff);                                                                         \
@@ -99,7 +95,8 @@
         (p) += 8;                                                                                            \
     }
 
-/* These checksum macros are borrowed directly from the HDF5 library for making this program stand-alone in the future */
+/* These checksum macros are borrowed directly from the HDF5 library for making this program stand-alone in
+ * the future */
 #define lookup_rot(x, k) (((x) << (k)) ^ ((x) >> (32 - (k))))
 
 #define lookup_mix(a, b, c)                                                                                  \
@@ -142,42 +139,41 @@
         c -= lookup_rot(b, 24);                                                                              \
     }
 
-
 typedef struct {
-    char     *log_file_path;            /* path name for the log file                                                   */
-    FILE     *log_file;                 /* log file containing the details of this program                              */
-    FILE     *output;                   /* output the details of this program to STDOUT or a log file                   */
-    int      polls_per_tick;            /* number of times to poll for a new updater file per tick (default is 10)      */
-    bool     print_stats;               /* print out the stats for this program                                         */
-    bool     verbose;                   /* print out the details of this program                                        */
-    bool     skip_aux;                  /* skip this program in the case of VDS across multiple files (not implemented) */
-    int      tick_len;                  /* tick length in tenths of a second (default is 4)                             */
-    char     *vfd_config;               /* configuration string for the VFD stack to be used (default is sec2)          */
-    char     *updater_path;             /* path name for the updater files                                              */
-    char     *md_file_path;             /* path name for the metadata file                                              */
-    char     *md_chksum_path;           /* path name for file containing the checksum values for the metadata file      */
-    FILE     *md_file;                  /* pointer to the metadata file                                                 */
-    FILE     *md_chksum_file;           /* pointer to the file containing the checksum values for the metadata file     */
-    unsigned int  num_mdfile_checksums; /* number of checksum values for the metadata file                              */
-    uint32_t      *md_file_checksums;   /* list of checksum values for the metadata file                                */
+    char *log_file_path;  /* path name for the log file                                                   */
+    FILE *log_file;       /* log file containing the details of this program                              */
+    FILE *output;         /* output the details of this program to STDOUT or a log file                   */
+    int   polls_per_tick; /* number of times to poll for a new updater file per tick (default is 10)      */
+    bool  print_stats;    /* print out the stats for this program                                         */
+    bool  verbose;        /* print out the details of this program                                        */
+    bool  skip_aux;       /* skip this program in the case of VDS across multiple files (not implemented) */
+    int   tick_len;       /* tick length in tenths of a second (default is 4)                             */
+    char *vfd_config;     /* configuration string for the VFD stack to be used (default is sec2)          */
+    char *updater_path;   /* path name for the updater files                                              */
+    char *md_file_path;   /* path name for the metadata file                                              */
+    char *md_chksum_path; /* path name for file containing the checksum values for the metadata file      */
+    FILE *md_file;        /* pointer to the metadata file                                                 */
+    FILE *md_chksum_file; /* pointer to the file containing the checksum values for the metadata file     */
+    unsigned int num_mdfile_checksums; /* number of checksum values for the metadata file */
+    uint32_t *   md_file_checksums;    /* list of checksum values for the metadata file    */
 } handler_t;
 
 /* Structure for the entry of change list in the updater file */
 typedef struct {
-    void     *data;                     /* buffer for the data (changes)                                                */
-    uint32_t ud_file_page_offset;       /* page offset of the data in the updater file                                  */
-    uint32_t md_file_page_offset;       /* page offset of the the data in the metadata file                             */
-    uint32_t h5_file_page_offset;       /* page offset of the data in the HDF5 file (future usage)                      */
-    uint32_t length;                    /* length of the data                                                           */
-    uint32_t checksum;                  /* checksum value of the data                                                   */
+    void *   data; /* buffer for the data (changes)                                                */
+    uint32_t ud_file_page_offset; /* page offset of the data in the updater file */
+    uint32_t md_file_page_offset; /* page offset of the the data in the metadata file */
+    uint32_t h5_file_page_offset; /* page offset of the data in the HDF5 file (future usage) */
+    uint32_t length;   /* length of the data                                                           */
+    uint32_t checksum; /* checksum value of the data                                                   */
 } cl_entry_t;
 
 /* updater file header related fields */
 typedef struct {
-    FILE     *file;
-    unsigned char     ud_header_buf[UD_HEADER_LEN];
-    unsigned char     ud_cl_top_buf[UD_CL_TOP_LEN];
-    unsigned char     *cl_buf;
+    FILE *         file;
+    unsigned char  ud_header_buf[UD_HEADER_LEN];
+    unsigned char  ud_cl_top_buf[UD_CL_TOP_LEN];
+    unsigned char *cl_buf;
 
     /* updater file header related fields */
     char     header_signature[5];
@@ -195,23 +191,23 @@ typedef struct {
     char     cl_signature[5];
     uint64_t cl_tick_num;
 
-    uint32_t md_file_header_ud_page_offset; 
+    uint32_t md_file_header_ud_page_offset;
     uint32_t md_file_header_len;
     uint32_t md_file_header_chksum;
-    void     *md_file_header_buf;
+    void *   md_file_header_buf;
 
     uint32_t md_file_index_ud_page_offset;
     uint64_t md_file_index_md_file_offset;
     uint32_t md_file_index_len;
     uint32_t md_file_index_chksum;
-    void     *md_file_index_buf;
+    void *   md_file_index_buf;
 
     uint32_t received_cl_checksum;
     uint32_t verified_cl_checksum;
 
-    uint32_t num_cl_entries;
+    uint32_t    num_cl_entries;
     cl_entry_t *change_list;
-    uint32_t cl_chksum; 
+    uint32_t    cl_chksum;
 } updater_t;
 
 enum aux_arg_level {
@@ -252,13 +248,12 @@ enum aux_arg_level {
  * end.
  */
 typedef struct {
-    const char *      name;     /* Name of the long option */
+    const char *       name;     /* Name of the long option */
     enum aux_arg_level has_arg;  /* Whether we should look for an arg */
-    char              shortval; /* The shortname equivalent of long arg
-                                 * this gets returned from get_option
-                                 */
+    char               shortval; /* The shortname equivalent of long arg
+                                  * this gets returned from get_option
+                                  */
 } aux_long_options;
-
 
 int         aux_opterr = 1; /* Get_option prints errors if this is on */
 int         aux_optind = 1; /* Token pointer                          */
@@ -302,7 +297,7 @@ aux_get_options(int argc, char **argv, const char *opts, const aux_long_options 
         size_t     arg_len = 0;
 
         aux_optarg = strchr(&argv[aux_optind][2], ch);
-        arg_len   = strlen(&argv[aux_optind][2]);
+        arg_len    = strlen(&argv[aux_optind][2]);
         if (aux_optarg) {
             arg_len -= strlen(aux_optarg);
             aux_optarg++; /* skip the equal sign */
@@ -435,19 +430,19 @@ aux_get_options(int argc, char **argv, const char *opts, const aux_long_options 
  */
 static int
 do_sleep(handler_t *hand)
-{   
+{
     struct timespec time, time2;
 
-    time.tv_sec = (hand->tick_len / hand->polls_per_tick) / 10;
+    time.tv_sec  = (hand->tick_len / hand->polls_per_tick) / 10;
     time.tv_nsec = (hand->tick_len * 100 * 1000 * 1000 / hand->polls_per_tick) % (1000 * 1000 * 1000);
-    
+
     if (nanosleep(&time, &time2) < 0) {
         fprintf(stderr, "Nano sleep system call failed \n");
         return -1;
     }
 
-    return 0; 
-}       
+    return 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -458,19 +453,27 @@ do_sleep(handler_t *hand)
 static void
 usage(void)
 {
-    printf("    [-h] [-a --skip_aux] [-c --vfd_config] [-l --log_file_path] [-m --md_chksum_path] [-p --polls_per_tick] [-s --stats] [-t --tick_len] [-v --verbose]\n");
+    printf("    [-h] [-a --skip_aux] [-c --vfd_config] [-l --log_file_path] [-m --md_chksum_path] [-p "
+           "--polls_per_tick] [-s --stats] [-t --tick_len] [-v --verbose]\n");
     printf("    <md_file> <ud_file>\n");
     printf("    [-h --help]: this help page\n");
-    printf("    [-a --skip_aux]: exit if VDS across multiple file is being enabled (to be implemented in the future)\n");
-    printf("    [-c --vfd_config]: quoted string containing the configuration string for the VFD stack to be used (default is sec2)\n");
+    printf("    [-a --skip_aux]: exit if VDS across multiple file is being enabled (to be implemented in the "
+           "future)\n");
+    printf("    [-c --vfd_config]: quoted string containing the configuration string for the VFD stack to be "
+           "used (default is sec2)\n");
     printf("    [-l --log_file_path]: path to the log file (default is no log file)\n");
-    printf("    [-m --md_chksum_path]: path to the file containing the checksum values for testing purpose\n");
-    printf("    [-p --polls_per_tick]: number of times to poll for a new updater file per tick (default is 10)\n");
+    printf(
+        "    [-m --md_chksum_path]: path to the file containing the checksum values for testing purpose\n");
+    printf("    [-p --polls_per_tick]: number of times to poll for a new updater file per tick (default is "
+           "10)\n");
     printf("    [-s --stats]: display stats on exit\n");
-    printf("    [-t --tick_len]: integer value indicating the tick length in tenths of a second (default is 4)\n");
+    printf("    [-t --tick_len]: integer value indicating the tick length in tenths of a second (default is "
+           "4)\n");
     printf("    [-v --verbose]: write log entries to stdout\n");
-    printf("    <md_file>: the path to the metadata file. Must be on a POSIX file system.  The file may not exist yet.\n");
-    printf("    <ud_file>: the path to the updater files, which end with a number, e.g. updater.1, updater.2, etc.  The path in this example will be /a/b/.../updater.\n");
+    printf("    <md_file>: the path to the metadata file. Must be on a POSIX file system.  The file may not "
+           "exist yet.\n");
+    printf("    <ud_file>: the path to the updater files, which end with a number, e.g. updater.1, "
+           "updater.2, etc.  The path in this example will be /a/b/.../updater.\n");
     printf("\n");
 }
 
@@ -487,68 +490,67 @@ usage(void)
 static int
 parse_command_line(int argc, char *argv[], handler_t *hand)
 {
-    int opt;
-    aux_long_options long_options[] =
-    {
-        {"vfd_config=", require_arg, 'c'},
-        {"help", no_arg, 'h'},
-        {"skip_aux", no_arg, 'a'},
-        {"log_file_path=", require_arg, 'l'},
-        {"md_file_chksum=", require_arg, 'm'},
-        {"polls_per_tick=", require_arg, 'p'},
-        {"stats=", require_arg, 's'},
-        {"tick_len=", require_arg, 't'},
-        {"verbose=", require_arg, 'v'},
-        {NULL, 0, 0}
-    };
+    int              opt;
+    aux_long_options long_options[] = {{"vfd_config=", require_arg, 'c'},
+                                       {"help", no_arg, 'h'},
+                                       {"skip_aux", no_arg, 'a'},
+                                       {"log_file_path=", require_arg, 'l'},
+                                       {"md_file_chksum=", require_arg, 'm'},
+                                       {"polls_per_tick=", require_arg, 'p'},
+                                       {"stats=", require_arg, 's'},
+                                       {"tick_len=", require_arg, 't'},
+                                       {"verbose=", require_arg, 'v'},
+                                       {NULL, 0, 0}};
 
     /* Initialize the command line options */
-    hand->log_file_path = NULL;
-    hand->log_file = NULL;
-    hand->output = NULL;
-    hand->polls_per_tick = 10;
-    hand->print_stats = false;
-    hand->tick_len = 4;
-    hand->verbose = false;
-    hand->skip_aux = false;
-    hand->vfd_config = NULL;
-    hand->updater_path = NULL;
-    hand->md_file_path = NULL;
-    hand->md_chksum_path = NULL;
-    hand->md_file = NULL;
-    hand->md_chksum_file = NULL;
+    hand->log_file_path        = NULL;
+    hand->log_file             = NULL;
+    hand->output               = NULL;
+    hand->polls_per_tick       = 10;
+    hand->print_stats          = false;
+    hand->tick_len             = 4;
+    hand->verbose              = false;
+    hand->skip_aux             = false;
+    hand->vfd_config           = NULL;
+    hand->updater_path         = NULL;
+    hand->md_file_path         = NULL;
+    hand->md_chksum_path       = NULL;
+    hand->md_file              = NULL;
+    hand->md_chksum_file       = NULL;
     hand->num_mdfile_checksums = 0;
-    hand->md_file_checksums = NULL;
+    hand->md_file_checksums    = NULL;
 
     if (argc >= 2) {
-        hand->updater_path = strdup(argv[argc-1]);
-        hand->md_file_path = strdup(argv[argc-2]);
+        hand->updater_path = strdup(argv[argc - 1]);
+        hand->md_file_path = strdup(argv[argc - 2]);
         argc -= 2;
-    } else {
-        fprintf(stderr, "command-line options must have the path for the metadata file and the updater files\n");
+    }
+    else {
+        fprintf(stderr,
+                "command-line options must have the path for the metadata file and the updater files\n");
         goto error;
     }
 
-    /* 
-     * aux_get_options supports both POSIX and Windows 
+    /*
+     * aux_get_options supports both POSIX and Windows
      */
-    while((opt = aux_get_options(argc, argv, "ac:hl:m:p:st:v", long_options)) != EOF)
-    {
-        switch(opt)
-        {
-            case 'a': 
-                /* Whether to exit if VDS across multiple files is enabled.  To be implemented in the future */
+    while ((opt = aux_get_options(argc, argv, "ac:hl:m:p:st:v", long_options)) != EOF) {
+        switch (opt) {
+            case 'a':
+                /* Whether to exit if VDS across multiple files is enabled.  To be implemented in the future
+                 */
                 hand->skip_aux = true;
                 break;
             case 'c':
                 /* The configuration string for the VFD stack */
-                if(aux_optarg) {
+                if (aux_optarg) {
                     fprintf(stdout, "The configuration string for the VFD stack:\t%s\n", aux_optarg);
                     hand->vfd_config = strdup(aux_optarg);
-                } else
+                }
+                else
                     fprintf(stderr, "aux_optarg is null\n");
                 break;
-            case 'h': 
+            case 'h':
                 fprintf(stdout, "Help page:\n");
                 usage();
 
@@ -557,42 +559,46 @@ parse_command_line(int argc, char *argv[], handler_t *hand)
                 break;
             case 'l':
                 /* The log file */
-                if(aux_optarg) {
+                if (aux_optarg) {
                     fprintf(stdout, "The log file:\t\t\t\t\t\t%s\n", aux_optarg);
                     hand->log_file_path = strdup(aux_optarg);
-                } else
+                }
+                else
                     fprintf(stderr, "aux_optarg is null\n");
                 break;
             case 'm':
                 /* The file with metadata file checksums */
-                if(aux_optarg) {
+                if (aux_optarg) {
                     fprintf(stdout, "The file with metadata file checksums:\t\t\t%s\n", aux_optarg);
                     hand->md_chksum_path = strdup(aux_optarg);
-                } else
+                }
+                else
                     fprintf(stderr, "aux_optarg is null\n");
                 break;
             case 'p':
                 /* The number of polls for the updater per tick */
-                if(aux_optarg) {
+                if (aux_optarg) {
                     fprintf(stdout, "Number of polls per tick:\t\t\t\t%s\n", aux_optarg);
                     hand->polls_per_tick = atoi(aux_optarg);
-                } else
+                }
+                else
                     fprintf(stderr, "aux_optarg is null\n");
                 break;
-            case 's': 
+            case 's':
                 /* Whether to display stats on exit */
                 fprintf(stdout, "Whether to display stats on exit:\t\t\ttrue\n");
                 hand->print_stats = true;
                 break;
             case 't':
                 /* The tick length in tenths of a second */
-                if(aux_optarg) {
+                if (aux_optarg) {
                     fprintf(stdout, "Tick length (in tenths of a second):\t\t\t%s\n", aux_optarg);
                     hand->tick_len = atoi(aux_optarg);
-                } else
+                }
+                else
                     fprintf(stderr, "aux_optarg is null\n");
                 break;
-            case 'v': 
+            case 'v':
                 /* Whether to write log entries to stdout */
                 fprintf(stdout, "Whether to write log entries to stdout:\t\t\ttrue\n");
                 hand->verbose = true;
@@ -606,7 +612,7 @@ parse_command_line(int argc, char *argv[], handler_t *hand)
         }
     }
 
-    if (hand->skip_aux) 
+    if (hand->skip_aux)
         exit(0);
 
     if (hand->log_file_path) {
@@ -614,9 +620,10 @@ parse_command_line(int argc, char *argv[], handler_t *hand)
             fprintf(stderr, "failed to create the log file: %s\n", hand->log_file_path);
             goto error;
         }
-   
+
         hand->output = hand->log_file;
-    } else if (hand->verbose) {
+    }
+    else if (hand->verbose) {
         hand->output = stdout;
     }
 
@@ -627,7 +634,7 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function: 	checksum_lookup() 
+ * Function: 	checksum_lookup()
  *
  * Purpose:	checksum_lookup is a copy of the function checksum_lookup3()
  *              in hdf5/src/H5checksum.c
@@ -637,7 +644,7 @@ error:
  * Parameters:  key     : the unaligned variable-length array of bytes
  *              length  : the length of the key, counting by bytes
  *              initval : can be any 4-byte value
- * 
+ *
  * Returns:	a 32-bit value.  Every bit of the key affects every bit of
  *              the return value.  Two keys differing by one or two bits
  *              will have totally different hash values.
@@ -746,19 +753,19 @@ done:
  * Function: verify_md_file_chksum
  *
  * Purpose:  For testing purpose, make sure the checksum of the metadata
- *           file matches the provided value 
+ *           file matches the provided value
  *
  * Return:   Success:    0
  *
  *           Failure:    -1
  *-------------------------------------------------------------------------
  */
-static int 
+static int
 verify_md_file_chksum(handler_t *hand, uint64_t ud_seq_num)
 {
-    long int md_file_size = 0;  /* size of the metadata file                 */
-    uint32_t verified_checksum; /* calculated checksum for the metadata file */
-    void *md_file_buf = NULL;   /* buffer for the entire metadata file       */
+    long int md_file_size = 0;   /* size of the metadata file                 */
+    uint32_t verified_checksum;  /* calculated checksum for the metadata file */
+    void *   md_file_buf = NULL; /* buffer for the entire metadata file       */
 
     /* Seek the end of the metadata file */
     if (fseek(hand->md_file, 0, SEEK_END) != 0) {
@@ -790,27 +797,31 @@ verify_md_file_chksum(handler_t *hand, uint64_t ud_seq_num)
         verified_checksum = checksum_lookup(md_file_buf, (size_t)md_file_size, 0);
 
         if (hand->output) {
-            fprintf(hand->output, "\nFor testing, verify the checksum after applying the updater file %llu:\n", ud_seq_num);
-            fprintf(hand->output, "received checksum=%u, calculated checksum=%u (at line %d)\n", hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
+            fprintf(hand->output,
+                    "\nFor testing, verify the checksum after applying the updater file %llu:\n", ud_seq_num);
+            fprintf(hand->output, "received checksum=%u, calculated checksum=%u (at line %d)\n",
+                    hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
         }
 
-        /* Make sure the checksum is correct */ 
+        /* Make sure the checksum is correct */
         if (verified_checksum != hand->md_file_checksums[ud_seq_num]) {
-            fprintf(stderr, "received checksum for updater file %llu (%u) doesn't match calculated checksum (%u) at line %d\n",
-                ud_seq_num, hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
+            fprintf(stderr,
+                    "received checksum for updater file %llu (%u) doesn't match calculated checksum (%u) at "
+                    "line %d\n",
+                    ud_seq_num, hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
             goto error;
         }
- 
+
         if (md_file_buf)
             free(md_file_buf);
     }
- 
+
     return 0;
 
 error:
     if (md_file_buf)
         free(md_file_buf);
- 
+
     return -1;
 }
 
@@ -829,7 +840,7 @@ error:
 static int
 decode_ud_header(updater_t *updater, handler_t *hand)
 {
-    unsigned char         *ptr;
+    unsigned char *ptr;
 
     /* Read the header of the updater file */
     if (fread(updater->ud_header_buf, UD_HEADER_LEN, 1, updater->file) == 0) {
@@ -852,7 +863,7 @@ decode_ud_header(updater_t *updater, handler_t *hand)
     ptr += SIGNATURE_LEN;
 
     UINT16DECODE(ptr, updater->version);
-    
+
     if (updater->version != 0) {
         fprintf(stderr, "the version of the updater file is incorrect: %hu\n", updater->version);
         goto error;
@@ -885,7 +896,7 @@ decode_ud_header(updater_t *updater, handler_t *hand)
     /* Compare the checksum */
     if (updater->received_header_checksum != updater->verified_header_checksum) {
         fprintf(stderr, "received header's checksum (%u) doesn't match the calculated one (%u)\n",
-            updater->received_header_checksum, updater->verified_header_checksum);
+                updater->received_header_checksum, updater->verified_header_checksum);
         goto error;
     }
 
@@ -903,9 +914,10 @@ decode_ud_header(updater_t *updater, handler_t *hand)
         fprintf(hand->output, "calculated checksum for header=%u\n\n", updater->verified_header_checksum);
     }
 
-    /* If the flag is CREATE_METADATA_FILE_ONLY_FLAG (0x0001), create the metadata file and close the updater file.
-     * Then skip the rest steps and exit the function.  Otherwise, if the metadata file isn't opened yet, it should
-     * be the case of opening an existing HDF5 file.  Simply open the metadata file in this case. */
+    /* If the flag is CREATE_METADATA_FILE_ONLY_FLAG (0x0001), create the metadata file and close the updater
+     * file. Then skip the rest steps and exit the function.  Otherwise, if the metadata file isn't opened
+     * yet, it should be the case of opening an existing HDF5 file.  Simply open the metadata file in this
+     * case. */
     if (updater->flags & CREATE_METADATA_FILE_ONLY_FLAG) {
         if (!(hand->md_file = fopen(hand->md_file_path, "w+"))) {
             fprintf(stderr, "failed to create the metadata file: %s\n", hand->md_file_path);
@@ -918,14 +930,16 @@ decode_ud_header(updater_t *updater, handler_t *hand)
         }
 
         return 0;
-    } else if (!hand->md_file) {
+    }
+    else if (!hand->md_file) {
         if (!(hand->md_file = fopen(hand->md_file_path, "w+"))) {
             fprintf(stderr, "failed to create the metadata file: %s\n", hand->md_file_path);
             goto error;
         }
 
         return 1;
-    } else
+    }
+    else
         return 1;
 
 error:
@@ -945,7 +959,7 @@ error:
 static int
 decode_cl_top_fields(updater_t *updater, handler_t *hand)
 {
-    unsigned char         *ptr;
+    unsigned char *ptr;
 
     /*----------------------------------------------
      * Read in the change list and verify
@@ -967,7 +981,7 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
     }
 
     /* Find the position of the checksum and decode it */
-    ptr = updater->cl_buf + updater->change_list_len - 4; 
+    ptr = updater->cl_buf + updater->change_list_len - 4;
 
     UINT32DECODE(ptr, updater->received_cl_checksum);
 
@@ -976,8 +990,10 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
 
     /* Compare the checksum */
     if (updater->received_cl_checksum != updater->verified_cl_checksum) {
-        fprintf(stderr, "received change list's checksum (%u) doesn't match the calculated one (%u) for the updater file\n",
-            updater->received_cl_checksum, updater->verified_cl_checksum);
+        fprintf(stderr,
+                "received change list's checksum (%u) doesn't match the calculated one (%u) for the updater "
+                "file\n",
+                updater->received_cl_checksum, updater->verified_cl_checksum);
         goto error;
     }
 
@@ -992,7 +1008,8 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
     updater->cl_signature[SIGNATURE_LEN] = '\0';
 
     if (strcmp(updater->cl_signature, CL_SIGNATURE)) {
-        fprintf(stderr, "the signature of the change list in the updater file is incorrect: %s\n", updater->cl_signature);
+        fprintf(stderr, "the signature of the change list in the updater file is incorrect: %s\n",
+                updater->cl_signature);
         goto error;
     }
 
@@ -1014,7 +1031,7 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
     /* Get the page offset for metadata file header in updater */
     UINT32DECODE(ptr, updater->md_file_index_ud_page_offset);
 
-    /* Get the offset for metadata file index in metadata file */ 
+    /* Get the offset for metadata file index in metadata file */
     UINT64DECODE(ptr, updater->md_file_index_md_file_offset);
 
     /* Get the length for metadata file index */
@@ -1030,16 +1047,20 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
     if (hand->output) {
         fprintf(hand->output, "change list signature=%s\n", updater->cl_signature);
         fprintf(hand->output, "change list tick number=%llu\n", updater->cl_tick_num);
-        fprintf(hand->output, "page offset for metadata file header in updater=%u\n", updater->md_file_header_ud_page_offset);
+        fprintf(hand->output, "page offset for metadata file header in updater=%u\n",
+                updater->md_file_header_ud_page_offset);
         fprintf(hand->output, "length for metadata file header (bytes)=%u\n", updater->md_file_header_len);
         fprintf(hand->output, "checksum for metadata file header=%u\n", updater->md_file_header_chksum);
-        fprintf(hand->output, "page offset for metadata file index in updater=%u\n", updater->md_file_index_ud_page_offset);
-        fprintf(hand->output, "offset for metadata file index in metadata file (bytes)=%llu\n", updater->md_file_index_md_file_offset);
+        fprintf(hand->output, "page offset for metadata file index in updater=%u\n",
+                updater->md_file_index_ud_page_offset);
+        fprintf(hand->output, "offset for metadata file index in metadata file (bytes)=%llu\n",
+                updater->md_file_index_md_file_offset);
         fprintf(hand->output, "length for metadata file index (bytes)=%u\n", updater->md_file_index_len);
         fprintf(hand->output, "checksum for metadata file index=%u\n", updater->md_file_index_chksum);
         fprintf(hand->output, "number of change list entries=%u\n", updater->num_cl_entries);
         fprintf(hand->output, "received checksum for the change list=%u\n", updater->received_cl_checksum);
-        fprintf(hand->output, "calculated checksum for the change list=%u\n\n", updater->verified_cl_checksum);
+        fprintf(hand->output, "calculated checksum for the change list=%u\n\n",
+                updater->verified_cl_checksum);
     }
 
     return 0;
@@ -1059,10 +1080,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-copy_data(handler_t *hand, FILE *src_file, FILE *dst_file, uint32_t src_file_offset, uint32_t dst_file_offset, uint32_t data_len, uint32_t received_checksum)
+copy_data(handler_t *hand, FILE *src_file, FILE *dst_file, uint32_t src_file_offset, uint32_t dst_file_offset,
+          uint32_t data_len, uint32_t received_checksum)
 {
-    uint32_t verified_checksum;        /* calculated checksum for the data being copied */
-    void *data_buf = malloc(data_len); /* buffer for the data being copied              */
+    uint32_t verified_checksum;           /* calculated checksum for the data being copied */
+    void *   data_buf = malloc(data_len); /* buffer for the data being copied              */
 
     /* Seek and read in the data from the source file */
     if (fseek(src_file, src_file_offset, SEEK_SET) != 0) {
@@ -1075,13 +1097,12 @@ copy_data(handler_t *hand, FILE *src_file, FILE *dst_file, uint32_t src_file_off
         goto error;
     }
 
-
     verified_checksum = checksum_lookup(data_buf, data_len, 0);
 
     /* Compare the checksum */
     if (received_checksum != verified_checksum) {
-        fprintf(stderr, "received checksum (%u) doesn't match the calculated one (%u)\n",
-            received_checksum, verified_checksum);
+        fprintf(stderr, "received checksum (%u) doesn't match the calculated one (%u)\n", received_checksum,
+                verified_checksum);
         goto error;
     }
 
@@ -1114,14 +1135,14 @@ copy_data(handler_t *hand, FILE *src_file, FILE *dst_file, uint32_t src_file_off
 error:
     if (data_buf)
         free(data_buf);
-   
+
     return -1;
 }
 
 /*-------------------------------------------------------------------------
  * Function: decode_and_copy_cl_entries
  *
- * Purpose:  Decode the entries of the change list and copy the data 
+ * Purpose:  Decode the entries of the change list and copy the data
  *           from the source file to the destination file
  *
  * Return:   Success:    0
@@ -1133,7 +1154,7 @@ static int
 decode_and_copy_cl_entries(updater_t *updater, handler_t *hand)
 {
     unsigned char *ptr; /* pointer to the data location */
-    unsigned int  i;
+    unsigned int   i;
 
     if (updater->num_cl_entries) {
         updater->change_list = (cl_entry_t *)malloc(sizeof(cl_entry_t) * updater->num_cl_entries);
@@ -1150,18 +1171,26 @@ decode_and_copy_cl_entries(updater_t *updater, handler_t *hand)
             /* Output the log info */
             if (hand->output) {
                 fprintf(hand->output, "change list entry %u\n", i);
-                fprintf(hand->output, "\tpage offset of change in updater=%u\n", updater->change_list[i].ud_file_page_offset);
-                fprintf(hand->output, "\tpage offset of change in metadata file=%u\n", updater->change_list[i].md_file_page_offset);
-                fprintf(hand->output, "\tpage offset of change in HDF5 file=%u\n", updater->change_list[i].h5_file_page_offset);
+                fprintf(hand->output, "\tpage offset of change in updater=%u\n",
+                        updater->change_list[i].ud_file_page_offset);
+                fprintf(hand->output, "\tpage offset of change in metadata file=%u\n",
+                        updater->change_list[i].md_file_page_offset);
+                fprintf(hand->output, "\tpage offset of change in HDF5 file=%u\n",
+                        updater->change_list[i].h5_file_page_offset);
                 fprintf(hand->output, "\tlength of change (bytes)=%u\n", updater->change_list[i].length);
                 fprintf(hand->output, "\tchecksum of change=%u\n", updater->change_list[i].checksum);
 
                 fprintf(hand->output, "\ncopy this change to the metadata file:\n");
             }
 
-            if (copy_data(hand, updater->file, hand->md_file, updater->change_list[i].ud_file_page_offset * updater->page_size, 
-                updater->change_list[i].md_file_page_offset * updater->page_size, updater->change_list[i].length, updater->change_list[i].checksum) < 0) {
-                fprintf(stderr, "failed to copy the data in the change list (%u) from the updater file to the metadata file\n", i);
+            if (copy_data(hand, updater->file, hand->md_file,
+                          updater->change_list[i].ud_file_page_offset * updater->page_size,
+                          updater->change_list[i].md_file_page_offset * updater->page_size,
+                          updater->change_list[i].length, updater->change_list[i].checksum) < 0) {
+                fprintf(stderr,
+                        "failed to copy the data in the change list (%u) from the updater file to the "
+                        "metadata file\n",
+                        i);
                 goto error;
             }
         }
@@ -1200,7 +1229,7 @@ static int
 apply_updater(char *updater_name, handler_t *hand)
 {
     updater_t updater; /* struct for the updater file header */
-    int ret;
+    int       ret;
 
     if (hand->output) {
         fprintf(hand->output, "\nupdater_name: %s\n", updater_name);
@@ -1257,8 +1286,9 @@ apply_updater(char *updater_name, handler_t *hand)
         fprintf(hand->output, "\ncopy the index to the metadata file:\n");
     }
 
-    if (copy_data(hand, updater.file, hand->md_file, updater.md_file_index_ud_page_offset * updater.page_size, (uint32_t)updater.md_file_index_md_file_offset,
-        updater.md_file_index_len, updater.md_file_index_chksum) < 0) {
+    if (copy_data(hand, updater.file, hand->md_file, updater.md_file_index_ud_page_offset * updater.page_size,
+                  (uint32_t)updater.md_file_index_md_file_offset, updater.md_file_index_len,
+                  updater.md_file_index_chksum) < 0) {
         fprintf(stderr, "failed to copy the index from the updater file to the metadata file\n");
         goto error;
     }
@@ -1268,8 +1298,9 @@ apply_updater(char *updater_name, handler_t *hand)
         fprintf(hand->output, "\ncopy the header to the metadata file:\n");
     }
 
-    if (copy_data(hand, updater.file, hand->md_file, updater.md_file_header_ud_page_offset * updater.page_size, 0, updater.md_file_header_len,
-        updater.md_file_header_chksum) < 0) {
+    if (copy_data(hand, updater.file, hand->md_file,
+                  updater.md_file_header_ud_page_offset * updater.page_size, 0, updater.md_file_header_len,
+                  updater.md_file_header_chksum) < 0) {
         fprintf(stderr, "failed to copy the header from the updater file to the metadata file\n");
         goto error;
     }
@@ -1291,7 +1322,8 @@ apply_updater(char *updater_name, handler_t *hand)
      *----------------------------------------------
      */
     if (hand->md_chksum_path && verify_md_file_chksum(hand, updater.sequence_num) < 0) {
-        fprintf(stderr, "failed in verification of the checksum for the metadata file with the name: %s\n", hand->md_chksum_path);
+        fprintf(stderr, "failed in verification of the checksum for the metadata file with the name: %s\n",
+                hand->md_chksum_path);
         goto error;
     }
 
@@ -1335,14 +1367,13 @@ error:
 static int
 get_md_file_chksums(handler_t *hand)
 {
-    long int      file_size = 0;
-    unsigned char *file_buf = NULL;
-    unsigned int  pair_size = 8
-                              + 4;
-    uint64_t      *seq_nums = NULL;
-    unsigned char *ptr      = NULL;
-    unsigned int  i;
- 
+    long int       file_size = 0;
+    unsigned char *file_buf  = NULL;
+    unsigned int   pair_size = 8 + 4;
+    uint64_t *     seq_nums  = NULL;
+    unsigned char *ptr       = NULL;
+    unsigned int   i;
+
     /* Open the metadata checksum file if it exists */
     if (!(hand->md_chksum_file = fopen(hand->md_chksum_path, "r"))) {
         fprintf(stderr, "failed to open the metadata checksum file: %s\n", hand->md_chksum_path);
@@ -1366,7 +1397,7 @@ get_md_file_chksums(handler_t *hand)
     seq_nums = (uint64_t *)malloc(hand->num_mdfile_checksums * 64);
 
     /* This buffer is freed in release_resources() in the end of the program */
-    hand->md_file_checksums   = (uint32_t *)malloc(hand->num_mdfile_checksums * 32);
+    hand->md_file_checksums = (uint32_t *)malloc(hand->num_mdfile_checksums * 32);
 
     file_buf = (unsigned char *)malloc((unsigned long)file_size);
 
@@ -1392,7 +1423,8 @@ get_md_file_chksums(handler_t *hand)
         UINT32DECODE(ptr, hand->md_file_checksums[i]);
 
         if (hand->output)
-            fprintf(hand->output, "\tupdater file %llu: checksum=%u\n", seq_nums[i], hand->md_file_checksums[i]);
+            fprintf(hand->output, "\tupdater file %llu: checksum=%u\n", seq_nums[i],
+                    hand->md_file_checksums[i]);
     }
 
     if (fclose(hand->md_chksum_file) == EOF) {
@@ -1432,10 +1464,10 @@ error:
 static int
 check_updater(handler_t *hand)
 {
-    int updater_exists;
-    int stop_update = 0;
+    int  updater_exists;
+    int  stop_update = 0;
     char updater_name[FILE_NAME_LEN];
-    int i;
+    int  i;
 
     /* For testing: retrieve the metadata file checksum values if it exists */
     if (hand->md_chksum_path && get_md_file_chksums(hand) < 0) {
@@ -1444,14 +1476,14 @@ check_updater(handler_t *hand)
     }
 
     /* Let it loop until an updater file appears */
-    for (i = 0; ; i++) {
+    for (i = 0;; i++) {
         sprintf(updater_name, "%s.%d", hand->updater_path, i);
 
         updater_exists = -1;
 
         do {
             updater_exists = access(updater_name, F_OK);
-     
+
             do_sleep(hand);
         } while (updater_exists != 0);
 
@@ -1460,7 +1492,7 @@ check_updater(handler_t *hand)
         if (stop_update)
             break;
         else if (stop_update < 0)
-            goto error;    
+            goto error;
     }
 
     return 0;
@@ -1486,18 +1518,18 @@ release_resources(handler_t *hand)
         free(hand->log_file_path);
 
         if (fclose(hand->log_file) == EOF) {
-           fprintf(stderr, "log file close failed\n");
-           goto error;
+            fprintf(stderr, "log file close failed\n");
+            goto error;
         }
     }
 
     if (hand->vfd_config)
         free(hand->vfd_config);
-    
+
     if (hand->updater_path)
         free(hand->updater_path);
 
-    if (hand->md_file_path) 
+    if (hand->md_file_path)
         free(hand->md_file_path);
 
     /* This buffer is allocated in get_md_file_chksums() */
@@ -1506,7 +1538,7 @@ release_resources(handler_t *hand)
 
     if (hand->md_chksum_path)
         free(hand->md_chksum_path);
-  
+
     return 0;
 
 error:
@@ -1518,14 +1550,14 @@ error:
  *
  * Purpose:  This program (auxiliary process) applies the updater files to
  *           the copy of the metadata file to support NFS file system.
- * 
+ *
  * Return:   Success:    0
  *
  *           Failure:    1
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, char** argv)
+main(int argc, char **argv)
 {
     handler_t hand;
 
@@ -1544,9 +1576,9 @@ error:
     return 1;
 }
 
-#else /* H5_HAVE_AUX_PROCESS */
+#else  /* H5_HAVE_AUX_PROCESS */
 int
-main ()
+main()
 {
     return 0;
 }
