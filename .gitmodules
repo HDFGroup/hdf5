@@ -1,3 +1,0 @@
-[submodule "utils/vfd_swmr"]
-	path = utils/vfd_swmr
-	url = https://github.com/HDFGroup/vfd_swmr_util.git
