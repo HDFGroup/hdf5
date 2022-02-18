@@ -521,7 +521,7 @@ handle_requests(struct server_run *run)
         /* Read handshake from port connection.
          */
 
-        if ((ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0 ) {
+        if ((ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0) {
             mirror_log(run->loginfo, V_ERR, "read:%d", ret);
             goto error;
         }

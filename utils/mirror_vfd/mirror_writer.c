@@ -843,7 +843,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 receive_communique(struct mirror_session *session, struct sock_comm *comm)
 {
-    ssize_t              read_ret = 0;
+    ssize_t             read_ret = 0;
     size_t              decode_ret;
     H5FD_mirror_xmit_t *X = comm->xmit_recd;
 
