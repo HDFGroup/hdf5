@@ -2070,6 +2070,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
+    MPI_Datatype *             sub_types         = NULL;
+    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2475,6 +2477,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
+    MPI_Datatype *             sub_types         = NULL;
+    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2716,6 +2720,19 @@ done:
     HDassert(vector_was_sorted || !s_addrs);
     HDassert(vector_was_sorted || !s_sizes);
     HDassert(vector_was_sorted || !s_bufs);
+
+    if (sub_types) {
+        HDassert(sub_types_created);
+
+        for (i = 0; i < (int)count; i++)
+            if (sub_types_created[i])
+                MPI_Type_free(&sub_types[i]);
+
+        HDfree(sub_types);
+        sub_types = NULL;
+        HDfree(sub_types_created);
+        sub_types_created = NULL;
+    }
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
