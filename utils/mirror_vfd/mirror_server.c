@@ -476,7 +476,7 @@ handle_requests(struct server_run *run)
 {
     int              connfd = -1;                       /**/
     char             mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE]; /**/
-    long             ret;                               /* general-purpose error-checking */
+    ssize_t          ret;                               /* general-purpose error-checking */
     int              pid;                               /* process ID of fork */
     struct sigaction sa;
     int              ret_value = 0;
