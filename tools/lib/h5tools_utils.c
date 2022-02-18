@@ -30,9 +30,9 @@ unsigned           h5tools_nCols    = 80;
 static int         h5tools_d_status = 0;
 static const char *h5tools_progname = "h5tools";
 /* ``get_option'' variables */
-int         opt_err = 1;    /*get_option prints errors if this is on */
-int         opt_ind = 1;    /*token pointer                          */
-const char *opt_arg;        /*flag argument (or value)               */
+int         opt_err = 1; /*get_option prints errors if this is on */
+int         opt_ind = 1; /*token pointer                          */
+const char *opt_arg;     /*flag argument (or value)               */
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
@@ -200,7 +200,7 @@ get_option(int argc, const char *const *argv, const char *opts, const struct lon
         size_t     arg_len = 0;
 
         opt_arg = strchr(&argv[opt_ind][2], ch);
-        arg_len   = HDstrlen(&argv[opt_ind][2]);
+        arg_len = HDstrlen(&argv[opt_ind][2]);
         if (opt_arg) {
             arg_len -= HDstrlen(opt_arg);
             opt_arg++; /* skip the equal sign */
@@ -221,7 +221,8 @@ get_option(int argc, const char *const *argv, const char *opts, const struct lon
                         }
                         else if (l_opts[i].has_arg == require_arg) {
                             if (opt_err)
-                                HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0], arg);
+                                HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
+                                          arg);
 
                             optchar = '?';
                         }
@@ -230,7 +231,8 @@ get_option(int argc, const char *const *argv, const char *opts, const struct lon
                 else {
                     if (opt_arg) {
                         if (opt_err)
-                            HDfprintf(rawerrorstream, "%s: no option required for \"%s\" flag\n", argv[0], arg);
+                            HDfprintf(rawerrorstream, "%s: no option required for \"%s\" flag\n", argv[0],
+                                      arg);
 
                         optchar = '?';
                     }

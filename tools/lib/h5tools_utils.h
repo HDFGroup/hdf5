@@ -43,9 +43,9 @@ H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
 /*
  * begin get_option section
  */
-H5TOOLS_DLLVAR int         opt_err;     /* getoption prints errors if this is on    */
-H5TOOLS_DLLVAR int         opt_ind;     /* token pointer                            */
-H5TOOLS_DLLVAR const char *opt_arg;     /* flag argument (or value)                 */
+H5TOOLS_DLLVAR int         opt_err; /* getoption prints errors if this is on    */
+H5TOOLS_DLLVAR int         opt_ind; /* token pointer                            */
+H5TOOLS_DLLVAR const char *opt_arg; /* flag argument (or value)                 */
 
 /*
  * get_option determines which options are specified on the command line and
@@ -76,13 +76,14 @@ H5TOOLS_DLLVAR const char *opt_arg;     /* flag argument (or value)             
  * end.
  */
 typedef struct long_options {
-    const char  *name;          /* name of the long option              */
-    int          has_arg;       /* whether we should look for an arg    */
-    char         shortval;      /* the shortname equivalent of long arg
-                                 * this gets returned from get_option   */
+    const char *name;     /* name of the long option              */
+    int         has_arg;  /* whether we should look for an arg    */
+    char        shortval; /* the shortname equivalent of long arg
+                           * this gets returned from get_option   */
 } long_options;
 
-H5TOOLS_DLL int get_option(int argc, const char *const *argv, const char *opt, const struct long_options *l_opt);
+H5TOOLS_DLL int get_option(int argc, const char *const *argv, const char *opt,
+                           const struct long_options *l_opt);
 /*
  * end get_option section
  */
