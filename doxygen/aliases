@@ -299,7 +299,7 @@ ALIASES += ref_rfc20130630="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Design-
 ALIASES += ref_rfc20130316="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5DynamicallyLoadedFilters.pdf\">HDF5 Dynamically Loaded Filters</a>"
 ALIASES += ref_rfc20121114="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/DECTRIS%20Integration%20RFC%202012-11-29.pdf\">Direct Chunk Write</a>"
 ALIASES += ref_rfc20121024="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/FileSpaceManagement.pdf\">HDF5 File Space Management</a>"
-ALIASES += ref_rfc20120828="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5HPC_MultiDset_RW_IO_RFC_v4_20130320.docx.pdf\">New HDF5 API Routines for HPC Applications</a>"
+ALIASES += ref_rfc20120828="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5HPC_MultiDset_RW_IO_RFC_v6_20220124.pdf\">New HDF5 API Routines for HPC Applications - Read/Write Multiple Datasets in an HDF5 file</a>"
 ALIASES += ref_rfc20120523="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/paged_aggregation.pdf\">HDF5 File Space Management: Paged Aggregation</a>"
 ALIASES += ref_rfc20120501="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5FileImageOperations.pdf\">HDF5 File Image Operations</a>"
 ALIASES += ref_rfc20120305="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"

@@ -289,7 +289,7 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
-    if ((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
+    if ((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -353,7 +353,7 @@ H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
     ret_value = oh;
 
 done:
-    if ((NULL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
+    if ((NULL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3014,7 +3014,7 @@ H5O_get_proxy(const H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__free(H5O_t *oh)
+H5O__free(H5O_t *oh, hbool_t force)
 {
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -3038,10 +3038,12 @@ H5O__free(H5O_t *oh)
         for (u = 0; u < oh->nmesgs; u++) {
 #ifndef NDEBUG
             /* Verify that message is clean, unless it could have been marked
-             * dirty by decoding */
+             * dirty by decoding, or if this is a forced free (in case of
+             * failure during creation of the object some messages may be dirty)
+             */
             if (oh->ndecode_dirtied && oh->mesg[u].dirty)
                 oh->ndecode_dirtied--;
-            else
+            else if (!force)
                 HDassert(oh->mesg[u].dirty == 0);
 #endif /* NDEBUG */
 
