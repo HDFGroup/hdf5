@@ -456,7 +456,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static void
-wait_for_child()
+wait_for_child(int H5_ATTR_UNUSED sig)
 {
     while (HDwaitpid(-1, NULL, WNOHANG) > 0)
         ;
@@ -476,7 +476,7 @@ handle_requests(struct server_run *run)
 {
     int              connfd = -1;                       /**/
     char             mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE]; /**/
-    ssize_t          ret;                               /* general-purpose error-checking */
+    long             ret;                               /* general-purpose error-checking */
     int              pid;                               /* process ID of fork */
     struct sigaction sa;
     int              ret_value = 0;

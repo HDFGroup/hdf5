@@ -794,7 +794,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
             return -1;
         }
 
-        mirror_log(session->loginfo, V_INFO, "received %zd bytes", (size_t)nbytes_in_packet);
+        mirror_log(session->loginfo, V_INFO, "received %zd bytes", nbytes_in_packet);
         if (HEXDUMP_WRITEDATA) {
             mirror_log(session->loginfo, V_ALL, "DATA:\n```");
             mirror_log_bytes(session->loginfo, V_ALL, (size_t)nbytes_in_packet, (const unsigned char *)buf);
@@ -863,7 +863,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
         goto error;
     }
 
-    mirror_log(session->loginfo, V_INFO, "received %zd bytes", (size_t)read_ret);
+    mirror_log(session->loginfo, V_INFO, "received %zd bytes", read_ret);
     if (HEXDUMP_XMITS) {
         mirror_log(session->loginfo, V_ALL, "```", read_ret);
         mirror_log_bytes(session->loginfo, V_ALL, (size_t)read_ret, (const unsigned char *)comm->raw);
