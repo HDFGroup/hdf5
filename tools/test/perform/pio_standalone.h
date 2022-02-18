@@ -465,9 +465,9 @@ extern char *         strdup(const char *s);
 
 /** From h5tools_utils.h **/
 
-extern int         opt_err;     /* getoption prints errors if this is on    */
-extern int         opt_ind;     /* token pointer                            */
-extern const char *opt_arg;     /* flag argument (or value)                 */
+extern int         opt_err; /* getoption prints errors if this is on    */
+extern int         opt_ind; /* token pointer                            */
+extern const char *opt_arg; /* flag argument (or value)                 */
 
 enum h5_arg_level {
     no_arg = 0,  /* doesn't take an argument     */
@@ -483,8 +483,7 @@ struct long_options {
                                  */
 };
 
-extern int get_option(int argc, const char *const *argv, const char *opt,
-                         const struct long_options *l_opt);
+extern int get_option(int argc, const char *const *argv, const char *opt, const struct long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 
