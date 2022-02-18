@@ -1761,7 +1761,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-        hsize_t bigio_count;         /* Transition point to create derived type */
+        hsize_t bigio_count; /* Transition point to create derived type */
 
         /* Get bio I/O transition point (may be lower than 2G for testing) */
         bigio_count = H5_mpi_get_bigio_count();
@@ -1797,7 +1797,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
                 file_type_created = TRUE;
 
-                size_i           = 1;
+                size_i = 1;
             }
         }
         else if (count > 0) { /* create MPI derived types describing the vector write */
@@ -1811,8 +1811,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
              * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
              * In this case, this function must free the memory allocated for the sorted vectors.
              */
-            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (const void **)bufs, &s_types,
-                                        &s_addrs, &s_sizes, &s_bufs) < 0)
+            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (const void **)bufs,
+                                        &s_types, &s_addrs, &s_sizes, &s_bufs) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
@@ -1898,7 +1898,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                         if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
                             sub_types = H5MM_free(sub_types);
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't alloc sub types created array")
                         }
 
                         /* Initialize sub_types to all MPI_BYTE */
@@ -1925,10 +1926,9 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                                                       sub_types, &buf_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for buf_type failed", mpi_code)
             }
-            else
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
-                                                                        MPI_BYTE, &buf_type)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
+            else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                         mpi_bufs, MPI_BYTE, &buf_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
             buf_type_created = TRUE;
 
@@ -1938,14 +1938,15 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             /* create the file MPI derived type */
             if (sub_types) {
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths,
-                                                                      mpi_displacments, sub_types, &file_type)))
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                                                       sub_types, &file_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
             }
-            else
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
-                                                                        mpi_displacments, MPI_BYTE, &file_type)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
+            else if (MPI_SUCCESS !=
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                                                          MPI_BYTE, &file_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
             file_type_created = TRUE;
 
@@ -2191,11 +2192,11 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #endif
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-                /* Compute the actual number of bytes requested */
+                    /* Compute the actual number of bytes requested */
 #if MPI_VERSION >= 3
                 io_size = (MPI_Count)sizes[i];
 #else
-                io_size = (int)sizes[i];
+                io_size     = (int)sizes[i];
 #endif
 
                 /* Check for read failure */
@@ -2426,8 +2427,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
-        if (count > 0) { /* create MPI derived types describing the vector write */
-            hsize_t bigio_count;         /* Transition point to create derived type */
+        if (count > 0) {         /* create MPI derived types describing the vector write */
+            hsize_t bigio_count; /* Transition point to create derived type */
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
                 (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
@@ -2515,7 +2516,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                         if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
                             sub_types = H5MM_free(sub_types);
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't alloc sub types created array")
                         }
 
                         /* Initialize sub_types to all MPI_BYTE */
@@ -2542,10 +2544,9 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                                                       sub_types, &buf_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for buf_type failed", mpi_code)
             }
-            else
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
-                                                                        MPI_BYTE, &buf_type)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
+            else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                         mpi_bufs, MPI_BYTE, &buf_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
             buf_type_created = TRUE;
 
@@ -2555,14 +2556,15 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
             /* create the file MPI derived type */
             if (sub_types) {
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths,
-                                                                      mpi_displacments, sub_types, &file_type)))
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                                                       sub_types, &file_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
             }
-            else
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
-                                                                        mpi_displacments, MPI_BYTE, &file_type)))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
+            else if (MPI_SUCCESS !=
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                                                          MPI_BYTE, &file_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
             file_type_created = TRUE;
 
