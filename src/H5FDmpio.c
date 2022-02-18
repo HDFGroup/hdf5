@@ -128,10 +128,10 @@ static const H5FD_class_t H5FD_mpio_g = {
     H5FD__mpio_get_handle,   /* get_handle            */
     H5FD__mpio_read,         /* read                  */
     H5FD__mpio_write,        /* write                 */
-    H5FD__mpio_read_vector,  /*read_vector          */
-    H5FD__mpio_write_vector, /*write_vector         */
-    NULL,                    /*read_selection       */
-    NULL,                    /*write_selection      */
+    H5FD__mpio_read_vector,  /* read_vector           */
+    H5FD__mpio_write_vector, /* write_vector          */
+    NULL,                    /* read_selection        */
+    NULL,                    /* write_selection       */
     H5FD__mpio_flush,        /* flush                 */
     H5FD__mpio_truncate,     /* truncate              */
     NULL,                    /* lock                  */
@@ -873,13 +873,18 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     file->mpi_size = mpi_size;
 
     /* Only processor p0 will get the filesize and broadcast it. */
-    if (mpi_rank == 0)
+    if (mpi_rank == 0) {
+        /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
         if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(fh, &file_size)))
-            HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
+            file_size = (MPI_Offset)-1;
+    }
 
     /* Broadcast file size */
     if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&file_size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, comm)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+
+    if (file_size < 0)
+        HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
 
     /* Determine if the file should be truncated */
     if (file_size && (flags & H5F_ACC_TRUNC)) {
@@ -1176,6 +1181,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     int n;
 #endif
     hbool_t use_view_this_time = FALSE;
+    hbool_t derived_type       = FALSE;
     hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1203,8 +1209,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
     size_i = (int)size;
-    if ((hsize_t)size_i != size)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
     /* Only look for MPI views for raw data transfers */
     if (type == H5FD_MEM_DRAW) {
@@ -1271,10 +1275,14 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 rank0_bcast = TRUE;
 
                 /* Read on rank 0 Bcast to other ranks */
-                if (file->mpi_rank == 0)
+                if (file->mpi_rank == 0) {
+                    /* If MPI_File_read_at fails, push an error, but continue
+                     * to participate in following MPI_Bcast */
                     if (MPI_SUCCESS !=
                         (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                        HMPI_DONE_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                }
+
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(buf, size_i, buf_type, 0, file->comm)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
             } /* end if */
@@ -1304,6 +1312,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
@@ -1318,11 +1341,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
         /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read))) {
 #else
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read))) {
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            if (rank0_bcast && file->mpi_rank == 0) {
+                /* If MPI_Get_elements(_x) fails for a rank 0 bcast strategy,
+                 * push an error, but continue to participate in the following
+                 * MPI_Bcast.
+                 */
+                bytes_read = -1;
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            }
+            else
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+        }
     } /* end if */
 
     /* If the rank0-bcast feature was used, broadcast the # of bytes read to
@@ -1367,6 +1400,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         HDmemset((char *)buf + bytes_read, 0, (size_t)n);
 
 done:
+    if (derived_type)
+        MPI_Type_free(&buf_type);
+
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
@@ -1479,20 +1515,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
          */
         mpi_off = 0;
     } /* end if */
-    else if (size != (hsize_t)size_i) {
-        /* If HERE, then we need to work around the integer size limit
-         * of 2GB. The input size_t size variable cannot fit into an integer,
-         * but we can get around that limitation by creating a different datatype
-         * and then setting the integer size (or element count) to 1 when using
-         * the derived_type.
-         */
-
-        if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
-
-        derived_type = TRUE;
-        size_i       = 1;
-    }
 
     /* Write the data. */
     if (use_view_this_time) {
@@ -1538,6 +1560,21 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
@@ -1663,6 +1700,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
+    MPI_Datatype *             sub_types         = NULL;
+    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        j;
     int                        mpi_code; /* MPI return code */
@@ -1722,6 +1761,10 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+        hsize_t bigio_count; /* Transition point to create derived type */
+
+        /* Get bio I/O transition point (may be lower than 2G for testing) */
+        bigio_count = H5_mpi_get_bigio_count();
 
         if (count == 1) {
             /* Single block.  Just use a series of MPI_BYTEs for the file view.
@@ -1738,6 +1781,24 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* some numeric conversions */
             if (H5FD_mpi_haddr_to_MPIOff(addrs[0], &mpi_off) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI offset")
+
+            /* Check for size overflow */
+            if (sizes[0] > bigio_count) {
+                /* We need to work around the integer size limit of 2GB. The input size_t size
+                 * variable cannot fit into an integer, but we can get around that limitation by
+                 * creating a different datatype and then setting the integer size (or element
+                 * count) to 1 when using the derived_type. */
+
+                if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, &buf_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                buf_type_created = TRUE;
+
+                if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, &file_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                file_type_created = TRUE;
+
+                size_i = 1;
+            }
         }
         else if (count > 0) { /* create MPI derived types describing the vector write */
 
@@ -1750,8 +1811,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
              * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
              * In this case, this function must free the memory allocated for the sorted vectors.
              */
-            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types,
-                                        &s_addrs, &s_sizes, &s_bufs) < 0)
+            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (const void **)bufs,
+                                        &s_types, &s_addrs, &s_sizes, &s_bufs) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
@@ -1805,12 +1866,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                     }
                 }
 
-                /* There is an obvious possibility of an overflow here, as size_t
-                 * will typically be 64 bits, where as int will typically be 32 bits.
-                 * This must be fixed, but it should be good enough for initial
-                 * correctness testing.
-                 *                                        JRM -- 3/17/21
-                 */
+                /* Add to block lengths and displacements arrays */
                 mpi_block_lengths[i] = (int)size;
                 mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
 
@@ -1825,12 +1881,53 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #else
                 mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
 #endif
+
+                /* Check for size overflow */
+                if (size > bigio_count) {
+                    /* We need to work around the integer size limit of 2GB. The input size_t size
+                     * variable cannot fit into an integer, but we can get around that limitation by
+                     * creating a different datatype and then setting the integer size (or element
+                     * count) to 1 when using the derived_type. */
+
+                    /* Allocate arrays to keep track of types and whether they were created, if
+                     * necessary */
+                    if (!sub_types) {
+                        HDassert(!sub_types_created);
+
+                        if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
+                        if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
+                            sub_types = H5MM_free(sub_types);
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't alloc sub types created array")
+                        }
+
+                        /* Initialize sub_types to all MPI_BYTE */
+                        for (j = 0; j < (int)count; j++)
+                            sub_types[j] = MPI_BYTE;
+                    }
+                    HDassert(sub_types_created);
+
+                    /* Create type for large block */
+                    if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &sub_types[i]) < 0)
+                        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                    sub_types_created[i] = TRUE;
+
+                    /* Only one of these large types for this vector element */
+                    mpi_block_lengths[i] = 1;
+                }
+                else
+                    HDassert(size == (size_t)mpi_block_lengths[i]);
             }
 
             /* create the memory MPI derived types */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
-                                                                    MPI_BYTE, &buf_type)))
-
+            if (sub_types) {
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_bufs,
+                                                                      sub_types, &buf_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for buf_type failed", mpi_code)
+            }
+            else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                         mpi_bufs, MPI_BYTE, &buf_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
             buf_type_created = TRUE;
@@ -1840,9 +1937,15 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for buf_type failed", mpi_code)
 
             /* create the file MPI derived type */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
-                                                                    mpi_displacments, MPI_BYTE, &file_type)))
-
+            if (sub_types) {
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                                                       sub_types, &file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
+            }
+            else if (MPI_SUCCESS !=
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                                                          MPI_BYTE, &file_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
             file_type_created = TRUE;
@@ -2053,7 +2156,22 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 }
             }
 
-            size_i = (int)size; /* todo: fix potential for overflow */
+            size_i = (int)size;
+
+            if (size != (size_t)size_i) {
+                /* If HERE, then we need to work around the integer size limit
+                 * of 2GB. The input size_t size variable cannot fit into an integer,
+                 * but we can get around that limitation by creating a different datatype
+                 * and then setting the integer size (or element count) to 1 when using
+                 * the derived_type.
+                 */
+
+                if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+                buf_type_created = TRUE;
+                size_i           = 1;
+            }
 
             /* Check if we actually need to do I/O */
             if (addrs[i] < max_addr) {
@@ -2062,7 +2180,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                 /* Issue read */
                 if (MPI_SUCCESS !=
-                    (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, MPI_BYTE, &mpi_stat)))
+                    (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, buf_type, &mpi_stat)))
 
                     HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
@@ -2074,8 +2192,15 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #endif
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
+                    /* Compute the actual number of bytes requested */
+#if MPI_VERSION >= 3
+                io_size = (MPI_Count)sizes[i];
+#else
+                io_size     = (int)sizes[i];
+#endif
+
                 /* Check for read failure */
-                if (bytes_read < 0 || bytes_read > size_i)
+                if (bytes_read < 0 || bytes_read > io_size)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
 
                 /*
@@ -2083,7 +2208,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                  * the physical MPI file and don't issue any more reads at higher
                  * addresses.
                  */
-                if ((n = (size_i - bytes_read)) > 0) {
+                if ((n = (io_size - bytes_read)) > 0) {
                     HDmemset((char *)bufs[i] + bytes_read, 0, (size_t)n);
                     max_addr = addrs[i] + (haddr_t)bytes_read;
                 }
@@ -2144,6 +2269,19 @@ done:
 
     if (buf_type_created) {
         MPI_Type_free(&buf_type);
+    }
+
+    if (sub_types) {
+        HDassert(sub_types_created);
+
+        for (i = 0; i < (int)count; i++)
+            if (sub_types_created[i])
+                MPI_Type_free(&sub_types[i]);
+
+        HDfree(sub_types);
+        sub_types = NULL;
+        HDfree(sub_types_created);
+        sub_types_created = NULL;
     }
 
     if (file_type_created) {
@@ -2222,6 +2360,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
+    MPI_Datatype *             sub_types         = NULL;
+    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        j;
     int                        mpi_code; /* MPI return code */
@@ -2287,7 +2427,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
-        if (count > 0) { /* create MPI derived types describing the vector write */
+        if (count > 0) {         /* create MPI derived types describing the vector write */
+            hsize_t bigio_count; /* Transition point to create derived type */
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
                 (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
@@ -2324,6 +2465,9 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
             fixed_size = FALSE;
 
+            /* Get bio I/O transition point (may be lower than 2G for testing) */
+            bigio_count = H5_mpi_get_bigio_count();
+
             /* load the mpi_block_lengths and mpi_displacements arrays */
             for (i = 0; i < (int)count; i++) {
 
@@ -2340,12 +2484,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                     }
                 }
 
-                /* There is an obvious possibility of an overflow here, as size_t
-                 * will typically be 64 bits, where as int will typically be 32 bits.
-                 * This must be fixed, but it should be good enough for initial
-                 * correctness testing.
-                 *                                        JRM -- 3/17/21
-                 */
+                /* Add to block lengths and displacements arrays */
                 mpi_block_lengths[i] = (int)size;
                 mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
 
@@ -2360,12 +2499,53 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 #else
                 mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
 #endif
+
+                /* Check for size overflow */
+                if (size > bigio_count) {
+                    /* We need to work around the integer size limit of 2GB. The input size_t size
+                     * variable cannot fit into an integer, but we can get around that limitation by
+                     * creating a different datatype and then setting the integer size (or element
+                     * count) to 1 when using the derived_type. */
+
+                    /* Allocate arrays to keep track of types and whether they were created, if
+                     * necessary */
+                    if (!sub_types) {
+                        HDassert(!sub_types_created);
+
+                        if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
+                        if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
+                            sub_types = H5MM_free(sub_types);
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't alloc sub types created array")
+                        }
+
+                        /* Initialize sub_types to all MPI_BYTE */
+                        for (j = 0; j < (int)count; j++)
+                            sub_types[j] = MPI_BYTE;
+                    }
+                    HDassert(sub_types_created);
+
+                    /* Create type for large block */
+                    if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &sub_types[i]) < 0)
+                        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+                    sub_types_created[i] = TRUE;
+
+                    /* Only one of these large types for this vector element */
+                    mpi_block_lengths[i] = 1;
+                }
+                else
+                    HDassert(size == (size_t)mpi_block_lengths[i]);
             }
 
             /* create the memory MPI derived types */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
-                                                                    MPI_BYTE, &buf_type)))
-
+            if (sub_types) {
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_bufs,
+                                                                      sub_types, &buf_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for buf_type failed", mpi_code)
+            }
+            else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                         mpi_bufs, MPI_BYTE, &buf_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
             buf_type_created = TRUE;
@@ -2375,9 +2555,15 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for buf_type failed", mpi_code)
 
             /* create the file MPI derived type */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
-                                                                    mpi_displacments, MPI_BYTE, &file_type)))
-
+            if (sub_types) {
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                                                       sub_types, &file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
+            }
+            else if (MPI_SUCCESS !=
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                                                          MPI_BYTE, &file_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
             file_type_created = TRUE;
@@ -2493,10 +2679,25 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                 }
             }
 
-            size_i = (int)size; /* todo: fix potential for overflow */
+            size_i = (int)size;
+
+            if (size != (size_t)size_i) {
+                /* If HERE, then we need to work around the integer size limit
+                 * of 2GB. The input size_t size variable cannot fit into an integer,
+                 * but we can get around that limitation by creating a different datatype
+                 * and then setting the integer size (or element count) to 1 when using
+                 * the derived_type.
+                 */
+
+                if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+                buf_type_created = TRUE;
+                size_i           = 1;
+            }
 
             if (MPI_SUCCESS !=
-                (mpi_code = MPI_File_write_at(file->f, mpi_off, s_bufs[i], size_i, MPI_BYTE, &mpi_stat)))
+                (mpi_code = MPI_File_write_at(file->f, mpi_off, s_bufs[i], size_i, buf_type, &mpi_stat)))
 
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
         }
@@ -2573,6 +2774,19 @@ done:
 
     if (file_type_created) {
         MPI_Type_free(&file_type);
+    }
+
+    if (sub_types) {
+        HDassert(sub_types_created);
+
+        for (i = 0; i < (int)count; i++)
+            if (sub_types_created[i])
+                MPI_Type_free(&sub_types[i]);
+
+        HDfree(sub_types);
+        sub_types = NULL;
+        HDfree(sub_types_created);
+        sub_types_created = NULL;
     }
 
 #ifdef H5FDmpio_DEBUG
@@ -2695,16 +2909,18 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         /* Only processor p0 will get the filesize and broadcast it. */
-        /* (Note that throwing an error here will cause non-rank 0 processes
-         *      to hang in following Bcast.  -QAK, 3/17/2018)
-         */
-        if (0 == file->mpi_rank)
+        if (0 == file->mpi_rank) {
+            /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
             if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(file->f, &size)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
+                size = (MPI_Offset)-1;
+        }
 
         /* Broadcast file size */
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if (size < 0)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
 
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
@@ -2788,9 +3004,13 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
     /* Delete the file */
-    if (mpi_rank == 0)
+    if (mpi_rank == 0) {
+        /* If MPI_File_delete fails, push an error but
+         * still participate in the following MPI_Barrier
+         */
         if (MPI_SUCCESS != (mpi_code = MPI_File_delete(filename, info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
+    }
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))

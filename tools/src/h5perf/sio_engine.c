@@ -1267,7 +1267,7 @@ done:
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
-    char  temp[2048];
+    char  temp[4096 + sizeof("-?.h5")];
     int   j;
     hid_t driver;
 

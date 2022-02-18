@@ -591,6 +591,8 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     if (outlen < 22)
         return 1;
 
+    H5_CHECK_OVERFLOW(outlen, int, size_t);
+
     lookup_ret = ref_path_table_lookup(str, &obj_token);
     if (lookup_ret < 0) {
         if (HDstrlen(str) == 0) {
@@ -600,7 +602,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                     ref_path_table_gen_fake(str, &obj_token);
 
                     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                    HDsprintf(outstr, "xid_%s", obj_tok_str);
+                    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     return 0;
@@ -615,7 +617,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 ref_path_table_gen_fake(str, &obj_token);
 
                 H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                HDsprintf(outstr, "xid_%s", obj_tok_str);
+                HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 return 0;
@@ -627,7 +629,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     }
 
     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-    HDsprintf(outstr, "xid_%s", obj_tok_str);
+    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
     H5free_memory(obj_tok_str);
 
     return 0;
@@ -2802,7 +2804,7 @@ xml_dump_group(hid_t gid, const char *name)
                             type = H5Dget_type(dset);
 
                             H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                            HDsprintf(type_name, "#%s", obj_tok_str);
+                            HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                             H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
@@ -2895,7 +2897,7 @@ xml_dump_group(hid_t gid, const char *name)
                     type = H5Dget_type(dset);
 
                     H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                    HDsprintf(type_name, "#%s", obj_tok_str);
+                    HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);
@@ -3598,7 +3600,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "\"");
                 for (i = 0; i < sz; i++) {
-                    h5tools_str_append(&buffer, "%x ", *(unsigned int *)buf + (i * sizeof(unsigned int)));
+                    unsigned long val = *(unsigned int *)buf + (i * sizeof(unsigned int));
+
+                    H5_CHECK_OVERFLOW(val, unsigned long, unsigned);
+                    h5tools_str_append(&buffer, "%x ", (unsigned)val);
                 }
                 h5tools_str_append(&buffer, "\"");
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
