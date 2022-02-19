@@ -3798,6 +3798,7 @@
 ./tools/test/perform/CMakeTests.cmake
 ./utils/CMakeLists.txt
 ./utils/mirror_vfd/CMakeLists.txt
+./utils/vfd_swmr/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake
@@ -3912,3 +3913,4 @@
 ./tools/test/perform/Makefile.in
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
+./utils/vfd_swmr/Makefile.in

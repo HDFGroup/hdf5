@@ -1,5 +1,4 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
  * Copyright by Akadio, Inc.                                                 *
  * All rights reserved.                                                      *
  *                                                                           *
