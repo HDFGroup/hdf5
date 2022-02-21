@@ -1967,7 +1967,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             HDfree(mpi_bufs);
             mpi_bufs = NULL;
 
-            if(sub_types) {
+            if (sub_types) {
                 HDassert(sub_types);
 
                 for (i = 0; i < (int)count; i++)
@@ -2621,7 +2621,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             HDfree(mpi_bufs);
             mpi_bufs = NULL;
 
-            if(sub_types) {
+            if (sub_types) {
                 HDassert(sub_types);
 
                 for (i = 0; i < (int)count; i++)
