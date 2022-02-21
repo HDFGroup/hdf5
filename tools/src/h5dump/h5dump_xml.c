@@ -4524,13 +4524,16 @@ xml_print_enum(hid_t type)
 
             for (j = 0; j < dst_size; j++)
                 h5tools_str_append(&buffer, "%02x", value[i * dst_size + j]);
-        }
-        else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-            /* XXX haven't I fixed this code somewhere else, before? */
-            h5tools_str_append(&buffer, "%llu", *((unsigned long long *)((void *)(value + i * dst_size))));
-        }
-        else {
-            h5tools_str_append(&buffer, "%lld", *((long long *)((void *)(value + i * dst_size))));
+        } else if (H5T_SGN_NONE == H5Tget_sign(native)) {
+            unsigned long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%llu", copy);
+        } else {
+            long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%lld", copy);
         }
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);

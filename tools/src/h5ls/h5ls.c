@@ -942,7 +942,6 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print members */
         for (i = 0; i < (unsigned)nmembs; i++) {
-            unsigned char *copy;   /* a pointer to value array */
             int            nchars; /* number of output characters */
 
             h5tools_str_append(buffer, "\n%*s", ind + 4, "");
@@ -955,19 +954,16 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 h5tools_str_append(buffer, "0x");
                 for (j = 0; j < dst_size; j++)
                     h5tools_str_append(buffer, "%02x", value[i * dst_size + j]);
-            }
-            else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                /* XXX haven't I seen (and fixed) this code somewhere else? */
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%llu", *((unsigned long long *)((void *)copy)));
-            }
-            else {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
+            } else if (H5T_SGN_NONE == H5Tget_sign(native)) {
+                unsigned long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%llu", copy);
+            } else {
+                long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%lld", copy);
             }
         }
 
