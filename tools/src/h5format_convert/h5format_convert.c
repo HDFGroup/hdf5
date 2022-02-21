@@ -127,7 +127,7 @@ parse_command_line(int argc, const char *const *argv)
                     dname_g = HDstrdup(H5_optarg);
                 if (dname_g == NULL) {
                     h5tools_setstatus(EXIT_FAILURE);
-                    error_msg("No dataset name\n", H5_optarg);
+                    error_msg("No dataset name `%s`\n", H5_optarg);
                     usage(h5tools_getprogname());
                     goto error;
                 }
