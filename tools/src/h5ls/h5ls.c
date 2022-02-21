@@ -942,7 +942,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print members */
         for (i = 0; i < (unsigned)nmembs; i++) {
-            int            nchars; /* number of output characters */
+            int nchars; /* number of output characters */
 
             h5tools_str_append(buffer, "\n%*s", ind + 4, "");
             nchars = print_string(buffer, name[i], TRUE);
@@ -954,12 +954,14 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 h5tools_str_append(buffer, "0x");
                 for (j = 0; j < dst_size; j++)
                     h5tools_str_append(buffer, "%02x", value[i * dst_size + j]);
-            } else if (H5T_SGN_NONE == H5Tget_sign(native)) {
+            }
+            else if (H5T_SGN_NONE == H5Tget_sign(native)) {
                 unsigned long long copy;
 
                 HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
                 h5tools_str_append(buffer, "%llu", copy);
-            } else {
+            }
+            else {
                 long long copy;
 
                 HDmemcpy(&copy, value + i * dst_size, sizeof(copy));

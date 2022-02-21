@@ -4524,12 +4524,14 @@ xml_print_enum(hid_t type)
 
             for (j = 0; j < dst_size; j++)
                 h5tools_str_append(&buffer, "%02x", value[i * dst_size + j]);
-        } else if (H5T_SGN_NONE == H5Tget_sign(native)) {
+        }
+        else if (H5T_SGN_NONE == H5Tget_sign(native)) {
             unsigned long long copy;
 
             HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
             h5tools_str_append(&buffer, "%llu", copy);
-        } else {
+        }
+        else {
             long long copy;
 
             HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
