@@ -2721,18 +2721,26 @@ done:
     HDassert(vector_was_sorted || !s_sizes);
     HDassert(vector_was_sorted || !s_bufs);
 
-    if (sub_types) {
-        HDassert(sub_types_created);
+        if (sub_types) {
+            HDassert(sub_types_created);
 
-        for (i = 0; i < (int)count; i++)
-            if (sub_types_created[i])
-                MPI_Type_free(&sub_types[i]);
+            for (i = 0; i < (int)count; i++)
+                if (sub_types_created[i])
+                    MPI_Type_free(&sub_types[i]);
 
-        HDfree(sub_types);
-        sub_types = NULL;
-        HDfree(sub_types_created);
-        sub_types_created = NULL;
+            HDfree(sub_types);
+            sub_types = NULL;
+            HDfree(sub_types_created);
+            sub_types_created = NULL;
+        }
     }
+
+    /* Make sure we cleaned up */
+    HDassert(!mpi_block_lengths);
+    HDassert(!mpi_displacements);
+    HDassert(!mpi_bufs);
+    HDassert(!sub_types);
+    HDassert(!sub_types_created);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
