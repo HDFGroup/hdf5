@@ -304,7 +304,7 @@ create_dsets(hid_t file)
      * Create a dataset using the default dataset creation properties.
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsprintf(dset_name, "dataset %d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         if ((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
             goto error;
@@ -366,14 +366,14 @@ create_attrs_1(void)
      * Create all(user specifies the number) attributes for each dataset
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsprintf(dset_name, "dataset %d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         open_t.start = retrieve_time();
         if ((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
             goto error;
         perf(&open_t, open_t.start, retrieve_time());
 
         for (j = 0; j < NUM_ATTRS; j++) {
-            HDsprintf(attr_name, "all attrs for each dset %d", j);
+            HDsnprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
             if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                    H5P_DEFAULT)) < 0)
@@ -468,7 +468,7 @@ create_attrs_2(void)
      * Create all(user specifies the number) attributes for each new dataset
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsprintf(dset_name, "dataset %d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         create_t.start = retrieve_time();
         if ((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
@@ -476,7 +476,7 @@ create_attrs_2(void)
         perf(&create_t, create_t.start, retrieve_time());
 
         for (j = 0; j < NUM_ATTRS; j++) {
-            HDsprintf(attr_name, "all attrs for each dset %d", j);
+            HDsnprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
             if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                    H5P_DEFAULT)) < 0)
@@ -579,14 +579,14 @@ create_attrs_3(void)
 
     for (i = 0; i < loop_num; i++) {
         for (j = 0; j < NUM_DSETS; j++) {
-            HDsprintf(dset_name, "dataset %d", j);
+            HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", j);
             open_t.start = retrieve_time();
             if ((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
                 goto error;
             perf(&open_t, open_t.start, retrieve_time());
 
             for (k = 0; k < BATCH_ATTRS; k++) {
-                HDsprintf(attr_name, "some attrs for each dset %d %d", i, k);
+                HDsnprintf(attr_name, sizeof(attr_name), "some attrs for each dset %d %d", i, k);
                 attr_t.start = retrieve_time();
                 if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                        H5P_DEFAULT)) < 0)

@@ -828,7 +828,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;
@@ -1329,7 +1329,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t             fid     = H5I_INVALID_HID;
     hid_t             gid     = H5I_INVALID_HID;
@@ -1349,7 +1349,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    if ((hand = parse_command_line(argc, argv)) == NULL) {
+    if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;
     }
 

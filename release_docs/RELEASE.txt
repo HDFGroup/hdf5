@@ -56,6 +56,13 @@ New Features
 
       (ADB - 2022/01/27)
 
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts that cat the 
+      libhdf5-settings to the standard output.
+
+      (ADB - 2022/01/25)
+
     - CMake will now run the PowerShell script tests in test/ by default
       on Windows.
 
@@ -1091,6 +1098,27 @@ Bug Fixes since HDF5-1.12.0 release
       returns a normal HDF5 error when the filter ID is out of range.
 
       (DER - 2021/11/23, HDFFV-11286)
+
+    - Unified handling of collective metadata reads to correctly fix old bugs
+
+      Due to MPI-related issues occurring in HDF5 from mismanagement of the
+      status of collective metadata reads, they were forced to be disabled
+      during chunked dataset raw data I/O in the HDF5 1.10.5 release. This
+      wouldn't generally have affected application performance because HDF5
+      already disables collective metadata reads during chunk lookup, since
+      it is generally unlikely that the same chunks will be read by all MPI
+      ranks in the I/O operation. However, this was only a partial solution
+      that wasn't granular enough.
+
+      This change now unifies the handling of the file-global flag and the
+      API context-level flag for collective metadata reads in order to
+      simplify querying of the true status of collective metadata reads. Thus,
+      collective metadata reads are once again enabled for chunked dataset
+      raw data I/O, but manually controlled at places where some processing
+      occurs on MPI rank 0 only and would cause issues when collective
+      metadata reads are enabled.
+
+      (JTH - 2021/11/16, HDFFV-10501/HDFFV-10562)
 
     - Fixed several potential MPI deadlocks in library failure conditions
 
