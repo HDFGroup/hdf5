@@ -186,7 +186,7 @@ create__dataset(hid_t fidin, hid_t fidout, trav_table_t *travt, size_t index, hb
     if (!use_h5ocopy) {
         int j;
 
-        /* Dataset is already opened at line 111 - Ray 
+        /* Dataset is already opened at line 111 - Ray
         if ((dset_in = H5Dopen2(fidin, travt->objs[index].name, H5P_DEFAULT)) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
          */
@@ -769,10 +769,9 @@ pcreate_new_objects(const char *fnameout, hid_t fcpl, hid_t fidin, hid_t *_fidou
         H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
 
     /* processes (re)open the output file with RDWR access */
-    if ((fidout = h5tools_fopen(fnameout, H5F_ACC_RDWR, options->fout_fapl, (options->fout_fapl != H5P_DEFAULT),
-                               NULL, (size_t)0)) < 0)
+    if ((fidout = h5tools_fopen(fnameout, H5F_ACC_RDWR, options->fout_fapl,
+                                (options->fout_fapl != H5P_DEFAULT), NULL, (size_t)0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnameout, H5FOPENERROR);
-
 
     /* Return the outputput file descriptor */
     *_fidout = fidout;
@@ -896,7 +895,7 @@ select_objs_by_rank(hid_t fidin, trav_table_t *orig, int **table_index)
             int mod_rank = (int)((int)k % g_nTasks);
 
             /* For debugging only, make it alwasy true - Ray */
-            //orig->objs[k].use_hyperslab = true;
+            // orig->objs[k].use_hyperslab = true;
 
             if ((orig->objs[k].use_hyperslab) || (mod_rank == (int)g_nID)) {
                 index[count++] = k;
@@ -1220,12 +1219,13 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
             if (H5Fclose(fidin) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "failed to close the input file");
 
-            /* reopen the input file with MPIO.  The output file is reopened in the end of pcreate_new_objects - Ray */
+            /* reopen the input file with MPIO.  The output file is reopened in the end of pcreate_new_objects
+             * - Ray */
             if (H5Pset_fapl_mpio(options->fin_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "Unable to select the MPIO driver");
 
-            if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
-                               NULL, (size_t)0)) < 0)
+            if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
+                                       (options->fin_fapl != H5P_DEFAULT), NULL, (size_t)0)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
             if (pcopy_objects(fidin, fidout, travt, travt_indices, tiCount, options) < 0)
@@ -1496,20 +1496,20 @@ done:
 } /* end get_hyperslab() */
 
 #ifdef H5_HAVE_PARALLEL
-/* This function is equivalent to h5tools_initialize_hyperslab_context() in tools/lib/h5tools_utils.c but is simpler.
- * h5tools_initialize_hyperslab_context() has some bug(s).  Instead of spending time debugging it, simply replace it
- * with this function.
+/* This function is equivalent to h5tools_initialize_hyperslab_context() in tools/lib/h5tools_utils.c but is
+ * simpler. h5tools_initialize_hyperslab_context() has some bug(s).  Instead of spending time debugging it,
+ * simply replace it with this function.
  */
 static hid_t
 initialize_hyperslab(hid_t dset_file_space, size_t *nelmts)
 {
-    hid_t   mem_space = -1;
-    int     ndims;
+    hid_t    mem_space = -1;
+    int      ndims;
     hsize_t *dims;
     hsize_t *offset, *count;
-    size_t  numb_elmts = 1;
-    int     i;
-    hid_t     ret_value = 0;
+    size_t   numb_elmts = 1;
+    int      i;
+    hid_t    ret_value = 0;
 
     if ((ndims = H5Sget_simple_extent_ndims(dset_file_space)) < 0)
         H5TOOLS_GOTO_ERROR((-2), "H5Sget_simple_extent_ndims failed");
@@ -1528,11 +1528,12 @@ initialize_hyperslab(hid_t dset_file_space, size_t *nelmts)
     }
 
     /* First step: even division among ranks. e.g. 5 / 3 = 1 */
-    if(dims[0] >= (hsize_t)g_nTasks) {
+    if (dims[0] >= (hsize_t)g_nTasks) {
         count[0]  = dims[0] / (hsize_t)g_nTasks;
         offset[0] = (hsize_t)g_nID * count[0];
-    } else {
-        count[0] = 0;
+    }
+    else {
+        count[0]  = 0;
         offset[0] = 0;
     }
 
@@ -1549,7 +1550,8 @@ initialize_hyperslab(hid_t dset_file_space, size_t *nelmts)
             offset[0] += dims[0] % (hsize_t)g_nTasks;
     }
 
-    /* If an error happens, return -2, while -1 of the mem_space indicates no hyperslab selection for the current rank */
+    /* If an error happens, return -2, while -1 of the mem_space indicates no hyperslab selection for the
+     * current rank */
     if (count[0]) {
         if ((mem_space = H5Screate_simple(ndims, count, NULL)) < 0)
             H5TOOLS_GOTO_ERROR((-2), "H5Screate_simple failed");
@@ -1567,7 +1569,7 @@ initialize_hyperslab(hid_t dset_file_space, size_t *nelmts)
     free(offset);
     free(count);
 
-    ret_value =  mem_space;
+    ret_value = mem_space;
 
 done:
     return ret_value;
@@ -1577,25 +1579,25 @@ int
 pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, int obj_count,
               pack_opt_t *options)
 {
-    hid_t              dset_in       = H5I_INVALID_HID; /* read dataset ID */
-    hid_t              dset_out      = H5I_INVALID_HID; /* write dataset ID */
+    hid_t dset_in  = H5I_INVALID_HID; /* read dataset ID */
+    hid_t dset_out = H5I_INVALID_HID; /* write dataset ID */
     /* hid_t              dcpl_in       = H5I_INVALID_HID; dataset creation property list ID */
     /* hid_t              dcpl_out      = H5I_INVALID_HID; dataset creation property list ID */
-    hid_t              f_space_id    = H5I_INVALID_HID; /* file space ID */
-    hid_t              wtype_id      = H5I_INVALID_HID; /* read/write type ID */
-    hid_t              ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
+    hid_t f_space_id = H5I_INVALID_HID; /* file space ID */
+    hid_t wtype_id   = H5I_INVALID_HID; /* read/write type ID */
+    hid_t ocpl_id    = H5I_INVALID_HID; /* property to pass copy options */
     /* hid_t              dxpl_id       = H5P_DEFAULT;      dataset transfer property list */
-    named_dt_t *       named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
+    named_dt_t *named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
     /* size_t             msize;                           size of type */
     /* hsize_t            nelmts;                           number of elements in dataset */
     /* int                rank;                             rank of dataset */
-    hsize_t            dims[H5S_MAX_RANK];              /* dimensions of dataset */
-    hsize_t            dsize_in;                        /* input dataset size before filter */
-    void *             buf       = NULL;                /* buffer for raw data */
-    void *             hslab_buf = NULL;                /* hyperslab buffer for raw data */
+    hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
+    hsize_t dsize_in;           /* input dataset size before filter */
+    void *  buf       = NULL;   /* buffer for raw data */
+    void *  hslab_buf = NULL;   /* hyperslab buffer for raw data */
     /* H5_timer_t         timer;                            Timer for read/write operations */
     /* H5_timevals_t      times;                            Elapsed time for each operation */
-    //static double      read_time  = 0;
+    // static double      read_time  = 0;
     static double      write_time = 0;
     h5tool_link_info_t linkinfo;
     int                i;
@@ -1625,10 +1627,10 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                 case H5TRAV_TYPE_GROUP:
                     break; /* Already accomplished by pcreate_new_objects() */
                 case H5TRAV_TYPE_DATASET: {
-                    //dataset_context_t *hs_context  = NULL;
-                    hbool_t            use_h5ocopy = travt->objs[obj_i].use_h5ocopy;
-                    char *             dataBuf;
-                    //read_time  = 0.0;
+                    // dataset_context_t *hs_context  = NULL;
+                    hbool_t use_h5ocopy = travt->objs[obj_i].use_h5ocopy;
+                    char *  dataBuf;
+                    // read_time  = 0.0;
                     write_time = 0.0;
 
                     /* Potentially override the default size where we will transistion
@@ -1665,11 +1667,11 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
 #ifdef TMP
                             /* Richard's code has some bug(s).  Instead of spending time debugging it,
                              * I replaced it with my own algorithm. - Ray */
-                            size_t       p_type_nbytes;  /*size of memory type */
-                            hsize_t      p_nelmts;       /*total elements */
-                            hsize_t      elmtno;                 /*counter  */
-                            int          carry;                  /*counter carry value */
-                            unsigned int vl_data = 0;            /*contains VL datatypes */
+                            size_t       p_type_nbytes; /*size of memory type */
+                            hsize_t      p_nelmts;      /*total elements */
+                            hsize_t      elmtno;        /*counter  */
+                            int          carry;         /*counter carry value */
+                            unsigned int vl_data = 0;   /*contains VL datatypes */
 
                             /* hyperslab info */
                             hsize_t hslab_dims[H5S_MAX_RANK]; /*hyperslab dims */
@@ -1692,8 +1694,12 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                             if (h5tools_initialize_hyperslab_context(dset_in, &hs_context) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "h5tools_initialize_hyperslab_context failed");
 
-//printf("Line %d, g_nID=%d, offset[0]=%ld, stride[0]=%ld, count[0]=%ld, block[0]=%ld\n", __LINE__, g_nID, hs_context->hs_offset[0], hs_context->hs_stride[0], hs_context->hs_count[0], hs_context->hs_block[0]);
-//printf("Line %d, g_nID=%d, offset[1]=%ld, stride[1]=%ld, count[1]=%ld, block[1]=%ld\n", __LINE__, g_nID, hs_context->hs_offset[1], hs_context->hs_stride[1], hs_context->hs_count[1], hs_context->hs_block[1]);
+                            // printf("Line %d, g_nID=%d, offset[0]=%ld, stride[0]=%ld, count[0]=%ld,
+                            // block[0]=%ld\n", __LINE__, g_nID, hs_context->hs_offset[0],
+                            // hs_context->hs_stride[0], hs_context->hs_count[0], hs_context->hs_block[0]);
+                            // printf("Line %d, g_nID=%d, offset[1]=%ld, stride[1]=%ld, count[1]=%ld,
+                            // block[1]=%ld\n", __LINE__, g_nID, hs_context->hs_offset[1],
+                            // hs_context->hs_stride[1], hs_context->hs_count[1], hs_context->hs_block[1]);
                             p_type_nbytes = hs_context->dt_size;
 
                             rank = hs_context->ds_rank;
@@ -1820,9 +1826,9 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                                 HDfree(hs_context);
 
 #else
-                            hid_t mem_space;
-                            size_t dtype_size = 0, nelmts = 0;
-                            unsigned int vl_data = 0;            /*contains VL datatypes */
+                            hid_t        mem_space;
+                            size_t       dtype_size = 0, nelmts = 0;
+                            unsigned int vl_data = 0; /*contains VL datatypes */
 
                             if ((f_space_id = H5Dget_space(dset_in)) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
@@ -1831,31 +1837,34 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                             if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
                                 vl_data = TRUE;
 
-                            /* Notice that mem_space is -1 if this rank has no element.  A failure from initialize_hyperslab is -2 here */ 
+                            /* Notice that mem_space is -1 if this rank has no element.  A failure from
+                             * initialize_hyperslab is -2 here */
                             if ((mem_space = initialize_hyperslab(f_space_id, &nelmts)) < -1)
                                 H5TOOLS_GOTO_ERROR((-1), "initialize_hyperslab failed");
 
-			    if ((dtype_size = H5Tget_size(wtype_id)) == 0)
+                            if ((dtype_size = H5Tget_size(wtype_id)) == 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
-			    if (nelmts) {
-				dataBuf = (char *)malloc(dtype_size * nelmts);
+                            if (nelmts) {
+                                dataBuf = (char *)malloc(dtype_size * nelmts);
 
-				if (H5Dread(dset_in, wtype_id, mem_space, f_space_id, H5P_DEFAULT, dataBuf) < 0)
+                                if (H5Dread(dset_in, wtype_id, mem_space, f_space_id, H5P_DEFAULT, dataBuf) <
+                                    0)
                                     H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
 
-				if (H5Dwrite(dset_out, wtype_id, mem_space, f_space_id, H5P_DEFAULT, dataBuf) < 0)
+                                if (H5Dwrite(dset_out, wtype_id, mem_space, f_space_id, H5P_DEFAULT,
+                                             dataBuf) < 0)
                                     H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                 /* reclaim any VL memory, if necessary */
                                 if (vl_data)
                                     H5Treclaim(wtype_id, mem_space, H5P_DEFAULT, dataBuf);
 
-				if (H5Sclose(mem_space) < 0) 
-				    H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
+                                if (H5Sclose(mem_space) < 0)
+                                    H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
 
                                 HDfree(dataBuf);
-			    }
+                            }
 
                             if (H5Sclose(f_space_id) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
