@@ -1695,7 +1695,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     void *                     mpi_bufs_base     = NULL;
     MPI_Aint                   mpi_bufs_base_Aint;
     MPI_Aint *                 mpi_bufs          = NULL;
-    MPI_Aint *                 mpi_displacments  = NULL;
+    MPI_Aint *                 mpi_displacements = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
@@ -1816,7 +1816,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
-                (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
+                (NULL == (mpi_displacements = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
                 (NULL == (mpi_bufs = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint))))) {
 
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
@@ -1868,7 +1868,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                 /* Add to block lengths and displacements arrays */
                 mpi_block_lengths[i] = (int)size;
-                mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
+                mpi_displacements[i] = (MPI_Aint)s_addrs[i];
 
                 /* convert s_bufs[i] to MPI_Aint... */
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_address(s_bufs[i], &(mpi_bufs[i]))))
@@ -1939,12 +1939,12 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* create the file MPI derived type */
             if (sub_types) {
                 if (MPI_SUCCESS !=
-                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacements,
                                                        sub_types, &file_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
             }
             else if (MPI_SUCCESS !=
-                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacements,
                                                           MPI_BYTE, &file_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
@@ -1953,6 +1953,32 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
 
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
+
+            /* Free up memory used to build types */
+            HDassert(mpi_block_lengths);
+            HDfree(mpi_block_lengths);
+            mpi_block_lengths = NULL;
+
+            HDassert(mpi_displacements);
+            HDfree(mpi_displacements);
+            mpi_displacements = NULL;
+
+            HDassert(mpi_bufs);
+            HDfree(mpi_bufs);
+            mpi_bufs = NULL;
+
+            if(sub_types) {
+                HDassert(sub_types);
+
+                for (i = 0; i < (int)count; i++)
+                    if (sub_types_created[i])
+                        MPI_Type_free(&sub_types[i]);
+
+                HDfree(sub_types);
+                sub_types = NULL;
+                HDfree(sub_types_created);
+                sub_types_created = NULL;
+            }
 
             /* some numeric conversions */
             if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
@@ -2249,44 +2275,54 @@ done:
         }
     }
 
-    if (mpi_block_lengths) {
-
-        HDfree(mpi_block_lengths);
-        mpi_block_lengths = NULL;
-    }
-
-    if (mpi_displacments) {
-
-        HDfree(mpi_displacments);
-        mpi_displacments = NULL;
-    }
-
-    if (mpi_bufs) {
-
-        HDfree(mpi_bufs);
-        mpi_bufs = NULL;
-    }
-
     if (buf_type_created) {
         MPI_Type_free(&buf_type);
-    }
-
-    if (sub_types) {
-        HDassert(sub_types_created);
-
-        for (i = 0; i < (int)count; i++)
-            if (sub_types_created[i])
-                MPI_Type_free(&sub_types[i]);
-
-        HDfree(sub_types);
-        sub_types = NULL;
-        HDfree(sub_types_created);
-        sub_types_created = NULL;
     }
 
     if (file_type_created) {
         MPI_Type_free(&file_type);
     }
+
+    /* Clean up on error */
+    if (ret_value < 0) {
+        if (mpi_block_lengths) {
+
+            HDfree(mpi_block_lengths);
+            mpi_block_lengths = NULL;
+        }
+
+        if (mpi_displacements) {
+
+            HDfree(mpi_displacements);
+            mpi_displacements = NULL;
+        }
+
+        if (mpi_bufs) {
+
+            HDfree(mpi_bufs);
+            mpi_bufs = NULL;
+        }
+
+        if (sub_types) {
+            HDassert(sub_types_created);
+
+            for (i = 0; i < (int)count; i++)
+                if (sub_types_created[i])
+                    MPI_Type_free(&sub_types[i]);
+
+            HDfree(sub_types);
+            sub_types = NULL;
+            HDfree(sub_types_created);
+            sub_types_created = NULL;
+        }
+    }
+
+    /* Make sure we cleaned up */
+    HDassert(!mpi_block_lengths);
+    HDassert(!mpi_displacements);
+    HDassert(!mpi_bufs);
+    HDassert(!sub_types);
+    HDassert(!sub_types_created);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -2355,7 +2391,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     void *                     mpi_bufs_base     = NULL;
     MPI_Aint                   mpi_bufs_base_Aint;
     MPI_Aint *                 mpi_bufs          = NULL;
-    MPI_Aint *                 mpi_displacments  = NULL;
+    MPI_Aint *                 mpi_displacements = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
@@ -2431,7 +2467,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             hsize_t bigio_count; /* Transition point to create derived type */
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
-                (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
+                (NULL == (mpi_displacements = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
                 (NULL == (mpi_bufs = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint))))) {
 
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
@@ -2486,7 +2522,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
                 /* Add to block lengths and displacements arrays */
                 mpi_block_lengths[i] = (int)size;
-                mpi_displacments[i]  = (MPI_Aint)s_addrs[i];
+                mpi_displacements[i] = (MPI_Aint)s_addrs[i];
 
                 /* convert s_bufs[i] to MPI_Aint... */
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_address(s_bufs[i], &(mpi_bufs[i]))))
@@ -2557,12 +2593,12 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             /* create the file MPI derived type */
             if (sub_types) {
                 if (MPI_SUCCESS !=
-                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacments,
+                    (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacements,
                                                        sub_types, &file_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
             }
             else if (MPI_SUCCESS !=
-                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacments,
+                     (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacements,
                                                           MPI_BYTE, &file_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
@@ -2571,6 +2607,32 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
 
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
+
+            /* Free up memory used to build types */
+            HDassert(mpi_block_lengths);
+            HDfree(mpi_block_lengths);
+            mpi_block_lengths = NULL;
+
+            HDassert(mpi_displacements);
+            HDfree(mpi_displacements);
+            mpi_displacements = NULL;
+
+            HDassert(mpi_bufs);
+            HDfree(mpi_bufs);
+            mpi_bufs = NULL;
+
+            if(sub_types) {
+                HDassert(sub_types);
+
+                for (i = 0; i < (int)count; i++)
+                    if (sub_types_created[i])
+                        MPI_Type_free(&sub_types[i]);
+
+                HDfree(sub_types);
+                sub_types = NULL;
+                HDfree(sub_types_created);
+                sub_types_created = NULL;
+            }
         }
         else {
 
@@ -2750,24 +2812,6 @@ done:
         }
     }
 
-    if (mpi_block_lengths) {
-
-        HDfree(mpi_block_lengths);
-        mpi_block_lengths = NULL;
-    }
-
-    if (mpi_displacments) {
-
-        HDfree(mpi_displacments);
-        mpi_displacments = NULL;
-    }
-
-    if (mpi_bufs) {
-
-        HDfree(mpi_bufs);
-        mpi_bufs = NULL;
-    }
-
     if (buf_type_created) {
         MPI_Type_free(&buf_type);
     }
@@ -2776,18 +2820,46 @@ done:
         MPI_Type_free(&file_type);
     }
 
-    if (sub_types) {
-        HDassert(sub_types_created);
+    /* Clean up on error */
+    if (ret_value < 0) {
+        if (mpi_block_lengths) {
 
-        for (i = 0; i < (int)count; i++)
-            if (sub_types_created[i])
-                MPI_Type_free(&sub_types[i]);
+            HDfree(mpi_block_lengths);
+            mpi_block_lengths = NULL;
+        }
 
-        HDfree(sub_types);
-        sub_types = NULL;
-        HDfree(sub_types_created);
-        sub_types_created = NULL;
+        if (mpi_displacements) {
+
+            HDfree(mpi_displacements);
+            mpi_displacements = NULL;
+        }
+
+        if (mpi_bufs) {
+
+            HDfree(mpi_bufs);
+            mpi_bufs = NULL;
+        }
+
+        if (sub_types) {
+            HDassert(sub_types_created);
+
+            for (i = 0; i < (int)count; i++)
+                if (sub_types_created[i])
+                    MPI_Type_free(&sub_types[i]);
+
+            HDfree(sub_types);
+            sub_types = NULL;
+            HDfree(sub_types_created);
+            sub_types_created = NULL;
+        }
     }
+
+    /* Make sure we cleaned up */
+    HDassert(!mpi_block_lengths);
+    HDassert(!mpi_displacements);
+    HDassert(!mpi_bufs);
+    HDassert(!sub_types);
+    HDassert(!sub_types_created);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
