@@ -97,35 +97,35 @@ static const char *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-static const char *           s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
-static struct h5_long_options l_opts[] = {{"align", require_arg, 'a'},
-                                          {"api", require_arg, 'A'},
+static const char *        s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+static struct long_options l_opts[] = {{"align", require_arg, 'a'},
+                                       {"api", require_arg, 'A'},
 #if 0
     /* a sighting of the elusive binary option */
     { "binary", no_arg, 'b' },
 #endif /* 0 */
-                                          {"block-size", require_arg, 'B'},
-                                          {"chunk", no_arg, 'c'},
-                                          {"collective", no_arg, 'C'},
-                                          {"debug", require_arg, 'D'},
-                                          {"file-driver", require_arg, 'v'},
-                                          {"geometry", no_arg, 'g'},
-                                          {"help", no_arg, 'h'},
-                                          {"interleaved", require_arg, 'I'},
-                                          {"max-num-processes", require_arg, 'P'},
-                                          {"min-num-processes", require_arg, 'p'},
-                                          {"max-xfer-size", require_arg, 'X'},
-                                          {"min-xfer-size", require_arg, 'x'},
-                                          {"num-bytes", require_arg, 'e'},
-                                          {"num-dsets", require_arg, 'd'},
-                                          {"num-files", require_arg, 'F'},
-                                          {"num-iterations", require_arg, 'i'},
-                                          {"order", require_arg, 'r'},
-                                          {"output", require_arg, 'o'},
-                                          {"extendable", no_arg, 't'},
-                                          {"threshold", require_arg, 'T'},
-                                          {"write-only", require_arg, 'w'},
-                                          {NULL, 0, '\0'}};
+                                       {"block-size", require_arg, 'B'},
+                                       {"chunk", no_arg, 'c'},
+                                       {"collective", no_arg, 'C'},
+                                       {"debug", require_arg, 'D'},
+                                       {"file-driver", require_arg, 'v'},
+                                       {"geometry", no_arg, 'g'},
+                                       {"help", no_arg, 'h'},
+                                       {"interleaved", require_arg, 'I'},
+                                       {"max-num-processes", require_arg, 'P'},
+                                       {"min-num-processes", require_arg, 'p'},
+                                       {"max-xfer-size", require_arg, 'X'},
+                                       {"min-xfer-size", require_arg, 'x'},
+                                       {"num-bytes", require_arg, 'e'},
+                                       {"num-dsets", require_arg, 'd'},
+                                       {"num-files", require_arg, 'F'},
+                                       {"num-iterations", require_arg, 'i'},
+                                       {"order", require_arg, 'r'},
+                                       {"output", require_arg, 'o'},
+                                       {"extendable", no_arg, 't'},
+                                       {"threshold", require_arg, 'T'},
+                                       {"write-only", require_arg, 'w'},
+                                       {NULL, 0, '\0'}};
 
 struct options {
     long        io_types;            /* bitmask of which I/O types to test   */
@@ -857,19 +857,19 @@ parse_command_line(int argc, const char *const *argv)
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
-                cl_opts->h5_alignment = parse_size_directive(H5_optarg);
+                cl_opts->h5_alignment = parse_size_directive(opt_arg);
                 break;
             case 'G':
-                cl_opts->page_size = parse_size_directive(H5_optarg);
+                cl_opts->page_size = parse_size_directive(opt_arg);
                 break;
             case 'b':
-                cl_opts->page_buffer_size = parse_size_directive(H5_optarg);
+                cl_opts->page_buffer_size = parse_size_directive(opt_arg);
                 break;
             case 'A': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 while (end && *end != '\0') {
                     char buf[10];
 
@@ -907,7 +907,7 @@ parse_command_line(int argc, const char *const *argv)
                 /* Turn on chunked HDF5 dataset creation */
                 cl_opts->h5_use_chunks = 1;
                 {
-                    const char *end = H5_optarg;
+                    const char *end = opt_arg;
                     int         j   = 0;
 
                     while (end && *end != '\0') {
@@ -934,7 +934,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'D': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -990,7 +990,7 @@ parse_command_line(int argc, const char *const *argv)
 
             break;
             case 'e': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1017,38 +1017,38 @@ parse_command_line(int argc, const char *const *argv)
             break;
 
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = HDatoi(opt_arg);
                 break;
             case 'o':
-                cl_opts->output_file = H5_optarg;
+                cl_opts->output_file = opt_arg;
                 break;
             case 'T':
-                cl_opts->h5_threshold = parse_size_directive(H5_optarg);
+                cl_opts->h5_threshold = parse_size_directive(opt_arg);
                 break;
             case 'v':
-                if (!HDstrcasecmp(H5_optarg, "sec2")) {
+                if (!HDstrcasecmp(opt_arg, "sec2")) {
                     cl_opts->vfd = sec2;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "stdio")) {
+                else if (!HDstrcasecmp(opt_arg, "stdio")) {
                     cl_opts->vfd = stdio;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "core")) {
+                else if (!HDstrcasecmp(opt_arg, "core")) {
                     cl_opts->vfd = core;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "split")) {
+                else if (!HDstrcasecmp(opt_arg, "split")) {
                     cl_opts->vfd = split;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "multi")) {
+                else if (!HDstrcasecmp(opt_arg, "multi")) {
                     cl_opts->vfd = multi;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "family")) {
+                else if (!HDstrcasecmp(opt_arg, "family")) {
                     cl_opts->vfd = family;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "direct")) {
+                else if (!HDstrcasecmp(opt_arg, "direct")) {
                     cl_opts->vfd = direct;
                 }
                 else {
-                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", H5_optarg);
+                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", opt_arg);
                     HDexit(EXIT_FAILURE);
                 }
                 break;
@@ -1059,7 +1059,7 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->h5_extendable = TRUE;
                 break;
             case 'x': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1086,7 +1086,7 @@ parse_command_line(int argc, const char *const *argv)
             break;
 
             case 'r': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
