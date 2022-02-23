@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - CPack will now generate RPM/DEB packages.
+
+      Enabled the RPM and DEB CPack generators on linux. In addition to
+      generating STGZ and TGZ packages, CPack will try to package the 
+      library for RPM and DEB packages. This is the initial attempt and
+      may change as issues are resolved.
+
+      (ADB - 2022/01/27)
+
     - Added new option to the h5cc scripts produced by CMake.
 
       Add -showconfig option to h5cc scripts that cat the 
