@@ -240,6 +240,9 @@ typedef struct _info_header { /* Header for a driver info message */
 #define WRITE_INDEP_DATA (DATA_PART | WRITE_OP)
 
 #define READ_INDEP_DATA (DATA_PART | READ_OP)
+
+#define GET_EOF_COMPLETED (COMPLETED | GET_EOF_OP)
+
 #define SET_LOGGING     (LOGGING_OP)
 
 #define INT32_MASK 0x07FFFFFFFFFFFFFFF
@@ -250,12 +253,18 @@ typedef struct _info_header { /* Header for a driver info message */
  * message.
  *
  * We currently ONLY use READ_OP and WRITE_OP
+ *
+ * Added TRUNC_OP 12/15/21 -- JRM
+ *
+ * Added GET_EOF_OP 12/28/21 -- JRM
  */
 typedef enum io_ops {
     READ_OP    = 1,
     WRITE_OP   = 2,
     OPEN_OP    = 3,
     CLOSE_OP   = 4,
+    TRUNC_OP   = 5,
+    GET_EOF_OP = 6,
     FINI_OP    = 8,
     LOGGING_OP = 16
 } io_op_t;
@@ -378,6 +387,7 @@ extern atomic_int sf_file_open_count;
 extern atomic_int sf_file_close_count;
 extern atomic_int sf_shutdown_flag;
 extern atomic_int sf_io_ops_pending;
+extern atomic_int sf_ioc_ready;
 
 #if 1 /* JRM */ /* this belongs in an IOC private header file */
 
@@ -699,6 +709,11 @@ struct hg_thread_work {
  * ind_write_requests Number of independent write requests received by the
  *          IOC to date.
  *
+ * truncate_requests:  Number of truncate requests received by the IOC to
+ *           date.
+ *
+ * get_eof_requests: Number fo get EOF request received by the IO to date.
+ *
  * requests_queued: Number of I/O requests received and placed on the IOC
  *          I/O queue.
  *
@@ -731,6 +746,8 @@ typedef struct H5FD_ioc_io_queue {
     int32_t max_num_in_progress;
     int64_t ind_read_requests;
     int64_t ind_write_requests;
+    int64_t truncate_requests;
+    int64_t get_eof_requests;
     int64_t requests_queued;
     int64_t requests_dispatched;
     int64_t requests_completed;

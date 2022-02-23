@@ -407,7 +407,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #endif /* JRM */
             }
 
-            /* Now we can set the SUBFILING fapl befor returning. */
+            /* Now we can set the SUBFILING fapl before returning. */
             if ((pass) && (H5Pset_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
 
                 pass         = FALSE;
@@ -415,6 +415,13 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             }
 
 #endif /* JRM */
+
+            /* set the MPI communicator and info in the FAPL */
+            if ( H5Pset_mpi_params(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0 ) {
+
+                pass         = FALSE;
+                failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
+            }
         }
         else {
             pass         = FALSE;

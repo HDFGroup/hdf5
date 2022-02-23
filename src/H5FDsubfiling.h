@@ -266,6 +266,14 @@ H5_DLL int sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t 
 
 H5_DLL int sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
 
+H5_DLL int sf_truncate(int fd, int64_t length, int subfile_rank);
+
+H5_DLL herr_t H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id);
+
+H5_DLL int report_sf_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+
+H5_DLL herr_t H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id);
+
 #ifdef __cplusplus
 }
 #endif

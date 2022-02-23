@@ -1346,6 +1346,8 @@ test_create_and_close(void)
     struct subfilingtest_filenames names;
     hid_t                          file_id = H5I_INVALID_HID;
     hid_t                          fapl_id = H5P_DEFAULT;
+    MPI_Info                       info    = MPI_INFO_NULL;
+    MPI_Comm                       comm    = MPI_COMM_WORLD;
 
     TESTING("File creation and immediate close");
 
@@ -1355,6 +1357,10 @@ test_create_and_close(void)
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
+
+    /* set the MPI communicator and info in the FAPL */
+    if ( H5Pset_mpi_params(fapl_id, comm, info) < 0 )
+        TEST_ERROR;
 
     /* -------------------- */
     /* TEST: Create and Close */
@@ -1888,6 +1894,9 @@ test_basic_dataset_write(void)
     hid_t                          dset_id   = H5I_INVALID_HID;
     hid_t                          dspace_id = H5I_INVALID_HID;
     hid_t                          dtype_id  = H5T_NATIVE_INT;
+    MPI_Info                       info      = MPI_INFO_NULL;
+    MPI_Comm                       comm      = MPI_COMM_WORLD;
+
 
     hid_t file_dataspace; /* File dataspace ID */
     hid_t mem_dataspace;  /* memory dataspace ID */
@@ -1927,6 +1936,10 @@ test_basic_dataset_write(void)
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
+
+    /* set the MPI communicator and info in the FAPL */
+    if ( H5Pset_mpi_params(fapl_id, comm, info) < 0 )
+        TEST_ERROR;
 
     /* Prepare data to be written
      */
@@ -2687,11 +2700,24 @@ main(int argc, char **argv)
 
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
-        // sleep(1);
+        
+#if 1 /* JRM */ /* skip remaining tests for now since they hang */
+        {
+            int         mpi_rank;
+
+            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+            if (mpi_rank == 0) {
+                SKIPPED();
+                HDputs("    Skipping remaining eests due to hang -- remove this skip to reproduce ");
+            }
+        }
+        MPI_Finalize();
+        HDexit(EXIT_FAILURE);
+#endif /* JRM */ /* skip remaining test for now since they hang */
+
         nerrors -= test_create_and_close();
-        // sleep(1);
         nerrors -= test_basic_dataset_write();
-        // sleep(1);
 #if 0
         nerrors -= test_chunked_dataset_write();
         nerrors -= test_on_disk_zoo();

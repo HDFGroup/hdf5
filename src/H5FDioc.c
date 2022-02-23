@@ -757,9 +757,16 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
     H5P_genplist_t *         plist_ptr = NULL;
     H5FD_t *                 ret_value = NULL;
     int                      l_error = 0, g_error = 0, mpi_enabled = 0;
+    int                      mpi_code;         /* MPI return code */
+
     FUNC_ENTER_STATIC
 
     H5FD_IOC_LOG_CALL(FUNC);
+
+#if 0 /* JRM */ /* delete this eventually */
+    HDfprintf(stdout, "\n\nH5FD__ioc_open: entering.\n\n");
+    HDfflush(stdout);
+#endif /* JRM */ /* delete this eventually */
 
     /* Check arguments */
     if (!name || !*name)
@@ -890,6 +897,33 @@ done:
             H5FL_FREE(H5FD_ioc_t, file_ptr);
         }
     } /* end if error */
+#if 1 /* JRM */
+    /* run a barrier just before exit.  The objective is to 
+     * ensure that the IOCs are fully up and running before 
+     * we proceed.  Note that this barrier is not sufficient
+     * by itself -- we also need code in initialize_ioc_threads()
+     * to wait until the main IOC thread has finished its 
+     * initialization.
+     */
+    /* TODO: don't use MPI_COMM_WORLD here -- use communicator supplied in the open instead */
+    /* Adendum:  Consider creating a copy of the supplied communicator for exclusing use by
+     *           the VFD.  I can't say that this is necessary, but it is a plausible cause
+     *           of the hangs observed with sub-filing.           -- JRM
+     */
+
+#if 0 /* JRM */ /* remove eventually */
+    HDfprintf(stdout, "\nH5FD__ioc_open: entering terminal barrier.\n");
+    HDfflush(stdout);
+#endif /* JRM */ /* remove eventually */
+
+    if ( ( mpi_code = MPI_Barrier(MPI_COMM_WORLD) ) != MPI_SUCCESS ) {
+        HMPI_DONE_ERROR(NULL, "Barrier failed", mpi_code)
+    } 
+#endif /* JRM */
+#if 0 /* JRM */
+    HDfprintf(stdout, "\n\nH5FD__ioc_open: exiting.\n\n");
+    HDfflush(stdout);
+#endif /* JRM */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_open() */

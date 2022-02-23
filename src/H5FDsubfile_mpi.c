@@ -131,6 +131,7 @@ H5FD_ioc_io_queue_t io_queue_g = {
     /* max_num_in_progress = */ 0,
     /* ind_read_requests   = */ 0,
     /* ind_write_requests  = */ 0,
+    /* truncate_requests   = */ 0,
     /* requests_queued     = */ 0,
     /* requests_dispatched = */ 0,
     /* requests_completed  = */ 0
@@ -1455,6 +1456,7 @@ errors:
     return FAIL;
 }
 
+#if 0 /* JRM */ /* delete this -- superceeded version of sf_truncate */
 int
 sf_truncate(hid_t h5_fid, haddr_t H5_ATTR_PARALLEL_UNUSED addr)
 {
@@ -1464,6 +1466,7 @@ sf_truncate(hid_t h5_fid, haddr_t H5_ATTR_PARALLEL_UNUSED addr)
     assert(sf_context != NULL);
     return 0;
 }
+#endif /* JRM */ /* delete this */
 
 #if 1 /* JRM */ /* delete this if all goes well */
 int
@@ -1726,6 +1729,11 @@ ioc_main(int64_t context_id)
     subfiling_context_t *context = get__subfiling_object(context_id);
     double               queue_start_time;
 
+#if 0 /* JRM */
+    HDfprintf(stdout, "\n\nioc_main: entering.\n\n");
+    HDfflush(stdout);
+#endif /* JRM */
+
     assert(context != NULL);
     /* We can't have opened any files at this point..
      * The file open approach has changed so that the normal
@@ -1744,25 +1752,40 @@ ioc_main(int64_t context_id)
     /* Initialize atomic vars */
     /* JRM */ /* delete most of these? */
     atomic_init(&sf_workinprogress, 0);
+#if 1 /* JRM */
     atomic_init(&sf_work_pending, 0);
+#endif /* JRM */
     atomic_init(&sf_file_close_count, 0);
     atomic_init(&sf_file_refcount, 0);
     atomic_init(&sf_ioc_fini_refcount, 0);
     atomic_init(&sf_shutdown_flag, 0);
-    atomic_init(&sf_ioc_ready, 1);
 #if 1           /* JRM */
-    /* this variable is incremented by tpool_add_work(), and decremented when the
-     * received I/O request is completed.
+    /* this variable is incremented by H5FD_ioc__queue_io_q_entry() when work 
+     * is added to the I/O request queue, and decremented by H5FD_ioc__complete_io_q_entry()
+     * when an I/O request is completed and removed from the queue..
      *
      * On shutdown, we must wait until this field is decremented to zero before
      * taking down the thread pool.
+     *
+     * Note that this is a convenience variable -- we could use io_queue_g.q_len instead.
+     * However, accessing this field requires locking io_queue_g.q_mutex.
      */
+#if 0 /* JRM */
+    HDfprintf(stdout, "\n\nioc_main: setting sf_io_ops_pending to zero.  sf_io_ops_pending = %d.\n\n",
+             atomic_load(&sf_io_ops_pending));
+    HDfflush(stdout);
+#endif /* JRM */
     atomic_init(&sf_io_ops_pending, 0);
 #endif          /* JRM */
+    /* tell initialize_ioc_threads() that ioc_main() is ready to enter its main loop */
+    atomic_init(&sf_ioc_ready, 1);
     shutdown_requested = 0;
 
-    while ((!shutdown_requested) || (0 < atomic_load(&sf_io_ops_pending)) || sf_work_pending) {
-
+    while ((!shutdown_requested) || (0 < atomic_load(&sf_io_ops_pending)) 
+#if 1 /* JRM */
+           || (0 < atomic_load(&sf_work_pending))
+#endif /* JRM */
+    ) {
         flag = 0;
         ret  = MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag, &status);
         if ((ret == MPI_SUCCESS) && (flag != 0)) {
@@ -1774,9 +1797,10 @@ ioc_main(int64_t context_id)
             int                tag          = status.MPI_TAG;
 
 #if 1  /* JRM */
-            if ((tag != READ_INDEP) && (tag != WRITE_INDEP)) {
+            if ((tag != READ_INDEP) && (tag != WRITE_INDEP) && (tag != TRUNC_OP) && (tag != GET_EOF_OP)) {
 
-                HDprintf("\n\nioc_main: recieved non READ_INDEP / WRITE_INDEP mssg. tag = %d.\n\n", tag);
+                HDprintf("\n\nioc_main: recieved non READ_INDEP / WRITE_INDEP / TRUNC_OP / GET_EOF_OP mssg. tag = %d.\n\n",
+                         tag);
                 HDfflush(stdout);
             }
 #endif /* JRM */
@@ -1819,11 +1843,9 @@ ioc_main(int64_t context_id)
                 wk_req.start_time   = queue_start_time;
                 wk_req.buffer       = NULL;
 
-                curr_io_ops_pending = atomic_fetch_add(&sf_io_ops_pending, 1);
-
-                HDassert(curr_io_ops_pending >= 0);
-
                 H5FD_ioc__queue_io_q_entry(&wk_req);
+
+                HDassert(atomic_load(&sf_io_ops_pending) >= 0);
 
                 H5FD_ioc__dispatch_elegible_io_q_entries();
             }
@@ -1836,6 +1858,11 @@ ioc_main(int64_t context_id)
 
     /* Reset the shutdown flag */
     atomic_init(&sf_shutdown_flag, 0);
+
+#if 0 /* JRM */
+    HDfprintf(stdout, "\n\nioc_main: exiting.\n\n");
+    HDfflush(stdout);
+#endif /* JRM */
 
     return 0;
 
@@ -2718,3 +2745,75 @@ sf_subfile_set_logging(hid_t sf_fid, int ioc_rank, int flag)
     }
     return status;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    report_sf_eof
+ *
+ * Purpose:     Determine the target sub-file's eof and report this value
+ *              to the requesting rank.
+ *
+ *              Notes: This functin will have to be reworked once we solve
+ *                     the IOC error reporting problem.
+ *
+ *                     This function mixes functionality that should be
+ *                     in two different VFDs.
+ *
+ * Return:      0 if sucessful, 1 or an MPI error code on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int
+report_sf_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
+{
+    int                  fd;
+    int                  mpi_ret;
+    int64_t              eof_req_reply[3];
+    int64_t              file_context_id;
+    subfiling_context_t *sf_context = NULL;
+    h5_stat_t            sb;
+
+    HDassert(msg);
+
+    /* first get the EOF of the target file. */
+
+    file_context_id = msg->header[2];
+
+    if ( NULL == (sf_context = get__subfiling_object(file_context_id)) ) {
+
+        HDfprintf(stdout, "report_sf_eof: get__subfiling_object() failed.\n");
+        HDfflush(stdout);
+        return(1);
+    }
+
+    fd = sf_context->sf_fid;
+
+    if (HDfstat(fd, &sb) < 0) {
+
+        HDfprintf(stdout, "report_sf_eof: get__subfiling_object() failed.\n");
+        HDfflush(stdout);
+        return(1);
+    }
+
+    eof_req_reply[0] = (int64_t)subfile_rank;
+    eof_req_reply[1] = (int64_t)(sb.st_size);
+    eof_req_reply[2] = 0; /* not used */
+
+    /* return the subfile EOF to the querying rank */
+    if ( MPI_SUCCESS != (mpi_ret = MPI_Send(eof_req_reply, 3, MPI_INT64_T, source, GET_EOF_COMPLETED, comm)) ) {
+
+        HDfprintf(stdout, "report_sf_eof: MPI_Send failed -- return code = %d.\n", mpi_ret);
+        HDfflush(stdout);
+        return(mpi_ret);
+    }
+
+    return 0;
+
+} /* report_sf_eof() */
+
+

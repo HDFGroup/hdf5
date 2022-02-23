@@ -200,10 +200,16 @@ initialize_ioc_threads(void *_sf_context)
      * 3. Pointer to the input argument that gets passed along to the user
      * function.
      */
+    atomic_init(&sf_ioc_ready, 0);
     status = hg_thread_create(&ioc_thread, ioc_thread_main, (void *)context_id);
     if (status) {
         puts("hg_thread_create failed");
         goto err_exit;
+    } else { /* wait until ioc_main() reports that it is ready */
+        while ( atomic_load(&sf_ioc_ready) != 1 ) {
+
+            usleep(20);
+        }
     }
 
 #ifndef NDEBUG
@@ -261,6 +267,12 @@ translate_opcode(io_op_t op)
         case CLOSE_OP:
             return "CLOSE_OP";
             break;
+        case TRUNC_OP:
+            return "TRUNC_OP";
+            break;
+        case GET_EOF_OP:
+            return "GET_EOF_OP";
+            break;
         case FINI_OP:
             return "FINI_OP";
             break;
@@ -308,17 +320,24 @@ handle_work_request(void *arg)
     sf_context = get__subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
+#if 0 /* JRM */
+    HDfprintf(stdout, "\nhandle_work_request: context_id = %lld, msg->tag = %d\n", (long long)(file_context_id), (int)(msg->tag));
+    HDfflush(stdout);
+#endif /* JRM */
+
     atomic_fetch_add(&sf_work_pending, 1); // atomic
     msg->in_progress = 1;
     switch (msg->tag) {
         case WRITE_INDEP:
             status = queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
             break;
+
         case READ_INDEP:
             if (msg->serialize)
                 ioc__wait_for_serialize(arg); // wait for dependency
             status = queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
             break;
+
         default:
             HDprintf("[ioc(%d)] received message tag(%x)from rank %d\n", msg->subfile_rank, msg->tag,
                      msg->source);
@@ -371,16 +390,36 @@ handle_work_request(void *arg)
     sf_context = get__subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
+#if 1 /* JRM */
     atomic_fetch_add(&sf_work_pending, 1); // atomic
+#endif /* JRM */
     msg->in_progress = 1;
+#if 0 /* JRM */
+    HDfprintf(stdout, "\n\nhandle_work_request: beginning execution of request %d. op = %d, offset/len = %lld/%lld.\n",
+              q_entry_ptr->counter, (msg->tag), (long long)(msg->header[1]), (long long)(msg->header[0]));
+    HDfflush(stdout);
+#endif /* JRM */
     switch (msg->tag) {
         case WRITE_INDEP:
             status = queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm,
                                        q_entry_ptr->counter);
             break;
+
         case READ_INDEP:
             status = queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
             break;
+
+        case TRUNC_OP:
+            status = sf_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0], sf_context->topology->subfile_rank);
+            break;
+
+        case GET_EOF_OP:
+            /* Use of data comm to return EOF to the requesting rank seems a bit odd, but follow existing
+             * convention for now.
+             */
+            status = report_sf_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            break;
+
         default:
             HDprintf("[ioc(%d)] received message tag(%x)from rank %d\n", msg->subfile_rank, msg->tag,
                      msg->source);
@@ -401,7 +440,7 @@ handle_work_request(void *arg)
     }
 
 #if 1  /* JRM */
-    curr_io_ops_pending = atomic_fetch_sub(&sf_io_ops_pending, 1);
+    curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
     if (curr_io_ops_pending <= 0) {
 
         HDprintf("\n\nhandle_work_request: curr_io_ops_pending = %d, op = %d, offset/len = %lld/%lld.\n\n",
@@ -414,6 +453,8 @@ handle_work_request(void *arg)
 
     /* complete the I/O request */
     H5FD_ioc__complete_io_q_entry(q_entry_ptr);
+
+    HDassert(atomic_load(&sf_io_ops_pending) >= 0);
 
     /* Check the I/O Queue to see if there are any dispatchable entries */
     H5FD_ioc__dispatch_elegible_io_q_entries();
@@ -786,6 +827,19 @@ H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
 
     HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
 
+    atomic_fetch_sub(&sf_io_ops_pending, 1);
+
+#if 0 /* JRM */
+    HDfprintf(stdout, 
+           "\n\nH5FD_ioc__complete_io_q_entry: request %d completed. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
+              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
+              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+              atomic_load(&sf_io_ops_pending));
+    HDfflush(stdout);
+#endif /* JRM */
+
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
+
 #if H5FD_IOC__COLLECT_STATS
 #if 0 /* no place to collect this yet */
     /* Compute the queued and execution time */
@@ -834,6 +888,13 @@ H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
  *
  *              Do this to maintain the POSIX semantics required by
  *              HDF5.
+ *
+ *              Note that TRUNC_OPs and GET_EOF_OPs are a special case.
+ *              Specifically, no I/O queue entry can be dispatched if
+ *              there is a truncate or get EOF operation between it and
+ *              the head of the queue.  Further, a truncate or get EOF
+ *              request cannot be executed unless it is at the head of
+ *              the queue.
  *
  * Return:      void.
  *
@@ -884,6 +945,19 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
             HDassert((scan_ptr == NULL) || (scan_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC));
 
+            if ( ( entry_ptr->wk_req.tag == TRUNC_OP ) || ( entry_ptr->wk_req.tag == GET_EOF_OP ) ) {
+
+                if ( scan_ptr != NULL ) {
+
+                    /* the TRUNC_OP or GET_EOF_OP is not at the head of the queue, and thus cannot
+                     * be dispatched.  Further, no operation can be dispatched if a truncate request
+                     * appears before it in the queue.  Thus we have done all we can and will break
+                     * out of the loop.
+                     */
+                    break;
+                }
+            }
+
             while ((scan_ptr) && (!conflict_detected)) {
 
                 /* check for overlaps */
@@ -933,16 +1007,37 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
                 io_queue_g.requests_dispatched++;
 
+#if 0 /* JRM */
+                HDfprintf(stdout, 
+"\n\nH5FD_ioc__dispatch_elegible_io_q_entries: request %d dispatched. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
+                    entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
+                    (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+                    atomic_load(&sf_io_ops_pending));
+                HDfflush(stdout);
+#endif /* JRM */
+
                 entry_ptr->dispatch_time = H5_now_usec();
 
 #endif /* H5FD_IOC__COLLECT_STATS */
 
                 hg_thread_pool_post(ioc_thread_pool, &(entry_ptr->thread_wk));
             }
+        } else if ( ( entry_ptr->wk_req.tag == TRUNC_OP ) || ( entry_ptr->wk_req.tag == GET_EOF_OP ) ) {
+
+            /* we have a truncate or get eof operation in progress -- thus no other operations
+             * can be dispatched until the truncate or get eof operation completes.  Just break
+             * out of the loop.
+             */
+            /* the truncate or get eof operation in progress must be at the head of the queue -- verify this */
+            HDassert(entry_ptr->prev == NULL);
+
+            break;
         }
 
         entry_ptr = entry_ptr->next;
     }
+
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
 
     hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
 
@@ -1033,11 +1128,24 @@ H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
     /* must obtain io_queue_g mutex before appending */
     hg_thread_mutex_lock(&(io_queue_g.q_mutex));
 
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
+
     entry_ptr->counter = io_queue_g.req_counter++;
 
     io_queue_g.num_pending++;
 
     H5FD_IOC__Q_APPEND(&io_queue_g, entry_ptr);
+
+    atomic_fetch_add(&sf_io_ops_pending, 1);
+
+#if 0 /* JRM */
+    HDfprintf(stdout, 
+              "\n\nH5FD_ioc__queue_io_q_entry: request %d queued. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
+              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
+              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+              atomic_load(&sf_io_ops_pending));
+    HDfflush(stdout);
+#endif /* JRM */
 
     HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
 
@@ -1063,10 +1171,29 @@ H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
 
         io_queue_g.ind_write_requests++;
     }
+    else if (entry_ptr->wk_req.tag == TRUNC_OP) {
+
+        io_queue_g.truncate_requests++;
+    }
+    else if (entry_ptr->wk_req.tag == GET_EOF_OP) {
+
+        io_queue_g.get_eof_requests++;
+    }
 
     io_queue_g.requests_queued++;
 
 #endif /* H5FD_IOC__COLLECT_STATS */
+
+#if 0 /* JRM */ 
+    if ( io_queue_g.q_len != atomic_load(&sf_io_ops_pending) ) {
+
+        HDfprintf(stdout, "\n\nH5FD_ioc__queue_io_q_entry: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).\n\n", 
+                  io_queue_g.q_len, atomic_load(&sf_io_ops_pending));
+        HDfflush(stdout);
+    }
+#endif /* JRM */
+
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
 
     hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
 
