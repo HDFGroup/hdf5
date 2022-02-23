@@ -20,15 +20,14 @@ Notes: This short instruction is written for users who want to quickly
 I. Preconditions
 ========================================================================
 
-   1. We suggest you obtain the latest CMake for windows from the Kitware
+   1. We suggest you obtain the latest CMake for your platform from the Kitware
       web site. The HDF5 1.10.x product requires a minimum CMake version
       of 3.12. If you are using VS2019, the minimum version is 3.15.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows or the *.sh on Linux). If you are using a Windows platform,
-      you can obtain a pre-built Windows binary from The HDF Group's website
-      at www.hdfgroup.org.
+      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      from The HDF Group's website at www.hdfgroup.org.
 
 
 

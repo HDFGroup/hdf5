@@ -29,27 +29,30 @@ Notes: This short instruction is written for users who want to quickly
             of using a ctest script for building and testing. See
             INSTALL_CMake.txt for more information.
 
+         4. See https://cmake.org/cmake/help/latest/command/find_package.html
+            for more information on the CMake "Config Mode Search Procedure".
 
 
 ========================================================================
 I. Preconditions
 ========================================================================
 
-   1. We suggest you obtain the latest CMake for windows from the Kitware
+   1. We suggest you obtain the latest CMake for your platform from the Kitware
       web site. The HDF5 1.10.x product requires a minimum CMake version
-      of 3.12.
+      of 3.12. If you are using VS2019, the minimum version is 3.15.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows). You can obtain pre-built binaries from The HDF Group's website at
-      www.hdfgroup.org.
+      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      from The HDF Group's website at www.hdfgroup.org.
 
-   3. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5.
+   3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+      or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+      to the installed location of HDF5.
          On Windows:
-            HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.10.x/cmake
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.10.x/cmake
          On unix:
-            HDF5_DIR=<install root folder>/HDF_Group/HDF5/1.10.x/cmake
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.10.x/cmake
 
       If you are using shared libraries, you may need to add to the path
       environment variable. Set the path environment variable to the
