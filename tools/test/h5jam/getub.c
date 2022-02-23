@@ -21,9 +21,9 @@ void parse_command_line(int argc, const char *const *argv);
 #define PROGRAM_NAME "getub"
 char *nbytes = NULL;
 
-static const char *           s_opts   = "c:";                     /* add more later ? */
-static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
-                                          {NULL, 0, '\0'}};
+static const char *        s_opts   = "c:";                     /* add more later ? */
+static struct long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -57,10 +57,10 @@ parse_command_line(int argc, const char *const *argv)
     int opt;
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'c':
-                nbytes = HDstrdup(H5_optarg);
+                nbytes = HDstrdup(opt_arg);
                 break;
             case '?':
             default:
@@ -69,7 +69,7 @@ parse_command_line(int argc, const char *const *argv)
         } /* end switch */
     }     /* end while */
 
-    if (argc <= H5_optind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         HDexit(EXIT_FAILURE);
@@ -100,13 +100,13 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    if (argc <= (H5_optind)) {
+    if (argc <= (opt_ind)) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
     } /* end if */
 
-    filename = HDstrdup(argv[H5_optind]);
+    filename = HDstrdup(argv[opt_ind]);
 
     size = 0;
     if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
