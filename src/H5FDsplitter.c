@@ -1320,7 +1320,6 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
 
     /* Sanity checks */
     HDassert(file);
-    HDassert(H5FD_SPLITTER == file->pub.driver_id);
 
     switch (op_code) {
         /* Unknown op code */

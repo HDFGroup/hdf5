@@ -31,8 +31,7 @@ static double sf_queue_delay_time = 0.0;
  * intend to use the user defined HDF5 filename for a
  * zeroth subfile as well as for all metadata.
  */
-#define SF_FILENAME_TEMPLATE ".subfile_%ld_%d_of_%d"
-
+#define SF_FILENAME_TEMPLATE ".subfile_%ld_%0*d_of_%d"
 static int *request_count_per_rank = NULL;
 
 atomic_int sf_workinprogress    = 0;
@@ -169,6 +168,32 @@ cast_to_void(const void *data)
 }
 static char *get_ioc_subfile_path(int ioc, int ioc_count, subfiling_context_t *sf_context);
 static int   async_completion(void *arg);
+
+static int
+numDigits(int n)
+{
+    if (n < 0)
+        n = (n == INT_MIN) ? INT_MAX : -n;
+    if (n < 10)
+        return 1;
+    if (n < 100)
+        return 2;
+    if (n < 1000)
+        return 3;
+    if (n < 10000)
+        return 4;
+    if (n < 100000)
+        return 5;
+    if (n < 1000000)
+        return 6;
+    if (n < 10000000)
+        return 7;
+    if (n < 100000000)
+        return 8;
+    if (n < 1000000000)
+        return 9;
+    return 10;
+}
 
 /* ===================================================================== */
 /* MPI_Datatype Creation functions.
@@ -828,14 +853,15 @@ get_ioc_subfile_path(int ioc, int ioc_count, subfiling_context_t *sf_context)
     char *      subfile_dir = NULL;
     char *      prefix      = sf_context->subfile_prefix;
 
+    int numD = numDigits(ioc_count);
     if (prefix != NULL) {
-        sprintf(filepath, "%s/" SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, ioc, ioc_count);
+        sprintf(filepath, "%s/" SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, numD, ioc, ioc_count);
     }
     else {
         strcpy(filepath, sf_context->h5_filename);
         subfile_dir = strrchr(filepath, '/');
         assert(subfile_dir);
-        sprintf(subfile_dir + 1, SF_FILENAME_TEMPLATE, sf_context->h5_file_id, ioc, ioc_count);
+        sprintf(subfile_dir + 1, SF_FILENAME_TEMPLATE, sf_context->h5_file_id, numD, ioc, ioc_count);
     }
     return filepath;
 } /* end get_ioc_subfile_path() */
@@ -2463,11 +2489,12 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
     /* The subfile naming should produce files of the following form:
      * If we assume the HDF5 file is named ABC.h5, then subfiles
      * will have names:
-     *   ABC.h5.subfile_<file-number>_0_of_2,
-     *   ABC.h5.subfile_<file-number>_1_of_2, and
+     *   ABC.h5.subfile_<file-number>_00_of_20,
+     *   ABC.h5.subfile_<file-number>_01_of_20, and
      *   ABC.h5.subfile_<file-number>.config
      */
-    sprintf(filepath, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base, h5_file_id, subfile_rank,
+    int numD = numDigits(n_io_concentrators);
+    sprintf(filepath, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base, h5_file_id, numD, subfile_rank,
             n_io_concentrators);
     if (prefix)
         HDfree(prefix);
@@ -2587,9 +2614,10 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
                     HDfwrite(linebuf, 1, strlen(linebuf), f);
                     sprintf(linebuf, "subfile_dir=%s\n", subfile_dir);
 
+                    int numD = numDigits(n_io_concentrators);
                     for (k = 0; k < n_io_concentrators; k++) {
-                        sprintf(linebuf, "%s.subfile_%ld_%d_of_%d:%d\n", base, h5_file_id, subfile_rank,
-                                n_io_concentrators, io_concentrator[k]);
+                        sprintf(linebuf, "%s" SF_FILENAME_TEMPLATE "\n", base, h5_file_id, numD, k,
+                                n_io_concentrators);
                         HDfwrite(linebuf, 1, strlen(linebuf), f);
                     }
 
