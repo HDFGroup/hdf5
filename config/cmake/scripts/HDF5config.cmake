@@ -105,7 +105,7 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")

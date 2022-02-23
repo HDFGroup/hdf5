@@ -759,7 +759,7 @@
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
-/* Data accuracy is prefered to speed during data conversions */
+/* Data accuracy is preferred to speed during data conversions */
 #cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */

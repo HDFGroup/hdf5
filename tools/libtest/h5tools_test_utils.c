@@ -431,7 +431,7 @@ test_parse_tuple(void)
             {"stuff keeps on going"},
         },
         {
-            "4-ple, escaped seperator",
+            "4-ple, escaped separator",
             "(elem0,elem1,el\\,em2,elem3)", /* "el\,em" */
             ',',
             SUCCEED,
@@ -701,7 +701,7 @@ test_populate_ros3_fa(void)
     }
 
     /* NULL region
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -720,7 +720,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty region
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -739,7 +739,7 @@ test_populate_ros3_fa(void)
     }
 
     /* region overflow
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -781,7 +781,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty id (non-empty region, key)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -851,7 +851,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key (non-empty region, id)
-     * yeilds authenticating fapl
+     * yields authenticating fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -870,7 +870,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key, region (non-empty id)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -889,7 +889,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key, id (non-empty region)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
