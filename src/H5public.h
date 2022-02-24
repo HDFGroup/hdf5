@@ -336,6 +336,10 @@ H5_GCC_DIAG_ON("long-long")
 #error "nothing appropriate for hsize_t"
 #endif
 
+#ifdef H5_HAVE_PARALLEL
+#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
+#endif
+
 /**
  * The address of an object in the file.
  *
@@ -382,6 +386,10 @@ typedef unsigned long long haddr_t;
 #endif
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
+
+#ifdef H5_HAVE_PARALLEL
+#define HADDR_AS_MPI_TYPE MPI_UINT64_T
+#endif
 
 /* uint32_t type is used for creation order field for messages.  It may be
  * defined in Posix.1g, otherwise it is defined here.
