@@ -115,7 +115,7 @@ New Features
       which case the release part of version, in major.minor.release, must
       be exact. An environment variable still controls the logic.
 
-        (ADB - 2021/07/27)
+      (ADB - 2021/07/27)
 
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
@@ -132,7 +132,7 @@ New Features
       The Doxygen documentation has been updated and passing values larger
       than UINT32_MAX for size_hint will now produce a normal HDF5 error.
 
-        (DER - 2021/04/29, HDFFV-11241)
+      (DER - 2021/04/29, HDFFV-11241)
 
 
     - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
@@ -146,7 +146,7 @@ New Features
       The pointer is now correctly initialized and the API call now
       produces a normal HDF5 error when fed an invalid fapl ID.
 
-        (DER - 2021/04/28, HDFFV-11240)
+      (DER - 2021/04/28, HDFFV-11240)
 
     - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
 
@@ -158,7 +158,7 @@ New Features
 
       The string is now handled properly and the segfault no longer occurs.
 
-        (DER - 2021/04/27, HDFFV-11239)
+      (DER - 2021/04/27, HDFFV-11239)
 
 
     Parallel Library:
@@ -307,7 +307,7 @@ Bug Fixes since HDF5-1.12.1 release
 
     - Fixed CMake C++ compiler flags
 
-      A recent refactoring of the C++ configure files accidently removed the
+      A recent refactoring of the C++ configure files accidentally removed the
       file that executed the enable_language command for C++ needed by the
       HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
       including adding support for windows platforms.
@@ -341,7 +341,7 @@ Bug Fixes since HDF5-1.12.1 release
 
       Incorrect length assignment.
 
-        (ADB - 2021/10/14)
+      (ADB - 2021/10/14)
 
 
     Fortran High-Level APIs
@@ -363,10 +363,10 @@ Bug Fixes since HDF5-1.12.1 release
     --------
     - Added DataSet::operator=
 
-        Some compilers complain if the copy constructor is given explicitly
-        but the assignment operator is implicitly set to default.
+      Some compilers complain if the copy constructor is given explicitly
+      but the assignment operator is implicitly set to default.
 
-        (2021/05/19)
+      (2021/05/19)
 
 
     Testing

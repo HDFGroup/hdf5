@@ -1278,7 +1278,7 @@ ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20})
 ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
 
 # comparable dataset with non-comparable attribute and other comparable attributes.
-# Also test non-compatible attributes with different type, dimention, rank.
+# Also test non-compatible attributes with different type, dimension, rank.
 # All the rest comparables should display differences.
 ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 
@@ -1438,7 +1438,7 @@ ADD_H5_TEST (h5diff_475 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_
 
 
 # ##############################################################################
-# # test for group diff recursivly
+# # test for group diff recursively
 # ##############################################################################
 # root
 ADD_H5_TEST (h5diff_500 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
