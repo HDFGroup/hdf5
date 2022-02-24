@@ -134,8 +134,8 @@ FORTRAN_RUN ("REAL and INTEGER KINDs"
     PROG_OUTPUT
 )
 # dnl The output from the above program will be:
-# dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
-# dnl    -- LINE 2 --  valid real kinds (comma seperated list)
+# dnl    -- LINE 1 --  valid integer kinds (comma separated list)
+# dnl    -- LINE 2 --  valid real kinds (comma separated list)
 # dnl    -- LINE 3 --  max decimal precision for reals
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
