@@ -333,6 +333,8 @@
 ./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/ph5_filtered_writes.c
+./examples/ph5_filtered_writes_no_sel.c
 ./examples/h5_vds.c
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c

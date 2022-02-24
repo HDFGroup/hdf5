@@ -883,8 +883,46 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Several improvements to parallel compression feature, including:
 
+      * Improved support for collective I/O (for both writes and reads)
+
+      * Significant reduction of memory usage for the feature as a whole
+
+      * Reduction of copying of application data buffers passed to H5Dwrite
+
+      * Addition of support for incremental file space allocation for filtered
+        datasets created in parallel. Incremental file space allocation is the
+        default for these types of datasets (early file space allocation is
+        also still supported), while early file space allocation is still the
+        default (and only supported allocation time) for unfiltered datasets
+        created in parallel. Incremental file space allocation should help with
+        parallel HDF5 applications that wish to use fill values on filtered
+        datasets, but would typically avoid doing so since dataset creation in
+        parallel would often take an excessive amount of time. Since these
+        datasets previously used early file space allocation, HDF5 would
+        allocate space for and write fill values to every chunk in the dataset
+        at creation time, leading to noticeable overhead. Instead, with
+        incremental file space allocation, allocation of file space for chunks
+        and writing of fill values to those chunks will be delayed until each
+        individual chunk is initially written to.
+
+      * Addition of support for HDF5's "don't filter partial edge chunks" flag
+        (https://portal.hdfgroup.org/display/HDF5/H5P_SET_CHUNK_OPTS)
+
+      * Addition of proper support for HDF5 fill values with the feature
+
+      * Addition of 'H5_HAVE_PARALLEL_FILTERED_WRITES' macro to H5pubconf.h
+        so HDF5 applications can determine at compile-time whether the feature
+        is available
+
+      * Addition of simple examples (ph5_filtered_writes.c and
+        ph5_filtered_writes_no_sel.c) under examples directory to demonstrate
+        usage of the feature
+
+      * Improved coverage of regression testing for the feature
+
+      (JTH - 2022/2/23)
 
     Fortran Library:
     ----------------

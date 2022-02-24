@@ -289,6 +289,11 @@ typedef long long ssize_t;
  * \internal Defined as a (minimum) 64-bit integer type.
  */
 typedef uint64_t hsize_t;
+
+#ifdef H5_HAVE_PARALLEL
+#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
+#endif
+
 /**
  * The size of file objects. Used when negative values are needed to indicate errors.
  *
@@ -323,7 +328,7 @@ typedef uint64_t haddr_t;
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
 #ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
+#define HADDR_AS_MPI_TYPE MPI_UINT64_T
 #endif
 
 //! <!-- [H5_iter_order_t_snip] -->
