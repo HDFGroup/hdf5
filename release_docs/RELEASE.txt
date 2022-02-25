@@ -1135,14 +1135,14 @@ Bug Fixes since HDF5-1.12.0 release
       Investigating the original fix, #812, we discovered some inconsistencies
       with a new block added to check H5_VERS_RELEASE for incompatibilities.
       This new block was not using the new warning text dealing with the
-      H5_VERS_RELEASE check and would could cause the warning to be duplicated.
+      H5_VERS_RELEASE check and would cause the warning to be duplicated.
       
       By removing the H5_VERS_RELEASE argument in the first check for 
       H5_VERS_MAJOR and H5_VERS_MINOR, the second check would only check
       the H5_VERS_RELEASE for incompatible release versions. This adheres
       to the statement that except for the develop branch, all release versions
       in a major.minor maintenance branch should be compatible. The prerequisite
-      is that an application will not use any new non-original APIs.
+      is that an application will not use any APIs not present in all release versions.
 
       (ADB - 2022/02/24, #1438)
 
