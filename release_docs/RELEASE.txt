@@ -922,6 +922,15 @@ New Features
 
       * Improved coverage of regression testing for the feature
 
+      NOTE: we are aware of and working on a fix for an assertion failure that
+            occurs during regression testing of the feature. It looks similar to:
+
+            hdf5/src/H5ACmpio.c:1089: H5AC__log_moved_entry: Assertion `!entry_dirty' failed.
+
+            so far, this assertion failure has only occurred during testing and has
+            not been seen in any production uses, but until this bug is fixed the
+            feature should be considered unstable.
+
       (JTH - 2022/2/23)
 
     Fortran Library:
