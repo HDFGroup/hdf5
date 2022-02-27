@@ -22,10 +22,10 @@
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: short and long-named parameters */
-static const char *           s_opts   = "hlpvV";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"latest", no_arg, 'l'},
-                                          {"parents", no_arg, 'p'}, {"verbose", no_arg, 'v'},
-                                          {"version", no_arg, 'V'}, {NULL, 0, '\0'}};
+static const char *        s_opts   = "hlpvV";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},    {"latest", no_arg, 'l'},
+                                       {"parents", no_arg, 'p'}, {"verbose", no_arg, 'v'},
+                                       {"version", no_arg, 'V'}, {NULL, 0, '\0'}};
 
 /* Command line parameter settings */
 typedef struct mkgrp_opt_t {
@@ -124,7 +124,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     }
 
     /* Parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             /* Display 'help' */
             case 'h':
@@ -161,33 +161,33 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     }     /* end while */
 
     /* Check for file name to be processed */
-    if (argc <= H5_optind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
     /* Retrieve file name */
-    options->fname = HDstrdup(argv[H5_optind]);
-    H5_optind++;
+    options->fname = HDstrdup(argv[opt_ind]);
+    opt_ind++;
 
     /* Check for group(s) to be created */
-    if (argc <= H5_optind) {
+    if (argc <= opt_ind) {
         error_msg("missing group name(s)\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
     /* Allocate space for the group name pointers */
-    options->ngroups = (size_t)(argc - H5_optind);
+    options->ngroups = (size_t)(argc - opt_ind);
     options->groups  = (char **)HDmalloc(options->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;
-    while (H5_optind < argc) {
-        options->groups[curr_group] = HDstrdup(argv[H5_optind]);
+    while (opt_ind < argc) {
+        options->groups[curr_group] = HDstrdup(argv[opt_ind]);
         curr_group++;
-        H5_optind++;
+        opt_ind++;
     }
 
     return 0;
