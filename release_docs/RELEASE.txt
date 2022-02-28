@@ -922,15 +922,6 @@ New Features
 
       * Improved coverage of regression testing for the feature
 
-      NOTE: we are aware of and working on a fix for an assertion failure that
-            occurs during regression testing of the feature. It looks similar to:
-
-            hdf5/src/H5ACmpio.c:1089: H5AC__log_moved_entry: Assertion `!entry_dirty' failed.
-
-            so far, this assertion failure has only occurred during testing and has
-            not been seen in any production uses, but until this bug is fixed the
-            feature should be considered unstable.
-
       (JTH - 2022/2/23)
 
     Fortran Library:
@@ -1138,6 +1129,23 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed a metadata cache bug when resizing a pinned/protected cache entry
+
+      When resizing a pinned/protected cache entry, the metadata
+      cache code previously would wait until after resizing the
+      entry to attempt to log the newly-dirtied entry. This would
+      cause H5C_resize_entry to mark the entry as dirty and make
+      H5AC_resize_entry think that it doesn't need to add the
+      newly-dirtied entry to the dirty entries skiplist.
+
+      Thus, a subsequent H5AC__log_moved_entry would think it
+      needs to allocate a new entry for insertion into the dirty
+      entry skip list, since the entry doesn't exist on that list.
+      This causes an assertion failure, as the code to allocate a
+      new entry assumes that the entry is not dirty.
+
+      (JRM - 2022/02/28)
+
     - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
       H5check_version function.
 
