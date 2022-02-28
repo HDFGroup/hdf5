@@ -53,7 +53,7 @@ uint64_t total_bytes   = 0;
 /* global flags which indicate whether we need
  * to capture tool outputs into a file...
  * Related to this is whether the stderr should
- * be logged seperately.
+ * be logged separately.
  */
 #define BUFT_SIZE 131072
 /* FIXME: 'buft_max' should probably be configurable.. */
@@ -1071,12 +1071,12 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             if ((log_instance > 0) || processing_inputfile) {
                 if (processing_inputfile)
                     log_instance = current_input_index;
-                HDsprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
-                          thisapp, log_instance);
+                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d",
+                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
             }
             else {
-                HDsprintf(logpath, "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
-                          thisapp);
+                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log",
+                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
             }
         }
         else {
@@ -1085,15 +1085,17 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 if (processing_inputfile)
                     log_instance = current_input_index;
                 if (txtlog[log_len - 1] == '/')
-                    HDsprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp,
+                               log_instance);
                 else
-                    HDsprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp,
+                               log_instance);
             }
             else {
                 if (txtlog[log_len - 1] == '/')
-                    HDsprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
+                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log", txtlog, logbase, thisapp);
                 else
-                    HDsprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log", txtlog, logbase, thisapp);
             }
         }
 
@@ -1204,7 +1206,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         }
     }
 
-    HDsprintf(cmdline, "\n---------\nCommand:");
+    HDsnprintf(cmdline, sizeof(cmdline), "\n---------\nCommand:");
     b_offset = strlen(cmdline);
     for (k = 0; k < count; k++) {
         HDsprintf(&cmdline[b_offset], " %s", argv[k]);
@@ -1242,7 +1244,7 @@ static void
 add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count __attribute__((unused)))
 {
     char cmdline[2048];
-    HDsprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
+    HDsnprintf(cmdline, sizeof(cmdline), "\n---------\nCommand: %s\n", cmdstring);
     argv[argc] = NULL;
     run_command(argc, argv, cmdline, argv[f_index[0]]);
     return;
@@ -1322,7 +1324,7 @@ process_input_file(char *inputname, int myrank, int size)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int i;
     int rc = 0;
@@ -1352,7 +1354,7 @@ main(int argc, const char *argv[])
     if (env_var) {
 		int enable = HDatoi(env_var);
 		if (enable) {
-			
+
 		}
     }
 #endif
@@ -1392,7 +1394,7 @@ main(int argc, const char *argv[])
     mfu_pred *pred_head = NULL;
 
     while (!tool_selected) {
-        opt = H5_get_option(argc, argv, s_opts, l_opts);
+        opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts);
         switch ((char)opt) {
             default:
                 usage();
@@ -1469,7 +1471,7 @@ main(int argc, const char *argv[])
     /* As we move forward, we might allow the HDF5 tool to be     */
     /* queried for an acceptable set set of runtime arguments.    */
     /* This could be just a simple string to allow getopt_long    */
-    /* to be invoked on the remaing command line arguments.       */
+    /* to be invoked on the remaining command line arguments.       */
     /**************************************************************/
 
     int *path_indices = NULL;
@@ -1635,7 +1637,7 @@ main(int argc, const char *argv[])
     if (outputname != NULL) {
         if (!text) {
             if (rank == 0) {
-                puts("ouput capture needs to be a text formated file");
+                puts("output capture needs to be a text formatted file");
             }
         }
         else {

@@ -2063,7 +2063,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }
@@ -2110,7 +2110,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }
@@ -2157,7 +2157,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }

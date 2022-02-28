@@ -291,7 +291,7 @@ index_type_str(H5D_chunk_index_t idx_type)
 /*-------------------------------------------------------------------------
  * Function:    verify_selected_chunks (helper function)
  *
- * Purpose:     Reads the chunks within the boundery {start,end} and verify
+ * Purpose:     Reads the chunks within the boundary {start,end} and verify
  *              the values against the populated data.
  *
  * Return:      Success:    SUCCEED
@@ -321,7 +321,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
             for (jj = 0; jj < CHUNK_NY; jj++)
                 expected_buf[n][ii][jj] = (int)(ii * jj) + 1;
 
-    /* Read each chunk within the boundery of {start,end} and verify the
+    /* Read each chunk within the boundary of {start,end} and verify the
        values against the expected data */
     chk_index = 0;
     for (ii = start[0]; ii < end[0]; ii++)
@@ -421,7 +421,7 @@ verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsi
     /* Ensure the correct chunk indexing scheme is used */
     if (idx_type != exp_idx_type) {
         char msg[256];
-        HDsprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
+        HDsnprintf(msg, sizeof(msg), "Should be using %s.\n", index_type_str(idx_type));
         FAIL_PUTS_ERROR(msg);
     }
 

@@ -18,7 +18,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5repack"
 
-static int  parse_command_line(int argc, const char **argv, pack_opt_t *options);
+static int  parse_command_line(int argc, const char *const *argv, pack_opt_t *options);
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
@@ -39,13 +39,13 @@ static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"file", require_arg, 'e'},
                                           {"filter", require_arg, 'f'},
                                           {"help", no_arg, 'h'},
-                                          {"infile", require_arg, 'i'}, /* for backward compability */
+                                          {"infile", require_arg, 'i'}, /* for backward compatibility */
                                           {"low", require_arg, 'j'},
                                           {"high", require_arg, 'k'},
                                           {"layout", require_arg, 'l'},
                                           {"minimum", require_arg, 'm'},
                                           {"native", no_arg, 'n'},
-                                          {"outfile", require_arg, 'o'}, /* for backward compability */
+                                          {"outfile", require_arg, 'o'}, /* for backward compatibility */
                                           {"sort_by", require_arg, 'q'},
                                           {"ssize", require_arg, 's'},
                                           {"threshold", require_arg, 't'},
@@ -399,7 +399,7 @@ read_info(const char *filename, pack_opt_t *options)
             goto done;
         }
 
-        /* find begining of info */
+        /* find beginning of info */
         i = 0;
         c = '0';
         while (c != ' ') {
@@ -507,7 +507,7 @@ set_sort_order(const char *form)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv, pack_opt_t *options)
+parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 {
     h5tools_vol_info_t in_vol_info;
     h5tools_vol_info_t out_vol_info;
@@ -928,7 +928,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char **argv)
+main(int argc, char **argv)
 {
     pack_opt_t options; /*the global options */
     int        parse_ret;
@@ -958,7 +958,7 @@ main(int argc, const char **argv)
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    parse_ret = parse_command_line(argc, argv, &options);
+    parse_ret = parse_command_line(argc, (const char *const *)argv, &options);
     if (parse_ret < 0) {
         HDprintf("Error occurred while parsing command-line options\n");
         h5tools_setstatus(EXIT_FAILURE);

@@ -50,7 +50,7 @@
  * each thread individually. The association of contexts to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5CX_get_my_context() must be preceeded
+ * In order for this macro to work, H5CX_get_my_context() must be preceded
  * by "H5CX_node_t *ctx =".
  */
 #define H5CX_get_my_context() H5CX__get_context()
@@ -1397,9 +1397,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
         /* If parallel is enabled and the file driver used is the MPI-IO
          * VFD, issue an MPI barrier for easier debugging if the API function
-         * calling this is supposed to be called collectively. Note that this
-         * happens only when the environment variable H5_COLL_BARRIER is set
-         * to non 0.
+         * calling this is supposed to be called collectively.
          */
         if (H5_coll_api_sanity_check_g) {
             MPI_Comm mpi_comm; /* File communicator */
@@ -1425,7 +1423,7 @@ done:
  * Purpose:     Sanity checks and sets up collective operations.
  *
  * Note:        Should be called for all API routines that modify file
- *              file metadata but don't pass in an access property list.
+ *              metadata but don't pass in an access property list.
  *
  * Return:      Non-negative on success / Negative on failure
  *
@@ -1456,9 +1454,7 @@ H5CX_set_loc(hid_t
 
     /* If parallel is enabled and the file driver used is the MPI-IO
      * VFD, issue an MPI barrier for easier debugging if the API function
-     * calling this is supposed to be called collectively. Note that this
-     * happens only when the environment variable H5_COLL_BARRIER is set
-     * to non 0.
+     * calling this is supposed to be called collectively.
      */
     if (H5_coll_api_sanity_check_g) {
         MPI_Comm mpi_comm; /* File communicator */

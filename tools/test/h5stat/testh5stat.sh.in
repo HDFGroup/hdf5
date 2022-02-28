@@ -13,7 +13,7 @@
 #
 # Tests for the h5stat tool
 #
-# Modifcations:
+# Modifications:
 #     Vailin Choi; July 2013
 #     Add tests for -l, -m, -a options
 #

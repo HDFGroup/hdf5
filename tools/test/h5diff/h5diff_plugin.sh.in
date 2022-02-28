@@ -158,7 +158,7 @@ done
 
 # RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
 if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
-    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Serial Exit Code is not passed back to shell correctly."
     echo "***Warning*** Exit code checking is skipped."
     h5haveexitcode=no
 fi
@@ -236,7 +236,7 @@ TOOLTEST() {
     # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in
-    # serial mode, so the test is fullfilled.
+    # serial mode, so the test is fulfilled.
     if test $h5haveexitcode = 'yes' -a -z "$pmode"; then
       echo "EXIT CODE: $EXIT_CODE" >> $actual
     fi
@@ -327,7 +327,7 @@ TOOLTEST_ERR() {
     # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in
-    # serial mode, so the test is fullfilled.
+    # serial mode, so the test is fulfilled.
     if test $h5haveexitcode = 'yes' -a -z "$pmode"; then
       echo "EXIT CODE: $EXIT_CODE" >> $actual
     fi

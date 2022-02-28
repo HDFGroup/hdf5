@@ -29,7 +29,7 @@
 #define ARRAY_DIM 4
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1
@@ -2359,7 +2359,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2410,7 +2410,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2451,7 +2451,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2635,9 +2635,9 @@ test_compound_13(void)
     HDmemset(&data_out, 0, sizeof(data_out));
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = (unsigned char)u;
-    data_out.y = 99.99f;
+    data_out.y = 99.99F;
 
-    /* Set latest_format in access propertly list to enable the latest
+    /* Set latest_format in access property list to enable the latest
      * compound datatype format.
      */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -3794,7 +3794,7 @@ error:
  *
  * Modifications:
  *              Raymond Lu
- *              Wednesday, Febuary 9, 2005
+ *              Wednesday, February 9, 2005
  *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
  *              H5Tget_member_value.
  *-------------------------------------------------------------------------
@@ -4969,7 +4969,7 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    HDsprintf(s, "Testing random string conversion speed");
+    HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5184,14 +5184,14 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    HDsprintf(s, "Testing random enum conversion O(N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
-    HDsprintf(s, "Testing random enum conversion O(N log N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -6847,7 +6847,7 @@ test_set_order(void)
 {
     hid_t       dtype;            /* Datatype ID */
     H5T_order_t order;            /* Byte order */
-    hsize_t     dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t     dims[2] = {3, 4}; /* Array dimensions */
     herr_t      ret;              /* Generic return value */
 
     TESTING("H5Tset/get_order");
@@ -7095,7 +7095,7 @@ test_set_order_compound(hid_t fapl)
     hid_t   file = -1;
     hid_t   cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
     hid_t   vl_id   = -1;
-    hsize_t dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t dims[2] = {3, 4}; /* Array dimensions */
     char    filename[1024];
     herr_t  ret; /* Generic return value */
 
@@ -7950,7 +7950,7 @@ test_deprec(hid_t fapl)
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
 
-    TESTING("deprected API routines for datatypes");
+    TESTING("deprecated API routines for datatypes");
 
     /* Create an array datatype with an atomic base type */
     /* (dimension permutations allowed, but not stored) */

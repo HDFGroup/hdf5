@@ -83,7 +83,7 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
         (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
         HGOTO_DONE(FAIL)
     /*
-     * move data from temorary buffer
+     * move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
@@ -188,7 +188,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
         (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
         HGOTO_DONE(FAIL)
     /*
-     * move data from temorary buffer
+     * move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {

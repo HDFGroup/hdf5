@@ -260,7 +260,7 @@ typedef struct H5D_chunk_iter_ud_t {
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
@@ -977,7 +977,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
             if (!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
-            /* Inital 'power2up' values for scaled dimensions */
+            /* Initial 'power2up' values for scaled dimensions */
             rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
@@ -1070,7 +1070,7 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  */
 static herr_t
 H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;       /* Local pointer to dataset info */
     hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
@@ -2268,7 +2268,6 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             /* Set the chunk's scaled coordinates */
             H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             chunk_info->scaled[fm->f_ndims] = 0;
-            H5MM_memcpy(chunk_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
 
             /* Insert the new chunk into the skip list */
             if (H5SL_insert(fm->sel_chunks, chunk_info, &chunk_info->index) < 0) {
@@ -2650,7 +2649,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                      (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Check for non-existant chunk & skip it if appropriate */
+            /* Check for non-existent chunk & skip it if appropriate */
             if (H5F_addr_defined(udata.chunk_block.offset)) {
                 /* Add chunk to list for selection I/O */
                 chunk_mem_spaces[num_chunks]  = chunk_info->mspace;
@@ -2675,9 +2674,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) */
         if (H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                   (const H5S_t *const *)chunk_mem_spaces,
-                                   (const H5S_t *const *)chunk_file_spaces, chunk_addrs, element_sizes,
-                                   bufs) < 0)
+                                   chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 
         /* Clean up memory */
@@ -2735,7 +2732,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                      (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-            /* Check for non-existant chunk & skip it if appropriate */
+            /* Check for non-existent chunk & skip it if appropriate */
             if (H5F_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint ||
                 !skip_missing_chunks) {
                 H5D_io_info_t *chk_io_info;  /* Pointer to I/O info object for this chunk */
@@ -3009,8 +3006,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) */
         if (H5F_shared_select_write(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                    (const H5S_t *const *)chunk_mem_spaces,
-                                    (const H5S_t *const *)chunk_file_spaces, chunk_addrs, element_sizes,
+                                    chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes,
                                     bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 
@@ -3565,7 +3561,9 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     unsigned             idx   = 0;     /* Index of chunk in cache, if present */
     hbool_t              found = FALSE; /* In cache? */
 #ifdef H5_HAVE_PARALLEL
-    hbool_t reenable_coll_md_reads = FALSE;
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 restore_md_reads_state = FALSE;
 #endif
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3639,11 +3637,10 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * processes.
              */
             if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
-                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
-                if (do_coll_md_reads) {
-                    H5CX_set_coll_metadata_read(FALSE);
-                    reenable_coll_md_reads = TRUE;
-                }
+                md_reads_file_flag    = H5P_FORCE_FALSE;
+                md_reads_context_flag = FALSE;
+                H5F_set_coll_metadata_reads(idx_info.f, &md_reads_file_flag, &md_reads_context_flag);
+                restore_md_reads_state = TRUE;
             }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -3689,8 +3686,8 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
 done:
 #ifdef H5_HAVE_PARALLEL
     /* Re-enable collective metadata reads if we disabled them */
-    if (reenable_coll_md_reads)
-        H5CX_set_coll_metadata_read(TRUE);
+    if (restore_md_reads_state)
+        H5F_set_coll_metadata_reads(dset->oloc.file, &md_reads_file_flag, &md_reads_context_flag);
 #endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4002,7 +3999,7 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
      * traversing the list when pointer pN reaches wN percent of the original
      * list.  In other words, preemption method N gets to consider entries in
      * approximate least recently used order w0 percent before method N+1
-     * where 100% means tha method N will run to completion before method N+1
+     * where 100% means the method N will run to completion before method N+1
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
@@ -5607,7 +5604,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* The number of bytes accessed in the chunk */
     /* (i.e. the bytes replaced with fill values) */
-    H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, uint32_t);
+    H5_CHECK_OVERFLOW(sel_nelmts, hsize_t, uint32_t);
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
@@ -6352,7 +6349,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
     const H5O_pline_t *pline    = udata->pline;    /* I/O pipeline for applying filters */
 
-    /* needed for commpressed variable length data */
+    /* needed for compressed variable length data */
     hbool_t  must_filter = FALSE;      /* Whether chunk must be filtered during copy */
     size_t   nbytes;                   /* Size of chunk in file (in bytes) */
     H5Z_cb_t filter_cb;                /* Filter failure callback struct */
@@ -7083,10 +7080,10 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
             miss_rate = 0.0;
         }
         if (miss_rate > 100) {
-            HDsprintf(ascii, "%7d%%", (int)(miss_rate + 0.5));
+            HDsnprintf(ascii, sizeof(ascii), "%7d%%", (int)(miss_rate + 0.5));
         }
         else {
-            HDsprintf(ascii, "%7.2f%%", miss_rate);
+            HDsnprintf(ascii, sizeof(ascii), "%7.2f%%", miss_rate);
         }
 
         HDfprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n", "raw data chunks", rdcc->stats.nhits,
@@ -7912,7 +7909,7 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
- * Purpose:     Iterate over all the chunks in the dataset with given callbak.
+ * Purpose:     Iterate over all the chunks in the dataset with given callback.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative

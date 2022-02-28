@@ -47,6 +47,23 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts that cat the 
+      libhdf5-settings to the standard output.
+
+      (ADB - 2022/01/25)
+
+    - CMake will now run the PowerShell script tests in test/ by default
+      on Windows.
+
+      The test directory includes several shell script tests that previously
+      were not run by CMake on Windows. These are now run by default.
+      If TEST_SHELL_SCRIPTS is ON and PWSH is found, the PowerShell scripts
+      will execute. Similar to the bash scripts on unix platforms.
+
+      (ADB - 2021/11/23)
+
     - Added new configure option to support building parallel tools.
       See Tools below (autotools - CMake):
             --enable-parallel-tools      HDF5_BUILD_PARALLEL_TOOLS
@@ -506,6 +523,13 @@ New Features
 
     Library:
     --------
+    - Add a new public function, H5ESget_requests()
+
+      This function allows the user to retrieve request pointers from an event
+      set. It is intended for use primarily by VOL plug in developers.
+
+      (NAF - 2022/01/11)
+
     - Adds new file driver-level memory copy operation for
       "ctl" callback and updates compact dataset I/O routines
       to utilize it
@@ -556,7 +580,7 @@ New Features
                       void **output);
 
       This newly-added "ctl" callback allows Virtual File
-      Drivers to intercept and handle arbitary operations
+      Drivers to intercept and handle arbitrary operations
       identified by an operation code. Its parameters are
       as follows:
 
@@ -1066,6 +1090,39 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/11/23, HDFFV-11286)
 
+    - Unified handling of collective metadata reads to correctly fix old bugs
+
+      Due to MPI-related issues occurring in HDF5 from mismanagement of the
+      status of collective metadata reads, they were forced to be disabled
+      during chunked dataset raw data I/O in the HDF5 1.10.5 release. This
+      wouldn't generally have affected application performance because HDF5
+      already disables collective metadata reads during chunk lookup, since
+      it is generally unlikely that the same chunks will be read by all MPI
+      ranks in the I/O operation. However, this was only a partial solution
+      that wasn't granular enough.
+
+      This change now unifies the handling of the file-global flag and the
+      API context-level flag for collective metadata reads in order to
+      simplify querying of the true status of collective metadata reads. Thus,
+      collective metadata reads are once again enabled for chunked dataset
+      raw data I/O, but manually controlled at places where some processing
+      occurs on MPI rank 0 only and would cause issues when collective
+      metadata reads are enabled.
+
+      (JTH - 2021/11/16, HDFFV-10501/HDFFV-10562)
+
+    - Fixed several potential MPI deadlocks in library failure conditions
+
+      In the parallel library, there were several places where MPI rank 0
+      could end up skipping past collective MPI operations when some failure
+      occurs in rank 0-specific processing. This would lead to deadlocks
+      where rank 0 completes an operation while other ranks wait in the
+      collective operation. These places have been rewritten to have rank 0
+      push an error and try to cleanup after the failure, then continue to
+      participate in the collective operation to the best of its ability.
+
+      (JTH - 2021/11/09)
+
     - Fixed an issue with collective metadata reads being permanently disabled
       after a dataset chunk lookup operation. This would usually cause a
       mismatched MPI_Bcast and MPI_ERR_TRUNCATE issue in the library for
@@ -1118,7 +1175,7 @@ Bug Fixes since HDF5-1.12.0 release
       dimension sizes.
 
       The problem was fixed by ensuring that decoding the dimension sizes
-      and max values will not go beyong the end of the buffer.
+      and max values will not go beyond the end of the buffer.
 
       (BMR - 2021/05/12, HDFFV-11223)
 
@@ -1324,7 +1381,7 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Fixed CMake C++ compiler flags
 
-      A recent refactoring of the C++ configure files accidently removed the
+      A recent refactoring of the C++ configure files accidentally removed the
       file that executed the enable_language command for C++ needed by the
       HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
       including adding support for windows platforms.
@@ -1452,7 +1509,7 @@ Bug Fixes since HDF5-1.12.0 release
     - h5diff fixed a command line parsing error.
 
       h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparison was used.
 
       (ADB - 2020/07/20, HDFFV-10897)
 

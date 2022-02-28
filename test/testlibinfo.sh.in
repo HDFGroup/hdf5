@@ -19,7 +19,7 @@
 # libhdf5.settings file.
 # Part 2:
 # If executable is linked with the static hdf5 library (how to determine?),
-# verify an executable indeed contains an exact copy of hte content of the
+# verify an executable indeed contains an exact copy of the content of the
 # libhdf5.settings file.
 #
 # Programmer: Albert Cheng

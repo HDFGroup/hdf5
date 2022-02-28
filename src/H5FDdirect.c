@@ -217,8 +217,11 @@ H5FD_direct_init(void)
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
-    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g)) {
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_DIRECT_g)
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register direct");
+    }
 
     /* Set return value */
     ret_value = H5FD_DIRECT_g;

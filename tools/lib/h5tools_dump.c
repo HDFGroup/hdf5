@@ -478,7 +478,7 @@ done:
  *      This is a special case subfunction to print the data in a region reference of type blocks.
  *
  * Return:
- *      The function returns FAIL if there was an error, otherwise SUCEED
+ *      The function returns FAIL if there was an error, otherwise SUCCEED
  *
  * Parameters Description:
  *      h5tools_str_t *buffer is the string into which to render
@@ -500,7 +500,7 @@ h5tools_print_region_data_blocks(hid_t region_id, FILE *stream, const h5tool_for
     hsize_t *         count           = NULL;
     hsize_t           blkndx;
     hsize_t           total_size[H5S_MAX_RANK];
-    hsize_t           elmtno; /* elemnt index  */
+    hsize_t           elmtno; /* element index  */
     hsize_t           curr_pos = 0;
     unsigned int      region_flags; /* buffer extent flags */
     hsize_t           numelem;
@@ -896,7 +896,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id, FILE *stre
 {
     hbool_t           dimension_break = TRUE;
     hsize_t *         dims1           = NULL;
-    hsize_t           elmtno; /* elemnt index  */
+    hsize_t           elmtno; /* element index  */
     hsize_t           curr_pos = 0;
     hsize_t           total_size[H5S_MAX_RANK];
     hsize_t           jndx;
@@ -1286,7 +1286,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
 
     H5TOOLS_START_DEBUG(" ");
     if ((size_t)ctx->ndims > NELMTS(sm_size))
-        H5TOOLS_THROW(FAIL, "ndims and sm_size comparision failed");
+        H5TOOLS_THROW(FAIL, "ndims and sm_size comparison failed");
 
     size_row_block = ctx->sset->block.data[row_dim];
 
@@ -2486,7 +2486,7 @@ found_string_type:
                     ctx->need_prefix = TRUE;
 
                     h5tools_str_reset(buffer);
-                    h5tools_str_append(buffer, "OPAQUE_SIZE \"%s\";", size);
+                    h5tools_str_append(buffer, "OPAQUE_SIZE \"%zu\";", size);
                     h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
                 }
@@ -2996,7 +2996,7 @@ h5tools_dump_oid(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
     ctx->need_prefix = TRUE;
 
     h5tools_str_reset(&buffer);
-    h5tools_str_append(&buffer, "%s %s %d %s", OBJID, BEGIN, oid, END);
+    h5tools_str_append(&buffer, "%s %s %" PRId64 " %s", OBJID, BEGIN, oid, END);
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     h5tools_str_close(&buffer);
@@ -3340,7 +3340,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         } break;
 
         case H5D_VIRTUAL: {
-            char   dsetname[256]; /* virtual datset name       */
+            char   dsetname[256]; /* virtual dataset name       */
             size_t n_vmaps;
 
             H5Pget_virtual_count(dcpl_id, &n_vmaps);

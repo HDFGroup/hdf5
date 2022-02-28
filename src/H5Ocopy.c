@@ -772,7 +772,7 @@ done:
     /* Free destination object header on failure */
     if (ret_value < 0) {
         if (oh_dst && !inserted) {
-            if (H5O__free(oh_dst) < 0)
+            if (H5O__free(oh_dst, TRUE) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
             if (H5O_loc_reset(oloc_dst) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
@@ -963,7 +963,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     if (H5P_get(ocpy_plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
 
-    /* Retrieve the marge committed datatype list */
+    /* Retrieve the merge committed datatype list */
     if (H5P_peek(ocpy_plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed datatype list")
 
