@@ -37,7 +37,7 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.13.1")
+set (CTEST_SOURCE_VERSION "1.13.2")
 set (CTEST_SOURCE_VERSEXT "-1")
 
 ##############################################################################
