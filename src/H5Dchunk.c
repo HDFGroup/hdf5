@@ -2674,9 +2674,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) */
         if (H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                   chunk_mem_spaces,
-                                   chunk_file_spaces, chunk_addrs, element_sizes,
-                                   bufs) < 0)
+                                   chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 
         /* Clean up memory */
@@ -3008,8 +3006,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) */
         if (H5F_shared_select_write(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                    chunk_mem_spaces,
-                                    chunk_file_spaces, chunk_addrs, element_sizes,
+                                    chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes,
                                     bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 

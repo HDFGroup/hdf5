@@ -255,8 +255,7 @@ done:
  */
 herr_t
 H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces,
-                       H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
-                       void *bufs[] /* out */)
+                       H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
     H5FD_mem_t map_type;            /* Mapped memory type */
     herr_t     ret_value = SUCCEED; /* Return value */
@@ -301,8 +300,7 @@ done:
  */
 herr_t
 H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces,
-                        H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
-                        const void *bufs[])
+                        H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     H5FD_mem_t map_type;            /* Mapped memory type */
     herr_t     ret_value = SUCCEED; /* Return value */
