@@ -43,6 +43,10 @@
 #define HDF5_DATATYPE H5T_NATIVE_INT
 typedef int C_DATATYPE;
 
+#ifndef PATH_MAX
+#define PATH_MAX 512
+#endif
+
 /* Global variables */
 int mpi_rank, mpi_size;
 
