@@ -922,6 +922,15 @@ New Features
 
       * Improved coverage of regression testing for the feature
 
+      NOTE: we are aware of and working on a fix for an assertion failure that
+            occurs during regression testing of the feature. It looks similar to:
+
+            hdf5/src/H5ACmpio.c:1089: H5AC__log_moved_entry: Assertion `!entry_dirty' failed.
+
+            so far, this assertion failure has only occurred during testing and has
+            not been seen in any production uses, but until this bug is fixed the
+            feature should be considered unstable.
+
       (JTH - 2022/2/23)
 
     Fortran Library:
@@ -1129,6 +1138,23 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
+      H5check_version function.
+
+      Investigating the original fix, #812, we discovered some inconsistencies
+      with a new block added to check H5_VERS_RELEASE for incompatibilities.
+      This new block was not using the new warning text dealing with the
+      H5_VERS_RELEASE check and would cause the warning to be duplicated.
+      
+      By removing the H5_VERS_RELEASE argument in the first check for 
+      H5_VERS_MAJOR and H5_VERS_MINOR, the second check would only check
+      the H5_VERS_RELEASE for incompatible release versions. This adheres
+      to the statement that except for the develop branch, all release versions
+      in a major.minor maintenance branch should be compatible. The prerequisite
+      is that an application will not use any APIs not present in all release versions.
+
+      (ADB - 2022/02/24, #1438)
+
     - Fixed an H5Pget_filter_by_id1/2() assert w/ out of range filter IDs
 
       Both H5Pget_filter_by_id1 and 2 did not range check the filter ID, which

@@ -43,6 +43,10 @@
 #define HDF5_DATATYPE H5T_NATIVE_INT
 typedef int C_DATATYPE;
 
+#ifndef PATH_MAX
+#define PATH_MAX 512
+#endif
+
 /* Global variables */
 int mpi_rank, mpi_size;
 
@@ -234,16 +238,16 @@ write_dataset_no_overlap(hid_t file_id, hid_t dxpl_id)
 static void
 write_dataset_overlap(hid_t file_id, hid_t dxpl_id)
 {
-    C_DATATYPE data[mpi_size][EXAMPLE_DSET_CHUNK_DIM_SIZE];
-    hsize_t    dataset_dims[EXAMPLE_DSET_DIMS];
-    hsize_t    chunk_dims[EXAMPLE_DSET_DIMS];
-    hsize_t    start[EXAMPLE_DSET_DIMS];
-    hsize_t    stride[EXAMPLE_DSET_DIMS];
-    hsize_t    count[EXAMPLE_DSET_DIMS];
-    size_t     i, j;
-    hid_t      dset_id        = H5I_INVALID_HID;
-    hid_t      dcpl_id        = H5I_INVALID_HID;
-    hid_t      file_dataspace = H5I_INVALID_HID;
+    C_DATATYPE *data = NULL;
+    hsize_t     dataset_dims[EXAMPLE_DSET_DIMS];
+    hsize_t     chunk_dims[EXAMPLE_DSET_DIMS];
+    hsize_t     start[EXAMPLE_DSET_DIMS];
+    hsize_t     stride[EXAMPLE_DSET_DIMS];
+    hsize_t     count[EXAMPLE_DSET_DIMS];
+    size_t      i, j;
+    hid_t       dset_id        = H5I_INVALID_HID;
+    hid_t       dcpl_id        = H5I_INVALID_HID;
+    hid_t       file_dataspace = H5I_INVALID_HID;
 
     /*
      * ------------------------------------
@@ -324,7 +328,9 @@ write_dataset_overlap(hid_t file_id, hid_t dxpl_id)
      * --------------------------------------
      */
 
-    fill_databuf(start, count, stride, &data[0][0]);
+    data = malloc(mpi_size * EXAMPLE_DSET_CHUNK_DIM_SIZE * sizeof(C_DATATYPE));
+
+    fill_databuf(start, count, stride, data);
 
     /*
      * ---------------------------------
@@ -333,6 +339,8 @@ write_dataset_overlap(hid_t file_id, hid_t dxpl_id)
      */
 
     H5Dwrite(dset_id, HDF5_DATATYPE, H5S_BLOCK, file_dataspace, dxpl_id, data);
+
+    free(data);
 
     /*
      * --------------
