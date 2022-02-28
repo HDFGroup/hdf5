@@ -243,7 +243,7 @@ typedef struct _info_header { /* Header for a driver info message */
 
 #define GET_EOF_COMPLETED (COMPLETED | GET_EOF_OP)
 
-#define SET_LOGGING     (LOGGING_OP)
+#define SET_LOGGING (LOGGING_OP)
 
 #define INT32_MASK 0x07FFFFFFFFFFFFFFF
 

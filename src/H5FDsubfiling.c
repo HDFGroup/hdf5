@@ -765,17 +765,17 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
   uint64_t h5_file_id = (uint64_t)-1;
 #endif /* JRM */
     H5FD_t *ret_value = NULL;
-#if 0  /* JRM */
+#if 0                                  /* JRM */
   hid_t fapl_check;
   hid_t ioc_fapl_id;
-#endif /* JRM */
-#if 1 /* JRM */
-    int             mpi_code;             /* MPI return code */
-    MPI_Comm        comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
-    MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
-    int             mpi_rank = INT_MAX;   /* MPI rank of this process */
-    int             mpi_size;             /* Total number of MPI processes */
-#endif /* JRM */
+#endif                                 /* JRM */
+#if 1                                  /* JRM */
+    int      mpi_code;                 /* MPI return code */
+    MPI_Comm comm     = MPI_COMM_NULL; /* MPI Communicator, from plist */
+    MPI_Info info     = MPI_INFO_NULL; /* MPI Info, from plist */
+    int      mpi_rank = INT_MAX;       /* MPI rank of this process */
+    int      mpi_size;                 /* Total number of MPI processes */
+#endif                                 /* JRM */
 
     FUNC_ENTER_STATIC
 
@@ -1113,12 +1113,13 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA;      /* OK to aggregate metadata allocations  */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;     /* OK to aggregate "small" raw data allocations */
-        *flags |= H5FD_FEAT_HAS_MPI;                 /* This driver uses MPI */
-        *flags |= H5FD_FEAT_ALLOCATE_EARLY;          /* Allocate space early instead of late  */
-        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;  /* VFD creates a file which can be opened with the default VFD */
-                                                     /* this is false -- delete the flag eventually */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations  */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_HAS_MPI;                /* This driver uses MPI */
+        *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late  */
+        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
+                                                       VFD */
+                                                    /* this is false -- delete the flag eventually */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1262,28 +1263,28 @@ done:
 } /* end H5FD_subfiling_get_eof() */
 
 #else /* JRM */ /* re-worked version */
-      /* this is a heavy weight implementation.  We need something like this 
-       * for file open, and probaby for file close.  However, in between, something
-       * similar to the current solution in the MPIIO VFD might be more appropriate.
-       */
+  /* this is a heavy weight implementation.  We need something like this
+   * for file open, and probaby for file close.  However, in between, something
+   * similar to the current solution in the MPIIO VFD might be more appropriate.
+   */
 
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
-    int64_t           logical_eof = -1;
-    haddr_t           ret_value = HADDR_UNDEF;
+    H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
+    int64_t logical_eof = -1;
+    haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_STATIC
 
-    if ( H5FD__subfiling__get_real_eof(&logical_eof, file->fa.common.context_id) < 0 ) 
+    if (H5FD__subfiling__get_real_eof(&logical_eof, file->fa.common.context_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "can't get eof")
 
     /* Return the global max of all the subfile EOF values */
 
     ret_value = (haddr_t)(logical_eof);
 
-#if 0 /* JRM */
+#if 0  /* JRM */
      HDfprintf(stdout, "\nH5FD__subfiling_get_eof: reporting eof = %lld\n", (long long)ret_value);
      HDfflush(stdout);
 #endif /* JRM */
@@ -2161,7 +2162,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      *                                                 JRM -- 12/18/21
      */
 #if 1 /* JRM */
-    if ( H5FD__subfiling__truncate_sub_files(file->eof, file->fa.common.context_id) < 0 )
+    if (H5FD__subfiling__truncate_sub_files(file->eof, file->fa.common.context_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
 #endif /* JRM */
 
@@ -2321,7 +2322,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
         case H5FD_CTL__GET_MPI_RANK_OPCODE:
             HDassert(output);
             HDassert(*output);
-#if 0 /* JRM */ /* remove eventually */
+#if 0 /* JRM */  /* remove eventually */
             HDfprintf(stdout, "\nH5FD__subfiling_ctl: rank requested. rank = %d\n", (int)(file->mpi_rank));
             HDfflush(stdout);
 #endif /* JRM */ /* remove eventually */
@@ -2331,7 +2332,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
         case H5FD_CTL__GET_MPI_SIZE_OPCODE:
             HDassert(output);
             HDassert(*output);
-#if 0 /* JRM */ /* remove eventually */
+#if 0 /* JRM */  /* remove eventually */
             HDfprintf(stdout, "\nH5FD__subfiling_ctl: size requested.  size = %d\n", (int)(file->mpi_size));
             HDfflush(stdout);
 #endif /* JRM */ /* remove eventually */

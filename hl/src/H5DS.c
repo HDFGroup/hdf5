@@ -1122,7 +1122,6 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
     } /* nelmts */
 
-
     /* Free references */
     if (is_new_ref) {
         if (H5Treclaim(tid, sid, H5P_DEFAULT, ndsbuf) < 0)

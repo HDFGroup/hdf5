@@ -461,7 +461,7 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
     t0 = MPI_Wtime();
 
 /* TODO: can't use comm world here -- must use communicator set in the file open */
-/* Addendum:  As mentioned earlier, it may be appropriate to copy the supplied 
+/* Addendum:  As mentioned earlier, it may be appropriate to copy the supplied
  *            communicator and use the copy here.
  */
 //#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
@@ -479,12 +479,12 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
         }
     }
 #else
-#if 0 /* JRM */ /* delete this eventually */
+#if 0 /* JRM */  /* delete this eventually */
     HDfprintf(stdout, "\n\nclose__subfiles: entering initial barrier.\n\n");
     HDfflush(stdout);
 #endif /* JRM */ /* delete this eventually */
 
-    if ( MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS ) {
+    if (MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS) {
 
         HDfprintf(stdout, "close__subfiles: entering barrier failed.\n");
         HDfflush(stdout);
@@ -609,19 +609,19 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
      * and opening another file before this file is completely closed
      * down.
      *
-     * Note that we shouldn't be using MPI_COMM_WORLD in the barrier 
+     * Note that we shouldn't be using MPI_COMM_WORLD in the barrier
      * below -- it should either be the communicator the user gave us
      * when opening the file, or possibly a copy of same.
      *
      *                                            JRM -- 11/29/21
      */
 
-#if 0 /* JRM */ /* delete this eventually */
+#if 0 /* JRM */  /* delete this eventually */
     HDfprintf(stdout, "\n\nclose__subfiles: entering closing barrier.\n\n");
     HDfflush(stdout);
 #endif /* JRM */ /* delete this eventually */
 
-    if ( MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS ) {
+    if (MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS) {
 
         HDfprintf(stdout, "close__subfiles: exiting barrier failed.\n");
         HDfflush(stdout);
@@ -754,14 +754,14 @@ sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
 int
 sf_truncate(int fd, int64_t length, int subfile_rank)
 {
-    int     ret             = 0;
+    int ret = 0;
 
-    if ( HDftruncate(fd, (off_t)length) != 0 ) {
+    if (HDftruncate(fd, (off_t)length) != 0) {
 
-            HDfprintf(stdout, "ftruncate failed on subfile rank %d.  errno = %d (%s)\n",
-                      subfile_rank, errno, strerror(errno));
-            fflush(stdout);
-            ret = -1;
+        HDfprintf(stdout, "ftruncate failed on subfile rank %d.  errno = %d (%s)\n", subfile_rank, errno,
+                  strerror(errno));
+        fflush(stdout);
+        ret = -1;
     }
 
 #ifdef VERBOSE
@@ -772,7 +772,6 @@ sf_truncate(int fd, int64_t length, int subfile_rank)
 
     return ret;
 } /* end sf_truncate() */
-
 
 /*
  * ---------------------------------------------------
@@ -1273,7 +1272,7 @@ next:
         HDputs("Unable to create app_toplogy");
     }
 
-#if 0 /* JRM */ 
+#if 0  /* JRM */ 
     HDfprintf(stdout, "\n\nH5FD__determine_ioc_count: ioc_count = %d \n\n", ioc_count);
     HDfflush(stdout);
 #endif /* JRM */
@@ -1683,13 +1682,13 @@ H5FD__close_subfiles(int64_t context_id)
 herr_t
 H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
 {
-    int                    mpi_code;         /* MPI return code */
-    MPI_Comm                   comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
+    int                  mpi_code;                   /* MPI return code */
+    MPI_Comm             comm       = MPI_COMM_NULL; /* MPI Communicator, from plist */
     subfiling_context_t *sf_context = NULL;
-    int64_t     msg[3] = {
+    int64_t              msg[3]     = {
         0,
     };
-    herr_t                ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1699,23 +1698,21 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
     comm = MPI_COMM_WORLD;
 
     /* Barrier on entry */
-#if 0 /* JRM */ /* delete this eventually */
+#if 0 /* JRM */  /* delete this eventually */
     HDfprintf(stdout, "\n\nH5FD__subfiling__truncate_sub_files: entering initial barrier.\n\n");
     HDfflush(stdout);
 #endif /* JRM */ /* delete this eventually */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
-
-    if ( NULL == (sf_context = (subfiling_context_t *)get__subfiling_object(context_id)) )
+    if (NULL == (sf_context = (subfiling_context_t *)get__subfiling_object(context_id)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context")
-
 
     /* Test to see if this rank is running an I/O concentrator. */
 
     if (sf_context->topology->rank_is_ioc) {
 
-        int i;
+        int     i;
         int64_t subfile_eof;
         int64_t num_full_stripes;
         int64_t partial_stripe_len;
@@ -1725,16 +1722,16 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
 
         /* if it is, first compute the sub-file EOF */
 
-        num_full_stripes = logical_file_eof / sf_context->sf_blocksize_per_stripe;
+        num_full_stripes   = logical_file_eof / sf_context->sf_blocksize_per_stripe;
         partial_stripe_len = logical_file_eof % sf_context->sf_blocksize_per_stripe;
 
         subfile_eof = num_full_stripes * sf_context->sf_stripe_size;
 
-        if ( sf_context->topology->subfile_rank < (partial_stripe_len / sf_context->sf_stripe_size) ) {
+        if (sf_context->topology->subfile_rank < (partial_stripe_len / sf_context->sf_stripe_size)) {
 
             subfile_eof += sf_context->sf_stripe_size;
-
-        } else if ( sf_context->topology->subfile_rank == (partial_stripe_len / sf_context->sf_stripe_size) ) {
+        }
+        else if (sf_context->topology->subfile_rank == (partial_stripe_len / sf_context->sf_stripe_size)) {
 
             subfile_eof += partial_stripe_len % sf_context->sf_stripe_size;
         }
@@ -1751,15 +1748,15 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
 #ifndef NDEBUG
         test_file_eof = 0;
 
-        for ( i = 0; i < sf_context->topology->n_io_concentrators; i++ ) {
+        for (i = 0; i < sf_context->topology->n_io_concentrators; i++) {
 
             test_file_eof += num_full_stripes * sf_context->sf_stripe_size;
 
-            if ( i < (partial_stripe_len / sf_context->sf_stripe_size) ) {
+            if (i < (partial_stripe_len / sf_context->sf_stripe_size)) {
 
                 test_file_eof += sf_context->sf_stripe_size;
-
-            } else if ( i == (partial_stripe_len / sf_context->sf_stripe_size) ) {
+            }
+            else if (i == (partial_stripe_len / sf_context->sf_stripe_size)) {
 
                 test_file_eof += partial_stripe_len % sf_context->sf_stripe_size;
             }
@@ -1767,7 +1764,7 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
         HDassert(test_file_eof == logical_file_eof);
 #endif /* NDEBUG */
 
-#if 0 /* JRM */
+#if 0  /* JRM */
         HDfprintf(stdout, "\nH5FD__subfiling__truncate_sub_files: eof / sf_eof = %lld/%lld\n\n",
                   (long long)logical_file_eof, (long long)subfile_eof);
         HDfflush(stdout);
@@ -1776,18 +1773,16 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
         /* then direct the IOC to truncate the sub-file to the correct EOF */
 
         msg[0] = subfile_eof;
-        msg[1] = 0;             /* padding -- not used in this message */
+        msg[1] = 0; /* padding -- not used in this message */
         msg[2] = context_id;
 
-        if ( MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T,
-                                                 sf_context->topology->subfile_rank,
-                                                 TRUNC_OP, sf_context->sf_msg_comm)) )
+        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, sf_context->topology->subfile_rank,
+                                                TRUNC_OP, sf_context->sf_msg_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
-
     }
 
     /* Barrier on exit */
-#if 0 /* JRM */ /* delete this eventually */
+#if 0 /* JRM */  /* delete this eventually */
     HDfprintf(stdout, "\n\nH5FD__subfiling__truncate_sub_files: entering final barrier.\n\n");
     HDfflush(stdout);
 #endif /* JRM */ /* delete this eventually */
@@ -1811,21 +1806,21 @@ done:
  *
  *              Do this as follows:
  *
- *              1) allocate an array of int64_t of length equal to the 
+ *              1) allocate an array of int64_t of length equal to the
  *                 the number of IOCs, and initialize all fields to -1.
  *
  *              2) Send each IOC a message requesting that sub-file's EOF.
  *
- *              3) Await reply from each IOC, storing the reply in 
+ *              3) Await reply from each IOC, storing the reply in
  *                 the appropriate entry in the array allocated in 1.
  *
- *              4) After all IOCs have replied, compute the offset of 
+ *              4) After all IOCs have replied, compute the offset of
  *                 each subfile in the logical file.  Take the maximum
  *                 of these values, and erport this value as the overall
  *                 EOF.
  *
  *              Note that this operation is not collective, and can return
- *              invalid data if other ranks perform writes while this 
+ *              invalid data if other ranks perform writes while this
  *              operation is in progress.
  *
  * Return:      SUCCEED/FAIL
@@ -1842,21 +1837,21 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
     int                  i;
     int                  reply_count;
     int                  ioc_rank;
-    int                  mpi_code;             /* MPI return code */
-    int                  n_io_concentrators;   /* copy of value in topology */
-    MPI_Status           status; 
-    subfiling_context_t *sf_context = NULL;
-    int64_t              msg[3] = { 0, 0, 0 };
-    int64_t              *sf_eofs = NULL;      /* dynamically allocated array for sf EOFs */
+    int                  mpi_code;           /* MPI return code */
+    int                  n_io_concentrators; /* copy of value in topology */
+    MPI_Status           status;
+    subfiling_context_t *sf_context  = NULL;
+    int64_t              msg[3]      = {0, 0, 0};
+    int64_t *            sf_eofs     = NULL; /* dynamically allocated array for sf EOFs */
     int64_t              logical_eof = 0;
     int64_t              sf_logical_eof;
-    herr_t               ret_value = SUCCEED;  /* Return value */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(logical_eof_ptr);
 
-    if ( NULL == (sf_context = (subfiling_context_t *)get__subfiling_object(context_id)) )
+    if (NULL == (sf_context = (subfiling_context_t *)get__subfiling_object(context_id)))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context")
 
     HDassert(sf_context->topology);
@@ -1865,68 +1860,65 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
 
     HDassert(n_io_concentrators > 0);
 
-
-    /* 1) allocate an array of int64_t of length equal to the 
+    /* 1) allocate an array of int64_t of length equal to the
      *    the number of IOCs, and initialize all fields to -1.
      */
     sf_eofs = (int64_t *)HDmalloc((size_t)n_io_concentrators * sizeof(int64_t));
 
-    if ( sf_eofs == NULL )
+    if (sf_eofs == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate sub-file EOFs array.");
 
-    for ( i = 0; i < n_io_concentrators; i++ ) {
+    for (i = 0; i < n_io_concentrators; i++) {
 
         sf_eofs[i] = -1;
     }
 
- 
     /* 2) Send each IOC an asynchronous message requesting that
      *    sub-file's EOF.
      */
-    msg[0] = 0;          /* padding -- not used in this message */
-    msg[1] = 0;          /* padding -- not used in this message */
+    msg[0] = 0; /* padding -- not used in this message */
+    msg[1] = 0; /* padding -- not used in this message */
     msg[2] = context_id;
 
-    for ( i = 0; i < n_io_concentrators; i++ ) {
+    for (i = 0; i < n_io_concentrators; i++) {
 
         ioc_rank = sf_context->topology->io_concentrator[i];
 
-        if ( MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)) )
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code)
     }
- 
 
-    /* 3) Await reply from each IOC, storing the reply in 
+    /* 3) Await reply from each IOC, storing the reply in
      *    the appropriate entry in sf_eofs.
      */
     reply_count = 0;
-    while ( reply_count < n_io_concentrators ) {
+    while (reply_count < n_io_concentrators) {
 
-        if ( MPI_SUCCESS != (mpi_code = 
-             MPI_Recv(msg, 3, MPI_INT64_T, MPI_ANY_SOURCE, GET_EOF_COMPLETED, sf_context->sf_data_comm, &status)) ) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Recv(msg, 3, MPI_INT64_T, MPI_ANY_SOURCE, GET_EOF_COMPLETED,
+                                                sf_context->sf_data_comm, &status))) {
 
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv", mpi_code)
         }
 
         ioc_rank = (int)msg[0];
-        
+
         HDassert(ioc_rank >= 0);
         HDassert(ioc_rank < n_io_concentrators);
         HDassert(sf_eofs[ioc_rank] == -1);
 
         sf_eofs[ioc_rank] = msg[1];
-        
+
         reply_count++;
     }
 
-
-    /* 4) After all IOCs have replied, compute the offset of 
+    /* 4) After all IOCs have replied, compute the offset of
      *    each subfile in the logical file.  Take the maximum
      *    of these values, and erport this value as the overall
      *    EOF.
      */
 
-    for ( i = 0; i < n_io_concentrators; i++ ) {
+    for (i = 0; i < n_io_concentrators; i++) {
 
         /* compute number of complete stripes */
         sf_logical_eof = sf_eofs[i] / sf_context->sf_stripe_size;
@@ -1935,7 +1927,7 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
         sf_logical_eof *= sf_context->sf_stripe_size * n_io_concentrators;
 
         /* if the sub-file doesn't end on a stripe size boundary, must add in a partial stripe */
-        if ( sf_eofs[i] % sf_context->sf_stripe_size > 0 ) {
+        if (sf_eofs[i] % sf_context->sf_stripe_size > 0) {
 
             /* add in the size of the partial stripe up to but not includeing this subfile */
             sf_logical_eof += i * sf_context->sf_stripe_size;
@@ -1944,13 +1936,13 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
             sf_logical_eof += sf_eofs[i] % sf_context->sf_stripe_size;
         }
 
-        if ( sf_logical_eof > logical_eof ) {
+        if (sf_logical_eof > logical_eof) {
 
             logical_eof = sf_logical_eof;
         }
     }
 
-#if 0 /* JRM */ /* delete this eventually */
+#if 0 /* JRM */  /* delete this eventually */
     HDfprintf(stdout, "\n\nH5FD__subfiling__get_real_eof: logical_eof = %lld\n\n", logical_eof);
     HDfflush(stdout);
 #endif /* JRM */ /* delete this eventually */

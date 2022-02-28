@@ -1359,7 +1359,7 @@ test_create_and_close(void)
     }
 
     /* set the MPI communicator and info in the FAPL */
-    if ( H5Pset_mpi_params(fapl_id, comm, info) < 0 )
+    if (H5Pset_mpi_params(fapl_id, comm, info) < 0)
         TEST_ERROR;
 
     /* -------------------- */
@@ -1897,7 +1897,6 @@ test_basic_dataset_write(void)
     MPI_Info                       info      = MPI_INFO_NULL;
     MPI_Comm                       comm      = MPI_COMM_WORLD;
 
-
     hid_t file_dataspace; /* File dataspace ID */
     hid_t mem_dataspace;  /* memory dataspace ID */
 
@@ -1938,7 +1937,7 @@ test_basic_dataset_write(void)
     }
 
     /* set the MPI communicator and info in the FAPL */
-    if ( H5Pset_mpi_params(fapl_id, comm, info) < 0 )
+    if (H5Pset_mpi_params(fapl_id, comm, info) < 0)
         TEST_ERROR;
 
     /* Prepare data to be written
@@ -2700,10 +2699,10 @@ main(int argc, char **argv)
 
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
-        
+
 #if 1 /* JRM */ /* skip remaining tests for now since they hang */
         {
-            int         mpi_rank;
+            int mpi_rank;
 
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 

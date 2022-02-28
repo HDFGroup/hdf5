@@ -205,8 +205,9 @@ initialize_ioc_threads(void *_sf_context)
     if (status) {
         puts("hg_thread_create failed");
         goto err_exit;
-    } else { /* wait until ioc_main() reports that it is ready */
-        while ( atomic_load(&sf_ioc_ready) != 1 ) {
+    }
+    else { /* wait until ioc_main() reports that it is ready */
+        while (atomic_load(&sf_ioc_ready) != 1) {
 
             usleep(20);
         }
@@ -320,7 +321,7 @@ handle_work_request(void *arg)
     sf_context = get__subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
-#if 0 /* JRM */
+#if 0  /* JRM */
     HDfprintf(stdout, "\nhandle_work_request: context_id = %lld, msg->tag = %d\n", (long long)(file_context_id), (int)(msg->tag));
     HDfflush(stdout);
 #endif /* JRM */
@@ -390,11 +391,11 @@ handle_work_request(void *arg)
     sf_context = get__subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
-#if 1 /* JRM */
+#if 1  /* JRM */
     atomic_fetch_add(&sf_work_pending, 1); // atomic
 #endif /* JRM */
     msg->in_progress = 1;
-#if 0 /* JRM */
+#if 0  /* JRM */
     HDfprintf(stdout, "\n\nhandle_work_request: beginning execution of request %d. op = %d, offset/len = %lld/%lld.\n",
               q_entry_ptr->counter, (msg->tag), (long long)(msg->header[1]), (long long)(msg->header[0]));
     HDfflush(stdout);
@@ -410,7 +411,8 @@ handle_work_request(void *arg)
             break;
 
         case TRUNC_OP:
-            status = sf_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0], sf_context->topology->subfile_rank);
+            status = sf_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0],
+                                 sf_context->topology->subfile_rank);
             break;
 
         case GET_EOF_OP:
@@ -829,7 +831,7 @@ H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
 
     atomic_fetch_sub(&sf_io_ops_pending, 1);
 
-#if 0 /* JRM */
+#if 0  /* JRM */
     HDfprintf(stdout, 
            "\n\nH5FD_ioc__complete_io_q_entry: request %d completed. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
               entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
@@ -945,9 +947,9 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
             HDassert((scan_ptr == NULL) || (scan_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC));
 
-            if ( ( entry_ptr->wk_req.tag == TRUNC_OP ) || ( entry_ptr->wk_req.tag == GET_EOF_OP ) ) {
+            if ((entry_ptr->wk_req.tag == TRUNC_OP) || (entry_ptr->wk_req.tag == GET_EOF_OP)) {
 
-                if ( scan_ptr != NULL ) {
+                if (scan_ptr != NULL) {
 
                     /* the TRUNC_OP or GET_EOF_OP is not at the head of the queue, and thus cannot
                      * be dispatched.  Further, no operation can be dispatched if a truncate request
@@ -1007,7 +1009,7 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
                 io_queue_g.requests_dispatched++;
 
-#if 0 /* JRM */
+#if 0  /* JRM */
                 HDfprintf(stdout, 
 "\n\nH5FD_ioc__dispatch_elegible_io_q_entries: request %d dispatched. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
                     entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
@@ -1022,13 +1024,15 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
                 hg_thread_pool_post(ioc_thread_pool, &(entry_ptr->thread_wk));
             }
-        } else if ( ( entry_ptr->wk_req.tag == TRUNC_OP ) || ( entry_ptr->wk_req.tag == GET_EOF_OP ) ) {
+        }
+        else if ((entry_ptr->wk_req.tag == TRUNC_OP) || (entry_ptr->wk_req.tag == GET_EOF_OP)) {
 
             /* we have a truncate or get eof operation in progress -- thus no other operations
              * can be dispatched until the truncate or get eof operation completes.  Just break
              * out of the loop.
              */
-            /* the truncate or get eof operation in progress must be at the head of the queue -- verify this */
+            /* the truncate or get eof operation in progress must be at the head of the queue -- verify this
+             */
             HDassert(entry_ptr->prev == NULL);
 
             break;
@@ -1138,7 +1142,7 @@ H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
 
     atomic_fetch_add(&sf_io_ops_pending, 1);
 
-#if 0 /* JRM */
+#if 0  /* JRM */
     HDfprintf(stdout, 
               "\n\nH5FD_ioc__queue_io_q_entry: request %d queued. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
               entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
@@ -1184,7 +1188,7 @@ H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
 
 #endif /* H5FD_IOC__COLLECT_STATS */
 
-#if 0 /* JRM */ 
+#if 0  /* JRM */ 
     if ( io_queue_g.q_len != atomic_load(&sf_io_ops_pending) ) {
 
         HDfprintf(stdout, "\n\nH5FD_ioc__queue_io_q_entry: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).\n\n", 

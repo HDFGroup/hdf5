@@ -417,7 +417,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #endif /* JRM */
 
             /* set the MPI communicator and info in the FAPL */
-            if ( H5Pset_mpi_params(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0 ) {
+            if (H5Pset_mpi_params(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0) {
 
                 pass         = FALSE;
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
