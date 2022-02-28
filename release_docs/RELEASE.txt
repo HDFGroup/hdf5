@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - CPack will now generate RPM/DEB packages.
+
+      Enabled the RPM and DEB CPack generators on linux. In addition to
+      generating STGZ and TGZ packages, CPack will try to package the 
+      library for RPM and DEB packages. This is the initial attempt and
+      may change as issues are resolved.
+
+      (ADB - 2022/01/27)
+
     - Added new option to the h5cc scripts produced by CMake.
 
       Add -showconfig option to h5cc scripts that cat the 
@@ -874,8 +883,55 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Several improvements to parallel compression feature, including:
 
+      * Improved support for collective I/O (for both writes and reads)
+
+      * Significant reduction of memory usage for the feature as a whole
+
+      * Reduction of copying of application data buffers passed to H5Dwrite
+
+      * Addition of support for incremental file space allocation for filtered
+        datasets created in parallel. Incremental file space allocation is the
+        default for these types of datasets (early file space allocation is
+        also still supported), while early file space allocation is still the
+        default (and only supported allocation time) for unfiltered datasets
+        created in parallel. Incremental file space allocation should help with
+        parallel HDF5 applications that wish to use fill values on filtered
+        datasets, but would typically avoid doing so since dataset creation in
+        parallel would often take an excessive amount of time. Since these
+        datasets previously used early file space allocation, HDF5 would
+        allocate space for and write fill values to every chunk in the dataset
+        at creation time, leading to noticeable overhead. Instead, with
+        incremental file space allocation, allocation of file space for chunks
+        and writing of fill values to those chunks will be delayed until each
+        individual chunk is initially written to.
+
+      * Addition of support for HDF5's "don't filter partial edge chunks" flag
+        (https://portal.hdfgroup.org/display/HDF5/H5P_SET_CHUNK_OPTS)
+
+      * Addition of proper support for HDF5 fill values with the feature
+
+      * Addition of 'H5_HAVE_PARALLEL_FILTERED_WRITES' macro to H5pubconf.h
+        so HDF5 applications can determine at compile-time whether the feature
+        is available
+
+      * Addition of simple examples (ph5_filtered_writes.c and
+        ph5_filtered_writes_no_sel.c) under examples directory to demonstrate
+        usage of the feature
+
+      * Improved coverage of regression testing for the feature
+
+      NOTE: we are aware of and working on a fix for an assertion failure that
+            occurs during regression testing of the feature. It looks similar to:
+
+            hdf5/src/H5ACmpio.c:1089: H5AC__log_moved_entry: Assertion `!entry_dirty' failed.
+
+            so far, this assertion failure has only occurred during testing and has
+            not been seen in any production uses, but until this bug is fixed the
+            feature should be considered unstable.
+
+      (JTH - 2022/2/23)
 
     Fortran Library:
     ----------------
@@ -1082,6 +1138,23 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
+      H5check_version function.
+
+      Investigating the original fix, #812, we discovered some inconsistencies
+      with a new block added to check H5_VERS_RELEASE for incompatibilities.
+      This new block was not using the new warning text dealing with the
+      H5_VERS_RELEASE check and would cause the warning to be duplicated.
+      
+      By removing the H5_VERS_RELEASE argument in the first check for 
+      H5_VERS_MAJOR and H5_VERS_MINOR, the second check would only check
+      the H5_VERS_RELEASE for incompatible release versions. This adheres
+      to the statement that except for the develop branch, all release versions
+      in a major.minor maintenance branch should be compatible. The prerequisite
+      is that an application will not use any APIs not present in all release versions.
+
+      (ADB - 2022/02/24, #1438)
+
     - Fixed an H5Pget_filter_by_id1/2() assert w/ out of range filter IDs
 
       Both H5Pget_filter_by_id1 and 2 did not range check the filter ID, which

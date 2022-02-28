@@ -551,7 +551,7 @@ H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_ty
                          H5O_iterate2_t op, void *op_data, unsigned fields);
 H5_DLL herr_t H5O__inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O__dec_rc(H5O_t *oh);
-H5_DLL herr_t H5O__free(H5O_t *oh);
+H5_DLL herr_t H5O__free(H5O_t *oh, hbool_t force);
 
 /* Object header message routines */
 H5_DLL herr_t   H5O__msg_alloc(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, unsigned *mesg_flags,

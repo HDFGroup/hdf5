@@ -28,10 +28,10 @@ extern "C" {
  * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
  */
 
-/* The maximum allowed size for a receiving buffer when accepting bytes to
+/* Define the maximum allowed size for a receiving buffer when accepting bytes to
  * write. Writes larger than this size are performed by multiple accept-write
  * steps by the Writer. */
-#define H5FD_MIRROR_DATA_BUFFER_MAX H5_GB /* 1 Gigabyte */
+#define H5FD_MIRROR_DATA_BUFFER_MAX (1024 * 1024 * 1024) /* 1 Gigabyte */
 
 #define H5FD_MIRROR_XMIT_CURR_VERSION 1
 #define H5FD_MIRROR_XMIT_MAGIC        0x87F8005B

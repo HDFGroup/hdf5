@@ -188,6 +188,41 @@ H5FD__mpio_parse_debug_str(const char *s)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD__mpio_parse_debug_str() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5FD__mem_t_to_str
+ *
+ * Purpose:     Returns a string representing the enum value in an H5FD_mem_t
+ *              enum
+ *
+ * Returns:     H5FD_mem_t enum value string
+ *
+ *---------------------------------------------------------------------------
+ */
+static const char *
+H5FD__mem_t_to_str(H5FD_mem_t mem_type)
+{
+    switch (mem_type) {
+        case H5FD_MEM_NOLIST:
+            return "H5FD_MEM_NOLIST";
+        case H5FD_MEM_DEFAULT:
+            return "H5FD_MEM_DEFAULT";
+        case H5FD_MEM_SUPER:
+            return "H5FD_MEM_SUPER";
+        case H5FD_MEM_BTREE:
+            return "H5FD_MEM_BTREE";
+        case H5FD_MEM_DRAW:
+            return "H5FD_MEM_DRAW";
+        case H5FD_MEM_GHEAP:
+            return "H5FD_MEM_GHEAP";
+        case H5FD_MEM_LHEAP:
+            return "H5FD_MEM_LHEAP";
+        case H5FD_MEM_OHDR:
+            return "H5FD_MEM_OHDR";
+        default:
+            return "(Unknown)";
+    }
+}
 #endif /* H5FDmpio_DEBUG */
 
 /*-------------------------------------------------------------------------
@@ -994,7 +1029,6 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
-        *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late         */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD */
     }                                               /* end if */
@@ -1172,6 +1206,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     int n;
 #endif
     hbool_t use_view_this_time = FALSE;
+    hbool_t derived_type       = FALSE;
     hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1199,8 +1234,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
     size_i = (int)size;
-    if ((hsize_t)size_i != size)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
     /* Only look for MPI views for raw data transfers */
     if (type == H5FD_MEM_DRAW) {
@@ -1304,6 +1337,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
@@ -1366,8 +1414,8 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_read);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__, file->mpi_rank,
+                  (long)mpi_off, bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
     /*
@@ -1377,6 +1425,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         HDmemset((char *)buf + bytes_read, 0, (size_t)n);
 
 done:
+    if (derived_type)
+        MPI_Type_free(&buf_type);
+
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
@@ -1489,20 +1540,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
          */
         mpi_off = 0;
     } /* end if */
-    else if (size != (hsize_t)size_i) {
-        /* If HERE, then we need to work around the integer size limit
-         * of 2GB. The input size_t size variable cannot fit into an integer,
-         * but we can get around that limitation by creating a different datatype
-         * and then setting the integer size (or element count) to 1 when using
-         * the derived_type.
-         */
-
-        if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
-
-        derived_type = TRUE;
-        size_i       = 1;
-    }
 
     /* Write the data. */
     if (use_view_this_time) {
@@ -1548,6 +1585,21 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
@@ -1583,8 +1635,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_written);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
+                  file->mpi_rank, (long)mpi_off, bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and

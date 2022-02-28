@@ -300,11 +300,11 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
         }
     }
     else /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)elmtno);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)elmtno);
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -341,11 +341,11 @@ h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
         }
     }
     else /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)0);
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -385,7 +385,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
     /* Start coordinates */
     h5tools_str_append(str, "%s%s ", info->line_indent, START);
     for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
+        h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", start[j]);
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
@@ -393,7 +393,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
     /* Stride coordinates */
     h5tools_str_append(str, "%s ", STRIDE);
     for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", stride[j]);
+        h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", stride[j]);
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
@@ -404,7 +404,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
         if (count[j] == H5S_UNLIMITED)
             h5tools_str_append(str, "%s%s", j ? "," : "(", "H5S_UNLIMITED");
         else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
+            h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", count[j]);
     }
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
@@ -416,7 +416,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
         if (block[j] == H5S_UNLIMITED)
             h5tools_str_append(str, "%s%s", j ? "," : "(", "H5S_UNLIMITED");
         else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
+            h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", block[j]);
     }
     h5tools_str_append(str, ")");
 }
@@ -468,11 +468,10 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
 
             /* Start coordinates and opposite corner */
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : "(", ptdata[u * 2 * ndims + v]);
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", ptdata[u * 2 * ndims + v]);
 
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : ")-(",
-                                   ptdata[u * 2 * ndims + v + ndims]);
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : ")-(", ptdata[u * 2 * ndims + v + ndims]);
 
             h5tools_str_append(str, ")");
         }
@@ -527,7 +526,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
                                (unsigned long)u);
 
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : "(", (ptdata[u * ndims + v]));
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", (ptdata[u * ndims + v]));
 
             h5tools_str_append(str, ")");
         }
