@@ -97,6 +97,12 @@ typedef struct H5FD_get_driver_ud_t {
 /* Local Prototypes */
 /********************/
 static int H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data);
+static herr_t H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                               H5S_t **mem_spaces, H5S_t **file_spaces,
+                               haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */);
+static herr_t H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                H5S_t **mem_spaces, H5S_t **file_spaces,
+                                haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
 /*********************/
 /* Package Variables */
@@ -728,7 +734,7 @@ done:
  */
 static herr_t
 H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                               const H5S_t *const *mem_spaces, const H5S_t *const *file_spaces,
+                               H5S_t **mem_spaces, H5S_t **file_spaces,
                                haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t        extend_sizes = FALSE;
@@ -1026,8 +1032,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t *const *mem_spaces,
-                    const H5S_t *const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces,
+                    H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
                     void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
@@ -1300,8 +1306,8 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(file, type, dxpl_id, count, (const H5S_t *const *)mem_spaces,
-                                           (const H5S_t *const *)file_spaces, offsets, element_sizes,
+        if (H5FD__read_selection_translate(file, type, dxpl_id, count, mem_spaces,
+                                           file_spaces, offsets, element_sizes,
                                            bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
     }
@@ -1348,7 +1354,7 @@ done:
  */
 static herr_t
 H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                const H5S_t *const *mem_spaces, const H5S_t *const *file_spaces,
+                                H5S_t **mem_spaces, H5S_t **file_spaces,
                                 haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t        extend_sizes = FALSE;
@@ -1644,8 +1650,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t *const *mem_spaces,
-                     const H5S_t *const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces,
+                     H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
                      const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
@@ -1903,8 +1909,8 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(file, type, dxpl_id, count, (const H5S_t *const *)mem_spaces,
-                                            (const H5S_t *const *)file_spaces, offsets, element_sizes,
+        if (H5FD__write_selection_translate(file, type, dxpl_id, count, mem_spaces,
+                                            file_spaces, offsets, element_sizes,
                                             bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
     }
@@ -2114,25 +2120,23 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
     HDassert(H5F_addr_defined(addr_1));
     HDassert(H5F_addr_defined(addr_2));
 
-    if (H5F_addr_gt(addr_1, addr_2)) {
-
+    /* Compare the addresses */
+    if (H5F_addr_gt(addr_1, addr_2))
         ret_value = 1;
-    }
-    else if (H5F_addr_lt(addr_1, addr_2)) {
-
+    else if (H5F_addr_lt(addr_1, addr_2))
         ret_value = -1;
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__vsrt_tmp_cmp() */
 
 herr_t
-H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t types[], haddr_t addrs[],
                         size_t sizes[], const void *bufs[], H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr,
                         size_t **s_sizes_ptr, void ***s_bufs_ptr)
 {
     herr_t                  ret_value = SUCCEED; /* Return value */
-    int                     i;
+    size_t                  count  = (size_t)_count;
+    size_t                  i;
     struct H5FD_vsrt_tmp_t *srt_tmp = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2157,27 +2161,22 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t t
     HDassert((count == 0) || ((s_sizes_ptr) && (NULL == *s_sizes_ptr)));
     HDassert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
 
-    *vector_was_sorted = TRUE;
+    /* scan the addrs array to see if it is sorted */
+    for (i = 1; i < count; i++) {
+        HDassert(H5F_addr_defined(addrs[i - 1]));
 
-    /* if count <= 1, vector is sorted by definition */
-    if (count > 1) {
-
-        /* scan the addrs array to see if it is sorted */
-        i = 1;
-
-        while ((*vector_was_sorted) && (i < (int)(count - 1))) {
-
-            if (H5F_addr_gt(addrs[i - 1], addrs[i])) {
-
-                *vector_was_sorted = FALSE;
-            }
-            else if (H5F_addr_eq(addrs[i - 1], addrs[i])) {
-
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
-            }
-            i++;
-        }
+        if (H5F_addr_gt(addrs[i - 1], addrs[i]))
+            break;
+        else if (H5F_addr_eq(addrs[i - 1], addrs[i]))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
     }
+
+    /* if we traversed the entire array without breaking out, then
+     * the array was already sorted */
+    if (i >= count)
+        *vector_was_sorted = TRUE;
+    else
+        *vector_was_sorted = FALSE;
 
     if (*vector_was_sorted) {
 
@@ -2201,43 +2200,40 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t t
          * the sorted array of H5FD_vsrt_tmp_t.
          */
         int    j;
-        int    fixed_size_index = (int)count;
-        int    fixed_type_index = (int)count;
+        size_t fixed_size_index = count;
+        size_t fixed_type_index = count;
         size_t srt_tmp_size;
 
-        srt_tmp_size = ((size_t)count * sizeof(struct H5FD_vsrt_tmp_t));
+        srt_tmp_size = (count * sizeof(struct H5FD_vsrt_tmp_t));
 
         if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)HDmalloc(srt_tmp_size)))
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
-        for (i = 0; i < (int)count; i++) {
+        for (i = 0; i < count; i++) {
+            HDassert(i == (size_t)((int)i));
 
             srt_tmp[i].addr  = addrs[i];
-            srt_tmp[i].index = i;
+            srt_tmp[i].index = (int)i;
         }
 
         /* sort the srt_tmp array */
-        HDqsort(srt_tmp, (size_t)count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
+        HDqsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
 
         /* verify no duplicate entries */
         i = 1;
 
-        while (i < (int)(count - 1)) {
-
+        for (i = 1; i < count; i++) {
             HDassert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
 
-            if (H5F_addr_eq(addrs[i - 1], addrs[i])) {
-
+            if (H5F_addr_eq(addrs[i - 1], addrs[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
-            }
-            i++;
         }
 
-        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc((size_t)count * sizeof(H5FD_mem_t)))) ||
-            (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc((size_t)count * sizeof(haddr_t)))) ||
-            (NULL == (*s_sizes_ptr = (size_t *)HDmalloc((size_t)count * sizeof(size_t)))) ||
-            (NULL == (*s_bufs_ptr = (void *)HDmalloc((size_t)count * sizeof(void *))))) {
+        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc(count * sizeof(H5FD_mem_t)))) ||
+            (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc(count * sizeof(haddr_t)))) ||
+            (NULL == (*s_sizes_ptr = (size_t *)HDmalloc(count * sizeof(size_t)))) ||
+            (NULL == (*s_bufs_ptr = (void *)HDmalloc(count * sizeof(void *))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
         }
@@ -2245,31 +2241,24 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t t
         HDassert(sizes[0] != 0);
         HDassert(types[0] != H5FD_MEM_NOLIST);
 
-        /* scan the sizes and types vectors to determine if the fixed size / type
+        /* Scan the sizes and types vectors to determine if the fixed size / type
          * optimization is in use, and if so, to determine the index of the last
-         * valid value on each vector.
+         * valid value on each vector.  We have already verified that the first
+         * elements of these arrays are valid so we can start at the second
+         * element (if it exists).
          */
-        i = 0;
-        while ((i < (int)count) && ((fixed_size_index == (int)count) || (fixed_type_index == (int)count))) {
-
-            if ((fixed_size_index == (int)count) && (sizes[i] == 0)) {
-
+        for (i = 1; i < count && ((fixed_size_index == count) || (fixed_type_index == count)); i++) {
+            if ((fixed_size_index == count) && (sizes[i] == 0))
                 fixed_size_index = i - 1;
-            }
-
-            if ((fixed_type_index == (int)count) && (types[i] == H5FD_MEM_NOLIST)) {
-
+            if ((fixed_type_index == count) && (types[i] == H5FD_MEM_NOLIST))
                 fixed_type_index = i - 1;
-            }
-
-            i++;
         }
 
-        HDassert((fixed_size_index >= 0) && (fixed_size_index <= (int)count));
-        HDassert((fixed_type_index >= 0) && (fixed_size_index <= (int)count));
+        HDassert(fixed_size_index <= count);
+        HDassert(fixed_type_index <= count);
 
         /* populate the sorted vectors */
-        for (i = 0; i < (int)count; i++) {
+        for (i = 0; i < count; i++) {
 
             j = srt_tmp[i].index;
 

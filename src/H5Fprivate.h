@@ -926,12 +926,12 @@ H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t si
 
 /* Functions that operate on selections of elements in the file */
 H5_DLL herr_t H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count,
-                                     const struct H5S_t *const *mem_spaces,
-                                     const struct H5S_t *const *file_spaces, haddr_t offsets[],
+                                     struct H5S_t **mem_spaces,
+                                     struct H5S_t **file_spaces, haddr_t offsets[],
                                      size_t element_sizes[], void *bufs[] /* out */);
 H5_DLL herr_t H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count,
-                                      const struct H5S_t *const *mem_spaces,
-                                      const struct H5S_t *const *file_spaces, haddr_t offsets[],
+                                      struct H5S_t **mem_spaces,
+                                      struct H5S_t **file_spaces, haddr_t offsets[],
                                       size_t element_sizes[], const void *bufs[]);
 
 /* Functions that flush or evict */
