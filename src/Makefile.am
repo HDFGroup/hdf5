@@ -118,6 +118,11 @@ if BUILD_PARALLEL_CONDITIONAL
     libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
 endif
 
+# Only compile the subfiling VFD if necessary
+if SUBFILING_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDsubfiling.c H5FDsubfile_int.c H5FDsubfile_mpi.c H5FDioc.c H5FDioc_threads.c
+endif
+
 # Only compile the direct VFD if necessary
 if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
@@ -143,9 +148,10 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
-        H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h \
+        H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h H5FDioc.h \
         H5FDlog.h H5FDmirror.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
-        H5FDsec2.h H5FDsplitter.h H5FDstdio.h H5FDwindows.h \
+        H5FDsec2.h H5FDsplitter.h H5FDsubfiling.h H5FDsubfiling_priv.h \
+        H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
@@ -157,6 +163,21 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 # Public component author headers
 include_HEADERS += H5ESdevelop.h H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
         H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
+
+if HAVE_MERCURY_CONDITIONAL
+    include_HEADERS += mercury/src/util/mercury_thread.h \
+    mercury/src/util/mercury_thread_mutex.h mercury/src/util/mercury_thread_pool.h
+
+    libhdf5_la_SOURCES += mercury/src/util/mercury_atomic_queue.c \
+    mercury/src/util/mercury_dlog.c mercury/src/util/mercury_event.c \
+    mercury/src/util/mercury_hash_table.c mercury/src/util/mercury_log.c \
+    mercury/src/util/mercury_mem.c mercury/src/util/mercury_mem_pool.c \
+    mercury/src/util/mercury_poll.c mercury/src/util/mercury_request.c \
+    mercury/src/util/mercury_thread.c mercury/src/util/mercury_thread_condition.c \
+    mercury/src/util/mercury_thread_pool.c mercury/src/util/mercury_thread_mutex.c \
+    mercury/src/util/mercury_thread_rwlock.c mercury/src/util/mercury_thread_spin.c \
+    mercury/src/util/mercury_util.c
+endif
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

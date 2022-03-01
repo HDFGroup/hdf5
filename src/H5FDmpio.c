@@ -2219,6 +2219,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
+
             /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
