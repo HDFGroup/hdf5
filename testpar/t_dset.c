@@ -3202,7 +3202,7 @@ test_actual_io_mode(int selection_mode)
         /* Set the threshold number of processes per chunk to twice mpi_size.
          * This will prevent the threshold from ever being met, thus forcing
          * multi chunk io instead of link chunk io.
-         * This is via deault.
+         * This is via default.
          */
         if (multi_chunk_io) {
             /* force multi-chunk-io by threshold */

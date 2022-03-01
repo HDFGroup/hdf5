@@ -1736,7 +1736,7 @@ main(int argc, char *argv[])
             warn_msg("Unable to retrieve file size\n");
         HDassert(iter.filesize != 0);
 
-        /* Get storge info for file-level structures */
+        /* Get storage info for file-level structures */
         if (H5Fget_info2(fid, &finfo) < 0)
             warn_msg("Unable to retrieve file info\n");
         else {

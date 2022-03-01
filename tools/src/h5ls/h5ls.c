@@ -2526,7 +2526,7 @@ done:
  *              were borrowed from the GNU less(1).
  *
  * Return:      Success: Number of columns.
- *              Failure: Some default number of columms.
+ *              Failure: Some default number of columns.
  *-------------------------------------------------------------------------
  */
 static int

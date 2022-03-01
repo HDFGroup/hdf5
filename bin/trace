@@ -88,6 +88,7 @@ $Source = "";
                "H5_index_t"                 => "Ii",
                "H5I_iterate_func_t"         => "II",
                "H5_iter_order_t"            => "Io",
+               "ioc_selection_t"            => "IO",
                "H5I_future_realize_func_t"  => "IR",
                "int"                        => "Is",
                "int32_t"                    => "Is",
@@ -188,6 +189,7 @@ $Source = "";
                "H5Z_filter_t"               => "Zf",
                "H5Z_filter_func_t"          => "ZF",
                "ssize_t"                    => "Zs",
+
 # Types below must be defined here, as they appear in function arguments,
 # but they are not yet supported in the H5_trace_args() routine yet.  If
 # they are used as an actual parameter type (and not just as a pointer to
