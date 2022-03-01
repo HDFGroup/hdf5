@@ -1897,7 +1897,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                         if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                         if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
-                            sub_types = H5MM_free(sub_types);
+                            /* MSB sub_types = H5MM_free(sub_types);*/
+                            H5MM_free(sub_types);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't alloc sub types created array")
                         }
@@ -2552,7 +2553,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                         if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                         if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
-                            sub_types = H5MM_free(sub_types);
+                            /*MSB sub_types = H5MM_free(sub_types);*/
+                            H5MM_free(sub_types);
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't alloc sub types created array")
                         }
