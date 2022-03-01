@@ -83,7 +83,7 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 1
+#define H5_VERS_RELEASE 2
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
@@ -91,7 +91,7 @@
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.1-1"
+#define H5_VERS_INFO "HDF5 library version: 1.13.2-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
