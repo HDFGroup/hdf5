@@ -71,8 +71,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 2;
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 3;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
