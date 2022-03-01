@@ -238,7 +238,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
   # Append more extra warning flags that only gcc 9.3+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.3)
-    # do not use C warnings, gnu-warnings 9.3, no cxx warniings
+    # do not use C warnings, gnu-warnings 9.3, no cxx warnings
     # ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/9.3")
   endif ()
 
