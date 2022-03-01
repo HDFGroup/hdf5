@@ -269,7 +269,7 @@ H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connector_ids, void 
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIo*i**xx", es_id, order, connector_ids, requests, count);
+    H5TRACE6("e", "iIo*i**xzx", es_id, order, connector_ids, requests, array_len, count);
 
     /* Check arguments */
     if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))

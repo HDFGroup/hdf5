@@ -89,7 +89,7 @@ ioc_thread_main(void *arg)
  * Purpose:     The principal entry point to initialize the execution
  *              context for an IO Concentrator (IOC). The main thread
  *              is responsible for receiving IO requests from each
- *              HDF5 "client" and distibuting those to helper threads
+ *              HDF5 "client" and distributing those to helper threads
  *              for actual processing.  We initialize a fixed number
  *              of helper threads by creating a thread_pool.
  *
@@ -305,7 +305,7 @@ translate_opcode(io_op_t op)
  *
  *-------------------------------------------------------------------------
  */
-#if 0 /* JRM */ /* Original version -- expects sf_work_request_t * as its arguement */
+#if 0 /* JRM */ /* Original version -- expects sf_work_request_t * as its argument */
 static HG_THREAD_RETURN_TYPE
 handle_work_request(void *arg)
 {
@@ -967,7 +967,7 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
                 scan_len    = scan_ptr->wk_req.header[0];
 
                 /* at present, I/O requests are scalar -- i.e. single blocks specified by offset and length.
-                 * when this changes, this if statment will have to be updated accordingly.
+                 * when this changes, this if statement will have to be updated accordingly.
                  */
                 if (!(((scan_offset + scan_len) < entry_offset) ||
                       ((entry_offset + entry_len) < scan_offset))) {

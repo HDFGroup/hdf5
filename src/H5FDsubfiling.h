@@ -72,7 +72,7 @@
  * `stripe_count` (int32_t)
  *
  *     The integer value which identifies the total number of
- *     subfiles that have been algorthmically been selected to
+ *     subfiles that have been algorithmically been selected to
  *     to contain the segments of raw data which make up an HDF5
  *     file.  This value is used to implement the RAID-0 functionality
  *     when reading or writing datasets.
@@ -89,7 +89,7 @@
  *
  *     The io_selection_t defines a specific algorithm by which IO
  *     concentrators (IOCs) and sub-files are identified.  The available
- *     algorthms are: SELECT_IOC_ONE_PER_NODE, SELECT_IOC_EVERY_NTH_RANK,
+ *     algorithms are: SELECT_IOC_ONE_PER_NODE, SELECT_IOC_EVERY_NTH_RANK,
  *     SELECT_IOC_WITH_CONFIG, and SELECT_IOC_TOTAL.
  *
  ***   STACKING and other VFD support
@@ -101,12 +101,12 @@
  *     A valid file access property list (fapl) is cached on each
  *     process and thus enables selection of an alternative provider
  *     for subsequent file operations.
- *     By defalt, Sub-filing employs an additional support VFD that
+ *     By default, Sub-filing employs an additional support VFD that
  *     provides file IO proxy capabilities to all MPI ranks in a
  *     distributed parallel application.  This IO indirection
  *     thus allows application access all sub-files even while
  *     these may actually be node-local and thus not directly
- *     accessable to remote ranks.
+ *     accessible to remote ranks.
  *
  ***   Subfiling file Info
  *
@@ -149,7 +149,7 @@ typedef struct config_common_t {
  *     Require_IOC is a boolean flag with a default value of TRUE.
  *     This flag indicates that the stacked H5FDioc VFD should be
  *     employed for sub-filing operations.  The default flag can be
- *     overriden with an environment variable: H5_REQUIRE_IOC=0
+ *     overridden with an environment variable: H5_REQUIRE_IOC=0
  *
  */
 
@@ -194,7 +194,7 @@ H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *conf
  * \brief Modifies the file access property list to use the #H5FD_SUBFILING driver
  *
  * \fapl_id
- * \param[in] vfd_config #H5FD_SUBFILING driver specfic properties. If NULL, then
+ * \param[in] vfd_config #H5FD_SUBFILING driver specific properties. If NULL, then
  *            the IO concentrator VFD will be used.
  * \returns \herr_t
  *

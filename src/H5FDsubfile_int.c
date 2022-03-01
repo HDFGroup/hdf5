@@ -214,7 +214,7 @@ int sf_open_file_count = 0;
  * Function:    Public/Client set_verbose_flag
  *
  * Purpose:     For debugging purposes, I allow a verbose setting to
- *              have printing of relevent information into an IOC specific
+ *              have printing of relevant information into an IOC specific
  *              file that is opened as a result of enabling the flag
  *              and closed when the verbose setting is disabled.
  *
@@ -349,7 +349,7 @@ record_fid_to_subfile(uint64_t fid, hid_t subfile_context_id, int *next_index)
  *              inode values, these being constant for all processes
  *              opening the shared file.  The inode value is utilized
  *              as a key value and is associated with the sf_context
- *              which we recieve as one of the input arguments.
+ *              which we receive as one of the input arguments.
  *
  *              IO Concentrator threads will be initialized on MPI ranks
  *              which have been identified via application toplogy
@@ -1109,7 +1109,7 @@ active_map_entries(void)
  *              The default of one(1) IO concentrator per node can be
  *              changed (principally for testing) by environment variable.
  *              if IOC_COUNT_PER_NODE is defined, then that integer value
- *              is utilized as a mulitiplier to modify the set of
+ *              is utilized as a multiplier to modify the set of
  *              IO Concentrator ranks.
  *
  *              The cached results will be replicated within the
@@ -1530,7 +1530,7 @@ done:
  *              storage arrays can be stack based rather than explicitly
  *              allocated and freed.
  *
- *              The Internal function is resposible for sending all IOC
+ *              The Internal function is responsible for sending all IOC
  *              instances, the (sub)file open requests.
  *
  *              Prior to calling the internal open function, we initialize
@@ -1560,7 +1560,7 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     char *           option_arg  = get_ioc_selection_criteria(&ioc_selection);
 
     HDassert(config_info);
-    /* Check to see who is calling ths function::
+    /* Check to see who is calling the function::
      * We only allow the ioc or subfiling VFDs
      */
     if ((config_info->magic != H5FD_IOC_FAPL_T_MAGIC) &&
@@ -1654,7 +1654,7 @@ H5FD__close_subfiles(int64_t context_id)
  *              1) Run a barrier on entry.
  *
  *              2) Determine if this rank is a IOC.  If it is, compute
- *                 the correct EOF for this sub-file, and send a trucate
+ *                 the correct EOF for this sub-file, and send a truncate
  *                 request to the IOC.
  *
  *              3) On the IOC thread, allow all pending I/O requests
@@ -1929,7 +1929,7 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
         /* if the sub-file doesn't end on a stripe size boundary, must add in a partial stripe */
         if (sf_eofs[i] % sf_context->sf_stripe_size > 0) {
 
-            /* add in the size of the partial stripe up to but not includeing this subfile */
+            /* add in the size of the partial stripe up to but not including this subfile */
             sf_logical_eof += i * sf_context->sf_stripe_size;
 
             /* finally, add in the number of bytes in the last partial stripe depth in the sub-file */

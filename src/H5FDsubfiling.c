@@ -103,7 +103,7 @@ typedef struct H5FD_subfiling_t {
     int                     fd;  /* the filesystem file descriptor   */
     H5FD_subfiling_config_t fa;  /* driver-specific file access properties */
 
-    /* the following fields are inherrited from the sec2 VFD, and will
+    /* the following fields are inherited from the sec2 VFD, and will
      * likely be deleted.
      */
     int     mpi_rank; /* useful MPI information           */
@@ -450,7 +450,7 @@ fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
  *
  * Purpose:     Modify the file access property list to use the
  *              H5FD_SUBFILING driver defined in this source file.  All
- *              driver specfic properties are passed in as a pointer to
+ *              driver specific properties are passed in as a pointer to
  *              a suitably initialized instance of H5FD_subfiling_config_t
  *
  * Return:      SUCCEED/FAIL
@@ -522,16 +522,16 @@ done:
  * Function:    H5FD_subfiling_validate_config()
  *
  * Purpose:     Test to see if the supplied instance of
- *              H5FD_subfiling_config_t contains internally consistant data.
+ *              H5FD_subfiling_config_t contains internally consistent data.
  *              Return SUCCEED if so, and FAIL otherwise.
  *
- *              Note the difference between internally consistant and
+ *              Note the difference between internally consistent and
  *              correct.  As we will have to try to setup subfiling to
  *              determine whether the supplied data is correct,
- *              we will settle for internal consistancy at this point
+ *              we will settle for internal consistency at this point
  *
  * Return:      SUCCEED if instance of H5FD_subfiling_config_t contains
- *              internally consistant data, FAIL otherwise.
+ *              internally consistent data, FAIL otherwise.
  *
  * Programmer:  Jacob Smith
  *              9/10/17
@@ -798,7 +798,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
 
 #if 1 /* JRM */
     /* The following code to store MPI communicator, rank, size, and info
-     * may have to be reworked to make the subfiling VFD plugable.
+     * may have to be reworked to make the subfiling VFD pluggable.
      */
     /* Get the MPI communicator and info object from the property list */
     if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
@@ -873,7 +873,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
                 H5FD_sec2_t *hdf_file = (H5FD_sec2_t *)file_ptr->sf_file;
                 h5_stat_t    sb;
                 /* We create a new file descriptor for our file structure.
-                 * Basically, we want these seperate so that sec2 can
+                 * Basically, we want these separate so that sec2 can
                  * deal with the opened file for additional operations
                  * (especially close) without interfering with subfiling.
                  */
@@ -1204,7 +1204,7 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  *              and a file offset) of any storage operation.
  *
  *              Having a defined storage layout, the virtual file EOF
- *              calculation shoud be the MAXIMUM value returned by the
+ *              calculation should be the MAXIMUM value returned by the
  *              collection of IOCs.  Every MPI rank which hosts an IOC
  *              maintains it's own EOF by updating that value for each
  *              WRITE operation that completes, i.e. if a new local EOF
@@ -1217,7 +1217,7 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  *                 we also determine the 'sf_blocksize_per_stripe' which
  *                 is simply the 'sf_stripe_size' * 'n_ioc_concentrators'
  *
- *              2. For every write operation, the IOC recieves a message
+ *              2. For every write operation, the IOC receives a message
  *                 containing a file_offset and the data_size.
  *              3. The file_offset + data_size are in turn used to
  *                 create a stripe_id:
@@ -1264,7 +1264,7 @@ done:
 
 #else /* JRM */ /* re-worked version */
   /* this is a heavy weight implementation.  We need something like this
-   * for file open, and probaby for file close.  However, in between, something
+   * for file open, and probably for file close.  However, in between, something
    * similar to the current solution in the MPIIO VFD might be more appropriate.
    */
 
@@ -1915,7 +1915,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         /* Note that the following code does not let the sub-filing VFD participate
-         * in collective calls when thre is no data to write.  This is not an issue
+         * in collective calls when there is no data to write.  This is not an issue
          * now, as we don't do anything special with collective operations.  However
          * this needs to be fixed.
          */
@@ -2063,7 +2063,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         /* Note that the following code does not let the sub-filing VFD participate
-         * in collective calls when thre is no data to write.  This is not an issue
+         * in collective calls when there is no data to write.  This is not an issue
          * now, as we don't do anything special with collective operations.  However
          * this needs to be fixed.
          */
@@ -2195,7 +2195,7 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 
     HDassert(file);
     if (file->fa.require_ioc)
-        puts("Subfiling driver doesn't suport file locking");
+        puts("Subfiling driver doesn't support file locking");
     else {
         if (H5FD_lock(file->sf_file, rw) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")

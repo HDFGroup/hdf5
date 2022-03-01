@@ -197,7 +197,7 @@ numDigits(int n)
 
 /* ===================================================================== */
 /* MPI_Datatype Creation functions.
- * These are catagorized by usage paterns, i.e. when data is sent to or
+ * These are categorized by usage patterns, i.e. when data is sent to or
  * received from and IOC, the initial data offset provided by the user
  * may or may NOT start on a stripe boundary.  Because this, the initial
  * data segment to the selected IOC will often be less than 'stripe_size'
@@ -450,7 +450,7 @@ H5FD__create_f_l_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t s
  *              Concentrator (IOC).
  *
  *              Each data segment is of 'stripe_size' length and will be
- *              seperated from a previous or following segment by
+ *              separated from a previous or following segment by
  *              'sf_blocksize_per_stripe' bytes of data.
  *
  * Return:      The MPI_Datatype that will be used to send or receive data.
@@ -528,7 +528,7 @@ H5FD__create_mpi_uniform_type(subfiling_context_t *context, int ioc_depth, int64
  *
  * Return:      A filled set of vectors.  As a consequence of not allowing
  *              use of MPI derived datatypes in the VFD layer, we need to
- *              accomodate the possiblity that large IO transactions will
+ *              accommodate the possibility that large IO transactions will
  *              be required to use multiple IOs per IOC.
  *
  *              Example: Using 4 IOCs, each with 1M stripe-depth; when
@@ -719,7 +719,7 @@ init__indep_io(void *_sf_context, size_t maxdepth, int H5_ATTR_PARALLEL_UNUSED i
  *
  *              We cycle through all 'n_io_conentrators' and send a
  *              descriptor to each IOC that has a non-zero sized IO
- *              request to fullfill.
+ *              request to fulfill.
  *
  *              Sending descriptors to an IOC usually gets an ACK or
  *              NACK in response.  For the read operations, we post
@@ -836,7 +836,7 @@ read__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset
  * Purpose:     We provide a utility function to generate a subfiling
  *              filename from a template.  While the user provides a
  *              name which will serve as the HDF5 file name, sub-filing
- *              files are related to the user filename via the filesytem
+ *              files are related to the user filename via the filesystem
  *              inode identifier.  The inode id can be utilized as a
  *              global unique identifier (GUID) which provides a
  *              grouping ID to easily distinguish subfiles.
@@ -936,7 +936,7 @@ write_data(io_func_t *this_func)
  *              until the request is completed as indicated by a non-zero
  *              flag variable.
  *
- *              As we go further with the implemention, we anticipate that
+ *              As we go further with the implementation, we anticipate that
  *              rather than testing a single request variable, we will
  *              deal with a collection of all pending IO requests (on
  *              this rank).
@@ -1000,7 +1000,7 @@ async_completion(void *arg)
  *
  *              We cycle through all 'n_io_conentrators' and send a
  *              descriptor to each IOC that has a non-zero sized IO
- *              request to fullfill.
+ *              request to fulfill.
  *
  *              Sending descriptors to an IOC usually gets an ACK or
  *              NACK in response.  For the write operations, we post
@@ -1318,7 +1318,7 @@ write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offse
  *
  * Purpose:    This function takes 'count' vector entries
  *             and initiates an asynch write operation for each.
- *             By asychronous, we mean that MPI_Isends are utilized
+ *             By asynchronous, we mean that MPI_Isends are utilized
  *             to communicate the write operations to the 'count'
  *             IO Concentrators.  The calling function will have
  *             decomposed the actual user IO request into the
@@ -1482,7 +1482,7 @@ errors:
     return FAIL;
 }
 
-#if 0 /* JRM */  /* delete this -- superceeded version of sf_truncate */
+#if 0 /* JRM */  /* delete this -- superseded version of sf_truncate */
 int
 sf_truncate(hid_t h5_fid, haddr_t H5_ATTR_PARALLEL_UNUSED addr)
 {
@@ -1673,7 +1673,7 @@ ioc_main(int64_t context_id)
 #if 1  /* JRM */ 
             if ( ( tag != READ_INDEP ) && ( tag != WRITE_INDEP ) ) {
 
-                HDprintf("\n\nioc_main: recieved non READ_INDEP / WRITE_INDEP mssg. tag = %d.\n\n", tag);
+                HDprintf("\n\nioc_main: received non READ_INDEP / WRITE_INDEP mssg. tag = %d.\n\n", tag);
                 HDfflush(stdout);
             }
 #endif /* JRM */
@@ -1825,7 +1825,7 @@ ioc_main(int64_t context_id)
 #if 1  /* JRM */
             if ((tag != READ_INDEP) && (tag != WRITE_INDEP) && (tag != TRUNC_OP) && (tag != GET_EOF_OP)) {
 
-                HDprintf("\n\nioc_main: recieved non READ_INDEP / WRITE_INDEP / TRUNC_OP / GET_EOF_OP mssg. "
+                HDprintf("\n\nioc_main: received non READ_INDEP / WRITE_INDEP / TRUNC_OP / GET_EOF_OP mssg. "
                          "tag = %d.\n\n",
                          tag);
                 HDfflush(stdout);
@@ -1895,7 +1895,7 @@ ioc_main(int64_t context_id)
 
 } /* ioc_main() */
 
-#endif /* JRM */ /* re-written versin of ioc_main() */
+#endif /* JRM */ /* re-written version of ioc_main() */
 
 /*
 =========================================
@@ -2477,7 +2477,7 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
         *_subfile_dir = strdup(subfile_dir);
     }
     else {
-        /* Note: Users may specify a directory name which is inaccessable
+        /* Note: Users may specify a directory name which is inaccessible
          * from where the current is running.  In particular, "node-local"
          * storage is not uniformly available to all processes.
          * We would like to check if the user pathname unavailable and
@@ -2511,7 +2511,7 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
  *              and then the second file open using the user supplied open
  *              flags is invoked.   The OPEN_OP provides the user flags as
  *              part of the RPC message.  The file prefix info doesn't
- *              transmited as part of the RPC since it is available as
+ *              transmitted as part of the RPC since it is available as
  *              part of the client context which can be utilized by the
  *              IOC thread.  We access the sf_context by reading the
  *              cache of contexts at the index provided with the RPC msg.
@@ -2781,13 +2781,13 @@ sf_subfile_set_logging(hid_t sf_fid, int ioc_rank, int flag)
  * Purpose:     Determine the target sub-file's eof and report this value
  *              to the requesting rank.
  *
- *              Notes: This functin will have to be reworked once we solve
+ *              Notes: This function will have to be reworked once we solve
  *                     the IOC error reporting problem.
  *
  *                     This function mixes functionality that should be
  *                     in two different VFDs.
  *
- * Return:      0 if sucessful, 1 or an MPI error code on failure.
+ * Return:      0 if successful, 1 or an MPI error code on failure.
  *
  * Programmer:  John Mainzer
  *              7/17/2020

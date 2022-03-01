@@ -84,7 +84,7 @@ extern "C" {
  * `stripe_count` (int32_t)
  *
  *     The integer value which identifies the total number of
- *     subfiles that have been algorthmically been selected to
+ *     subfiles that have been algorithmically been selected to
  *     to contain the segments of raw data which make up an HDF5
  *     file.  This value is used to implement the RAID-0 functionality
  *     when reading or writing datasets.
@@ -101,7 +101,7 @@ extern "C" {
  *
  *     The io_selection_t defines a specific algorithm by which IO
  *     concentrators (IOCs) and sub-files are identified.  The available
- *     algorthms are: SELECT_IOC_ONE_PER_NODE, SELECT_IOC_EVERY_NTH_RANK,
+ *     algorithms are: SELECT_IOC_ONE_PER_NODE, SELECT_IOC_EVERY_NTH_RANK,
  *     SELECT_IOC_WITH_CONFIG, and SELECT_IOC_TOTAL.
  *
  ***   STACKING and other VFD support
@@ -113,12 +113,12 @@ extern "C" {
  *     A valid file access property list (fapl) is cached on each
  *     process and thus enables selection of an alternative provider
  *     for subsequent file operations.
- *     By defalt, Sub-filing employs an additional support VFD that
+ *     By default, Sub-filing employs an additional support VFD that
  *     provides file IO proxy capabilities to all MPI ranks in a
  *     distributed parallel application.  This IO indirection
  *     thus allows application access all sub-files even while
  *     these may actually be node-local and thus not directly
- *     accessable to remote ranks.
+ *     accessible to remote ranks.
  *
  ***   Subfiling file Info
  *
@@ -154,7 +154,7 @@ extern "C" {
 
 typedef struct stat_record {
     int64_t op_count; /* How many ops in total */
-    double  min;      /* minium (time)         */
+    double  min;      /* minimum (time)         */
     double  max;      /* maximum (time)        */
     double  total;    /* average (time)        */
 } stat_record_t;
@@ -300,7 +300,7 @@ typedef struct app_layout_t {
     long      hostid;      /* value returned by gethostid()  */
     layout_t *layout;      /* Vector of {rank,hostid} values */
     int *     node_ranks;  /* ranks extracted from sorted layout */
-    int       node_count;  /* Total nodes (differnt hostids) */
+    int       node_count;  /* Total nodes (different hostids) */
     int       node_index;  /* My node: index into node_ranks */
     int       local_peers; /* How may local peers on my node */
     int       world_rank;  /* My MPI rank                    */
@@ -409,7 +409,7 @@ extern atomic_int sf_ioc_ready;
  * At least initially, all sanity checking is done with asserts, as the
  * the existing I/O concentrator code is not well integrated into the HDF5
  * error reporting system.  This will have to be revisited for a production
- * version, but it should be suficient for now.
+ * version, but it should be sufficient for now.
  *
  *                                                 JRM -- 11/2/21
  *
@@ -500,11 +500,11 @@ do {                                                                            
  *         the IOC I/O Queue.  This field points to the previous entry
  *         in the queue, or NULL if there is no previous entry.
  *
- * in_progress: Boolean flag that must be FALSE when the entry is insterted
+ * in_progress: Boolean flag that must be FALSE when the entry is inserted
  *         into the IOC I/O Queue, and set to TRUE when the entry is dispatched
  *         to the worker thread pool for execution.
  *
- *         When in_progress is FALS, the enty is said to be pending.
+ *         When in_progress is FALS, the entry is said to be pending.
  *
  * counter: uint32_t containing a serial number assigned to this IOC
  *         I/O Queue entry.  Note that this will roll over on long
@@ -554,7 +554,7 @@ typedef struct H5FD_ioc_io_queue_entry {
     hbool_t                         in_progress;
     uint32_t                        counter;
 
-    /* rework these fileds */ /* JRM */
+    /* rework these fields */ /* JRM */
     sf_work_request_t     wk_req;
     struct hg_thread_work thread_wk;
 
@@ -599,7 +599,7 @@ struct hg_thread_work {
  * structure H5FD_ioc_io_queue
  *
  * This is a temporary structure -- its fields should be moved to an I/O
- * concentrator Catchall structure eventualy.
+ * concentrator Catchall structure eventually.
  *
  * The fields of this structure support the io queue used to receive and
  * sequence I/O requests for execution by the worker threads.  The rules
@@ -608,20 +608,20 @@ struct hg_thread_work {
  * 1) Non-overlaping I/O requests must be fed to the worker threads in
  *    the order received, and may execute concurrently
  *
- * 2) Overlaping read requests must be fed to the worker threads in
+ * 2) Overlapping read requests must be fed to the worker threads in
  *    the order received, but may execute concurrently.
  *
  * 3) If any pair of I/O requests overlap, and at least one is a write
  *    request, they must be executed in strict arrival order, and the
  *    first must complete before the second starts.
  *
- * Due to the strict ordering requirment in rule 3, entries must be
+ * Due to the strict ordering requirement in rule 3, entries must be
  * inserted at the tail of the queue in receipt order, and retained on
  * the queue until completed.  Entries in the queue are marked pending
  * when inserted on the queue, in progress when handed to a worker
  * thread, and deleted from the queue when completed.
  *
- * The dispatch algorith is as follows:
+ * The dispatch algorithm is as follows:
  *
  * 1) Set X equal to the element at the head of the queue.
  *
@@ -651,7 +651,7 @@ struct hg_thread_work {
  * I/O requests from the queue, check to see if there are any pending
  * requests, and trigger the dispatch algorithm if there are.
  *
- * The fileds in the structure are discussed individually below.
+ * The fields in the structure are discussed individually below.
  *
  * magic:  Unsigned 32 bit integer always set to H5FD_IOC__IO_Q_MAGIC.
  *         This field is used to validate pointers to instances of
@@ -683,7 +683,7 @@ struct hg_thread_work {
  *         to wrap around once its maximum value is reached.
  *
  * q_mutex: Mutex used to ensure that only one thread accesses the IOC I/O
- *         Queue at once.  This mutex must be held to access of modifiy
+ *         Queue at once.  This mutex must be held to access of modify
  *         all fields of the
  *
  *
@@ -697,10 +697,10 @@ struct hg_thread_work {
  * max_q_len: Maximum number of requests residing on the IOC I/O Queue at
  *         any point in time in the current run.
  *
- * max_num_pending: Maximum number of pending rquests residing on the IOC
+ * max_num_pending: Maximum number of pending requests residing on the IOC
  *         I/O Queue at any point in time in the current run.
  *
- * max_num_in_progress: Maximum number of in progress rquests residing on
+ * max_num_in_progress: Maximum number of in progress requests residing on
  *         the IOC I/O Queue at any point in time in the current run.
  *
  * ind_read_requests:  Number of independent read requests received by the
