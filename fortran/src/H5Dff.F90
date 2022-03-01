@@ -1625,8 +1625,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
@@ -1676,8 +1675,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
@@ -1724,8 +1722,7 @@ CONTAINS
   ! Inputs:
   !		fill_value	- fill value
   !		space_id	- memory space selection identifier
-  !		buf		- data buffer iin memory ro apply selection to
-  !				- of k-th dimension of the buf array
+  !		buf		- memory buffer containing the selection to be filled
   ! Outputs:
   !		hdferr:		- error code
   !				 	Success:  0
@@ -1799,8 +1796,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
