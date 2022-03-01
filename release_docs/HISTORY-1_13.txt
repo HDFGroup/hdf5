@@ -1,7 +1,7 @@
 HDF5 History
 ============
 
-This file contains development history of the HDF5 1.13 releasesfrom
+This file contains development history of the HDF5 1.13 releases from
 the develop branch
 
 01.      Release Information for hdf5-1.13.0
