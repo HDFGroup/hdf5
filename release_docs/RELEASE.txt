@@ -1,4 +1,4 @@
-HDF5 version 1.13.1 released on 2022-02-26
+HDF5 version 1.13.1 released on 2022-03-02
 ================================================================================
 
 
@@ -58,8 +58,8 @@ New Features
 
     - Added new option to the h5cc scripts produced by CMake.
 
-      Add -showconfig option to h5cc scripts that cat the 
-      libhdf5-settings to the standard output.
+      Add -showconfig option to h5cc scripts to cat the 
+      libhdf5.settings file to the standard output.
 
       (ADB - 2022/01/25)
 
@@ -79,7 +79,7 @@ New Features
     - Add a new public function, H5ESget_requests()
 
       This function allows the user to retrieve request pointers from an event
-      set. It is intended for use primarily by VOL plug in developers.
+      set. It is intended for use primarily by VOL plugin developers.
 
       (NAF - 2022/01/11)
 
@@ -98,7 +98,7 @@ New Features
         datasets created in parallel. Incremental file space allocation is the
         default for these types of datasets (early file space allocation is
         also still supported), while early file space allocation is still the
-        default (and only supported allocation time) for unfiltered datasets
+        default (and only supported at allocation time) for unfiltered datasets
         created in parallel. Incremental file space allocation should help with
         parallel HDF5 applications that wish to use fill values on filtered
         datasets, but would typically avoid doing so since dataset creation in
@@ -180,15 +180,15 @@ Bug Fixes since HDF5-1.13.0 release
 
       When resizing a pinned/protected cache entry, the metadata
       cache code previously would wait until after resizing the
-      entry to attempt to log the newly-dirtied entry. This would
-      cause H5C_resize_entry to mark the entry as dirty and make
-      H5AC_resize_entry think that it doesn't need to add the
+      entry to attempt to log the newly-dirtied entry. This 
+      caused H5C_resize_entry to mark the entry as dirty and made
+      H5AC_resize_entry think that it didn't need to add the
       newly-dirtied entry to the dirty entries skiplist.
 
       Thus, a subsequent H5AC__log_moved_entry would think it
-      needs to allocate a new entry for insertion into the dirty
-      entry skip list, since the entry doesn't exist on that list.
-      This causes an assertion failure, as the code to allocate a
+      needed to allocate a new entry for insertion into the dirty
+      entry skip list, since the entry didGn't exist on that list.
+      This caused an assertion failure, as the code to allocate a
       new entry assumes that the entry is not dirty.
 
       (JRM - 2022/02/28)
