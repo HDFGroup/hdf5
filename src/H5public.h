@@ -46,7 +46,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is available
  * on Windows, though it doesn't necessarily contain all the POSIX types
  * we need for HDF5 (e.g. ssize_t).
  */
@@ -83,7 +83,7 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 1
+#define H5_VERS_RELEASE 2
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
@@ -91,7 +91,7 @@
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.1-1"
+#define H5_VERS_INFO "HDF5 library version: 1.13.2-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 

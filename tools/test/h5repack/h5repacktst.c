@@ -6244,7 +6244,7 @@ gen_refered_objs(hid_t loc_id)
         goto out;
     }
 
-    /* create normal dataset which is refered */
+    /* create normal dataset which is referred */
     did2 = H5Dcreate2(loc_id, NAME_OBJ_DS2, H5T_STD_I8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did2 < 0) {
         HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
@@ -6284,7 +6284,7 @@ out:
  *  Generate object references to objects (dataset,group and named datatype)
  *
  * Note:
- *  copied from h5copygentest.c and upate to create named datatype
+ *  copied from h5copygentest.c and update to create named datatype
  *
  * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
