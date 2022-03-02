@@ -323,6 +323,10 @@ Platforms Tested
                                          XL 16.1.1.2
                                      (cmake)
 
+    Linux-3.10.0-1160.49.1           openmpi-intel/4.1
+    #1 SMP x86_64 GNU/Linux              Intel(R) Version 18.0.5, 19.1.2
+    (chama)                          (cmake)
+
     Linux-4.12.14-150.75-default     cray-mpich/7.7.10
     #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0
     (cori)                               Intel (R) Version 19.0.3.199
