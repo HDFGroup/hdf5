@@ -2782,9 +2782,11 @@ AC_ARG_ENABLE([memory-alloc-sanity-check],
                               [Enable this option to turn on internal memory
                               allocation sanity checking.  This could cause
                               more memory use and somewhat slower allocation.
-                              This option is orthogonal to the
-                              --enable-using-memchecker option.
-                               [default=yes if debug build, otherwise no]
+                              This option may also cause issues with HDF5
+                              filter plugins, so should not be enabled if
+                              filters are to be used.  This option is orthogonal
+                              to the --enable-using-memchecker option.
+                               [default=no]
                               ])],
               [MEMORYALLOCSANITYCHECK=$enableval])
 
@@ -2794,11 +2796,10 @@ AC_SUBST([MEMORYALLOCSANITYCHECK])
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+# Should consider enabling this option by default for
+# 'developer' builds if that build mode is added in
+# the future
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
