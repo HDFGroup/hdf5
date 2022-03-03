@@ -179,7 +179,7 @@
  */
 #define BEGIN_MPE_LOG                                                                                        \
     if (H5_MPEinit_g) {                                                                                      \
-        sprintf(p_event_start, "start %s", __func__);                                                        \
+        snprintf(p_event_start, sizeof(p_event_start), "start %s", __func__);                                \
         if (eventa(__func__) == -1 && eventb(__func__) == -1) {                                              \
             const char *p_color = "red";                                                                     \
             eventa(__func__)    = MPE_Log_get_event_number();                                                \
@@ -394,6 +394,25 @@
 #define HSSIZET_MAX ((hssize_t)LLONG_MAX)
 #define HSSIZET_MIN (~(HSSIZET_MAX))
 
+#ifdef H5_HAVE_PARALLEL
+
+/* Define a type for safely sending size_t values with MPI */
+#if SIZE_MAX == UCHAR_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG_LONG
+#else
+#error "no suitable MPI type for size_t"
+#endif
+
+#endif /* H5_HAVE_PARALLEL */
+
 /*
  * Types and max sizes for POSIX I/O.
  * OS X (Darwin) is odd since the max I/O size does not match the types.
@@ -514,6 +533,9 @@
 #define H5_GCC_CLANG_DIAG_OFF(x)
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
+
+/* Function pointer typedef for qsort */
+typedef int (*H5_sort_func_cb_t)(const void *, const void *);
 
 /* Typedefs and functions for timing certain parts of the library. */
 
@@ -2731,7 +2753,8 @@ struct h5_long_options {
                                  */
 };
 
-H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+H5_DLL int H5_get_option(int argc, const char *const *argv, const char *opt,
+                         const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */

@@ -221,6 +221,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *          to free the stack.
  *-------------------------------------------------------------------------
  */
+
 hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
                     pack_opt_t *options)
@@ -569,7 +570,7 @@ check_options(pack_opt_t *options)
      * Objects to layout
      *-------------------------------------------------------------------------
      */
-    if (options->verbose && have_request(options)) {
+    if (options->verbose > 0 && have_request(options)) {
         if (options->all_layout == 1) {
             HDprintf("All objects to modify layout are...\n");
             switch (options->layout_g) {
@@ -610,7 +611,7 @@ check_options(pack_opt_t *options)
         char *name = options->op_tbl->objs[i].path;
 
         if (options->op_tbl->objs[i].chunk.rank > 0) {
-            if (options->verbose) {
+            if (options->verbose > 0) {
                 HDprintf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
                     HDprintf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
@@ -619,7 +620,7 @@ check_options(pack_opt_t *options)
             has_ck = 1;
         }
         else if (options->op_tbl->objs[i].chunk.rank == -2) { /* TODO: replace 'magic number' */
-            if (options->verbose)
+            if (options->verbose > 0)
                 HDprintf(" <%s> %s\n", name, "NONE (contiguous)");
             has_ck = 1;
         }
@@ -633,7 +634,7 @@ check_options(pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose && have_request(options)) {
+    if (options->verbose > 0 && have_request(options)) {
         if (options->all_filter == 1) {
             HDprintf("All objects to apply filter are...\n");
             for (k = 0; k < options->n_filter_g; k++) {
@@ -670,7 +671,7 @@ check_options(pack_opt_t *options)
         char *      name = pack.path;
 
         for (j = 0; j < pack.nfilters; j++) {
-            if (options->verbose) {
+            if (options->verbose > 0) {
                 if (pack.filter[j].filtn >= 0) {
                     if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
                         HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
@@ -708,7 +709,7 @@ check_options(pack_opt_t *options)
      *------------------------------------------------------------------------
      */
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
-        if (options->verbose) {
+        if (options->verbose > 0) {
             HDprintf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
                      options->ublock_filename);
             options->ublock_size = 1024;
@@ -781,21 +782,21 @@ check_objects(const char *fname, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose)
+    if (options->verbose > 0)
         HDprintf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         pack_info_t obj  = options->op_tbl->objs[i];
         char *      name = obj.path;
 
-        if (options->verbose)
+        if (options->verbose > 0)
             HDprintf(" <%s>", name);
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
             H5TOOLS_GOTO_ERROR((-1), "%s Could not find <%s> in file <%s>. Exiting...\n",
-                               (options->verbose ? "\n" : ""), name, fname);
-        if (options->verbose)
+                               (options->verbose > 0 ? "\n" : ""), name, fname);
+        if (options->verbose > 0)
             HDprintf("...Found\n");
 
         for (ifil = 0; ifil < obj.nfilters; ifil++) {

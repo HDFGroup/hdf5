@@ -168,6 +168,12 @@
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
+/* Macros for various environment variables that HDF5 interprets */
+/**
+ * Used to instruct HDF5 not to cleanup files created during testing.
+ */
+#define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
+
 /**
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
