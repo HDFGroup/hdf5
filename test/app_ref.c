@@ -69,8 +69,10 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 {
     int i, n;
 
+    const char *string = " ID reference count: ";
     for (i = 0; i < T_NUMCLASSES; i++) {
-        HDfprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
+        HDfprintf(stderr, "%s%s", IDNAME[i], string);
+        n = (int)(strlen(IDNAME[i]) + strlen(string));
         HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
@@ -79,11 +81,12 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 int
 main(void)
 {
-    hid_t ids[T_NUMCLASSES];
-    hid_t fapl; /* File Access Property List */
-    int   ninc;
-    int   i;
-    char  filename[1024];
+    const char *env_h5_drvr; /* File Driver value from environment */
+    hid_t       ids[T_NUMCLASSES];
+    hid_t       fapl; /* File Access Property List */
+    int         ninc;
+    int         i;
+    char        filename[1024];
 
     h5_reset();
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
@@ -91,6 +94,19 @@ main(void)
     HDsrand((unsigned)HDtime(NULL));
 
     TESTING("library shutdown with reference count > 1");
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Don't run this test with the multi/split VFD. A bug in library shutdown
+     * ordering causes problems with the multi VFD when IDs are left dangling.
+     */
+    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
+        HDputs("\n -- SKIPPED for incompatible VFD --");
+        return 0;
+    }
 
     /* Create the file */
     if ((ids[T_FILE] = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)

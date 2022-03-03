@@ -26,7 +26,11 @@
  */
 #define H5C_FRIEND  /*suppress error about including H5Cpkg      */
 #define H5C_TESTING /*suppress warning about H5C testing funcs*/
+#define H5FD_FRIEND /*suppress error about including H5FDpkg      */
+#define H5FD_TESTING
+
 #include "H5Cpkg.h" /* Cache                */
+#include "H5FDpkg.h"
 
 /* ============ */
 /* Test Defines */
@@ -97,7 +101,7 @@ verify_old_dset_cork(void)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data bufer (pointers to fake 2D array) */
+    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
     int *       buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
@@ -509,7 +513,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data bufer (pointers to fake 2D array) */
+    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
     int *       buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
@@ -1883,7 +1887,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     hid_t    fid = H5I_INVALID_HID;                          /* File ID */
     hid_t    fapl;                                           /* File access property list */
-    hid_t    gid  = H5I_INVALID_HID;                         /* Groupd ID */
+    hid_t    gid  = H5I_INVALID_HID;                         /* Grouped ID */
     hid_t    did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
     hid_t    tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
     hid_t    sid  = H5I_INVALID_HID;                         /* Dataspace ID */
@@ -2244,6 +2248,19 @@ main(void)
     nerrs += verify_old_dset_cork();
 
     for (swmr = 0; swmr <= 1; swmr++) {
+        if (swmr) {
+            char *driver = NULL;
+
+            /* Skip these tests if SWMR I/O is not supported for the VFD specified
+             * by the environment variable.
+             */
+            driver = HDgetenv("HDF5_DRIVER");
+            if (!H5FD__supports_swmr_test(driver)) {
+                HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
+                continue;
+            }
+        }
+
         /* Tests with new/old library format */
         /* This is the test moved from th5o.c: test_h5o_cork() */
         nerrs += test_objs_cork(swmr, TRUE);

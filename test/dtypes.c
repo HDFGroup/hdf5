@@ -29,7 +29,7 @@
 #define ARRAY_DIM 4
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1
@@ -2359,7 +2359,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2410,7 +2410,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2451,7 +2451,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2635,9 +2635,9 @@ test_compound_13(void)
     HDmemset(&data_out, 0, sizeof(data_out));
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = (unsigned char)u;
-    data_out.y = 99.99f;
+    data_out.y = 99.99F;
 
-    /* Set latest_format in access propertly list to enable the latest
+    /* Set latest_format in access property list to enable the latest
      * compound datatype format.
      */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -3723,53 +3723,55 @@ test_compound_18(void)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    /* Open Generated File */
-    /* (generated with gen_bad_compound.c) */
-    if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+    if (!h5_driver_uses_modified_filename()) {
+        /* Open Generated File */
+        /* (generated with gen_bad_compound.c) */
+        if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Try to open the datatype */
-    H5E_BEGIN_TRY
-    {
-        tid = H5Topen2(file, "cmpnd", H5P_DEFAULT);
+        /* Try to open the datatype */
+        H5E_BEGIN_TRY
+        {
+            tid = H5Topen2(file, "cmpnd", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (tid > 0) {
+            H5Tclose(tid);
+            FAIL_PUTS_ERROR("opened named datatype with bad compound datatype")
+        } /* end if */
+
+        /* Try to open the dataset */
+        H5E_BEGIN_TRY
+        {
+            did = H5Dopen2(file, "dataset", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (did > 0) {
+            H5Dclose(did);
+            FAIL_PUTS_ERROR("opened dataset with bad compound datatype")
+        } /* end if */
+
+        /* Open the group with the attribute */
+        if ((gid = H5Gopen2(file, "group", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+        /* Try to open the dataset */
+        H5E_BEGIN_TRY
+        {
+            aid = H5Aopen(gid, "attr", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (aid > 0) {
+            H5Aclose(aid);
+            FAIL_PUTS_ERROR("opened attribute with bad compound datatype")
+        } /* end if */
+
+        /* Close IDs */
+        if (H5Gclose(gid) < 0)
+            FAIL_STACK_ERROR
+        if (H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
     }
-    H5E_END_TRY;
-    if (tid > 0) {
-        H5Tclose(tid);
-        FAIL_PUTS_ERROR("opened named datatype with bad compound datatype")
-    } /* end if */
-
-    /* Try to open the dataset */
-    H5E_BEGIN_TRY
-    {
-        did = H5Dopen2(file, "dataset", H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (did > 0) {
-        H5Dclose(did);
-        FAIL_PUTS_ERROR("opened dataset with bad compound datatype")
-    } /* end if */
-
-    /* Open the group with the attribute */
-    if ((gid = H5Gopen2(file, "group", H5P_DEFAULT)) < 0)
-        TEST_ERROR
-
-    /* Try to open the dataset */
-    H5E_BEGIN_TRY
-    {
-        aid = H5Aopen(gid, "attr", H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (aid > 0) {
-        H5Aclose(aid);
-        FAIL_PUTS_ERROR("opened attribute with bad compound datatype")
-    } /* end if */
-
-    /* Close IDs */
-    if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR
-    if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -3792,7 +3794,7 @@ error:
  *
  * Modifications:
  *              Raymond Lu
- *              Wednesday, Febuary 9, 2005
+ *              Wednesday, February 9, 2005
  *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
  *              H5Tget_member_value.
  *-------------------------------------------------------------------------
@@ -4967,7 +4969,7 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    HDsprintf(s, "Testing random string conversion speed");
+    HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5182,14 +5184,14 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    HDsprintf(s, "Testing random enum conversion O(N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
-    HDsprintf(s, "Testing random enum conversion O(N log N)");
+    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     HDprintf("%-70s", s);
     HDfflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -6845,7 +6847,7 @@ test_set_order(void)
 {
     hid_t       dtype;            /* Datatype ID */
     H5T_order_t order;            /* Byte order */
-    hsize_t     dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t     dims[2] = {3, 4}; /* Array dimensions */
     herr_t      ret;              /* Generic return value */
 
     TESTING("H5Tset/get_order");
@@ -7093,7 +7095,7 @@ test_set_order_compound(hid_t fapl)
     hid_t   file = -1;
     hid_t   cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
     hid_t   vl_id   = -1;
-    hsize_t dims[2] = {3, 4}; /* Array dimenstions */
+    hsize_t dims[2] = {3, 4}; /* Array dimensions */
     char    filename[1024];
     herr_t  ret; /* Generic return value */
 
@@ -7948,7 +7950,7 @@ test_deprec(hid_t fapl)
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
 
-    TESTING("deprected API routines for datatypes");
+    TESTING("deprecated API routines for datatypes");
 
     /* Create an array datatype with an atomic base type */
     /* (dimension permutations allowed, but not stored) */

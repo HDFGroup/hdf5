@@ -138,7 +138,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             }
 
             /* set the dataset creation plist to specify that the raw data is
-             * to be partioned into 10X10 element chunks.
+             * to be partitioned into 10X10 element chunks.
              */
 
             if (pass) {
@@ -166,7 +166,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -445,7 +445,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
         i = min_dset;
 
         while ((pass) && (i <= max_dset)) {
-            HDsprintf(dset_name, "/dset%03d", i);
+            HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
 
             if (H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -472,7 +472,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
  *        Set pass to FALSE and issue a suitable failure
  *        message if either the file contains a metadata cache image
  *        superblock extension and mdci_sbem_expected is TRUE, or
- *        vise versa.
+ *        vice versa.
  *
  *        If mdci_sbem_expected is TRUE, also verify that the metadata
  *        cache has been advised of this.
@@ -546,7 +546,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* create a file access propertly list. */
+    /* create a file access property list. */
     if (pass) {
 
         fapl_id = h5_fileaccess();
@@ -881,7 +881,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
-    /* create a file access propertly list. */
+    /* create a file access property list. */
     if (pass) {
 
         fapl_id = h5_fileaccess();
@@ -1021,7 +1021,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
@@ -1507,7 +1507,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
  *        processed as part of the first protect operation after the
  *        superblock is loaded.)
  *
- *        In this particular test, we preform the following operations:
+ *        In this particular test, we perform the following operations:
  *
  *        1) Create a HDF5 file with the cache image FAPL entry.
  *
@@ -4626,7 +4626,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     /* 2) Create a process specific group. */
     if (pass) {
 
-        HDsprintf(process_group_name, "/process_%d", min_group);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", min_group);
 
         proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4737,7 +4737,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
         if (pass) {
 
             max_group++;
-            HDsprintf(process_group_name, "/process_%d", max_group);
+            HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", max_group);
 
             proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4815,7 +4815,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     /* 11) Validate all the zoos. */
     i = min_group;
     while (pass && i <= max_group) {
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         pass = validate_zoo(
             file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
@@ -4869,7 +4869,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while ((pass) && (i <= max_group)) {
 
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         pass = validate_zoo(
             file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
@@ -4931,7 +4931,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
      */
     i = min_group;
     while ((pass) && (i <= max_group)) {
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         pass = validate_zoo(
             file_id, process_group_name, &lastmsgtime,
             (zoo_config_t){.proc_num = i++, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
@@ -7020,7 +7020,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
  *        image.
  *
  *        The objective of this test is to create a test file
- *        with both non-empty self referential presistant
+ *        with both non-empty self referential persistent
  *              free space managers, and a cache image, and then
  *              verify that this situation is handled correctly if
  *              H5Fget_free_sections() is called before the metadata
@@ -7872,8 +7872,7 @@ main(void)
     HDprintf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                                HDstrcmp(env_h5_drvr, "family") != 0);
+    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
 
     nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
     nerrs += check_cache_image_ctl_flow_2(single_file_vfd);

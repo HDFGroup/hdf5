@@ -115,12 +115,12 @@ main(void)
     unsigned    chunk_cache; /* Whether to enable chunk caching */
     int         nerrors = 0;
     const char *env_h5_drvr;     /* File Driver value from environment */
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
+    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
-    /* Current VFD that does not support contigous address space */
+    /* Current VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Initialize random number seed */
@@ -343,14 +343,18 @@ do_ranks(hid_t fapl, hbool_t new_format)
                 goto error;
             } /* end if */
 
-            /* VL test */
-            if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
-                DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
-                HDprintf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
-                                               ? "btree"
-                                               : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                goto error;
-            } /* end if */
+            if (!h5_using_parallel_driver(NULL)) {
+                /* VL test */
+                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
+                    0) {
+                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
+                    HDprintf("   Index: %s\n",
+                             index_type == RANK4_INDEX_BTREE
+                                 ? "btree"
+                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                    goto error;
+                } /* end if */
+            }
 
             /* Sparse allocation test (regular and VL) */
             if (!(config & CONFIG_EARLY_ALLOC)) {
@@ -362,16 +366,19 @@ do_ranks(hid_t fapl, hbool_t new_format)
                                  : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                     goto error;
                 } /* end if */
-                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE, index_type) <
-                    0) {
-                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
-                    HDprintf("   Index: %s\n",
-                             index_type == RANK4_INDEX_BTREE
-                                 ? "btree"
-                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                    goto error;
-                } /* end if */
-            }     /* end if */
+
+                if (!h5_using_parallel_driver(NULL)) {
+                    if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE,
+                                             index_type) < 0) {
+                        DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
+                        HDprintf("   Index: %s\n",
+                                 index_type == RANK4_INDEX_BTREE
+                                     ? "btree"
+                                     : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                        goto error;
+                    } /* end if */
+                }
+            } /* end if */
 
             /* Break out if using the old format */
             if (!new_format)
@@ -649,7 +656,7 @@ test_rank1(hid_t fapl, hid_t dcpl, hbool_t do_fill_value, hbool_t disable_edge_f
     HDprintf("\n");
 #endif
 
-    /* compare the read array with the shrinked array */
+    /* compare the read array with the shrunk array */
     for (i = 0; i < (int)dims_r[0]; i++)
         if (buf_s[i] != buf_o[i]) {
             HDprintf("buf_s[%d] = %d\n", i, buf_s[i]);
@@ -1055,7 +1062,7 @@ test_rank2(hid_t fapl, hid_t dcpl, hbool_t do_fill_value, hbool_t disable_edge_f
     }
 #endif
 
-    /* compare the read array with the shrinked array */
+    /* compare the read array with the shrunk array */
     for (i = 0; i < (int)dims_r[0]; i++) {
         for (j = 0; j < (int)dims_r[1]; j++) {
             if (buf_s[i][j] != buf_o[i][j]) {
@@ -1536,7 +1543,7 @@ test_rank3(hid_t fapl, hid_t dcpl, hbool_t do_fill_value, hbool_t disable_edge_f
     HDprintf("\n");
 #endif
 
-    /* compare the read array with the shrinked array */
+    /* compare the read array with the shrunk array */
     for (i = 0; i < (int)dims_r[0]; i++) {
         for (j = 0; j < (int)dims_r[1]; j++) {
             for (k = 0; k < (int)dims_r[2]; k++) {
@@ -1734,7 +1741,7 @@ test_external(hid_t fapl)
     hsize_t dims_r[RANK2];                  /* read dimensions */
     hsize_t maxdims[RANK2] = {DIME0, DIM1}; /* only the first dimension can be extendible */
     int     buf_o[DIM0][DIM1];              /* original buffer, for writing */
-    int     buf_s[DIMS0][DIMS1];            /* shrinked buffer, for reading */
+    int     buf_s[DIMS0][DIMS1];            /* shrunk buffer, for reading */
     int     buf_e[DIME0][DIM1];             /* extended buffer, for writing, dimension 1 is the original */
     int     buf_ro[DIM0][DIM1];             /* original buffer for reading */
     int     i, j;
@@ -1946,7 +1953,7 @@ test_external(hid_t fapl)
     }
 #endif
 
-    /* compare the read array with the shrinked array */
+    /* compare the read array with the shrunk array */
     for (i = 0; i < (int)dims_r[0]; i++) {
         for (j = 0; j < (int)dims_r[1]; j++) {
             if (buf_s[i][j] != buf_o[i][j]) {

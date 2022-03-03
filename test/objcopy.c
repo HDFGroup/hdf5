@@ -2789,7 +2789,7 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     char    dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): empty and openend contiguous dataset");
+        TESTING("H5Ocopy(): empty and opened contiguous dataset");
     }
     else {
         TESTING("H5Ocopy(): empty contiguous dataset");
@@ -8679,7 +8679,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
     char    dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): openend object through soft link");
+        TESTING("H5Ocopy(): opened object through soft link");
     }
     else {
         TESTING("H5Ocopy(): object through soft link");
@@ -9674,7 +9674,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
-    TESTING("H5Ocopy(): contigous dataset with named VLEN datatype");
+    TESTING("H5Ocopy(): contiguous dataset with named VLEN datatype");
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
@@ -10434,10 +10434,10 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     char         dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): contigous and opened dataset with nested VLEN datatype");
+        TESTING("H5Ocopy(): contiguous and opened dataset with nested VLEN datatype");
     }
     else {
-        TESTING("H5Ocopy(): contigous dataset with nested VLEN datatype");
+        TESTING("H5Ocopy(): contiguous dataset with nested VLEN datatype");
     }
 
     /* set initial data values */
@@ -17305,13 +17305,18 @@ error:
 int
 main(void)
 {
-    int      nerrors = 0;
-    hid_t    fapl, fapl2;
-    hid_t    fcpl_shared, ocpl;
-    unsigned max_compact, min_dense;
-    int      configuration; /* Configuration of tests. */
-    int      ExpressMode;
-    hbool_t  same_file; /* Whether to run tests that only use one file */
+    int         nerrors = 0;
+    hid_t       fapl, fapl2;
+    hid_t       fcpl_shared, ocpl;
+    unsigned    max_compact, min_dense;
+    int         configuration; /* Configuration of tests. */
+    int         ExpressMode;
+    const char *env_h5_drvr; /* File Driver value from environment */
+    hbool_t     same_file;   /* Whether to run tests that only use one file */
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     /* Setup */
     h5_reset();
@@ -17468,9 +17473,14 @@ main(void)
                                     FALSE, "H5Ocopy(): expand soft link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG,
                                     FALSE, "H5Ocopy(): expand external link");
-        nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
-                                    H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE,
-                                    "H5Ocopy(): expand soft and external links");
+
+        /* Splitter VFD currently has external link-related bugs */
+        if (HDstrcmp(env_h5_drvr, "splitter")) {
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
+                                        H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE,
+                                        "H5Ocopy(): expand soft and external links");
+        }
+
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG,
                                     FALSE, "H5Ocopy(): shallow group copy");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG,
@@ -17548,9 +17558,14 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
 
-            /* Test with dataset opened in the file or not */
-            nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
-            nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);
+            /* Check if current driver might modify the filename. Skip these tests
+             * if so, since the file is pre-generated.
+             */
+            if (!h5_driver_uses_modified_filename()) {
+                /* Test with dataset opened in the file or not */
+                nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
+                nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);
+            }
 
             /* Test with dataset opened in the file or not */
             nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, src_fapl, dst_fapl);

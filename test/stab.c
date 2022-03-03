@@ -125,7 +125,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (H5Gclose(g3) < 0)
         TEST_ERROR
 
-    /* Open all groups with absolute names to check for exsistence */
+    /* Open all groups with absolute names to check for existence */
     if ((g1 = H5Gopen2(fid, "/test_1a", H5P_DEFAULT)) < 0)
         TEST_ERROR
     if ((g2 = H5Gopen2(fid, "/test_1a/sub_1", H5P_DEFAULT)) < 0)
@@ -1416,15 +1416,16 @@ main(void)
     hid_t       fcpl, fcpl2;     /* File creation property list ID */
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
-    int         nerrors = 0;
+    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    int         nerrors                       = 0;
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
-    /* VFD that does not support contigous address space */
+    /* VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
@@ -1473,14 +1474,21 @@ main(void)
     if (contig_addr_vfd) {
         nerrors += lifecycle(fcpl2, fapl2);
         nerrors += long_compact(fcpl2, fapl2);
-        nerrors += read_old();
+
+        if (!driver_uses_modified_filename) {
+            nerrors += read_old();
+        }
+
         nerrors += no_compact(fcpl2, fapl2);
         nerrors += gcpl_on_root(fapl2);
     }
 
     /* Old group API specific tests */
     nerrors += old_api(fapl);
-    nerrors += corrupt_stab_msg();
+
+    if (!driver_uses_modified_filename) {
+        nerrors += corrupt_stab_msg();
+    }
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);

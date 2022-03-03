@@ -1918,7 +1918,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     if ((fspace = H5Dget_space(dset)) < 0)
         TEST_ERROR
 
-    /* Create dataspace for single element sized bufer */
+    /* Create dataspace for single element sized buffer */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
         TEST_ERROR
 
@@ -2142,7 +2142,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
 #if 1
     /*
-     * Remove this when contiguous datasets can be exended to some
+     * Remove this when contiguous datasets can be extended to some
      * predetermined fininte size, even if it's just in the slowest varying
      * dimension.  If it's removed prematurely then you'll get one of the
      * errors described above or `unable to select fill value region'.
@@ -2722,7 +2722,10 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
             nerrors += test_rdwr(my_fapl, FILENAME[3], H5D_CONTIGUOUS);
             nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
-            nerrors += test_compatible();
+
+            if (!h5_driver_uses_modified_filename()) {
+                nerrors += test_compatible();
+            }
         } /* end if */
 
         /* Compact dataset storage tests */
