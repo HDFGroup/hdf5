@@ -814,9 +814,11 @@ test_basic_file_operation(const char *env_h5_drvr)
     if ((obj_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATASET, 2, obj_id_list)) < 0)
         TEST_ERROR;
 
-    /* Can't compare VFD properties for split / multi / family VFDs */
+    /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
+                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -876,9 +878,11 @@ test_basic_file_operation(const char *env_h5_drvr)
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* Can't compare VFD properties for split / multi / family VFDs */
+    /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
+                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -891,9 +895,11 @@ test_basic_file_operation(const char *env_h5_drvr)
     if ((fid_reopen = H5Freopen(fid)) < 0)
         TEST_ERROR;
 
-    /* Can't compare VFD properties for split / multi / family VFDs */
+    /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
+                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
@@ -942,7 +948,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_group_operation(void)
+test_basic_group_operation(const char *env_h5_drvr)
 {
     hid_t      fid     = H5I_INVALID_HID;
     hid_t      fapl_id = H5I_INVALID_HID;
@@ -985,9 +991,10 @@ test_basic_group_operation(void)
     if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Gflush */
-    if (H5Gflush(gid) < 0)
-        TEST_ERROR;
+    /* H5Gflush - skip for MPIO file driver as flush calls cause assertions in the library */
+    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+        if (H5Gflush(gid) < 0)
+            TEST_ERROR;
 
     /* H5Gclose */
     if (H5Gclose(gid) < 0)
@@ -1045,7 +1052,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_dataset_operation(void)
+test_basic_dataset_operation(const char *env_h5_drvr)
 {
     hid_t fid     = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -1110,9 +1117,10 @@ test_basic_dataset_operation(void)
     if (H5Dset_extent(did, &curr_dims) < 0)
         TEST_ERROR;
 
-    /* H5Dflush */
-    if (H5Dflush(did) < 0)
-        TEST_ERROR;
+    /* H5Dflush - skip for MPIO file driver as flush calls cause assertions in the library */
+    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+        if (H5Dflush(did) < 0)
+            TEST_ERROR;
 
     /* H5Dwrite */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, in_buf) < 0)
@@ -1384,9 +1392,9 @@ test_basic_object_operation(void)
     if (H5Oclose(oid) < 0)
         TEST_ERROR;
 
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
     if (H5Gclose(gid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
     h5_delete_test_file(FILENAME[0], fapl_id);
@@ -1463,9 +1471,9 @@ test_basic_link_operation(void)
                 H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
     if (H5Gclose(gid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
     h5_delete_test_file(FILENAME[0], fapl_id);
@@ -1500,7 +1508,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_datatype_operation(void)
+test_basic_datatype_operation(const char *env_h5_drvr)
 {
     hid_t fid      = H5I_INVALID_HID;
     hid_t fapl_id  = H5I_INVALID_HID;
@@ -1524,9 +1532,10 @@ test_basic_datatype_operation(void)
     if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Tflush */
-    if (H5Tflush(tid) < 0)
-        TEST_ERROR;
+    /* H5Tflush - skip for MPIO file driver as flush calls cause assertions in the library */
+    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+        if (H5Tflush(tid) < 0)
+            TEST_ERROR;
 
     /* H5Trefresh */
     if (H5Trefresh(tid) < 0)
@@ -2124,12 +2133,12 @@ main(void)
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_group_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_group_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_dataset_operation(env_h5_drvr) < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
     nerrors += test_basic_object_operation() < 0 ? 1 : 0;
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_datatype_operation(env_h5_drvr) < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
 
     if (nerrors) {

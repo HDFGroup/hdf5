@@ -360,7 +360,7 @@ write_file(void)
         return -1;
     }
 
-    /* verify chunk_dims against set paramenters */
+    /* verify chunk_dims against set parameters */
     if (chunk_dims[0] != chunkdims_g[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
         HDfprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
                   (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],

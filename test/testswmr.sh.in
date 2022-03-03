@@ -17,7 +17,8 @@
 #   Albert Cheng, 2009/07/22
 
 srcdir=@srcdir@
-bindir=@bindir@
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
 ###############################################################################
 ## test parameters
@@ -37,9 +38,9 @@ nerrors=0
 ## definitions for message file to coordinate test runs
 ###############################################################################
 WRITER_MESSAGE=SWMR_WRITER_MESSAGE      # The message file created by writer that the open is complete
-                                        # This should be the same as the define in "./swmr_common.h"
+                                        # This should be the same as the define in "test/swmr_common.h"
 MESSAGE_TIMEOUT=300                     # Message timeout length in secs
-                                        # This should be the same as the define in "./h5test.h"
+                                        # This should be the same as the define in "test/h5test.h"
 
 ###############################################################################
 ## short hands and function definitions
@@ -93,19 +94,10 @@ WAIT_MESSAGE() {
 ##     to proceed as expected.
 ##
 ###############################################################################
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
-# If the bindir directory is not set just use current (.).
-if test -z "$bindir"; then
-   bindir=.
-fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$bindir/swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
@@ -178,7 +170,7 @@ do
         echo "###############################################################################"
         # Launch the Generator without SWMR_WRITE
         echo launch the swmr_generator
-        $bindir/swmr_generator $compress $index_type
+        $testdir/swmr_generator $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -186,13 +178,13 @@ do
 
         # Launch the Generator with SWMR_WRITE
         echo launch the swmr_generator with SWMR_WRITE
-        $bindir/swmr_generator -s $compress $index_type
+        $testdir/swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -210,7 +202,7 @@ do
         # Launch the Writer
         echo launch the swmr_start_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_start_write $compress $index_type $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_start_write $compress $index_type $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -226,7 +218,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -252,7 +244,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -271,7 +263,7 @@ do
 
         # Launch the Generator
         echo launch the swmr_generator
-        $bindir/swmr_generator -s $compress $index_type
+        $testdir/swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -283,7 +275,7 @@ do
         # Launch the Writer
         echo launch the swmr_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_writer -o $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_writer -o $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -298,7 +290,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -324,7 +316,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -346,7 +338,7 @@ do
         # Launch the Remove Writer
         echo launch the swmr_remove_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -361,7 +353,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -387,7 +379,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -406,7 +398,7 @@ do
 
         # Launch the Generator
         echo launch the swmr_generator
-        $bindir/swmr_generator $compress $index_type
+        $testdir/swmr_generator $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -415,7 +407,7 @@ do
         # Launch the Writer (not in parallel - just to rebuild the datasets)
         echo launch the swmr_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_writer $Nrecords $seed
+        $testdir/swmr_writer $Nrecords $seed
         if test $? -ne 0; then
             echo writer had error
             nerrors=`expr $nerrors + 1`
@@ -427,7 +419,7 @@ do
         # Launch the Add/Remove Writer
         echo launch the swmr_addrem_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_addrem_writer $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_addrem_writer $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -442,7 +434,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -468,7 +460,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -490,7 +482,7 @@ do
         #       created by the generator.
         echo launch the swmr_generator
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_generator $compress $index_type $seed
+        $testdir/swmr_generator $compress $index_type $seed
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -500,7 +492,7 @@ do
         rm -f $WRITER_MESSAGE
         # Launch the Sparse writer
         echo launch the swmr_sparse_writer
-        nice -n 20 $bindir/swmr_sparse_writer $Nrecs_spa 2>&1 |tee swmr_writer.out &
+        nice -n 20 $testdir/swmr_sparse_writer $Nrecs_spa 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -513,7 +505,7 @@ do
         echo launch $Nrdrs_spa swmr_sparse_readers
         while [ $n -lt $Nrdrs_spa ]; do
             # The sparse reader spits out a LOT of data so it's set to 'quiet'
-            $bindir/swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -538,7 +530,7 @@ do
             fi
         done
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."

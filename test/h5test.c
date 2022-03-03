@@ -2287,3 +2287,137 @@ error:
     }
     return FAIL;
 } /* end h5_check_if_file_locking_enabled() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_using_default_driver
+ *
+ * Purpose:     Checks if the specified VFD name matches the library's
+ *              default VFD. If `drv_name` is NULL, the HDF5_DRIVER
+ *              environment is checked instead (if it is set).
+ *
+ * Return:      TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+h5_using_default_driver(const char *drv_name)
+{
+    hbool_t ret_val = TRUE;
+
+    HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
+
+    if (!drv_name)
+        drv_name = HDgetenv("HDF5_DRIVER");
+
+    if (drv_name)
+        return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
+
+    return ret_val;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_using_parallel_driver
+ *
+ * Purpose:     Checks if the specified VFD name matches a parallel-enabled
+ *              VFD (usually `mpio`). If `drv_name` is NULL, the
+ *              HDF5_DRIVER environment is checked instead (if it is set).
+ *
+ *              This is mostly useful for avoiding tests that use features
+ *              which are not currently supported for parallel HDF5, such
+ *              as writing of VL or region reference datatypes.
+ *
+ * Return:      TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+h5_using_parallel_driver(const char *drv_name)
+{
+    hbool_t ret_val = FALSE;
+
+    if (!drv_name)
+        drv_name = HDgetenv("HDF5_DRIVER");
+
+    if (drv_name)
+        return (!HDstrcmp(drv_name, "mpio"));
+
+    return ret_val;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_driver_uses_modified_filename
+ *
+ * Purpose:     Checks if the current VFD set by use of the HDF5_DRIVER
+ *              environment variable uses a modified filename. Examples
+ *              are the multi and family drivers.
+ *
+ *              This routine is helpful for skipping tests that use
+ *              pre-generated files. VFDs that use a modified filename will
+ *              not be able to find these files and those tests will fail.
+ *              Eventually, HDF5's testing framework should be modified to
+ *              not run VFD testing against tests that use pre-generated
+ *              files.
+ *
+ * Return:      TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+h5_driver_uses_modified_filename(void)
+{
+    hbool_t ret_val = FALSE;
+    char *  driver  = HDgetenv("HDF5_DRIVER");
+
+    if (driver) {
+        ret_val = !HDstrcmp(driver, "multi") || !HDstrcmp(driver, "split") || !HDstrcmp(driver, "family") ||
+                  !HDstrcmp(driver, "splitter");
+    }
+
+    return ret_val;
+} /* end h5_driver_uses_modified_filename() */
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_driver_uses_multiple_files
+ *
+ * Purpose:     Checks if the specified VFD name matches a driver that
+ *              stores data using multiple files.
+ *
+ *              The following flags can be used to control what types of
+ *              drivers are checked for by this routine:
+ *
+ *              H5_EXCLUDE_MULTIPART_DRIVERS - This flag excludes any
+ *                drivers which store data using multiple files which,
+ *                together, make up a single logical file. These are
+ *                drivers like the split, multi and family drivers.
+ *
+ *              H5_EXCLUDE_NON_MULTIPART_DRIVERS - This flag excludes any
+ *                drivers which store data using multiple files which are
+ *                separate logical files. The splitter driver is an example
+ *                of this type of driver.
+ *
+ * Return:      TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
+{
+    hbool_t ret_val = FALSE;
+
+    if (!drv_name)
+        drv_name = HDgetenv("HDF5_DRIVER");
+
+    if (drv_name) {
+        if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
+            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") || !HDstrcmp(drv_name, "family"))
+                return TRUE;
+        }
+
+        if ((flags & H5_EXCLUDE_NON_MULTIPART_DRIVERS) == 0) {
+            if (!HDstrcmp(drv_name, "splitter"))
+                return TRUE;
+        }
+    }
+
+    return ret_val;
+}

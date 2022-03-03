@@ -169,6 +169,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define H5_FILEACCESS_VFD    0x01
 #define H5_FILEACCESS_LIBVER 0x02
 
+/* Flags for h5_driver_uses_multiple_files() */
+#define H5_EXCLUDE_MULTIPART_DRIVERS     0x01
+#define H5_EXCLUDE_NON_MULTIPART_DRIVERS 0x02
+
 /* Fill an array on the heap with an increasing count value.  BUF
  * is expected to point to a `struct { TYPE arr[...][...]; }`.
  */
@@ -214,6 +218,10 @@ H5TEST_DLL const char *  h5_get_version_string(H5F_libver_t libver);
 H5TEST_DLL int           h5_compare_file_bytes(char *fname1, char *fname2);
 H5TEST_DLL int           h5_duplicate_file_by_bytes(const char *orig, const char *dest);
 H5TEST_DLL herr_t        h5_check_if_file_locking_enabled(hbool_t *are_enabled);
+H5TEST_DLL hbool_t       h5_using_default_driver(const char *drv_name);
+H5TEST_DLL hbool_t       h5_using_parallel_driver(const char *drv_name);
+H5TEST_DLL hbool_t       h5_driver_uses_modified_filename(void);
+H5TEST_DLL hbool_t       h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);

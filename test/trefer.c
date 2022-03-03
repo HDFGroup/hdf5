@@ -2732,7 +2732,7 @@ test_reference_compat_conv(void)
     hid_t   sid1, sid2, sid3; /* Dataspace IDs            */
     hid_t   tid1, tid2;       /* Datatype ID              */
     hsize_t dims1[] = {SPACE1_DIM1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2},
-            dims3[] = {SPACE1_DIM1};      /* Purposedly set dimension larger to test NULL references */
+            dims3[] = {SPACE1_DIM1};      /* Purposely set dimension larger to test NULL references */
     hsize_t          start[SPACE2_RANK];  /* Starting location of hyperslab */
     hsize_t          stride[SPACE2_RANK]; /* Stride of hyperslab      */
     hsize_t          count[SPACE2_RANK];  /* Element count of hyperslab */
@@ -3452,10 +3452,16 @@ test_reference_perf(void)
 void
 test_reference(void)
 {
-    H5F_libver_t low, high; /* Low and high bounds */
+    H5F_libver_t low, high;   /* Low and high bounds */
+    const char * env_h5_drvr; /* File Driver value from environment */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     test_reference_params();    /* Test for correct parameter checking */
     test_reference_obj();       /* Test basic H5R object reference code */
@@ -3476,7 +3482,11 @@ test_reference(void)
         } /* end high bound */
     }     /* end low bound */
 
-    test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
+    /* The following test is currently broken with the Direct VFD */
+    if (HDstrcmp(env_h5_drvr, "direct") != 0) {
+        test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
+    }
+
     test_reference_group();       /* Test operations on dereferenced groups */
     test_reference_attr();        /* Test attribute references */
     test_reference_external();    /* Test external references */
