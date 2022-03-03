@@ -355,24 +355,28 @@ done:
 int
 copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
-    hid_t       attr_id  = H5I_INVALID_HID; /* attr ID */
-    hid_t       attr_out = H5I_INVALID_HID; /* attr ID */
-    hid_t       space_id = H5I_INVALID_HID; /* space ID */
-    hid_t       ftype_id = H5I_INVALID_HID; /* file type ID */
-    hid_t       wtype_id = H5I_INVALID_HID; /* read/write type ID */
-    size_t      msize;                      /* size of type */
-    void *      buf = NULL;                 /* data buffer */
-    hsize_t     nelmts;                     /* number of elements in dataset */
-    int         rank;                       /* rank of dataset */
-    htri_t      is_named;                   /* Whether the datatype is named */
-    hsize_t     dims[H5S_MAX_RANK];         /* dimensions of dataset */
-    char        name[255];
-    H5O_info2_t oinfo; /* object info */
-    int         j;
-    unsigned    u;
-    hbool_t     is_ref     = 0;
-    H5T_class_t type_class = -1;
-    int         ret_value  = 0;
+    hid_t         attr_id  = H5I_INVALID_HID; /* attr ID */
+    hid_t         attr_out = H5I_INVALID_HID; /* attr ID */
+    hid_t         space_id = H5I_INVALID_HID; /* space ID */
+    hid_t         ftype_id = H5I_INVALID_HID; /* file type ID */
+    hid_t         wtype_id = H5I_INVALID_HID; /* read/write type ID */
+    size_t        msize;                      /* size of type */
+    void *        buf = NULL;                 /* data buffer */
+    hsize_t       nelmts;                     /* number of elements in dataset */
+    int           rank;                       /* rank of dataset */
+    htri_t        is_named;                   /* Whether the datatype is named */
+    hsize_t       dims[H5S_MAX_RANK];         /* dimensions of dataset */
+    H5_timer_t    timer;                      /* Timer for read/write operations */
+    H5_timevals_t times;                      /* Elapsed time for each operation */
+    static double read_time  = 0;
+    static double write_time = 0;
+    char          name[255];
+    H5O_info2_t   oinfo; /* object info */
+    int           j;
+    unsigned      u;
+    hbool_t       is_ref     = 0;
+    H5T_class_t   type_class = -1;
+    int           ret_value  = 0;
 
     if (H5Oget_info3(loc_in, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Oget_info failed");
@@ -469,6 +473,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             } /* end for each member */
         }     /* end if type_class is H5T_COMPOUND */
 
+        read_time  = 0;
+        write_time = 0;
+
         if (!is_ref) {
             /*-----------------------------------------------------------------
              * read to memory
@@ -479,8 +486,17 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (buf == NULL) {
                 H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
             } /* end if */
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Aread(attr_id, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
+            if (options->verbose == 2) {
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                read_time += times.elapsed;
+            }
 
             /*-----------------------------------------------------------------
              * copy
@@ -489,8 +505,18 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
 
             if ((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Acreate2 failed on ,%s>", name);
+
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Awrite(attr_out, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Awrite failed");
+            if (options->verbose == 2) {
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                write_time += times.elapsed;
+            }
 
             /*close*/
             if (H5Aclose(attr_out) < 0)
@@ -500,11 +526,14 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
              * be reclaimed */
             if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+
             HDfree(buf);
             buf = NULL;
         } /*H5T_REFERENCE*/
 
-        if (options->verbose)
+        if (options->verbose == 2)
+            HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
+        else
             HDprintf(FORMAT_OBJ_ATTR, "attr", name);
 
         /*---------------------------------------------------------------------
@@ -759,8 +788,8 @@ check_objects(const char *fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl,
-                             (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0)) < 0)
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+                             NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------

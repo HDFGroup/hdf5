@@ -18,7 +18,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5repack"
 
-static int  parse_command_line(int argc, const char **argv, pack_opt_t *options);
+static int  parse_command_line(int argc, const char *const *argv, pack_opt_t *options);
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
+static const char *           s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
 static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"block", require_arg, 'b'},
                                           {"compact", require_arg, 'c'},
@@ -39,18 +39,18 @@ static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"file", require_arg, 'e'},
                                           {"filter", require_arg, 'f'},
                                           {"help", no_arg, 'h'},
-                                          {"infile", require_arg, 'i'}, /* for backward compability */
+                                          {"infile", require_arg, 'i'}, /* for backward compatibility */
                                           {"low", require_arg, 'j'},
                                           {"high", require_arg, 'k'},
                                           {"layout", require_arg, 'l'},
                                           {"minimum", require_arg, 'm'},
                                           {"native", no_arg, 'n'},
-                                          {"outfile", require_arg, 'o'}, /* for backward compability */
+                                          {"outfile", require_arg, 'o'}, /* for backward compatibility */
                                           {"sort_by", require_arg, 'q'},
                                           {"ssize", require_arg, 's'},
                                           {"threshold", require_arg, 't'},
                                           {"ublock", require_arg, 'u'},
-                                          {"verbose", no_arg, 'v'},
+                                          {"verbose", optional_arg, 'v'},
                                           {"sort_order", require_arg, 'z'},
                                           {"enable-error-stack", no_arg, 'E'},
                                           {"fs_pagesize", require_arg, 'G'},
@@ -88,7 +88,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  file2                    Output HDF5 File\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help              Print a usage message and exit\n");
-    PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
+    PRINTVALSTREAM(rawoutstream, "   -v N, --verbose=N       Verbose mode, print object information.\n");
+    PRINTVALSTREAM(rawoutstream, "      N - is an integer greater than 1, 2 displays read/write timing\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream,
@@ -374,7 +375,7 @@ read_info(const char *filename, pack_opt_t *options)
             goto done;
         }
 
-        /* find begining of info */
+        /* find beginning of info */
         i = 0;
         c = '0';
         while (c != ' ') {
@@ -482,7 +483,7 @@ set_sort_order(const char *form)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char **argv, pack_opt_t *options)
+parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 {
     h5tools_vol_info_t in_vol_info;
     h5tools_vol_info_t out_vol_info;
@@ -525,7 +526,12 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
                 goto done;
 
             case 'v':
-                options->verbose = 1;
+                if (H5_optarg != NULL) {
+                    if (2 == HDatoi(H5_optarg))
+                        options->verbose = 2;
+                }
+                else
+                    options->verbose = 1;
                 break;
 
             case 'f':
@@ -665,7 +671,7 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
             case 'a':
                 options->alignment = HDstrtoull(H5_optarg, NULL, 0);
                 if (options->alignment < 1) {
-                    error_msg("invalid alignment size\n", H5_optarg);
+                    error_msg("invalid alignment size `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -685,7 +691,7 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
                 else if (!HDstrcmp(strategy, "NONE"))
                     options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
                 else {
-                    error_msg("invalid file space management strategy\n", H5_optarg);
+                    error_msg("invalid file space management strategy `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -858,7 +864,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char **argv)
+main(int argc, char **argv)
 {
     pack_opt_t options; /*the global options */
     int        parse_ret;
@@ -888,7 +894,7 @@ main(int argc, const char **argv)
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    parse_ret = parse_command_line(argc, argv, &options);
+    parse_ret = parse_command_line(argc, (const char *const *)argv, &options);
     if (parse_ret < 0) {
         HDprintf("Error occurred while parsing command-line options\n");
         h5tools_setstatus(EXIT_FAILURE);

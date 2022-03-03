@@ -129,7 +129,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when
          * buffer is smaller than source string. On Unix, this function
-         * returns length of the source string and copy string upto the
+         * returns length of the source string and copy string up to the
          * buffer size with NULL at the end of the buffer. However on
          * Windows with the same condition, this function returns -1 and
          * doesn't add NULL at the end of the buffer.
@@ -147,7 +147,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
              *  something other than "%s"
-             * Alocate at least twice as much space and try again.
+             * Allocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + (size_t)nchars + 1, 2 * str->nalloc);
             HDassert(newsize > str->nalloc); /*overflow*/
@@ -300,11 +300,11 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
         }
     }
     else /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)elmtno);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)elmtno);
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -341,11 +341,11 @@ h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
-            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
         }
     }
     else /* Scalar */
-        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
+        h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)0);
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -385,7 +385,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
     /* Start coordinates */
     h5tools_str_append(str, "%s%s ", info->line_indent, START);
     for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
+        h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", start[j]);
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
@@ -393,7 +393,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
     /* Stride coordinates */
     h5tools_str_append(str, "%s ", STRIDE);
     for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", stride[j]);
+        h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", stride[j]);
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
@@ -404,7 +404,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
         if (count[j] == H5S_UNLIMITED)
             h5tools_str_append(str, "%s%s", j ? "," : "(", "H5S_UNLIMITED");
         else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
+            h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", count[j]);
     }
     h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
@@ -416,7 +416,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace, const h5tool_form
         if (block[j] == H5S_UNLIMITED)
             h5tools_str_append(str, "%s%s", j ? "," : "(", "H5S_UNLIMITED");
         else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
+            h5tools_str_append(str, "%s%" PRIuHSIZE, j ? "," : "(", block[j]);
     }
     h5tools_str_append(str, ")");
 }
@@ -468,11 +468,10 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
 
             /* Start coordinates and opposite corner */
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : "(", ptdata[u * 2 * ndims + v]);
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", ptdata[u * 2 * ndims + v]);
 
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : ")-(",
-                                   ptdata[u * 2 * ndims + v + ndims]);
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : ")-(", ptdata[u * 2 * ndims + v + ndims]);
 
             h5tools_str_append(str, ")");
         }
@@ -527,7 +526,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
                                (unsigned long)u);
 
             for (v = 0; v < ndims; v++)
-                h5tools_str_append(str, "%s" HSIZE_T_FORMAT, v ? "," : "(", (ptdata[u * ndims + v]));
+                h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", (ptdata[u * ndims + v]));
 
             h5tools_str_append(str, ")");
         }
@@ -1246,7 +1245,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                 /* Print the closing bracket */
                 h5tools_str_append(str, "%s", OPT(info->arr_suf, "]"));
-                is_next_arry_elmt = 1; /* set for begining of next array element */
+                is_next_arry_elmt = 1; /* set for beginning of next array element */
                 H5Tclose(memb);
             } break;
 
@@ -1504,7 +1503,7 @@ h5tools_str_is_zero(const void *_mem, size_t size)
  *              March 8, 2012
  *
  * Notes:
- *   Applications need to call free() to free the memoery allocated for
+ *   Applications need to call free() to free the memory allocated for
  *   the return string
  *
  *-------------------------------------------------------------------------
