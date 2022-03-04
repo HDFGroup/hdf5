@@ -47,6 +47,25 @@ New Features
 
     Configuration:
     -------------
+    - HDF5 memory allocation sanity checking is now off by default for
+      Autotools debug builds
+
+      HDF5 can be configured to perform sanity checking on internal memory
+      allocations by adding heap canaries to these allocations. However,
+      enabling this option can cause issues with external filter plugins
+      when working with (reallocating/freeing/allocating and passing back)
+      buffers.
+
+      Previously, this option was off by default for all CMake build types,
+      but only off by default for non-debug Autotools builds. Since debug
+      is the default build mode for HDF5 when built from source with
+      Autotools, this can result in surprising segfaults that don't occur
+      when an application is built against a release version of HDF5.
+      Therefore, this option is now off by default for all build types
+      across both CMake and Autotools.
+
+      (JTH - 2022/03/01)
+
     - CPack will now generate RPM/DEB packages.
 
       Enabled the RPM and DEB CPack generators on linux. In addition to
