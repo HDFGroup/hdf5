@@ -410,7 +410,7 @@ done:
  *
  * Return:
  *              Success:        Non-negative
- *              Failture:       Negative
+ *              Failure:       Negative
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -424,40 +424,18 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
 
     /* Check for chunked layout */
     if (dset->shared->layout.type == H5D_CHUNKED) {
-        hsize_t  space_allocated; /* The number of bytes allocated for chunks */
-        hssize_t snelmts;         /* Temporary holder for number of elements in dataspace */
-        hsize_t  nelmts;          /* Number of elements in dataspace */
-        size_t   dt_size;         /* Size of datatype */
-        hsize_t  full_size;       /* The number of bytes in the dataset when fully populated */
+        hsize_t n_chunks_total = dset->shared->layout.u.chunk.nchunks;
+        hsize_t n_chunks_alloc = 0;
 
-        /* For chunked layout set the space status by the storage size */
-        /* Get the dataset's dataspace */
-        HDassert(dset->shared->space);
+        if (H5D__get_num_chunks(dset, dset->shared->space, &n_chunks_alloc) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "unable to retrieve number of allocated chunks in dataset")
 
-        /* Get the total number of elements in dataset's dataspace */
-        if ((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
-        nelmts = (hsize_t)snelmts;
+        HDassert(n_chunks_alloc <= n_chunks_total);
 
-        /* Get the size of the dataset's datatype */
-        if (0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
-
-        /* Compute the maximum size of the dataset in bytes */
-        full_size = nelmts * dt_size;
-
-        /* Check for overflow during multiplication */
-        if (nelmts != (full_size / dt_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
-
-        /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
-        if (H5D__get_storage_size(dset, &space_allocated) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
-
-        /* Decide on how much of the space is allocated */
-        if (space_allocated == 0)
+        if (n_chunks_alloc == 0)
             *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
-        else if (space_allocated == full_size)
+        else if (n_chunks_alloc == n_chunks_total)
             *allocation = H5D_SPACE_STATUS_ALLOCATED;
         else
             *allocation = H5D_SPACE_STATUS_PART_ALLOCATED;
@@ -757,7 +735,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     H5T_t *     type             = NULL;
     H5O_fill_t *fill_prop        = NULL;
     hbool_t     use_at_least_v18 = FALSE;
-    const char  continuation[1]  = ""; /* requred for work-around */
+    const char  continuation[1]  = ""; /* required for work-around */
     size_t      get_value        = 0;
     size_t      ret_value        = 0;
 
@@ -804,7 +782,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of continuation message")
     ret_value += get_value;
 
-    /* Fill Value (backwards compatability) message size */
+    /* Fill Value (backwards compatibility) message size */
     if (fill_prop->buf && !use_at_least_v18) {
         H5O_fill_t old_fill_prop; /* Copy for writing "old" fill value */
 
@@ -893,7 +871,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     if (ohdr_size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "computed header size is invalid")
 
-    /* Special allocation of space for compact datsets is handled by the call here. */
+    /* Special allocation of space for compact datasets is handled by the call here. */
     if (H5O_apply_ohdr(file, oh, dset->shared->dcpl_id, ohdr_size, (size_t)1, oloc) == FAIL)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
@@ -1347,7 +1325,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
     } /* end if */
 
-    /* Check if this dataset is going into a parallel file and set space allocation time */
+    /* Check if the file driver would like to force early space allocation */
     if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 

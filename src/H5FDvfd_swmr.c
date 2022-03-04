@@ -90,6 +90,7 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
+    H5FD_VFD_SWMR_VALUE,       /* value                */
     "vfd_swmr",                /* name                 */
     MAXADDR,                   /* maxaddr              */
     H5F_CLOSE_WEAK,            /* fc_degree            */
@@ -122,6 +123,7 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD__vfd_swmr_lock,       /* lock                 */
     H5FD__vfd_swmr_unlock,     /* unlock               */
     NULL,                      /* del                  */
+    NULL,                      /* ctl                  */
     H5FD_FLMAP_DICHOTOMY       /* fl_map               */
 };
 
@@ -231,7 +233,7 @@ H5Pset_fapl_vfd_swmr(hid_t fapl_id)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

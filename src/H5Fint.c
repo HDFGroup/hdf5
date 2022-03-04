@@ -459,9 +459,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set initial metadata cache resize config.")
 
     /* Prepare the driver property */
-    driver_prop.driver_id   = f->shared->lf->driver_id;
-    driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
-    driver_prop_copied      = TRUE;
+    driver_prop.driver_id         = f->shared->lf->driver_id;
+    driver_prop.driver_info       = H5FD_fapl_get(f->shared->lf);
+    driver_prop.driver_config_str = H5P_peek_driver_config_str(old_plist);
+    driver_prop_copied            = TRUE;
 
     /* Set the driver property */
     if (H5P_set(new_plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -1064,7 +1065,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
     H5FD_t *      file      = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
-    haddr_t       sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature    */
+    haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */
 
     FUNC_ENTER_PACKAGE
@@ -1161,7 +1162,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         /* Initialization for handling file space (for paged aggregation) */
         f->shared->pgend_meta_thres = H5F_FILE_SPACE_PGEND_META_THRES;
 
-        /* intialize point of no return */
+        /* initialize point of no return */
         f->shared->point_of_no_return = FALSE;
 
         /* Copy the file creation and file access property lists into the
@@ -1298,7 +1299,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
                 f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
         }
 
-        /* Determine the # of bins for metdata read retries */
+        /* Determine the # of bins for metadata read retries */
         if (H5F_set_retries(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
 
@@ -1910,7 +1911,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * or creating it) so we can compare it with files that are already
      * open. If that fails then we try again with the full set of flags
      * (only if they're different than the original failed attempt).
-     * However, if the file driver can't distinquish between files then
+     * However, if the file driver can't distinguish between files then
      * there's no reason to open the file tentatively because it's the
      * application's responsibility to prevent this situation (there's no
      * way for us to detect it here anyway).
@@ -2020,8 +2021,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Short cuts */
     shared = file->shared;
-
-    lf = shared->lf;
+    lf     = shared->lf;
 
     /* Set the file locking flag. If the file is already open, the file
      * requested file locking flag must match that of the open file.
@@ -3304,7 +3304,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      * file driver.  However, this test will not work if there is some
      * other file driver sitting on top of the multi file driver.
      *
-     * I'm not sure if this is possible at present, but in all likelyhood,
+     * I'm not sure if this is possible at present, but in all likelihood,
      * it will become possible in the future.  On the other hand, we may
      * remove the split/multi file drivers before then.
      *
@@ -3324,7 +3324,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      *
      * While this problem is quite solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files
+     * allow the get file image operation to be performed on files
      * opened with the family file driver.
      *
      * Observe that the following test only looks at the top level
@@ -3755,7 +3755,7 @@ done:
  *              1) The file being opened has v3 superblock
  *              2) The file is opened with H5F_ACC_RDWR
  *              3) The file is not already marked for SWMR writing
- *              4) Current implementaion for opened objects:
+ *              4) Current implementation for opened objects:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects
@@ -3774,7 +3774,7 @@ herr_t
 H5F__start_swmr_write(H5F_t *f)
 {
     hbool_t     ci_load        = FALSE;  /* whether MDC ci load requested */
-    hbool_t     ci_write       = FALSE;  /* whether MDC ci write requested */
+    hbool_t     ci_write       = FALSE;  /* whether MDC CI write requested */
     size_t      grp_dset_count = 0;      /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;      /* # of opened named datatypes  + opened attributes */
     hid_t *     obj_ids        = NULL;   /* List of ids */

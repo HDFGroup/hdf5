@@ -1333,30 +1333,58 @@ h5_get_file_size(const char *filename, hid_t fapl)
 #ifdef H5_HAVE_DIRECT
             driver == H5FD_DIRECT ||
 #endif /* H5_HAVE_DIRECT */
-            driver == H5FD_LOG) {
+            driver == H5FD_LOG || driver == H5FD_SPLITTER) {
             /* Get the file's statistics */
             if (0 == HDstat(filename, &sb))
                 return ((h5_stat_size_t)sb.st_size);
         } /* end if */
         else if (driver == H5FD_MULTI) {
             H5FD_mem_t     mt;
-            h5_stat_size_t tot_size = 0;
+            h5_stat_size_t tot_size       = 0;
+            char *         driver_env_var = NULL;
 
-            HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-            for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                /* Create the filename to query */
-                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+            driver_env_var = HDgetenv("HDF5_DRIVER");
+            if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
+                    if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
+                        continue;
 
-                /* Check for existence of file */
-                if (0 == HDaccess(temp, F_OK)) {
-                    /* Get the file's statistics */
-                    if (0 != HDstat(temp, &sb))
-                        return (-1);
+                    /* Create the filename to query */
+                    if (mt == H5FD_MEM_DRAW) {
+                        HDsnprintf(temp, sizeof temp, "%s.raw", filename);
+                    }
+                    else {
+                        HDsnprintf(temp, sizeof temp, "%s.meta", filename);
+                    }
 
-                    /* Add to total size */
-                    tot_size += (h5_stat_size_t)sb.st_size;
-                } /* end if */
-            }     /* end for */
+                    /* Check for existence of file */
+                    if (0 == HDaccess(temp, F_OK)) {
+                        /* Get the file's statistics */
+                        if (0 != HDstat(temp, &sb))
+                            return (-1);
+
+                        /* Add to total size */
+                        tot_size += (h5_stat_size_t)sb.st_size;
+                    } /* end if */
+                }     /* end for */
+            }
+            else {
+                HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
+                    /* Create the filename to query */
+                    HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+
+                    /* Check for existence of file */
+                    if (0 == HDaccess(temp, F_OK)) {
+                        /* Get the file's statistics */
+                        if (0 != HDstat(temp, &sb))
+                            return (-1);
+
+                        /* Add to total size */
+                        tot_size += (h5_stat_size_t)sb.st_size;
+                    } /* end if */
+                }     /* end for */
+            }
 
             /* Return total size */
             return (tot_size);
@@ -1404,7 +1432,9 @@ h5_get_file_size(const char *filename, hid_t fapl)
             return (tot_size);
         } /* end if */
         else {
-            HDassert(0 && "Unknown VFD!");
+            /* Get the file's statistics */
+            if (0 == HDstat(filename, &sb))
+                return ((h5_stat_size_t)sb.st_size);
         } /* end else */
     }     /* end else */
 
@@ -1892,7 +1922,9 @@ dummy_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hi
 }
 
 /* Dummy VFD with the minimum parameters to make a VFD that can be registered */
+#define DUMMY_VFD_VALUE (H5FD_class_value_t)155
 static const H5FD_class_t H5FD_dummy_g = {
+    DUMMY_VFD_VALUE,     /* value        */
     "dummy",             /* name         */
     1,                   /* maxaddr      */
     H5F_CLOSE_WEAK,      /* fc_degree    */
@@ -1925,6 +1957,7 @@ static const H5FD_class_t H5FD_dummy_g = {
     NULL,                /* lock         */
     NULL,                /* unlock       */
     NULL,                /* del          */
+    NULL,                /* ctl          */
     H5FD_FLMAP_DICHOTOMY /* fl_map       */
 };
 

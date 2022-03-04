@@ -166,7 +166,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
      * difficulties with the notion.
      *
      * To solve this, we check to see if H5S_select_shape_same() returns true,
-     * and if the ranks of the mem and file spaces are different.  If the are,
+     * and if the ranks of the mem and file spaces are different.  If they are,
      * construct a new mem space that is equivalent to the old mem space, and
      * use that instead.
      *
@@ -302,6 +302,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
+    hbool_t          should_alloc_space  = FALSE; /* Whether or not to initialize dataset's storage */
     H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
@@ -434,8 +435,20 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
 
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if (nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-        !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+    should_alloc_space = dataset->shared->dcpl_cache.efl.nused == 0 &&
+                         !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
+
+    /*
+     * If not using an MPI-based VFD, we only need to allocate
+     * and initialize storage if there's a selection in the
+     * dataset's dataspace. Otherwise, we always need to participate
+     * in the storage allocation since this may use collective
+     * operations and we will hang if we don't participate.
+     */
+    if (!H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI))
+        should_alloc_space = should_alloc_space && (nelmts > 0);
+
+    if (should_alloc_space) {
         hssize_t file_nelmts;    /* Number of elements in file dataset's dataspace */
         hbool_t  full_overwrite; /* Whether we are over-writing all the elements */
 

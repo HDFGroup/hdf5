@@ -23,8 +23,10 @@
 
 #ifdef H5_HAVE_LIBHDFS
 #define H5FD_HDFS (H5FD_hdfs_init())
+#define H5FD_HDFS_VALUE H5_VFD_HDFS
 #else /* H5_HAVE_LIBHDFS */
-#define H5FD_HDFS (H5I_INVALID_HID)
+#define H5FD_HDFS       (H5I_INVALID_HID)
+#define H5FD_HDFS_VALUE H5_VFD_INVALID
 #endif /* H5_HAVE_LIBHDFS */
 
 #ifdef H5_HAVE_LIBHDFS
