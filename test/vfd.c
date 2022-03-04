@@ -51,7 +51,7 @@
 const char *FILENAME[] = {"sec2_file",          /*0*/
                           "core_file",          /*1*/
                           "family_file",        /*2*/
-                          "new_family_v16_",    /*3*/
+                          "new_family_v16",     /*3*/
                           "multi_file",         /*4*/
                           "direct_file",        /*5*/
                           "log_file",           /*6*/
@@ -66,7 +66,7 @@ const char *FILENAME[] = {"sec2_file",          /*0*/
 
 #define LOG_FILENAME "log_vfd_out.log"
 
-#define COMPAT_BASENAME       "family_v16_"
+#define COMPAT_BASENAME       "family_v16"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 #define SPLITTER_DATASET_NAME "dataset"
 

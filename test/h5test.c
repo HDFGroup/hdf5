@@ -546,9 +546,9 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
         if (suffix) {
             if (H5FD_FAMILY == driver) {
                 if (subst_for_superblock)
-                    suffix = "00000.h5";
+                    suffix = "-000000.h5";
                 else
-                    suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
+                    suffix = nest_printf ? "-%%06d.h5" : "-%06d.h5";
             }
             else if (H5FD_MULTI == driver) {
 

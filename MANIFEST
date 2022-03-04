@@ -20,7 +20,6 @@
 
 ./.gitattributes       _DO_NOT_DISTRIBUTE_
 ./.gitignore           _DO_NOT_DISTRIBUTE_
-./.gitmodules          _DO_NOT_DISTRIBUTE_
 ./.autom4te.cfg        _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
@@ -1236,10 +1235,10 @@
 ./test/external_common.h
 ./test/external_env.c
 ./test/external_fname.h
-./test/family_v16_00000.h5
-./test/family_v16_00001.h5
-./test/family_v16_00002.h5
-./test/family_v16_00003.h5
+./test/family_v16-000000.h5
+./test/family_v16-000001.h5
+./test/family_v16-000002.h5
+./test/family_v16-000003.h5
 ./test/farray.c
 ./test/fheap.c
 ./test/file_image.c
