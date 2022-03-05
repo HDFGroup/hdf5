@@ -70,9 +70,6 @@ static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -143,29 +140,7 @@ H5AC_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_init() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__init_package
- *
- * Purpose:     Initialize interface-specific information
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, July 18, 2002
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC__init_package(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_NOAPI_NOERR
 
 #ifdef H5_HAVE_PARALLEL
     /* check whether to enable strict collective function calling
@@ -182,8 +157,8 @@ H5AC__init_package(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5AC__init_package() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_term_package
@@ -203,10 +178,6 @@ int
 H5AC_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR)
-        /* Reset interface initialization flag */
-        H5_PKG_INIT_VAR = FALSE;
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5AC_term_package() */
@@ -339,7 +310,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsprintf(prefix, "%d:", mpi_rank);
+        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1248,7 +1219,7 @@ done:
  *              metadata cache flush.
  *
  *              Initially, this means setting up the slist prior to the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list
@@ -1300,7 +1271,7 @@ done:
  *              flush.
  *
  *              Initially, this means taking down the slist after the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list

@@ -239,6 +239,7 @@ struct H5FD_t {
 extern "C" {
 #endif
 
+H5_DLL hid_t  H5FDperform_init(hid_t (*)(void));
 H5_DLL hid_t  H5FDregister(const H5FD_class_t *cls);
 H5_DLL htri_t H5FDis_driver_registered_by_name(const char *driver_name);
 H5_DLL htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value);

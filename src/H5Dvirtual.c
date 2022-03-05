@@ -1310,7 +1310,7 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
     H5O_storage_virtual_name_seg_t *next_seg;
     herr_t                          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Walk name segments, freeing them */
     while (name_seg) {
@@ -1320,7 +1320,6 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
         name_seg = next_seg;
     } /* end while */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_free_parsed_name() */
 
@@ -1488,7 +1487,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                         storage->list[i].source_dset.dset->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
-                    /* Get source space dimenstions */
+                    /* Get source space dimensions */
                     if (H5S_get_simple_extent_dims(storage->list[i].source_select, curr_dims, NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source space dimensions")
 
@@ -1966,7 +1965,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                                         storage->list[i].source_dset.dset->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
-                    /* Get source space dimenstions */
+                    /* Get source space dimensions */
                     if (H5S_get_simple_extent_dims(storage->list[i].source_select, source_dims, NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source space dimensions")
 
@@ -2322,7 +2321,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                /* Check for cahced data in source dset */
+                /* Check for cached data in source dset */
                 if (storage->list[i].sub_dset[j].dset &&
                     storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached &&
                     storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached(
@@ -2656,7 +2655,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read_one
  *
- * Purpose:     Read from a singe source dataset in a virtual dataset.
+ * Purpose:     Read from a single source dataset in a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2846,7 +2845,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write_one
  *
- * Purpose:     Write to a singe source dataset in a virtual dataset.
+ * Purpose:     Write to a single source dataset in a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
  *

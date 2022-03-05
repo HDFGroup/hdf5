@@ -109,9 +109,6 @@ static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, const
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -119,7 +116,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 /* Local Variables */
 /*******************/
-
 /* Declare a free list to manage the H5PB_t struct */
 H5FL_DEFINE_STATIC(H5PB_t);
 

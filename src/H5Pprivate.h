@@ -156,8 +156,9 @@ struct H5O_fill_t;
 struct H5T_t;
 struct H5VL_connector_prop_t;
 
-/* Package initialization routine */
-H5_DLL herr_t H5P_init(void);
+/* Package initialization routines */
+H5_DLL herr_t H5P_init_phase1(void);
+H5_DLL herr_t H5P_init_phase2(void);
 
 /* Internal versions of API routines */
 H5_DLL herr_t H5P_close(H5P_genplist_t *plist);

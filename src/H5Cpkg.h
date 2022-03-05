@@ -999,7 +999,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
  *
  ***********************************************************************/
 
-/* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It must be a power of two. */
+/* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It mut be a power of two. */
 
 #define H5C__HASH_MASK        ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
 
@@ -1642,7 +1642,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *
  *            H5C_DO_SLIST_SANITY_CHECKS
  *
- *        can be selected independantly.  This is easy to miss as the
+ *        can be selected independently.  This is easy to miss as the
  *        two #defines are easy to confuse.
  */
 

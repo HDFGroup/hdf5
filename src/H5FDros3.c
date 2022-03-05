@@ -278,31 +278,6 @@ static const H5FD_class_t H5FD_ros3_g = {
 H5FL_DEFINE_STATIC(H5FD_ros3_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jacob Smith 2017
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_ros3_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize ros3 VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -329,8 +304,12 @@ H5FD_ros3_init(void)
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
+    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
         H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_ROS3_g) {
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
+        }
+    }
 
 #if ROS3_STATS
     /* pre-compute statsbin boundaries

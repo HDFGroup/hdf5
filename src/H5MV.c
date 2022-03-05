@@ -77,9 +77,6 @@ H5_DLL htri_t  H5MV__try_extend_md(H5F_shared_t *, haddr_t, hsize_t);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/

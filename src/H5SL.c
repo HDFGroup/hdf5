@@ -239,7 +239,7 @@
     }
 
 /* Macro used to reduce the level of a node by 1.  Does not update the head node
- * "current level".  PREV is the previous node of the currrent height of X. */
+ * "current level".  PREV is the previous node of the current height of X. */
 #define H5SL_DEMOTE(X, PREV)                                                                                 \
     {                                                                                                        \
         size_t _lvl = X->level;                                                                              \
@@ -255,7 +255,7 @@
 #define H5SL_INSERT(CMP, SLIST, X, TYPE, KEY, HASHVAL)                                                       \
     {                                                                                                        \
         H5SL_node_t *_last = X;    /* Lowest node in the current gap */                                      \
-        H5SL_node_t *_next = NULL; /* Highest node in the currect gap */                                     \
+        H5SL_node_t *_next = NULL; /* Highest node in the current gap */                                     \
         H5SL_node_t *_drop;        /* Low node of the gap to drop into */                                    \
         int          _count;       /* Number of nodes in the current gap */                                  \
         int          _i;                                                                                     \
@@ -311,7 +311,7 @@
     {                                                                                                        \
         H5SL_node_t *_last  = X;             /* Lowest node in the current gap */                            \
         H5SL_node_t *_llast = X;             /* Lowest node in the previous gap */                           \
-        H5SL_node_t *_next  = NULL;          /* Highest node in the currect gap */                           \
+        H5SL_node_t *_next  = NULL;          /* Highest node in the current gap */                           \
         H5SL_node_t *_drop  = NULL;          /* Low node of the gap to drop into */                          \
         H5SL_node_t *_ldrop = NULL;          /* Low node of gap before the one to drop into */               \
         H5SL_node_t *_head  = SLIST->header; /* Head of the skip list */                                     \
@@ -510,9 +510,6 @@ static H5SL_node_t *H5SL__insert_common(H5SL_t *slist, void *item, const void *k
 static herr_t       H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 static herr_t       H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
 
@@ -524,26 +521,21 @@ static H5FL_fac_head_t **H5SL_fac_g;
 static size_t            H5SL_fac_nused_g;
 static size_t            H5SL_fac_nalloc_g;
 
-/*--------------------------------------------------------------------------
- NAME
-    H5SL__init_package
- PURPOSE
-    Initialize interface-specific information
- USAGE
-    herr_t H5SL__init_package()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Initializes any interface-specific data or routines.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5SL_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5SL__init_package(void)
+H5SL_init(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
@@ -555,8 +547,8 @@ H5SL__init_package(void)
     HDassert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SL__init_package() */
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -584,32 +576,26 @@ H5SL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Terminate all the factories */
-        if (H5SL_fac_nused_g > 0) {
-            size_t                       i;
-            herr_t H5_ATTR_NDEBUG_UNUSED ret;
+    /* Terminate all the factories */
+    if (H5SL_fac_nused_g > 0) {
+        size_t                       i;
+        herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
-            for (i = 0; i < H5SL_fac_nused_g; i++) {
-                ret = H5FL_fac_term(H5SL_fac_g[i]);
-                HDassert(ret >= 0);
-            }
-            H5SL_fac_nused_g = 0;
-
-            n++;
+        for (i = 0; i < H5SL_fac_nused_g; i++) {
+            ret = H5FL_fac_term(H5SL_fac_g[i]);
+            HDassert(ret >= 0);
         }
+        H5SL_fac_nused_g = 0;
 
-        /* Free the list of factories */
-        if (H5SL_fac_g) {
-            H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
-            H5SL_fac_nalloc_g = 0;
+        n++;
+    }
 
-            n++;
-        }
+    /* Free the list of factories */
+    if (H5SL_fac_g) {
+        H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
+        H5SL_fac_nalloc_g = 0;
 
-        /* Mark the interface as uninitialized */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+        n++;
     }
 
     FUNC_LEAVE_NOAPI(n)
@@ -1943,7 +1929,7 @@ H5SL_next(H5SL_node_t *slist_node)
  NAME
     H5SL_prev
  PURPOSE
-    Gets a pointer to the previos node in a skip list
+    Gets a pointer to the previous node in a skip list
  USAGE
     H5SL_node_t *H5SL_prev(slist_node)
         H5SL_node_t *slist_node;          IN: Pointer to skip list node

@@ -1727,7 +1727,7 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * \brief Obtains information about a cache image if it exists
  *
  * \file_id
- * \param[out] image_addr Offset of the cache image if it exists, or \c HADDR_UNDEF if it does not
+ * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
  * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
  * \returns \herr_t
  *
@@ -1806,7 +1806,6 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  */
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
-H5_DLL herr_t H5Fwait(hid_t file_id);
 
 /* VFD SWMR */
 /**
@@ -2022,6 +2021,7 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
  *
  * \deprecated When?
  *
+ * \todo In which version was this function introduced?
  * \todo In which version was this function deprecated?
  *
  */
@@ -2040,6 +2040,7 @@ H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
  * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
  *
  * \todo In which version was this function deprecated?
+ * \todo In which version was this function introduced?
  *
  */
 H5_DLL htri_t H5Fis_hdf5(const char *file_name);

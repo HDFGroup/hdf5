@@ -134,30 +134,6 @@ H5FL_DEFINE_STATIC(H5FD_vfd_swmr_t);
 H5FL_SEQ_DEFINE(H5FD_vfd_swmr_idx_entry_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
-b
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_vfd_swmr_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize swmr VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -176,7 +152,7 @@ H5FD_vfd_swmr_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_VFD_SWMR_g))
         H5FD_VFD_SWMR_g = H5FD_register(&H5FD_vfd_swmr_g, sizeof(H5FD_class_t), FALSE);
@@ -184,7 +160,6 @@ H5FD_vfd_swmr_init(void)
     /* Set return value */
     ret_value = H5FD_VFD_SWMR_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_init() */
 

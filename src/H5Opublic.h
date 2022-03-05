@@ -80,7 +80,7 @@
 #define H5O_SHMESG_MAX_LIST_SIZE 5000
 
 /* Flags for H5Oget_info.
- * Theses flags determine which fields will be filled in in the H5O_info_t
+ * These flags determine which fields will be filled in the H5O_info_t
  * struct.
  */
 #define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
@@ -90,8 +90,8 @@
 
 //! <!-- [H5O_native_info_fields_snip] -->
 /**
- * Flags for H5Oget_native_info().  Theses flags determine which fields will be
- * filled in in the \ref H5O_native_info_t struct.
+ * Flags for H5Oget_native_info().  These flags determine which fields will be
+ * filled in the \ref H5O_native_info_t struct.
  */
 #define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
 #define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
@@ -510,7 +510,7 @@ H5_DLL herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
  *        location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \param[in] fields Flags specifying the fields to include in \p oinfo
  * \lapl_id
@@ -1166,7 +1166,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1265,7 +1265,7 @@ H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1834,7 +1834,7 @@ H5_DLL herr_t H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo);
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \lapl_id
  *
@@ -1960,7 +1960,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \param[in] fields Flags specifying the fields to include in \p oinfo
  * \lapl_id
@@ -1978,7 +1978,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields);
  *          in the H5Oget_info1() function entry.
  *
  *          The \p fields parameter contains flags to determine which fields
- *          will be filled in in the H5O_info1_t \c struct returned in
+ *          will be filled in the H5O_info1_t \c struct returned in
  *          \p oinfo. These flags are defined in the H5Opublic.h file:
  *
  *          \obj_info_fields
@@ -2096,7 +2096,7 @@ H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -2188,7 +2188,7 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -2291,7 +2291,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -2385,7 +2385,7 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *

@@ -374,6 +374,7 @@ H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
+H5_DLL herr_t H5FD_init(void);
 /* Function prototypes for VFD SWMR */
 H5_DLL int    shadow_image_defer_free(struct H5F_shared_t *, const H5FD_vfd_swmr_idx_entry_t *);
 H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index, uint64_t *tick_ptr,
