@@ -836,6 +836,7 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDperform.c
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
