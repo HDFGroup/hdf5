@@ -2726,6 +2726,14 @@ H5_DLL herr_t  H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
 H5_DLL herr_t  H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
 H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datatype old_type,
                                          MPI_Datatype *new_type);
+H5_DLL herr_t  H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type,
+                                     const int recv_counts[], const int displacements[],
+                                     MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                     int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries);
+H5_DLL herr_t  H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type,
+                                            MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                            int mpi_rank, int mpi_size, void **out_buf,
+                                            size_t *out_buf_num_entries);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */

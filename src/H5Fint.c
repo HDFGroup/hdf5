@@ -398,7 +398,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     } /* end if */
 
     if (H5P_set(new_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, &(f->shared->vfd_swmr_config)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFD SWMR config")
 
 #ifdef H5_HAVE_PARALLEL
     if (H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)

@@ -84,9 +84,9 @@
 /* Layout operation callbacks */
 static hbool_t H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t  H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t  H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                  H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t  H5D__virtual_flush(H5D_t *dset);
 
 /* Other functions */
@@ -103,26 +103,37 @@ static herr_t H5D__virtual_build_source_name(char *                             
                                              size_t static_strlen, size_t nsubs, hsize_t blockno,
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
-static herr_t H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage,
-                                  const H5S_t *file_space, const H5S_t *mem_space, hsize_t *tot_nelmts);
+static herr_t H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+                                  H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                    const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                    H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                     const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                     H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 
 /*********************/
 /* Package Variables */
 /*********************/
 
 /* Contiguous storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{NULL, H5D__virtual_init, H5D__virtual_is_space_alloc,
-                                               H5D__virtual_is_data_cached, NULL, H5D__virtual_read,
-                                               H5D__virtual_write,
+const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
+    NULL,                        /* construct */
+    H5D__virtual_init,           /* init */
+    H5D__virtual_is_space_alloc, /* is_space_alloc */
+    H5D__virtual_is_data_cached, /* is_data_cached */
+    NULL,                        /* io_init */
+    H5D__virtual_read,           /* ser_read */
+    H5D__virtual_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-                                               NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                               NULL, NULL, H5D__virtual_flush, NULL, NULL}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    NULL,               /* readvv */
+    NULL,               /* writevv */
+    H5D__virtual_flush, /* flush */
+    NULL,               /* io_term */
+    NULL                /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -195,7 +206,7 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
                             "can't get number of elements in non-unlimited dimension")
             if (nenu_vs != nenu_ss)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "numbers of elemnts in the non-unlimited dimensions is different for source and "
+                            "numbers of elements in the non-unlimited dimensions is different for source and "
                             "virtual spaces")
         } /* end if */
         /* We will handle the printf case after parsing the source names */
@@ -2242,9 +2253,37 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
         storage->printf_gap = (hsize_t)0;
 
     /* Retrieve VDS file FAPL to layout */
-    if (storage->source_fapl <= 0)
+    if (storage->source_fapl <= 0) {
+        H5P_genplist_t *   source_fapl  = NULL;           /* Source file FAPL */
+        H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
+
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Source files must always be opened with H5F_CLOSE_WEAK close degree */
+        if (H5P_set(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
+    } /* end if */
+#ifndef NDEBUG
+    else {
+        H5P_genplist_t *   source_fapl = NULL; /* Source file FAPL */
+        H5F_close_degree_t close_degree;       /* Close degree for source files */
+
+        /* Get property list pointer */
+        if (NULL == (source_fapl = (H5P_genplist_t *)H5I_object(storage->source_fapl)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+
+        /* Verify H5F_CLOSE_WEAK close degree is set */
+        if (H5P_get(source_fapl, H5F_ACS_CLOSE_DEGREE_NAME, &close_degree) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
+
+        HDassert(close_degree == H5F_CLOSE_WEAK);
+    }  /* end else */
+#endif /* NDEBUG */
 
     /* Copy DAPL to layout */
     if (storage->source_dapl <= 0)
@@ -2354,8 +2393,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, const H5S_t *file_space,
-                    const H5S_t *mem_space, hsize_t *tot_nelmts)
+H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+                    H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     hssize_t select_nelmts;              /* Number of elements in selection */
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
@@ -2665,7 +2704,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *projected_src_space = NULL;    /* File space for selection in a single source dataset */
@@ -2725,8 +2764,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
+                  H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
@@ -2855,7 +2894,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                        H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *projected_src_space = NULL;    /* File space for selection in a single source dataset */
@@ -2918,7 +2957,7 @@ done:
  */
 static herr_t
 H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */

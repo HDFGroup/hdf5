@@ -894,7 +894,7 @@ H5P__facc_set_def_driver(void)
     FUNC_ENTER_STATIC
 
     /* Check if VFL driver environment variable is set */
-    driver_env_var = HDgetenv("HDF5_DRIVER");
+    driver_env_var = HDgetenv(HDF5_DRIVER);
 
     /* Only parse VFL driver string if it's set */
     if (driver_env_var && *driver_env_var) {
@@ -932,7 +932,7 @@ H5P__facc_set_def_driver(void)
         }     /* end else */
 
         /* Retrieve driver configuration string from environment variable, if set. */
-        driver_config_env_var = HDgetenv("HDF5_DRIVER_CONFIG");
+        driver_config_env_var = HDgetenv(HDF5_DRIVER_CONFIG);
 
         driver_prop.driver_id         = driver_id;
         driver_prop.driver_info       = NULL;
