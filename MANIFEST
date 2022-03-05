@@ -3055,6 +3055,10 @@
 ./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
+# test utilities
+./utils/test/Makefile.am
+./utils/test/swmr_check_compat_vfd.c
+
 # VFD SWMR utilities
 ./utils/vfd_swmr/README.md
 ./utils/vfd_swmr/Makefile.am
@@ -3807,6 +3811,7 @@
 
 ./utils/CMakeLists.txt
 ./utils/mirror_vfd/CMakeLists.txt
+./utils/test/CMakeLists.txt
 ./utils/vfd_swmr/CMakeLists.txt
 
 # CMake-specific User Scripts
@@ -3922,4 +3927,5 @@
 ./tools/test/perform/Makefile.in
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
+./utils/test/Makefile.in
 ./utils/vfd_swmr/Makefile.in

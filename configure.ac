@@ -1122,6 +1122,12 @@ else
   AC_MSG_RESULT([no])
 fi
 
+## These need to be exposed for some tests.
+AC_SUBST([H5_UTILS_TEST_BUILDDIR])
+H5_UTILS_TEST_BUILDDIR='utils/test'
+AC_SUBST([H5_TEST_BUILDDIR])
+H5_TEST_BUILDDIR='test'
+
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
 ##
@@ -1686,6 +1692,7 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
@@ -1770,7 +1777,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
-  AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
+  LL_PATH="$LD_LIBRARY_PATH"
 
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_RUN_IFELSE(
@@ -2977,11 +2984,11 @@ if test -n "$PARALLEL"; then
   fi
 
   ## ----------------------------------------------------------------------
-  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## Check for the MPI functions necessary for the Parallel Compression
   ## feature. If these are not present, issue a warning that Parallel
   ## Compression will be disabled.
   ##
-  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+  AC_MSG_CHECKING([for MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions])
 
   AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
@@ -2989,16 +2996,19 @@ if test -n "$PARALLEL"; then
               #include <mpi.h>
           ]],
           [[
-              MPI_Message message;
+              int flag;
               MPI_Init(0, (void *) 0);
-              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
-              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+              MPI_Ibarrier(0, (void *) 0);
+              MPI_Issend((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
+              MPI_Iprobe(0, 0, 0, &flag, (void *) 0);
+              MPI_Irecv((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
           ]]
       )],
       [AC_MSG_RESULT([yes])
-       PARALLEL_FILTERED_WRITES=yes],
+       PARALLEL_FILTERED_WRITES=yes
+       AC_DEFINE([HAVE_PARALLEL_FILTERED_WRITES], [1], [Define if we have support for writing to filtered datasets in parallel])],
       [AC_MSG_RESULT([no])
-       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+       AC_MSG_WARN([A simple MPI program using the MPI_Ibarrier, MPI_Issend, MPI_Iprobe and MPI_Irecv functions could not be compiled and linked.
                     Parallel writes of filtered data will be disabled.])
        PARALLEL_FILTERED_WRITES=no]
   )
@@ -4087,6 +4097,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  utils/Makefile
                  utils/mirror_vfd/Makefile
+                 utils/test/Makefile
                  utils/vfd_swmr/Makefile
                  tools/Makefile
                  tools/lib/Makefile

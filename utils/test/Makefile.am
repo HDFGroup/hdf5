@@ -1,5 +1,6 @@
 #
 # Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -11,29 +12,23 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Utils HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src and tools/lib directories
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib -I$(top_srcdir)/utils/test
 
-if BUILD_TESTS_CONDITIONAL
-   TESTUTIL_DIR =test
-else
-   TESTUTIL_DIR=
-endif
+# These are our main targets, the tools
 
-if MIRROR_VFD_CONDITIONAL
-   MIRROR_VFD_DIR = mirror_vfd
-else
-   MIRROR_VFD_DIR=
-endif
+noinst_PROGRAMS=swmr_check_compat_vfd
 
+# Programs all depend on the hdf5 library, the tools library, and the HL
+# library.
+LDADD=$(LIBH5TEST) $(LIBHDF5)
 
-# All subdirectories
-SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR) vfd_swmr
+CHECK_CLEANFILES+=*.h5
 
 include $(top_srcdir)/config/conclude.am
