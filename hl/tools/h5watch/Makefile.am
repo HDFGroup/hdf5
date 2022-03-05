@@ -24,7 +24,6 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/sr
 # These are our main targets, the tools
 
 bin_PROGRAMS=h5watch
-noinst_PROGRAMS=swmr_check_compat_vfd
 
 # Add h5watch specific linker flags here
 h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -38,7 +37,7 @@ if BUILD_TESTS_CONDITIONAL
   TEST_SCRIPT=testh5watch.sh
   check_SCRIPTS=$(TEST_SCRIPT)
   SCRIPT_DEPEND=swmr_check_compat_vfd$(EXEEXT) extend_dset$(EXEEXT) h5watch$(EXEEXT)
-  noinst_PROGRAMS+=h5watchgentest extend_dset
+  noinst_PROGRAMS=h5watchgentest extend_dset
   # Add extend_dset specific preprocessor flags here
   # (add the main test subdirectory to the include file path)
   extend_dset_CPPFLAGS=$(AM_CPPFLAGS) -I$(top_srcdir)/test

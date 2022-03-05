@@ -149,14 +149,18 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-set (SWMR_INCOMPAT ${hl_swmr_check_compat_vfd})
+add_test (
+    NAME H5WATCH-SWMR_INCOMPAT
+    COMMAND swmr_check_compat_vfd
+)
+set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES FIXTURES_SETUP swmr_vfd_check_compat)
 
-if (NOT SWMR_INCOMPAT)
 # Remove any output file left over from previous test run
 add_test (
   NAME H5WATCH-clearall-objects
   COMMAND ${CMAKE_COMMAND} -E remove WATCH.h5
 )
+set_tests_properties (H5WATCH-clearall-objects PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)
 if (last_test)
   set_tests_properties (H5WATCH-clearall-objects PROPERTIES DEPENDS ${last_test})
 endif ()
@@ -188,6 +192,7 @@ set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
     DEPENDS "H5WATCH-clearall-objects"
 )
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
+set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)
 set (last_test "H5WATCH-h5watchgentest")
 
 # Test on --help options
@@ -210,4 +215,3 @@ ADD_H5_ERR_TEST (w-err-cmpd3 1 --fields=field1,field2, WATCH.h5/DSET_CMPD)
 ADD_H5_ERR_TEST (w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
 ADD_H5_ERR_TEST (w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
 #
-endif ()

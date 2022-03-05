@@ -3178,7 +3178,6 @@
 ./hl/tools/h5watch/extend_dset.c
 ./hl/tools/h5watch/h5watch.c
 ./hl/tools/h5watch/h5watchgentest.c
-./hl/tools/h5watch/swmr_check_compat_vfd.c
 ./hl/tools/h5watch/testh5watch.sh.in
 
 # expected test output from testing h5watch
