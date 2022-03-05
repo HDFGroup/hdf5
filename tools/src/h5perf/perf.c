@@ -605,7 +605,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  * we are using the split driver since both of those
                  * use the multi VFD under the hood.
                  */
-                env = HDgetenv("HDF5_DRIVER");
+                env = HDgetenv(HDF5_DRIVER);
 #ifdef HDF5_DRIVER
                 /* Use the environment variable, then the compile-time constant */
                 if (!env)

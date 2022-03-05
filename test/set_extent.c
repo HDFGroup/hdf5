@@ -117,7 +117,7 @@ main(void)
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contiguous address space */

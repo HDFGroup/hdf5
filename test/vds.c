@@ -12292,7 +12292,7 @@ main(void)
     const char * env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

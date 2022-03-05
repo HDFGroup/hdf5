@@ -166,8 +166,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
 
 /* Flags for h5_fileaccess_flags() */
-#define H5_FILEACCESS_VFD    0x01
-#define H5_FILEACCESS_LIBVER 0x02
+#define H5_FILEACCESS_LIBVER 0x01
 
 /* Flags for h5_driver_uses_multiple_files() */
 #define H5_EXCLUDE_MULTIPART_DRIVERS     0x01
@@ -224,7 +223,6 @@ H5TEST_DLL hbool_t       h5_driver_uses_modified_filename(void);
 H5TEST_DLL hbool_t       h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
-H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
 H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
 
 /* h5_clean_files() replacements */

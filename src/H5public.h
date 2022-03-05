@@ -170,6 +170,13 @@
 
 /* Macros for various environment variables that HDF5 interprets */
 /**
+ * Used to specify the name of an HDF5 Virtual File Driver to use as
+ * the default file driver for file access. Setting this environment
+ * variable overrides the default file driver for File Access Property
+ * Lists.
+ */
+#define HDF5_DRIVER "HDF5_DRIVER"
+/**
  * Used to specify a configuration string for the HDF5 Virtual File
  * Driver being used for file access.
  */
@@ -282,6 +289,11 @@ typedef long long ssize_t;
  * \internal Defined as a (minimum) 64-bit integer type.
  */
 typedef uint64_t hsize_t;
+
+#ifdef H5_HAVE_PARALLEL
+#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
+#endif
+
 /**
  * The size of file objects. Used when negative values are needed to indicate errors.
  *
@@ -316,7 +328,7 @@ typedef uint64_t haddr_t;
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
 #ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
+#define HADDR_AS_MPI_TYPE MPI_UINT64_T
 #endif
 
 //! <!-- [H5_iter_order_t_snip] -->

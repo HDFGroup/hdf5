@@ -16339,7 +16339,7 @@ main(void)
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 

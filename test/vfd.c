@@ -3933,9 +3933,9 @@ main(void)
      * specific VFD to be set and HDF5_DRIVER being set can interfere
      * with that.
      */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr) {
-        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", "HDF5_DRIVER");
+        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
         HDexit(EXIT_SUCCESS);
     }
 

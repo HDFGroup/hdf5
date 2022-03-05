@@ -153,7 +153,7 @@ main(int argc, char *argv[])
          * anything. */
 
         /* Determine driver being used */
-        envval = HDgetenv("HDF5_DRIVER");
+        envval = HDgetenv(HDF5_DRIVER);
 
         if (envval == NULL || H5FD__supports_swmr_test(envval)) {
             if (test_flush() != SUCCEED)
@@ -1371,7 +1371,7 @@ error:
  *
  * Purpose:     This function checks the status of external verification
  *              processes to see if they've succeeded. It checks for the
- *              existance of flushrefresh_ERROR file. If present, that indicates
+ *              existence of flushrefresh_ERROR file. If present, that indicates
  *              an external verification process has failed, and this function
  *              thus fails as well. If not present, then nothing else has
  *              failed, and this function succeeds.

@@ -1820,7 +1820,7 @@ main(void)
     herr_t         ret;                    /* Generic return value */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

@@ -1984,11 +1984,11 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
-    conn_env_str = HDgetenv("HDF5_VOL_CONNECTOR");
+    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
     if (conn_env_str) {
         if (NULL == (conn_env_str = HDstrdup(conn_env_str)))
             TEST_ERROR
-        if (HDunsetenv("HDF5_VOL_CONNECTOR") < 0)
+        if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
             TEST_ERROR
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR
@@ -2013,7 +2013,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Set environment variable to use 'fake async' connector & re-init default connector */
-    if (HDsetenv("HDF5_VOL_CONNECTOR", "fake_async", TRUE) < 0)
+    if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", TRUE) < 0)
         TEST_ERROR
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
         TEST_ERROR
@@ -2031,7 +2031,7 @@ test_async_vol_props(void)
         TEST_ERROR
 
     /* Reset environment variable & re-init default connector */
-    if (HDunsetenv("HDF5_VOL_CONNECTOR") < 0)
+    if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
         TEST_ERROR
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
         TEST_ERROR
@@ -2081,7 +2081,7 @@ test_async_vol_props(void)
 
     /* Restore environment variable, if there was one */
     if (conn_env_str) {
-        if (HDsetenv("HDF5_VOL_CONNECTOR", conn_env_str, TRUE) < 0)
+        if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
             TEST_ERROR
         HDfree(conn_env_str);
 
@@ -2121,7 +2121,7 @@ main(void)
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
