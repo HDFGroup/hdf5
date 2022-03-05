@@ -50,6 +50,14 @@
 /* Local Typedefs */
 /******************/
 
+/* Callback context for get events operations */
+typedef struct H5ES_get_requests_ctx_t {
+    hid_t *connector_ids; /* Output buffer for list of connector IDs that match the above requests */
+    void **requests;      /* Output buffer for list of requests in event set */
+    size_t array_len;     /* Length of the above output buffers */
+    size_t i;             /* Number of elements filled in output buffers */
+} H5ES_get_requests_ctx_t;
+
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
     H5ES_t * es;              /* Event set being operated on */
@@ -84,6 +92,7 @@ static herr_t H5ES__close(H5ES_t *es);
 static herr_t H5ES__close_cb(void *es, void **request_token);
 static herr_t H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app_file,
                            const char *app_func, unsigned app_line, const char *caller, const char *api_args);
+static int    H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx);
 static herr_t H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev);
 static herr_t H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status);
 static int    H5ES__wait_cb(H5ES_event_t *ev, void *_ctx);
@@ -294,7 +303,8 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
      * there's no need to duplicate it.
      */
     ev->op_info.api_name = caller;
-    if (NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
+    HDassert(ev->op_info.api_args == NULL);
+    if (api_args && NULL == (ev->op_info.api_args = H5MM_xstrdup(api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't copy API routine arguments")
 
     /* Append fully initialized event onto the event set's 'active' list */
@@ -429,6 +439,86 @@ H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__insert_request() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_requests_cb
+ *
+ * Purpose:     Iterator callback for H5ES__get_events - adds the event to
+ *              the list.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 23, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
+{
+    H5ES_get_requests_ctx_t *ctx       = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
+    int                      ret_value = H5_ITER_CONT;                    /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(ev);
+    HDassert(ctx);
+    HDassert(ctx->i < ctx->array_len);
+
+    /* Get the connector ID for the event */
+    if (ctx->connector_ids)
+        ctx->connector_ids[ctx->i] = ev->request->connector->id;
+
+    /* Get the request for the event */
+    if (ctx->requests)
+        ctx->requests[ctx->i] = ev->request->data;
+
+    /* Check if we've run out of room in the arrays */
+    if (++ctx->i == ctx->array_len)
+        ret_value = H5_ITER_STOP;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_requests_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ES__get_requests
+ *
+ * Purpose:     Get all requests in an event set.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 23, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ES__get_requests(H5ES_t *es, H5_iter_order_t order, hid_t *connector_ids, void **requests, size_t array_len)
+{
+    H5ES_get_requests_ctx_t ctx;                 /* Callback context */
+    herr_t                  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(es);
+    HDassert(array_len > 0);
+    HDassert(requests || connector_ids);
+
+    /* Set up context for iterator callbacks */
+    ctx.connector_ids = connector_ids;
+    ctx.requests      = requests;
+    ctx.array_len     = array_len;
+    ctx.i             = 0;
+
+    /* Iterate over the events in the set */
+    if (H5ES__list_iterate(&es->active, order, H5ES__get_requests_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5ES__get_requests() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ES__handle_fail
@@ -673,7 +763,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_fa
     ctx.op_failed       = op_failed;
 
     /* Iterate over the events in the set, waiting for them to complete */
-    if (H5ES__list_iterate(&es->active, H5ES__wait_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, H5_ITER_NATIVE, H5ES__wait_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
@@ -781,7 +871,7 @@ H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
     ctx.op_failed        = op_failed;
 
     /* Iterate over the events in the set, attempting to cancel them */
-    if (H5ES__list_iterate(&es->active, H5ES__cancel_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->active, H5_ITER_NATIVE, H5ES__cancel_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
 done:
@@ -818,13 +908,13 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
      * so there's no need to duplicate them internally, but they are duplicated
      * here, when they are given back to the user.
      */
-    if (NULL == (ctx->curr_err_info->api_name = H5MM_strdup(ev->op_info.api_name)))
+    if (NULL == (ctx->curr_err_info->api_name = H5MM_xstrdup(ev->op_info.api_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine name")
-    if (NULL == (ctx->curr_err_info->api_args = H5MM_strdup(ev->op_info.api_args)))
+    if (NULL == (ctx->curr_err_info->api_args = H5MM_xstrdup(ev->op_info.api_args)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 API routine arguments")
-    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_strdup(ev->op_info.app_file_name)))
+    if (NULL == (ctx->curr_err_info->app_file_name = H5MM_xstrdup(ev->op_info.app_file_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 application file name")
-    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_strdup(ev->op_info.app_func_name)))
+    if (NULL == (ctx->curr_err_info->app_func_name = H5MM_xstrdup(ev->op_info.app_func_name)))
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, H5_ITER_ERROR, "can't copy HDF5 application function name")
     ctx->curr_err_info->app_line_num = ev->op_info.app_line_num;
     ctx->curr_err_info->op_ins_count = ev->op_info.op_ins_count;
@@ -895,7 +985,7 @@ H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[], 
     ctx.curr_err_info = &err_info[0];
 
     /* Iterate over the failed events in the set, copying their error info */
-    if (H5ES__list_iterate(&es->failed, H5ES__get_err_info_cb, &ctx) < 0)
+    if (H5ES__list_iterate(&es->failed, H5_ITER_NATIVE, H5ES__get_err_info_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Set # of failed events cleared from event set's failed list */
@@ -969,7 +1059,7 @@ H5ES__close(H5ES_t *es)
             "can't close event set while unfinished operations are present (i.e. wait on event set first)")
 
     /* Iterate over the failed events in the set, releasing them */
-    if (H5ES__list_iterate(&es->failed, H5ES__close_failed_cb, (void *)es) < 0)
+    if (H5ES__list_iterate(&es->failed, H5_ITER_NATIVE, H5ES__close_failed_cb, (void *)es) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_BADITER, FAIL, "iteration failed")
 
     /* Release the event set */
