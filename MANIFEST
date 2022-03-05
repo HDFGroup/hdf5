@@ -1343,7 +1343,6 @@
 ./test/supervise.subr
 ./test/swmr.c
 ./test/swmr_addrem_writer.c
-./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c
@@ -1441,7 +1440,6 @@
 ./test/vfd_swmr_dsetops_writer.c
 ./test/vfd_swmr_dsetchks_writer.c
 ./test/vfd_swmr_bigset_writer.c
-./test/vfd_swmr_check_compat.c
 ./test/vfd_swmr_common.c
 ./test/vfd_swmr_common.h
 ./test/vfd_swmr_generator.c

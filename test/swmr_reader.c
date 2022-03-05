@@ -387,7 +387,7 @@ usage(void)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     long     nseconds     = 0;     /* # of seconds to test */
     int      poll_time    = 1;     /* # of seconds between polling */

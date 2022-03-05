@@ -37,8 +37,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
     testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
-    testvfdswmr.sh \
-    test_mirror.sh
+    testvfdswmr.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -57,11 +56,14 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_gperf_reader$(EXEEXT) vfd_swmr_gperf_writer$(EXEEXT) \
     vfd_swmr_gfail_reader$(EXEEXT) vfd_swmr_gfail_writer$(EXEEXT) \
     vfd_swmr_indep_wr_p0$(EXEEXT) vfd_swmr_indep_wr_p1$(EXEEXT) \
-    vds_env$(EXEEXT) \
-    vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
+    vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
   SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
+endif
+
+if MIRROR_VFD_CONDITIONAL
+  TEST_SCRIPT += test_mirror.sh
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -117,12 +119,14 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_gperf_reader vfd_swmr_gperf_writer \
     vfd_swmr_gfail_reader vfd_swmr_gfail_writer \
     vfd_swmr_indep_wr_p0 vfd_swmr_indep_wr_p1 \
-	vfd_swmr_check_compat \
     vfd_swmr_dsetchks_reader vfd_swmr_dsetchks_writer \
-    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
-    mirror_vfd
+    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vol_plugin
+endif
+
+if MIRROR_VFD_CONDITIONAL
+  check_PROGRAMS+= mirror_vfd
 endif
 
 # These programs generate test files for the tests.  They don't need to be
