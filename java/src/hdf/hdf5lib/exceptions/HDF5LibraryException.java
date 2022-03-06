@@ -114,7 +114,7 @@ public class HDF5LibraryException extends HDF5Exception {
             return "special zero no error";
         }
         else if (err_code == HDF5Constants.H5E_UNINITIALIZED) {
-            return "information is unitialized";
+            return "information is uninitialized";
         }
         else if (err_code == HDF5Constants.H5E_UNSUPPORTED) {
             return "feature is unsupported";

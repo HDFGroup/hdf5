@@ -308,7 +308,7 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  *
  * To facilitate identification of entries that must be removed from the
  * DWL during the end of tick scan, the list always observes the following
- * invarient for any entry on the list:
+ * invariant for any entry on the list:
  *
  *    entry_ptr->next == NULL ||
  *    entry_ptr->delay_write_until >= entry_ptr->next->delay_write_until
@@ -528,7 +528,7 @@ typedef struct H5PB_entry_t H5PB_entry_t;
  * max_dwl_size: int64_t containing the maximum value of dwl_size.
  *
  * total_dwl_ins_depth: int64_t containing the total insertion depth
- *              required to maintain the odering invarient on the
+ *              required to maintain the odering invariant on the
  *              delayed write list.
  *
  * md_read_splits:  int64_t containing the number of metadata reads that

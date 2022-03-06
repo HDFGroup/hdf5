@@ -52,7 +52,7 @@
 #define PWRITES  2 /* Writes that cover a partial chunk per write */
 #define TWRITES  3 /* Writes that cover multiple chunks per write  */
 #define LWRITES  4 /* Writes that cover multiple partial chunks per write */
-#define INCR_EXT 5 /* Increase dataset dimenion sizes */
+#define INCR_EXT 5 /* Increase dataset dimension sizes */
 #define DECR_EXT 6 /* Decrease dataset dimension sizes */
 
 /* Fill values */
@@ -846,7 +846,7 @@ error:
  *
  * Dataset with fixed array/extensible array/version 2 btree index:
  * --INCR_EXT: increase dataset dimension sizes
- * --DECR_EXT: decrease dataset dimenions sizes
+ * --DECR_EXT: decrease dataset dimension sizes
  */
 static bool
 perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
@@ -1253,7 +1253,7 @@ error:
 } /* write_chunks() */
 
 /*
- * Increase or decrease the dimenion sizes for the specified datasets.
+ * Increase or decrease the dimension sizes for the specified datasets.
  */
 static bool
 dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds)
@@ -1827,7 +1827,7 @@ error:
 } /* verify_chunks() */
 
 /*
- * Verify the increase or decrease of dimenion sizes for the specified datasets.
+ * Verify the increase or decrease of dimension sizes for the specified datasets.
  */
 static bool
 verify_dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
@@ -2277,8 +2277,9 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl, fcpl;
-    bool                  writer;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
+    bool                  writer = false;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;

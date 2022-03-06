@@ -200,7 +200,7 @@ parse_subset_params(const char *dset)
  */
 
 void
-parse_command_line(int argc, const char *argv[], const char **fname1, const char **fname2,
+parse_command_line(int argc, const char *const *argv, const char **fname1, const char **fname2,
                    const char **objname1, const char **objname2, diff_opt_t *opts)
 {
     int                       i;
@@ -277,7 +277,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'q':
-                /* use quiet mode; supress the message "0 differences found" */
+                /* use quiet mode; suppress the message "0 differences found" */
                 opts->mode_quiet = 1;
                 break;
 
@@ -657,6 +657,24 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-1            Name of the VFL driver to use for opening the first\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-1            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-value-2           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-2            Name of the VFL driver to use for opening the second\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-2            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Follow symbolic links (soft links and external links and compare the)\n");
@@ -778,7 +796,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
-                   "  Default mode: print the number of differences found and where they occured\n");
+                   "  Default mode: print the number of differences found and where they occurred\n");
     PRINTVALSTREAM(rawoutstream, "  -r Report mode: print the above plus the differences\n");
     PRINTVALSTREAM(rawoutstream, "  -v Verbose mode: print the above plus a list of objects and warnings\n");
     PRINTVALSTREAM(rawoutstream, "  -q Quiet mode: do not print output\n");

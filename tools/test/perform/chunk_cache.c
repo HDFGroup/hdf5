@@ -39,7 +39,7 @@
 
 #define RDCC_NSLOTS 5
 #define RDCC_NBYTES (1024 * 1024 * 10)
-#define RDCC_W0     0.75F
+#define RDCC_W0     0.75
 
 #define FILTER_COUNTER 306
 static size_t nbytes_global;
@@ -81,7 +81,7 @@ counter(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (!getenv(HDF5_NOCLEANUP)) {
         remove(FILENAME);
     }
 }
@@ -98,7 +98,9 @@ create_dset1(hid_t file)
     hid_t   dcpl             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DSET1_DIM1, DSET1_DIM2};
     hsize_t chunk_dims[RANK] = {CHUNK1_DIM1, CHUNK1_DIM2};
-    int **  data             = NULL; /* data for writing */
+    struct {
+        int arr[DSET1_DIM1][DSET1_DIM2];
+    } *data = malloc(sizeof(*data));
 
     /* Create the data space. */
     if ((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -122,9 +124,8 @@ create_dset1(hid_t file)
         0)
         goto error;
 
-    /* Create & fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(data, int, DSET1_DIM1, DSET1_DIM2);
-    H5TEST_FILL_2D_ARRAY(data, int, DSET1_DIM1, DSET1_DIM2);
+    /* Fill array */
+    H5TEST_FILL_2D_HEAP_ARRAY(data, int);
 
     /* Write data to dataset */
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
@@ -162,7 +163,9 @@ create_dset2(hid_t file)
     hid_t   dcpl             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DSET2_DIM1, DSET2_DIM2};
     hsize_t chunk_dims[RANK] = {CHUNK2_DIM1, CHUNK2_DIM2};
-    int **  data             = NULL; /* data for writing */
+    struct {
+        int arr[DSET2_DIM1][DSET2_DIM2];
+    } *data = malloc(sizeof(*data));
 
     /* Create the data space. */
     if ((dataspace = H5Screate_simple(RANK, dims, NULL)) < 0)
@@ -185,9 +188,8 @@ create_dset2(hid_t file)
         0)
         goto error;
 
-    /* Create & fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(data, int, DSET2_DIM1, DSET2_DIM2);
-    H5TEST_FILL_2D_ARRAY(data, int, DSET2_DIM1, DSET2_DIM2);
+    /* Fill array */
+    H5TEST_FILL_2D_HEAP_ARRAY(data, int);
 
     /* Write data to dataset */
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)

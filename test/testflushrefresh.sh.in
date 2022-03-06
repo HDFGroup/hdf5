@@ -58,14 +58,13 @@ fi
 ###############################################################################
 ## Main
 ###############################################################################
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
+srcdir=@srcdir@
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
@@ -83,7 +82,7 @@ fi
 # the test.  Running each of these tests in its own directory should eliminate
 # the problem.
 mkdir -p flushrefresh_test
-cp flushrefresh flushrefresh_test
+cp $testdir/flushrefresh flushrefresh_test
 
 # With the --disable-shared option, flushrefresh is built in the test directory,
 # otherwise it is in test/.libs with a wrapper script named flushrefresh in
@@ -118,7 +117,7 @@ fi
 # ========================
 # Launch the Test Program.
 # ========================
-./flushrefresh &
+$testdir/flushrefresh &
 pid_main=$!
 
 # =======================================
@@ -155,7 +154,7 @@ until [ $verification_done -eq 1 ]; do
     verification_done=1
     echo "all flush verification complete" > $endsignal
   else
-    ./flushrefresh $param1 $param2
+    $testdir/flushrefresh $param1 $param2
 
     # Check for core dump
     if [ $? -gt 0 ]; then
@@ -200,7 +199,7 @@ if [ $timedout -eq 0 ]; then
       verification_done=2
       echo "all refresh verification complete" > $endsignal
     else
-      ./flushrefresh $param1
+      $testdir/flushrefresh $param1
 
       # Check for core dump
       if [ $? -gt 0 ]; then

@@ -16,7 +16,8 @@
 #ifndef H5FDvfd_swmr_H
 #define H5FDvfd_swmr_H
 
-#define H5FD_VFD_SWMR (H5FD_vfd_swmr_init())
+#define H5FD_VFD_SWMR       (H5FDperform_init(H5FD_vfd_swmr_init))
+#define H5FD_VFD_SWMR_VALUE H5_VFD_SWMR
 
 #ifdef __cplusplus
 extern "C" {

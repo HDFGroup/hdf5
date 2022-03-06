@@ -2395,7 +2395,7 @@ error:
  *  (5) Parent: open a file with write access; enable SWMR writing mode
  *      Child: concurrent open of the file with write and SWMR write access (fail)
  */
-#ifndef H5_HAVE_UNISTD_H
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
 test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
@@ -2408,11 +2408,11 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to a lack of unistd.h functionality.");
+    HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
-#else  /* H5_HAVE_UNISTD_H */
+#else  /* !defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
 test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
@@ -3014,7 +3014,7 @@ error:
     return -1;
 
 } /* test_start_swmr_write_concur() */
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* !defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 /*
  * test_start_swmr_write_stress_ohdr():
@@ -3666,7 +3666,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dcpl  = -1;           /* A copy of dataset creation property */
     hid_t dapl  = -1;           /* A copy of dataset access property */
@@ -3889,7 +3889,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dapl  = -1;           /* A copy of dataset access property */
     hid_t ddapl = -1;           /* The dataset access property of the opened dataset */
@@ -4107,7 +4107,7 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 {
     hid_t fid  = -1;            /* file ID */
     hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The datset ID */
+    hid_t did1 = -1, did2 = -1; /* The dataset ID */
     hid_t sid   = -1;           /* The dataspace ID */
     hid_t dcpl  = -1;           /* A copy of dataset creation property */
     hid_t dapl1 = -1;           /* A copy of dataset access property */
@@ -4809,7 +4809,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#ifndef H5_HAVE_UNISTD_H
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
 
 static int
 test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -4817,12 +4817,12 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to a lack of unistd.h functionality.");
+    HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_concur() */
 
-#else /* H5_HAVE_UNISTD_H */
+#else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
 
 static int
 test_file_lock_concur(hid_t in_fapl)
@@ -5192,7 +5192,7 @@ error:
 
 } /* end test_file_lock_concur() */
 
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
 
 /****************************************************************
 **
@@ -5202,7 +5202,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#ifndef H5_HAVE_UNISTD_H
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
 test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -5210,12 +5210,12 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to a lack of unistd.h functionality.");
+    HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
 
-#else /* H5_HAVE_UNISTD_H */
+#else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 static int
 test_file_lock_swmr_concur(hid_t in_fapl)
@@ -6215,7 +6215,7 @@ error:
 
 } /* end test_file_lock_swmr_concur() */
 
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 /****************************************************************
 **
@@ -6227,7 +6227,7 @@ error:
 static int
 test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
 {
-#ifndef H5_HAVE_UNISTD_H
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
     if (turn_locking_on && env_var_override)
         TESTING("File locking: ON w/ env var override")
     else if (turn_locking_on && !env_var_override)
@@ -6237,9 +6237,9 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
     else
         TESTING("File locking: OFF")
     SKIPPED();
-    HDputs("    Test skipped due to a lack of unistd.h functionality.");
+    HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
-#else /* H5_HAVE_UNISTD_H */
+#else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
     hid_t  fid  = -1;               /* File ID */
     hid_t  fapl = -1;               /* File access property list */
     char   filename[NAME_BUF_SIZE]; /* file name */
@@ -6270,13 +6270,13 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
     /* If requested, set the environment variable */
     if (env_var_override) {
-        if (HDsetenv("HDF5_USE_FILE_LOCKING", turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
             TEST_ERROR
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR
     }
     else {
-        if (HDsetenv("HDF5_USE_FILE_LOCKING", "", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", TRUE) < 0)
             TEST_ERROR
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR
@@ -6405,7 +6405,7 @@ error:
 
     return -1;
 
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 } /* end test_file_locking() */
 
@@ -6699,7 +6699,7 @@ error:
  *              (7) Refresh the dataset
  *              (8) Verify the dataset's dimension and data are correct
  */
-#ifndef H5_HAVE_UNISTD_H
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
 test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
@@ -6712,11 +6712,11 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to a lack of unistd.h functionality.");
+    HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* H5_HAVE_UNISTD_H */
+#else  /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
@@ -7016,7 +7016,7 @@ error:
     return -1;
 
 } /* test_refresh_concur() */
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 /*
  * test_multiple_same():
@@ -7367,7 +7367,7 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv("HDF5_DRIVER");
+    driver = HDgetenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
@@ -7377,7 +7377,7 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
         use_file_locking = FALSE;
     else
@@ -7412,7 +7412,7 @@ main(void)
     /*
      * Modify the following routines to test for files:
      *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
-     *   --both result in v3 superblock and latest version suppport
+     *   --both result in v3 superblock and latest version support
      */
     nerrors += test_start_swmr_write(fapl, TRUE);
     nerrors += test_start_swmr_write(fapl, FALSE);
@@ -7446,7 +7446,7 @@ main(void)
          *
          * Modify the following 2 routines to test for files:
          *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
-         *   --both result in v3 superblock and latest version suppport
+         *   --both result in v3 superblock and latest version support
          */
         nerrors += test_file_lock_swmr_same(fapl);
         nerrors += test_file_lock_swmr_concur(fapl);

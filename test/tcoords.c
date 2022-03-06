@@ -17,7 +17,7 @@
  *
  * Test the element coordinates for dataspace selection.  For
  * chunked dataset, when the hyperslab selection of some
- * dimensions is full, the library optimize it by "flattenning"
+ * dimensions is full, the library optimize it by "flattening"
  * the fully selected dimensions.  This program tests if the
  * coordinates of selected elements are correctly calculated.
  *

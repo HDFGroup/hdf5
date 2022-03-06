@@ -45,7 +45,7 @@
 /* Macros */
 /**********/
 
-/* Whether to display log messge when callback is invoked */
+/* Whether to display log message when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_PASSTHRU_LOGGING */
 
@@ -641,16 +641,13 @@ H5VL_pass_through_info_to_str(const void *_info, char **str)
         under_vol_str_len = strlen(under_vol_string);
 
     /* Allocate space for our info */
-    *str = (char *)H5allocate_memory(32 + under_vol_str_len, (hbool_t)0);
+    size_t strSize = 32 + under_vol_str_len;
+    *str           = (char *)H5allocate_memory(strSize, (hbool_t)0);
     assert(*str);
 
-    /* Encode our info
-     * Normally we'd use snprintf() here for a little extra safety, but that
-     * call had problems on Windows until recently. So, to be as platform-independent
-     * as we can, we're using sprintf() instead.
-     */
-    sprintf(*str, "under_vol=%u;under_info={%s}", (unsigned)under_value,
-            (under_vol_string ? under_vol_string : ""));
+    /* Encode our info */
+    snprintf(*str, strSize, "under_vol=%u;under_info={%s}", (unsigned)under_value,
+             (under_vol_string ? under_vol_string : ""));
 
     return 0;
 } /* end H5VL_pass_through_info_to_str() */

@@ -160,6 +160,7 @@ typedef struct H5FD_t H5FD_t;
 
 /* Class information for each file driver */
 typedef struct H5FD_class_t {
+    H5FD_class_value_t value;
     const char *       name;
     haddr_t            maxaddr;
     H5F_close_degree_t fc_degree;
@@ -192,6 +193,7 @@ typedef struct H5FD_class_t {
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
     herr_t (*unlock)(H5FD_t *file);
     herr_t (*del)(const char *name, hid_t fapl);
+    herr_t (*ctl)(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
@@ -237,7 +239,10 @@ struct H5FD_t {
 extern "C" {
 #endif
 
+H5_DLL hid_t  H5FDperform_init(hid_t (*)(void));
 H5_DLL hid_t  H5FDregister(const H5FD_class_t *cls);
+H5_DLL htri_t H5FDis_driver_registered_by_name(const char *driver_name);
+H5_DLL htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value);
 H5_DLL herr_t H5FDunregister(hid_t driver_id);
 H5_DLL H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FDclose(H5FD_t *file);
@@ -258,6 +263,7 @@ H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FDunlock(H5FD_t *file);
 H5_DLL herr_t  H5FDdelete(const char *name, hid_t fapl_id);
+H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
 
 #ifdef __cplusplus
 }

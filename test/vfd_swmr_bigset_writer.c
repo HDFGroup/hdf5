@@ -378,7 +378,7 @@ state_init(state_t *s, int argc, char **argv)
                 s->vds = vds_single;
                 break;
             case 'N':
-                /* Disable named pipes, mainly for running the writer and reader seperately */
+                /* Disable named pipes, mainly for running the writer and reader separately */
                 s->use_named_pipe = false;
                 break;
             case 'd':
@@ -1168,7 +1168,7 @@ error:
  *                  --Generate checksum for the metadata file
  *                  --Write the tick number and the checksum to the checksum file
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  *-------------------------------------------------------------------------
@@ -2012,7 +2012,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
 
     dset_id = s->dataset[which];
 
-    /* Attempt to check the availablity of the chunks for a number times
+    /* Attempt to check the availability of the chunks for a number times
      * (NUM_ATTEMPTS) before reporting it as a failure */
     for (i = 0; i < NUM_ATTEMPTS; i++) {
         if (H5Drefresh(dset_id) < 0) {
@@ -2543,7 +2543,7 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *                 mat;
+    mat_t *                 mat  = NULL;
     hid_t                   fcpl = H5I_INVALID_HID;
     unsigned                which;
     state_t                 s;

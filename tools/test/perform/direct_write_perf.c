@@ -625,7 +625,7 @@ test_unix_write(void)
             TEST_ERROR;
         }
         else if (op_size == 0) {
-            printf(" unable to write sufficent data to file because %s \n", strerror(errno));
+            printf(" unable to write sufficient data to file because %s \n", strerror(errno));
             TEST_ERROR;
         }
     }
@@ -655,7 +655,7 @@ main(void)
     hid_t fapl = H5P_DEFAULT;
     int   i;
 
-    sprintf(filename, "%s.h5", FILENAME[0]);
+    snprintf(filename, sizeof(filename), "%s.h5", FILENAME[0]);
 
     create_file(fapl);
     test_direct_write_uncompressed_data(fapl);

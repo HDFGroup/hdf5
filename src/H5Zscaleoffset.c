@@ -659,7 +659,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 buf[i] = (type)(buf[i] + (type)(minval));                                                    \
     } while (0)
 
-/* Retrive minimum value of floating-point type */
+/* Retrieve minimum value of floating-point type */
 #define H5Z_scaleoffset_get_min(type, minval, min)                                                           \
     {                                                                                                        \
         if (sizeof(type) <= sizeof(long long))                                                               \
@@ -1205,7 +1205,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
 
     /* prepare parameters to pass to compress/decompress functions */
     p.size      = cd_values[H5Z_SCALEOFFSET_PARM_SIZE];
-    p.mem_order = H5T_native_order_g;
+    p.mem_order = (unsigned)H5T_native_order_g;
 
     /* input; decompress */
     if (flags & H5Z_FLAG_REVERSE) {
@@ -1240,7 +1240,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         p.minbits = minbits;
 
         /* calculate size of output buffer after decompression */
-        size_out = d_nelmts * p.size;
+        size_out = d_nelmts * (size_t)p.size;
 
         /* allocate memory space for decompressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
@@ -1388,7 +1388,7 @@ done:
  * assume one byte has 8 bit
  * assume padding bit is 0
  * assume size of unsigned char is one byte
- * assume one data item of certain datatype is stored continously in bytes
+ * assume one data item of certain datatype is stored continuously in bytes
  * atomic datatype is treated on byte basis
  */
 
@@ -1403,7 +1403,7 @@ H5Z__scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size)
         unsigned char *buffer, temp;
 
         buffer = (unsigned char *)buf;
-        for (i = 0; i < d_nelmts * dtype_size; i += dtype_size)
+        for (i = 0; i < d_nelmts * (size_t)dtype_size; i += dtype_size)
             for (j = 0; j < dtype_size / 2; j++) {
                 /* swap pair of bytes */
                 temp                           = buffer[i + j];
@@ -1681,7 +1681,7 @@ H5Z__scaleoffset_decompress(unsigned char *data, unsigned d_nelmts, unsigned cha
     unsigned buf_len;
 
     /* must initialize to zeros */
-    for (i = 0; i < d_nelmts * p.size; i++)
+    for (i = 0; i < d_nelmts * (size_t)p.size; i++)
         data[i] = 0;
 
     /* initialization before the loop */

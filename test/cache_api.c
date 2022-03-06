@@ -306,10 +306,10 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -442,16 +442,6 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* close the fapl used to create the file */
-    if (pass) {
-
-        if (H5Pclose(fapl_id) < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "H5Pclose() failed.\n";
-        }
-    }
-
     /* close the file and delete it */
     if (pass) {
 
@@ -460,10 +450,20 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, fapl_id) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
+        }
+    }
+
+    /* close the fapl used to create the file */
+    if (pass) {
+
+        if (H5Pclose(fapl_id) < 0) {
+
+            pass         = FALSE;
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -662,7 +662,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
      * configured as per the default both by looking at its internal
      * configuration, and via the H5Fget_mdc_config() call.
      *
-     * Then set serveral different configurations, and verify that
+     * Then set several different configurations, and verify that
      * they took as per above.
      */
 
@@ -803,10 +803,10 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -1054,7 +1054,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             }
 
             /* set the dataset creation plist to specify that the raw data is
-             * to be partioned into 10X10 element chunks.
+             * to be partitioned into 10X10 element chunks.
              */
 
             if (pass) {
@@ -1082,7 +1082,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             /* create the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -1445,10 +1445,10 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -1885,7 +1885,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
     pass = TRUE;
 
-    /* Create a file for test purposes, and veify that its metadata cache
+    /* Create a file for test purposes, and verify that its metadata cache
      * set to the default MDC configuration.
      */
 
@@ -2170,10 +2170,10 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -2254,12 +2254,17 @@ main(void)
     } /* end if */
 
     /* Test with paged aggregation enabled or not */
-    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordinly */
+    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordingly */
     for (paged = FALSE; paged <= TRUE; paged++) {
         hid_t my_fcpl = fcpl_id;
 
-        if (paged)
-            my_fcpl = fcpl2_id;
+        if (paged) {
+            /* Only run paged aggregation tests with sec2/default driver */
+            if (!h5_using_default_driver(NULL))
+                continue;
+            else
+                my_fcpl = fcpl2_id;
+        }
 
         if (!check_fapl_mdc_api_calls(paged, my_fcpl))
             nerrs += 1;

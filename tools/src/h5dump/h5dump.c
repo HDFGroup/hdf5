@@ -196,6 +196,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "     --vol-info           VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vfd-value          Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "     --vfd-name           Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vfd-info           VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     PRINTVALSTREAM(rawoutstream,
@@ -816,7 +824,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;
@@ -1298,7 +1306,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t             fid     = H5I_INVALID_HID;
     hid_t             gid     = H5I_INVALID_HID;
@@ -1318,7 +1326,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    if ((hand = parse_command_line(argc, argv)) == NULL) {
+    if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;
     }
 
@@ -1474,7 +1482,7 @@ main(int argc, const char *argv[])
         dset_table  = table_list.tables[0].dset_table;
         type_table  = table_list.tables[0].type_table;
 
-        /* does there exist unamed committed datatype */
+        /* does there exist unnamed committed datatype */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 unamedtype = 1;

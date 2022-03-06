@@ -265,6 +265,9 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
+/* Define if we have support for writing to filtered datasets in parallel */
+#cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@
+
 /* Define if both pread and pwrite exist. */
 #cmakedefine H5_HAVE_PREADWRITE @H5_HAVE_PREADWRITE@
 
@@ -669,7 +672,7 @@
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
-/* Data accuracy is prefered to speed during data conversions */
+/* Data accuracy is preferred to speed during data conversions */
 #cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */

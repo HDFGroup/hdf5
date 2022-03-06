@@ -1,0 +1,42 @@
+.TH "h5dwalk" 1
+.SH NAME
+h5dwalk \- Provides a means of extending HDF5 tools by using parallelism on groups of files.
+.SH SYNOPSIS
+h5dwalk [OPTIONS] -T h5tool [H5TOOL_options...] 
+.SH DESCRIPTION
+h5dwalk utilizes the mpiFileUtils library to invoke a selected HDF5 tool on a collection of files.  The mpiFileUtils library provides the facilities to walk directory trees and provide a selection of files contained therein.  This selection can be filtered in various ways.  At present, h5dwalk filters the original file selection to include only HDF5 formatted files.  The resulting collection or collections can be utilized as the file inputs to the selected h5tool.
+.SH OPTIONS
+.TP
+.B \-h   
+or  
+.B \-\-help
+Print a usage message and exit. 
+.TP
+.B \-i   
+or  
+.B \-\-input filename
+Read command input from a file.  Not yet implemented.
+.TP
+.B \-o   
+or  
+.B \-\-output filename
+Captures the hdf5 tool output into a named file. 
+.TP
+.B \-l   
+or  
+.B \-\-log [file]
+Captures hdf5 tool output into a individual log files. If an optional file (directory) is specified, then output from all tool instances will be written in the given file directory.  Without the optional filename, each tool instance output will be captured in a new log file whose name is associated with the hdf5 tool that was run and is written in the current working directory.
+.TP
+.B \-E   
+or  
+.B \-\-error [file]
+Show all HDF5 error reporting. Behavior is similar to --log, i.e. errors can either be logged in a single named file or in individual tool specific files. Not yet implemented.
+.TP
+.B \-T   
+or  
+.B \-\-tool hdf5_tool
+Specifies the hdf5 tool that should be invoked for each file in a collection of files.  The collection consists of individual HDF5 files found by walking a specified directory tree which is used in place of the normal tool filename argument.  The '-T' option should appear on the command line just prior to the HDF5 tool argument options.
+.TP
+.SH "SEE ALSO"
+\&\fIh5dump\fR\|(1), \fIh5diff\fR\|(1), \fIh5repart\fR\|(1), \fIh5diff\fR\|(1),
+\&\fIh5import\fR\|(1), \fIgif2h5\fR\|(1), \fIh52gif\fR\|(1), \fIh5perf\fR\|(1)

@@ -105,6 +105,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "      --vol-info         VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      --vfd-value        Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "      --vfd-name         Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      --vfd-info         VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 } /* end usage() */
 
@@ -122,7 +130,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
+parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 {
     int                opt;        /* Option from command line */
     size_t             curr_group; /* Current group name to copy */
@@ -252,7 +260,7 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t  fid     = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t  lcpl_id = H5I_INVALID_HID; /* Link creation property list ID */
@@ -274,7 +282,7 @@ main(int argc, const char *argv[])
     }
 
     /* Parse command line */
-    if (parse_command_line(argc, argv, &params_g) < 0) {
+    if (parse_command_line(argc, (const char *const *)argv, &params_g) < 0) {
         error_msg("unable to parse command line arguments\n");
         leave(EXIT_FAILURE);
     }

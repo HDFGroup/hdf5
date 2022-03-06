@@ -224,7 +224,7 @@ H5VL__native_term(void)
  * Purpose:     Query the connector class.
  *
  * Note:        This routine is in this file so that it can return the address
- *              of the staticly declared class struct.
+ *              of the statically declared class struct.
  *
  * Returns:     SUCCEED (Can't fail)
  *
@@ -251,7 +251,7 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
  * Purpose:     Query the capability flags for this connector.
  *
  * Note:        This routine is in this file so that it can return the field
- *              from the staticly declared class struct.
+ *              from the statically declared class struct.
  *
  * Returns:     SUCCEED (Can't fail)
  *
@@ -324,7 +324,7 @@ done:
 herr_t
 H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, size_t *addr_len)
 {
-    H5F_t *file      = NULL; /* File stuct pointer */
+    H5F_t *file      = NULL; /* File struct pointer */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)

@@ -1991,7 +1991,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_mpio_actual_io_mode
  *
- * Purpose:	Retrieves the type of I/O actually preformed when collective I/O
+ * Purpose:	Retrieves the type of I/O actually performed when collective I/O
  *		is requested.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2213,10 +2213,18 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
         if (TRUE != H5S_extent_equal(*space1, *space2))
             HGOTO_DONE(-1);
 
-        /* Compare the selection "shape" of the dataspaces */
-        /* (Error & not-equal count the same) */
-        if (TRUE != H5S_select_shape_same(*space1, *space2))
+        /* Compare the selection "shape" of the dataspaces
+         * (Error & not-equal count the same)
+         *
+         * Since H5S_select_shape_same() can result in the dataspaces being
+         * rebuilt, the parameters are not const which makes it impossible
+         * to match the cmp prototype. Since we need to compare them,
+         * we quiet the const warning.
+         */
+        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        if (TRUE != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
             HGOTO_DONE(-1);
+        H5_GCC_CLANG_DIAG_ON("cast-qual")
     } /* end if */
 
 done:

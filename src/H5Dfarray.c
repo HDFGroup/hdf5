@@ -416,7 +416,7 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
     HDassert(elmt);
 
     /* Print element */
-    HDsprintf(temp_str, "Element #%" PRIuHSIZE ":", idx);
+    HDsnprintf(temp_str, sizeof(temp_str), "Element #%" PRIuHSIZE ":", idx);
     HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, temp_str, *(const haddr_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

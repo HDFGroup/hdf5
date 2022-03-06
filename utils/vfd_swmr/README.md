@@ -8,7 +8,7 @@ Where: <md_file> is the path to the metadata file. Must be on a POSIX file syste
        <ud_path> is the path of the updater files including the directory. This will typically be in an NFS mounted file system.
 
 Options:
-    -a --skip_aux:       Exit if VDS across multiple file is being enabled (to be implented in the future).
+    -a --skip_aux:       Exit if VDS across multiple file is being enabled (to be implemented in the future).
     -c --vfd_config:     Quoted string containing the configuration string for the VFD stack to be used. Default: sec2
     -l --log_file:       Path to the log file. Default: no log file.
     -m --md_chksum_path: Path to the file containing the checksum values for testing purpose.

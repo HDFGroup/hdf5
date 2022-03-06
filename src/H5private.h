@@ -44,10 +44,12 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
 #endif
-#include <unistd.h>
+#ifdef H5_HAVE_WAITPID
 #include <sys/wait.h>
 #endif
 
@@ -106,8 +108,14 @@
  */
 #include "H5queue.h"
 
-/* Define the default VFD for this platform.
- * Since the removal of the Windows VFD, this is sec2 for all platforms.
+/* Define the default VFD for this platform.  Since the removal of the
+ * Windows VFD, this is sec2 for all platforms.
+ *
+ * Note well: if you change the default, then be sure to change
+ * H5_default_vfd_init() to call that default's initializer.  Also,
+ * make sure that the initializer for each *non*-default VFD calls
+ * H5_init_library(); also, make sure that the initializer for default
+ * VFD does *not* call H5_init_library().
  */
 #define H5_DEFAULT_VFD H5FD_SEC2
 
@@ -171,7 +179,7 @@
  */
 #define BEGIN_MPE_LOG                                                                                        \
     if (H5_MPEinit_g) {                                                                                      \
-        sprintf(p_event_start, "start %s", __func__);                                                        \
+        snprintf(p_event_start, sizeof(p_event_start), "start %s", __func__);                                \
         if (eventa(__func__) == -1 && eventb(__func__) == -1) {                                              \
             const char *p_color = "red";                                                                     \
             eventa(__func__)    = MPE_Log_get_event_number();                                                \
@@ -386,6 +394,25 @@
 #define HSSIZET_MAX ((hssize_t)LLONG_MAX)
 #define HSSIZET_MIN (~(HSSIZET_MAX))
 
+#ifdef H5_HAVE_PARALLEL
+
+/* Define a type for safely sending size_t values with MPI */
+#if SIZE_MAX == UCHAR_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+#define H5_SIZE_T_AS_MPI_TYPE MPI_UNSIGNED_LONG_LONG
+#else
+#error "no suitable MPI type for size_t"
+#endif
+
+#endif /* H5_HAVE_PARALLEL */
+
 /*
  * Types and max sizes for POSIX I/O.
  * OS X (Darwin) is odd since the max I/O size does not match the types.
@@ -507,6 +534,9 @@
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
 
+/* Function pointer typedef for qsort */
+typedef int (*H5_sort_func_cb_t)(const void *, const void *);
+
 /* Typedefs and functions for timing certain parts of the library. */
 
 /* A set of elapsed/user/system times emitted as a time point by the
@@ -575,7 +605,7 @@ typedef off_t       h5_stat_size_t;
 #define HDoff_t off_t
 #endif
 
-#/* Redefine all the POSIX and C functions.  We should never see an
+/* Redefine all the POSIX and C functions.  We should never see an
  * undecorated POSIX or C function (or any other non-HDF5 function)
  * in the source.
  */
@@ -2006,7 +2036,7 @@ extern H5_api_t H5_g;
 #define H5_API_LOCK
 #define H5_API_UNLOCK
 
-/* disable cancelability (sequential version) */
+/* disable cancellability (sequential version) */
 #define H5_API_UNSET_CANCEL
 #define H5_API_SET_CANCEL
 
@@ -2035,33 +2065,6 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 #ifdef H5_HAVE_MPE
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 #endif
-
-/* Macros for referencing package initialization symbols */
-#define H5_PACKAGE_INIT_VAR(x)  H5_GLUE(x, _init_g)
-#define H5_PACKAGE_INIT_FUNC(x) H5_GLUE(x, __init_package)
-
-/* Macros for defining package initialization routines */
-#ifdef H5_MY_PKG
-#define H5_PKG_INIT_VAR  H5_PACKAGE_INIT_VAR(H5_MY_PKG)
-#define H5_PKG_INIT_FUNC H5_PACKAGE_INIT_FUNC(H5_MY_PKG)
-#define H5_PACKAGE_YES_INIT(err)                                                                             \
-    /* Initialize this interface or bust */                                                                  \
-    if (!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL) {                                                               \
-        H5_PKG_INIT_VAR = TRUE;                                                                              \
-        if (H5_PKG_INIT_FUNC() < 0) {                                                                        \
-            H5_PKG_INIT_VAR = FALSE;                                                                         \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "interface initialization failed")                      \
-        }                                                                                                    \
-    }
-#define H5_PACKAGE_NO_INIT(err)                                                                              \
-    /* Initialize this interface or bust */                                                                  \
-    if (!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL)                                                                 \
-        H5_PKG_INIT_VAR = TRUE;
-#define H5_PACKAGE_INIT(pkg_init, err) H5_GLUE3(H5_PACKAGE_, pkg_init, _INIT)(err)
-#else /* H5_MY_PKG */
-#define H5_PKG_INIT_VAR (TRUE)
-#define H5_PACKAGE_INIT(pkg_init, err)
-#endif /* H5_MY_PKG */
 
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
@@ -2116,13 +2119,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_INIT(err)                                                                             \
     /* Initialize the library */                                                                             \
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
-        H5_INIT_GLOBAL = TRUE;                                                                               \
         if (H5_init_library() < 0)                                                                           \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
-    } /* end if */                                                                                           \
-                                                                                                             \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+    }
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
     /* Push the name of this function on the function stack */                                               \
@@ -2131,6 +2130,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     /* Push the API context */                                                                               \
     if (H5CX_push() < 0)                                                                                     \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
+    else                                                                                                     \
+        api_ctx_pushed = TRUE;                                                                               \
                                                                                                              \
     BEGIN_MPE_LOG
 
@@ -2170,6 +2171,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
@@ -2182,6 +2185,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_NO_EOT(err)                                                                           \
     {                                                                                                        \
         {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
@@ -2196,6 +2201,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
@@ -2270,27 +2277,19 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                             FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                    \
                             {
 
-/* Note: this macro only works when there's _no_ interface initialization routine for the module */
-#define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                     \
-                                                                                                             \
-    /* Push the name of this function on the function stack */                                               \
-    H5_PUSH_FUNC
-
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
-        FUNC_ENTER_NOAPI_INIT(-)                                                                             \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2304,7 +2303,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2319,7 +2318,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2331,9 +2330,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
                                                                                                              \
-        /* Initialize the package, if appropriate */                                                         \
-        H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                 \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2347,7 +2344,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_NOAPI_NOERR_NOFS                                                                          \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
@@ -2369,8 +2366,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 #define FUNC_ENTER_NOAPI_NOINIT_TAG(tag)                                                                     \
     {                                                                                                        \
@@ -2379,21 +2376,21 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for all "normal" package-level functions */
 #define FUNC_ENTER_PACKAGE                                                                                   \
     {                                                                                                        \
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for package-level functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
  * macro when the function needs to set up a metadata tag. */
@@ -2404,28 +2401,28 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC                                                                                    \
     {                                                                                                        \
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR                                                                              \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
@@ -2447,7 +2444,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*-------------------------------------------------------------------------
  * Purpose:  Register function exit for code profiling.  This should be
@@ -2463,15 +2460,18 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_SET_CANCEL
 
 #define FUNC_LEAVE_API_COMMON(ret_value)                                                                     \
-    ;                                                                                                        \
-    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FINISH_MPE_LOG                                                                                           \
     H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                                                            \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     VFD_SWMR_LEAVE(ret_value);                                                                               \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    (void)H5CX_pop(TRUE);                                                                                    \
+    if (api_ctx_pushed) {                                                                                    \
+        (void)H5CX_pop(TRUE);                                                                                \
+        api_ctx_pushed = FALSE;                                                                              \
+    }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \
@@ -2482,8 +2482,13 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro when VFD SWMR EOT is not used on leaving an API function */
 #define FUNC_LEAVE_API_NO_EOT(ret_value)                                                                     \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    (void)H5CX_pop(TRUE);                                                                                    \
+    if (api_ctx_pushed) {                                                                                    \
+        (void)H5CX_pop(TRUE);                                                                                \
+        api_ctx_pushed = FALSE;                                                                              \
+    }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \
@@ -2494,6 +2499,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT macro */
 #define FUNC_LEAVE_API_NOINIT(ret_value)                                                                     \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
@@ -2506,6 +2513,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                                                       \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
@@ -2581,27 +2590,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_POP_FUNC                                                                                              \
     return (ret_value);                                                                                      \
     } /*end scope from beginning of FUNC_ENTER*/
-
-/* Macros to declare package initialization function, if a package initialization routine is defined */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#else
-#define H5_PKG_DECLARE_YES_FUNC(pkg) extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#endif
-#define H5_PKG_DECLARE_NO_FUNC(pkg)
-
-/* Declare package initialization symbols (if in a package) */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_VAR(pkg) static hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#else
-#define H5_PKG_DECLARE_VAR(pkg) extern hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#endif
-#define H5_PKG_DECLARE_FUNC(pkg_init, pkg) H5_GLUE3(H5_PKG_DECLARE_, pkg_init, _FUNC)(pkg)
-
-#ifdef H5_MY_PKG
-H5_PKG_DECLARE_VAR(H5_MY_PKG)
-H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
-#endif
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
@@ -2723,7 +2711,8 @@ struct h5_long_options {
                                  */
 };
 
-H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+H5_DLL int H5_get_option(int argc, const char *const *argv, const char *opt,
+                         const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
@@ -2737,6 +2726,14 @@ H5_DLL herr_t  H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
 H5_DLL herr_t  H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
 H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datatype old_type,
                                          MPI_Datatype *new_type);
+H5_DLL herr_t  H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type,
+                                     const int recv_counts[], const int displacements[],
+                                     MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                     int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries);
+H5_DLL herr_t  H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type,
+                                            MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                            int mpi_rank, int mpi_size, void **out_buf,
+                                            size_t *out_buf_num_entries);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */

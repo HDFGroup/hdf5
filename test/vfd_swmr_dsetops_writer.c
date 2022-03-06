@@ -79,7 +79,7 @@ typedef struct {
     bool         reg_ref;            /* For -R option */
     bool         compact;            /* -p option: create compact dataset */
     bool         compact_write;      /* -t option: write to the whole compact dataset */
-    unsigned int compact_elmts;      /* -e <elmts> option: # of elments for the compact dataset */
+    unsigned int compact_elmts;      /* -e <elmts> option: # of elements for the compact dataset */
     bool         contig;             /* -g option: create contiguous dataset */
     bool         chunked;            /* -k option: create chunked datasets with 5 indexing types */
     unsigned int rows;               /* -m <rows> option for contiguous and/or chunked datasets */

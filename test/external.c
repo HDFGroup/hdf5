@@ -890,8 +890,8 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         char name1[64], name2[64];
 
-        HDsprintf(name1, "extern_%dr.raw", i + 1);
-        HDsprintf(name2, "extern_%dw.raw", i + 1);
+        HDsnprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
+        HDsnprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
         if (!files_have_same_contents(name1, name2))
             FAIL_PUTS_ERROR("   Output differs from expected value.")
     } /* end for */
@@ -1217,7 +1217,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));
@@ -1233,7 +1233,7 @@ test_path_relative_cwd(hid_t fapl)
     if (H5Dclose(dset) < 0)
         FAIL_STACK_ERROR
 
-    /* Open dataset (use a differend prefix than for create.
+    /* Open dataset (use a different prefix than for create.
      * This works because the dataset was closed.
      */
     if (H5Pset_efile_prefix(dapl2, "${ORIGIN}/.") < 0)
@@ -1254,7 +1254,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));

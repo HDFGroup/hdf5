@@ -77,7 +77,7 @@ usage(const char *progname)
               "-c steps:       `steps` between communication between the writer and reader\n"
               "-n ngroups:     the number of groups\n"
               "-N:             do not use named pipes, \n"
-              "                mainly for running the writer and reader seperately\n"
+              "                mainly for running the writer and reader separately\n"
               "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
               "-t tick_len:    length of a tick in tenths of a second.\n"
               "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
@@ -1250,7 +1250,7 @@ error:
  * Purpose:     Add some attributes to the group.
  *              First, the number of attributes should be the maximal number
  *              of attributes that the compact storage can hold.
- *              Then,  add another atribute, the storage becomes dense.
+ *              Then,  add another attribute, the storage becomes dense.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -1430,7 +1430,7 @@ error2:
  * Purpose:     Add some attributes to the group and then delete one attribute.
  *              First, the number of attributes to be added should be the
  *              maximal number of attributes that the compact storage can hold.
- *              Then,  delete one atribute, the storage is still compact.
+ *              Then,  delete one attribute, the storage is still compact.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -1476,7 +1476,7 @@ add_del_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
  *              First, the number of attributes to be added exceeds
  *              the maximal number of attributes that the compact storage can hold.
  *              The storage changes from compact to dense.
- *              Then,  delete one atribute, the storage is still dense.
+ *              Then,  delete one attribute, the storage is still dense.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -1652,7 +1652,7 @@ del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
  * Function:    add_group_attribute
  *
  * Purpose:     Check the attribute test pattern and then call the
- *              correponding test function..
+ *              corresponding test function..
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -2020,8 +2020,8 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
     }
 
     if (read_which != which) {
-        HDprintf("reader: the add_attribute verfication failed,expected value is  %d\n", which);
-        HDprintf("reader: the add_attribute verfication failed, the value is %d\n", read_which);
+        HDprintf("reader: the add_attribute verification failed,expected value is  %d\n", which);
+        HDprintf("reader: the add_attribute verification failed, the value is %d\n", read_which);
         HDprintf("The add_attribute verification failed\n");
         TEST_ERROR;
     }
@@ -2320,8 +2320,8 @@ verify_group_vlstr_attr(state_t *s, hid_t g, unsigned int which, bool vrfy_mod)
 
     dbgf(1, "read attr is= %s\n", astr_val);
     if (HDstrcmp(astr_val, astr_val_exp) != 0) {
-        HDprintf("reader: the vl add_attribute verfication failed,expected value is  %s\n", astr_val_exp);
-        HDprintf("reader: the vl add_attribute verfication failed, the value is %s\n", astr_val);
+        HDprintf("reader: the vl add_attribute verification failed,expected value is  %s\n", astr_val_exp);
+        HDprintf("reader: the vl add_attribute verification failed, the value is %s\n", astr_val);
         HDprintf("The vl add_attribute verification failed\n");
         TEST_ERROR;
     }
@@ -2883,7 +2883,7 @@ verify_del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
  * Function:    verify_group_attribute
  *
  * Purpose:     Check the attribute test pattern and then call the
- *              correponding verification function.
+ *              corresponding verification function.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file, named pipe
@@ -5147,7 +5147,7 @@ main(int argc, char **argv)
             }
             else {
 
-                /* Send back the same nofity value for acknowledgement to tell the writer
+                /* Send back the same notify value for acknowledgement to tell the writer
                  * move to the next step. */
                 if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true &&
                     step % s.csteps == 0) {

@@ -79,7 +79,7 @@
 #define H5F_SUPERBLOCK_FIXED_SIZE (H5F_SIGNATURE_LEN + 1) /* superblock version */
 
 /* The H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE is the minimal amount of super block
- * variable length data guarnateed to load the sizeof offsets and the sizeof
+ * variable length data guaranteed to load the sizeof offsets and the sizeof
  * lengths fields in all versions of the superblock.
  *
  * This is necessary in the V3 cache, as on the initial load, we need to
@@ -218,10 +218,10 @@ typedef struct H5F_mtab_t {
  * the shadow file to release after max_lag ticks.
  */
 typedef struct shadow_defree {
-    uint64_t offset;                 // offset of the region in *bytes*
-    uint32_t length;                 // length of the region in *bytes*
-    uint64_t tick_num;               // tick number when the free was deferred
-    TAILQ_ENTRY(shadow_defree) link; // deferred-free queue linkage
+    uint64_t offset;                 /* offset of the region in *bytes* */
+    uint32_t length;                 /* length of the region in *bytes* */
+    uint64_t tick_num;               /* tick number when the free was deferred */
+    TAILQ_ENTRY(shadow_defree) link; /* deferred-free queue linkage */
 } shadow_defree_t;
 
 /* Structure specifically to store superblock. This was originally
@@ -247,10 +247,10 @@ typedef struct H5F_super_t {
  * the file below the SWMR VFD to release after a delay.
  */
 typedef struct lower_defree {
-    SIMPLEQ_ENTRY(lower_defree) link; // deferred-free queue linkage
-    H5FD_mem_t alloc_type;            // type with which the region was allocated
-    haddr_t    addr;                  // start of the region *in bytes*
-    hsize_t    size;                  // length of the region *in bytes*
+    SIMPLEQ_ENTRY(lower_defree) link; /* deferred-free queue linkage */
+    H5FD_mem_t alloc_type;            /* type with which the region was allocated */
+    haddr_t    addr;                  /* start of the region *in bytes* */
+    hsize_t    size;                  /* length of the region *in bytes* */
     uint64_t   free_after_tick;       /* the region may be reused on tick
                                        * free_after_tick + 1 at the earliest
                                        */
@@ -385,7 +385,7 @@ struct H5F_shared_t {
     /* Metadata retry info */
     unsigned  read_attempts;        /* The # of reads to try when reading metadata with checksum */
     unsigned  retries_nbins;        /* # of bins for each retries[] */
-    uint32_t *retries[H5AC_NTYPES]; /* Track # of read retries for metdata items with checksum */
+    uint32_t *retries[H5AC_NTYPES]; /* Track # of read retries for metadata items with checksum */
 
     /* Object flush info */
     H5F_object_flush_t object_flush;           /* Information for object flush callback */
@@ -441,7 +441,7 @@ struct H5F_shared_t {
                                          */
     uint32_t mdf_idx_entries_used;      /* Number of entries in *mdf_idx
                                          * that are in use -- these will
-                                         * be contiguous at indicies 0
+                                         * be contiguous at indices 0
                                          * through mdf_idx_entries_used - 1.
                                          */
 
@@ -482,7 +482,7 @@ struct H5F_shared_t {
                                * file
                                */
     uint64_t updater_seq_num; /* Sequence number of the next updater file to be
-                               * genereated.  This field must be initialized to zero,
+                               * generated.  This field must be initialized to zero,
                                * and incremented after each updater file is generated.
                                */
 
@@ -659,14 +659,14 @@ H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
  * in the testhdf5 program, which involves the test of a non-existing HDF5 file.
  */
 
-H5_DLL void H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info);
+H5_DLL void H5F__post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, const char *log_info);
 
 #define H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info)                                  \
     do {                                                                                                     \
         if (fp != NULL) {                                                                                    \
             if (fp->shared != NULL) {                                                                        \
                 if (fp->shared->vfd_swmr_log_on == TRUE) {                                                   \
-                    H5F_post_vfd_swmr_log_entry(fp, entry_type_code, log_info);                              \
+                    H5F__post_vfd_swmr_log_entry(fp, entry_type_code, log_info);                             \
                 }                                                                                            \
             }                                                                                                \
         }                                                                                                    \

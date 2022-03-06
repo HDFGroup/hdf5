@@ -48,7 +48,7 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR	The name of the directory where the releas(es) should be
+   -d DIR	The name of the directory where the release(s) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
@@ -103,7 +103,7 @@ EOF
 # Modifications
 #
 # Steps:
-# 1. untar the tarball in a temporay directory;
+# 1. untar the tarball in a temporary directory;
 #    Note: do this in a temporary directory to avoid changing
 #    the original source directory which maybe around.
 # 2. convert all its text files to DOS (LF-CR) style;
@@ -246,7 +246,7 @@ if [ "X$methods" = "X" ]; then
     methods="tar"
 fi
 
-# Create the temporay work directory.
+# Create the temporary work directory.
 if mkdir $tmpdir; then
     echo "temporary work directory for release.  "\
          "Can be deleted after release completes." > $tmpdir/README
@@ -320,9 +320,9 @@ ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
 
-# Update README.txt and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/RELEASE.txt with release information in
 # line 1.
-for f in README.txt release_docs/RELEASE.txt; do
+for f in README.md release_docs/RELEASE.txt; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f

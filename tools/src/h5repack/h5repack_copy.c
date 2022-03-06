@@ -39,7 +39,8 @@
  */
 static int  get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
                           hsize_t dims_hslab[], hsize_t *hslab_nbytes_p);
-static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
+static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr, pack_opt_t *options,
+                               double read_time, double write_time);
 static int  do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
 static int  copy_user_block(const char *infile, const char *outfile, hsize_t size);
 #if defined(H5REPACK_DEBUG_USER_BLOCK)
@@ -66,7 +67,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     hid_t                 fcpl    = H5P_DEFAULT;     /* file creation property list ID */
     trav_table_t *        travt   = NULL;
     hsize_t               ub_size = 0;     /* size of user block */
-    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in outupt file */
+    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in output file */
     hbool_t               set_persist;     /* Persist free-space status to be set in output file */
     hsize_t               set_threshold;   /* Free-space section threshold to be set in output file */
     hsize_t               set_pagesize;    /* File space page size to be set in output file */
@@ -81,8 +82,8 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      * open input file
      *-------------------------------------------------------------------------
      */
-    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
-                               (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, (size_t)0)) < 0)
+    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+                               NULL, (size_t)0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
     /* get user block size and file space strategy/persist/threshold */
@@ -187,7 +188,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                     H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_nindexes failed to set the number of shared "
                                              "object header message indexes");
 
-                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
+                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipeline, 4=attribute */
                 for (i = 0; i < (nindex - 1); i++)
                     if (H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_index failed to configure the specified "
@@ -298,7 +299,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      * create the output file
      *-------------------------------------------------------------------------
      */
-    if (options->verbose)
+    if (options->verbose > 0)
         HDprintf("Making new file ...\n");
 
     if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, options->fout_fapl)) < 0)
@@ -401,18 +402,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function: get_hyperslab
  *
- * Purpose: Calulate a hyperslab from a dataset for higher performance.
- *          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
- *          Return the hyperslab dimentions and size in byte.
+ * Purpose: Calculate a hyperslab from a dataset for higher performance.
+ *          The size of hyperslab is limited by H5TOOLS_BUFSIZE.
+ *          Return the hyperslab dimensions and size in byte.
  *
  * Return:  0 - SUCCEED, -1 FAILED
  *
  * Parameters:
  *   dcpl_id : [IN] dataset creation property.
  *   rank_dset : [IN] dataset rank
- *   dims_dset[] : [IN] dataset dimentions
+ *   dims_dset[] : [IN] dataset dimensions
  *   size_datum : [IN] size of a data element in byte
- *   dims_hslab[] : [OUT] calculated hyperslab dimentions
+ *   dims_hslab[] : [OUT] calculated hyperslab dimensions
  *   * hslab_nbytes_p : [OUT] total byte of the hyperslab
  *
  * Update:
@@ -427,7 +428,7 @@ done:
  *   3. If not chunked, each data element would be a unit of collection and
  *      the boundary would be dataset's dims.
  *
- *   The calulation starts from the last dimention (h5dump dims output).
+ *   The calculation starts from the last dimension (h5dump dims output).
  *-----------------------------------------*/
 
 int
@@ -441,8 +442,8 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     hsize_t      size_chunk = 1;
     hsize_t      nchunk_fit; /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
     hsize_t      ndatum_fit; /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
-    hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimentions */
-    hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimentions */
+    hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimensions */
+    hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimensions */
     hsize_t      hslab_nbytes;                 /* size of hyperslab in byte */
     int          ret_value = 0;
 
@@ -467,18 +468,18 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
 
         /* 1. if a chunk fit in hyperslab buffer */
         if (nchunk_fit >= 1) {
-            /* Calulate a hyperslab that contains as many chunks that can fit
+            /* Calculate a hyperslab that contains as many chunks that can fit
              * in hyperslab buffer. Hyperslab will be increased starting from
-             * the last dimention of the dataset (see h5dump's dims output).
+             * the last dimension of the dataset (see h5dump's dims output).
              * The calculation boundary is dataset dims.
              * In the loop, used mapping from a datum to a chunk to figure out
              * chunk based hyperslab.
              */
             for (k = rank_dset; k > 0; --k) {
-                /* map dataset dimentions with a chunk dims */
+                /* map dataset dimensions with a chunk dims */
                 chunk_dims_map[k - 1] = dims_dset[k - 1] / dims_chunk[k - 1];
 
-                /* if reminder exist, increse by 1 to cover partial edge chunks */
+                /* if reminder exist, increase by 1 to cover partial edge chunks */
                 if (dims_dset[k - 1] % dims_chunk[k - 1] > 0)
                     chunk_dims_map[k - 1]++;
 
@@ -491,7 +492,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
                 if (nchunk_fit == 0)
                     nchunk_fit = 1;
 
-                /* get hyperslab dimentions as unmapping to actual size */
+                /* get hyperslab dimensions as unmapping to actual size */
                 dims_hslab[k - 1] = MIN((hs_dims_map[k - 1] * dims_chunk[k - 1]), dims_dset[k - 1]);
 
                 /* calculate total size for the hyperslab */
@@ -500,9 +501,9 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
         }
         /* 2. if a chunk is bigger than hyperslab buffer */
         else {
-            /* Calulate a hyperslab that contains as many data elements that
+            /* Calculate a hyperslab that contains as many data elements that
              * can fit in hyperslab buffer. Hyperslab will be increased
-             * starting from the last dimention of the chunk (see h5dump's dims
+             * starting from the last dimension of the chunk (see h5dump's dims
              * output).
              * The calculation boundary is a chunk dims.
              */
@@ -512,7 +513,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
                 /* if a datum is bigger than rest of buffer */
                 if (ndatum_fit == 0)
                     ndatum_fit = 1;
-                /* get hyperslab dimentions within a chunk boundary */
+                /* get hyperslab dimensions within a chunk boundary */
                 dims_hslab[k - 1] = MIN(dims_chunk[k - 1], ndatum_fit);
 
                 /* calculate total size for the hyperslab */
@@ -525,9 +526,9 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     }
     /* 3. if dataset is not chunked */
     else {
-        /* Calulate a hyperslab that contains as many data elements that can
+        /* Calculate a hyperslab that contains as many data elements that can
          * fit in hyperslab buffer. Hyperslab will be increased starting from
-         * the last dimention of the dataset (see h5dump's dims output).
+         * the last dimension of the dataset (see h5dump's dims output).
          * The calculation boundary is dataset dims.
          */
         for (k = rank_dset; k > 0; --k) {
@@ -536,7 +537,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
             /* if a datum is bigger than rest of buffer */
             if (ndatum_fit == 0)
                 ndatum_fit = 1;
-            /* get hyperslab dimentions within dataset boundary */
+            /* get hyperslab dimensions within dataset boundary */
             dims_hslab[k - 1] = MIN(dims_dset[k - 1], ndatum_fit);
 
             /* calculate total size for the hyperslab */
@@ -600,7 +601,7 @@ done:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
- *  1. figure out a hyperslab (dimentions) and size  (refer to get_hyperslab()).
+ *  1. figure out a hyperslab (dimensions) and size  (refer to get_hyperslab()).
  *  2. Calculate the hyperslab selections as the selection is moving forward.
  *     Selection would be same as the hyperslab except for the remaining edge portion
  *     of the dataset. The code take care of the remaining portion if exist.
@@ -643,6 +644,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     int                req_filter;         /* there was a request for a filter */
     int                req_obj_layout = 0; /* request layout to current object */
     unsigned           crt_order_flags;    /* group creation order flag */
+    H5_timer_t         timer;              /* Timer for read/write operations */
+    H5_timevals_t      times;              /* Elapsed time for each operation */
+    static double      read_time  = 0;
+    static double      write_time = 0;
     h5tool_link_info_t linkinfo;
     unsigned           i;
     unsigned           u;
@@ -661,7 +666,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose) {
+    if (options->verbose == 2) {
+        HDprintf("-----------------------------------------------------------------\n");
+        HDprintf(" Type     Filter (Compression)        Timing read/write    Name\n");
+        HDprintf("-----------------------------------------------------------------\n");
+    }
+    else {
         HDprintf("-----------------------------------------\n");
         HDprintf(" Type     Filter (Compression)     Name\n");
         HDprintf("-----------------------------------------\n");
@@ -682,7 +692,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      *-------------------------------------------------------------------------
                      */
                 case H5TRAV_TYPE_GROUP:
-                    if (options->verbose)
+                    if (options->verbose == 2)
+                        HDprintf(FORMAT_OBJ_NOTIME, "group", travt->objs[i].name);
+                    else
                         HDprintf(FORMAT_OBJ, "group", travt->objs[i].name);
 
                     /* open input group */
@@ -748,6 +760,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                  */
                 case H5TRAV_TYPE_DATASET: {
                     hbool_t use_h5ocopy;
+
+                    read_time  = 0.0;
+                    write_time = 0.0;
 
                     has_filter = 0;
                     req_filter = 0;
@@ -972,7 +987,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                       H5P_DEFAULT, dcpl_out, H5P_DEFAULT);
                                 if (dset_out == H5I_INVALID_HID) {
                                     H5TOOLS_INFO("H5Dcreate2 failed");
-                                    if (options->verbose)
+                                    if (options->verbose > 0)
                                         HDprintf(" warning: could not create dataset <%s>. Applying original "
                                                  "settings\n",
                                                  travt->objs[i].name);
@@ -1013,11 +1028,27 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     }
 
                                     if (buf != NULL) {
+                                        if (options->verbose == 2) {
+                                            H5_timer_init(&timer);
+                                            H5_timer_start(&timer);
+                                        }
                                         if (H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) <
                                             0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
+                                        if (options->verbose == 2) {
+                                            H5_timer_stop(&timer);
+                                            H5_timer_get_times(timer, &times);
+                                            read_time += times.elapsed;
+                                            H5_timer_init(&timer);
+                                            H5_timer_start(&timer);
+                                        }
                                         if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
+                                        if (options->verbose == 2) {
+                                            H5_timer_stop(&timer);
+                                            H5_timer_get_times(timer, &times);
+                                            write_time += times.elapsed;
+                                        }
 
                                         /* Check if we have VL data in the dataset's
                                          * datatype that must be reclaimed */
@@ -1115,12 +1146,28 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                 hs_select_nelmts = 1;
                                             } /* end (else) rank  == 0 */
 
+                                            if (options->verbose == 2) {
+                                                H5_timer_init(&timer);
+                                                H5_timer_start(&timer);
+                                            }
                                             if (H5Dread(dset_in, wtype_id, hslab_space, f_space_id,
                                                         H5P_DEFAULT, hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
+                                            if (options->verbose == 2) {
+                                                H5_timer_stop(&timer);
+                                                H5_timer_get_times(timer, &times);
+                                                read_time += times.elapsed;
+                                                H5_timer_init(&timer);
+                                                H5_timer_start(&timer);
+                                            }
                                             if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id, dxpl_id,
                                                          hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
+                                            if (options->verbose == 2) {
+                                                H5_timer_stop(&timer);
+                                                H5_timer_get_times(timer, &times);
+                                                write_time += times.elapsed;
+                                            }
 
                                             /* reclaim any VL memory, if necessary */
                                             if (vl_data)
@@ -1149,7 +1196,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                  * print amount of compression used
                                  *-------------------------------------------------------------------------
                                  */
-                                if (options->verbose) {
+                                if (options->verbose > 0) {
                                     double ratio = 0;
 
                                     /* only print the compression ration if there was a filter request */
@@ -1160,10 +1207,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         /* compression ratio = uncompressed size /  compressed size */
                                         if (dsize_out != 0)
                                             ratio = (double)dsize_in / (double)dsize_out;
-                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1);
+                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1, options,
+                                                           read_time, write_time);
                                     }
                                     else
-                                        print_dataset_info(dcpl_in, travt->objs[i].name, ratio, 0);
+                                        print_dataset_info(dcpl_in, travt->objs[i].name, ratio, 0, options,
+                                                           read_time, write_time);
 
                                     /* print a message that the filter was not applied
                                      * (in case there was a filter)
@@ -1220,6 +1269,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                         if (H5Pset_copy_object(ocpl_id, H5O_COPY_WITHOUT_ATTR_FLAG) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Pset_copy_object failed");
 
+                        if (options->verbose == 2) {
+                            H5_timer_init(&timer);
+                            H5_timer_start(&timer);
+                        }
                         if (H5Ocopy(fidin,               /* Source file or group identifier */
                                     travt->objs[i].name, /* Name of the source object to be copied */
                                     fidout,              /* Destination file or group identifier  */
@@ -1227,6 +1280,11 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     ocpl_id,             /* Properties which apply to the copy   */
                                     H5P_DEFAULT) < 0)    /* Properties which apply to the new hard link */
                             H5TOOLS_GOTO_ERROR((-1), "H5Ocopy failed");
+                        if (options->verbose == 2) {
+                            H5_timer_stop(&timer);
+                            H5_timer_get_times(timer, &times);
+                            write_time += times.elapsed;
+                        }
 
                         if (H5Pclose(ocpl_id) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
@@ -1247,7 +1305,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                         if (H5Dclose(dset_out) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
 
-                        if (options->verbose)
+                        if (options->verbose == 2)
+                            HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[i].name);
+                        else
                             HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
 
                     } /* end whether we have request for filter/chunking */
@@ -1260,7 +1320,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                  *-------------------------------------------------------------------------
                  */
                 case H5TRAV_TYPE_NAMED_DATATYPE:
-                    if (options->verbose)
+                    if (options->verbose == 2)
+                        HDprintf(FORMAT_OBJ_NOTIME, "type", travt->objs[i].name);
+                    else
                         HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
 
                     if ((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1300,7 +1362,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                  */
                 case H5TRAV_TYPE_LINK:
                 case H5TRAV_TYPE_UDLINK:
-                    if (options->verbose)
+                    if (options->verbose == 2)
+                        HDprintf(FORMAT_OBJ_NOTIME, "link", travt->objs[i].name);
+                    else
                         HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
 
                     /* Check -X option. */
@@ -1425,7 +1489,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
+print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_t *options, double read_time,
+                   double write_time)
 {
     char strfilter[255];
 #if defined(PRINT_DEBUG)
@@ -1514,7 +1579,10 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
     }     /* end for each filter */
 
     if (!pr)
-        HDprintf(FORMAT_OBJ, "dset", objname);
+        if (options->verbose == 2)
+            HDprintf(FORMAT_OBJ_TIME, "dset", read_time, write_time, objname);
+        else
+            HDprintf(FORMAT_OBJ, "dset", objname);
     else {
         char str[512], temp[512];
 
@@ -1522,7 +1590,10 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
         HDstrcat(str, strfilter);
         HDsprintf(temp, "  (%.3f:1)", ratio);
         HDstrcat(str, temp);
-        HDprintf(FORMAT_OBJ, str, objname);
+        if (options->verbose == 2)
+            HDprintf(FORMAT_OBJ_TIME, str, read_time, write_time, objname);
+        else
+            HDprintf(FORMAT_OBJ, str, objname);
     }
 } /* end print_dataset_info() */
 
@@ -1550,7 +1621,7 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
 
     /* Copy the userblock from the input file to the output file */
     while (size > 0) {
-        ssize_t     nread, nbytes;             /* # of bytes transfered, etc. */
+        ssize_t     nread, nbytes;             /* # of bytes transferred, etc. */
         char        rbuf[USERBLOCK_XFER_SIZE]; /* Buffer for reading */
         const char *wbuf;                      /* Pointer into buffer, for writing */
 

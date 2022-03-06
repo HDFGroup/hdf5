@@ -999,7 +999,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
  *
  ***********************************************************************/
 
-/* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It must be a power of two. */
+/* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It mut be a power of two. */
 
 #define H5C__HASH_MASK        ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
 
@@ -1642,7 +1642,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *
  *            H5C_DO_SLIST_SANITY_CHECKS
  *
- *        can be selected independantly.  This is easy to miss as the
+ *        can be selected independently.  This is easy to miss as the
  *        two #defines are easy to confuse.
  */
 
@@ -4664,7 +4664,7 @@ typedef struct H5C_tag_info_t {
  *              This field exists because the fixed and variable length
  *              array cache clients allocate numerous entries in a single
  *              block, and sub-allocate metadata cache entries out of this
- *              block.  The effect of this is to break the invarient,
+ *              block.  The effect of this is to break the invariant,
  *              normally maintained by the free space managers in paged
  *              allocation mode, that no entry of less than a page in
  *              size crosses page boundaries, and that entries of page
@@ -4674,7 +4674,7 @@ typedef struct H5C_tag_info_t {
  *
  *              The correct solution is to modify the fixed and variable
  *              length array cache client to repair this.  However, in
- *              the interrim, this field exists to detect similar
+ *              the interim, this field exists to detect similar
  *              behaviour elsewhere.
  *
  *              To complicate matters, speculative reads for metadata
@@ -5029,7 +5029,7 @@ typedef struct H5C_tag_info_t {
  *              This field exists because the fixed and variable length
  *              array cache clients allocate numerous entries in a single
  *              block, and sub-allocate metadata cache entries out of this
- *              block.  The effect of this is to break the invarient,
+ *              block.  The effect of this is to break the invariant,
  *              normally maintained by the free space managers in paged
  *              allocation mode, that no entry of less than a page in
  *              size crosses page boundaries, and that entries of page
@@ -5039,7 +5039,7 @@ typedef struct H5C_tag_info_t {
  *
  *              The correct solution is to modify the fixed and variable
  *              length array cache client to repair this.  However, in
- *              the interrim, this field exists to detect similar
+ *              the interim, this field exists to detect similar
  *              behaviour elsewhere.
  *
  ****************************************************************************/
@@ -5317,7 +5317,6 @@ H5_DLL herr_t H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry_ptr);
 H5_DLL herr_t H5C__make_space_in_cache(H5F_t * f, size_t space_needed,
     hbool_t write_permitted);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f);
-H5_DLL herr_t H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
 H5_DLL herr_t H5C__serialize_cache(H5F_t *f);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);

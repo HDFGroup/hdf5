@@ -122,9 +122,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     {                                                                                                        \
         TYPE        array[ROWS][COLS];                                                                       \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
-        /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
-         * fit into uchar */                                                                                 \
-        const char *utrans = "((x+100)/4)*3";                                                                \
+        /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
+        const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t       dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset, dset_nn, dt_nn;                         \
         H5T_order_t order;                                                                                   \
@@ -199,6 +198,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
         }                                                                                                    \
                                                                                                              \
+        if (H5Dclose(dset_nn) < 0)                                                                           \
+            TEST_ERROR;                                                                                      \
         if (H5Dclose(dset) < 0)                                                                              \
             TEST_ERROR;                                                                                      \
         if (H5Sclose(dataspace) < 0)                                                                         \
@@ -209,9 +210,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     {                                                                                                        \
         TYPE        array[ROWS][COLS];                                                                       \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
-        /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to   \
-         * fit into uchar */                                                                                 \
-        const char *utrans = "((x+100)/4)*3";                                                                \
+        /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
+        const char *utrans = "(x/4+25)*3";                                                                   \
                                                                                                              \
         hid_t   dataspace, dxpl_id_f_to_c, dxpl_id_utrans, cparms, memspace, dset_chunk, filespace;          \
         hsize_t dim[2]    = {ROWS, COLS};                                                                    \
@@ -312,7 +312,7 @@ main(void)
     const char *simple     = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
     const char *polynomial = "(2+x)* ((x-8)/2)";
     /* inverses the utrans transform in init_test to get back original array */
-    const char *utrans_inv = "(x/3)*4 - 100";
+    const char *utrans_inv = "(x/3 - 25)*4";
 
     if ((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -434,9 +434,8 @@ static int
 init_test(hid_t file_id)
 {
     const char *f_to_c = "(5/9.0)*(x-32)";
-    /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit
-     * into uchar */
-    const char *utrans = "((x+100)/4)*3";
+    /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */
+    const char *utrans = "(x/4+25)*3";
 
     hid_t   dataspace      = -1;
     hid_t   dxpl_id_f_to_c = -1;
@@ -463,7 +462,7 @@ init_test(hid_t file_id)
     if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)
         TEST_ERROR
 
-    TESTING("Intializing test...")
+    TESTING("Initializing test...")
 
     if ((dset_id_int = H5Dcreate2(file_id, "/default_int", H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0)

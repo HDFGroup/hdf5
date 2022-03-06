@@ -67,9 +67,6 @@ static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -103,20 +100,20 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
+ * Function:    H5FD_init
  *
- * Purpose:     Initialize the virtual file layer.
+ * Purpose:     Initialize the interface from some other layer.
  *
- * Return:      SUCCEED/FAIL
- *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD__init_package(void)
+H5FD_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5I_register_type(H5I_VFL_CLS) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
@@ -126,7 +123,7 @@ H5FD__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_term_package
@@ -150,20 +147,14 @@ H5FD_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        if (H5I_nmembers(H5I_VFL) > 0) {
-            (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-        else {
-            /* Destroy the VFL driver ID group */
-            n += (H5I_dec_type_ref(H5I_VFL) > 0);
-
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
+    if (H5I_nmembers(H5I_VFL) > 0) {
+        (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
+        n++; /*H5I*/
+    }        /* end if */
+    else {
+        /* Destroy the VFL driver ID group */
+        n += (H5I_dec_type_ref(H5I_VFL) > 0);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5FD_term_package() */
@@ -173,7 +164,7 @@ H5FD_term_package(void)
  *
  * Purpose:     Frees a file driver class struct and returns an indication of
  *              success. This function is used as the free callback for the
- *              virtual file layer object identifiers (cf H5FD__init_package).
+ *              virtual file layer object identifiers (cf H5FD_init).
  *
  * Return:      SUCCEED/FAIL
  *
@@ -309,6 +300,62 @@ done:
 } /* end H5FD_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_name
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver name.
+ *
+ * Return:      >0 if a VFD with that name has been registered
+ *              0 if a VFD with that name has NOT been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_name(const char *driver_name)
+{
+    htri_t ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "*s", driver_name);
+
+    /* Check if driver with this name is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_value
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver value (ID).
+ *
+ * Return:      >0 if a VFD with that value has been registered
+ *              0 if a VFD with that value hasn't been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "DV", driver_value);
+
+    /* Check if driver with this value is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_value() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FDunregister
  *
  * Purpose:     Removes a driver ID from the library. This in no way affects
@@ -406,7 +453,7 @@ H5FD_sb_size(H5FD_t *file)
 {
     hsize_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -416,7 +463,6 @@ H5FD_sb_size(H5FD_t *file)
     if (file->cls->sb_size)
         ret_value = (file->cls->sb_size)(file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -544,7 +590,7 @@ H5FD_fapl_get(H5FD_t *file)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -554,7 +600,6 @@ H5FD_fapl_get(H5FD_t *file)
     if (file->cls->fapl_get)
         ret_value = (file->cls->fapl_get)(file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_fapl_get() */
 
@@ -826,9 +871,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Dispatch to file driver */
     if (HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
-#if 0  /* JRM */
-    HDfprintf(stderr, "H5FD_open():  calling %s.open().\n", driver->name);
-#endif /* JRM */
     if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
@@ -875,7 +917,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = file;
 
 done:
-    /* XXX We leak H5FD_t's on many error conditions. */
     /* Can't cleanup 'file' information, since we don't know what type it is */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_open() */
@@ -1015,10 +1056,9 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI(-1) /* return value is arbitrary */
+    FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
-        HGOTO_DONE(0)
+        if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HGOTO_DONE(0)
     if (!f1 || !f1->cls)
         HGOTO_DONE(-1)
     if (!f2 || !f2->cls)
@@ -1376,7 +1416,7 @@ H5FD_get_maxaddr(const H5FD_t *file)
 {
     haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -1384,7 +1424,6 @@ H5FD_get_maxaddr(const H5FD_t *file)
     /* Set return value */
     ret_value = file->maxaddr;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_maxaddr() */
 
@@ -1456,7 +1495,7 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     HDassert(file->cls);
     HDassert(type_map);
 
-    /* Check for VFD class providing a type map retrieval rouine */
+    /* Check for VFD class providing a type map retrieval routine */
     if (file->cls->get_type_map) {
         /* Retrieve type mapping for this file */
         if ((file->cls->get_type_map)(file, type_map) < 0)
@@ -1818,6 +1857,111 @@ H5FD_unlock(H5FD_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDctl
+ *
+ * Purpose:     Perform a CTL operation.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*#ULUL*x**x", file, op_code, flags, input, output);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    /* Don't attempt to validate the op code.  If appropriate, that will
+     * be done by the underlying VFD callback, along with the input and
+     * output parameters.
+     */
+
+    /* Call private function */
+    if (H5FD_ctl(file, op_code, flags, input, output) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDctl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ctl
+ *
+ * Purpose:     Private version of H5FDctl()
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+
+    /* Dispatch to driver if the ctl function exists.
+     *
+     * If it doesn't, fail if the H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+     *
+     * Otherwise, report success.
+     */
+    if (file->cls->ctl) {
+
+        if ((file->cls->ctl)(file, op_code, flags, input, output) < 0)
+
+            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+    }
+    else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_ctl() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_get_fileno

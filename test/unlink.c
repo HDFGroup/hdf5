@@ -617,7 +617,7 @@ test_filespace(hid_t fapl)
 
     /* Create common objects for datasets */
 
-    /* Create dataset creation property list for contigous storage */
+    /* Create dataset creation property list for contiguous storage */
     if ((contig_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
 
@@ -1099,7 +1099,7 @@ test_filespace(hid_t fapl)
 
     PASSED();
 
-    /* Create simple group hiearchy, remove it & verify file size */
+    /* Create simple group hierarchy, remove it & verify file size */
     TESTING("    simple group hierarchy");
 
     /* Create file */
@@ -1138,7 +1138,7 @@ test_filespace(hid_t fapl)
 
     PASSED();
 
-    /* Create complex group hiearchy, remove it & verify file size */
+    /* Create complex group hierarchy, remove it & verify file size */
     TESTING("    complex group hierarchy");
 
     /* Create file */

@@ -21,17 +21,26 @@
 # For now, it shows how to run the test cases programs. It only verifies the
 # exit codes are okay (0).
 
-srcdir=@srcdir@
-bindir=@bindir@
+###############################################################################
+## test variables
+###############################################################################
 
-# If the bindir directory is not set just use current (.).
-if test -z "$bindir"; then
-   bindir=.
-fi
+# Number of errors encountered during test run.
+nerrors=0
+
+# Define variables
+verbose=yes
+
+###############################################################################
+## Main
+###############################################################################
+srcdir=@srcdir@
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$bindir/swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [[ $rc != 0 ]] ; then
     echo
@@ -52,10 +61,6 @@ RESULT_FAILED="*FAILED*"
 RESULT_SKIP="-SKIP-"
 USECASES_PROGRAMS="use_append_chunk use_append_mchunks"
 TESTNAME="Use Case"
-
-# Define variables
-nerrors=0
-verbose=yes
 
 # Source in the output filter function definitions.
 . $srcdir/../bin/output_filter.sh
@@ -91,7 +96,7 @@ TOOLTEST() {
     # Run test.
     TESTING $program $@
     (
-      $RUNSERIAL $bindir/$program "$@"
+      $RUNSERIAL $testdir/$program "$@"
     ) >$actual 2>$actual_err
     exit_code=$?
 
@@ -123,7 +128,7 @@ TOOLTEST() {
 # the test.  Running each of these tests in its own directory should eliminate
 # the problem.
 mkdir usecases_test
-cp twriteorder usecases_test
+cp $testdir/twriteorder usecases_test
 for FILE in use_*; do
     case "$FILE" in
         *.o) continue ;;    ## don't copy the .o files

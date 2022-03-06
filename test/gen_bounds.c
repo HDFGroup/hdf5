@@ -858,12 +858,12 @@ gen_sel_files(const char *filename, H5F_libver_t low_bound, H5F_libver_t high_bo
         if (H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid) < 0)
             TEST_ERROR;
 
-        /* Create the reference datset */
+        /* Create the reference dataset */
         if ((ref_did = H5Dcreate2(fid, SEL_EX_REG_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
-        /* Write to the reference datset */
+        /* Write to the reference dataset */
         if (H5Dwrite(ref_did, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_wbuf) < 0)
             TEST_ERROR;
 
@@ -886,12 +886,12 @@ gen_sel_files(const char *filename, H5F_libver_t low_bound, H5F_libver_t high_bo
         if (H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid) < 0)
             TEST_ERROR;
 
-        /* Create the reference datset */
+        /* Create the reference dataset */
         if ((ref_did = H5Dcreate2(fid, SEL_EX_IRR_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
-        /* Write to the reference datset */
+        /* Write to the reference dataset */
         if (H5Dwrite(ref_did, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_wbuf) < 0)
             TEST_ERROR;
 
@@ -915,12 +915,12 @@ gen_sel_files(const char *filename, H5F_libver_t low_bound, H5F_libver_t high_bo
         if (H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid) < 0)
             TEST_ERROR;
 
-        /* Create the reference datset */
+        /* Create the reference dataset */
         if ((ref_did = H5Dcreate2(fid, SEL_EX_PT_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
-        /* Write to the reference datset */
+        /* Write to the reference dataset */
         if (H5Dwrite(ref_did, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_wbuf) < 0)
             TEST_ERROR;
 

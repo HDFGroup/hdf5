@@ -20,7 +20,6 @@
 
 ./.gitattributes       _DO_NOT_DISTRIBUTE_
 ./.gitignore           _DO_NOT_DISTRIBUTE_
-./.gitmodules          _DO_NOT_DISTRIBUTE_
 ./.autom4te.cfg        _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
@@ -30,7 +29,7 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./README.txt
+./README.md
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
@@ -41,6 +40,8 @@
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
+./.github/workflows/codespell.yml  _DO_NOT_DISTRIBUTE_
+./.github/FUNDING.yml  _DO_NOT_DISTRIBUTE_
 
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
@@ -231,6 +232,7 @@
 ./doxygen/dox/DDLBNF112.dox
 ./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
+./doxygen/dox/Glossary.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
 ./doxygen/dox/Overview.dox
@@ -297,6 +299,7 @@
 ./doxygen/img/FF-IH_FileGroup.gif
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
+./doxygen/img/HDF5.png
 ./doxygen/img/HDFG-logo.png
 ./doxygen/img/IOFlow.gif
 ./doxygen/img/IOFlow2.gif
@@ -340,6 +343,8 @@
 ./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/ph5_filtered_writes.c
+./examples/ph5_filtered_writes_no_sel.c
 ./examples/h5_vds.c
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c
@@ -627,6 +632,7 @@
 ./release_docs/HISTORY-1_8.txt
 ./release_docs/HISTORY-1_10.txt
 ./release_docs/HISTORY-1_12.txt
+./release_docs/HISTORY-1_13.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
@@ -832,6 +838,7 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDperform.c
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
@@ -1231,10 +1238,10 @@
 ./test/external_common.h
 ./test/external_env.c
 ./test/external_fname.h
-./test/family_v16_00000.h5
-./test/family_v16_00001.h5
-./test/family_v16_00002.h5
-./test/family_v16_00003.h5
+./test/family_v16-000000.h5
+./test/family_v16-000001.h5
+./test/family_v16-000002.h5
+./test/family_v16-000003.h5
 ./test/farray.c
 ./test/fheap.c
 ./test/file_image.c
@@ -1319,6 +1326,8 @@
 ./test/ntypes.c
 ./test/null_vol_connector.c
 ./test/null_vol_connector.h
+./test/null_vfd_plugin.c
+./test/null_vfd_plugin.h
 ./test/objcopy.c
 ./test/objcopy_ref.c
 ./test/ohdr.c
@@ -1339,7 +1348,6 @@
 ./test/supervise.subr
 ./test/swmr.c
 ./test/swmr_addrem_writer.c
-./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c
@@ -1376,8 +1384,10 @@
 ./test/testlinks_env.sh.in
 ./test/testmeta.c
 ./test/test_mirror.sh.in
+./test/testswmr.pwsh.in
 ./test/testswmr.sh.in
 ./test/testvds_env.sh.in
+./test/testvdsswmr.pwsh.in
 ./test/testvdsswmr.sh.in
 ./test/testvfdswmr.sh.in
 ./test/tfile.c
@@ -1435,7 +1445,6 @@
 ./test/vfd_swmr_dsetops_writer.c
 ./test/vfd_swmr_dsetchks_writer.c
 ./test/vfd_swmr_bigset_writer.c
-./test/vfd_swmr_check_compat.c
 ./test/vfd_swmr_common.c
 ./test/vfd_swmr_common.h
 ./test/vfd_swmr_generator.c
@@ -1453,6 +1462,7 @@
 ./test/vfd_swmr_writer.c
 ./test/vfd_swmr_zoo_writer.c
 ./test/vfd.c
+./test/vfd_plugin.c
 ./test/vol.c
 ./test/vol_plugin.c
 
@@ -3049,6 +3059,26 @@
 ./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
+# test utilities
+./utils/test/Makefile.am
+./utils/test/swmr_check_compat_vfd.c
+
+# parallel tools (h5dwalk) and tests
+./utils/tools/CMakeLists.txt
+./utils/tools/Makefile.am
+./utils/tools/h5dwalk/CMakeLists.txt
+./utils/tools/h5dwalk/Makefile.am
+./utils/tools/h5dwalk/h5dwalk.1
+./utils/tools/h5dwalk/h5dwalk.c
+./utils/tools/test/CMakeLists.txt
+./utils/tools/test/Makefile.am
+./utils/tools/test/h5dwalk/CMakeLists.txt
+./utils/tools/test/h5dwalk/CMakeTests.cmake
+./utils/tools/test/h5dwalk/Makefile.am
+./utils/tools/test/h5dwalk/copy_demo_files.sh.in
+./utils/tools/test/h5dwalk/help.h5dwalk
+./utils/tools/test/h5dwalk/testh5dwalk.sh.in
+
 # VFD SWMR utilities
 ./utils/vfd_swmr/README.md
 ./utils/vfd_swmr/Makefile.am
@@ -3168,7 +3198,6 @@
 ./hl/tools/h5watch/extend_dset.c
 ./hl/tools/h5watch/h5watch.c
 ./hl/tools/h5watch/h5watchgentest.c
-./hl/tools/h5watch/swmr_check_compat_vfd.c
 ./hl/tools/h5watch/testh5watch.sh.in
 
 # expected test output from testing h5watch
@@ -3554,6 +3583,7 @@
 ./java/test/testfiles/JUnit-TestH5Obasic.txt
 ./java/test/testfiles/JUnit-TestH5Ocreate.txt
 ./java/test/testfiles/JUnit-TestH5Ocopy.txt
+./java/test/testfiles/JUnit-TestH5OcopyOld.txt
 ./java/test/testfiles/JUnit-TestH5P.txt
 ./java/test/testfiles/JUnit-TestH5PData.txt
 ./java/test/testfiles/JUnit-TestH5Pfapl.txt
@@ -3597,6 +3627,7 @@
 ./java/test/TestH5Obasic.java
 ./java/test/TestH5Ocreate.java
 ./java/test/TestH5Ocopy.java
+./java/test/TestH5OcopyOld.java
 ./java/test/TestH5P.java
 ./java/test/TestH5PData.java
 ./java/test/TestH5Pfapl.java
@@ -3619,9 +3650,9 @@
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
 ./java/lib/simplelogger.properties
-./java/lib/slf4j-api-1.7.25.jar
-./java/lib/ext/slf4j-nop-1.7.25.jar
-./java/lib/ext/slf4j-simple-1.7.25.jar
+./java/lib/slf4j-api-1.7.33.jar
+./java/lib/ext/slf4j-nop-1.7.33.jar
+./java/lib/ext/slf4j-simple-1.7.33.jar
 
 # CMake-specific Files
 ./config/toolchain/build32.cmake
@@ -3657,7 +3688,7 @@
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
-./config/cmake/README.txt.cmake.in
+./config/cmake/README.md.cmake.in
 ./config/cmake/UseJava.cmake
 ./config/cmake/UseJavaClassFilelist.cmake
 ./config/cmake/UseJavaSymlinks.cmake
@@ -3796,8 +3827,10 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+
 ./utils/CMakeLists.txt
 ./utils/mirror_vfd/CMakeLists.txt
+./utils/test/CMakeLists.txt
 ./utils/vfd_swmr/CMakeLists.txt
 
 # CMake-specific User Scripts
@@ -3913,4 +3946,9 @@
 ./tools/test/perform/Makefile.in
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
+./utils/test/Makefile.in
+./utils/tools/Makefile.in
+./utils/tools/h5dwalk/Makefile.in
+./utils/tools/test/Makefile.in
+./utils/tools/test/h5dwalk/Makefile.in
 ./utils/vfd_swmr/Makefile.in

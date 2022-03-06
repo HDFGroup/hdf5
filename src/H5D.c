@@ -62,9 +62,6 @@ static herr_t H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], vo
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -1805,7 +1802,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
-    /* Change a datset's dimenions synchronously */
+    /* Change a datset's dimensions synchronously */
     if ((ret_value = H5D__set_extent_api_common(dset_id, size, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to synchronously change a dataset's dimensions")
 
@@ -1838,7 +1835,7 @@ H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_lin
     if (H5ES_NONE != es_id)
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
-    /* Change a datset's dimenions asynchronously */
+    /* Change a datset's dimensions asynchronously */
     if (H5D__set_extent_api_common(dset_id, size, token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to asynchronously change a dataset's dimensions")
 

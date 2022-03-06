@@ -119,7 +119,7 @@ static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suf
 int
 main(int argc, char **argv)
 {
-    char *  buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
+    char *  buf = NULL, *tmp = NULL, *buf2 = NULL, *tmp2 = NULL, *check = NULL;
     int     i, j, mynod = 0, nprocs = 1, my_correct = 1, correct, myerrno;
     double  stim, etim;
     double  write_tim = 0;
@@ -605,7 +605,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  * we are using the split driver since both of those
                  * use the multi VFD under the hood.
                  */
-                env = HDgetenv("HDF5_DRIVER");
+                env = HDgetenv(HDF5_DRIVER);
 #ifdef HDF5_DRIVER
                 /* Use the environment variable, then the compile-time constant */
                 if (!env)

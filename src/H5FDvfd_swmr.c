@@ -90,6 +90,7 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
+    H5FD_VFD_SWMR_VALUE,       /* value                */
     "vfd_swmr",                /* name                 */
     MAXADDR,                   /* maxaddr              */
     H5F_CLOSE_WEAK,            /* fc_degree            */
@@ -122,6 +123,7 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD__vfd_swmr_lock,       /* lock                 */
     H5FD__vfd_swmr_unlock,     /* unlock               */
     NULL,                      /* del                  */
+    NULL,                      /* ctl                  */
     H5FD_FLMAP_DICHOTOMY       /* fl_map               */
 };
 
@@ -130,30 +132,6 @@ H5FL_DEFINE_STATIC(H5FD_vfd_swmr_t);
 
 /* Declare a free list to manage the H5FD_vfd_swmr_idx_entry_t sequence information */
 H5FL_SEQ_DEFINE(H5FD_vfd_swmr_idx_entry_t);
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
-b
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_vfd_swmr_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize swmr VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_init
@@ -174,7 +152,7 @@ H5FD_vfd_swmr_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_VFD_SWMR_g))
         H5FD_VFD_SWMR_g = H5FD_register(&H5FD_vfd_swmr_g, sizeof(H5FD_class_t), FALSE);
@@ -182,7 +160,6 @@ H5FD_vfd_swmr_init(void)
     /* Set return value */
     ret_value = H5FD_VFD_SWMR_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_init() */
 
@@ -231,7 +208,7 @@ H5Pset_fapl_vfd_swmr(hid_t fapl_id)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -24,11 +24,9 @@ typedef struct H5F_t H5F_t;
 /* Include package's public header */
 #include "H5Fpublic.h"
 
-/* Public headers needed by this file */
-#include "H5FDpublic.h" /* File drivers                 */
-
 /* Private headers needed by this file */
 #include "H5MMprivate.h" /* Memory management            */
+#include "H5FDprivate.h" /* File drivers                 */
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"  /* Property lists               */
 #endif                   /* H5_HAVE_PARALLEL */
@@ -938,7 +936,7 @@ typedef enum H5F_prefix_open_t {
  *  the past tick is used to assemble the associated data in preparation for
  *  writing an updater file.
  *
- *  Each entry in this array pertains to a given modified metdata page or
+ *  Each entry in this array pertains to a given modified metadata page or
  *  multi-page metadata entry, and contains the following fields:
  *
  *  entry_image_ptr: void pointer to a buffer containing the image of the
@@ -1187,6 +1185,7 @@ H5_DLL hbool_t H5F_shared_has_feature(const H5F_shared_t *f, unsigned feature);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
+H5_DLL herr_t  H5F_shared_get_file_driver(const H5F_shared_t *f_sh, H5FD_t **file_handle);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
 /* VFD SWMR functions */
@@ -1247,6 +1246,9 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
+H5_DLL herr_t  H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived);
+H5_DLL hbool_t H5F_get_coll_metadata_reads(const H5F_t *f);
+H5_DLL void H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */

@@ -86,7 +86,7 @@ usage(const char *progname)
     fprintf(stderr,
             "usage: %s [-u milliseconds]\n"
             "\n"
-            "-c:	increase the frame number continously (reader mode)\n"
+            "-c:	increase the frame number continuously (reader mode)\n"
             "-f:	add \"fuzz\" (linear noise) to the data (writer mode)\n"
             "-u ms: milliseconds interval between updates to %s.h5\n"
             "\n",

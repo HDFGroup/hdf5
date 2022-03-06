@@ -21,6 +21,8 @@ srcdir=@srcdir@
 
 . ${srcdir}/supervise.subr
 
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+
 ###############################################################################
 ## test parameters
 ###############################################################################
@@ -80,6 +82,12 @@ GFAIL_FIFO_WRITER_TO_READER=fifo_group_writer_to_reader
 GFAIL_FIFO_READER_TO_WRITER=fifo_group_reader_to_writer
 
 ###############################################################################
+## Was the aux process built?
+###############################################################################
+#
+USING_AUX_PROCESS=@AUX_PROCESS@
+
+###############################################################################
 ## short hands and function definitions
 ###############################################################################
 #
@@ -131,17 +139,15 @@ if test -z "$srcdir"; then
 fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR and/or if we are using parallel HDF5, which does not
-# currently support SWMR.
-./vfd_swmr_check_compat
+# supports SWMR.
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
-    echo "Either the VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support VFD SWMR or parallel HDF5 was configured, which"
-    echo "currently does not support SWMR."
+    echo "The VFD specified by the HDF5_DRIVER environment variable"
+    echo "does not support SWMR."
     echo
-    echo "VFD SWMR acceptance tests skipped"
+    echo "SWMR acceptance tests skipped"
     echo
     exit 0
 fi
@@ -1075,62 +1081,68 @@ fi
 #
 #
 for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t -F" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
-	if [ ${do_many_small:-no} = no ]; then
-		continue
-	fi
-	#
-	# Test many small datasets of two or three dimensions.
-	#
-	# Perform 25 iterations on 100 extensible datasets configured with
-	# 2D 16x16 chunks or 3D 1x16x16 chunks of 32-bit unsigned integer elements,
-	# expanding each dataset by a chunk in one dimension (up to 25x1
-	# 16x16 chunks) on each iteration.
-	#
-	# Perform the test again, extending each dataset
-	# in *two* dimensions (up to 25x25 16x16 chunks).
-	#
-        # If testing 3D datasets (-t option), extending each dataset along the
-        # first dimension (up to 25 1x16x16)
-        #
+    if [ ${do_many_small:-no} = no ]; then
+        continue
+    fi
+    #
+    # Test many small datasets of two or three dimensions.
+    #
+    # Perform 25 iterations on 100 extensible datasets configured with
+    # 2D 16x16 chunks or 3D 1x16x16 chunks of 32-bit unsigned integer elements,
+    # expanding each dataset by a chunk in one dimension (up to 25x1
+    # 16x16 chunks) on each iteration.
+    #
+    # Perform the test again, extending each dataset
+    # in *two* dimensions (up to 25x25 16x16 chunks).
+    #
+    # If testing 3D datasets (-t option), extending each dataset along the
+    # first dimension (up to 25 1x16x16)
+    #
 
-        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
-        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
-        # VDS across multiple files (-M option), the program also skips for future support.
+    # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+    # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+    # VDS across multiple files (-M option), the program also skips for future support.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
         if [[ $options == *"-M"* ]]; then
-	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
         else
-	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
         fi
         pid_aux_proc=$!
+    fi
 
-	echo launch vfd_swmr_bigset_writer many small, options $options
-	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
-	pid_writer=$!
+    echo launch vfd_swmr_bigset_writer many small, options $options
+    catch_out_err_and_rc vfd_swmr_bigset_writer \
+        ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
+    pid_writer=$!
 
-	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
-	pid_reader=$!
+    catch_out_err_and_rc vfd_swmr_bigset_reader \
+        ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
+    pid_reader=$!
 
-	# Wait for the reader to finish before signalling the
-	# writer to quit: the writer holds the file open so that the
-	# reader will find the shadow file when it opens
-	# the .h5 file. Also wait for the auxiliary process to finish.
+    # Wait for the reader to finish before signalling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file. Also wait for the auxiliary process to finish.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
         wait $pid_aux_proc
-	wait $pid_reader
-	wait $pid_writer
+    fi
+    wait $pid_reader
+    wait $pid_writer
 
-	# Collect exit code of the auxiliary process
-	if [ $(cat aux_process.rc) -ne 0 ]; then
-		echo the auxiliary process had error
-		nerrors=$((nerrors + 1))
-	fi
+    # Collect exit code of the auxiliary process
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [ $(cat aux_process.rc) -ne 0 ]; then
+            echo the auxiliary process had error
+            nerrors=$((nerrors + 1))
+        fi
+    fi
 
-	# Collect exit code of the reader
-	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
-		echo reader had error
-		nerrors=$((nerrors + 1))
-	fi
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
 
 	# Collect exit code of the writer
 	if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
@@ -1139,83 +1151,89 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
 	fi
 
 	# Clean up output files
-	rm -f vfd_swmr_bigset_writer.{out,rc}
-	rm -f vfd_swmr_bigset_reader.*.{out,rc}
-        rm -f aux_process.{out,rc}
-        rm -f mdfile bigset_updater.* bigset-shadow-*
+    rm -f vfd_swmr_bigset_writer.{out,rc}
+    rm -f vfd_swmr_bigset_reader.*.{out,rc}
+    rm -f aux_process.{out,rc}
+    rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 # bigset test for bigger chunks
 for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d 1 -t -F -l 10" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
-	#
-	# Test a few big datasets of two or three dimensions.
-	#
-	# Perform 25 iterations on 10 extensible datasets configured with
-	# 2D 256x256 chunks or 3D 8x256x256 of 32-bit unsigned integer elements,
-	# expanding each dataset by a chunk in one dimension (up to 25x1
-	# 256x256 chunks) on each iteration.
-	#
-	# Perform the test again, extending each dataset
-	# in *two* dimensions (up to 25x25 256x256 chunks).
-	#
-        # If testing 3D datasets (-t option), extending each dataset along the
-        # first dimension (up to 25 8x256x256)
-        #
+    #
+    # Test a few big datasets of two or three dimensions.
+    #
+    # Perform 25 iterations on 10 extensible datasets configured with
+    # 2D 256x256 chunks or 3D 8x256x256 of 32-bit unsigned integer elements,
+    # expanding each dataset by a chunk in one dimension (up to 25x1
+    # 256x256 chunks) on each iteration.
+    #
+    # Perform the test again, extending each dataset
+    # in *two* dimensions (up to 25x25 256x256 chunks).
+    #
+    # If testing 3D datasets (-t option), extending each dataset along the
+    # first dimension (up to 25 8x256x256)
+    #
 
-	if [ ${do_few_big:-no} = no ]; then
-		continue
-	fi
-	echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
+    if [ ${do_few_big:-no} = no ]; then
+        continue
+    fi
+    echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
 
-        # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
-        # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
-        # VDS across multiple files (-M option), the program also skips for future support.
+    # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+    # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+    # VDS across multiple files (-M option), the program also skips for future support.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
         if [[ $options == *"-M"* ]]; then
-	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
         else
-	    catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
         fi
         pid_aux_proc=$!
+    fi
 
-	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
-	pid_writer=$!
+    catch_out_err_and_rc vfd_swmr_bigset_writer \
+        ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
+    pid_writer=$!
 
-	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
-	pid_reader=$!
+    catch_out_err_and_rc vfd_swmr_bigset_reader \
+        ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
+    pid_reader=$!
 
-	# Wait for the reader to finish before signalling the
-	# writer to quit: the writer holds the file open so that the
-	# reader will find the shadow file when it opens
-	# the .h5 file. Also wait for the auxiliary process to finish.
+    # Wait for the reader to finish before signalling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file. Also wait for the auxiliary process to finish.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
         wait $pid_aux_proc
-	wait $pid_reader
-	wait $pid_writer
+    fi
+    wait $pid_reader
+    wait $pid_writer
 
 	# Collect exit code of the auxiliary process
-	if [ $(cat aux_process.rc) -ne 0 ]; then
-		echo the auxiliary process had error
-		nerrors=$((nerrors + 1))
-	fi
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [ $(cat aux_process.rc) -ne 0 ]; then
+            echo the auxiliary process had error
+            nerrors=$((nerrors + 1))
+        fi
+    fi
 
-	# Collect exit code of the reader
-	if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
-		echo reader had error
-		nerrors=$((nerrors + 1))
-	fi
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
 
-	# Collect exit code of the writer
-	if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
-	    echo writer had error
-	    nerrors=$((nerrors + 1))
-	fi
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
 
-	# Clean up output files
-	rm -f vfd_swmr_bigset_writer.{out,rc}
-	rm -f vfd_swmr_bigset_reader.*.{out,rc}
-        rm -f aux_process.{out,rc}
-        rm -f mdfile bigset_updater.* bigset-shadow-*
+    # Clean up output files
+    rm -f vfd_swmr_bigset_writer.{out,rc}
+    rm -f vfd_swmr_bigset_reader.*.{out,rc}
+    rm -f aux_process.{out,rc}
+    rm -f mdfile bigset_updater.* bigset-shadow-*
 done
 
 ###############################################################################
@@ -1563,7 +1581,7 @@ fi
 # Only for exhaustive run
 #
 # Verify that meaningful message about increasing max_lag is printed when
-# incorrect metadata checksum error is enountered when loading the cache entry.
+# incorrect metadata checksum error is encountered when loading the cache entry.
 #
 # Note that there will be messages from the error stack printed out for this test.
 # This is expected.
