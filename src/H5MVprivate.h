@@ -14,7 +14,7 @@
  *
  * Created:             H5MVprivate.h
  *
- * Purpose:             Private header file for VFD SWMR free space mangement
+ * Purpose:             Private header file for VFD SWMR free space management
  *
  *-------------------------------------------------------------------------
  */

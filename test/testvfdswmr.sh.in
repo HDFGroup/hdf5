@@ -1563,7 +1563,7 @@ fi
 # Only for exhaustive run
 #
 # Verify that meaningful message about increasing max_lag is printed when
-# incorrect metadata checksum error is enountered when loading the cache entry.
+# incorrect metadata checksum error is encountered when loading the cache entry.
 #
 # Note that there will be messages from the error stack printed out for this test.
 # This is expected.

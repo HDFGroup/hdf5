@@ -1117,7 +1117,7 @@ error:
  * Purpose:     Add some attributes to the group.
  *              First, the number of attributes should be the maximal number
  *              of attributes that the compact storage can hold.
- *              Then,  add another atribute, the storage becomes dense.
+ *              Then,  add another attribute, the storage becomes dense.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file
@@ -1253,7 +1253,7 @@ error:
  * Purpose:     Add some attributes to the group and then delete one attribute.
  *              First, the number of attributes to be added should be the
  *              maximal number of attributes that the compact storage can hold.
- *              Then,  delete one atribute, the storage is still compact.
+ *              Then,  delete one attribute, the storage is still compact.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file
@@ -1299,7 +1299,7 @@ add_del_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
  *              First, the number of attributes to be added exceeds
  *              the maximal number of attributes that the compact storage can hold.
  *              The storage changes from compact to dense.
- *              Then,  delete one atribute, the storage is still dense.
+ *              Then,  delete one attribute, the storage is still dense.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file
@@ -1473,7 +1473,7 @@ del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
  * Function:    add_group_attribute
  *
  * Purpose:     Check the attribute test pattern and then call the
- *              correponding test function..
+ *              corresponding test function.
  *
  * Parameters:  state_t *s
  *              The struct that stores information of HDF5 file
@@ -2814,7 +2814,7 @@ main(int argc, char **argv)
     if (s.nglevels > 0) {
         if (s.grp_op_pattern != ' ' || s.at_pattern != ' ') {
             printf("For nested group creation test, only the default option is supported.\n");
-            printf("Please re-run the tests with the appopriate option.\n");
+            printf("Please re-run the tests with the appropriate option.\n");
             TEST_ERROR;
         }
     }
@@ -2946,7 +2946,7 @@ main(int argc, char **argv)
                 fprintf(stdout, " Not using VFD SWMR \n");
 
             if (s.old_style_grp)
-                fprintf(stdout, " Groups: Created via the earlist file format(old-style) \n");
+                fprintf(stdout, " Groups: Created via the earliest file format(old-style) \n");
             else
                 fprintf(stdout, " Groups: Created via the latest file format(new-style) \n");
 

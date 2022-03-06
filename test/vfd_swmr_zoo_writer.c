@@ -145,7 +145,7 @@ parse_command_line_options(int argc, char **argv)
                 }
                 break;
             case 'N':
-                /* Disable named pipes, mainly for running the writer and reader seperately */
+                /* Disable named pipes, mainly for running the writer and reader separately */
                 use_named_pipe = false;
                 break;
             case 'q':

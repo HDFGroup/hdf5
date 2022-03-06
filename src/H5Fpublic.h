@@ -322,7 +322,7 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *          An integer field indicating the threshold for the page buffer size.
  *          During a tick, the page buffer must expand as necessary to retain copies
  *          of all modified metadata pages and multi-page metadata entries.
- *          If the page buffer size exceeds this thresold, an early end of tick
+ *          If the page buffer size exceeds this threshold, an early end of tick
  *          will be triggered.
  *          Note that this is not a limit on the maximum page buffer size, as the
  *          metadata cache is flushed as part of end of tick processing.

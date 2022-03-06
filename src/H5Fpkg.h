@@ -482,7 +482,7 @@ struct H5F_shared_t {
                                * file
                                */
     uint64_t updater_seq_num; /* Sequence number of the next updater file to be
-                               * genereated.  This field must be initialized to zero,
+                               * generated.  This field must be initialized to zero,
                                * and incremented after each updater file is generated.
                                */
 

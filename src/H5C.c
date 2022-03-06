@@ -1169,10 +1169,10 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
                      *    Note that this will be satisfied from the metadata
                      *    file via the VFD SWMR reade VFD.
                      *
-                     *    For this reason, we don't nead to check for reads
+                     *    For this reason, we don't need to check for reads
                      *    past the EOA.  Torn reads and checksums are also
                      *    not an issue, since pages in the metadata file
-                     *    are checksumed and re-tried if necessary in the
+                     *    are checksummed and re-tried if necessary in the
                      *    VFD SWMR reader VFD.
                      */
                     if (NULL == (image_ptr = (uint8_t *)H5MM_malloc(image_len + H5C_IMAGE_EXTRA_SPACE)))
@@ -7794,11 +7794,11 @@ init_len = len;
                      * initial portion of the buffer.
                      *
                      * In addition to being of questionable utility,
-                     * this optimization changed the invarient that
+                     * this optimization changed the invariant that
                      * that metadata is read and written atomically.
                      * While this didn't cause immediate problems,
                      * the page buffer in VFD SWMR depends on this
-                     * invarient in its management of multi-page
+                     * invariant in its management of multi-page
                      * metadata entries.
                      *
                      * To repair this issue, I have reverted to
@@ -7814,7 +7814,7 @@ init_len = len;
                      * disable it in the VFD SWMR case.
                      *
                      * While this issue was detected in the global
-                     * heap case, note that the super bloc, the
+                     * heap case, note that the super block, the
                      * local heap, and the fractal heap also use
                      * speculative loads.
                      *

@@ -153,7 +153,7 @@
             /* successor at head of list -- prepend */                                                       \
             H5PB__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                            \
                                                                                                              \
-        else /* sucessor in body of list -- insert before it */                                              \
+        else /* successor in body of list -- insert before it */                                              \
         {                                                                                                    \
             H5PB__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                      \
             HDassert(suc_ptr->prev->magic == H5PB__H5PB_ENTRY_T_MAGIC);                                      \
@@ -278,7 +278,7 @@
             /* successor at head of list -- prepend */                                                       \
             H5PB__IL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                         \
                                                                                                              \
-        else /* sucessor in body of list -- insert before it */                                              \
+        else /* successor in body of list -- insert before it */                                              \
         {                                                                                                    \
             H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                   \
             HDassert(suc_ptr->il_prev->magic == H5PB__H5PB_ENTRY_T_MAGIC);                                   \
@@ -1458,7 +1458,7 @@
  * Macro:	H5PB__INSERT_IN_DWL
  *
  * Insert the supplied page buffer entry in the delayed write list
- * maintaining the invarient:
+ * maintaining the invariant:
  *
  *    entry_ptr->next == NULL ||
  *    entry_ptr->delay_write_until >= entry_ptr->next->delay_write_until
@@ -1599,7 +1599,7 @@
  * Fields supporting the hash table:
  *
  * Entries in the page buffer are indexed by a more or less conventional
- * hash table with chaining (see header comment on H5PB_t for futher details).
+ * hash table with chaining (see header comment on H5PB_t for further details).
  * If there are multiple entries in any hash bin, they are stored in a doubly
  * linked list.
  *
@@ -1647,7 +1647,7 @@
  * Fields supporting VFD SWMR:
  *
  * is_mpmde:    Boolean flag that is set to TRUE iff the entry
- *              is a multi-page metadata entry.  In the absense of VFD
+ *              is a multi-page metadata entry.  In the absence of VFD
  *              SWMR, the field should always be set to FALSE.
  *
  *              Observe that:
@@ -1668,15 +1668,15 @@
  *
  * delay_write_until: Unsigned 64 bit integer containing the first tick
  *              in which the entry may be written to file, or 0 if there
- *              is no such constraint.  It should be set ot 0 when VFD
+ *              is no such constraint.  It should be set to 0 when VFD
  *              is not enabled.
  *
  * tl_next:     Next pointer on the list of entries modified in the current
- *              tick,  If the enty is not on the tick list, or if there is
+ *              tick,  If the entry is not on the tick list, or if there is
  *              no next entry on the list, this field should be set to NULL.
  *
  * tl_prev:     Prev pointer on the list of entries modified in the current
- *              tick,  If the enty is not on the tick list, or if there is
+ *              tick,  If the entry is not on the tick list, or if there is
  *              no previous entry on the list, this field should be set to
  *              NULL.
  *

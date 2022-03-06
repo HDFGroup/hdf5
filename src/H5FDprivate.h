@@ -88,7 +88,7 @@
  *
  *  struct H5FD_vfd_swmr_idx_entry_t
  *
- * Indicies into the VFD SWMR metadata file are maintained in arrays of
+ * Indices into the VFD SWMR metadata file are maintained in arrays of
  * instances of H5FD_vfd_swmr_index_t.
  *
  * The fields of H5FD_vfd_swmr_idx_entry_t are discussed below.
@@ -182,7 +182,7 @@ typedef struct H5FD_vfd_swmr_idx_entry_t {
  *  tick_num:       Sequence number of the current tick.
  *                  Initialized to zero on file creation/open, and incremented
  *                  by the VFD SWMR writer at the end of each tick.
- *  num_entries:    The number of entires in the index.
+ *  num_entries:    The number of entries in the index.
  *  entries:        The array of index entries
  */
 typedef struct H5FD_vfd_swmr_md_index {

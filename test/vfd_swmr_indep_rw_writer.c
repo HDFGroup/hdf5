@@ -492,7 +492,7 @@ open_dset(state_t *s)
 
     s->r_dsetid = dset_id;
     if (i == NUM_ATTEMPTS) {
-        HDfprintf(stderr, "dataset opening reachs the maximal number of attempts\n");
+        HDfprintf(stderr, "dataset opening reaches the maximal number of attempts\n");
         TEST_ERROR;
     }
 

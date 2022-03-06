@@ -1592,17 +1592,17 @@ main(void)
 #endif
 
     /*-------------------------------------------------------------------------
-     * test file with aligment
+     * test file with alignment
      *-------------------------------------------------------------------------
      */
-    TESTING("    file with aligment");
+    TESTING("    file with alignment");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
 
-    /* add the options for aligment */
+    /* add the options for alignment */
     pack_options.alignment = 1;
     pack_options.threshold = 1;
 
@@ -1613,7 +1613,7 @@ main(void)
     if (h5repack_verify(FNAME8, FNAME8OUT, &pack_options) <= 0)
         GOERROR;
 
-    /* verify aligment */
+    /* verify alignment */
     {
         hsize_t threshold;
         hsize_t alignment;

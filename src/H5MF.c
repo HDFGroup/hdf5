@@ -1355,7 +1355,7 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
      * Further, in the VFD SWMR case, the large metadata entry will typically
      * be buffered in the page buffer.  If an intersecting entry is left
      * in the page buffer, in addition to causing potential corruption in
-     * the HDF5 file, it may also result in overlaping entries in the page
+     * the HDF5 file, it may also result in overlapping entries in the page
      * buffer and metadata file index.
      *
      * It's ok to remove the page from the PB without flushing to

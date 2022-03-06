@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  Purpose: To demostrate the four issues uncovered during the test plan
+ *  Purpose: To demonstrate the four issues uncovered during the test plan
  *           1.4 part 1.
  *
  *           Setup:
@@ -19,7 +19,7 @@
  *            1) Create an HDF5 file
  *            2) Create many groups
  *            3) Use the named pipe to send the reader a message to start verifying
- *            4) Call H5Fvfd_swmr_end_tick immeidately after sending out the message to the reader
+ *            4) Call H5Fvfd_swmr_end_tick immediately after sending out the message to the reader
  *            5) Sleep for two ticks before receiving a message from the reader that informs the reader
  *               started verifying
  *            6) If the option to delete the group is off(by default), just sleep for a relatively long time,
@@ -163,7 +163,7 @@ usage(const char *progname)
               "-G:             old-style type of group\n"
               "-n ngroups:     the number of groups\n"
               "-N:             do not use named pipes, \n"
-              "                mainly for running the writer and reader seperately\n"
+              "                mainly for running the writer and reader separately\n"
               "-t tick_len:    length of a tick in tenths of a second.\n"
               "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
               "-B pbs:         page buffer size in bytes:\n"

@@ -879,7 +879,7 @@ typedef struct H5C_t H5C_t;
  *      managers.
  *
  *      The refresh entry callback exists to address this issue.  As
- *      indicated above, it is essential for the superblock, and desireable
+ *      indicated above, it is essential for the superblock, and desirable
  *      whenever it is not possible to simply evict an entry that resides
  *      in a modified page cache page.
  *
@@ -1680,7 +1680,7 @@ typedef int H5C_ring_t;
  *
  * refreshed_in_tick: When an entry is refreshed as part of the VFD SWMR
  *              reader end of tick processing, this field is used to
- *              record the tick in which this occured.  The field is
+ *              record the tick in which this occurred.  The field is
  *              used primarily for sanity checking.
  *
  * pi_next:     Next pointer used by the page index hash table that maps

@@ -113,7 +113,7 @@ static unsigned test_updater_generate_md_checksums(hbool_t file_create);
  *                   then updater_file_path field shouldn't be empty
  *              B) Verify that info set in the fapl is retrieved correctly.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; July 2018
@@ -307,7 +307,7 @@ error:
  *                 used to create/open the file is the same as the
  *                 configuration retrieved from the file's fapl.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; July 2018
@@ -639,7 +639,7 @@ error:
  * Purpose:     Verify the public routine H5Fvfd_swmr_end_tick() works
  *              as described in the RFC for VFD SWMR.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -882,7 +882,7 @@ error:
  *                  --Verify info in the header and index read from
  *                    the metadata file is as expected (empty index)
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -994,7 +994,7 @@ error:
  *                file is as expected:
  *                --num_entries and index
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -1297,7 +1297,7 @@ test_file_end_tick_concur(void)
  *                    Index entries are constructed at the front end by the
  *                    writer and verified at the back end by the reader.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -1634,7 +1634,7 @@ test_reader_md_concur(void)
     /* Get the file pointer */
     file_writer = H5VL_object(fid_writer);
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -1945,7 +1945,7 @@ error:
  * Purpose:     Verify the entries on the EOT queue when opening files
  *              with and without VFD SWMR configured.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; 11/18/2019
@@ -2258,7 +2258,7 @@ error:
  *              enables/disables EOT when the files are opened
  *              concurrently.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -2485,7 +2485,7 @@ test_disable_enable_eot_concur(void)
     if ((fid_writer = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_writer)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -2550,7 +2550,7 @@ error:
  *              triggers end of tick processing when the files
  *              are opened concurrently.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -2759,7 +2759,7 @@ test_file_end_tick_concur(void)
     if ((fid_writer = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_writer)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -2825,7 +2825,7 @@ error:
  * Purpose:     Verify the entries on the EOT queue when opening files
  *              with and without VFD SWMR configured.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; 11/18/2019
@@ -3018,7 +3018,7 @@ error:
  *        f: the open fails
  *        s: the open succeeds
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2019
@@ -3420,7 +3420,7 @@ out:
  *                  H5Fvfd_swmr_disable_end_of_tick()
  *               enables/disables EOT for the specified file
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -3694,7 +3694,7 @@ error:
  * Purpose:     This is the helper routine used to verify whether
  *              "flags" in the updater file is as expected.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -3738,7 +3738,7 @@ error:
  * Purpose:     Verify "flags" in the updater file is as expected for
  *              file creation.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -3881,7 +3881,7 @@ error:
  * Purpose:     Verify "flags" in the updater file is as expected for
  *              multiple opens of the same file.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4074,7 +4074,7 @@ clean_chk_ud_files(char *md_file_path, char *updater_file_path)
  *                is consistent with num_change_list_entries in each updater's
  *                change list header
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4189,7 +4189,7 @@ error:
  *                  --Generate checksum for the metadata file
  *                  --Write the tick number and the checksum to the checksum file
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4288,7 +4288,7 @@ error:
  *              The test is invoked when the file is created via H5Fcreate()
  *              and via H5Fopen().
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4391,7 +4391,7 @@ error:
  *
  * Purpose:     Main function for VFD SWMR tests.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  *-------------------------------------------------------------------------

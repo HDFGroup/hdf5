@@ -81,7 +81,7 @@ h5_retry_init(struct h5_retry_t *r, unsigned int maxtries, uint64_t minival, uin
     return h5_retry_decrement(r);
 }
 
-/* If any tries remain, sleep for the mininum interval, or twice the
+/* If any tries remain, sleep for the minimum interval, or twice the
  * previous sleep time, and return true.  If no tries remain, return false.
  */
 static inline bool

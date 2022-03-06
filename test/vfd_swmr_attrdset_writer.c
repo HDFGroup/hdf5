@@ -1123,7 +1123,7 @@ add_attr(const state_t *s, hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Write to the attribure */
+    /* Write to the attribute */
     if (H5Awrite(aid, tid, s->vl_attr ? &val : (const void *)&which) < 0) {
         HDprintf("H5Awrite failed\n");
         TEST_ERROR;
@@ -1207,7 +1207,7 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Write to the attribure */
+    /* Write to the attribute */
     if (H5Awrite(aid, tid, s->vl_attr ? &val : (const void *)&tmp_val) < 0) {
         HDprintf("H5Awrite failed\n");
         TEST_ERROR;
@@ -1277,7 +1277,7 @@ error:
  *
  * Also verify continuation block and compact<->dense storage if:
  *      --[-c <csteps>] is 1
- *      --not appliable for -m option
+ *      --not applicable for -m option
  */
 static bool
 verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)

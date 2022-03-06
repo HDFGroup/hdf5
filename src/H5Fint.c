@@ -1843,7 +1843,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* When configured with VFD SWMR */
     if (vfd_swmr_config_ptr->version) {
-        /* Verify that file access flags are consistent with VFD SWMR configuartion */
+        /* Verify that file access flags are consistent with VFD SWMR configuration */
         if ((flags & H5F_ACC_RDWR) && !vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is writer but VFD SWMR config is reader")
         if ((flags & H5F_ACC_RDWR) == 0 && vfd_swmr_config_ptr->writer)

@@ -4664,7 +4664,7 @@ typedef struct H5C_tag_info_t {
  *              This field exists because the fixed and variable length
  *              array cache clients allocate numerous entries in a single
  *              block, and sub-allocate metadata cache entries out of this
- *              block.  The effect of this is to break the invarient,
+ *              block.  The effect of this is to break the invariant,
  *              normally maintained by the free space managers in paged
  *              allocation mode, that no entry of less than a page in
  *              size crosses page boundaries, and that entries of page
@@ -4674,7 +4674,7 @@ typedef struct H5C_tag_info_t {
  *
  *              The correct solution is to modify the fixed and variable
  *              length array cache client to repair this.  However, in
- *              the interrim, this field exists to detect similar
+ *              the interim, this field exists to detect similar
  *              behaviour elsewhere.
  *
  *              To complicate matters, speculative reads for metadata
@@ -5029,7 +5029,7 @@ typedef struct H5C_tag_info_t {
  *              This field exists because the fixed and variable length
  *              array cache clients allocate numerous entries in a single
  *              block, and sub-allocate metadata cache entries out of this
- *              block.  The effect of this is to break the invarient,
+ *              block.  The effect of this is to break the invariant,
  *              normally maintained by the free space managers in paged
  *              allocation mode, that no entry of less than a page in
  *              size crosses page boundaries, and that entries of page
@@ -5039,7 +5039,7 @@ typedef struct H5C_tag_info_t {
  *
  *              The correct solution is to modify the fixed and variable
  *              length array cache client to repair this.  However, in
- *              the interrim, this field exists to detect similar
+ *              the interim, this field exists to detect similar
  *              behaviour elsewhere.
  *
  ****************************************************************************/

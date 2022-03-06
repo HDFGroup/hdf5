@@ -293,7 +293,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
               (page_buf->bypasses[0] + page_buf->bypasses[1] + page_buf->bypasses[2]), page_buf->bypasses[0],
               page_buf->bypasses[1], page_buf->bypasses[2]);
 
-    HDfprintf(stdout, "acesses    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
+    HDfprintf(stdout, "accesses    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (page_buf->accesses[0] + page_buf->accesses[1] + page_buf->accesses[2]), page_buf->accesses[0],
               page_buf->accesses[1], page_buf->accesses[2]);
 
@@ -920,7 +920,7 @@ H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
  *                 max_pages), simply read from the HDF5 file and return.
  *
  *              The free space manager guarantees that allocations larger
- *              than one page will be page alligned, and that allocations
+ *              than one page will be page aligned, and that allocations
  *              of size less than or equal to page size will not cross page
  *              boundaries.  Further, unlike raw data, metadata is always
  *              written and read atomically.
@@ -1048,7 +1048,7 @@ H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
  * Changes:     Updated for discovery of the fact that the fixed and
  *              extensible array data structures allocate multiple
  *              metadata cache entries in a single block, and thus
- *              violate that invarient that metadata entries either
+ *              violate that invariant that metadata entries either
  *              do not cross page boundaries, or are page aligned.
  *
  *                                               JRM -- 3/28/20
@@ -1201,7 +1201,7 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, void
                      *         empty.
                      *
                      * Since we know that the read crosses at least one
-                     * page boundary, and we have aleady filtered out the
+                     * page boundary, and we have already filtered out the
                      * body only case, at least two of the above must be
                      * non-empty.
                      */
@@ -1538,7 +1538,7 @@ done:
  *              In all contexts, there is no guarantee that the page buffer
  *              will contain any of the possible entries.
  *
- *              Space allocations larger than one page must be page alligned.
+ *              Space allocations larger than one page must be page aligned.
  *              Further, any space between the end of a multi-page allocation
  *              and the next page boundary will remain un-allocated until after
  *              the original allocation is freed.  This implies that:
@@ -1896,7 +1896,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
             }
         }
         /* if the entry is not a multi-page metadata entry, it must already
-         * be on either the replacment policy or the delayed write list.
+         * be on either the replacement policy or the delayed write list.
          * In either case, it will be flush when possible and necessary.
          */
     }
@@ -2232,7 +2232,7 @@ done:
  *                 max_pages), simply write to the HDF5 file and return.
  *
  *              The free space manager guarantees that allocations larger
- *              than one page will be page alligned, and that allocations
+ *              than one page will be page aligned, and that allocations
  *              of size less than or equal to page size will not cross page
  *              boundaries.  Further, unlike raw data, metadata is always
  *              written and read atomically.
@@ -2252,7 +2252,7 @@ done:
  *              structures, it complicates the metadata cache and the page
  *              buffer.
  *
- *              From the page buffer perspective, it breaks the invarient
+ *              From the page buffer perspective, it breaks the invariant
  *              that metadata entries of less than page size don't cross
  *              page boundaries, and those of size greater than or equal
  *              to page size start on page boundaries -- which is important
@@ -2507,7 +2507,7 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, con
                      *         empty.
                      *
                      * Since we know that the write crosses at least one
-                     * page boundary, and we have aleady filtered out the
+                     * page boundary, and we have already filtered out the
                      * body only case, at least two of the above must be
                      * non-empty.
                      */
@@ -3135,7 +3135,7 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *const en
      *       true in all cases.
      */
 
-    /* Verify that the base addresss of the page is within the EOA.  If it
+    /* Verify that the base address of the page is within the EOA.  If it
      * isn't, the associated page has been discarded and should have been
      * removed from the page buffer.  This is a bug in the HDF5 library, so
      * an assertion is adequate here.
@@ -3350,7 +3350,7 @@ done:
  *
  *              evict the entry and test to see if page_buf->curr_pages <
  *              page_buf->max_pages.  If it is, return.  Otherwise, continue
- *              the scan until either the above condidtion is fulfilled,
+ *              the scan until either the above condition is fulfilled,
  *              or the head of the LRU is reach.
  *
  *              Under normal circumstances, it should always be possible
@@ -3721,7 +3721,7 @@ done:
  *   Y   |  Y   | MPMDE  |  N   |    X    | Error (case 9)
  * ------+------+--------+------+---------+-------------------------------------
  *   Y   |  Y   | MPMDE  |  Y   |    X    | Clip read to MPE size if required.
- *       |      |        |      |         | Satify read from MPE (case 9)
+ *       |      |        |      |         | Satisfy read from MPE (case 9)
  * ------+------+--------+------+---------+-------------------------------------
  *       |      |        |      |         |
  * ------+------+--------+------+---------+-------------------------------------
@@ -4191,7 +4191,7 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
                     else {
 
                         /* this is an internal page -- copy it in its
-                         * entireity.
+                         * entirety.
                          */
 
                         offset =
@@ -4371,7 +4371,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
     H5PB_t *      page_buf;            /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
     uint64_t      page;                /* page offset of addr */
-    haddr_t       page_addr;           /* page containg addr */
+    haddr_t       page_addr;           /* page containing addr */
     size_t        offset;              /* offset of write in page */
     herr_t        ret_value = SUCCEED; /* Return value */
 

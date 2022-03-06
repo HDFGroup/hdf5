@@ -828,7 +828,7 @@ clean_shadow_index(H5F_t *f, uint32_t nentries, H5FD_vfd_swmr_idx_entry_t *idx, 
  *               dirty the first page in the HDF5 file.  However, the
  *               metadata cache will no longer exist at this point.
  *
- *               Thus, we must check for the existance of the metadata
+ *               Thus, we must check for the existence of the metadata
  *               cache, and only attempt to flush it if it exists.
  *
  *            3) If this is the first tick (i.e. tick == 1), create the
@@ -1021,7 +1021,7 @@ update_eot:
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 done:
-    /* Kent: Calcuate the processing time and write the time info to the log file */
+    /* Kent: Calculate the processing time and write the time info to the log file */
     if (shared->vfd_swmr_log_on == true) {
         if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
@@ -1105,11 +1105,11 @@ done:
  *
  *              If any such pages or multi-page metadata entries are found:
  *
- *                 a) direct the page buffer to evict any such superceeded
+ *                 a) direct the page buffer to evict any such superseded
  *                    pages, and
  *
  *                 b) direct the metadata cache to either evict or refresh
- *                    any entries residing in the superceeded pages.
+ *                    any entries residing in the superseded pages.
  *
  *              Note that this operation MUST be performed in this order,
  *              as the metadata cache will refer to the page buffer
@@ -2276,7 +2276,7 @@ H5F__vfd_swmr_construct_ud_cl(H5F_vfd_swmr_updater_t *updater)
  *              --determine num_change_list entries
  *              --allocate buffers
  *              --construct on disk image (serialize) of the updater header and change list
- *              --create updater file using a temporay file name:
+ *              --create updater file using a temporary file name:
  *                  --<shared->vfd_swmr_config.updater_file_path>.ud_tmp
  *              --allocate space and write the following to the updater file
  *                  --updater file header

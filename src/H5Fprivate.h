@@ -936,7 +936,7 @@ typedef enum H5F_prefix_open_t {
  *  the past tick is used to assemble the associated data in preparation for
  *  writing an updater file.
  *
- *  Each entry in this array pertains to a given modified metdata page or
+ *  Each entry in this array pertains to a given modified metadata page or
  *  multi-page metadata entry, and contains the following fields:
  *
  *  entry_image_ptr: void pointer to a buffer containing the image of the
