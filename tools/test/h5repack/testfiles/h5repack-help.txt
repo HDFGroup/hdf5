@@ -21,6 +21,18 @@ usage: h5repack [OPTIONS] file1 file2
                            HDF5 file specified
    --dst-vol-info          VOL-specific info to pass to the VOL connector used for
                            opening the output HDF5 file specified
+   --src-vfd-value         Value (ID) of the VFL driver to use for opening the
+                           input HDF5 file specified
+   --src-vfd-name          Name of the VFL driver to use for opening the input
+                           HDF5 file specified
+   --src-vfd-info          VFD-specific info to pass to the VFL driver used for
+                           opening the input HDF5 file specified
+   --dst-vfd-value         Value (ID) of the VFL driver to use for opening the
+                           output HDF5 file specified
+   --dst-vfd-name          Name of the VFL driver to use for opening the output
+                           HDF5 file specified
+   --dst-vfd-info          VFD-specific info to pass to the VFL driver used for
+                           opening the output HDF5 file specified
    -L, --latest            Use latest version of file format
                            This option will take precedence over the options
                            --low and --high

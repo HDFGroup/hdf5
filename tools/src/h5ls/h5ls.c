@@ -244,6 +244,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-value     Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-name      Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-info      VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
     PRINTVALSTREAM(rawoutstream, "    Each object consists of an HDF5 file name optionally followed by a\n");

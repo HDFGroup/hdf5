@@ -657,6 +657,24 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-1            Name of the VFL driver to use for opening the first\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-1            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-value-2           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-2            Name of the VFL driver to use for opening the second\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-2            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Follow symbolic links (soft links and external links and compare the)\n");

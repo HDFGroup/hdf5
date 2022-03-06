@@ -441,7 +441,7 @@ struct H5F_shared_t {
                                          */
     uint32_t mdf_idx_entries_used;      /* Number of entries in *mdf_idx
                                          * that are in use -- these will
-                                         * be contiguous at indicies 0
+                                         * be contiguous at indices 0
                                          * through mdf_idx_entries_used - 1.
                                          */
 

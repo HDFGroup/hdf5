@@ -113,6 +113,24 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the output HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vfd-value         Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vfd-name          Name of the VFL driver to use for opening the input\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --src-vfd-info          VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the input HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vfd-value         Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           output HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vfd-name          Name of the VFL driver to use for opening the output\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --dst-vfd-info          VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the output HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
     PRINTVALSTREAM(rawoutstream,
                    "                           This option will take precedence over the options\n");

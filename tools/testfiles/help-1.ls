@@ -54,6 +54,12 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
                    HDF5 file specified
    --vol-info      VOL-specific info to pass to the VOL connector used for
                    opening the HDF5 file specified
+   --vfd-value     Value (ID) of the VFL driver to use for opening the
+                   HDF5 file specified
+   --vfd-name      Name of the VFL driver to use for opening the
+                   HDF5 file specified
+   --vfd-info      VFD-specific info to pass to the VFL driver used for
+                   opening the HDF5 file specified
 
   file/OBJECT
     Each object consists of an HDF5 file name optionally followed by a
