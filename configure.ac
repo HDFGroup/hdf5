@@ -3043,6 +3043,138 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+## Build parallel tools if parallel tools, parallel, and build tools options
+## are all enabled.
+##
+AC_SUBST([PARALLEL_TOOLS])
+
+## Default is no parallel tools
+PARALLEL_TOOLS=no
+
+AC_MSG_CHECKING([parallel tools])
+AC_ARG_ENABLE([parallel-tools],
+              [AS_HELP_STRING([--enable-parallel-tools],
+                              [Enable building parallel tools.
+                              [default=no]])],
+              [PARALLEL_TOOLS=$enableval])
+
+if test "X${PARALLEL_TOOLS}" = "Xyes"; then
+  if test "X${HDF5_TOOLS}" != "Xyes"; then
+    AC_MSG_ERROR([--enable-tools is required for --enable-parallel-tools])
+  fi
+  if test "X${PARALLEL}" != "Xyes"; then
+    AC_MSG_ERROR([--enable-parallel is required for --enable-parallel-tools])
+  fi
+fi
+
+case "X-$PARALLEL_TOOLS" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+  ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+  ;;
+  *)
+  ;;
+esac
+
+if test "X${PARALLEL_TOOLS}" = "Xyes"; then
+  ## Is the mpiFileUtils library (libmfu) required and available?
+  ##
+  AC_SUBST([H5DWALK_LDFLAGS])
+  AC_SUBST([H5DWALK_LIBS])
+  AC_SUBST([H5DWALK_CPPFLAGS])
+
+  H5DWALK_LDFLAGS="${H5DWALK_LDFLAGS}"
+
+  ## Default is not present
+  HAVE_LIBMFU=no
+
+  AC_ARG_WITH([libmfu],
+              [AS_HELP_STRING([--with-libmfu=DIR],
+                              [Use the libmfu library [default=no]])],,
+              [withval=no])
+
+  case "X-$withval" in
+    X-yes)
+      HAVE_LIBMFU="yes"
+      AC_CHECK_HEADERS([mfu.h],, [unset HAVE_LIBMFU])
+      if test "x$HAVE_LIBMFU" = "xyes"; then
+        AC_CHECK_LIB([mfu], [mfu_init], [H5DWALK_LIBS="-lmfu"], [unset HAVE_LIBMFU])
+      fi
+      if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find libmfu library])
+      fi
+      ;;
+    X-|X-no|X-none)
+      HAVE_LIBMFU="no"
+      AC_MSG_CHECKING([for libmfu library])
+      AC_MSG_RESULT([suppressed])
+      ;;
+    *)
+      HAVE_LIBMFU="yes"
+      case "$withval" in
+        *,*)
+          libmfu_inc="`echo $withval |cut -f1 -d,`"
+          libmfu_lib="`echo $withval |cut -f2 -d, -s`"
+          ;;
+        *)
+          if test -n "$withval"; then
+            libmfu_inc="$withval/include"
+            libmfu_lib="$withval/lib64"
+            libcircle_lib="$withval/lib"
+          fi
+          ;;
+      esac
+
+      saved_CPPFLAGS="$CPPFLAGS"
+      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+      saved_LDFLAGS="$LDFLAGS"
+      saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+  ## For these checks we need the libmfu locations added to CPPFLAGS,
+  ## AM_CPPFLAGS, LDFLAGS, and AM_LDFLAGS.  The third param should set them
+  ## back to these saved values.  If the checks pass, then normally these four
+  ## flag variables would be updated, but in this case we put the changes in
+  ## variables specific to H5DWALK since they aren't used elsewhere.
+    if test -n "$libmfu_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libmfu_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libmfu_inc"
+    fi
+
+    if test -n "$libmfu_lib"; then
+      LDFLAGS="$LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+    fi
+
+    if test "x$HAVE_LIBMFU" = "xyes"; then
+      AC_CHECK_LIB([mfu], [mfu_init],[H5DWALK_LIBS="-lmfu"], [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+      if test -n "$HAVE_LIBMFU"; then
+        AC_CHECK_HEADERS([mfu.h],[H5DWALK_CPPFLAGS="-I$libmfu_inc"],[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+      fi
+    fi
+
+    if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find libmfu library])
+    else
+      H5DWALK_LDFLAGS="-L$libmfu_lib -L$libcircle_lib"
+    fi
+
+    if test -z  "$LD_LIBRARY_PATH"; then
+      export LD_LIBRARY_PATH="$libmfu_lib:$libcircle_lib"
+    else
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$libmfu_lib:$libcircle_lib"
+    fi
+
+    LL_PATH="$LD_LIBRARY_PATH"
+    ;;
+  esac
+fi
+
+##
+AM_CONDITIONAL([PARALLEL_TOOLS_CONDITIONAL], [test "X$HAVE_LIBMFU" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if the map API is enabled by --enable-map-api
 ##
 AC_SUBST([MAP_API])
@@ -3192,7 +3324,7 @@ AC_MSG_CHECKING([if the auxiliary process is enabled])
 
 AC_ARG_ENABLE([aux-process],
               [AS_HELP_STRING([--enable-aux-process],
-                              [Build the auxiliary process for the VFD SWMR.
+                              [Build the auxiliary process for VFD SWMR.
                                [default=no]])],
               [AUX_PROCESS=$enableval], [AUX_PROCESS=no])
 
@@ -3203,6 +3335,9 @@ if test "X$AUX_PROCESS" = "Xyes"; then
 else
     AC_MSG_RESULT([no])
 fi
+
+## Aux process files built only if able.
+AM_CONDITIONAL([AUX_PROCESS_CONDITIONAL], [test "X$AUX_PROCESS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
@@ -4098,6 +4233,12 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  utils/Makefile
                  utils/mirror_vfd/Makefile
                  utils/test/Makefile
+                 utils/tools/Makefile
+                 utils/tools/h5dwalk/Makefile
+                 utils/tools/test/Makefile
+                 utils/tools/test/h5dwalk/Makefile
+                 utils/tools/test/h5dwalk/copy_demo_files.sh
+                 utils/tools/test/h5dwalk/testh5dwalk.sh
                  utils/vfd_swmr/Makefile
                  tools/Makefile
                  tools/lib/Makefile

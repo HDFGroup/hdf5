@@ -45,6 +45,8 @@ set (examples
 if (H5_HAVE_PARALLEL)
   set (parallel_examples
     ph5example
+    ph5_filtered_writes
+    ph5_filtered_writes_no_sel
   )
 endif ()
 

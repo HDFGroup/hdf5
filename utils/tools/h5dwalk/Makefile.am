@@ -11,40 +11,27 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Utils HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src directory
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib $(H5DWALK_CPPFLAGS)
 
-if BUILD_TESTS_CONDITIONAL
-   TESTUTIL_DIR =test
-else
-   TESTUTIL_DIR=
-endif
+# These are our main targets, the tools
+# h5dwalk_SOURCES=h5dwalk.c $(TOOLSOURCES)
+bin_PROGRAMS=h5dwalk
+#bin_SCRIPTS=install-examples
 
-if MIRROR_VFD_CONDITIONAL
-   MIRROR_VFD_DIR = mirror_vfd
-else
-   MIRROR_VFD_DIR=
-endif
+# Add h5stat specific linker flags here
+h5dwalk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(H5DWALK_LDFLAGS)
 
-if BUILD_TOOLS_CONDITIONAL
-   TOOLS_DIR =tools
-else
-   TOOLS_DIR=
-endif
+# Tell automake to clean h5redeploy script
+CLEANFILES=
 
-if AUX_PROCESS_CONDITIONAL
-   VFD_SWMR_DIR=vfd_swmr
-else
-   VFD_SWMR_DIR=
-endif
-
-# All subdirectories
-SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR) $(TOOLS_DIR) $(VFD_SWMR_DIR)
+# All programs rely on hdf5 library and h5tools library
+h5dwalk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(H5DWALK_LIBS)
 
 include $(top_srcdir)/config/conclude.am
