@@ -153,7 +153,7 @@
             /* successor at head of list -- prepend */                                                       \
             H5PB__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                            \
                                                                                                              \
-        else /* successor in body of list -- insert before it */                                              \
+        else /* successor in body of list -- insert before it */                                             \
         {                                                                                                    \
             H5PB__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                      \
             HDassert(suc_ptr->prev->magic == H5PB__H5PB_ENTRY_T_MAGIC);                                      \
@@ -278,7 +278,7 @@
             /* successor at head of list -- prepend */                                                       \
             H5PB__IL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                         \
                                                                                                              \
-        else /* successor in body of list -- insert before it */                                              \
+        else /* successor in body of list -- insert before it */                                             \
         {                                                                                                    \
             H5PB__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)                   \
             HDassert(suc_ptr->il_prev->magic == H5PB__H5PB_ENTRY_T_MAGIC);                                   \
