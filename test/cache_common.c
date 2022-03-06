@@ -23,10 +23,9 @@
 
 #include "cache_common.h"
 
-hbool_t     pass         = TRUE; /* set to false on error */
-const char *failure_mssg = NULL;
+hbool_t     pass              = TRUE; /* set to false on error */
+const char *failure_mssg      = NULL;
 const char *last_failure_mssg = "";
-
 
 static test_entry_t *pico_entries = NULL, *orig_pico_entries = NULL;
 static test_entry_t *nano_entries = NULL, *orig_nano_entries = NULL;
