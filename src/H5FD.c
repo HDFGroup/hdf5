@@ -917,7 +917,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = file;
 
 done:
-    /* XXX We leak H5FD_t's on many error conditions. */
     /* Can't cleanup 'file' information, since we don't know what type it is */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_open() */

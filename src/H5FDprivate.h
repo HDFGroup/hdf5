@@ -259,13 +259,6 @@ vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentri
 /* Definitions for file MPI type property */
 #define H5FD_MPI_XFER_FILE_MPI_TYPE_NAME "H5FD_mpi_file_mpi_type"
 
-/* Sub-class the H5FD_class_t to add more specific functions for MPI-based VFDs */
-typedef struct H5FD_class_mpi_t {
-    H5FD_class_t super;                       /* Superclass information & methods */
-    int (*get_rank)(const H5FD_t *file);      /* Get the MPI rank of a process */
-    int (*get_size)(const H5FD_t *file);      /* Get the MPI size of a communicator */
-    MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
-} H5FD_class_mpi_t;
 #endif
 
 /****************************/
