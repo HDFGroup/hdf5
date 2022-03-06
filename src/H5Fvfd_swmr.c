@@ -1060,7 +1060,7 @@ H5F_vfd_swmr_writer__dump_index(H5F_shared_t *shared)
     H5FD_vfd_swmr_idx_entry_t *index     = NULL;
     herr_t                     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(shared);
     HDassert(shared->vfd_swmr);
@@ -1079,8 +1079,6 @@ H5F_vfd_swmr_writer__dump_index(H5F_shared_t *shared)
         HDfprintf(stderr, "%u: %" PRIu64 " %" PRIu64 " %" PRIu32 "\n", i, index[i].hdf5_page_offset,
                   index[i].md_file_page_offset, index[i].length);
     }
-
-done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -2091,7 +2089,7 @@ done:
  */
 
 void
-H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
+H5F__post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, const char *log_info)
 {
     double        temp_time;
     H5_timevals_t current_time;

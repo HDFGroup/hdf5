@@ -2277,8 +2277,9 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl, fcpl;
-    bool                  writer;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
+    bool                  writer = false;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;

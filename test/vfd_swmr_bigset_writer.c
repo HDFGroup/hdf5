@@ -2543,7 +2543,7 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *                 mat;
+    mat_t *                 mat  = NULL;
     hid_t                   fcpl = H5I_INVALID_HID;
     unsigned                which;
     state_t                 s;

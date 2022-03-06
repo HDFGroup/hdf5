@@ -2642,7 +2642,7 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
 
     char            name[sizeof("group-9999999999")];
     unsigned int    i;
-    hid_t           grp_id;
+    hid_t           grp_id = H5I_INVALID_HID;
     bool            result = true;
     H5G_info_t      group_info;
     struct timespec start_time, end_time;
@@ -2763,7 +2763,7 @@ main(int argc, char **argv)
     H5F_vfd_swmr_config_t config;
     bool                  wg_ret = false;
     struct timespec       start_time, end_time;
-    unsigned int          num_elems_per_level;
+    unsigned int          num_elems_per_level = 0;
 
     if (!state_init(&s, argc, argv)) {
         printf("state_init failed\n");
