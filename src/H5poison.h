@@ -476,10 +476,6 @@
 #error "HDsinh must not be defined"
 #endif /* HDsinh */
 #define HDsinh HDsinh_disallowed
-#ifdef HDsleep
-#error "HDsleep must not be defined"
-#endif /* HDsleep */
-#define HDsleep HDsleep_disallowed
 #ifdef HDsnprintf
 #error "HDsnprintf must not be defined"
 #endif /* HDsnprintf */
