@@ -70,9 +70,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /* Library Private Variables */
 /*****************************/
 
-/* Library incompatible release versions */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 0;
+/* Library incompatible release versions, develop releases are incompatible by design */
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 3;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -172,7 +172,7 @@ H5_init_library(void)
             int mpe_code;
             if (mpi_initialized && !mpi_finalized) {
                 mpe_code = MPE_Init_log();
-                assert(mpe_code >= 0);
+                HDassert(mpe_code >= 0);
                 H5_MPEinit_g = TRUE;
             }
         }
@@ -200,7 +200,7 @@ H5_init_library(void)
     /*
      * Make sure the package information is updated.
      */
-    memset(&H5_debug_g, 0, sizeof H5_debug_g);
+    HDmemset(&H5_debug_g, 0, sizeof H5_debug_g);
     H5_debug_g.pkg[H5_PKG_A].name  = "a";
     H5_debug_g.pkg[H5_PKG_AC].name = "ac";
     H5_debug_g.pkg[H5_PKG_B].name  = "b";
@@ -235,11 +235,11 @@ H5_init_library(void)
          * This must be entered before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
-        (void)atexit(H5TS_win32_process_exit);
+        (void)HDatexit(H5TS_win32_process_exit);
 #endif /* H5_HAVE_THREADSAFE && H5_HAVE_WIN_THREADS */
 
         /* Normal library termination code */
-        (void)atexit(H5_term_library);
+        (void)HDatexit(H5_term_library);
 
         H5_dont_atexit_g = TRUE;
     } /* end if */
@@ -290,7 +290,7 @@ H5_init_library(void)
 
     /* Debugging? */
     H5__debug_mask("-all");
-    H5__debug_mask(getenv("HDF5_DEBUG"));
+    H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -474,12 +474,12 @@ H5_term_library(void)
 
             /* log a package when its terminator needs to be retried */
             pending++;
-            nprinted = snprintf(next, nleft, "%s%s",
+            nprinted = HDsnprintf(next, nleft, "%s%s",
                 (next != loop) ? "," : "", terminator[i].name);
             if (nprinted < 0)
                 continue;
             if ((size_t)nprinted >= nleft)
-                nprinted = snprintf(next, nleft, "...");
+                nprinted = HDsnprintf(next, nleft, "...");
             if (nprinted < 0 || (size_t)nprinted >= nleft)
                 continue;
             nleft -= (size_t)nprinted;
@@ -492,10 +492,10 @@ H5_term_library(void)
     if (pending) {
         /* Only display the error message if the user is interested in them. */
         if (func) {
-            fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s\n", loop);
+            HDfprintf(stderr, "HDF5: infinite loop closing library\n");
+            HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
-            abort();
+            HDabort();
 #endif    /* NDEBUG */
         } /* end if */
     }     /* end if */
@@ -514,7 +514,7 @@ H5_term_library(void)
 
         if (mpi_initialized && !mpi_finalized) {
             mpe_code = MPE_Finish_log("h5log");
-            assert(mpe_code >= 0);
+            HDassert(mpe_code >= 0);
         }                     /* end if */
         H5_MPEinit_g = FALSE; /* turn it off no matter what */
     }                         /* end if */
@@ -525,7 +525,7 @@ H5_term_library(void)
         H5_debug_open_stream_t *tmp_open_stream;
 
         tmp_open_stream = H5_debug_g.open_stream;
-        (void)fclose(H5_debug_g.open_stream->stream);
+        (void)HDfclose(H5_debug_g.open_stream->stream);
         H5_debug_g.open_stream = H5_debug_g.open_stream->next;
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
@@ -778,7 +778,7 @@ H5__debug_mask(const char *s)
 
     while (s && *s) {
 
-        if (isalpha((int)(unsigned char)*s) || '-' == *s || '+' == *s) {
+        if (HDisalpha(*s) || '-' == *s || '+' == *s) {
 
             /* Enable or Disable debugging? */
             if ('-' == *s) {
@@ -794,48 +794,48 @@ H5__debug_mask(const char *s)
             } /* end if */
 
             /* Get the name */
-            for (i = 0; isalpha((int)(unsigned char)*s); i++, s++)
+            for (i = 0; HDisalpha(*s); i++, s++)
                 if (i < sizeof pkg_name)
                     pkg_name[i] = *s;
             pkg_name[MIN(sizeof(pkg_name) - 1, i)] = '\0';
 
             /* Trace, all, or one? */
-            if (!strcmp(pkg_name, "trace")) {
+            if (!HDstrcmp(pkg_name, "trace")) {
                 H5_debug_g.trace = clear ? NULL : stream;
             }
-            else if (!strcmp(pkg_name, "ttop")) {
+            else if (!HDstrcmp(pkg_name, "ttop")) {
                 H5_debug_g.trace = stream;
                 H5_debug_g.ttop  = (hbool_t)!clear;
             }
-            else if (!strcmp(pkg_name, "ttimes")) {
+            else if (!HDstrcmp(pkg_name, "ttimes")) {
                 H5_debug_g.trace  = stream;
                 H5_debug_g.ttimes = (hbool_t)!clear;
             }
-            else if (!strcmp(pkg_name, "all")) {
+            else if (!HDstrcmp(pkg_name, "all")) {
                 for (i = 0; i < (size_t)H5_NPKGS; i++)
                     H5_debug_g.pkg[i].stream = clear ? NULL : stream;
             }
             else {
                 for (i = 0; i < (size_t)H5_NPKGS; i++) {
-                    if (!strcmp(H5_debug_g.pkg[i].name, pkg_name)) {
+                    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
                         H5_debug_g.pkg[i].stream = clear ? NULL : stream;
                         break;
                     } /* end if */
                 }     /* end for */
                 if (i >= (size_t)H5_NPKGS)
-                    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+                    HDfprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
         }
-        else if (isdigit((int)(unsigned char)*s)) {
-            int                     fd = (int)strtol(s, &rest, 0);
+        else if (HDisdigit(*s)) {
+            int                     fd = (int)HDstrtol(s, &rest, 0);
             H5_debug_open_stream_t *open_stream;
 
             if ((stream = HDfdopen(fd, "w")) != NULL) {
-                (void)setvbuf(stream, NULL, _IOLBF, BUFSIZ);
+                (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
 
                 if (NULL ==
                     (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
-                    (void)fclose(stream);
+                    (void)HDfclose(stream);
                     return;
                 } /* end if */
 
@@ -954,6 +954,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static int          checked                  = 0; /* If we've already checked the version info */
     static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
     static const char * version_mismatch_warning = VERSION_MISMATCH_WARNING;
+    static const char * release_mismatch_warning = RELEASE_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
@@ -967,83 +968,81 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         const char *s; /* Environment string for disabling version check */
 
         /* Allow different versions of the header files and library? */
-        s = getenv("HDF5_DISABLE_VERSION_CHECK");
+        s = HDgetenv("HDF5_DISABLE_VERSION_CHECK");
 
-        if (s && isdigit((int)(unsigned char)*s))
-            disable_version_check = (unsigned int)strtol(s, NULL, 0);
+        if (s && HDisdigit(*s))
+            disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
-    /* Cast relnum to int to avoid warning for unsigned < 0 comparison
-     * in first release versions */
-    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > (int)relnum) {
-
+    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) {
         switch (disable_version_check) {
             case 0:
-                fprintf(stderr, "%s%s", version_mismatch_warning,
+                HDfprintf(stderr, "%s%s", version_mismatch_warning,
                           "You can, at your own risk, disable this warning by setting the environment\n"
                           "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
                           "Setting it to 2 or higher will suppress the warning messages totally.\n");
                 /* Mention the versions we are referring to */
-                fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                           (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library settings if available */
-                fprintf(stderr, "%s", H5libhdf5_settings);
+                HDfprintf(stderr, "%s", H5libhdf5_settings);
 
                 /* Bail out now. */
-                fputs("Bye...\n", stderr);
-                abort();
+                HDfputs("Bye...\n", stderr);
+                HDabort();
             case 1:
                 /* continue with a warning */
                 /* Note that the warning message is embedded in the format string.*/
-                fprintf(stderr,
+                HDfprintf(stderr,
                           "%s'HDF5_DISABLE_VERSION_CHECK' "
                           "environment variable is set to %d, application will\n"
                           "continue at your own risk.\n",
                           version_mismatch_warning, disable_version_check);
                 /* Mention the versions we are referring to */
-                fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                           (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library settings if available */
-                fprintf(stderr, "%s", H5libhdf5_settings);
+                HDfprintf(stderr, "%s", H5libhdf5_settings);
                 break;
             default:
                 /* 2 or higher: continue silently */
                 break;
         } /* end switch */
 
-    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > relnum) */
+    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
 
     /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
+    /* Library develop release versions are incompatible by design */
     if (H5_VERS_RELEASE != relnum) {
         for (unsigned i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++) {
             /* Check for incompatible headers or incompatible library */
             if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
                 switch (disable_version_check) {
                     case 0:
-                        fprintf(
-                            stderr, "%s%s", version_mismatch_warning,
+                        HDfprintf(
+                            stderr, "%s%s", release_mismatch_warning,
                             "You can, at your own risk, disable this warning by setting the environment\n"
                             "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
                             "Setting it to 2 or higher will suppress the warning messages totally.\n");
                         /* Mention the versions we are referring to */
-                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
+                        HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
                                   relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
                                   (unsigned)H5_VERS_RELEASE);
 
                         /* Bail out now. */
-                        fputs("Bye...\n", stderr);
-                        abort();
+                        HDfputs("Bye...\n", stderr);
+                        HDabort();
                     case 1:
                         /* continue with a warning */
                         /* Note that the warning message is embedded in the format string.*/
-                        fprintf(stderr,
+                        HDfprintf(stderr,
                                   "%s'HDF5_DISABLE_VERSION_CHECK' "
                                   "environment variable is set to %d, application will\n"
                                   "continue at your own risk.\n",
-                                  version_mismatch_warning, disable_version_check);
+                                  release_mismatch_warning, disable_version_check);
                         /* Mention the versions we are referring to */
-                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
+                        HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
                                   relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
                                   (unsigned)H5_VERS_RELEASE);
                         break;
@@ -1067,18 +1066,18 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
          * Check only the first sizeof(lib_str) char.  Assume the information
          * will fit within this size or enough significance.
          */
-        snprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d%s%s", H5_VERS_MAJOR,
+        HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d%s%s", H5_VERS_MAJOR,
                    H5_VERS_MINOR, H5_VERS_RELEASE, (*substr ? "-" : ""), substr);
 
-        if (strcmp(lib_str, H5_lib_vers_info_g) != 0) {
-            fputs("Warning!  Library version information error.\n"
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
+            HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "
                     "but should be corrected.  Setting the environment\n"
                     "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of 1 "
                     "will suppress\nthis warning.\n",
                     stderr);
-            fprintf(stderr,
+            HDfprintf(stderr,
                       "Library version information are:\n"
                       "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
                       "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
@@ -1334,7 +1333,7 @@ H5is_library_terminating(hbool_t *is_terminating /*out*/)
     FUNC_ENTER_API_NOINIT
     H5TRACE1("e", "x", is_terminating);
 
-    assert(is_terminating);
+    HDassert(is_terminating);
 
     if (is_terminating)
         *is_terminating = H5_TERM_GLOBAL;

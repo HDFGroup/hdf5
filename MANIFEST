@@ -333,6 +333,8 @@
 ./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/ph5_filtered_writes.c
+./examples/ph5_filtered_writes_no_sel.c
 ./examples/h5_vds.c
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c
@@ -618,6 +620,7 @@
 ./release_docs/HISTORY-1_8.txt
 ./release_docs/HISTORY-1_10.txt
 ./release_docs/HISTORY-1_12.txt
+./release_docs/HISTORY-1_13.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
@@ -3889,3 +3892,7 @@
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
 ./utils/test/Makefile.in
+./utils/tools/Makefile.in
+./utils/tools/h5dwalk/Makefile.in
+./utils/tools/test/Makefile.in
+./utils/tools/test/h5dwalk/Makefile.in

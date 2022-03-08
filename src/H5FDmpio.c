@@ -175,7 +175,7 @@ H5FD__mpio_parse_debug_str(const char *s)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    assert(s);
+    HDassert(s);
 
     /* Set debug mask */
     while (*s) {
@@ -188,6 +188,41 @@ H5FD__mpio_parse_debug_str(const char *s)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD__mpio_parse_debug_str() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5FD__mem_t_to_str
+ *
+ * Purpose:     Returns a string representing the enum value in an H5FD_mem_t
+ *              enum
+ *
+ * Returns:     H5FD_mem_t enum value string
+ *
+ *---------------------------------------------------------------------------
+ */
+static const char *
+H5FD__mem_t_to_str(H5FD_mem_t mem_type)
+{
+    switch (mem_type) {
+        case H5FD_MEM_NOLIST:
+            return "H5FD_MEM_NOLIST";
+        case H5FD_MEM_DEFAULT:
+            return "H5FD_MEM_DEFAULT";
+        case H5FD_MEM_SUPER:
+            return "H5FD_MEM_SUPER";
+        case H5FD_MEM_BTREE:
+            return "H5FD_MEM_BTREE";
+        case H5FD_MEM_DRAW:
+            return "H5FD_MEM_DRAW";
+        case H5FD_MEM_GHEAP:
+            return "H5FD_MEM_GHEAP";
+        case H5FD_MEM_LHEAP:
+            return "H5FD_MEM_LHEAP";
+        case H5FD_MEM_OHDR:
+            return "H5FD_MEM_OHDR";
+        default:
+            return "(Unknown)";
+    }
+}
 #endif /* H5FDmpio_DEBUG */
 
 /*-------------------------------------------------------------------------
@@ -218,8 +253,8 @@ H5FD_mpio_init(void)
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), FALSE);
 
         /* Check if MPI driver has been loaded dynamically */
-        env = getenv(HDF5_DRIVER);
-        if (env && !strcmp(env, "mpio")) {
+        env = HDgetenv(HDF5_DRIVER);
+        if (env && !HDstrcmp(env, "mpio")) {
             int mpi_initialized = 0;
 
             /* Initialize MPI if not already initialized */
@@ -237,16 +272,16 @@ H5FD_mpio_init(void)
         const char *s; /* String for environment variables */
 
         /* Allow MPI buf-and-file-type optimizations? */
-        s = getenv("HDF5_MPI_OPT_TYPES");
-        if (s && isdigit((int)(unsigned char)*s))
-            H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? FALSE : TRUE;
+        s = HDgetenv("HDF5_MPI_OPT_TYPES");
+        if (s && HDisdigit(*s))
+            H5FD_mpi_opt_types_g = (0 == HDstrtol(s, NULL, 0)) ? FALSE : TRUE;
 
 #ifdef H5FDmpio_DEBUG
         /* Clear the flag buffer */
-        memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
+        HDmemset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
 
         /* Retrieve MPI-IO debugging environment variable */
-        s = getenv("H5FD_mpio_Debug");
+        s = HDgetenv("H5FD_mpio_Debug");
         if (s)
             H5FD__mpio_parse_debug_str(s);
 #endif /* H5FDmpio_DEBUG */
@@ -698,7 +733,7 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* set atomicity value */
@@ -708,7 +743,7 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -741,7 +776,7 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Get atomicity value */
@@ -756,7 +791,7 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -826,7 +861,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] &&
                               (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == mpi_rank));
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n",
+        HDfprintf(stderr, "%s: (%d) Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n",
                   __func__, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
 #endif
 
@@ -912,7 +947,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -945,12 +980,12 @@ H5FD__mpio_close(H5FD_t *_file)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != (mpi_code = MPI_File_close(&(file->f))))
@@ -964,7 +999,7 @@ H5FD__mpio_close(H5FD_t *_file)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -994,7 +1029,6 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
-        *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late         */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD */
     }                                               /* end if */
@@ -1025,8 +1059,8 @@ H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD__mpio_get_eoa() */
@@ -1053,8 +1087,8 @@ H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     file->eoa = addr;
 
@@ -1095,8 +1129,8 @@ H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eof)
 } /* end H5FD__mpio_get_eof() */
@@ -1185,16 +1219,16 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
-    assert(buf);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(buf);
 
     /* Portably initialize MPI status variable */
-    memset(&mpi_stat, 0, sizeof(MPI_Status));
+    HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
@@ -1245,7 +1279,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            fprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
@@ -1254,13 +1288,13 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                fprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
             /* Check whether we should read from rank 0 and broadcast to other ranks */
             if (H5CX_get_mpio_rank0_bcast()) {
 #ifdef H5FDmpio_DEBUG
                 if (H5FD_mpio_debug_r_flag)
-                    fprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
+                    HDfprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
                 rank0_bcast = TRUE;
@@ -1286,7 +1320,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         else {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
             /* Perform independent read operation */
@@ -1320,7 +1354,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
         /* Perform independent read operation */
@@ -1380,15 +1414,15 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
-        fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_read);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__, file->mpi_rank,
+                  (long)mpi_off, bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
     /*
      * This gives us zeroes beyond end of physical MPI file.
      */
     if ((n = (io_size - bytes_read)) > 0)
-        memset((char *)buf + bytes_read, 0, (size_t)n);
+        HDmemset((char *)buf + bytes_read, 0, (size_t)n);
 
 done:
     if (derived_type)
@@ -1396,7 +1430,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1455,19 +1489,19 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
-    assert(buf);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(buf);
 
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
-    assert(!H5CX_get_mpi_file_flushing());
+    HDassert(!H5CX_get_mpi_file_flushing());
 
     /* Portably initialize MPI status variable */
-    memset(&mpi_stat, 0, sizeof(MPI_Status));
+    HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
@@ -1513,7 +1547,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            fprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
@@ -1523,7 +1557,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                fprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
             /* Perform collective write operation */
             if (MPI_SUCCESS !=
@@ -1537,7 +1571,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
             /* Perform independent write operation */
             if (MPI_SUCCESS !=
@@ -1568,7 +1602,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
         /* Perform independent write operation */
@@ -1601,8 +1635,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_written);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
+                  file->mpi_rank, (long)mpi_off, bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and
@@ -1622,7 +1656,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
+        HDfprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1654,12 +1688,12 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     /* Only sync the file if we are not going to immediately close it */
     if (!closing)
@@ -1669,7 +1703,7 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1711,12 +1745,12 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
         int        mpi_code; /* mpi return code */
@@ -1782,7 +1816,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1809,11 +1843,11 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_STATIC
 
-    assert(filename);
+    HDassert(filename);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    assert(H5FD_MPIO == H5P_peek_driver(plist));
+    HDassert(H5FD_MPIO == H5P_peek_driver(plist));
 
     if (H5FD_mpi_self_initialized) {
         comm = MPI_COMM_WORLD;
@@ -1896,26 +1930,26 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    assert(file);
-    assert(H5FD_MPIO == file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
     switch (op_code) {
 
         case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
-            assert(output);
-            assert(*output);
+            HDassert(output);
+            HDassert(*output);
             **((MPI_Comm **)output) = file->comm;
             break;
 
         case H5FD_CTL__GET_MPI_RANK_OPCODE:
-            assert(output);
-            assert(*output);
+            HDassert(output);
+            HDassert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
         case H5FD_CTL__GET_MPI_SIZE_OPCODE:
-            assert(output);
-            assert(*output);
+            HDassert(output);
+            HDassert(*output);
             **((int **)output) = file->mpi_size;
             break;
 

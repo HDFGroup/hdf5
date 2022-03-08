@@ -110,9 +110,9 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
-    assert(dataset && dataset->oloc.file);
-    assert(file_space);
-    assert(mem_space);
+    HDassert(dataset && dataset->oloc.file);
+    HDassert(file_space);
+    HDassert(mem_space);
 
     /* Set up datatype info for operation */
     if (H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -182,8 +182,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
                                             (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
                                             type_info.dst_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        assert(projected_mem_space);
-        assert(adj_buf);
+        HDassert(projected_mem_space);
+        HDassert(adj_buf);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
@@ -236,7 +236,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
 
     /* Sanity check that space is allocated, if there are elements */
     if (nelmts > 0)
-        assert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
+        HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
                  (dataset->shared->layout.ops->is_data_cached &&
                   (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
                  dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
@@ -300,6 +300,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
+    hbool_t          should_alloc_space  = FALSE; /* Whether or not to initialize dataset's storage */
     H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
@@ -322,9 +323,9 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
-    assert(dataset && dataset->oloc.file);
-    assert(file_space);
-    assert(mem_space);
+    HDassert(dataset && dataset->oloc.file);
+    HDassert(file_space);
+    HDassert(mem_space);
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
@@ -414,8 +415,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
                                             (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
                                             type_info.src_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        assert(projected_mem_space);
-        assert(adj_buf);
+        HDassert(projected_mem_space);
+        HDassert(adj_buf);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
@@ -432,8 +433,20 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
 
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if (nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-        !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+    should_alloc_space = dataset->shared->dcpl_cache.efl.nused == 0 &&
+                         !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
+
+    /*
+     * If not using an MPI-based VFD, we only need to allocate
+     * and initialize storage if there's a selection in the
+     * dataset's dataspace. Otherwise, we always need to participate
+     * in the storage allocation since this may use collective
+     * operations and we will hang if we don't participate.
+     */
+    if (!H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI))
+        should_alloc_space = should_alloc_space && (nelmts > 0);
+
+    if (should_alloc_space) {
         hssize_t file_nelmts;    /* Number of elements in file dataset's dataspace */
         hbool_t  full_overwrite; /* Whether we are over-writing all the elements */
 
@@ -528,11 +541,11 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    assert(dset);
-    assert(dset->oloc.file);
-    assert(type_info);
-    assert(type_info->tpath);
-    assert(io_info);
+    HDassert(dset);
+    HDassert(dset->oloc.file);
+    HDassert(type_info);
+    HDassert(type_info->tpath);
+    HDassert(io_info);
 
     /* Set up "normal" I/O fields */
     io_info->dset  = dset;
@@ -595,15 +608,15 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     FUNC_ENTER_STATIC
 
     /* check args */
-    assert(type_info);
-    assert(dset);
+    HDassert(type_info);
+    HDassert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
-    memset(type_info, 0, sizeof(*type_info));
+    HDmemset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
@@ -765,13 +778,13 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
     FUNC_ENTER_STATIC
 
     /* check args */
-    assert(dset);
-    assert(dset->oloc.file);
-    assert(mem_space);
-    assert(file_space);
-    assert(type_info);
-    assert(type_info->tpath);
-    assert(io_info);
+    HDassert(dset);
+    HDassert(dset->oloc.file);
+    HDassert(mem_space);
+    HDassert(file_space);
+    HDassert(type_info);
+    HDassert(type_info->tpath);
+    HDassert(io_info);
 
     /* Reset the actual io mode properties to the default values in case
      * the DXPL (if it's non-default) was previously used in a collective
@@ -808,98 +821,35 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
-            int comm_size = 0;
-
-            /* Retrieve size of MPI communicator used for file */
-            if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
-
             /* Check if there are any filters in the pipeline. If there are,
              * we cannot break to independent I/O if this is a write operation
              * with multiple ranks involved; otherwise, there will be metadata
              * inconsistencies in the file.
              */
-            if (comm_size > 1 && io_info->op_type == H5D_IO_OP_WRITE &&
-                io_info->dset->shared->dcpl_cache.pline.nused > 0) {
-                H5D_mpio_no_collective_cause_t cause;
-                uint32_t                       local_no_collective_cause;
-                uint32_t                       global_no_collective_cause;
-                hbool_t                        local_error_message_previously_written  = FALSE;
-                hbool_t                        global_error_message_previously_written = FALSE;
-                size_t                         idx;
-                size_t                         cause_strings_len;
-                char                           local_no_collective_cause_string[512]  = "";
-                char                           global_no_collective_cause_string[512] = "";
-                const char *                   cause_strings[]                        = {
-                    "independent I/O was requested",
-                    "datatype conversions were required",
-                    "data transforms needed to be applied",
-                    "optimized MPI types flag wasn't set",
-                    "one of the dataspaces was neither simple nor scalar",
-                    "dataset was not contiguous or chunked",
-                    "parallel writes to filtered datasets are disabled",
-                    "an error occurred while checking if collective I/O was possible"};
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+                int comm_size = 0;
 
-                cause_strings_len = sizeof(cause_strings) / sizeof(cause_strings[0]);
+                /* Retrieve size of MPI communicator used for file */
+                if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
 
-                if (H5CX_get_mpio_local_no_coll_cause(&local_no_collective_cause) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                "unable to get local no collective cause value")
-                if (H5CX_get_mpio_global_no_coll_cause(&global_no_collective_cause) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                "unable to get global no collective cause value")
+                if (comm_size > 1) {
+                    char local_no_coll_cause_string[512];
+                    char global_no_coll_cause_string[512];
 
-                /* Append each of the "reason for breaking collective I/O" error messages to the
-                 * local and global no collective cause strings */
-                for (cause = 1, idx = 0;
-                     (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len);
-                     cause <<= 1, idx++) {
-                    if (cause & local_no_collective_cause) {
-                        size_t local_buffer_space = sizeof(local_no_collective_cause_string) -
-                                                    strlen(local_no_collective_cause_string) - 1;
+                    if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
+                                                            global_no_coll_cause_string, 512) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "can't get reasons for breaking collective I/O")
 
-                        /* Check if there were any previous error messages included. If so, prepend a
-                         * semicolon to separate the messages.
-                         */
-                        if (local_buffer_space && local_error_message_previously_written) {
-                            strncat(local_no_collective_cause_string, "; ", local_buffer_space);
-                            local_buffer_space -= MIN(local_buffer_space, 2);
-                        }
-
-                        if (local_buffer_space)
-                            strncat(local_no_collective_cause_string, cause_strings[idx],
-                                      local_buffer_space);
-
-                        local_error_message_previously_written = TRUE;
-                    } /* end if */
-
-                    if (cause & global_no_collective_cause) {
-                        size_t global_buffer_space = sizeof(global_no_collective_cause_string) -
-                                                     strlen(global_no_collective_cause_string) - 1;
-
-                        /* Check if there were any previous error messages included. If so, prepend a
-                         * semicolon to separate the messages.
-                         */
-                        if (global_buffer_space && global_error_message_previously_written) {
-                            strncat(global_no_collective_cause_string, "; ", global_buffer_space);
-                            global_buffer_space -= MIN(global_buffer_space, 2);
-                        }
-
-                        if (global_buffer_space)
-                            strncat(global_no_collective_cause_string, cause_strings[idx],
-                                      global_buffer_space);
-
-                        global_error_message_previously_written = TRUE;
-                    } /* end if */
-                }     /* end for */
-
-                HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
-                            "Can't perform independent write with filters in pipeline.\n"
-                            "    The following caused a break from collective I/O:\n"
-                            "        Local causes: %s\n"
-                            "        Global causes: %s",
-                            local_no_collective_cause_string, global_no_collective_cause_string);
-            } /* end if */
+                    HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
+                                "Can't perform independent write with filters in pipeline.\n"
+                                "    The following caused a break from collective I/O:\n"
+                                "        Local causes: %s\n"
+                                "        Global causes: %s",
+                                local_no_coll_cause_string, global_no_coll_cause_string);
+                }
+            }
 
             /* If we won't be doing collective I/O, but the user asked for
              * collective I/O, change the request to use independent I/O
@@ -936,11 +886,11 @@ H5D__typeinfo_term(const H5D_type_info_t *type_info)
 
     /* Check for releasing datatype conversion & background buffers */
     if (type_info->tconv_buf_allocated) {
-        assert(type_info->tconv_buf);
+        HDassert(type_info->tconv_buf);
         (void)H5FL_BLK_FREE(type_conv, type_info->tconv_buf);
     } /* end if */
     if (type_info->bkg_buf_allocated) {
-        assert(type_info->bkg_buf);
+        HDassert(type_info->bkg_buf);
         (void)H5FL_BLK_FREE(type_conv, type_info->bkg_buf);
     } /* end if */
 

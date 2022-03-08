@@ -199,7 +199,7 @@ static int             destroy_comm_world(void);
 static void  output_results(const struct options *options, const char *name, minmax *table, int table_size,
                             off_t data_size);
 static void  output_times(const struct options *options, const char *name, minmax *table, int table_size);
-static void  output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+static void  output_report(const char *fmt, ...);
 static void  print_indent(register int indent);
 static void  usage(const char *prog);
 static void  report_parameters(struct options *opts);
