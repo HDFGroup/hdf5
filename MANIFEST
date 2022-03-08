@@ -73,6 +73,7 @@
 ./bin/chkmanifest
 ./bin/cmakehdf5
 ./bin/debug-ohdr      _DO_NOT_DISTRIBUTE_
+./bin/dehd-c99
 ./bin/dependencies
 ./bin/deploy
 ./bin/distdep
@@ -213,6 +214,7 @@
 ./doc/branches-explained.md
 ./doc/code-conventions.md
 ./doc/contributing.md
+./doc/de-HD-notes.md
 ./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
@@ -647,6 +649,7 @@
 ./src/H5module.h
 ./src/H5mpi.c
 ./src/H5overflow.txt
+./src/H5poison.h
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5system.c
