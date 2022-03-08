@@ -66,7 +66,6 @@ getenv
 gmtime
 isalnum
 isalpha
-isatty
 iscntrl
 isdigit
 isgraph

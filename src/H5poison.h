@@ -240,10 +240,6 @@
 #error "HDisalpha must not be defined"
 #endif /* HDisalpha */
 #define HDisalpha HDisalpha_disallowed
-#ifdef HDisatty
-#error "HDisatty must not be defined"
-#endif /* HDisatty */
-#define HDisatty HDisatty_disallowed
 #ifdef HDiscntrl
 #error "HDiscntrl must not be defined"
 #endif /* HDiscntrl */

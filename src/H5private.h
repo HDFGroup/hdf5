@@ -744,6 +744,9 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDinet_ntoa
 #define HDinet_ntoa(C) inet_ntoa((C))
 #endif
+#ifndef HDisatty
+#define HDisatty(F) isatty(F)
+#endif
 #ifndef HDkill
 #define HDkill(P, S) kill(P, S)
 #endif

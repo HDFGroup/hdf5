@@ -55,7 +55,7 @@ struct timezone {
 #define HDgetdrive()         _getdrive()
 #define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define isatty(F)            _isatty(F)
+#define HDisatty(F)            _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmkdir(S, M)        _mkdir(S)

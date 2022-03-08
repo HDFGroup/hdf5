@@ -230,7 +230,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
 
                                 if (acc != ref_value) {
                                     H5_FAILED()
-                                    if (!isatty(1)) {
+                                    if (!HDisatty(1)) {
                                         /*
                                          * Print debugging info unless output
                                          * is going directly to a terminal.
@@ -464,7 +464,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                         acc += dst[u * ny * nz + v * nz + w];
                             if (acc != ref_value) {
                                 H5_FAILED()
-                                if (!isatty(1)) {
+                                if (!HDisatty(1)) {
                                     /*
                                      * Print debugging info unless output is
                                      * going directly to a terminal.
@@ -501,7 +501,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                             if (acc + (unsigned)dx * (unsigned)dy * (unsigned)dz !=
                                 ref_value + nx * ny * nz) {
                                 H5_FAILED()
-                                if (!isatty(1)) {
+                                if (!HDisatty(1)) {
                                     /*
                                      * Print debugging info unless output is
                                      * going directly to a terminal.
@@ -629,7 +629,7 @@ test_multifill(size_t nx)
             sprintf(s, "bad dst[%lu].right", (unsigned long)i);
         if (s[0]) {
             H5_FAILED()
-            if (!isatty(1)) {
+            if (!HDisatty(1)) {
                 AT();
                 printf("   fill={%d,%g,%d}\n   ", fill.left, fill.mid, fill.right);
                 for (j = 0; j < sizeof(fill); j++)
@@ -713,7 +713,7 @@ test_endian(size_t nx)
         for (j = 0; j < 4; j++) {
             if (src[i * 4 + j] != dst[i * 4 + 3 - j]) {
                 H5_FAILED()
-                if (!isatty(1)) {
+                if (!HDisatty(1)) {
                     /*
                      * Print debugging info unless output is going directly
                      * to a terminal.
@@ -801,7 +801,7 @@ test_transpose(size_t nx, size_t ny)
         for (j = 0; j < ny; j++) {
             if (src[i * ny + j] != dst[j * nx + i]) {
                 H5_FAILED()
-                if (!isatty(1)) {
+                if (!HDisatty(1)) {
                     AT();
                     printf("   diff at i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
                     printf("   Source is:\n");
@@ -900,7 +900,7 @@ test_sub_super(size_t nx, size_t ny)
         for (j = 0; j < ny; j++) {
             if (full[4 * i * ny + 2 * j] != half[i * ny + j]) {
                 H5_FAILED()
-                if (!isatty(1)) {
+                if (!HDisatty(1)) {
                     AT();
                     printf("   full[%lu][%lu] != half[%lu][%lu]\n", (unsigned long)i * 2,
                            (unsigned long)j * 2, (unsigned long)i, (unsigned long)j);
@@ -959,7 +959,7 @@ test_sub_super(size_t nx, size_t ny)
                         (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
             if (s[0]) {
                 H5_FAILED()
-                if (!isatty(1)) {
+                if (!HDisatty(1)) {
                     AT();
                     printf("   %s\n   Half is:\n", s);
                     print_array(half, nx, ny, (size_t)1);
@@ -1384,7 +1384,7 @@ main(int argc, char *argv[])
 
     if (nerrors) {
         printf("***** %d HYPERSLAB TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        if (isatty(1))
+        if (HDisatty(1))
             printf("(Redirect output to a pager or a file to see debug output)\n");
         exit(EXIT_FAILURE);
     } /* end if */
