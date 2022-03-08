@@ -54,20 +54,20 @@ static void
 usage(const char *progname)
 {
     fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2|-family_to_single] SRC DST\n",
-              progname);
+            progname);
     fprintf(stderr, "   -v     Produce verbose output\n");
     fprintf(stderr, "   -V     Print a version number and exit\n");
     fprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
     fprintf(stderr, "   -m N   The destination member size or 1GB\n");
     fprintf(stderr, "   -family_to_sec2   Deprecated version of -family_to_single (below)\n");
     fprintf(stderr, "   -family_to_single   Change file driver from family to the default single-file VFD "
-                      "(windows or sec2)\n");
+                    "(windows or sec2)\n");
     fprintf(stderr, "   SRC    The name of the source file\n");
     fprintf(stderr, "   DST    The name of the destination files\n");
     fprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
-                      "'k' for kB.\n");
+                    "'k' for kB.\n");
     fprintf(stderr, "File family names include an integer printf "
-                      "format such as '%%d'\n");
+                    "format such as '%%d'\n");
     exit(EXIT_FAILURE);
 }
 
@@ -207,7 +207,7 @@ main(int argc, char *argv[])
         }
         else if (!strcmp(argv[argno], "-V")) {
             printf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
-                     H5_VERS_RELEASE);
+                   H5_VERS_RELEASE);
             exit(EXIT_SUCCESS);
         }
         else if (!strcmp(argv[argno], "-family_to_sec2")) {

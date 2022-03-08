@@ -79,8 +79,8 @@
 
 #define H5PB__INSERT_LRU(page_buf, page_ptr)                                                                 \
     {                                                                                                        \
-        assert(page_buf);                                                                                  \
-        assert(page_ptr);                                                                                  \
+        assert(page_buf);                                                                                    \
+        assert(page_ptr);                                                                                    \
         /* insert the entry at the head of the list. */                                                      \
         H5PB__PREPEND((page_ptr), (page_buf)->LRU_head_ptr, (page_buf)->LRU_tail_ptr,                        \
                       (page_buf)->LRU_list_len)                                                              \
@@ -88,8 +88,8 @@
 
 #define H5PB__REMOVE_LRU(page_buf, page_ptr)                                                                 \
     {                                                                                                        \
-        assert(page_buf);                                                                                  \
-        assert(page_ptr);                                                                                  \
+        assert(page_buf);                                                                                    \
+        assert(page_ptr);                                                                                    \
         /* remove the entry from the list. */                                                                \
         H5PB__REMOVE((page_ptr), (page_buf)->LRU_head_ptr, (page_buf)->LRU_tail_ptr,                         \
                      (page_buf)->LRU_list_len)                                                               \
@@ -97,8 +97,8 @@
 
 #define H5PB__MOVE_TO_TOP_LRU(page_buf, page_ptr)                                                            \
     {                                                                                                        \
-        assert(page_buf);                                                                                  \
-        assert(page_ptr);                                                                                  \
+        assert(page_buf);                                                                                    \
+        assert(page_ptr);                                                                                    \
         /* Remove entry and insert at the head of the list. */                                               \
         H5PB__REMOVE((page_ptr), (page_buf)->LRU_head_ptr, (page_buf)->LRU_tail_ptr,                         \
                      (page_buf)->LRU_list_len)                                                               \
@@ -252,7 +252,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
     printf("\t Evictions: %u\n", page_buf->evictions[0]);
     printf("\t Bypasses: %u\n", page_buf->bypasses[0]);
     printf("\t Hit Rate = %f%%\n",
-             ((double)page_buf->hits[0] / (page_buf->accesses[0] - page_buf->bypasses[0])) * 100);
+           ((double)page_buf->hits[0] / (page_buf->accesses[0] - page_buf->bypasses[0])) * 100);
     printf("*****************\n\n");
 
     printf("******* RAWDATA\n");
@@ -262,7 +262,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
     printf("\t Evictions: %u\n", page_buf->evictions[1]);
     printf("\t Bypasses: %u\n", page_buf->bypasses[1]);
     printf("\t Hit Rate = %f%%\n",
-             ((double)page_buf->hits[1] / (page_buf->accesses[1] - page_buf->bypasses[0])) * 100);
+           ((double)page_buf->hits[1] / (page_buf->accesses[1] - page_buf->bypasses[0])) * 100);
     printf("*****************\n\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1225,7 +1225,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                                     "memory allocation failed for page buffer entry")
                     memset(new_page_buf, 0, (size_t)offset);
                     memset((uint8_t *)new_page_buf + offset + access_size, 0,
-                             page_size - ((size_t)offset + access_size));
+                           page_size - ((size_t)offset + access_size));
 
                     page_entry->page_buf_ptr = new_page_buf;
 

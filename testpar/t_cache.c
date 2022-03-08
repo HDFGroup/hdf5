@@ -490,11 +490,11 @@ static void
 print_stats(void)
 {
     fprintf(stdout, "%d: datum clears / pinned clears / destroys = %ld / %ld / %ld\n", world_mpi_rank,
-              datum_clears, datum_pinned_clears, datum_destroys);
+            datum_clears, datum_pinned_clears, datum_destroys);
     fprintf(stdout, "%d: datum flushes / pinned flushes / loads  = %ld / %ld / %ld\n", world_mpi_rank,
-              datum_flushes, datum_pinned_flushes, datum_loads);
+            datum_flushes, datum_pinned_flushes, datum_loads);
     fprintf(stdout, "%d: pins: global / global dirty / local = %ld / %ld / %ld\n", world_mpi_rank,
-              global_pins, global_dirty_pins, local_pins);
+            global_pins, global_dirty_pins, local_pins);
     fflush(stdout);
 
     return;
@@ -578,7 +578,7 @@ set_up_file_communicator(void)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: MPI_Comm_group() failed with error %d.\n", world_mpi_rank, __func__,
-                          mpi_result);
+                        mpi_result);
             }
         }
     }
@@ -595,7 +595,7 @@ set_up_file_communicator(void)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: MPI_Group_excl() failed with error %d.\n", world_mpi_rank, __func__,
-                          mpi_result);
+                        mpi_result);
             }
         }
     }
@@ -609,8 +609,8 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                fprintf(stdout, "%d:%s: MPI_Comm_create() failed with error %d.\n", world_mpi_rank,
-                          __func__, mpi_result);
+                fprintf(stdout, "%d:%s: MPI_Comm_create() failed with error %d.\n", world_mpi_rank, __func__,
+                        mpi_result);
             }
         }
         else {
@@ -622,8 +622,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if (verbose) {
-                        fprintf(stdout, "%d:%s: file_mpi_comm == MPI_COMM_NULL.\n", world_mpi_rank,
-                                  __func__);
+                        fprintf(stdout, "%d:%s: file_mpi_comm == MPI_COMM_NULL.\n", world_mpi_rank, __func__);
                     }
                 }
             }
@@ -636,8 +635,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if (verbose) {
-                        fprintf(stdout, "%d:%s: file_mpi_comm != MPI_COMM_NULL.\n", world_mpi_rank,
-                                  __func__);
+                        fprintf(stdout, "%d:%s: file_mpi_comm != MPI_COMM_NULL.\n", world_mpi_rank, __func__);
                     }
                 }
             }
@@ -654,7 +652,7 @@ set_up_file_communicator(void)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: MPI_Comm_size() failed with error %d.\n", world_mpi_rank, __func__,
-                          mpi_result);
+                        mpi_result);
             }
         }
     }
@@ -669,7 +667,7 @@ set_up_file_communicator(void)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: MPI_Comm_rank() failed with error %d.\n", world_mpi_rank, __func__,
-                          mpi_result);
+                        mpi_result);
             }
         }
     }
@@ -1256,7 +1254,7 @@ reset_server_counters(void)
         nerrors++;
         if (verbose) {
             fprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%d).\n", world_mpi_rank, __func__,
-                      actual_total_reads, total_reads);
+                    actual_total_reads, total_reads);
         }
     }
 
@@ -1266,7 +1264,7 @@ reset_server_counters(void)
         nerrors++;
         if (verbose) {
             fprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%d).\n", world_mpi_rank, __func__,
-                      actual_total_writes, total_writes);
+                    actual_total_writes, total_writes);
         }
     }
 
@@ -1470,7 +1468,7 @@ serve_read_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, __func__,
-                          target_addr);
+                        target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1479,7 +1477,7 @@ serve_read_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, __func__,
-                          data[target_index].len, mssg_ptr->len);
+                        data[target_index].len, mssg_ptr->len);
             }
         }
         else if (!(data[target_index].valid)) {
@@ -1488,10 +1486,9 @@ serve_read_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout,
-                          "%d:%s: proc %d read invalid entry. "
-                          "idx/base_addr = %d/%" PRIuHADDR ".\n",
-                          world_mpi_rank, __func__, mssg_ptr->src, target_index,
-                          data[target_index].base_addr);
+                        "%d:%s: proc %d read invalid entry. "
+                        "idx/base_addr = %d/%" PRIuHADDR ".\n",
+                        world_mpi_rank, __func__, mssg_ptr->src, target_index, data[target_index].base_addr);
             }
         }
         else {
@@ -1523,14 +1520,14 @@ serve_read_request(struct mssg_t *mssg_ptr)
         if (success) {
 
             fprintf(stdout, "%d read 0x%llx. len = %d. ver = %d.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (int)(data[target_index].len),
-                      (int)(data[target_index].ver));
+                    (long long)(data[target_index].base_addr), (int)(data[target_index].len),
+                    (int)(data[target_index].ver));
         }
         else {
 
             fprintf(stdout, "%d read 0x%llx FAILED. len = %d. ver = %d.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (int)(data[target_index].len),
-                      (int)(data[target_index].ver));
+                    (long long)(data[target_index].base_addr), (int)(data[target_index].len),
+                    (int)(data[target_index].ver));
         }
     }
 
@@ -1660,7 +1657,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, __func__,
-                          target_addr);
+                        target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1669,7 +1666,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, __func__,
-                          data[target_index].len, mssg_ptr->len);
+                        data[target_index].len, mssg_ptr->len);
             }
         }
     }
@@ -1685,7 +1682,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: new ver = %d <= old ver = %d.\n", world_mpi_rank, __func__,
-                          new_ver_num, data[target_index].ver);
+                        new_ver_num, data[target_index].ver);
             }
         }
     }
@@ -1724,14 +1721,14 @@ serve_write_request(struct mssg_t *mssg_ptr)
         if (success) {
 
             fprintf(stdout, "%d write 0x%llx. len = %d. ver = %d.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (int)(data[target_index].len),
-                      (int)(data[target_index].ver));
+                    (long long)(data[target_index].base_addr), (int)(data[target_index].len),
+                    (int)(data[target_index].ver));
         }
         else {
 
             fprintf(stdout, "%d write 0x%llx FAILED. len = %d. ver = %d.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (int)(data[target_index].len),
-                      (int)(data[target_index].ver));
+                    (long long)(data[target_index].base_addr), (int)(data[target_index].len),
+                    (int)(data[target_index].ver));
         }
     }
 
@@ -1927,7 +1924,7 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, __func__,
-                          target_addr);
+                        target_addr);
             }
         }
         else {
@@ -1955,12 +1952,12 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
         if (success) {
 
             fprintf(stdout, "%d request entry 0x%llx writes = %ld.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (long)(data[target_index].writes));
+                    (long long)(data[target_index].base_addr), (long)(data[target_index].writes));
         }
         else {
 
             fprintf(stdout, "%d request entry 0x%llx writes = %ld FAILED.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (long)(data[target_index].writes));
+                    (long long)(data[target_index].base_addr), (long)(data[target_index].writes));
         }
     }
 
@@ -2016,7 +2013,7 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, __func__,
-                          target_addr);
+                        target_addr);
             }
         }
         else {
@@ -2044,12 +2041,12 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
         if (success) {
 
             fprintf(stdout, "%d request entry 0x%llx reads = %ld.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (long)(data[target_index].reads));
+                    (long long)(data[target_index].base_addr), (long)(data[target_index].reads));
         }
         else {
 
             fprintf(stdout, "%d request entry 0x%llx reads = %ld FAILED.\n", (int)(mssg_ptr->src),
-                      (long long)(data[target_index].base_addr), (long)(data[target_index].reads));
+                    (long long)(data[target_index].base_addr), (long)(data[target_index].reads));
         }
     }
 
@@ -2171,8 +2168,8 @@ datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
 
     if (callbacks_verbose) {
 
-        fprintf(stdout, "%d: get_initial_load_size() idx = %d, addr = %ld, len = %d.\n", world_mpi_rank,
-                  idx, (long)addr, (int)entry_ptr->local_len);
+        fprintf(stdout, "%d: get_initial_load_size() idx = %d, addr = %ld, len = %d.\n", world_mpi_rank, idx,
+                (long)addr, (int)entry_ptr->local_len);
         fflush(stdout);
     }
 
@@ -2221,8 +2218,8 @@ datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr, H5_ATTR_UNUSED si
 
     if (callbacks_verbose) {
 
-        fprintf(stdout, "%d: deserialize() idx = %d, addr = %ld, len = %d, is_dirty = %d.\n",
-                  world_mpi_rank, idx, (long)addr, (int)len, (int)(entry_ptr->header.is_dirty));
+        fprintf(stdout, "%d: deserialize() idx = %d, addr = %ld, len = %d, is_dirty = %d.\n", world_mpi_rank,
+                idx, (long)addr, (int)len, (int)(entry_ptr->header.is_dirty));
         fflush(stdout);
     }
 
@@ -2274,7 +2271,7 @@ datum_image_len(const void *thing, size_t *image_len)
 
     if (callbacks_verbose) {
         fprintf(stdout, "%d: image_len() idx = %d, addr = %ld, len = %d.\n", world_mpi_rank, idx,
-                  (long)(entry_ptr->base_addr), (int)(entry_ptr->local_len));
+                (long)(entry_ptr->base_addr), (int)(entry_ptr->local_len));
         fflush(stdout);
     }
 
@@ -2333,7 +2330,7 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
     if (callbacks_verbose) {
 
         fprintf(stdout, "%d: serialize() idx = %d, addr = %ld, len = %d.\n", world_mpi_rank, idx,
-                  (long)entry_ptr->header.addr, (int)len);
+                (long)entry_ptr->header.addr, (int)len);
         fflush(stdout);
     }
 
@@ -2390,8 +2387,8 @@ datum_notify(H5C_notify_action_t action, void *thing)
 
     if (callbacks_verbose) {
 
-        fprintf(stdout, "%d: notify() action = %d, idx = %d, addr = %ld.\n", world_mpi_rank, (int)action,
-                  idx, (long)entry_ptr->header.addr);
+        fprintf(stdout, "%d: notify() action = %d, idx = %d, addr = %ld.\n", world_mpi_rank, (int)action, idx,
+                (long)entry_ptr->header.addr);
         fflush(stdout);
     }
 
@@ -2402,14 +2399,14 @@ datum_notify(H5C_notify_action_t action, void *thing)
      */
     if (H5AC_NOTIFY_ACTION_ENTRY_DIRTIED != action)
         assert((entry_ptr->header.size == entry_ptr->len) ||
-                 (entry_ptr->header.size == entry_ptr->local_len));
+               (entry_ptr->header.size == entry_ptr->local_len));
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
             if (callbacks_verbose) {
 
-                fprintf(stdout, "%d: notify() action = insert, idx = %d, addr = %ld.\n", world_mpi_rank,
-                          idx, (long)entry_ptr->header.addr);
+                fprintf(stdout, "%d: notify() action = insert, idx = %d, addr = %ld.\n", world_mpi_rank, idx,
+                        (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
             /* do nothing */
@@ -2419,7 +2416,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = load, idx = %d, addr = %ld.\n", world_mpi_rank, idx,
-                          (long)entry_ptr->header.addr);
+                        (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2541,7 +2538,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = flush, idx = %d, addr = %ld.\n", world_mpi_rank, idx,
-                          (long)entry_ptr->header.addr);
+                        (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2557,7 +2554,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
 
                 ret_value = FAIL;
                 fprintf(stdout, "%d:%s: Flushed dirty entry from non-zero file process.", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
 
             if (ret_value == SUCCEED) {
@@ -2634,7 +2631,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = evict, idx = %d, addr = %ld.\n", world_mpi_rank, idx,
-                          (long)entry_ptr->header.addr);
+                        (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2644,8 +2641,8 @@ datum_notify(H5C_notify_action_t action, void *thing)
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             if (callbacks_verbose) {
 
-                fprintf(stdout, "%d: notify() action = entry dirty, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fprintf(stdout, "%d: notify() action = entry dirty, idx = %d, addr = %ld.\n", world_mpi_rank,
+                        idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2655,8 +2652,8 @@ datum_notify(H5C_notify_action_t action, void *thing)
         case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
             if (callbacks_verbose) {
 
-                fprintf(stdout, "%d: notify() action = entry clean, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fprintf(stdout, "%d: notify() action = entry clean, idx = %d, addr = %ld.\n", world_mpi_rank,
+                        idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2676,7 +2673,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = child entry dirty, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                        world_mpi_rank, idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2687,7 +2684,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = child entry clean, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                        world_mpi_rank, idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2698,7 +2695,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = child entry unserialized, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                        world_mpi_rank, idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2709,7 +2706,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (callbacks_verbose) {
 
                 fprintf(stdout, "%d: notify() action = child entry serialized, idx = %d, addr = %ld.\n",
-                          world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                        world_mpi_rank, idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }
 
@@ -2765,7 +2762,7 @@ datum_free_icr(void *thing)
     if (callbacks_verbose) {
 
         fprintf(stdout, "%d: free_icr() idx = %d, dirty = %d.\n", world_mpi_rank, idx,
-                  (int)(entry_ptr->dirty));
+                (int)(entry_ptr->dirty));
         fflush(stdout);
     }
 
@@ -2930,8 +2927,8 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
                 nerrors++;
                 if (verbose) {
-                    fprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n", world_mpi_rank, __func__,
-                              idx, (int)(data[idx].header.is_dirty));
+                    fprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n", world_mpi_rank, __func__, idx,
+                            (int)(data[idx].header.is_dirty));
                 }
             }
         }
@@ -3564,7 +3561,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
                     nerrors++;
                     if (verbose) {
                         fprintf(stdout, "%d:%s: data[%d].header.is_dirty = %d.\n", world_mpi_rank, __func__,
-                                  new_idx, (int)(data[new_idx].header.is_dirty));
+                                new_idx, (int)(data[new_idx].header.is_dirty));
                     }
                 }
             }
@@ -3638,7 +3635,7 @@ reset_server_counts(void)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: Bad data in req r/w counter reset reply.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
         }
     }
@@ -3679,7 +3676,7 @@ resize_entry(int32_t idx, size_t new_size)
         assert(!(entry_ptr->locked));
         assert((entry_ptr->global_pinned) && (!entry_ptr->local_pinned));
         assert((entry_ptr->header.size == entry_ptr->len) ||
-                 (entry_ptr->header.size == entry_ptr->local_len));
+               (entry_ptr->header.size == entry_ptr->local_len));
         assert(new_size > 0);
         assert(new_size <= entry_ptr->len);
 
@@ -3805,7 +3802,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
         if (H5AC_get_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
 
             fprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config(1) failed.\n", world_mpi_rank,
-                      __func__);
+                    __func__);
         }
         else {
 
@@ -3815,7 +3812,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             if (H5AC_set_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
 
                 fprintf(stdout, "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
             else if (enable_rpt_fcn) {
 
@@ -3843,7 +3840,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: cache_ptr->aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC.\n",
-                          world_mpi_rank, __func__);
+                        world_mpi_rank, __func__);
             }
         }
         else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy != metadata_write_strategy) {
@@ -3851,7 +3848,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: bad cache_ptr->aux_ptr->metadata_write_strategy\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
         }
     }
@@ -3867,7 +3864,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
         if (H5AC_get_cache_auto_resize_config(cache_ptr, &test_config) != SUCCEED) {
 
             fprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config(2) failed.\n", world_mpi_rank,
-                      __func__);
+                    __func__);
         }
         else if (test_config.metadata_write_strategy != metadata_write_strategy) {
 
@@ -3946,7 +3943,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: H5AC__set_sync_point_done_callback failed.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
         }
     }
@@ -4177,7 +4174,7 @@ take_down_cache(hid_t fid, H5C_t *cache_ptr)
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: H5AC__set_sync_point_done_callback failed.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
         }
     }
@@ -4309,7 +4306,7 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: rep/exp entry 0x%" PRIxHADDR " reads mismatch (%d/%d).\n",
-                          world_mpi_rank, __func__, addr, reported_entry_reads, expected_entry_reads);
+                        world_mpi_rank, __func__, addr, reported_entry_reads, expected_entry_reads);
             }
         }
     }
@@ -4406,7 +4403,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: rep/exp entry 0x%llx writes mismatch (%d/%d).\n", world_mpi_rank,
-                          __func__, (long long)addr, reported_entry_writes, expected_entry_writes);
+                        __func__, (long long)addr, reported_entry_writes, expected_entry_writes);
             }
         }
     }
@@ -4498,7 +4495,7 @@ verify_total_reads(int expected_total_reads)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: reported/expected total reads mismatch (%ld/%d).\n", world_mpi_rank,
-                          __func__, reported_total_reads, expected_total_reads);
+                        __func__, reported_total_reads, expected_total_reads);
             }
         }
     }
@@ -4590,7 +4587,7 @@ verify_total_writes(unsigned expected_total_writes)
             success = FALSE;
             if (verbose) {
                 fprintf(stdout, "%d:%s: reported/expected total writes mismatch (%u/%u).\n", world_mpi_rank,
-                          __func__, reported_total_writes, expected_total_writes);
+                        __func__, reported_total_writes, expected_total_writes);
             }
         }
     }
@@ -6380,7 +6377,7 @@ trace_file_check(int metadata_write_strategy)
             if (H5AC_get_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
                 nerrors++;
                 fprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
             else {
                 config.open_trace_file = TRUE;
@@ -6389,7 +6386,7 @@ trace_file_check(int metadata_write_strategy)
                 if (H5AC_set_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
                     nerrors++;
                     fprintf(stdout, "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n", world_mpi_rank,
-                              __func__);
+                            __func__);
                 }
             }
         } /* end if */
@@ -6433,7 +6430,7 @@ trace_file_check(int metadata_write_strategy)
             if (H5AC_get_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
                 nerrors++;
                 fprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
             else {
                 config.open_trace_file    = FALSE;
@@ -6443,7 +6440,7 @@ trace_file_check(int metadata_write_strategy)
                 if (H5AC_set_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
                     nerrors++;
                     fprintf(stdout, "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n", world_mpi_rank,
-                              __func__);
+                            __func__);
                 }
             }
         } /* end if */
@@ -6523,18 +6520,18 @@ trace_file_check(int metadata_write_strategy)
                     nerrors++;
                     if (verbose) {
                         fprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
-                                  __func__, i);
+                                __func__, i);
                         if (expected_line_len == 0) {
                             fprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, __func__,
-                                      "<EMPTY>", expected_line_len);
+                                    "<EMPTY>", expected_line_len);
                             fprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, __func__,
-                                      buffer, actual_line_len);
+                                    buffer, actual_line_len);
                         }
                         if (actual_line_len == 0) {
                             fprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, __func__,
-                                      (*expected_output)[i], expected_line_len);
+                                    (*expected_output)[i], expected_line_len);
                             fprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, __func__,
-                                      "<EMPTY>", actual_line_len);
+                                    "<EMPTY>", actual_line_len);
                         }
                     }
                     fprintf(stdout, "BADNESS BADNESS BADNESS\n");
@@ -6542,17 +6539,16 @@ trace_file_check(int metadata_write_strategy)
             }
             /* We directly compare the header line (line 0) */
             else if (0 == i) {
-                if ((actual_line_len != expected_line_len) ||
-                    (strcmp(buffer, (*expected_output)[i]) != 0)) {
+                if ((actual_line_len != expected_line_len) || (strcmp(buffer, (*expected_output)[i]) != 0)) {
 
                     nerrors++;
                     if (verbose) {
                         fprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
-                                  __func__, i);
+                                __func__, i);
                         fprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, __func__,
-                                  (*expected_output)[i], expected_line_len);
+                                (*expected_output)[i], expected_line_len);
                         fprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, __func__, buffer,
-                                  actual_line_len);
+                                actual_line_len);
                     }
                 }
             }
@@ -6569,9 +6565,9 @@ trace_file_check(int metadata_write_strategy)
                     nerrors++;
                     if (verbose) {
                         fprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
-                                  __func__, i);
+                                __func__, i);
                         fprintf(stdout, "%d:%s: expected = \"%s\"\n", world_mpi_rank, __func__,
-                                  (*expected_output)[i]);
+                                (*expected_output)[i]);
                         fprintf(stdout, "%d:%s: actual   = \"%s\"\n", world_mpi_rank, __func__, tok);
                     }
                 }
@@ -6700,7 +6696,7 @@ smoke_check_6(int metadata_write_strategy)
                 nerrors++;
                 if (verbose) {
                     fprintf(stdout, "%d:%s: Entry inserted not marked as collective.\n", world_mpi_rank,
-                              __func__);
+                            __func__);
                 }
             }
 
@@ -6725,7 +6721,7 @@ smoke_check_6(int metadata_write_strategy)
                 nerrors++;
                 if (verbose) {
                     fprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
-                              world_mpi_rank, __func__);
+                            world_mpi_rank, __func__);
                 }
             }
 
@@ -6757,7 +6753,7 @@ smoke_check_6(int metadata_write_strategy)
                 nerrors++;
                 if (verbose) {
                     fprintf(stdout, "%d:%s: Entry protected not marked as collective.\n", world_mpi_rank,
-                              __func__);
+                            __func__);
                 }
             }
 
@@ -6781,7 +6777,7 @@ smoke_check_6(int metadata_write_strategy)
                 nerrors++;
                 if (verbose) {
                     fprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
-                              world_mpi_rank, __func__);
+                            world_mpi_rank, __func__);
                 }
             }
 
@@ -7029,7 +7025,7 @@ main(int argc, char **argv)
             nerrors++;
             if (verbose) {
                 fprintf(stdout, "%d:%s: H5Pset_all_coll_metadata_ops() failed 1.\n", world_mpi_rank,
-                          __func__);
+                        __func__);
             }
         }
     }

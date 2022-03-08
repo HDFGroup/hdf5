@@ -1830,7 +1830,7 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         assert(ret >= 0);
         assert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+               (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
     }
 
     if (pass) {
@@ -2174,7 +2174,7 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         assert(ret >= 0);
         assert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+               (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
     }
 
     if (pass) {
@@ -2896,7 +2896,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         assert(ret >= 0);
         assert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+               (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
     }
 
     if (pass) {

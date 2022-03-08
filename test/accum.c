@@ -2371,14 +2371,14 @@ accum_printf(const H5F_t *f)
         fprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
             fprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
-                      (haddr_t)(accum->loc + accum->dirty_off));
+                    (haddr_t)(accum->loc + accum->dirty_off));
             fprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
-                      (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
+                    (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
         fprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
-                  (haddr_t)(accum->loc + accum->size));
+                (haddr_t)(accum->loc + accum->size));
         fprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
-                  (haddr_t)(accum->loc + accum->alloc_size));
+                (haddr_t)(accum->loc + accum->alloc_size));
         printf("=====================================================\n");
     }
     printf("\n\n");

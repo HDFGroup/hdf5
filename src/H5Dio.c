@@ -237,9 +237,9 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     /* Sanity check that space is allocated, if there are elements */
     if (nelmts > 0)
         assert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
-                 (dataset->shared->layout.ops->is_data_cached &&
-                  (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
-                 dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
+               (dataset->shared->layout.ops->is_data_cached &&
+                (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
+               dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
 
     /* Allocate the chunk map */
     if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))

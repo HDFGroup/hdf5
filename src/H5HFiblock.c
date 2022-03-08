@@ -116,7 +116,7 @@ H5HF__iblock_pin(H5HF_indirect_t *iblock)
         /* Sanity check */
         assert(par_iblock->child_iblocks);
         assert(iblock->par_entry >=
-                 (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
+               (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
         indir_idx = iblock->par_entry -
@@ -248,7 +248,7 @@ H5HF__iblock_decr(H5HF_indirect_t *iblock)
             /* Sanity check */
             assert(par_iblock->child_iblocks);
             assert(iblock->par_entry >=
-                     (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
+                   (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
 
             /* Compute index in parent's child iblock pointer array */
             indir_idx = iblock->par_entry -

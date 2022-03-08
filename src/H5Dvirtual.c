@@ -1006,9 +1006,9 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *    virtual_ent,
         source_dset->file_name = (char *)H5MM_xfree(source_dset->file_name);
     else
         assert((source_dset->file_name == virtual_ent->source_file_name) ||
-                 (virtual_ent->parsed_source_file_name &&
-                  (source_dset->file_name == virtual_ent->parsed_source_file_name->name_segment)) ||
-                 !source_dset->file_name);
+               (virtual_ent->parsed_source_file_name &&
+                (source_dset->file_name == virtual_ent->parsed_source_file_name->name_segment)) ||
+               !source_dset->file_name);
 
     /* Free dataset name */
     if (virtual_ent->parsed_source_dset_name &&
@@ -1016,9 +1016,9 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *    virtual_ent,
         source_dset->dset_name = (char *)H5MM_xfree(source_dset->dset_name);
     else
         assert((source_dset->dset_name == virtual_ent->source_dset_name) ||
-                 (virtual_ent->parsed_source_dset_name &&
-                  (source_dset->dset_name == virtual_ent->parsed_source_dset_name->name_segment)) ||
-                 !source_dset->dset_name);
+               (virtual_ent->parsed_source_dset_name &&
+                (source_dset->dset_name == virtual_ent->parsed_source_dset_name->name_segment)) ||
+               !source_dset->dset_name);
 
     /* Free clipped virtual selection */
     if (source_dset->clipped_virtual_select) {
@@ -1524,7 +1524,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                  * any */
                                 if (storage->list[i].source_dset.clipped_virtual_select) {
                                     assert(storage->list[i].source_dset.clipped_virtual_select !=
-                                             storage->list[i].source_dset.virtual_select);
+                                           storage->list[i].source_dset.virtual_select);
                                     if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                                         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                                     "unable to release clipped virtual dataspace")
@@ -1547,7 +1547,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                              */
                             if (storage->list[i].source_dset.clipped_source_select) {
                                 assert(storage->list[i].source_dset.clipped_source_select !=
-                                         storage->list[i].source_select);
+                                       storage->list[i].source_select);
                                 if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                     HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                                 "unable to release clipped source dataspace")
@@ -1608,8 +1608,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
 
                             /* Clear new space in sub_dset */
                             (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                           storage->list[i].sub_dset_nalloc *
-                                               sizeof(H5O_storage_virtual_srcdset_t));
+                                         storage->list[i].sub_dset_nalloc *
+                                             sizeof(H5O_storage_virtual_srcdset_t));
 
                             /* Update sub_dset_nalloc */
                             storage->list[i].sub_dset_nalloc *= 2;
@@ -1772,7 +1772,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                     /* Close previous clipped virtual selection, if any */
                     if (storage->list[i].source_dset.clipped_virtual_select) {
                         assert(storage->list[i].source_dset.clipped_virtual_select !=
-                                 storage->list[i].source_dset.virtual_select);
+                               storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped virtual dataspace")
@@ -1799,7 +1799,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                         /* Close previous clipped source selection, if any */
                         if (storage->list[i].source_dset.clipped_source_select) {
                             assert(storage->list[i].source_dset.clipped_source_select !=
-                                     storage->list[i].source_select);
+                                   storage->list[i].source_select);
                             if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                             "unable to release clipped source dataspace")
@@ -1983,7 +1983,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                     /* Close previous clipped virtual selection, if any */
                     if (storage->list[i].source_dset.clipped_virtual_select) {
                         assert(storage->list[i].source_dset.clipped_virtual_select !=
-                                 storage->list[i].source_dset.virtual_select);
+                               storage->list[i].source_dset.virtual_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_virtual_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped virtual dataspace")
@@ -1997,7 +1997,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                     /* Close previous clipped source selection, if any */
                     if (storage->list[i].source_dset.clipped_source_select) {
                         assert(storage->list[i].source_dset.clipped_source_select !=
-                                 storage->list[i].source_select);
+                               storage->list[i].source_select);
                         if (H5S_close(storage->list[i].source_dset.clipped_source_select) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
                                         "unable to release clipped source dataspace")
@@ -2079,8 +2079,8 @@ H5D__virtual_init_all(const H5D_t *dset)
 
                     /* Clear new space in sub_dset */
                     (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                   (sub_dset_max - storage->list[i].sub_dset_nalloc) *
-                                       sizeof(H5O_storage_virtual_srcdset_t));
+                                 (sub_dset_max - storage->list[i].sub_dset_nalloc) *
+                                     sizeof(H5O_storage_virtual_srcdset_t));
 
                     /* Update sub_dset_nalloc */
                     storage->list[i].sub_dset_nalloc = sub_dset_max;

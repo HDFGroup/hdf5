@@ -749,7 +749,7 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
             /* tag should always be CLOSE is nrefs > 1 or DEFAULT if nrefs == 1
              * here */
             assert(((esf->nrefs > 1) && ((esf->efc->tag == H5F_EFC_TAG_CLOSE))) ||
-                     ((esf->nrefs == 1) && (esf->efc->tag == H5F_EFC_TAG_DEFAULT)));
+                   ((esf->nrefs == 1) && (esf->efc->tag == H5F_EFC_TAG_DEFAULT)));
 
             /* If tag is set to DONTCLOSE, we have already visited this file
              * *or* it will be the start point of another iteration so just

@@ -89,7 +89,7 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         /* Reallocate array */
         if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
             printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
-                     newAlloc);
+                   newAlloc);
             exit(EXIT_FAILURE);
         } /* end if */
 
@@ -630,7 +630,7 @@ TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
     char *        env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
+    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)

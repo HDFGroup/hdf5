@@ -150,11 +150,11 @@ H5Z_term_package(void)
                 if (0 == nprint++) {
                     /* Print column headers */
                     fprintf(H5DEBUG(Z), "H5Z: filter statistics "
-                                          "accumulated over life of library:\n");
-                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total",
-                              "Errors", "User", "System", "Elapsed", "Bandwidth");
-                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----",
-                              "------", "----", "------", "-------", "---------");
+                                        "accumulated over life of library:\n");
+                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total", "Errors",
+                            "User", "System", "Elapsed", "Bandwidth");
+                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----", "------",
+                            "----", "------", "-------", "---------");
                 } /* end if */
 
                 /* Truncate the comment to fit in the field */
@@ -171,9 +171,9 @@ H5Z_term_package(void)
 
                 /* Print the statistics */
                 fprintf(H5DEBUG(Z), "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
-                          (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
-                          H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
-                          timestrs.elapsed, bandwidth);
+                        (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
+                        H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
+                        timestrs.elapsed, bandwidth);
 next:
                 free(timestrs.user);
                 free(timestrs.system);
@@ -424,10 +424,10 @@ H5Z__unregister(H5Z_filter_t filter_id)
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
     memmove(&H5Z_table_g[filter_index], &H5Z_table_g[filter_index + 1],
-              sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
+            sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
 #ifdef H5Z_DEBUG
     memmove(&H5Z_stat_table_g[filter_index], &H5Z_stat_table_g[filter_index + 1],
-              sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
+            sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
 #endif /* H5Z_DEBUG */
     H5Z_table_used_g--;
 

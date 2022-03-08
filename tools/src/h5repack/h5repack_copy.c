@@ -989,8 +989,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     H5TOOLS_INFO("H5Dcreate2 failed");
                                     if (options->verbose > 0)
                                         printf(" warning: could not create dataset <%s>. Applying original "
-                                                 "settings\n",
-                                                 travt->objs[i].name);
+                                               "settings\n",
+                                               travt->objs[i].name);
 
                                     if ((dset_out =
                                              H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id,
@@ -1219,12 +1219,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                      */
                                     if (has_filter && apply_s == 0)
                                         printf(" <warning: filter not applied to %s. dataset smaller than "
-                                                 "%d bytes>\n",
-                                                 travt->objs[i].name, (int)options->min_comp);
+                                               "%d bytes>\n",
+                                               travt->objs[i].name, (int)options->min_comp);
 
                                     if (has_filter && apply_f == 0)
                                         printf(" <warning: could not apply the filter to %s>\n",
-                                                 travt->objs[i].name);
+                                               travt->objs[i].name);
                                 } /* end if verbose (print compression) */
 
                                 /*-------------------------------------------------------------------------

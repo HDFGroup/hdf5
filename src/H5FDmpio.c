@@ -862,7 +862,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
                               (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == mpi_rank));
     if (H5FD_mpio_debug_t_flag)
         fprintf(stderr, "%s: (%d) Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n",
-                  __func__, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
+                __func__, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
 #endif
 
     /* Convert HDF5 flags to MPI-IO flags */
@@ -1415,7 +1415,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
         fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_read, H5FD__mem_t_to_str(type));
+                (long)mpi_off, bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
     /*
@@ -1635,8 +1635,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
-                  file->mpi_rank, (long)mpi_off, bytes_written, H5FD__mem_t_to_str(type));
+        fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__, file->mpi_rank,
+                (long)mpi_off, bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and

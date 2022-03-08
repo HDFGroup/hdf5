@@ -520,7 +520,7 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
     haddr_t  _maxaddr = HADDR_UNDEF;
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
-             TRUE == H5FD_mirror_xmit_is_open(xmit_open));
+           TRUE == H5FD_mirror_xmit_is_open(xmit_open));
 
     mirror_log(session->loginfo, V_INFO, "do_open()");
 
@@ -848,8 +848,8 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     H5FD_mirror_xmit_t *X = comm->xmit_recd;
 
     assert((session != NULL) && (session->magic == MW_SESSION_MAGIC) && (comm != NULL) &&
-             (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
-             (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
+           (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
+           (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 

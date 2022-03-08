@@ -532,7 +532,7 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Heap address:", mesg->heap_addr);
 
     fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Slots used/allocated:", mesg->nused,
-              mesg->nalloc);
+            mesg->nalloc);
 
     for (u = 0; u < mesg->nused; u++) {
         char buf[64];
@@ -540,17 +540,16 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
         snprintf(buf, sizeof(buf), "File %zu", u);
         fprintf(stream, "%*s%s:\n", indent, "", buf);
 
-        fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Name:", mesg->slot[u].name);
+        fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0), "Name:", mesg->slot[u].name);
 
         fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Name offset:", mesg->slot[u].name_offset);
+                "Name offset:", mesg->slot[u].name_offset);
 
         fprintf(stream, "%*s%-*s %" PRIdMAX "\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Offset of data in file:", (intmax_t)(mesg->slot[u].offset));
+                "Offset of data in file:", (intmax_t)(mesg->slot[u].offset));
 
         fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent + 3, "", MAX(fwidth - 3, 0),
-                  "Bytes reserved for data:", (mesg->slot[u].size));
+                "Bytes reserved for data:", (mesg->slot[u].size));
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

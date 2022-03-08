@@ -376,7 +376,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
         /* Make room for new record */
         if (idx < leaf->nrec)
             memmove(H5B2_LEAF_NREC(leaf, hdr, idx + 1), H5B2_LEAF_NREC(leaf, hdr, idx),
-                      hdr->cls->nrec_size * (leaf->nrec - idx));
+                    hdr->cls->nrec_size * (leaf->nrec - idx));
     } /* end else */
 
     /* Make callback to store record in native form */
@@ -498,7 +498,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
             /* Make room for new record */
             if (idx < leaf->nrec)
                 memmove(H5B2_LEAF_NREC(leaf, hdr, idx + 1), H5B2_LEAF_NREC(leaf, hdr, idx),
-                          hdr->cls->nrec_size * (leaf->nrec - idx));
+                        hdr->cls->nrec_size * (leaf->nrec - idx));
         } /* end if */
     }     /* end else */
 
@@ -829,7 +829,7 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
         /* Pack record out of leaf */
         if (idx < leaf->nrec)
             memmove(H5B2_LEAF_NREC(leaf, hdr, idx), H5B2_LEAF_NREC(leaf, hdr, (idx + 1)),
-                      hdr->cls->nrec_size * (leaf->nrec - idx));
+                    hdr->cls->nrec_size * (leaf->nrec - idx));
 
         /* Mark leaf node as dirty also */
         leaf_flags |= H5AC__DIRTIED_FLAG;
@@ -930,7 +930,7 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_n
         /* Pack record out of leaf */
         if (idx < leaf->nrec)
             memmove(H5B2_LEAF_NREC(leaf, hdr, idx), H5B2_LEAF_NREC(leaf, hdr, (idx + 1)),
-                      hdr->cls->nrec_size * (leaf->nrec - idx));
+                    hdr->cls->nrec_size * (leaf->nrec - idx));
 
         /* Mark leaf node as dirty also */
         leaf_flags |= H5AC__DIRTIED_FLAG;

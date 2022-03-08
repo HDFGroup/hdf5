@@ -2844,8 +2844,7 @@ test_vltypes_fill_value(void)
                 if ((i % 2) == select_offset[0]) {
                     if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
                         rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
                         strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
@@ -2902,8 +2901,7 @@ test_vltypes_fill_value(void)
                 if ((i % 2) == select_offset[0]) {
                     if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
                         rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
                         strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
@@ -3032,8 +3030,7 @@ test_vltypes_fill_value(void)
                 else {
                     if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
                         rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
                         strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
@@ -3120,8 +3117,7 @@ test_vltypes_fill_value(void)
                 else {
                     if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
                         rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
                         strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;

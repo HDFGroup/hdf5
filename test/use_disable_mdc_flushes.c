@@ -124,7 +124,7 @@ parse_option(int argc, char *const argv[])
             case 'y': /* Number of planes per chunk */
                 if ((chunkplanes_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
-                              optarg);
+                            optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
@@ -168,9 +168,9 @@ show_parameters(void)
 {
     printf("===Parameters used:===\n");
     printf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)chunkdims_g[0],
-             (unsigned long long)chunkdims_g[1], (unsigned long long)chunkdims_g[2]);
+           (unsigned long long)chunkdims_g[1], (unsigned long long)chunkdims_g[2]);
     printf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)max_dims_g[0],
-             (unsigned long long)max_dims_g[1], (unsigned long long)max_dims_g[2]);
+           (unsigned long long)max_dims_g[1], (unsigned long long)max_dims_g[2]);
     printf("number of planes to write=%llu\n", (unsigned long long)nplanes_g);
     printf("using SWMR mode=%s\n", use_swmr_g ? "yes(1)" : "no(0)");
     printf("data filename=%s\n", filename_g);
@@ -363,8 +363,8 @@ write_file(void)
     /* verify chunk_dims against set parameters */
     if (chunk_dims[0] != chunkdims_g[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
         fprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
-                  (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
-                  (unsigned long long)chunk_dims[2]);
+                (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
+                (unsigned long long)chunk_dims[2]);
         return -1;
     }
 
@@ -391,11 +391,11 @@ write_file(void)
         return -1;
     }
     printf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
-             (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
+           (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]) {
         fprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n", (unsigned long long)dims[0],
-                  (unsigned long long)dims[1], (unsigned long long)dims[2]);
+                (unsigned long long)dims[1], (unsigned long long)dims[2]);
         return -1;
     }
 

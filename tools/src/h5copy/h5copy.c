@@ -374,7 +374,7 @@ main(int argc, char *argv[])
 
     if (verbose) {
         printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n", fname_src, oname_src,
-                 fname_dst, oname_dst);
+               fname_dst, oname_dst);
         if (flag) {
             printf("Using %s flag\n", str_flag);
         }

@@ -188,7 +188,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         else
                                             printf(FORMAT_OBJ, "dset", travt->objs[i].name);
                                         printf("object <%s> object reference created to <%s>\n",
-                                                 travt->objs[i].name, refname);
+                                               travt->objs[i].name, refname);
                                     }
                                 } /*refname*/
                                 if (H5Oclose(refobj_id) < 0)
@@ -248,7 +248,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                              *-------------------------------------------------------------------------
                              */
                             refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t),
-                                                                 (size_t)nelmts); /*init to zero */
+                                                               (size_t)nelmts); /*init to zero */
                             if (refbuf == NULL) {
                                 printf("cannot allocate memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "calloc failed");
@@ -282,7 +282,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     if (options->verbose > 0) {
                                         printf(FORMAT_OBJ, "dset", travt->objs[i].name);
                                         printf("object <%s> region reference created to <%s>\n",
-                                                 travt->objs[i].name, refname);
+                                               travt->objs[i].name, refname);
                                     }
                                 } /*refname*/
                                 if (H5Oclose(refobj_id) < 0)
@@ -633,8 +633,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                  * create output
                  *-------------------------------------------------------------------------
                  */
-                refbuf =
-                    (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
+                refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
                 if (refbuf == NULL) {
                     printf("cannot allocate memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "calloc failed");

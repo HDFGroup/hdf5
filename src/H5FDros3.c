@@ -910,9 +910,9 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      ******************/
 
     fprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
-              count_raw);
+            count_raw);
     fprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
-              bytes_raw);
+            bytes_raw);
 
     if (count_raw + count_meta == 0)
         goto done;
@@ -1035,13 +1035,13 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         assert(suffix_i < sizeof(suffixes));
 
         fprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
-                  suffixes[suffix_i], /* bin ceiling      */
-                  m->count,           /* metadata reads   */
-                  r->count,           /* rawdata reads    */
-                  bm_val, bm_suffix,  /* metadata bytes   */
-                  br_val, br_suffix,  /* rawdata bytes    */
-                  am_val, am_suffix,  /* metadata average */
-                  ar_val, ar_suffix); /* rawdata average  */
+                suffixes[suffix_i], /* bin ceiling      */
+                m->count,           /* metadata reads   */
+                r->count,           /* rawdata reads    */
+                bm_val, bm_suffix,  /* metadata bytes   */
+                br_val, br_suffix,  /* rawdata bytes    */
+                am_val, am_suffix,  /* metadata average */
+                ar_val, ar_suffix); /* rawdata average  */
 
         fflush(stream);
     }

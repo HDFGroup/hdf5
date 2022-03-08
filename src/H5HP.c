@@ -414,7 +414,7 @@ H5HP_count(const H5HP_t *heap)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Return the number of objects in the heap */
@@ -461,7 +461,7 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Increment number of objects in heap */
@@ -500,7 +500,7 @@ done:
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -539,7 +539,7 @@ H5HP_top(const H5HP_t *heap, int *val)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Get value of the top object in the heap */
@@ -586,7 +586,7 @@ H5HP_remove(H5HP_t *heap, int *val, void **obj)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Check if there are any objects on the heap to remove */
@@ -625,7 +625,7 @@ done:
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -670,7 +670,7 @@ H5HP_change(H5HP_t *heap, int val, void *_obj)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Get the location of the object in the heap */
@@ -710,7 +710,7 @@ done:
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -754,7 +754,7 @@ H5HP_incr(H5HP_t *heap, unsigned amt, void *_obj)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Get the location of the object in the heap */
@@ -781,7 +781,7 @@ done:
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -825,7 +825,7 @@ H5HP_decr(H5HP_t *heap, unsigned amt, void *_obj)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     /* Get the location of the object in the heap */
@@ -853,7 +853,7 @@ done:
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(heap->heap[0].obj == NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -891,7 +891,7 @@ H5HP_close(H5HP_t *heap)
     assert(heap->nobjs < heap->nalloc);
     assert(heap->heap);
     assert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
-             (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+           (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
     assert(NULL == heap->heap[0].obj);
 
     /* Free internal structures for heap */

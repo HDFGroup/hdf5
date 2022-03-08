@@ -81,9 +81,9 @@ static int __k;
 #define HEXPRINT(size, buf)                                                                                  \
     for (__k = 0; __k < (size); __k++) {                                                                     \
         if (__k % 16 == 0) {                                                                                 \
-            printf("\n%04x", __k);                                                                         \
+            printf("\n%04x", __k);                                                                           \
         }                                                                                                    \
-        printf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
+        printf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                              \
     } /* end #define HEXPRINT() */
 
 /* Helper structure to pass around dataset information.
@@ -2331,9 +2331,9 @@ error:
     {                                                                                                        \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        fprintf(stderr, mesg);                                                                             \
+        fprintf(stderr, mesg);                                                                               \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
-        fflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
     }

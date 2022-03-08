@@ -1071,7 +1071,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
                  *  not defined)
                  */
                 assert((H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
-                         (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
+                       (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
 
                 /* I/O filter mask for filtered direct block */
                 UINT32DECODE(image, iblock->filt_ents[u].filter_mask);
@@ -1360,7 +1360,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
                  *  not defined)
                  */
                 assert((H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
-                         (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
+                       (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
 
                 /* Size of filtered direct block */
                 H5F_ENCODE_LENGTH(f, image, iblock->filt_ents[u].size);
@@ -1445,7 +1445,7 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
         /* Sanity check */
         assert(par_iblock->child_iblocks);
         assert(iblock->par_entry >=
-                 (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
+               (iblock->hdr->man_dtable.max_direct_rows * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
         indir_idx = iblock->par_entry -
@@ -1455,7 +1455,7 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
         /* verify that it is either NULL, or that it has been set to */
         /* iblock.                                                   */
         assert((NULL == par_iblock->child_iblocks[indir_idx]) ||
-                 (par_iblock->child_iblocks[indir_idx] == iblock));
+               (par_iblock->child_iblocks[indir_idx] == iblock));
     } /* end else */
 
     switch (action) {

@@ -956,7 +956,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
                 /* Compare source file names */
                 strcmp_ret = strcmp(layout1->storage.u.virt.list[u].source_file_name,
-                                      layout2->storage.u.virt.list[u].source_file_name);
+                                    layout2->storage.u.virt.list[u].source_file_name);
                 if (strcmp_ret < 0)
                     HGOTO_DONE(-1)
                 if (strcmp_ret > 0)
@@ -964,7 +964,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
 
                 /* Compare source dataset names */
                 strcmp_ret = strcmp(layout1->storage.u.virt.list[u].source_dset_name,
-                                      layout2->storage.u.virt.list[u].source_dset_name);
+                                    layout2->storage.u.virt.list[u].source_dset_name);
                 if (strcmp_ret < 0)
                     HGOTO_DONE(-1)
                 if (strcmp_ret > 0)

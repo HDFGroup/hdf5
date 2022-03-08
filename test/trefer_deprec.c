@@ -809,7 +809,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
     coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) *
-                                 2); /* allocate space for the hyperslab blocks */
+                               2); /* allocate space for the hyperslab blocks */
     ret    = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -838,7 +838,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
     coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK *
-                                 sizeof(hsize_t)); /* allocate space for the element points */
+                               sizeof(hsize_t)); /* allocate space for the element points */
     ret    = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -1133,7 +1133,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     ret = (int)H5Sget_select_hyper_nblocks(sid3);
     VERIFY(ret, 15, "H5Sget_select_hyper_nblocks");
     coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) *
-                                 2); /* allocate space for the hyperslab blocks */
+                               2); /* allocate space for the hyperslab blocks */
     ret    = H5Sget_select_hyper_blocklist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -1186,7 +1186,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     ret = (int)H5Sget_select_elem_npoints(sid3);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
     coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK *
-                                 sizeof(hsize_t)); /* allocate space for the element points */
+                               sizeof(hsize_t)); /* allocate space for the element points */
     ret    = H5Sget_select_elem_pointlist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");

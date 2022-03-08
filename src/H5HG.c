@@ -542,8 +542,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         H5MM_memcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
 #ifdef OLD_WAY
         /* Don't bother zeroing out the rest of the info in the heap -QAK */
-        memset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
-                 need - (H5HG_SIZEOF_OBJHDR(f) + size));
+        memset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0, need - (H5HG_SIZEOF_OBJHDR(f) + size));
 #endif /* OLD_WAY */
     }  /* end if */
     heap_flags |= H5AC__DIRTIED_FLAG;

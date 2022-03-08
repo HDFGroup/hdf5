@@ -435,7 +435,7 @@ H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *_nr
     FUNC_ENTER_STATIC_NOERR
 
     fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len, nrecord->id);
+            "Record:", nrecord->addr, nrecord->len, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_indir_debug() */
@@ -636,9 +636,9 @@ H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void
 
     FUNC_ENTER_STATIC_NOERR
 
-    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n",
-              indent, "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask,
-              nrecord->obj_size, nrecord->id);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent,
+            "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size,
+            nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_indir_debug() */
@@ -820,7 +820,7 @@ H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrec
     FUNC_ENTER_STATIC_NOERR
 
     fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len);
+            "Record:", nrecord->addr, nrecord->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_dir_debug() */
@@ -1031,7 +1031,7 @@ H5HF__huge_bt2_filt_dir_debug(FILE *stream, int indent, int fwidth, const void *
     FUNC_ENTER_STATIC_NOERR
 
     fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE "}\n", indent, "", fwidth,
-              "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);
+            "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_dir_debug() */

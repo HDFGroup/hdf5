@@ -3226,7 +3226,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
 
     /* verify file image field consistency */
     assert(((image_info.buffer != NULL) && (image_info.size > 0)) ||
-             ((image_info.buffer == NULL) && (image_info.size == 0)));
+           ((image_info.buffer == NULL) && (image_info.size == 0)));
 
     /* Set output size */
     if (buf_len != NULL)
@@ -3428,8 +3428,7 @@ H5P__file_image_info_copy(void *value)
         info = (H5FD_file_image_info_t *)value;
 
         /* verify file image field consistency */
-        assert(((info->buffer != NULL) && (info->size > 0)) ||
-                 ((info->buffer == NULL) && (info->size == 0)));
+        assert(((info->buffer != NULL) && (info->size > 0)) || ((info->buffer == NULL) && (info->size == 0)));
 
         if (info->buffer && info->size > 0) {
             void *old_buffer; /* Pointer to old image buffer */
@@ -3502,8 +3501,7 @@ H5P__file_image_info_free(void *value)
         info = (H5FD_file_image_info_t *)value;
 
         /* Verify file image field consistency */
-        assert(((info->buffer != NULL) && (info->size > 0)) ||
-                 ((info->buffer == NULL) && (info->size == 0)));
+        assert(((info->buffer != NULL) && (info->size > 0)) || ((info->buffer == NULL) && (info->size == 0)));
 
         /* Free buffer */
         if (info->buffer != NULL && info->size > 0) {

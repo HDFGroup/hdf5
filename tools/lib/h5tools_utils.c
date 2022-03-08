@@ -83,7 +83,7 @@ parallel_print(const char *format, ...)
                 overflow_file = tmpfile();
                 if (overflow_file == NULL)
                     fprintf(rawerrorstream,
-                              "warning: could not create overflow file.  Output may be truncated.\n");
+                            "warning: could not create overflow file.  Output may be truncated.\n");
                 else
                     bytes_written = vfprintf(overflow_file, format, ap);
             }
@@ -270,7 +270,7 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
 
     /* create destination string
      */
-    start++;                                                  /* advance past opening paren '(' */
+    start++;                                              /* advance past opening paren '(' */
     cpy = (char *)malloc(sizeof(char) * (strlen(start))); /* no +1; less '(' */
     if (cpy == NULL) {
         ret_value = FAIL;

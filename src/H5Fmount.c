@@ -70,7 +70,7 @@ H5F__close_mounts(H5F_t *f)
 
             /* Eliminate the mount point from the table */
             memmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
-                      (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
+                    (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
             f->shared->mtab.nmounts--;
             f->nmounts--;
         }
@@ -203,7 +203,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
 
     /* Insert into table */
     memmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
-              (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
+            (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts++;
     parent->nmounts++;
     parent->shared->mtab.child[md].group = mount_point;
@@ -367,9 +367,9 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
 
     /* Eliminate the mount point from the table */
     memmove(parent->shared->mtab.child + (unsigned)child_idx,
-              (parent->shared->mtab.child + (unsigned)child_idx) + 1,
-              ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
-                  sizeof(parent->shared->mtab.child[0]));
+            (parent->shared->mtab.child + (unsigned)child_idx) + 1,
+            ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
+                sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts -= 1;
     parent->nmounts -= 1;
 

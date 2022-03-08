@@ -44,7 +44,7 @@
     }
 #define ERRMSG(mesg)                                                                                         \
     {                                                                                                        \
-        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);   \
+        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);     \
     }
 
 /* verify: if val is false (0), print mesg. */
@@ -178,9 +178,9 @@ do_sio(parameters param, results *res)
 
         if ((param.dset_size[i] % param.buf_size[i]) != 0) {
             fprintf(stderr,
-                      "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "transfer buffer size[%d] (%zu)\n",
-                      param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
+                    "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                    "transfer buffer size[%d] (%zu)\n",
+                    param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
             GOTOERROR(FAIL);
         }
     }

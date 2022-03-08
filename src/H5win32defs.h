@@ -55,7 +55,7 @@ struct timezone {
 #define HDgetdrive()         _getdrive()
 #define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define isatty(F)          _isatty(F)
+#define isatty(F)            _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmkdir(S, M)        _mkdir(S)
@@ -70,18 +70,18 @@ struct timezone {
 #define HDopen(S, F, ...) Wopen_utf8(S, F, ##__VA_ARGS__)
 #endif
 
-#define HDread(F, M, Z)       _read(F, M, Z)
+#define HDread(F, M, Z)     _read(F, M, Z)
 #define remove(S)           Wremove_utf8(S)
-#define HDrmdir(S)            _rmdir(S)
-#define HDsetenv(N, V, O)     Wsetenv(N, V, O)
+#define HDrmdir(S)          _rmdir(S)
+#define HDsetenv(N, V, O)   Wsetenv(N, V, O)
 #define sleep(S)            Sleep(S * 1000)
-#define HDstat(S, B)          _stati64(S, B)
-#define HDstrdup(S)           _strdup(S)
-#define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
-#define HDtzset()             _tzset()
-#define HDunlink(S)           _unlink(S)
-#define HDunsetenv(N)         Wsetenv(N, "", 1)
-#define HDwrite(F, M, Z)      _write(F, M, Z)
+#define HDstat(S, B)        _stati64(S, B)
+#define HDstrdup(S)         _strdup(S)
+#define HDstrtok_r(X, Y, Z) strtok_s(X, Y, Z)
+#define HDtzset()           _tzset()
+#define HDunlink(S)         _unlink(S)
+#define HDunsetenv(N)       Wsetenv(N, "", 1)
+#define HDwrite(F, M, Z)    _write(F, M, Z)
 
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F, L) _chsize_s(F, L)
@@ -93,14 +93,14 @@ struct timezone {
  */
 
 #ifndef H5_HAVE_MINGW
-#define HDfseek(F, O, W)  _fseeki64(F, O, W)
+#define HDfseek(F, O, W) _fseeki64(F, O, W)
 #endif /* H5_HAVE_MINGW */
 
 /* strcasecmp is a POSIX function whose semantics our Windows implementation
  * does not replicate.  strcasecmp is used only a handful of times.  We
  * probably can just poison it everywhere and provide a portable alternative.
  */
-#define HDstrcasecmp(A, B)    _stricmp(A, B)
+#define HDstrcasecmp(A, B) _stricmp(A, B)
 
 #ifdef __cplusplus
 extern "C" {

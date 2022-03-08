@@ -979,12 +979,12 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         switch (disable_version_check) {
             case 0:
                 fprintf(stderr, "%s%s", version_mismatch_warning,
-                          "You can, at your own risk, disable this warning by setting the environment\n"
-                          "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-                          "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                        "You can, at your own risk, disable this warning by setting the environment\n"
+                        "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                        "Setting it to 2 or higher will suppress the warning messages totally.\n");
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
-                          (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                        (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library settings if available */
                 fprintf(stderr, "%s", H5libhdf5_settings);
 
@@ -995,13 +995,13 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* continue with a warning */
                 /* Note that the warning message is embedded in the format string.*/
                 fprintf(stderr,
-                          "%s'HDF5_DISABLE_VERSION_CHECK' "
-                          "environment variable is set to %d, application will\n"
-                          "continue at your own risk.\n",
-                          version_mismatch_warning, disable_version_check);
+                        "%s'HDF5_DISABLE_VERSION_CHECK' "
+                        "environment variable is set to %d, application will\n"
+                        "continue at your own risk.\n",
+                        version_mismatch_warning, disable_version_check);
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
-                          (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                        (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library settings if available */
                 fprintf(stderr, "%s", H5libhdf5_settings);
                 break;
@@ -1020,15 +1020,13 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
                 switch (disable_version_check) {
                     case 0:
-                        fprintf(
-                            stderr, "%s%s", release_mismatch_warning,
-                            "You can, at your own risk, disable this warning by setting the environment\n"
-                            "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-                            "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                        fprintf(stderr, "%s%s", release_mismatch_warning,
+                                "You can, at your own risk, disable this warning by setting the environment\n"
+                                "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                                "Setting it to 2 or higher will suppress the warning messages totally.\n");
                         /* Mention the versions we are referring to */
-                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
-                                  relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
-                                  (unsigned)H5_VERS_RELEASE);
+                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                                (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 
                         /* Bail out now. */
                         fputs("Bye...\n", stderr);
@@ -1037,14 +1035,13 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                         /* continue with a warning */
                         /* Note that the warning message is embedded in the format string.*/
                         fprintf(stderr,
-                                  "%s'HDF5_DISABLE_VERSION_CHECK' "
-                                  "environment variable is set to %d, application will\n"
-                                  "continue at your own risk.\n",
-                                  release_mismatch_warning, disable_version_check);
+                                "%s'HDF5_DISABLE_VERSION_CHECK' "
+                                "environment variable is set to %d, application will\n"
+                                "continue at your own risk.\n",
+                                release_mismatch_warning, disable_version_check);
                         /* Mention the versions we are referring to */
-                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
-                                  relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
-                                  (unsigned)H5_VERS_RELEASE);
+                        fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                                (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                         break;
                     default:
                         /* 2 or higher: continue silently */
@@ -1066,22 +1063,22 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
          * Check only the first sizeof(lib_str) char.  Assume the information
          * will fit within this size or enough significance.
          */
-        snprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d%s%s", H5_VERS_MAJOR,
-                   H5_VERS_MINOR, H5_VERS_RELEASE, (*substr ? "-" : ""), substr);
+        snprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d%s%s", H5_VERS_MAJOR, H5_VERS_MINOR,
+                 H5_VERS_RELEASE, (*substr ? "-" : ""), substr);
 
         if (strcmp(lib_str, H5_lib_vers_info_g) != 0) {
             fputs("Warning!  Library version information error.\n"
-                    "The HDF5 library version information are not "
-                    "consistent in its source code.\nThis is NOT a fatal error "
-                    "but should be corrected.  Setting the environment\n"
-                    "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of 1 "
-                    "will suppress\nthis warning.\n",
-                    stderr);
+                  "The HDF5 library version information are not "
+                  "consistent in its source code.\nThis is NOT a fatal error "
+                  "but should be corrected.  Setting the environment\n"
+                  "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of 1 "
+                  "will suppress\nthis warning.\n",
+                  stderr);
             fprintf(stderr,
-                      "Library version information are:\n"
-                      "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
-                      "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
-                      H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE, H5_VERS_INFO);
+                    "Library version information are:\n"
+                    "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
+                    "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
+                    H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, H5_VERS_SUBRELEASE, H5_VERS_INFO);
         } /* end if */
     }
 

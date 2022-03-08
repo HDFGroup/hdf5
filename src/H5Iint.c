@@ -390,9 +390,9 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 #ifdef H5I_DEBUG
                     if (H5DEBUG(I)) {
                         fprintf(H5DEBUG(I),
-                                  "H5I: discard type=%d obj=0x%08lx "
-                                  "failure ignored\n",
-                                  (int)udata->type_info->cls->type, (unsigned long)(info->object));
+                                "H5I: discard type=%d obj=0x%08lx "
+                                "failure ignored\n",
+                                (int)udata->type_info->cls->type, (unsigned long)(info->object));
                     }
 #endif /* H5I_DEBUG */
 
@@ -413,9 +413,9 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 #ifdef H5I_DEBUG
                     if (H5DEBUG(I)) {
                         fprintf(H5DEBUG(I),
-                                  "H5I: free type=%d obj=0x%08lx "
-                                  "failure ignored\n",
-                                  (int)udata->type_info->cls->type, (unsigned long)(info->object));
+                                "H5I: free type=%d obj=0x%08lx "
+                                "failure ignored\n",
+                                (int)udata->type_info->cls->type, (unsigned long)(info->object));
                     }
 #endif /* H5I_DEBUG */
 

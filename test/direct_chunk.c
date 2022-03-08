@@ -884,7 +884,7 @@ test_skip_compress_write2(hid_t file)
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
                 printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j],
-                         check_chunk[i][j]);
+                       check_chunk[i][j]);
                 goto error;
             }
         }
@@ -1092,13 +1092,13 @@ test_data_conv(hid_t file)
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
                 printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
                 printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (read_chunk[i][j]).a,
-                         (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
-                         (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
-                         (read_chunk[i][j]).e);
+                       (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
+                       (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
+                       (read_chunk[i][j]).e);
 
                 goto error;
             }
@@ -1135,12 +1135,12 @@ test_data_conv(hid_t file)
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
                 printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
                 printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", (check_chunk[i][j]).a,
-                         (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
-                         (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
+                       (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
+                       (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
 
                 goto error;
             }

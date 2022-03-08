@@ -114,7 +114,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     /* Emit informational message */
     if (verbose)
         fprintf(stderr, "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX "\n", symbol->name,
-                  (uintmax_t)start[0], (uintmax_t)start[1]);
+                (uintmax_t)start[0], (uintmax_t)start[1]);
 
     /* Read record from dataset */
     record->rec_id = (uint64_t)ULLONG_MAX;
@@ -125,9 +125,8 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     if (record->rec_id != start[1]) {
         fprintf(stderr, "*** ERROR ***\n");
         fprintf(stderr, "Incorrect record value!\n");
-        fprintf(stderr,
-                  "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX ", record->rec_id = %" PRIu64 "\n",
-                  symbol->name, (uintmax_t)start[0], (uintmax_t)start[1], record->rec_id);
+        fprintf(stderr, "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX ", record->rec_id = %" PRIu64 "\n",
+                symbol->name, (uintmax_t)start[0], (uintmax_t)start[1], record->rec_id);
         return -1;
     } /* end if */
 

@@ -144,7 +144,7 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
     ret_value = fspace;
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: fspace = %p, fspace->addr = %" PRIuHADDR "\n", __func__, (void *)fspace,
-              fspace->addr);
+            fspace->addr);
 #endif /* H5FS_DEBUG */
 
 done:
@@ -182,7 +182,7 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
     FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: Opening free space manager, fs_addr = %" PRIuHADDR ", nclasses = %Zu\n", __func__,
-              fs_addr, nclasses);
+            fs_addr, nclasses);
 #endif /* H5FS_DEBUG */
 
     /* Check arguments. */
@@ -406,7 +406,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
     assert(fspace);
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: Entering, fspace = %p, fspace->addr = %" PRIuHADDR ", fspace->sinfo = %p\n",
-              __func__, (void *)fspace, fspace->addr, (void *)fspace->sinfo);
+            __func__, (void *)fspace, fspace->addr, (void *)fspace->sinfo);
 #endif /* H5FS_DEBUG */
 
     /* Check if section info is valid */
@@ -414,12 +414,11 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
     if (fspace->sinfo) {
 #ifdef H5FS_DEBUG
         fprintf(stderr,
-                  "%s: fspace->tot_sect_count = %" PRIuHSIZE ", fspace->serial_sect_count = %" PRIuHSIZE
-                  ", fspace->sect_addr = %" PRIuHADDR ", fspace->rc = %u\n",
-                  __func__, fspace->tot_sect_count, fspace->serial_sect_count, fspace->sect_addr, fspace->rc);
-        fprintf(stderr,
-                  "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
-                  __func__, fspace->alloc_sect_size, fspace->sect_size);
+                "%s: fspace->tot_sect_count = %" PRIuHSIZE ", fspace->serial_sect_count = %" PRIuHSIZE
+                ", fspace->sect_addr = %" PRIuHADDR ", fspace->rc = %u\n",
+                __func__, fspace->tot_sect_count, fspace->serial_sect_count, fspace->sect_addr, fspace->rc);
+        fprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
+                __func__, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_DEBUG */
         /* If there are sections to serialize, update them */
         /* (if the free space manager is persistent) */
@@ -490,8 +489,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                     /* Try to shrink the file or absorb the section info into a block aggregator */
                     if (H5F_IS_TMP_ADDR(f, fspace->sect_addr)) {
 #ifdef H5FS_DEBUG
-                        fprintf(stderr, "%s: Section info in temp. address space went 'go away'\n",
-                                  __func__);
+                        fprintf(stderr, "%s: Section info in temp. address space went 'go away'\n", __func__);
 #endif /* H5FS_DEBUG */
                         /* Reset section info in header */
                         fspace->sect_addr       = HADDR_UNDEF;
@@ -513,7 +511,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                              */
 #ifdef H5FS_DEBUG
                             fprintf(stderr, "%s: Section info can't 'go away', header will own it\n",
-                                      __func__);
+                                    __func__);
 #endif                    /* H5FS_DEBUG */
                         } /* end if */
                         else {
@@ -711,7 +709,7 @@ H5FS__incr(H5FS_t *fspace)
     FUNC_ENTER_PACKAGE
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: Entering, fpace->addr = %" PRIuHADDR ", fspace->rc = %u\n", __func__, fspace->addr,
-              fspace->rc);
+            fspace->rc);
 #endif /* H5FS_DEBUG */
 
     /*
@@ -751,7 +749,7 @@ H5FS__decr(H5FS_t *fspace)
     FUNC_ENTER_PACKAGE
 #ifdef H5FS_DEBUG
     fprintf(stderr, "%s: Entering, fpace->addr = %" PRIuHADDR ", fspace->rc = %u\n", __func__, fspace->addr,
-              fspace->rc);
+            fspace->rc);
 #endif /* H5FS_DEBUG */
 
     /*

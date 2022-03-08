@@ -340,8 +340,7 @@ monitor_dataset(hid_t fid, char *dsetname)
         if (i != ndims) {
             /* Printing changes in dimension sizes */
             for (u = 0; u < ndims; u++) {
-                fprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u],
-                          cur_dims[u]);
+                fprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u], cur_dims[u]);
                 if (cur_dims[u] > prev_dims[u])
                     fprintf(stdout, " (increases)\n");
                 else if (cur_dims[u] < prev_dims[u])
@@ -623,11 +622,11 @@ usage(const char *prog)
     fprintf(stdout, "                              maximum (65535). The default width is 80 columns.\n");
     fprintf(stdout, "        --polling=N       Set the polling interval to N (in seconds) when the\n");
     fprintf(stdout,
-              "                              dataset will be checked for appended data.  The default\n");
+            "                              dataset will be checked for appended data.  The default\n");
     fprintf(stdout, "                              polling interval is 1.\n");
     fprintf(stdout, "        --fields=<list_of_fields>\n");
     fprintf(stdout,
-              "                              Display data for the fields specified in <list_of_fields>\n");
+            "                              Display data for the fields specified in <list_of_fields>\n");
     fprintf(stdout, "                              for a compound data type.  <list_of_fields> can be\n");
     fprintf(stdout, "                              specified as follows:\n");
     fprintf(stdout, "                                   1) A comma-separated list of field names in a\n");
@@ -638,7 +637,7 @@ usage(const char *prog)
     fprintf(stdout, "                                   Can use this option multiple times.\n");
     fprintf(stdout, "                              Note that backslash is the escape character to avoid\n");
     fprintf(stdout,
-              "                              characters in field names that conflict with the tool's\n");
+            "                              characters in field names that conflict with the tool's\n");
     fprintf(stdout, "                              separators.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "     OBJECT is specified as [<filename>/<path_to_dataset>/<dsetname>]\n");
@@ -648,7 +647,7 @@ usage(const char *prog)
     fprintf(stdout, "        <dsetname>            Name of the dataset\n");
     fprintf(stdout, "\n");
     fprintf(stdout,
-              "     User can end the h5watch process by ctrl-C (SIGINT) or kill the process (SIGTERM).\n");
+            "     User can end the h5watch process by ctrl-C (SIGINT) or kill the process (SIGTERM).\n");
 
 } /* usage() */
 
@@ -733,8 +732,8 @@ parse_command_line(int argc, const char *const *argv)
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    if ((g_list_of_fields = (char *)realloc(
-                             g_list_of_fields, strlen(g_list_of_fields) + strlen(str) + 2)) == NULL) {
+                    if ((g_list_of_fields = (char *)realloc(g_list_of_fields, strlen(g_list_of_fields) +
+                                                                                  strlen(str) + 2)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }

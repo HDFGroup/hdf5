@@ -98,15 +98,15 @@ static void
 usage(void)
 {
     printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-             "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+           "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-m<n_datasets>"
-             "\tset number of datasets for the multiple dataset test\n");
+           "\tset number of datasets for the multiple dataset test\n");
     printf("\t-n<n_groups>"
-             "\tset number of groups for the multiple group test\n");
+           "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
     printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", BIG_X_FACTOR,
-             BIG_Y_FACTOR);
+           BIG_Y_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
     printf("\n");
 }
@@ -376,11 +376,11 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
     }
     if (VERBOSE_MED) {
         printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -419,11 +419,11 @@ point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], s
 
     if (VERBOSE_MED) {
         printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
         k = 0;
         for (i = 0; i < num_points; i++) {
             printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
@@ -491,9 +491,9 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
     if (VERBOSE_MED) {
         printf("dataset_vrfy dumping:::\n");
         printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1]);
         printf("original values:\n");
         dataset_print(start, block, original);
         printf("compared values:\n");
@@ -506,8 +506,8 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
             if (*dataset != *original) {
                 if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
                     printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-                             (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
-                             (unsigned long)(j + start[1]), *(original), *(dataset));
+                           (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
+                           (unsigned long)(j + start[1]), *(original), *(dataset));
                 }
                 dataset++;
                 original++;
@@ -579,8 +579,8 @@ MpioTest2G(MPI_Comm comm)
 
     if (mpi_rank == 0) {
         printf("Using %d process on dataset shape "
-                 "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
-                 mpi_size, shape[0], shape[1], shape[2]);
+               "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
+               mpi_size, shape[0], shape[1], shape[2]);
     }
 
     /*
@@ -2220,7 +2220,7 @@ extend_writeInd2(void)
     for (i = 0; i < (int)orig_size; i++)
         if (written[i] != retrieved[i]) {
             printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
-                     written[i], i, retrieved[i]);
+                   written[i], i, retrieved[i]);
             nerrors++;
         }
     if (VERBOSE_MED) {
@@ -2265,7 +2265,7 @@ extend_writeInd2(void)
     for (i = 0; i < (int)orig_size; i++)
         if (written[i] != retrieved[i]) {
             printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
-                     written[i], i, retrieved[i]);
+                   written[i], i, retrieved[i]);
             nerrors++;
         }
     if (VERBOSE_MED) {
@@ -3043,7 +3043,7 @@ compress_readAll(void)
             for (u = 0; u < dim; u++)
                 if (data_orig[u] != data_read[u]) {
                     printf("Line #%d: written!=retrieved: data_orig[%u]=%d, data_read[%u]=%d\n", __LINE__,
-                             (unsigned)u, data_orig[u], (unsigned)u, data_read[u]);
+                           (unsigned)u, data_orig[u], (unsigned)u, data_read[u]);
                     nerrors++;
                 }
 
@@ -3711,7 +3711,7 @@ test_actual_io_mode(int selection_mode)
     }
     else {
         fprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank, actual_chunk_opt_mode_write,
-                  actual_io_mode_write);
+                actual_io_mode_write);
     }
 
     /* To test that the property is successfully reset to the default, we perform some
@@ -4358,7 +4358,7 @@ dataset_atomicity(void)
         for (i = 1; i < buf_size; i++) {
             if (read_buf[i] != compare) {
                 printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i,
-                         read_buf[i], compare);
+                       read_buf[i], compare);
                 nerrors++;
             }
         }
@@ -4479,7 +4479,7 @@ dataset_atomicity(void)
                 }
                 else if (compare != read_buf[k]) {
                     printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank,
-                             k, read_buf[k], compare);
+                           k, read_buf[k], compare);
                     nerrors++;
                 }
                 k++;

@@ -436,7 +436,7 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
     assert(record);
 
     fprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
-              "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
+            "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test2_debug() */

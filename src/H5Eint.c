@@ -228,9 +228,9 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
         fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
-                  (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
-                  (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
-                  (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
+                (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
+                (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
+                (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
 
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
@@ -259,8 +259,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
     /* Print error message */
     fprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
-              err_desc->line, err_desc->func_name, (have_desc ? ": " : ""),
-              (have_desc ? err_desc->desc : ""));
+            err_desc->line, err_desc->func_name, (have_desc ? ": " : ""), (have_desc ? err_desc->desc : ""));
     fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
     fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
@@ -356,9 +355,9 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
         fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
-                  (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
-                  (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
-                  (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
+                (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
+                (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
+                (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
 
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
@@ -387,8 +386,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
     /* Print error message */
     fprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
-              err_desc->line, err_desc->func_name, (have_desc ? ": " : ""),
-              (have_desc ? err_desc->desc : ""));
+            err_desc->line, err_desc->func_name, (have_desc ? ": " : ""), (have_desc ? err_desc->desc : ""));
     fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
     fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 

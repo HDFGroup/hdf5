@@ -452,7 +452,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
 
     /* Generate filename */
     if ((ret = snprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length,
-                          little_endian ? "le" : "be")) < 0)
+                        little_endian ? "le" : "be")) < 0)
         assert(ret > 0);
 
     /* first call to encode returns only the size of the buffer needed */

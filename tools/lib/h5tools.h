@@ -44,7 +44,7 @@
 #define PUTSTREAM(X, S)                                                                                      \
     do {                                                                                                     \
         if (S != NULL)                                                                                       \
-            fputs(X, S);                                                                                   \
+            fputs(X, S);                                                                                     \
     } while (0)
 
 /*

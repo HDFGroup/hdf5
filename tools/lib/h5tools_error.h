@@ -37,31 +37,31 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         char lib_str[256];                                                                                   \
                                                                                                              \
         /* Initialize library version string for error class */                                              \
-        snprintf(lib_str, sizeof(lib_str), "%d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);     \
+        snprintf(lib_str, sizeof(lib_str), "%d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);       \
                                                                                                              \
         /* Create new HDF5 error stack for the tools to use */                                               \
         if ((H5tools_ERR_STACK_g = H5Ecreate_stack()) < 0)                                                   \
-            fprintf(stderr, "Failed to create HDF5 tools error stack\n");                                  \
+            fprintf(stderr, "Failed to create HDF5 tools error stack\n");                                    \
                                                                                                              \
         /* Register errors from the HDF5 tools as a new error class */                                       \
         if ((H5tools_ERR_CLS_g = H5Eregister_class("H5tools", "HDF5:tools", lib_str)) < 0)                   \
-            fprintf(stderr, "Failed to register HDF5 tools error class\n");                                \
+            fprintf(stderr, "Failed to register HDF5 tools error class\n");                                  \
                                                                                                              \
         /* Create a new HDF5 major error message for errors from the tools library */                        \
         if ((H5E_tools_g = H5Ecreate_msg(H5tools_ERR_CLS_g, H5E_MAJOR, "Failure in tools library")) < 0)     \
-            fprintf(stderr, "Failed to register major error message for tools library errors\n");          \
+            fprintf(stderr, "Failed to register major error message for tools library errors\n");            \
                                                                                                              \
         /* Create a new HDF5 minor error message for errors from the tools library */                        \
         if ((H5E_tools_min_id_g = H5Ecreate_msg(H5tools_ERR_CLS_g, H5E_MINOR, "error in function")) < 0)     \
-            fprintf(stderr, "Failed to register minor error message for tools library errors\n");          \
+            fprintf(stderr, "Failed to register minor error message for tools library errors\n");            \
                                                                                                              \
         /* Create a new HDF5 minor error message for info messages from the tools library */                 \
         if ((H5E_tools_min_info_id_g = H5Ecreate_msg(H5tools_ERR_CLS_g, H5E_MINOR, "function info")) < 0)    \
-            fprintf(stderr, "Failed to register minor error message for tools library info messages\n");   \
+            fprintf(stderr, "Failed to register minor error message for tools library info messages\n");     \
                                                                                                              \
         /* Create a new HDF5 minor error message for debug messages from the tools library */                \
         if ((H5E_tools_min_dbg_id_g = H5Ecreate_msg(H5tools_ERR_CLS_g, H5E_MINOR, "function debug")) < 0)    \
-            fprintf(stderr, "Failed to register minor error message for tools library debug messages\n");  \
+            fprintf(stderr, "Failed to register minor error message for tools library debug messages\n");    \
     } while (0)
 
 /*
@@ -71,21 +71,21 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
     do {                                                                                                     \
         /* Close all error messages created by H5TOOLS_INIT_ERROR() */                                       \
         if (H5Eclose_msg(H5E_tools_min_dbg_id_g) < 0)                                                        \
-            fprintf(stderr, "Failed to close minor error message for tools library debug messages\n");     \
+            fprintf(stderr, "Failed to close minor error message for tools library debug messages\n");       \
         if (H5Eclose_msg(H5E_tools_min_info_id_g) < 0)                                                       \
-            fprintf(stderr, "Failed to close minor error message for tools library info messages\n");      \
+            fprintf(stderr, "Failed to close minor error message for tools library info messages\n");        \
         if (H5Eclose_msg(H5E_tools_min_id_g) < 0)                                                            \
-            fprintf(stderr, "Failed to close minor error message for tools library errors\n");             \
+            fprintf(stderr, "Failed to close minor error message for tools library errors\n");               \
         if (H5Eclose_msg(H5E_tools_g) < 0)                                                                   \
-            fprintf(stderr, "Failed to close major error message for tools library errors\n");             \
+            fprintf(stderr, "Failed to close major error message for tools library errors\n");               \
                                                                                                              \
         /* Unregister the HDF5 tools error class */                                                          \
         if (H5Eunregister_class(H5tools_ERR_CLS_g) < 0)                                                      \
-            fprintf(stderr, "Failed to unregister the HDF5 tools error class\n");                          \
+            fprintf(stderr, "Failed to unregister the HDF5 tools error class\n");                            \
                                                                                                              \
         /* Close the tools error stack */                                                                    \
         if (H5Eclose_stack(H5tools_ERR_STACK_g) < 0)                                                         \
-            fprintf(stderr, "Failed to close HDF5 tools error stack\n");                                   \
+            fprintf(stderr, "Failed to close HDF5 tools error stack\n");                                     \
     } while (0)
 
 /*
@@ -99,8 +99,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
                 H5Epush2(estack_id, __FILE__, __func__, __LINE__, err_cls, maj_err_id, min_err_id,           \
                          __VA_ARGS__);                                                                       \
             else {                                                                                           \
-                fprintf(stderr, __VA_ARGS__);                                                              \
-                fprintf(stderr, "\n");                                                                     \
+                fprintf(stderr, __VA_ARGS__);                                                                \
+                fprintf(stderr, "\n");                                                                       \
             }                                                                                                \
         }                                                                                                    \
     } while (0)
@@ -167,27 +167,27 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 #define H5TOOLS_START_DEBUG(...)                                                                             \
     do {                                                                                                     \
         H5tools_INDENT_g += 2;                                                                               \
-        fprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);  \
-        fprintf(stderr, __VA_ARGS__);                                                                      \
-        fprintf(stderr, "\n");                                                                             \
-        fflush(stderr);                                                                                    \
+        fprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);    \
+        fprintf(stderr, __VA_ARGS__);                                                                        \
+        fprintf(stderr, "\n");                                                                               \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #define H5TOOLS_DEBUG(...)                                                                                   \
     do {                                                                                                     \
-        fprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);       \
-        fprintf(stderr, __VA_ARGS__);                                                                      \
-        fprintf(stderr, "\n");                                                                             \
-        fflush(stderr);                                                                                    \
+        fprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);         \
+        fprintf(stderr, __VA_ARGS__);                                                                        \
+        fprintf(stderr, "\n");                                                                               \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #define H5TOOLS_ENDDEBUG(...)                                                                                \
     do {                                                                                                     \
-        fprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);   \
-        fprintf(stderr, __VA_ARGS__);                                                                      \
-        fprintf(stderr, "\n");                                                                             \
+        fprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);     \
+        fprintf(stderr, __VA_ARGS__);                                                                        \
+        fprintf(stderr, "\n");                                                                               \
         H5tools_INDENT_g -= 2;                                                                               \
-        fflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #else

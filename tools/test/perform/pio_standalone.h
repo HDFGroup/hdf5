@@ -51,36 +51,36 @@
 #define W_OK 02
 #define R_OK 04
 #endif
-#endif /* H5_HAVE_WIN32_API */
-#define HDasprintf               asprintf /*varargs*/
-#define HDcfgetispeed(T)         cfgetispeed(T)
-#define HDcfgetospeed(T)         cfgetospeed(T)
-#define HDcfsetispeed(T, S)      cfsetispeed(T, S)
-#define HDcfsetospeed(T, S)      cfsetospeed(T, S)
-#define HDchdir(S)               chdir(S)
-#define HDchmod(S, M)            chmod(S, M)
-#define HDchown(S, O, G)         chown(S, O, G)
-#define HDclock()                clock()
-#define HDclose(F)               close(F)
-#define HDclosedir(D)            closedir(D)
-#define HDcreat(S, M)            creat(S, M)
-#define HDctermid(S)             ctermid(S)
-#define HDcuserid(S)             cuserid(S)
-#define HDdup(F)                 dup(F)
-#define HDdup2(F, I)             dup2(F, I)
-#define HDexecv(S, AV)           execv(S, AV)
-#define HDexecve(S, AV, E)       execve(S, AV, E)
-#define HDexecvp(S, AV)          execvp(S, AV)
-#define HD_exit(N)               _exit(N)
+#endif                               /* H5_HAVE_WIN32_API */
+#define HDasprintf          asprintf /*varargs*/
+#define HDcfgetispeed(T)    cfgetispeed(T)
+#define HDcfgetospeed(T)    cfgetospeed(T)
+#define HDcfsetispeed(T, S) cfsetispeed(T, S)
+#define HDcfsetospeed(T, S) cfsetospeed(T, S)
+#define HDchdir(S)          chdir(S)
+#define HDchmod(S, M)       chmod(S, M)
+#define HDchown(S, O, G)    chown(S, O, G)
+#define HDclock()           clock()
+#define HDclose(F)          close(F)
+#define HDclosedir(D)       closedir(D)
+#define HDcreat(S, M)       creat(S, M)
+#define HDctermid(S)        ctermid(S)
+#define HDcuserid(S)        cuserid(S)
+#define HDdup(F)            dup(F)
+#define HDdup2(F, I)        dup2(F, I)
+#define HDexecv(S, AV)      execv(S, AV)
+#define HDexecve(S, AV, E)  execve(S, AV, E)
+#define HDexecvp(S, AV)     execvp(S, AV)
+#define HD_exit(N)          _exit(N)
 /* fcntl() variable arguments */
-#define HDfdopen(N, S)   fdopen(N, S)
+#define HDfdopen(N, S) fdopen(N, S)
 #ifdef H5_HAVE_WIN32_API
 #define HDfileno(F) _fileno(F)
 #else /* H5_HAVE_WIN32_API */
 #define HDfileno(F) fileno(F)
 #endif /* H5_HAVE_WIN32_API */
-#define HDfork()            fork()
-#define HDfpathconf(F, N)   fpathconf(F, N)
+#define HDfork()          fork()
+#define HDfpathconf(F, N) fpathconf(F, N)
 /* fscanf() variable arguments */
 #ifdef H5_HAVE_FSEEKO
 #define HDfseek(F, O, W) fseeko(F, O, W)
@@ -115,14 +115,14 @@ typedef off_t       h5_stat_size_t;
 #define HDoff_t       off_t
 #endif
 
-#define HDftruncate(F, L)    ftruncate(F, L)
-#define HDgetcwd(S, Z)       getcwd(S, Z)
-#define HDgetegid()          getegid()
-#define HDgeteuid()          geteuid()
-#define HDgetgid()           getgid()
-#define HDgetgrgid(G)        getgrgid(G)
-#define HDgetgrnam(S)        getgrnam(S)
-#define HDgetgroups(Z, G)    getgroups(Z, G)
+#define HDftruncate(F, L) ftruncate(F, L)
+#define HDgetcwd(S, Z)    getcwd(S, Z)
+#define HDgetegid()       getegid()
+#define HDgeteuid()       geteuid()
+#define HDgetgid()        getgid()
+#define HDgetgrgid(G)     getgrgid(G)
+#define HDgetgrnam(S)     getgrnam(S)
+#define HDgetgroups(Z, G) getgroups(Z, G)
 #ifdef H5_HAVE_WIN32_API
 #define HDgetlogin() Wgetlogin()
 #else /* H5_HAVE_WIN32_API */
@@ -182,15 +182,15 @@ H5_DLL int HDrand(void);
 #define HDrandom() rand()
 #endif
 
-#define HDread(F, M, Z)    read(F, M, Z)
-#define HDreaddir(D)       readdir(D)
-#define HDrewinddir(D)     rewinddir(D)
-#define HDrmdir(S)         rmdir(S)
+#define HDread(F, M, Z) read(F, M, Z)
+#define HDreaddir(D)    readdir(D)
+#define HDrewinddir(D)  rewinddir(D)
+#define HDrmdir(S)      rmdir(S)
 /* scanf() variable arguments */
-#define HDsetgid(G)       setgid(G)
-#define HDsetpgid(P, PG)  setpgid(P, PG)
-#define HDsetsid()        setsid()
-#define HDsetuid(U)       setuid(U)
+#define HDsetgid(G)      setgid(G)
+#define HDsetpgid(P, PG) setpgid(P, PG)
+#define HDsetsid()       setsid()
+#define HDsetuid(U)      setuid(U)
 /* Windows does not permit setting the buffer size to values
    less than 2.  */
 #define HDsigaddset(S, N)      sigaddset(S, N)
@@ -240,11 +240,11 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #else
 #define HDunlink(S) unlink(S)
 #endif
-#define HDutime(S, T)             utime(S, T)
-#define HDvasprintf(RET, FMT, A)  vasprintf(RET, FMT, A)
-#define HDwait(W)                 wait(W)
-#define HDwaitpid(P, W, O)        waitpid(P, W, O)
-#define HDwrite(F, M, Z)          write(F, M, Z)
+#define HDutime(S, T)            utime(S, T)
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#define HDwait(W)                wait(W)
+#define HDwaitpid(P, W, O)       waitpid(P, W, O)
+#define HDwrite(F, M, Z)         write(F, M, Z)
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that

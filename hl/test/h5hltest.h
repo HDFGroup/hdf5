@@ -30,13 +30,13 @@
 /* Macros used in HL tests */
 #define HL_TESTING2(WHAT)                                                                                    \
     {                                                                                                        \
-        printf("Testing %-62s", WHAT);                                                                     \
-        fflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     }
 #define HL_TESTING3(WHAT)                                                                                    \
     {                                                                                                        \
-        printf("Testing %-62s", WHAT);                                                                     \
-        fflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     }
 
 /* Implements verbose 'assert' with 'goto error' exit  */

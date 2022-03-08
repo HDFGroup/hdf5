@@ -518,7 +518,7 @@ H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
             break;
 
         case H5L_TYPE_SOFT:
-            ret_value += 2 +                         /* Link value length */
+            ret_value += 2 +                       /* Link value length */
                          strlen(lnk->u.soft.name); /* Link value */
             break;
 
@@ -808,26 +808,26 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Type:",
-              (lnk->type == H5L_TYPE_HARD
-                   ? "Hard"
-                   : (lnk->type == H5L_TYPE_SOFT
-                          ? "Soft"
-                          : (lnk->type == H5L_TYPE_EXTERNAL
-                                 ? "External"
-                                 : (lnk->type >= H5L_TYPE_UD_MIN ? "User-defined" : "Unknown")))));
+            (lnk->type == H5L_TYPE_HARD
+                 ? "Hard"
+                 : (lnk->type == H5L_TYPE_SOFT
+                        ? "Soft"
+                        : (lnk->type == H5L_TYPE_EXTERNAL
+                               ? "External"
+                               : (lnk->type >= H5L_TYPE_UD_MIN ? "User-defined" : "Unknown")))));
 
     if (lnk->corder_valid)
         fprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth, "Creation Order:", lnk->corder);
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Link Name Character Set:",
-              (lnk->cset == H5T_CSET_ASCII ? "ASCII" : (lnk->cset == H5T_CSET_UTF8 ? "UTF-8" : "Unknown")));
+            (lnk->cset == H5T_CSET_ASCII ? "ASCII" : (lnk->cset == H5T_CSET_UTF8 ? "UTF-8" : "Unknown")));
     fprintf(stream, "%*s%-*s '%s'\n", indent, "", fwidth, "Link Name:", lnk->name);
 
     /* Display link-specific information */
     switch (lnk->type) {
         case H5L_TYPE_HARD:
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Object address:", lnk->u.hard.addr);
+                    "Object address:", lnk->u.hard.addr);
             break;
 
         case H5L_TYPE_SOFT:
@@ -844,12 +844,12 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
                         (const char *)lnk->u.ud.udata + (strlen((const char *)lnk->u.ud.udata) + 1);
 
                     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                              "External File Name:", (const char *)lnk->u.ud.udata);
+                            "External File Name:", (const char *)lnk->u.ud.udata);
                     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "External Object Name:", objname);
                 } /* end if */
                 else {
                     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-                              "User-Defined Link Size:", lnk->u.ud.size);
+                            "User-Defined Link Size:", lnk->u.ud.size);
                 } /* end else */
             }     /* end if */
             else

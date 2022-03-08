@@ -96,7 +96,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Dirty:", (int)(h->cache_info.is_dirty));
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Total collection size in file:", (unsigned long)(h->size));
+            "Total collection size in file:", (unsigned long)(h->size));
 
     for (u = 1, nused = 0, maxobj = 0; u < h->nused; u++)
         if (h->obj[u].begin) {
@@ -105,7 +105,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
                 maxobj = u;
         }
     fprintf(stream, "%*s%-*s %u/%lu/", indent, "", fwidth, "Objects defined/allocated/max:", nused,
-              (unsigned long)h->nalloc);
+            (unsigned long)h->nalloc);
     if (nused)
         fprintf(stream, "%u\n", maxobj);
     else
@@ -120,12 +120,12 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
             snprintf(buf, sizeof(buf), "Object %u", u);
             fprintf(stream, "%*s%s\n", indent, "", buf);
             fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MIN(fwidth - 3, 0),
-                      "Obffset in block:", (unsigned long)(h->obj[u].begin - h->chunk));
+                    "Obffset in block:", (unsigned long)(h->obj[u].begin - h->chunk));
             fprintf(stream, "%*s%-*s %d\n", indent + 3, "", MIN(fwidth - 3, 0),
-                      "Reference count:", h->obj[u].nrefs);
+                    "Reference count:", h->obj[u].nrefs);
             fprintf(stream, "%*s%-*s %lu/%lu\n", indent + 3, "", MIN(fwidth - 3, 0),
-                      "Size of object body:", (unsigned long)(h->obj[u].size),
-                      (unsigned long)H5HG_ALIGN(h->obj[u].size));
+                    "Size of object body:", (unsigned long)(h->obj[u].size),
+                    (unsigned long)H5HG_ALIGN(h->obj[u].size));
             p = h->obj[u].begin + H5HG_SIZEOF_OBJHDR(f);
             for (j = 0; j < h->obj[u].size; j += 16) {
                 fprintf(stream, "%*s%04u: ", indent + 6, "", j);

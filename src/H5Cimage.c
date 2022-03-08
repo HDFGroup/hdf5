@@ -320,15 +320,15 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
              * the metadata cache image block.
              */
             assert((cache_ptr->image_entries)[u].fd_child_count ==
-                     (fake_cache_ptr->image_entries)[u].fd_child_count);
+                   (fake_cache_ptr->image_entries)[u].fd_child_count);
             assert((cache_ptr->image_entries)[u].fd_dirty_child_count ==
-                     (fake_cache_ptr->image_entries)[u].fd_dirty_child_count);
+                   (fake_cache_ptr->image_entries)[u].fd_dirty_child_count);
             assert((cache_ptr->image_entries)[u].fd_parent_count ==
-                     (fake_cache_ptr->image_entries)[u].fd_parent_count);
+                   (fake_cache_ptr->image_entries)[u].fd_parent_count);
 
             for (v = 0; v < (cache_ptr->image_entries)[u].fd_parent_count; v++)
                 assert((cache_ptr->image_entries)[u].fd_parent_addrs[v] ==
-                         (fake_cache_ptr->image_entries)[u].fd_parent_addrs[v]);
+                       (fake_cache_ptr->image_entries)[u].fd_parent_addrs[v]);
 
             /* free the fd_parent_addrs array if it exists */
             if ((fake_cache_ptr->image_entries)[u].fd_parent_addrs) {
@@ -343,15 +343,14 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
             assert((cache_ptr->image_entries)[u].image_ptr);
             assert((fake_cache_ptr->image_entries)[u].image_ptr);
             assert(!memcmp((cache_ptr->image_entries)[u].image_ptr,
-                               (fake_cache_ptr->image_entries)[u].image_ptr,
-                               (cache_ptr->image_entries)[u].size));
+                           (fake_cache_ptr->image_entries)[u].image_ptr, (cache_ptr->image_entries)[u].size));
 
             (fake_cache_ptr->image_entries)[u].image_ptr =
                 H5MM_xfree((fake_cache_ptr->image_entries)[u].image_ptr);
         } /* end for */
 
         assert((size_t)(q - (const uint8_t *)cache_ptr->image_buffer) ==
-                 cache_ptr->image_data_len - H5F_SIZEOF_CHKSUM);
+               cache_ptr->image_data_len - H5F_SIZEOF_CHKSUM);
 
         /* compute the checksum  */
         old_chksum = chksum;
@@ -699,7 +698,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
     if (pf_entry_ptr->is_dirty) {
 
         assert(((cache_ptr->slist_enabled) && (pf_entry_ptr->in_slist)) ||
-                 ((!cache_ptr->slist_enabled) && (!pf_entry_ptr->in_slist)));
+               ((!cache_ptr->slist_enabled) && (!pf_entry_ptr->in_slist)));
 
         flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
 
@@ -948,11 +947,10 @@ H5C_image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
     } /* end if */
 
     fprintf(stdout, "%3.1lf    %5lld   %5lld   %5lld  %5lld   %5lld   %5lld   %3.1lf\n", hit_rate,
-              (long long)(cache_ptr->prefetches), (long long)(cache_ptr->dirty_prefetches),
-              (long long)(cache_ptr->prefetch_hits),
-              (long long)(cache_ptr->flushes[H5AC_PREFETCHED_ENTRY_ID]),
-              (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]),
-              (long long)(cache_ptr->last_image_size), prefetch_use_rate);
+            (long long)(cache_ptr->prefetches), (long long)(cache_ptr->dirty_prefetches),
+            (long long)(cache_ptr->prefetch_hits), (long long)(cache_ptr->flushes[H5AC_PREFETCHED_ENTRY_ID]),
+            (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]),
+            (long long)(cache_ptr->last_image_size), prefetch_use_rate);
 #endif /* H5C_COLLECT_CACHE_STATS */
 
 done:
@@ -1501,7 +1499,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
 
             /* Sort the entries */
             qsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
-                    sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
+                  sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
         }      /* end if */
         else { /* cancel creation of metadata cache image */
             assert(cache_ptr->image_entries == NULL);
@@ -2598,7 +2596,7 @@ H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, 
     assert(entry_ptr->include_in_image);
     assert((entry_ptr->image_fd_height == 0) || (entry_ptr->image_fd_height < fd_height));
     assert(((fd_height == 0) && (entry_ptr->fd_child_count == 0)) ||
-             ((fd_height > 0) && (entry_ptr->fd_child_count > 0)));
+           ((fd_height > 0) && (entry_ptr->fd_child_count > 0)));
 
     entry_ptr->image_fd_height = fd_height;
     if (entry_ptr->flush_dep_nparents > 0) {
@@ -3115,7 +3113,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     while (pf_entry_ptr != NULL) {
         assert(pf_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         assert((pf_entry_ptr->prefetched && pf_entry_ptr->type == H5AC_PREFETCHED_ENTRY) ||
-                 (!pf_entry_ptr->prefetched && pf_entry_ptr->type != H5AC_PREFETCHED_ENTRY));
+               (!pf_entry_ptr->prefetched && pf_entry_ptr->type != H5AC_PREFETCHED_ENTRY));
         if (pf_entry_ptr->type == H5AC_PREFETCHED_ENTRY)
             assert(pf_entry_ptr->fd_parent_count == pf_entry_ptr->flush_dep_nparents);
 
@@ -3293,7 +3291,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
     /* Decode dependency child count */
     UINT16DECODE(p, pf_entry_ptr->fd_child_count);
     assert((is_fd_parent && pf_entry_ptr->fd_child_count > 0) ||
-             (!is_fd_parent && pf_entry_ptr->fd_child_count == 0));
+           (!is_fd_parent && pf_entry_ptr->fd_child_count == 0));
 
     /* Decode dirty dependency child count */
     UINT16DECODE(p, pf_entry_ptr->fd_dirty_child_count);
@@ -3305,7 +3303,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
     /* Decode dependency parent count */
     UINT16DECODE(p, pf_entry_ptr->fd_parent_count);
     assert((is_fd_child && pf_entry_ptr->fd_parent_count > 0) ||
-             (!is_fd_child && pf_entry_ptr->fd_parent_count == 0));
+           (!is_fd_child && pf_entry_ptr->fd_parent_count == 0));
 
     /* Decode index in LRU */
     INT32DECODE(p, pf_entry_ptr->lru_rank);

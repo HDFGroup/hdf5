@@ -710,7 +710,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
 
     if (!H5F_POINT_OF_NO_RETURN(f))
         assert((!H5F_addr_defined(fspace->sect_addr)) ||
-                 ((fspace->sect_size > 0) && (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
+               ((fspace->sect_size > 0) && (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
 
     /* Magic number */
     H5MM_memcpy(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1090,7 +1090,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Sanity check */
     assert((image == chksum_image) ||
-             ((size_t)((image - (const uint8_t *)_image) + (chksum_image - image)) == old_sect_size));
+           ((size_t)((image - (const uint8_t *)_image) + (chksum_image - image)) == old_sect_size));
 
     /* Set return value */
     ret_value = sinfo;
@@ -1295,7 +1295,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
 
     /* Sanity check */
     assert((chksum_image == image) ||
-             ((size_t)((image - (uint8_t *)_image) + (chksum_image - image)) == sinfo->fspace->sect_size));
+           ((size_t)((image - (uint8_t *)_image) + (chksum_image - image)) == sinfo->fspace->sect_size));
     assert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
 
 done:

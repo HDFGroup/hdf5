@@ -908,9 +908,9 @@ test_attr_compound_read(hid_t fapl)
         for (j = 0; j < ATTR4_DIM2; j++)
             if (memcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct)) != 0) {
                 printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
-                         __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
+                       __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
                 printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
-                         __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
+                       __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
                 TestErrPrintf(
                     "%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",
                     __LINE__, i, j, attr_data4[i][j].c, i, j, read_data4[i][j].c);
@@ -1048,7 +1048,7 @@ test_attr_scalar_read(hid_t fapl)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(rdata, attr_data5))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Aread",
-                 (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
+               (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);
@@ -6586,8 +6586,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         if (order == H5_ITER_INC)
                             snprintf(attrname, sizeof(attrname), "attr %02u", (u + 1));
                         else
-                            snprintf(attrname, sizeof(attrname), "attr %02u",
-                                       ((max_compact * 2) - (u + 2)));
+                            snprintf(attrname, sizeof(attrname), "attr %02u", ((max_compact * 2) - (u + 2)));
                         ret = strcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6701,7 +6700,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             snprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 1));
                         else
                             snprintf(attrname, sizeof(attrname), "attr %02u",
-                                       ((max_compact * 2) - ((u * 2) + 2)));
+                                     ((max_compact * 2) - ((u * 2) + 2)));
                         ret = strcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6754,7 +6753,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             snprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 3));
                         else
                             snprintf(attrname, sizeof(attrname), "attr %02u",
-                                       ((max_compact * 2) - ((u * 2) + 4)));
+                                     ((max_compact * 2) - ((u * 2) + 4)));
                         ret = strcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */

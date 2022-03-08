@@ -84,7 +84,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
         snprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
         fprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
-                  freelist->offset, freelist->size);
+                freelist->offset, freelist->size);
         if ((freelist->offset + freelist->size) > h->dblk_size)
             fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
         else {
@@ -105,7 +105,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
     if (h->dblk_size)
         fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
-                  (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
+                (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
     /* Print the data in a VMS-style octal dump */
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);

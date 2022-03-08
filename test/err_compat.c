@@ -127,7 +127,7 @@ custom_print_cb1(int n, H5E_error1_t *err_desc, void *client_data)
         TEST_ERROR;
 
     fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
+            err_desc->func_name, err_desc->line);
 
     fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
@@ -174,7 +174,7 @@ custom_print_cb2(int n, H5E_error2_t *err_desc, void *client_data)
         TEST_ERROR;
 
     fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
+            err_desc->func_name, err_desc->line);
 
     fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
@@ -466,7 +466,7 @@ main(void)
     int         i;
 
     fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to "
-                      "be some error messages\n");
+                    "be some error messages\n");
     fapl_id = h5_fileaccess();
 
     /* Set up data arrays */

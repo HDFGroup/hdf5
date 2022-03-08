@@ -484,7 +484,7 @@ typedef struct H5F_t H5F_t;
             UINT16ENCODE(p, l);                                                                              \
             break;                                                                                           \
         default:                                                                                             \
-            assert("bad sizeof size" && 0);                                                                \
+            assert("bad sizeof size" && 0);                                                                  \
     }
 
 #define H5F_ENCODE_LENGTH(f, p, l) H5F_ENCODE_LENGTH_LEN(p, l, H5F_SIZEOF_SIZE(f))
@@ -501,7 +501,7 @@ typedef struct H5F_t H5F_t;
             UINT16DECODE(p, l);                                                                              \
             break;                                                                                           \
         default:                                                                                             \
-            assert("bad sizeof size" && 0);                                                                \
+            assert("bad sizeof size" && 0);                                                                  \
     }
 
 #define H5F_DECODE_LENGTH(f, p, l) DECODE_VAR(p, l, H5F_SIZEOF_SIZE(f))

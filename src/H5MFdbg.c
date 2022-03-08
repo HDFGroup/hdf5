@@ -105,19 +105,19 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 
     /* Print generic section information */
     fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
-              (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE
-                   ? "simple"
-                   : (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL
-                          ? "small"
-                          : (sect->sect_info.type == H5MF_FSPACE_SECT_LARGE ? "large" : "unknown"))));
+            (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE
+                 ? "simple"
+                 : (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL
+                        ? "small"
+                        : (sect->sect_info.type == H5MF_FSPACE_SECT_LARGE ? "large" : "unknown"))));
     fprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
-              "Section address:", sect->sect_info.addr);
+            "Section address:", sect->sect_info.addr);
     fprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
-              "Section size:", sect->sect_info.size);
+            "Section size:", sect->sect_info.size);
     fprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
-              "End of section:", (haddr_t)((sect->sect_info.addr + sect->sect_info.size) - 1));
+            "End of section:", (haddr_t)((sect->sect_info.addr + sect->sect_info.size) - 1));
     fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-              "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
+            "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
 
     /* Dump section-specific debugging information */
     if (H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) <
@@ -266,16 +266,16 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 #ifdef H5MF_ALLOC_DEBUG
         fprintf(stderr,
-                  "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
-                  __func__, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
+                "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
+                __func__, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
         /* Retrieve 'small data' aggregator info, if available */
         H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size);
 #ifdef H5MF_ALLOC_DEBUG
         fprintf(stderr,
-                  "%s: sda_addr = %" PRIuHADDR ", sda_size = %" PRIuHSIZE ", end of sda = %" PRIuHADDR "\n",
-                  __func__, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
+                "%s: sda_addr = %" PRIuHADDR ", sda_size = %" PRIuHSIZE ", end of sda = %" PRIuHADDR "\n",
+                __func__, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
         /* Iterate over all the free space types that have managers and dump each free list's space */
@@ -288,8 +288,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
                 /* Retrieve the 'eoa' for this file memory type */
                 if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, atype)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
-                          "eoa:", eoa);
+                fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3), "eoa:", eoa);
 
                 /* Print header for sections */
                 fprintf(stream, "%*sSections:\n", indent + 3, "");
@@ -313,7 +312,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
             } /* end if */
             else
                 fprintf(stream, "%*sMapped to type = %u\n", indent, "",
-                          (unsigned)f->shared->fs_type_map[atype]);
+                        (unsigned)f->shared->fs_type_map[atype]);
         } /* end for */
     }     /* end else */
 

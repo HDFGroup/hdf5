@@ -102,7 +102,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -193,10 +193,10 @@
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
         if (reason != NULL) {                                                                                \
-            printf("%s\n", (reason));                                                                      \
+            printf("%s\n", (reason));                                                                        \
         }                                                                                                    \
         else {                                                                                               \
-            printf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
+            printf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));                \
         }                                                                                                    \
     }
 
@@ -233,10 +233,10 @@
         const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
         if (_reason != NULL) {                                                                               \
-            printf("%s\n", _reason);                                                                       \
+            printf("%s\n", _reason);                                                                         \
         }                                                                                                    \
         else {                                                                                               \
-            printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
+            printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                             \
         }                                                                                                    \
     }
 
@@ -303,7 +303,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -348,7 +348,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -870,8 +870,8 @@ test_vfd_open(void)
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
                 fprintf(stderr, "\n!!!!! WARNING !!!!!\n"
-                                  "    Successful open of file on local system "
-                                  "with non-HDFS VFD.\n");
+                                "    Successful open of file on local system "
+                                "with non-HDFS VFD.\n");
                 JSVERIFY(SUCCEED, H5FDclose(fd), "unable to close errant open");
                 fd = NULL;
             }
@@ -1663,7 +1663,7 @@ main(void)
     }
     else {
         strncpy(/* TODO: error-check? */
-                  default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
+                default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
 #endif /* H5_HAVE_LIBHDFS */
 

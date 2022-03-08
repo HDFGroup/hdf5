@@ -155,7 +155,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
     if (block->u.info.size != SIZET_MAX) {
         assert(0 == memcmp(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE));
         assert(0 == memcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->u.info.size, H5MM_block_tail_guard_s,
-                               H5MM_TAIL_GUARD_SIZE));
+                           H5MM_TAIL_GUARD_SIZE));
     }
 }
 
@@ -227,8 +227,7 @@ H5MM_final_sanity_check(void)
     fprintf(stderr, "%s: H5MM_total_alloc_bytes_s = %llu\n", __func__, H5MM_total_alloc_bytes_s);
     fprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %zu\n", __func__, H5MM_peak_alloc_bytes_s);
     fprintf(stderr, "%s: H5MM_max_block_size_s = %zu\n", __func__, H5MM_max_block_size_s);
-    fprintf(stderr, "%s: H5MM_total_alloc_blocks_count_s = %zu\n", __func__,
-              H5MM_total_alloc_blocks_count_s);
+    fprintf(stderr, "%s: H5MM_total_alloc_blocks_count_s = %zu\n", __func__, H5MM_total_alloc_blocks_count_s);
     fprintf(stderr, "%s: H5MM_peak_alloc_blocks_count_s = %zu\n", __func__, H5MM_peak_alloc_blocks_count_s);
 #endif /* H5MM_PRINT_MEMORY_STATS */
 }

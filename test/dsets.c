@@ -2239,11 +2239,11 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
                     H5_FAILED();
                     fprintf(stderr, "    Read different values than written.\n");
                     fprintf(stderr, "    At index %lu,%lu\n", (unsigned long)((size_t)hs_offset[0] + i),
-                              (unsigned long)((size_t)hs_offset[1] + j));
+                            (unsigned long)((size_t)hs_offset[1] + j));
                     fprintf(stderr, "    At original: %d\n",
-                              (int)points[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j]);
+                            (int)points[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j]);
                     fprintf(stderr, "    At returned: %d\n",
-                              (int)check[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j]);
+                            (int)check[(size_t)hs_offset[0] + i][(size_t)hs_offset[1] + j]);
                     goto error;
                 }
             }
@@ -2949,7 +2949,7 @@ test_missing_filter(hid_t file)
     if (0 == (dset_size = H5Dget_storage_size(dsid))) {
         H5_FAILED();
         printf("    Line %d: Error querying dataset size, dset_size=%lu\n", __LINE__,
-                 (unsigned long)dset_size);
+               (unsigned long)dset_size);
         goto error;
     } /* end if */
 
@@ -3656,7 +3656,7 @@ test_nbit_array(hid_t file)
                         H5_FAILED();
                         printf("    Read different values than written.\n");
                         printf("    At index %lu,%lu,%lu,%lu\n", (unsigned long)i, (unsigned long)j,
-                                 (unsigned long)m, (unsigned long)n);
+                               (unsigned long)m, (unsigned long)n);
                         goto error;
                     }
                 }
@@ -4397,8 +4397,8 @@ test_nbit_compound_3(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
-            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
+            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
+            new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu\n", (unsigned long)i);
@@ -7733,7 +7733,7 @@ test_missing_chunk(hid_t file)
         else {
             if (rdata[u] != wdata[u]) {
                 printf("    Line %d: Incorrect value, wdata[%u]=%d, rdata[%u]=%d\n", __LINE__, (unsigned)u,
-                         wdata[u], (unsigned)u, rdata[u]);
+                       wdata[u], (unsigned)u, rdata[u]);
                 TEST_ERROR;
             } /* end if */
         }     /* end else */
@@ -7746,15 +7746,15 @@ test_missing_chunk(hid_t file)
             if ((i % 10) >= 5 || (j % 10) >= 5) {
                 if (rdata2[i][j] != 911) {
                     printf("    Line %d: Incorrect value, rdata2[%u][%u] = %d\n", __LINE__, (unsigned)i,
-                             (unsigned)j, rdata2[i][j]);
+                           (unsigned)j, rdata2[i][j]);
                     TEST_ERROR;
                 } /* end if */
             }     /* end if */
             else {
                 if (rdata2[i][j] != wdata2[i][j]) {
                     printf("    Line %d: Incorrect value, wdata2[%u][%u] = %d, rdata2[%u][%u] = %d\n",
-                             __LINE__, (unsigned)i, (unsigned)j, wdata2[i][j], (unsigned)i, (unsigned)j,
-                             rdata2[i][j]);
+                           __LINE__, (unsigned)i, (unsigned)j, wdata2[i][j], (unsigned)i, (unsigned)j,
+                           rdata2[i][j]);
                     TEST_ERROR;
                 } /* end if */
             }     /* end else */
@@ -8034,10 +8034,10 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     /* Verify that written and read data are the same */
     for (i = 0; i < NPOINTS; i++)
         if (rbuf[i] != wbuf[i]) {
-            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
-                     wbuf[i], (unsigned)i, rbuf[i]);
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i, wbuf[i],
+                   (unsigned)i, rbuf[i]);
             printf("             coord[%u] = {%lu, %lu}\n", (unsigned)i, (unsigned long)coord[i][0],
-                     (unsigned long)coord[i][1]);
+                   (unsigned long)coord[i][1]);
             TEST_ERROR;
         } /* end if */
 
@@ -8176,8 +8176,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     /* Verify that written and read data are the same */
     for (i = 0; i < NPOINTS; i++)
         if (rbuf[i] != wbuf[i]) {
-            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
-                     wbuf[i], (unsigned)i, rbuf[i]);
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i, wbuf[i],
+                   (unsigned)i, rbuf[i]);
             TEST_ERROR;
         } /* end if */
 
@@ -8314,8 +8314,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     /* Verify that written and read data are the same */
     for (i = 0; i < NPOINTS; i++)
         if (rbuf[i] != wbuf[i]) {
-            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
-                     wbuf[i], (unsigned)i, rbuf[i]);
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i, wbuf[i],
+                   (unsigned)i, rbuf[i]);
             TEST_ERROR;
         } /* end if */
 
@@ -9055,8 +9055,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
 
     /* Set up data arrays */
-    if (NULL ==
-        (t_wdata_bytes = (int *)calloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
+    if (NULL == (t_wdata_bytes = (int *)calloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
         TEST_ERROR;
     if (NULL == (t_wdata = (int **)calloc((BYPASS_CHUNK_DIM / 2), sizeof(t_wdata_bytes))))
         TEST_ERROR;
@@ -9226,8 +9225,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     for (i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
         if (rdata1[i] != i) {
             printf("    Read different values than written in the 1st chunk.\n");
-            printf("    At line %d and index %d, rdata1 = %d. It should be %d.\n", __LINE__, i, rdata1[i],
-                     i);
+            printf("    At line %d and index %d, rdata1 = %d. It should be %d.\n", __LINE__, i, rdata1[i], i);
             TEST_ERROR
         } /* end if */
 
@@ -9235,7 +9233,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
         if (rdata1[j] != fvalue) {
             printf("    Read different values than written in the 2nd chunk.\n");
             printf("    At line %d and index %d, rdata1 = %d. It should be %d.\n", __LINE__, i, rdata1[i],
-                     fvalue);
+                   fvalue);
             TEST_ERROR
         } /* end if */
 
@@ -9244,8 +9242,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
         for (j = 0; j < BYPASS_CHUNK_DIM / 2; j++)
             if (t_rdata1[i][j] != j) {
                 printf("    Read different values than written in the 1st chunk.\n");
-                printf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n", __LINE__, i,
-                         j, t_rdata1[i][j], j);
+                printf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n", __LINE__, i, j,
+                       t_rdata1[i][j], j);
                 TEST_ERROR
             } /* end if */
 
@@ -9253,8 +9251,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
         for (j = BYPASS_CHUNK_DIM / 2; j < BYPASS_DIM; j++)
             if (t_rdata1[i][j] != fvalue) {
                 printf("    Read different values than written in the 2nd chunk.\n");
-                printf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n", __LINE__, i,
-                         j, t_rdata1[i][j], fvalue);
+                printf("    At line %d and index (%d, %d), t_rdata1 = %d. It should be %d.\n", __LINE__, i, j,
+                       t_rdata1[i][j], fvalue);
                 TEST_ERROR
             } /* end if */
 
@@ -9309,8 +9307,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     for (i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
         if (rdata2[i] != i) {
             printf("    Read different values than written in the chunk.\n");
-            printf("    At line %d and index %d, rdata2 = %d. It should be %d.\n", __LINE__, i, rdata2[i],
-                     i);
+            printf("    At line %d and index %d, rdata2 = %d. It should be %d.\n", __LINE__, i, rdata2[i], i);
             TEST_ERROR
         } /* end if */
 
@@ -9319,8 +9316,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
         for (j = 0; j < BYPASS_CHUNK_DIM / 2; j++)
             if (t_rdata2[i][j] != j) {
                 printf("    Read different values than written in the chunk.\n");
-                printf("    At line %d and index (%d, %d), t_rdata2 = %d. It should be %d.\n", __LINE__, i,
-                         j, t_rdata2[i][j], j);
+                printf("    At line %d and index (%d, %d), t_rdata2 = %d. It should be %d.\n", __LINE__, i, j,
+                       t_rdata2[i][j], j);
                 TEST_ERROR
             } /* end if */
 
@@ -11072,8 +11069,8 @@ test_fixed_array(hid_t fapl)
             /* Verify that written and read data are the same */
             for (i = 0; i < POINTS; i++)
                 if (rbuf[i] != wbuf[i]) {
-                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__,
-                             (unsigned)i, wbuf[i], (unsigned)i, rbuf[i]);
+                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
+                           wbuf[i], (unsigned)i, rbuf[i]);
                     TEST_ERROR;
                 } /* end if */
 
@@ -11108,8 +11105,8 @@ test_fixed_array(hid_t fapl)
             /* Verify that written and read data are the same */
             for (i = 0; i < POINTS; i++)
                 if (rbuf[i] != wbuf[i]) {
-                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__,
-                             (unsigned)i, wbuf[i], (unsigned)i, rbuf[i]);
+                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
+                           wbuf[i], (unsigned)i, rbuf[i]);
                     TEST_ERROR;
                 } /* end if */
 
@@ -11143,7 +11140,7 @@ test_fixed_array(hid_t fapl)
             for (i = 0; i < POINTS_BIG; i++)
                 if (rbuf_big[i] != wbuf_big[i]) {
                     printf("    Line %d: Incorrect value, wbuf_bif[%u]=%d, rbuf_big[%u]=%d\n", __LINE__,
-                             (unsigned)i, wbuf_big[i], (unsigned)i, rbuf_big[i]);
+                           (unsigned)i, wbuf_big[i], (unsigned)i, rbuf_big[i]);
                     TEST_ERROR;
                 } /* end if */
 
@@ -11430,8 +11427,8 @@ test_single_chunk(hid_t fapl)
             /* Verify that written and read data are the same */
             for (i = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
                 if (rbuf[i] != wbuf[i]) {
-                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__,
-                             (unsigned)i, wbuf[i], (unsigned)i, rbuf[i]);
+                    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n", __LINE__, (unsigned)i,
+                           wbuf[i], (unsigned)i, rbuf[i]);
                     TEST_ERROR;
                 } /* end if */
 
@@ -11453,7 +11450,7 @@ test_single_chunk(hid_t fapl)
             for (i = 0; i < (DSET_TMP_DIM1 * DSET_TMP_DIM2); i++)
                 if (t_rbuf[i] != t_wbuf[i]) {
                     printf("    Line %d: Incorrect value, t_wbuf[%u]=%d, t_rbuf[%u]=%d\n", __LINE__,
-                             (unsigned)i, t_wbuf[i], (unsigned)i, t_rbuf[i]);
+                           (unsigned)i, t_wbuf[i], (unsigned)i, t_rbuf[i]);
                     TEST_ERROR;
                 } /* end if */
 
@@ -13227,8 +13224,8 @@ typedef struct scatter_info_t {
                 if (ARR[i][j][k] != EXP[i][j][k]) {                                                          \
                     H5_FAILED();                                                                             \
                     AT();                                                                                    \
-                    printf("  " #ARR "[%d][%d][%d] == %d, " #EXP "[%d][%d][%d] == %d\n", i, j, k,          \
-                             ARR[i][j][k], i, j, k, EXP[i][j][k]);                                           \
+                    printf("  " #ARR "[%d][%d][%d] == %d, " #EXP "[%d][%d][%d] == %d\n", i, j, k,            \
+                           ARR[i][j][k], i, j, k, EXP[i][j][k]);                                             \
                     goto error;                                                                              \
                 }
 
@@ -15420,7 +15417,7 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
 
                 /* Compose dataset name */
                 snprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time,
-                           (unsigned)layout);
+                         (unsigned)layout);
 
                 /* Set up DCPL */
                 if ((dcpl_id_copy = H5Pcopy(dcpl_id)) < 0)

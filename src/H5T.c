@@ -1514,10 +1514,10 @@ H5T_top_term_package(void)
 #ifdef H5T_DEBUG
                         if (H5DEBUG(T)) {
                             fprintf(H5DEBUG(T),
-                                      "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
-                                      "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.app_func), path->name);
+                                    "H5T: conversion function "
+                                    "0x%08lx failed to free private data for "
+                                    "%s (ignored)\n",
+                                    (unsigned long)(path->conv.u.app_func), path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -1529,10 +1529,10 @@ H5T_top_term_package(void)
 #ifdef H5T_DEBUG
                         if (H5DEBUG(T)) {
                             fprintf(H5DEBUG(T),
-                                      "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
-                                      "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.lib_func), path->name);
+                                    "H5T: conversion function "
+                                    "0x%08lx failed to free private data for "
+                                    "%s (ignored)\n",
+                                    (unsigned long)(path->conv.u.lib_func), path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -2644,9 +2644,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         fprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx "
-                                  "failed to free private data for %s (ignored)\n",
-                                  (unsigned long)(old_path->conv.u.app_func), old_path->name);
+                                "H5T: conversion function 0x%08lx "
+                                "failed to free private data for %s (ignored)\n",
+                                (unsigned long)(old_path->conv.u.app_func), old_path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2655,9 +2655,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx "
-                              "failed to free private data for %s (ignored)\n",
-                              (unsigned long)(old_path->conv.u.lib_func), old_path->name);
+                            "H5T: conversion function 0x%08lx "
+                            "failed to free private data for %s (ignored)\n",
+                            (unsigned long)(old_path->conv.u.lib_func), old_path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(old_path->src);
@@ -2785,8 +2785,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
             if (func && func != soft->conv.u.app_func)
                 continue;
 
-            memmove(H5T_g.soft + i, H5T_g.soft + i + 1,
-                      (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
+            memmove(H5T_g.soft + i, H5T_g.soft + i + 1, (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
         } /* end for */
     }     /* end if */
@@ -2812,7 +2811,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         else {
             /* Remove from table */
             memmove(H5T_g.path + i, H5T_g.path + i + 1,
-                      (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
+                    (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
             --H5T_g.npaths;
 
             /* Shut down path */
@@ -2824,9 +2823,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         fprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx failed "
-                                  "to free private data for %s (ignored)\n",
-                                  (unsigned long)(path->conv.u.app_func), path->name);
+                                "H5T: conversion function 0x%08lx failed "
+                                "to free private data for %s (ignored)\n",
+                                (unsigned long)(path->conv.u.app_func), path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2835,9 +2834,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx failed "
-                              "to free private data for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.lib_func), path->name);
+                            "H5T: conversion function 0x%08lx failed "
+                            "to free private data for %s (ignored)\n",
+                            (unsigned long)(path->conv.u.lib_func), path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(path->src);
@@ -3593,7 +3592,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                     if (old_dt->shared->u.compnd.sorted != H5T_SORT_VALUE) {
                         for (old_match = -1, j = 0; j < old_dt->shared->u.compnd.nmembs; j++) {
                             if (!strcmp(new_dt->shared->u.compnd.memb[i].name,
-                                          old_dt->shared->u.compnd.memb[j].name)) {
+                                        old_dt->shared->u.compnd.memb[j].name)) {
                                 old_match = (int)j;
                                 break;
                             } /* end if */
@@ -4548,7 +4547,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                     for (j = 0, swapped = FALSE; j < i; j++)
                         if (strcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
-                                     dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
+                                   dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
                             unsigned tmp_idx = idx1[j];
                             idx1[j]          = idx1[j + 1];
                             idx1[j + 1]      = tmp_idx;
@@ -4560,7 +4559,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                     for (j = 0, swapped = FALSE; j < i; j++)
                         if (strcmp(dt2->shared->u.compnd.memb[idx2[j]].name,
-                                     dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
+                                   dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
                             unsigned tmp_idx = idx2[j];
                             idx2[j]          = idx2[j + 1];
                             idx2[j + 1]      = tmp_idx;
@@ -4573,16 +4572,16 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             /* I don't quite trust the code above yet :-)  --RPM */
             for (u = 0; u < dt1->shared->u.compnd.nmembs - 1; u++) {
                 assert(strcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
-                                  dt1->shared->u.compnd.memb[idx1[u + 1]].name));
+                              dt1->shared->u.compnd.memb[idx1[u + 1]].name));
                 assert(strcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
-                                  dt2->shared->u.compnd.memb[idx2[u + 1]].name));
+                              dt2->shared->u.compnd.memb[idx2[u + 1]].name));
             }
 #endif
 
             /* Compare the members */
             for (u = 0; u < dt1->shared->u.compnd.nmembs; u++) {
                 tmp = strcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
-                               dt2->shared->u.compnd.memb[idx2[u]].name);
+                             dt2->shared->u.compnd.memb[idx2[u]].name);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
                 if (tmp > 0)
@@ -4639,7 +4638,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                     for (j = 0, swapped = FALSE; j < i; j++)
                         if (strcmp(dt1->shared->u.enumer.name[idx1[j]],
-                                     dt1->shared->u.enumer.name[idx1[j + 1]]) > 0) {
+                                   dt1->shared->u.enumer.name[idx1[j + 1]]) > 0) {
                             unsigned tmp_idx = idx1[j];
                             idx1[j]          = idx1[j + 1];
                             idx1[j + 1]      = tmp_idx;
@@ -4657,7 +4656,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                     for (j = 0, swapped = FALSE; j < i; j++)
                         if (strcmp(dt2->shared->u.enumer.name[idx2[j]],
-                                     dt2->shared->u.enumer.name[idx2[j + 1]]) > 0) {
+                                   dt2->shared->u.enumer.name[idx2[j + 1]]) > 0) {
                             unsigned tmp_idx = idx2[j];
                             idx2[j]          = idx2[j + 1];
                             idx2[j + 1]      = tmp_idx;
@@ -4669,10 +4668,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
             for (u = 0; u < dt1->shared->u.enumer.nmembs - 1; u++) {
-                assert(
-                    strcmp(dt1->shared->u.enumer.name[idx1[u]], dt1->shared->u.enumer.name[idx1[u + 1]]));
-                assert(
-                    strcmp(dt2->shared->u.enumer.name[idx2[u]], dt2->shared->u.enumer.name[idx2[u + 1]]));
+                assert(strcmp(dt1->shared->u.enumer.name[idx1[u]], dt1->shared->u.enumer.name[idx1[u + 1]]));
+                assert(strcmp(dt2->shared->u.enumer.name[idx2[u]], dt2->shared->u.enumer.name[idx2[u + 1]]));
             }
 #endif
 
@@ -4696,7 +4693,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
                         /* compare */
                         if ((cmp = strcmp(dt1->shared->u.enumer.name[idx1[u]],
-                                            dt2->shared->u.enumer.name[idx2[idx]])) < 0)
+                                          dt2->shared->u.enumer.name[idx2[idx]])) < 0)
                             rt = idx;
                         else
                             lt = idx + 1;
@@ -4720,7 +4717,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 } /* end else */
 
                 tmp = memcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
-                               (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
+                             (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
                 if (tmp > 0)
@@ -4730,9 +4727,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 
         case H5T_VLEN:
             assert(dt1->shared->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     dt1->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
+                   dt1->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
             assert(dt2->shared->u.vlen.type > H5T_VLEN_BADTYPE &&
-                     dt2->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
+                   dt2->shared->u.vlen.type < H5T_VLEN_MAXTYPE);
             assert(dt1->shared->u.vlen.loc >= H5T_LOC_BADLOC && dt1->shared->u.vlen.loc < H5T_LOC_MAXLOC);
             assert(dt2->shared->u.vlen.loc >= H5T_LOC_BADLOC && dt2->shared->u.vlen.loc < H5T_LOC_MAXLOC);
 
@@ -5233,7 +5230,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.app_func), path->name);
+                            (unsigned long)(path->conv.u.app_func), path->name);
 #endif
                 H5E_clear_stack(NULL); /*ignore the failure*/
             }                          /* end if */
@@ -5243,7 +5240,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
 #ifdef H5T_DEBUG
             if (H5DEBUG(T))
                 fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                          (unsigned long)(path->conv.u.lib_func), path->name);
+                        (unsigned long)(path->conv.u.lib_func), path->name);
 #endif
             H5E_clear_stack(NULL); /*ignore the failure*/
         }                          /* end if */

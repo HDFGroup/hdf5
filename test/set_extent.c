@@ -42,12 +42,12 @@ const char *FILENAME[] = {"set_extent1", "set_extent2", "set_extent3", "set_exte
 #define FILL_VALUE         (-1)
 #define DO_RANKS_PRINT_CONFIG(TEST)                                                                          \
     {                                                                                                        \
-        printf("  Config:\n");                                                                             \
-        printf("   Test: %s\n", TEST);                                                                     \
-        printf("   Compression: %s\n", (config & CONFIG_COMPRESS ? "yes" : "no"));                         \
-        printf("   Fill value: %s\n", (do_fillvalue ? "yes" : "no"));                                      \
-        printf("   Early allocation: %s\n", (config & CONFIG_EARLY_ALLOC ? "yes" : "no"));                 \
-        printf("   Edge chunk filters: %s\n", (config & CONFIG_UNFILT_EDGE ? "disabled" : "enabled"));     \
+        printf("  Config:\n");                                                                               \
+        printf("   Test: %s\n", TEST);                                                                       \
+        printf("   Compression: %s\n", (config & CONFIG_COMPRESS ? "yes" : "no"));                           \
+        printf("   Fill value: %s\n", (do_fillvalue ? "yes" : "no"));                                        \
+        printf("   Early allocation: %s\n", (config & CONFIG_EARLY_ALLOC ? "yes" : "no"));                   \
+        printf("   Edge chunk filters: %s\n", (config & CONFIG_UNFILT_EDGE ? "disabled" : "enabled"));       \
     } /* end DO_RANKS_PRINT_CONFIG */
 
 #define RANK1               1
@@ -338,8 +338,8 @@ do_ranks(hid_t fapl, hbool_t new_format)
             if (test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
                 DO_RANKS_PRINT_CONFIG("Randomized rank 4")
                 printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
-                                               ? "btree"
-                                               : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                                             ? "btree"
+                                             : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                 goto error;
             } /* end if */
 
@@ -348,10 +348,9 @@ do_ranks(hid_t fapl, hbool_t new_format)
                 if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
                     0) {
                     DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
-                    printf("   Index: %s\n",
-                             index_type == RANK4_INDEX_BTREE
-                                 ? "btree"
-                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                    printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
+                                                 ? "btree"
+                                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                     goto error;
                 } /* end if */
             }
@@ -360,10 +359,9 @@ do_ranks(hid_t fapl, hbool_t new_format)
             if (!(config & CONFIG_EARLY_ALLOC)) {
                 if (test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE, index_type) < 0) {
                     DO_RANKS_PRINT_CONFIG("Randomized rank 4 with sparse allocation")
-                    printf("   Index: %s\n",
-                             index_type == RANK4_INDEX_BTREE
-                                 ? "btree"
-                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                    printf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
+                                                 ? "btree"
+                                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                     goto error;
                 } /* end if */
 
@@ -372,9 +370,9 @@ do_ranks(hid_t fapl, hbool_t new_format)
                                              index_type) < 0) {
                         DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
                         printf("   Index: %s\n",
-                                 index_type == RANK4_INDEX_BTREE
-                                     ? "btree"
-                                     : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                               index_type == RANK4_INDEX_BTREE
+                                   ? "btree"
+                                   : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                         goto error;
                     } /* end if */
                 }
@@ -2692,11 +2690,11 @@ test_random_rank4_dump(unsigned ndim_sets, hsize_t dim_log[][4], hsize_t cdims[4
     unsigned i;
 
     printf("  Chunk dimensions: ( %u, %u, %u, %u )\n", (unsigned)cdims[0], (unsigned)cdims[1],
-             (unsigned)cdims[2], (unsigned)cdims[3]);
+           (unsigned)cdims[2], (unsigned)cdims[3]);
     printf("  Log of dataset dimensions (oldest first):\n");
     for (i = 0; i < ndim_sets; i++)
         printf("  Iteration %-3u: ( %2u, %2u, %2u, %2u )\n", i, (unsigned)dim_log[i][0],
-                 (unsigned)dim_log[i][1], (unsigned)dim_log[i][2], (unsigned)dim_log[i][3]);
+               (unsigned)dim_log[i][1], (unsigned)dim_log[i][2], (unsigned)dim_log[i][3]);
     if (j >= 0)
         printf("  First incorrect value read: ( %d, %d, %d, %d )\n", j, k, l, m);
 } /* end test_random_rank4_dump */

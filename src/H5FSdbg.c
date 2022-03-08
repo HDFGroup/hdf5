@@ -118,31 +118,31 @@ H5FS_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
      * Print the values.
      */
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Free space client:",
-              (fspace->client == H5FS_CLIENT_FHEAP_ID
-                   ? "Fractal heap"
-                   : (fspace->client == H5FS_CLIENT_FILE_ID ? "File" : "Unknown")));
+            (fspace->client == H5FS_CLIENT_FHEAP_ID
+                 ? "Fractal heap"
+                 : (fspace->client == H5FS_CLIENT_FILE_ID ? "File" : "Unknown")));
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Total free space tracked:", fspace->tot_space);
+            "Total free space tracked:", fspace->tot_space);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Total number of free space sections tracked:", fspace->tot_sect_count);
+            "Total number of free space sections tracked:", fspace->tot_sect_count);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of serializable free space sections tracked:", fspace->serial_sect_count);
+            "Number of serializable free space sections tracked:", fspace->serial_sect_count);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of ghost free space sections tracked:", fspace->ghost_sect_count);
+            "Number of ghost free space sections tracked:", fspace->ghost_sect_count);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Number of free space section classes:", (unsigned)fspace->nclasses);
+            "Number of free space section classes:", (unsigned)fspace->nclasses);
     fprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth, "Shrink percent:", fspace->shrink_percent);
     fprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth, "Expand percent:", fspace->expand_percent);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "# of bits for section address space:", fspace->max_sect_addr);
+            "# of bits for section address space:", fspace->max_sect_addr);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Maximum section size:", fspace->max_sect_size);
+            "Maximum section size:", fspace->max_sect_size);
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Serialized sections address:", fspace->sect_addr);
+            "Serialized sections address:", fspace->sect_addr);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Serialized sections size used:", fspace->sect_size);
+            "Serialized sections size used:", fspace->sect_size);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Serialized sections size allocated:", fspace->alloc_sect_size);
+            "Serialized sections size allocated:", fspace->alloc_sect_size);
 
 done:
     if (fspace && H5AC_unprotect(f, H5AC_FSPACE_HDR, addr, fspace, H5AC__NO_FLAGS_SET) < 0)

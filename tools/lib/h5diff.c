@@ -985,8 +985,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         int i;
 
         if ((strlen(fname1) > MAX_FILENAME) || (strlen(fname2) > MAX_FILENAME)) {
-            fprintf(stderr, "The parallel diff only supports path names up to %d characters\n",
-                      MAX_FILENAME);
+            fprintf(stderr, "The parallel diff only supports path names up to %d characters\n", MAX_FILENAME);
             MPI_Abort(MPI_COMM_WORLD, 0);
         } /* end if */
 

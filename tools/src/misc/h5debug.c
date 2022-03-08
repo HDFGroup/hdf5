@@ -333,7 +333,7 @@ main(int argc, char *argv[])
         /* Range check against 'extra' array size */
         if (extra_count > (int)(sizeof(extra) / sizeof(haddr_t))) {
             fprintf(stderr, "\nWARNING: Only using first %d extra parameters\n\n",
-                      (int)(sizeof(extra) / sizeof(haddr_t)));
+                    (int)(sizeof(extra) / sizeof(haddr_t)));
             extra_count = (int)(sizeof(extra) / sizeof(haddr_t));
         } /* end if */
 
@@ -376,7 +376,7 @@ main(int argc, char *argv[])
         /* Check for extra parameters */
         if (extra_count == 0 || extra[0] == 0) {
             fprintf(stderr,
-                      "\nWarning: Providing the group's local heap address will give more information\n");
+                    "\nWarning: Providing the group's local heap address will give more information\n");
             fprintf(stderr, "Symbol table node usage:\n");
             fprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
         } /* end if */
@@ -401,8 +401,7 @@ main(int argc, char *argv[])
                         stderr,
                         "\nWarning: Providing the group's local heap address will give more information\n");
                     fprintf(stderr, "B-tree symbol table node usage:\n");
-                    fprintf(stderr,
-                              "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                    fprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
                     exit_value = 4;
                     goto done;
                 } /* end if */
@@ -413,12 +412,11 @@ main(int argc, char *argv[])
             case H5B_CHUNK_ID:
                 /* Check for extra parameters */
                 if (extra_count == 0 || extra[0] == 0) {
-                    fprintf(
-                        stderr,
-                        "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
+                    fprintf(stderr,
+                            "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
                     fprintf(stderr, "B-tree chunked storage node usage:\n");
                     fprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest "
-                                      "chunk dim>...<fastest chunk dim>\n");
+                                    "chunk dim>...<fastest chunk dim>\n");
                     exit_value = 4;
                     goto done;
                 } /* end if */
@@ -431,7 +429,7 @@ main(int argc, char *argv[])
                     fprintf(stderr, "ERROR: Only 9 dimensions support currently (fix h5debug)\n");
                     fprintf(stderr, "B-tree chunked storage node usage:\n");
                     fprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest "
-                                      "chunk dim>...<fastest chunk dim>\n");
+                                    "chunk dim>...<fastest chunk dim>\n");
                     exit_value = 4;
                     goto done;
                 } /* end for */
@@ -446,7 +444,7 @@ main(int argc, char *argv[])
                         fprintf(stderr, "ERROR: Chunk dimensions should be >0\n");
                         fprintf(stderr, "B-tree chunked storage node usage:\n");
                         fprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> "
-                                          "<slowest chunk dim>...<fastest chunk dim>\n");
+                                        "<slowest chunk dim>...<fastest chunk dim>\n");
                         exit_value = 4;
                         goto done;
                     } /* end if */
@@ -473,7 +471,7 @@ main(int argc, char *argv[])
 
         if ((cls == H5D_BT2 || cls == H5D_BT2_FILT) && (extra_count == 0 || extra[0] == 0)) {
             fprintf(stderr, "ERROR: Need v2 B-tree header address and object header address containing the "
-                              "layout message in order to dump header\n");
+                            "layout message in order to dump header\n");
             fprintf(stderr, "v2 B-tree hdr usage:\n");
             fprintf(stderr, "\th5debug <filename> <v2 B-tree header address> <object header address>\n");
             exit_value = 4;
@@ -493,24 +491,24 @@ main(int argc, char *argv[])
         if ((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
             (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0 || extra[3] == 0)) {
             fprintf(stderr,
-                      "ERROR: Need v2 B-tree header address, the node's number of records, depth, and object "
-                      "header address containing the layout message in order to dump internal node\n");
+                    "ERROR: Need v2 B-tree header address, the node's number of records, depth, and object "
+                    "header address containing the layout message in order to dump internal node\n");
             fprintf(stderr,
-                      "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+                    "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             fprintf(stderr, "v2 B-tree internal node usage:\n");
             fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> "
-                              "<number of records> <depth> <object header address>\n");
+                            "<number of records> <depth> <object header address>\n");
             exit_value = 4;
             goto done;
         }
         else if (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0) {
             fprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and "
-                              "depth in order to dump internal node\n");
+                            "depth in order to dump internal node\n");
             fprintf(stderr,
-                      "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+                    "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             fprintf(stderr, "v2 B-tree internal node usage:\n");
             fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> "
-                              "<number of records> <depth>\n");
+                            "<number of records> <depth>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -530,10 +528,10 @@ main(int argc, char *argv[])
             (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0)) {
 
             fprintf(stderr, "ERROR: Need v2 B-tree header address, number of records, and object header "
-                              "address containing the layout message in order to dump leaf node\n");
+                            "address containing the layout message in order to dump leaf node\n");
             fprintf(stderr, "v2 B-tree leaf node usage:\n");
             fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number "
-                              "of records> <object header address>\n");
+                            "of records> <object header address>\n");
             exit_value = 4;
             goto done;
         }
@@ -566,7 +564,7 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
             fprintf(stderr, "ERROR: Need fractal heap header address and size of direct block in order to "
-                              "dump direct block\n");
+                            "dump direct block\n");
             fprintf(stderr, "Fractal heap direct block usage:\n");
             fprintf(
                 stderr,
@@ -585,11 +583,10 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
             fprintf(stderr, "ERROR: Need fractal heap header address and number of rows in order to dump "
-                              "indirect block\n");
+                            "indirect block\n");
             fprintf(stderr, "Fractal heap indirect block usage:\n");
-            fprintf(
-                stderr,
-                "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
+            fprintf(stderr,
+                    "\th5debug <filename> <indirect block address> <heap header address> <number of rows>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -611,10 +608,10 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
             fprintf(stderr, "ERROR: Need free space header address and client address in order to dump "
-                              "serialized sections\n");
+                            "serialized sections\n");
             fprintf(stderr, "Free space serialized sections usage:\n");
             fprintf(stderr, "\th5debug <filename> <serialized sections address> <free space header "
-                              "address> <client address>\n");
+                            "address> <client address>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -638,7 +635,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "ERROR: Need shared message header address in order to shared message list\n");
             fprintf(stderr, "Shared message list usage:\n");
             fprintf(stderr,
-                      "\th5debug <filename> <shared message list address> <shared message header address>\n");
+                    "\th5debug <filename> <shared message list address> <shared message header address>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -659,7 +656,7 @@ main(int argc, char *argv[])
                 "ERROR: Need object header address containing the layout message in order to dump header\n");
             fprintf(stderr, "Extensible array header block usage:\n");
             fprintf(stderr,
-                      "\th5debug <filename> <Extensible Array header address> <object header address>\n");
+                    "\th5debug <filename> <Extensible Array header address> <object header address>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -676,7 +673,7 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
             fprintf(stderr, "ERROR: Need extensible array header address and object header address "
-                              "containing the layout message in order to dump index block\n");
+                            "containing the layout message in order to dump index block\n");
             fprintf(stderr, "Extensible array index block usage:\n");
             fprintf(
                 stderr,
@@ -697,10 +694,10 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0) {
             fprintf(stderr, "ERROR: Need extensible array header address, super block index and object "
-                              "header address containing the layout message in order to dump super block\n");
+                            "header address containing the layout message in order to dump super block\n");
             fprintf(stderr, "Extensible array super block usage:\n");
             fprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super "
-                              "block index> <object header address>\n");
+                            "block index> <object header address>\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -717,11 +714,11 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0) {
             fprintf(stderr,
-                      "ERROR: Need extensible array header address, # of elements in data block and object "
-                      "header address containing the layout message in order to dump data block\n");
+                    "ERROR: Need extensible array header address, # of elements in data block and object "
+                    "header address containing the layout message in order to dump data block\n");
             fprintf(stderr, "Extensible array data block usage:\n");
             fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of "
-                              "elements in data block> <object header address\n");
+                            "elements in data block> <object header address\n");
             exit_value = 4;
             goto done;
         } /* end if */
@@ -758,7 +755,7 @@ main(int argc, char *argv[])
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
             fprintf(stderr, "ERROR: Need fixed array header address and object header address containing "
-                              "the layout message in order to dump data block\n");
+                            "the layout message in order to dump data block\n");
             fprintf(stderr, "fixed array data block usage:\n");
             fprintf(
                 stderr,

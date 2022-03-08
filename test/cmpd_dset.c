@@ -218,16 +218,16 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
         printf("Preserve status of dataset transfer property list should be"
-                 " 0 (FALSE), got %d\n",
-                 ret_code);
+               " 0 (FALSE), got %d\n",
+               ret_code);
         goto error;
     }
     if (H5Pset_preserve(PRESERVE, 1) < 0)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
         printf("Preserve status of dataset transfer property list should be"
-                 " 1 (TRUE), got %d\n",
-                 ret_code);
+               " 1 (TRUE), got %d\n",
+               ret_code);
         goto error;
     }
 
@@ -529,10 +529,10 @@ test_compound(char *filename, hid_t fapl)
             s1[i].d != 8 * i + 6 || s1[i].e != 8 * i + 7) {
             H5_FAILED();
             printf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
-            printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0],
-                     s1[i].c[1], s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
+            printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0], s1[i].c[1],
+                   s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
             printf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
-                     8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
+                   8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
             goto error;
         }
     }
@@ -1684,11 +1684,11 @@ error:
         int _i;                                                                                              \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        printf("    Insertion order =");                                                                   \
+        printf("    Insertion order =");                                                                     \
         for (_i = 0; _i < PACK_NMEMBS; _i++)                                                                 \
-            printf(" %d", order[_i]);                                                                      \
-        printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
-        fflush(stdout);                                                                                    \
+            printf(" %d", order[_i]);                                                                        \
+        printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]);   \
+        fflush(stdout);                                                                                      \
         goto error;                                                                                          \
     }
 

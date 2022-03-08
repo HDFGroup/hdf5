@@ -802,7 +802,7 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
     if (H5DEBUG(O)) {
         if (FALSE == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
             fprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
-                      (unsigned long)H5F_NOPEN_OBJS(loc->file));
+                    (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
             fprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
     }

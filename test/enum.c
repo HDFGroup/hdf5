@@ -196,7 +196,7 @@ test_conv(hid_t file)
         if (data1[i] != data2[i]) {
             H5_FAILED();
             printf("    1. data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data2[i]));
+                   (int)(data1[i]), (unsigned long)i, (int)(data2[i]));
             goto error;
         } /* end if */
 
@@ -208,7 +208,7 @@ test_conv(hid_t file)
         if ((short)data1[i] != data_short[i]) {
             H5_FAILED();
             printf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_short[i]));
+                   (int)(data1[i]), (unsigned long)i, (int)(data_short[i]));
             goto error;
         } /* end if */
 
@@ -220,7 +220,7 @@ test_conv(hid_t file)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
             printf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+                   (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
             goto error;
         } /* end if */
 
@@ -246,7 +246,7 @@ test_conv(hid_t file)
         if ((int)data1[i] != data_int[i]) {
             H5_FAILED();
             printf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_int[i]));
+                   (int)(data1[i]), (unsigned long)i, (int)(data_int[i]));
             goto error;
         } /* end if */
 
@@ -272,7 +272,7 @@ test_conv(hid_t file)
         if ((int)data1[i] != (int)data_double[i]) {
             H5_FAILED();
             printf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n", (unsigned long)i,
-                     (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
+                   (int)(data1[i]), (unsigned long)i, (int)(data_double[i]));
             goto error;
         } /* end if */
 
@@ -376,7 +376,7 @@ test_tr1(hid_t file)
         if (data1[i] != data2[i]) {
             H5_FAILED();
             printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+                   (unsigned long)i, (int)(data2[i]));
             goto error;
         }
 
@@ -480,7 +480,7 @@ test_tr2(hid_t file)
         if (data1[i] != data2[i]) {
             H5_FAILED();
             printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n", (unsigned long)i, (int)(data1[i]),
-                     (unsigned long)i, (int)(data2[i]));
+                   (unsigned long)i, (int)(data2[i]));
             goto error;
         }
 

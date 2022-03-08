@@ -186,7 +186,7 @@ main(void)
     /* Results */
     if (nerrors) {
         printf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n", nerrors,
-                 1 == nerrors ? "" : "s");
+               1 == nerrors ? "" : "s");
         exit(EXIT_FAILURE);
     }
     printf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");

@@ -421,8 +421,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const
 
     /* Make sure that if the the source or destination is committed, both are
      * committed */
-    assert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) ==
-             (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
+    assert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) == (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -127,7 +127,7 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
     fprintf(stdout, "\n");
 
     fprintf(stdout, "--------------------------------------------------------------------------------------"
-                      "--------------------------\n");
+                    "--------------------------\n");
 
     i         = 0;
     entry_ptr = (H5C_cache_entry_t *)H5SL_remove_first(slist_ptr);
@@ -199,10 +199,10 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 
     fprintf(stdout, "\n\nDump of metadata cache LRU \"%s\"\n", cache_name);
     fprintf(stdout, "LRU len = %d, LRU size = %d\n", cache_ptr->LRU_list_len,
-              (int)(cache_ptr->LRU_list_size));
+            (int)(cache_ptr->LRU_list_size));
     fprintf(stdout, "index_size = %d, max_cache_size = %d, delta = %d\n\n", (int)(cache_ptr->index_size),
-              (int)(cache_ptr->max_cache_size),
-              (int)(cache_ptr->max_cache_size) - (int)(cache_ptr->index_size));
+            (int)(cache_ptr->max_cache_size),
+            (int)(cache_ptr->max_cache_size) - (int)(cache_ptr->index_size));
 
     /* Print header */
     fprintf(stdout, "Entry ");
@@ -215,7 +215,7 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
     fprintf(stdout, "\n");
 
     fprintf(stdout, "--------------------------------------------------------------------------------------"
-                      "--------------------------\n");
+                    "--------------------------\n");
 
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
@@ -241,7 +241,7 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
     } /* end while */
 
     fprintf(stdout, "--------------------------------------------------------------------------------------"
-                      "--------------------------\n");
+                    "--------------------------\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C_dump_cache_LRU() */
@@ -313,9 +313,9 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
             assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
             fprintf(stdout, "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n", cache_ptr->prefix, i,
-                      (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
-                      (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
-                      entry_ptr->type->name);
+                    (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
+                    (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
+                    entry_ptr->type->name);
 
             fprintf(stdout, "		node_ptr = %p, item = %p\n", (void *)node_ptr, H5SL_item(node_ptr));
 
@@ -509,85 +509,85 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     fprintf(stdout, "\n");
 
     fprintf(stdout, "%s  hash table insertion / deletions   = %ld / %ld\n", cache_ptr->prefix,
-              (long)(cache_ptr->total_ht_insertions), (long)(cache_ptr->total_ht_deletions));
+            (long)(cache_ptr->total_ht_insertions), (long)(cache_ptr->total_ht_deletions));
 
     fprintf(stdout, "%s  HT successful / failed searches    = %ld / %ld\n", cache_ptr->prefix,
-              (long)(cache_ptr->successful_ht_searches), (long)(cache_ptr->failed_ht_searches));
+            (long)(cache_ptr->successful_ht_searches), (long)(cache_ptr->failed_ht_searches));
 
     fprintf(stdout, "%s  Av. HT suc / failed search depth   = %f / %f\n", cache_ptr->prefix,
-              average_successful_search_depth, average_failed_search_depth);
+            average_successful_search_depth, average_failed_search_depth);
 
     fprintf(stdout, "%s  current (max) index size / length  = %ld (%ld) / %lu (%lu)\n", cache_ptr->prefix,
-              (long)(cache_ptr->index_size), (long)(cache_ptr->max_index_size),
-              (unsigned long)(cache_ptr->index_len), (unsigned long)(cache_ptr->max_index_len));
+            (long)(cache_ptr->index_size), (long)(cache_ptr->max_index_size),
+            (unsigned long)(cache_ptr->index_len), (unsigned long)(cache_ptr->max_index_len));
 
     fprintf(stdout, "%s  current (max) clean/dirty idx size = %ld (%ld) / %ld (%ld)\n", cache_ptr->prefix,
-              (long)(cache_ptr->clean_index_size), (long)(cache_ptr->max_clean_index_size),
-              (long)(cache_ptr->dirty_index_size), (long)(cache_ptr->max_dirty_index_size));
+            (long)(cache_ptr->clean_index_size), (long)(cache_ptr->max_clean_index_size),
+            (long)(cache_ptr->dirty_index_size), (long)(cache_ptr->max_dirty_index_size));
 
     fprintf(stdout, "%s  current (max) slist size / length  = %ld (%ld) / %lu (%lu)\n", cache_ptr->prefix,
-              (long)(cache_ptr->slist_size), (long)(cache_ptr->max_slist_size),
-              (unsigned long)(cache_ptr->slist_len), (unsigned long)(cache_ptr->max_slist_len));
+            (long)(cache_ptr->slist_size), (long)(cache_ptr->max_slist_size),
+            (unsigned long)(cache_ptr->slist_len), (unsigned long)(cache_ptr->max_slist_len));
 
     fprintf(stdout, "%s  current (max) PL size / length     = %ld (%ld) / %lu (%lu)\n", cache_ptr->prefix,
-              (long)(cache_ptr->pl_size), (long)(cache_ptr->max_pl_size), (unsigned long)(cache_ptr->pl_len),
-              (unsigned long)(cache_ptr->max_pl_len));
+            (long)(cache_ptr->pl_size), (long)(cache_ptr->max_pl_size), (unsigned long)(cache_ptr->pl_len),
+            (unsigned long)(cache_ptr->max_pl_len));
 
     fprintf(stdout, "%s  current (max) PEL size / length    = %ld (%ld) / %lu (%lu)\n", cache_ptr->prefix,
-              (long)(cache_ptr->pel_size), (long)(cache_ptr->max_pel_size),
-              (unsigned long)(cache_ptr->pel_len), (unsigned long)(cache_ptr->max_pel_len));
+            (long)(cache_ptr->pel_size), (long)(cache_ptr->max_pel_size), (unsigned long)(cache_ptr->pel_len),
+            (unsigned long)(cache_ptr->max_pel_len));
 
     fprintf(stdout, "%s  current LRU list size / length     = %ld / %lu\n", cache_ptr->prefix,
-              (long)(cache_ptr->LRU_list_size), (unsigned long)(cache_ptr->LRU_list_len));
+            (long)(cache_ptr->LRU_list_size), (unsigned long)(cache_ptr->LRU_list_len));
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     fprintf(stdout, "%s  current clean LRU size / length    = %ld / %lu\n", cache_ptr->prefix,
-              (long)(cache_ptr->cLRU_list_size), (unsigned long)(cache_ptr->cLRU_list_len));
+            (long)(cache_ptr->cLRU_list_size), (unsigned long)(cache_ptr->cLRU_list_len));
 
     fprintf(stdout, "%s  current dirty LRU size / length    = %ld / %lu\n", cache_ptr->prefix,
-              (long)(cache_ptr->dLRU_list_size), (unsigned long)(cache_ptr->dLRU_list_len));
+            (long)(cache_ptr->dLRU_list_size), (unsigned long)(cache_ptr->dLRU_list_len));
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     fprintf(stdout, "%s  Total hits / misses / hit_rate     = %ld / %ld / %f\n", cache_ptr->prefix,
-              (long)total_hits, (long)total_misses, hit_rate);
+            (long)total_hits, (long)total_misses, hit_rate);
 
     fprintf(stdout, "%s  Total write / read (max) protects  = %ld / %ld (%ld)\n", cache_ptr->prefix,
-              (long)total_write_protects, (long)total_read_protects, (long)max_read_protects);
+            (long)total_write_protects, (long)total_read_protects, (long)max_read_protects);
 
     fprintf(stdout, "%s  Total clears / flushes             = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_clears, (long)total_flushes);
+            (long)total_clears, (long)total_flushes);
 
     fprintf(stdout, "%s  Total evictions / take ownerships  = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_evictions, (long)total_take_ownerships);
+            (long)total_evictions, (long)total_take_ownerships);
 
     fprintf(stdout, "%s  Total insertions(pinned) / moves   = %ld(%ld) / %ld\n", cache_ptr->prefix,
-              (long)total_insertions, (long)total_pinned_insertions, (long)total_moves);
+            (long)total_insertions, (long)total_pinned_insertions, (long)total_moves);
 
     fprintf(stdout, "%s  Total entry / cache flush moves    = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_entry_flush_moves, (long)total_cache_flush_moves);
+            (long)total_entry_flush_moves, (long)total_cache_flush_moves);
 
     fprintf(stdout, "%s  Total entry size incrs / decrs     = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_size_increases, (long)total_size_decreases);
+            (long)total_size_increases, (long)total_size_decreases);
 
     fprintf(stdout, "%s  Ttl entry/cache flush size changes = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_entry_flush_size_changes, (long)total_cache_flush_size_changes);
+            (long)total_entry_flush_size_changes, (long)total_cache_flush_size_changes);
 
     fprintf(stdout, "%s  Total entry pins (dirty) / unpins  = %ld (%ld) / %ld\n", cache_ptr->prefix,
-              (long)total_pins, (long)total_dirty_pins, (long)total_unpins);
+            (long)total_pins, (long)total_dirty_pins, (long)total_unpins);
 
     fprintf(stdout, "%s  Total pinned flushes / clears      = %ld / %ld\n", cache_ptr->prefix,
-              (long)total_pinned_flushes, (long)total_pinned_clears);
+            (long)total_pinned_flushes, (long)total_pinned_clears);
 
     fprintf(stdout, "%s  MSIC: (make space in cache) calls  = %lld\n", cache_ptr->prefix,
-              (long long)(cache_ptr->calls_to_msic));
+            (long long)(cache_ptr->calls_to_msic));
 
     if (cache_ptr->calls_to_msic > 0)
         average_entries_skipped_per_calls_to_msic =
             (((double)(cache_ptr->total_entries_skipped_in_msic)) / ((double)(cache_ptr->calls_to_msic)));
 
     fprintf(stdout, "%s  MSIC: Average/max entries skipped  = %lf / %ld\n", cache_ptr->prefix,
-              (double)average_entries_skipped_per_calls_to_msic,
-              (long)(cache_ptr->max_entries_skipped_in_msic));
+            (double)average_entries_skipped_per_calls_to_msic,
+            (long)(cache_ptr->max_entries_skipped_in_msic));
 
     if (cache_ptr->calls_to_msic > 0)
         average_dirty_pf_entries_skipped_per_call_to_msic =
@@ -595,39 +595,37 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
              ((double)(cache_ptr->calls_to_msic)));
 
     fprintf(stdout, "%s  MSIC: Average/max dirty pf entries skipped  = %lf / %ld\n", cache_ptr->prefix,
-              average_dirty_pf_entries_skipped_per_call_to_msic,
-              (long)(cache_ptr->max_dirty_pf_entries_skipped_in_msic));
+            average_dirty_pf_entries_skipped_per_call_to_msic,
+            (long)(cache_ptr->max_dirty_pf_entries_skipped_in_msic));
 
     if (cache_ptr->calls_to_msic > 0)
         average_entries_scanned_per_calls_to_msic =
             (((double)(cache_ptr->total_entries_scanned_in_msic)) / ((double)(cache_ptr->calls_to_msic)));
 
     fprintf(stdout, "%s  MSIC: Average/max entries scanned  = %lf / %ld\n", cache_ptr->prefix,
-              (double)average_entries_scanned_per_calls_to_msic,
-              (long)(cache_ptr->max_entries_scanned_in_msic));
+            (double)average_entries_scanned_per_calls_to_msic,
+            (long)(cache_ptr->max_entries_scanned_in_msic));
 
     fprintf(stdout, "%s  MSIC: Scanned to make space(evict) = %lld\n", cache_ptr->prefix,
-              (long long)(cache_ptr->entries_scanned_to_make_space));
+            (long long)(cache_ptr->entries_scanned_to_make_space));
 
-    fprintf(
-        stdout, "%s  MSIC: Scanned to satisfy min_clean = %lld\n", cache_ptr->prefix,
-        (long long)(cache_ptr->total_entries_scanned_in_msic - cache_ptr->entries_scanned_to_make_space));
+    fprintf(stdout, "%s  MSIC: Scanned to satisfy min_clean = %lld\n", cache_ptr->prefix,
+            (long long)(cache_ptr->total_entries_scanned_in_msic - cache_ptr->entries_scanned_to_make_space));
 
     fprintf(stdout, "%s  slist/LRU/index scan restarts   = %lld / %lld / %lld.\n", cache_ptr->prefix,
-              (long long)(cache_ptr->slist_scan_restarts), (long long)(cache_ptr->LRU_scan_restarts),
-              (long long)(cache_ptr->index_scan_restarts));
+            (long long)(cache_ptr->slist_scan_restarts), (long long)(cache_ptr->LRU_scan_restarts),
+            (long long)(cache_ptr->index_scan_restarts));
 
     fprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
-              cache_ptr->prefix, cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
-              cache_ptr->last_image_size);
+            cache_ptr->prefix, cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
+            cache_ptr->last_image_size);
 
     fprintf(stdout, "%s  prefetches / dirty prefetches      = %lld / %lld\n", cache_ptr->prefix,
-              (long long)(cache_ptr->prefetches), (long long)(cache_ptr->dirty_prefetches));
+            (long long)(cache_ptr->prefetches), (long long)(cache_ptr->dirty_prefetches));
 
     fprintf(stdout, "%s  prefetch hits/flushes/evictions    = %lld / %lld / %lld\n", cache_ptr->prefix,
-              (long long)(cache_ptr->prefetch_hits),
-              (long long)(cache_ptr->flushes[H5AC_PREFETCHED_ENTRY_ID]),
-              (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
+            (long long)(cache_ptr->prefetch_hits), (long long)(cache_ptr->flushes[H5AC_PREFETCHED_ENTRY_ID]),
+            (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
 
     if (cache_ptr->prefetches > 0)
         prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
@@ -639,13 +637,13 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
     fprintf(stdout, "%s  aggregate max / min accesses       = %d / %d\n", cache_ptr->prefix,
-              (int)aggregate_max_accesses, (int)aggregate_min_accesses);
+            (int)aggregate_max_accesses, (int)aggregate_min_accesses);
 
     fprintf(stdout, "%s  aggregate max_clears / max_flushes = %d / %d\n", cache_ptr->prefix,
-              (int)aggregate_max_clears, (int)aggregate_max_flushes);
+            (int)aggregate_max_clears, (int)aggregate_max_flushes);
 
     fprintf(stdout, "%s  aggregate max_size / max_pins      = %d / %d\n", cache_ptr->prefix,
-              (int)aggregate_max_size, (int)aggregate_max_pins);
+            (int)aggregate_max_size, (int)aggregate_max_pins);
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
@@ -653,8 +651,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
         for (i = 0; i <= cache_ptr->max_type_id; i++) {
             fprintf(stdout, "\n");
 
-            fprintf(stdout, "%s  Stats on %s:\n", cache_ptr->prefix,
-                      ((cache_ptr->class_table_ptr))[i]->name);
+            fprintf(stdout, "%s  Stats on %s:\n", cache_ptr->prefix, ((cache_ptr->class_table_ptr))[i]->name);
 
             if ((cache_ptr->hits[i] > 0) || (cache_ptr->misses[i] > 0))
                 hit_rate = 100.0 * ((double)(cache_ptr->hits[i])) /
@@ -663,48 +660,48 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
                 hit_rate = 0.0;
 
             fprintf(stdout, "%s    hits / misses / hit_rate       = %ld / %ld / %f\n", cache_ptr->prefix,
-                      (long)(cache_ptr->hits[i]), (long)(cache_ptr->misses[i]), hit_rate);
+                    (long)(cache_ptr->hits[i]), (long)(cache_ptr->misses[i]), hit_rate);
 
             fprintf(stdout, "%s    write / read (max) protects    = %ld / %ld (%d)\n", cache_ptr->prefix,
-                      (long)(cache_ptr->write_protects[i]), (long)(cache_ptr->read_protects[i]),
-                      (int)(cache_ptr->max_read_protects[i]));
+                    (long)(cache_ptr->write_protects[i]), (long)(cache_ptr->read_protects[i]),
+                    (int)(cache_ptr->max_read_protects[i]));
 
             fprintf(stdout, "%s    clears / flushes               = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->clears[i]), (long)(cache_ptr->flushes[i]));
+                    (long)(cache_ptr->clears[i]), (long)(cache_ptr->flushes[i]));
 
             fprintf(stdout, "%s    evictions / take ownerships    = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->evictions[i]), (long)(cache_ptr->take_ownerships[i]));
+                    (long)(cache_ptr->evictions[i]), (long)(cache_ptr->take_ownerships[i]));
 
             fprintf(stdout, "%s    insertions(pinned) / moves     = %ld(%ld) / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->insertions[i]), (long)(cache_ptr->pinned_insertions[i]),
-                      (long)(cache_ptr->moves[i]));
+                    (long)(cache_ptr->insertions[i]), (long)(cache_ptr->pinned_insertions[i]),
+                    (long)(cache_ptr->moves[i]));
 
             fprintf(stdout, "%s    entry / cache flush moves      = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->entry_flush_moves[i]), (long)(cache_ptr->cache_flush_moves[i]));
+                    (long)(cache_ptr->entry_flush_moves[i]), (long)(cache_ptr->cache_flush_moves[i]));
 
             fprintf(stdout, "%s    size increases / decreases     = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->size_increases[i]), (long)(cache_ptr->size_decreases[i]));
+                    (long)(cache_ptr->size_increases[i]), (long)(cache_ptr->size_decreases[i]));
 
             fprintf(stdout, "%s    entry/cache flush size changes = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->entry_flush_size_changes[i]),
-                      (long)(cache_ptr->cache_flush_size_changes[i]));
+                    (long)(cache_ptr->entry_flush_size_changes[i]),
+                    (long)(cache_ptr->cache_flush_size_changes[i]));
 
             fprintf(stdout, "%s    entry pins / unpins            = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->pins[i]), (long)(cache_ptr->unpins[i]));
+                    (long)(cache_ptr->pins[i]), (long)(cache_ptr->unpins[i]));
 
             fprintf(stdout, "%s    entry dirty pins/pin'd flushes = %ld / %ld\n", cache_ptr->prefix,
-                      (long)(cache_ptr->dirty_pins[i]), (long)(cache_ptr->pinned_flushes[i]));
+                    (long)(cache_ptr->dirty_pins[i]), (long)(cache_ptr->pinned_flushes[i]));
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
             fprintf(stdout, "%s    entry max / min accesses       = %d / %d\n", cache_ptr->prefix,
-                      cache_ptr->max_accesses[i], cache_ptr->min_accesses[i]);
+                    cache_ptr->max_accesses[i], cache_ptr->min_accesses[i]);
 
             fprintf(stdout, "%s    entry max_clears / max_flushes = %d / %d\n", cache_ptr->prefix,
-                      cache_ptr->max_clears[i], cache_ptr->max_flushes[i]);
+                    cache_ptr->max_clears[i], cache_ptr->max_flushes[i]);
 
             fprintf(stdout, "%s    entry max_size / max_pins      = %d / %d\n", cache_ptr->prefix,
-                      (int)(cache_ptr->max_size[i]), (int)(cache_ptr->max_pins[i]));
+                    (int)(cache_ptr->max_size[i]), (int)(cache_ptr->max_pins[i]));
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 

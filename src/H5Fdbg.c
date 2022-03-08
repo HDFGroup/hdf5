@@ -69,51 +69,51 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "File name (as opened):", H5F_OPEN_NAME(f));
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "File name (after resolving symlinks):", H5F_ACTUAL_NAME(f));
+            "File name (after resolving symlinks):", H5F_ACTUAL_NAME(f));
     fprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "File access flags", f->shared->flags);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "File open reference count:", f->shared->nrefs);
     fprintf(stream, "%*s%-*s %" PRIuHADDR " (abs)\n", indent, "", fwidth,
-              "Address of super block:", f->shared->sblock->base_addr);
+            "Address of super block:", f->shared->sblock->base_addr);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE " bytes\n", indent, "", fwidth,
-              "Size of userblock:", userblock_size);
+            "Size of userblock:", userblock_size);
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Superblock version number:", f->shared->sblock->super_vers);
+            "Superblock version number:", f->shared->sblock->super_vers);
 
     /* Hard-wired versions */
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Free list version number:", (unsigned)HDF5_FREESPACE_VERSION);
+            "Free list version number:", (unsigned)HDF5_FREESPACE_VERSION);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Root group symbol table entry version number:", (unsigned)HDF5_OBJECTDIR_VERSION);
+            "Root group symbol table entry version number:", (unsigned)HDF5_OBJECTDIR_VERSION);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Shared header version number:", (unsigned)HDF5_SHAREDHEADER_VERSION);
+            "Shared header version number:", (unsigned)HDF5_SHAREDHEADER_VERSION);
 
     fprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-              "Size of file offsets (haddr_t type):", (unsigned)f->shared->sizeof_addr);
+            "Size of file offsets (haddr_t type):", (unsigned)f->shared->sizeof_addr);
     fprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-              "Size of file lengths (hsize_t type):", (unsigned)f->shared->sizeof_size);
+            "Size of file lengths (hsize_t type):", (unsigned)f->shared->sizeof_size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Symbol table leaf node 1/2 rank:", f->shared->sblock->sym_leaf_k);
+            "Symbol table leaf node 1/2 rank:", f->shared->sblock->sym_leaf_k);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Symbol table internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_SNODE_ID]);
+            "Symbol table internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_SNODE_ID]);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Indexed storage internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_CHUNK_ID]);
+            "Indexed storage internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_CHUNK_ID]);
     fprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
-              "File status flags:", (unsigned)(f->shared->sblock->status_flags));
+            "File status flags:", (unsigned)(f->shared->sblock->status_flags));
     fprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
-              "Superblock extension address:", f->shared->sblock->ext_addr);
+            "Superblock extension address:", f->shared->sblock->ext_addr);
     fprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
-              "Shared object header message table address:", f->shared->sohm_addr);
+            "Shared object header message table address:", f->shared->sohm_addr);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Shared object header message version number:", (unsigned)f->shared->sohm_vers);
+            "Shared object header message version number:", (unsigned)f->shared->sohm_vers);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Number of shared object header message indexes:", (unsigned)f->shared->sohm_nindexes);
+            "Number of shared object header message indexes:", (unsigned)f->shared->sohm_nindexes);
 
     fprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
-              "Address of driver information block:", f->shared->sblock->driver_addr);
+            "Address of driver information block:", f->shared->sblock->driver_addr);
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Root group symbol table entry:", f->shared->root_grp ? "" : "(none)");
+            "Root group symbol table entry:", f->shared->root_grp ? "" : "(none)");
     if (f->shared->root_grp) {
         if (f->shared->sblock->root_ent) /* Use real root group symbol table entry */
             H5G__ent_debug(f->shared->sblock->root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);

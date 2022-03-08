@@ -1569,7 +1569,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
                     "memory allocation failed for extensible array data block")
 
     assert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
-             (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
+           (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
 
     /* Set the extensible array data block's information */
     dblock->addr = udata->dblk_addr;

@@ -258,15 +258,15 @@ test_VLof_comptype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].len != readBuf[uu].len) {
             fprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%d, readBuf[%u].len=%d\n",
-                      __LINE__, uu, (int)writeBuf[uu].len, uu, (int)readBuf[uu].len);
+                    __LINE__, uu, (int)writeBuf[uu].len, uu, (int)readBuf[uu].len);
             continue;
         } /* write len != read len */
 
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)writeBuf[uu].p)[vv] != ((unsigned int *)readBuf[uu].p)[vv]) {
-                fprintf(
-                    stderr, "VL data values don't match!, writeBuf[uu].p[%d]=%d, readBuf[uu].p[%d]=%d\n", vv,
-                    (int)((unsigned int *)writeBuf[uu].p)[vv], vv, (int)((unsigned int *)readBuf[uu].p)[vv]);
+                fprintf(stderr, "VL data values don't match!, writeBuf[uu].p[%d]=%d, readBuf[uu].p[%d]=%d\n",
+                        vv, (int)((unsigned int *)writeBuf[uu].p)[vv], vv,
+                        (int)((unsigned int *)readBuf[uu].p)[vv]);
                 continue;
             } /* write value != read value */
         }
@@ -430,19 +430,19 @@ test_compound_VL_VLtype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].u != readBuf[uu].u) {
             fprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
-                      writeBuf[uu].u, uu, readBuf[uu].u);
+                    writeBuf[uu].u, uu, readBuf[uu].u);
             continue;
         } /* end if */
         if (!H5_FLT_ABS_EQUAL(writeBuf[uu].f, readBuf[uu].f)) {
             fprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
-                      (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
+                    (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
             continue;
         } /* end if */
 
         if (writeBuf[uu].v.len != readBuf[uu].v.len) {
             fprintf(stderr,
-                      "%d: VL data length don't match!, writeBuf[%d].v.len=%zu, readBuf[%d].v.len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
+                    "%d: VL data length don't match!, writeBuf[%d].v.len=%zu, readBuf[%d].v.len=%zu\n",
+                    __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
             continue;
         } /* end if */
 
@@ -450,13 +450,13 @@ test_compound_VL_VLtype(void)
              (size_t)vv < readBuf[uu].v.len; vv++, t1++, t2++) {
             if (t1->len != t2->len) {
                 fprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
-                          __LINE__, uu, vv, t1->len, t2->len);
+                        __LINE__, uu, vv, t1->len, t2->len);
                 continue;
             } /* end if */
             for (ww = 0; (size_t)ww < t2->len; ww++) {
                 if (((unsigned int *)t1->p)[ww] != ((unsigned int *)t2->p)[ww]) {
                     fprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
-                              ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
+                            ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
             }     /* end for */
@@ -1293,15 +1293,14 @@ testfl_VLof_comptype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].len != readBuf[uu].len) {
             fprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%zu, readBuf[%u].len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].len, uu, readBuf[uu].len);
+                    __LINE__, uu, writeBuf[uu].len, uu, readBuf[uu].len);
             continue;
         } /* write len != read len */
 
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)writeBuf[uu].p)[vv] != ((unsigned int *)readBuf[uu].p)[vv]) {
-                fprintf(stderr,
-                          "VL data values don't match!, writeBuf[uu].p[%u]=%u, readBuf[uu].p[%u]=%u\n", vv,
-                          ((unsigned int *)writeBuf[uu].p)[vv], vv, ((unsigned int *)readBuf[uu].p)[vv]);
+                fprintf(stderr, "VL data values don't match!, writeBuf[uu].p[%u]=%u, readBuf[uu].p[%u]=%u\n",
+                        vv, ((unsigned int *)writeBuf[uu].p)[vv], vv, ((unsigned int *)readBuf[uu].p)[vv]);
                 continue;
             } /* write value != read value */
         }
@@ -1465,19 +1464,19 @@ testfl_compound_VL_VLtype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].u != readBuf[uu].u) {
             fprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
-                      writeBuf[uu].u, uu, readBuf[uu].u);
+                    writeBuf[uu].u, uu, readBuf[uu].u);
             continue;
         } /* end if */
         if (!H5_FLT_ABS_EQUAL(writeBuf[uu].f, readBuf[uu].f)) {
             fprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
-                      (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
+                    (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
             continue;
         } /* end if */
 
         if (writeBuf[uu].v.len != readBuf[uu].v.len) {
             fprintf(stderr,
-                      "%d: VL data length don't match!, writeBuf[%u].v.len=%zu, readBuf[%u].v.len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
+                    "%d: VL data length don't match!, writeBuf[%u].v.len=%zu, readBuf[%u].v.len=%zu\n",
+                    __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
             continue;
         } /* end if */
 
@@ -1485,13 +1484,13 @@ testfl_compound_VL_VLtype(void)
              (size_t)vv < readBuf[uu].v.len; vv++, t1++, t2++) {
             if (t1->len != t2->len) {
                 fprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
-                          __LINE__, uu, vv, t1->len, t2->len);
+                        __LINE__, uu, vv, t1->len, t2->len);
                 continue;
             } /* end if */
             for (ww = 0; (size_t)ww < t2->len; ww++) {
                 if (((unsigned int *)t1->p)[ww] != ((unsigned int *)t2->p)[ww]) {
                     fprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
-                              ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
+                            ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
             }     /* end for */

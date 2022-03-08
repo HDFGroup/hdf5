@@ -41,11 +41,11 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
 /* Other functions */
 #define H5VM_vector_cpy(N, DST, SRC)                                                                         \
     {                                                                                                        \
-        assert(sizeof(*(DST)) == sizeof(*(SRC)));                                                          \
+        assert(sizeof(*(DST)) == sizeof(*(SRC)));                                                            \
         if (SRC)                                                                                             \
             H5MM_memcpy(DST, SRC, (N) * sizeof(*(DST)));                                                     \
         else                                                                                                 \
-            memset(DST, 0, (N) * sizeof(*(DST)));                                                          \
+            memset(DST, 0, (N) * sizeof(*(DST)));                                                            \
     }
 
 #define H5VM_vector_zero(N, DST) memset(DST, 0, (N) * sizeof(*(DST)))
@@ -56,13 +56,13 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
 #define H5VM_swizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                         \
     {                                                                                                        \
         /* COORDS must be an array of type TYPE */                                                           \
-        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                         \
+        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
         /* Nothing to do when unlimited dimension is at position 0 */                                        \
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[UNLIM_DIM];                                                                 \
                                                                                                              \
-            memmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[0] = _tmp;                                                                              \
         } /* end if */                                                                                       \
     }
@@ -74,13 +74,13 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
 #define H5VM_unswizzle_coords(TYPE, COORDS, UNLIM_DIM)                                                       \
     {                                                                                                        \
         /* COORDS must be an array of type TYPE */                                                           \
-        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                         \
+        assert(sizeof(COORDS[0]) == sizeof(TYPE));                                                           \
                                                                                                              \
         /* Nothing to do when unlimited dimension is at position 0 */                                        \
         if (0 != (UNLIM_DIM)) {                                                                              \
             TYPE _tmp = (COORDS)[0];                                                                         \
                                                                                                              \
-            memmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                               \
+            memmove(&(COORDS)[0], &(COORDS)[1], sizeof(TYPE) * (UNLIM_DIM));                                 \
             (COORDS)[UNLIM_DIM] = _tmp;                                                                      \
         } /* end if */                                                                                       \
     }

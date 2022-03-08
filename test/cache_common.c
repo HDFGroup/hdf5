@@ -720,10 +720,10 @@ deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, hb
             if ((*(((const char *)image) + 2)) != (char)(idx & 0xFF)) {
                 fprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
                 fprintf(stdout, "*image = 0x%" PRIx8 " 0x%" PRIx8 " 0x%" PRIx8 "\n",
-                          (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
-                          (*(((const uint8_t *)image) + 2)));
+                        (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
+                        (*(((const uint8_t *)image) + 2)));
                 fprintf(stdout, "expected *image = 0x%02" PRIx32 "%02" PRIx32 "\n", (uint32_t)idx & 0xFF,
-                          (((uint32_t)idx & 0xFF00) >> 8));
+                        (((uint32_t)idx & 0xFF00) >> 8));
             } /* end if */
             assert((*((const char *)image)) == (char)(type & 0xFF));
             assert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));
@@ -1907,8 +1907,7 @@ create_entry_arrays(void)
     /* variable entries */
     if (NULL == (variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL ==
-        (orig_variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* notify entries */
@@ -2337,8 +2336,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
         if ((!expected[i].in_cache) && (expected[i].is_dirty) && (!entry_ptr->expunged)) {
 
             pass = FALSE;
-            snprintf(msg, sizeof(msg), "%d: expected[%d] specs non-expunged, dirty, non-resident.\n", tag,
-                       i);
+            snprintf(msg, sizeof(msg), "%d: expected[%d] specs non-expunged, dirty, non-resident.\n", tag, i);
             failure_mssg = msg;
         }
 
@@ -2350,8 +2348,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) in cache actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index, (int)in_cache,
-                           (int)expected[i].in_cache);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index, (int)in_cache,
+                         (int)expected[i].in_cache);
                 failure_mssg = msg;
             }
         }
@@ -2362,8 +2360,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) size actual/expected = %ld/%ld.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index, (long)(entry_ptr->size),
-                           (long)expected[i].size);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index, (long)(entry_ptr->size),
+                         (long)expected[i].size);
                 failure_mssg = msg;
             }
         }
@@ -2373,9 +2371,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->header.size != expected[i].size) {
 
                 pass = FALSE;
-                snprintf(msg, sizeof(msg), "%d entry (%d, %d) header size actual/expected = %ld/%ld.\n",
-                           tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (long)(entry_ptr->header.size), (long)expected[i].size);
+                snprintf(msg, sizeof(msg), "%d entry (%d, %d) header size actual/expected = %ld/%ld.\n", tag,
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (long)(entry_ptr->header.size), (long)expected[i].size);
                 failure_mssg = msg;
             }
         }
@@ -2386,8 +2384,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) at main addr actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->at_main_addr), (int)expected[i].at_main_addr);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->at_main_addr), (int)expected[i].at_main_addr);
                 failure_mssg = msg;
             }
         }
@@ -2398,8 +2396,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) is_dirty actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->is_dirty), (int)expected[i].is_dirty);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->is_dirty), (int)expected[i].is_dirty);
                 failure_mssg = msg;
             }
         }
@@ -2410,8 +2408,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) header is_dirty actual/expected = %d/%d.\n",
-                           tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->header.is_dirty), (int)expected[i].is_dirty);
+                         tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->header.is_dirty), (int)expected[i].is_dirty);
                 failure_mssg = msg;
             }
         }
@@ -2422,8 +2420,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) is_protected actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->is_protected), (int)expected[i].is_protected);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->is_protected), (int)expected[i].is_protected);
                 failure_mssg = msg;
             }
         }
@@ -2433,10 +2431,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->header.is_protected != expected[i].is_protected) {
 
                 pass = FALSE;
-                snprintf(msg, sizeof(msg),
-                           "%d entry (%d, %d) header is_protected actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->header.is_protected), (int)expected[i].is_protected);
+                snprintf(msg, sizeof(msg), "%d entry (%d, %d) header is_protected actual/expected = %d/%d.\n",
+                         tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->header.is_protected), (int)expected[i].is_protected);
                 failure_mssg = msg;
             }
         }
@@ -2447,8 +2444,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) is_pinned actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->is_pinned), (int)expected[i].is_pinned);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->is_pinned), (int)expected[i].is_pinned);
                 failure_mssg = msg;
             }
         }
@@ -2459,8 +2456,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) is_corked actual/expected = %d/%d.\n", tag,
-                           (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->is_corked), (int)expected[i].is_corked);
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->is_corked), (int)expected[i].is_corked);
                 failure_mssg = msg;
             }
         }
@@ -2471,8 +2468,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) header is_pinned actual/expected = %d/%d.\n",
-                           tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->header.is_pinned), (int)expected[i].is_pinned);
+                         tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->header.is_pinned), (int)expected[i].is_pinned);
                 failure_mssg = msg;
             }
         }
@@ -2485,11 +2482,11 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
 
                 pass = FALSE;
                 snprintf(msg, sizeof(msg),
-                           "%d entry (%d,%d) deserialized = %d(%d), serialized = %d(%d), dest = %d(%d)\n",
-                           tag, (int)expected[i].entry_type, (int)expected[i].entry_index,
-                           (int)(entry_ptr->deserialized), (int)(expected[i].deserialized),
-                           (int)(entry_ptr->serialized), (int)(expected[i].serialized),
-                           (int)(entry_ptr->destroyed), (int)(expected[i].destroyed));
+                         "%d entry (%d,%d) deserialized = %d(%d), serialized = %d(%d), dest = %d(%d)\n", tag,
+                         (int)expected[i].entry_type, (int)expected[i].entry_index,
+                         (int)(entry_ptr->deserialized), (int)(expected[i].deserialized),
+                         (int)(entry_ptr->serialized), (int)(expected[i].serialized),
+                         (int)(entry_ptr->destroyed), (int)(expected[i].destroyed));
                 failure_mssg = msg;
             }
         }
@@ -2500,9 +2497,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
         if (pass) {
             if (entry_ptr->flush_dep_npar != expected[i].flush_dep_npar) {
                 pass = FALSE;
-                snprintf(msg, sizeof(msg), "%d entry (%d, %d) flush_dep_npar actual/expected = %u/%u.\n",
-                           tag, expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_npar,
-                           expected[i].flush_dep_npar);
+                snprintf(msg, sizeof(msg), "%d entry (%d, %d) flush_dep_npar actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_npar,
+                         expected[i].flush_dep_npar);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2510,9 +2507,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->header.flush_dep_nparents != expected[i].flush_dep_npar) {
                 pass = FALSE;
                 snprintf(msg, sizeof(msg),
-                           "%d entry (%d, %d) header flush_dep_nparents actual/expected = %u/%u.\n", tag,
-                           expected[i].entry_type, expected[i].entry_index,
-                           entry_ptr->header.flush_dep_nparents, expected[i].flush_dep_npar);
+                         "%d entry (%d, %d) header flush_dep_nparents actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index,
+                         entry_ptr->header.flush_dep_nparents, expected[i].flush_dep_npar);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2524,9 +2521,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                 if (entry_ptr->flush_dep_par_type[u] != expected[i].flush_dep_par_type[u]) {
                     pass = FALSE;
                     snprintf(msg, sizeof(msg),
-                               "%d entry (%d, %d) flush_dep_par_type[%u] actual/expected = %d/%d.\n", tag,
-                               expected[i].entry_type, expected[i].entry_index, u,
-                               entry_ptr->flush_dep_par_type[u], expected[i].flush_dep_par_type[u]);
+                             "%d entry (%d, %d) flush_dep_par_type[%u] actual/expected = %d/%d.\n", tag,
+                             expected[i].entry_type, expected[i].entry_index, u,
+                             entry_ptr->flush_dep_par_type[u], expected[i].flush_dep_par_type[u]);
                     failure_mssg = msg;
                 } /* end if */
             }     /* end for */
@@ -2536,9 +2533,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                 if (entry_ptr->flush_dep_par_idx[u] != expected[i].flush_dep_par_idx[u]) {
                     pass = FALSE;
                     snprintf(msg, sizeof(msg),
-                               "%d entry (%d, %d) flush_dep_par_idx[%u] actual/expected = %d/%d.\n", tag,
-                               expected[i].entry_type, expected[i].entry_index, u,
-                               entry_ptr->flush_dep_par_idx[u], expected[i].flush_dep_par_idx[u]);
+                             "%d entry (%d, %d) flush_dep_par_idx[%u] actual/expected = %d/%d.\n", tag,
+                             expected[i].entry_type, expected[i].entry_index, u,
+                             entry_ptr->flush_dep_par_idx[u], expected[i].flush_dep_par_idx[u]);
                     failure_mssg = msg;
                 } /* end if */
             }     /* end for */
@@ -2548,9 +2545,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
         if (pass) {
             if (entry_ptr->flush_dep_nchd != expected[i].flush_dep_nchd) {
                 pass = FALSE;
-                snprintf(msg, sizeof(msg), "%d entry (%d, %d) flush_dep_nchd actual/expected = %u/%u.\n",
-                           tag, expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_nchd,
-                           expected[i].flush_dep_nchd);
+                snprintf(msg, sizeof(msg), "%d entry (%d, %d) flush_dep_nchd actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_nchd,
+                         expected[i].flush_dep_nchd);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2558,9 +2555,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->header.flush_dep_nchildren != expected[i].flush_dep_nchd) {
                 pass = FALSE;
                 snprintf(msg, sizeof(msg),
-                           "%d entry (%d, %d) header flush_dep_nchildren actual/expected = %u/%u.\n", tag,
-                           expected[i].entry_type, expected[i].entry_index,
-                           entry_ptr->header.flush_dep_nchildren, expected[i].flush_dep_nchd);
+                         "%d entry (%d, %d) header flush_dep_nchildren actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index,
+                         entry_ptr->header.flush_dep_nchildren, expected[i].flush_dep_nchd);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2568,9 +2565,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->flush_dep_ndirty_chd != expected[i].flush_dep_ndirty_chd) {
                 pass = FALSE;
                 snprintf(msg, sizeof(msg),
-                           "%d entry (%d, %d) flush_dep_ndirty_chd actual/expected = %u/%u.\n", tag,
-                           expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_ndirty_chd,
-                           expected[i].flush_dep_ndirty_chd);
+                         "%d entry (%d, %d) flush_dep_ndirty_chd actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_dep_ndirty_chd,
+                         expected[i].flush_dep_ndirty_chd);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2578,9 +2575,9 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (entry_ptr->header.flush_dep_ndirty_children != expected[i].flush_dep_ndirty_chd) {
                 pass = FALSE;
                 snprintf(msg, sizeof(msg),
-                           "%d entry (%d, %d) header flush_dep_ndirty_children actual/expected = %u/%u.\n",
-                           tag, expected[i].entry_type, expected[i].entry_index,
-                           entry_ptr->header.flush_dep_ndirty_children, expected[i].flush_dep_ndirty_chd);
+                         "%d entry (%d, %d) header flush_dep_ndirty_children actual/expected = %u/%u.\n", tag,
+                         expected[i].entry_type, expected[i].entry_index,
+                         entry_ptr->header.flush_dep_ndirty_children, expected[i].flush_dep_ndirty_chd);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2590,8 +2587,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
             if (expected[i].flush_order >= 0 && entry_ptr->flush_order != (unsigned)expected[i].flush_order) {
                 pass = FALSE;
                 snprintf(msg, sizeof(msg), "%d entry (%d, %d) flush_order actual/expected = %u/%d.\n", tag,
-                           expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_order,
-                           expected[i].flush_order);
+                         expected[i].entry_type, expected[i].entry_index, entry_ptr->flush_order,
+                         expected[i].flush_order);
                 failure_mssg = msg;
             } /* end if */
         }     /* end if */
@@ -2779,8 +2776,8 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
             if (verbose) {
 
                 fprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", __func__,
-                          (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
-                          (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
+                        (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
+                        (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
             }
             pass         = FALSE;
             failure_mssg = "non zero index len/sizes after H5C_flush_cache() with invalidate.";
@@ -3249,8 +3246,7 @@ protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx)
         assert(entry_ptr->index == idx);
         assert(entry_ptr->type == type);
         assert(entry_ptr == entry_ptr->self);
-        assert((!(entry_ptr->is_protected)) ||
-                 ((entry_ptr->is_read_only) && (entry_ptr->ro_ref_count > 0)));
+        assert((!(entry_ptr->is_protected)) || ((entry_ptr->is_read_only) && (entry_ptr->ro_ref_count > 0)));
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, types[type], entry_ptr->addr,
                                                            &entry_ptr->addr, H5C__READ_ONLY_FLAG);
@@ -3562,8 +3558,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx--;
@@ -3574,8 +3569,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 protect_entry(file_ptr, type, tmp_idx);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx--;
@@ -3586,8 +3580,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             /* (don't decrement tmp_idx) */
@@ -3598,8 +3591,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx--;
@@ -3610,8 +3602,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 protect_entry(file_ptr, type, tmp_idx);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx -= 2;
@@ -3622,8 +3613,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             if (do_mult_ro_protects) {
@@ -3636,7 +3626,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
 
                 tmp_idx--;
@@ -3648,7 +3638,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
 
                 tmp_idx--;
@@ -3660,7 +3650,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
 
                 /* (don't decrement tmp_idx) */
@@ -3672,7 +3662,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
 
                 tmp_idx--;
@@ -3684,7 +3674,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
 
                 tmp_idx--;
@@ -3696,7 +3686,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
             }     /* if ( do_mult_ro_protects ) */
 
@@ -3706,8 +3696,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 protect_entry(file_ptr, type, idx);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx = idx - lag + 2;
@@ -3718,8 +3707,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             tmp_idx--;
@@ -3730,8 +3718,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                 protect_entry(file_ptr, type, tmp_idx);
 
-                assert((!cache_ptr->slist_enabled) ||
-                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                assert((!cache_ptr->slist_enabled) || (cache_ptr->slist_size == cache_ptr->dirty_index_size));
             } /* end if */
 
             if (do_destroys) {
@@ -3745,7 +3732,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
                             assert((!cache_ptr->slist_enabled) ||
-                                     (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                   (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             break;
 
                         case 1:
@@ -3756,7 +3743,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
                                 assert((!cache_ptr->slist_enabled) ||
-                                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                       (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             } /* end if */
                             else {
                                 if (verbose)
@@ -3766,7 +3753,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                                                 (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
 
                                 assert((!cache_ptr->slist_enabled) ||
-                                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                       (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             } /* end else */
                             break;
 
@@ -3777,7 +3764,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
 
                             assert((!cache_ptr->slist_enabled) ||
-                                     (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                   (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             break;
 
                         case 3:
@@ -3788,7 +3775,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
 
                                 assert((!cache_ptr->slist_enabled) ||
-                                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                       (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             } /* end if */
                             else {
                                 if (verbose)
@@ -3799,7 +3786,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                                                     H5C__DELETED_FLAG);
 
                                 assert((!cache_ptr->slist_enabled) ||
-                                         (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                                       (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                             } /* end else */
                             break;
 
@@ -3819,7 +3806,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                                     (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
 
                     assert((!cache_ptr->slist_enabled) ||
-                             (cache_ptr->slist_size == cache_ptr->dirty_index_size));
+                           (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
             }     /* end elseif */
 
@@ -4822,10 +4809,10 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
         assert(i < chd_entry_ptr->flush_dep_npar);
         if (i < chd_entry_ptr->flush_dep_npar - 1)
             memmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
         if (i < chd_entry_ptr->flush_dep_npar - 1)
             memmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
         chd_entry_ptr->flush_dep_npar--;
         par_entry_ptr->flush_dep_nchd--;
         if (par_entry_ptr->flush_dep_nchd == 0) {
@@ -5040,7 +5027,7 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
     if ((pass) && (dump_data)) {
 
         fprintf(stdout, "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n", (long)cache_hits,
-                  (long)cache_accesses, hit_rate);
+                (long)cache_accesses, hit_rate);
     }
 
     if ((pass) && (cache_accesses > min_accesses) && (hit_rate < min_hit_rate)) {
@@ -5163,7 +5150,7 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
     if ((pass) && (dump_data)) {
 
         fprintf(stdout, "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n", (long)max_size,
-                  (long)min_clean_size, (long)cur_size, (long)cur_num_entries);
+                (long)min_clean_size, (long)cur_size, (long)cur_num_entries);
     }
 
 } /* check_and_validate_cache_size() */

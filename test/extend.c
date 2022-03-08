@@ -119,7 +119,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
                         printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
                         printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
                         printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
-                                 buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                               buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
         }             /* end for */
@@ -222,7 +222,7 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
                         printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
                         printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
                         printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
-                                 buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                               buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
         }             /* end for */

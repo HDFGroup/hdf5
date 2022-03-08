@@ -32,7 +32,7 @@ usage(const char *prog)
     fprintf(stderr, "     -h, --help            Print a usage message and exit\n");
     fprintf(stderr, "     -f FN                 Test file name [default: %s.h5]\n", prog);
     fprintf(stderr,
-              "     -i N, --iteration=N   Number of iterations to repeat the whole thing. [default: 1]\n");
+            "     -i N, --iteration=N   Number of iterations to repeat the whole thing. [default: 1]\n");
     fprintf(stderr, "     -l w|r                launch writer or reader only. [default: launch both]\n");
     fprintf(stderr, "     -n N, --nplanes=N     Number of planes to write/read. [default: 1000]\n");
     fprintf(stderr, "     -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes\n");
@@ -112,7 +112,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
             case 'y': /* Number of planes per chunk */
                 if ((opts->chunkplanes = strtoul(optarg, NULL, 0)) <= 0) {
                     fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
-                              optarg);
+                            optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
@@ -158,9 +158,9 @@ show_parameters(options_t *opts)
 {
     printf("===Parameters used:===\n");
     printf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->chunkdims[0],
-             (unsigned long long)opts->chunkdims[1], (unsigned long long)opts->chunkdims[2]);
+           (unsigned long long)opts->chunkdims[1], (unsigned long long)opts->chunkdims[2]);
     printf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->max_dims[0],
-             (unsigned long long)opts->max_dims[1], (unsigned long long)opts->max_dims[2]);
+           (unsigned long long)opts->max_dims[1], (unsigned long long)opts->max_dims[2]);
     printf("number of planes to write=%llu\n", (unsigned long long)opts->nplanes);
     printf("using SWMR mode=%s\n", opts->use_swmr ? "yes(1)" : "no(0)");
     printf("data filename=%s\n", opts->filename);
@@ -301,8 +301,8 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
     /* verify chunk_dims against set parameters */
     if (chunk_dims[0] != opts->chunkdims[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
         fprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
-                  (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
-                  (unsigned long long)chunk_dims[2]);
+                (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
+                (unsigned long long)chunk_dims[2]);
         return -1;
     }
 
@@ -331,11 +331,11 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
         return -1;
     }
     printf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
-             (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
+           (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]) {
         fprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n", (unsigned long long)dims[0],
-                  (unsigned long long)dims[1], (unsigned long long)dims[2]);
+                (unsigned long long)dims[1], (unsigned long long)dims[2]);
         free(buffer);
         return -1;
     }
@@ -508,13 +508,13 @@ read_uc_file(hbool_t towait, options_t *opts)
         return -1;
     }
     printf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
-             (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
+           (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[1] != memdims[1] || dims[2] != memdims[2]) {
         fprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
-                  (unsigned long long)dims[0], (unsigned long long)dims[1], (unsigned long long)dims[2]);
+                (unsigned long long)dims[0], (unsigned long long)dims[1], (unsigned long long)dims[2]);
         fprintf(stderr, "But memdims=(%llu,%llu,%llu)\n", (unsigned long long)memdims[0],
-                  (unsigned long long)memdims[1], (unsigned long long)memdims[2]);
+                (unsigned long long)memdims[1], (unsigned long long)memdims[2]);
         free(buffer);
         return -1;
     }
@@ -541,7 +541,7 @@ read_uc_file(hbool_t towait, options_t *opts)
                 loops_waiting_for_plane = 0;
             }
             printf("reading planes %llu to %llu\n", (unsigned long long)nplanes_seen,
-                     (unsigned long long)dims[0]);
+                   (unsigned long long)dims[0]);
         }
         else {
             if (loops_waiting_for_plane) {
@@ -593,8 +593,8 @@ read_uc_file(hbool_t towait, options_t *opts)
                     if ((hsize_t)*bufptr++ != nplane) {
                         if (++nerrs < ErrorReportMax) {
                             fprintf(stderr, "found error %llu plane(%llu,%llu), expected %llu, got %d\n",
-                                      (unsigned long long)nplane, (unsigned long long)j,
-                                      (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr - 1));
+                                    (unsigned long long)nplane, (unsigned long long)j, (unsigned long long)k,
+                                    (unsigned long long)nplane, (int)*(bufptr - 1));
                         } /* end if should print error */
                     }     /* end if value mismatch */
                 }         /* end for plane second dimension */
@@ -602,7 +602,7 @@ read_uc_file(hbool_t towait, options_t *opts)
             if (nerrs) {
                 nreadererr++;
                 fprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs,
-                          (unsigned long long)nplane);
+                        (unsigned long long)nplane);
             }
         } /* end for each plane added since last read */
 

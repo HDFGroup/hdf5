@@ -186,7 +186,7 @@ my_err(int code, const char *fmt, ...)
 
 #define threads_failure(_call, _result)                                                                      \
     do {                                                                                                     \
-        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, strerror(_result));             \
+        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, strerror(_result));               \
     } while (false)
 
 #define NTHREADS 5

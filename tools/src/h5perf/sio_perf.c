@@ -675,27 +675,27 @@ recover_size_and_print(long long val, const char *end)
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
                 fprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
-                          "GB%s",
-                          val / ONE_GB, end);
+                        "%" H5_PRINTF_LL_WIDTH "d"
+                        "GB%s",
+                        val / ONE_GB, end);
             else
                 fprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
-                          "MB%s",
-                          val / ONE_MB, end);
+                        "%" H5_PRINTF_LL_WIDTH "d"
+                        "MB%s",
+                        val / ONE_MB, end);
         }
         else {
             fprintf(output,
-                      "%" H5_PRINTF_LL_WIDTH "d"
-                      "KB%s",
-                      val / ONE_KB, end);
+                    "%" H5_PRINTF_LL_WIDTH "d"
+                    "KB%s",
+                    val / ONE_KB, end);
         }
     }
     else {
         fprintf(output,
-                  "%" H5_PRINTF_LL_WIDTH "d"
-                  "%s",
-                  val, end);
+                "%" H5_PRINTF_LL_WIDTH "d"
+                "%s",
+                val, end);
     }
 }
 

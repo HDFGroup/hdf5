@@ -436,7 +436,7 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         TEST_ERROR;
 
     fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
+            err_desc->func_name, err_desc->line);
     fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
     fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);

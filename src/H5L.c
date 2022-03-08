@@ -687,7 +687,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     /* Encode the external link information */
     p    = (uint8_t *)ext_link_buf;
     *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL; /* External link version & flags */
-    strncpy((char *)p, file_name, buf_size - 1);     /* Name of file containing external link's object */
+    strncpy((char *)p, file_name, buf_size - 1);       /* Name of file containing external link's object */
     p += file_name_len;
     strncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
 

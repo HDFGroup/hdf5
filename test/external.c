@@ -167,7 +167,7 @@ test_non_extendible(hid_t file)
         H5_FAILED();
         puts("    Wrong file size.");
         printf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
-                 (unsigned long)max_size[0] * sizeof(int));
+               (unsigned long)max_size[0] * sizeof(int));
         goto error;
     }
 

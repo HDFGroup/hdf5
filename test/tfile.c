@@ -2919,8 +2919,8 @@ test_userblock_file_size(const char *env_h5_drvr)
     herr_t        ret;              /* Generic return value */
 
     /* Don't run with multi/split, family or direct drivers */
-    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split") ||
-        !strcmp(env_h5_drvr, "family") || !strcmp(env_h5_drvr, "direct"))
+    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split") || !strcmp(env_h5_drvr, "family") ||
+        !strcmp(env_h5_drvr, "direct"))
         return;
 
     /* Output message about test being performed */

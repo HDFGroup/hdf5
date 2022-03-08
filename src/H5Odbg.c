@@ -118,8 +118,7 @@ H5O__assert(const H5O_t *oh)
         /* Version specific checks */
         if (oh->version > H5O_VERSION_1) {
             /* Make certain that the magic number is correct for each chunk */
-            assert(
-                !memcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
+            assert(!memcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
 
             /* Check for valid gap size */
             assert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
@@ -193,22 +192,22 @@ H5O__assert(const H5O_t *oh)
 
         /* Make certain that the message is completely in a chunk message area */
         assert(curr_tot_size <= (oh->chunk[curr_msg->chunkno].size) -
-                                      (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
+                                    (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
         if (curr_msg->chunkno == 0)
             assert(curr_hdr >=
-                     oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+                   oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         else
             assert(curr_hdr >= oh->chunk[curr_msg->chunkno].image +
-                                     (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+                                   (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         assert(curr_msg->raw + curr_msg->raw_size <=
-                 (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) -
-                     (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
+               (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) -
+                   (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
 
         /* Make certain that no other messages overlap this message */
         for (v = 0, tmp_msg = &oh->mesg[0]; v < oh->nmesgs; v++, tmp_msg++) {
             if (u != v)
                 assert(!((tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) >= curr_hdr &&
-                           (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) < (curr_hdr + curr_tot_size)));
+                         (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) < (curr_hdr + curr_tot_size)));
         } /* end for */
     }     /* end for */
 
@@ -295,24 +294,23 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
     /* debug */
     fprintf(stream, "%*sObject Header...\n", indent, "");
 
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Dirty:", oh->cache_info.is_dirty ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Dirty:", oh->cache_info.is_dirty ? "TRUE" : "FALSE");
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", oh->version);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Header size (in bytes):", (unsigned)H5O_SIZEOF_HDR(oh));
+            "Header size (in bytes):", (unsigned)H5O_SIZEOF_HDR(oh));
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of links:", oh->nlink);
 
     /* Extra information for later versions */
     if (oh->version > H5O_VERSION_1) {
         /* Display object's status flags */
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Attribute creation order tracked:",
-                  (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? "Yes" : "No");
+                (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Attribute creation order indexed:",
-                  (oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? "Yes" : "No");
+                (oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Attribute storage phase change values:",
-                  (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) ? "Non-default" : "Default");
+                (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) ? "Non-default" : "Default");
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                  "Timestamps:", (oh->flags & H5O_HDR_STORE_TIMES) ? "Enabled" : "Disabled");
+                "Timestamps:", (oh->flags & H5O_HDR_STORE_TIMES) ? "Enabled" : "Disabled");
         if (oh->flags & ~H5O_HDR_ALL_FLAGS)
             fprintf(stream, "*** UNKNOWN OBJECT HEADER STATUS FLAG: %02x!\n", (unsigned)oh->flags);
 
@@ -339,16 +337,16 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
         /* Attribute tracking fields */
         if (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
             fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                      "Max. compact attributes:", (unsigned)oh->max_compact);
+                    "Max. compact attributes:", (unsigned)oh->max_compact);
             fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                      "Min. dense attributes:", (unsigned)oh->min_dense);
+                    "Min. dense attributes:", (unsigned)oh->min_dense);
         } /* end if */
     }     /* end if */
 
-    fprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth,
-              "Number of messages (allocated):", oh->nmesgs, oh->alloc_nmesgs);
+    fprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth, "Number of messages (allocated):", oh->nmesgs,
+            oh->alloc_nmesgs);
     fprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth, "Number of chunks (allocated):", oh->nchunks,
-              oh->alloc_nchunks);
+            oh->alloc_nchunks);
 
     /* debug each chunk */
     for (i = 0, chunk_total = 0; i < oh->nchunks; i++) {
@@ -357,7 +355,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
         fprintf(stream, "%*sChunk %d...\n", indent, "", i);
 
         fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Address:", oh->chunk[i].addr);
+                "Address:", oh->chunk[i].addr);
 
         /* Decrement chunk 0's size by the object header prefix size */
         if (0 == i) {
@@ -401,10 +399,10 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
         /* message name and size */
         fprintf(stream, "%*s%-*s 0x%04x `%s' (%d)\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Message ID (sequence number):", (unsigned)(oh->mesg[i].type->id), oh->mesg[i].type->name,
-                  sequence[oh->mesg[i].type->id]++);
+                "Message ID (sequence number):", (unsigned)(oh->mesg[i].type->id), oh->mesg[i].type->name,
+                sequence[oh->mesg[i].type->id]++);
         fprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Dirty:", oh->mesg[i].dirty ? "TRUE" : "FALSE");
+                "Dirty:", oh->mesg[i].dirty ? "TRUE" : "FALSE");
         fprintf(stream, "%*s%-*s ", indent + 3, "", MAX(0, fwidth - 3), "Message flags:");
         if (oh->mesg[i].flags) {
             hbool_t flag_printed = FALSE;
@@ -454,19 +452,19 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             fprintf(stream, ">\n");
             if (oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS)
                 fprintf(stream, "%*s%-*s 0x%02x\n", indent + 3, "", MAX(0, fwidth - 3),
-                          "*** ADDITIONAL UNKNOWN FLAGS --->", oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
+                        "*** ADDITIONAL UNKNOWN FLAGS --->", oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
         } /* end if */
         else
             fprintf(stream, "<none>\n");
 
         fprintf(stream, "%*s%-*s %u\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Chunk number:", oh->mesg[i].chunkno);
+                "Chunk number:", oh->mesg[i].chunkno);
         chunkno = oh->mesg[i].chunkno;
         if (chunkno >= oh->nchunks)
             fprintf(stream, "*** BAD CHUNK NUMBER\n");
         fprintf(stream, "%*s%-*s (%zu, %zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Raw message data (offset, size) in chunk:",
-                  (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image), oh->mesg[i].raw_size);
+                "Raw message data (offset, size) in chunk:",
+                (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image), oh->mesg[i].raw_size);
 
         /* check the size */
         if ((oh->mesg[i].raw + oh->mesg[i].raw_size > oh->chunk[chunkno].image + oh->chunk[chunkno].size) ||

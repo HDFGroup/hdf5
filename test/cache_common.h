@@ -418,7 +418,7 @@ typedef struct test_entry_t {
         ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size)) ||      \
         (!H5F_addr_defined(Addr)) || (H5C__HASH_FCN(Addr) < 0) ||                                            \
         (H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN)) {                                                      \
-        fprintf(stdout, "Pre HT search SC failed.\n");                                                     \
+        fprintf(stdout, "Pre HT search SC failed.\n");                                                       \
     }
 
 #define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                             \
@@ -430,13 +430,13 @@ typedef struct test_entry_t {
         ((((cache_ptr)->index)[k] == (entry_ptr)) && ((entry_ptr)->ht_prev != NULL)) ||                      \
         (((entry_ptr)->ht_prev != NULL) && ((entry_ptr)->ht_prev->ht_next != (entry_ptr))) ||                \
         (((entry_ptr)->ht_next != NULL) && ((entry_ptr)->ht_next->ht_prev != (entry_ptr)))) {                \
-        fprintf(stdout, "Post successful HT search SC failed.\n");                                         \
+        fprintf(stdout, "Post successful HT search SC failed.\n");                                           \
     }
 
 #define H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k)                                            \
     if (((cache_ptr) == NULL) || (((cache_ptr)->index)[k] != (entry_ptr)) ||                                 \
         ((entry_ptr)->ht_prev != NULL)) {                                                                    \
-        fprintf(stdout, "Post HT shift to front failed.\n");                                               \
+        fprintf(stdout, "Post HT shift to front failed.\n");                                                 \
     }
 
 #define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                                                   \
@@ -451,7 +451,7 @@ typedef struct test_entry_t {
                 if (entry_ptr != ((cache_ptr)->index)[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \
                         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;                                \
-                    assert((entry_ptr)->ht_prev != NULL);                                                  \
+                    assert((entry_ptr)->ht_prev != NULL);                                                    \
                     (entry_ptr)->ht_prev->ht_next    = (entry_ptr)->ht_next;                                 \
                     ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                                          \
                     (entry_ptr)->ht_next             = ((cache_ptr)->index)[k];                              \

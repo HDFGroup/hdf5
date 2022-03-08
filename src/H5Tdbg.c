@@ -102,9 +102,9 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
         if (nprint && 0 == (*nprint)++) {
             fprintf(H5DEBUG(T), "H5T: type conversion statistics:\n");
             fprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Conversion", "Elmts", "Calls",
-                      "User", "System", "Elapsed", "Bandwidth");
+                    "User", "System", "Elapsed", "Bandwidth");
             fprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n", "----------", "-----", "-----",
-                      "----", "------", "-------", "---------");
+                    "----", "------", "-------", "---------");
         } /* end if */
 
         if (path->src && path->dst)
@@ -118,8 +118,8 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, (double)nbytes, path->stats.times.elapsed);
         fprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
-                  path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
-                  bandwidth);
+                path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
+                bandwidth);
         free(timestrs.user);
         free(timestrs.system);
         free(timestrs.elapsed);
@@ -321,9 +321,9 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
                 fprintf(stream, ", sign=%lu+1", (unsigned long)(dt->shared->u.atomic.u.f.sign));
                 fprintf(stream, ", mant=%lu+%lu (%s)", (unsigned long)(dt->shared->u.atomic.u.f.mpos),
-                          (unsigned long)(dt->shared->u.atomic.u.f.msize), s1);
+                        (unsigned long)(dt->shared->u.atomic.u.f.msize), s1);
                 fprintf(stream, ", exp=%lu+%lu", (unsigned long)(dt->shared->u.atomic.u.f.epos),
-                          (unsigned long)(dt->shared->u.atomic.u.f.esize));
+                        (unsigned long)(dt->shared->u.atomic.u.f.esize));
                 tmp = dt->shared->u.atomic.u.f.ebias >> 32;
                 if (tmp) {
                     size_t hi = (size_t)tmp;
@@ -355,7 +355,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
         /* Compound data type */
         for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
             fprintf(stream, "\n\"%s\" @%lu", dt->shared->u.compnd.memb[i].name,
-                      (unsigned long)(dt->shared->u.compnd.memb[i].offset));
+                    (unsigned long)(dt->shared->u.compnd.memb[i].offset));
             fprintf(stream, " ");
             H5T_debug(dt->shared->u.compnd.memb[i].type, stream);
         } /* end for */
@@ -403,8 +403,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
             fprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
             for (k = 0; k < base_size; k++)
-                fprintf(stream, "%02" PRIx8,
-                          *((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
+                fprintf(stream, "%02" PRIx8, *((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
         } /* end for */
         fprintf(stream, "\n");
     }

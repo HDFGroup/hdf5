@@ -112,19 +112,18 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
      * Print the values.
      */
     fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Tree type ID:", hdr->cls->name,
-              (unsigned)hdr->cls->id);
+            (unsigned)hdr->cls->id);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Size of node:", (unsigned)hdr->node_size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
+            "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Dirty flag:", hdr->cache_info.is_dirty ? "True" : "False");
+            "Dirty flag:", hdr->cache_info.is_dirty ? "True" : "False");
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Depth:", hdr->depth);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of records in tree:", hdr->root.all_nrec);
+            "Number of records in tree:", hdr->root.all_nrec);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Number of records in root node:", hdr->root.node_nrec);
-    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Address of root node:", hdr->root.addr);
+            "Number of records in root node:", hdr->root.node_nrec);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of root node:", hdr->root.addr);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Split percent:", hdr->split_percent);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Merge percent:", hdr->merge_percent);
 
@@ -133,7 +132,7 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     for (u = 0; u < (unsigned)(hdr->depth + 1); u++) {
         snprintf(temp_str, sizeof(temp_str), "Depth %u:", u);
         fprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3), temp_str,
-                  hdr->node_info[u].max_nrec, hdr->node_info[u].split_nrec, hdr->node_info[u].merge_nrec);
+                hdr->node_info[u].max_nrec, hdr->node_info[u].split_nrec, hdr->node_info[u].merge_nrec);
     } /* end for */
 
 done:
@@ -205,12 +204,12 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
      * Print the values.
      */
     fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Tree type ID:", hdr->cls->name,
-              (unsigned)hdr->cls->id);
+            (unsigned)hdr->cls->id);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Size of node:", (unsigned)hdr->node_size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
+            "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Dirty flag:", internal->cache_info.is_dirty ? "True" : "False");
+            "Dirty flag:", internal->cache_info.is_dirty ? "True" : "False");
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of records in node:", internal->nrec);
 
     /* Print all node pointers and records */
@@ -218,8 +217,8 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
         /* Print node pointer */
         snprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
         fprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
-                  temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
-                  internal->node_ptrs[u].addr);
+                temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
+                internal->node_ptrs[u].addr);
 
         /* Print record */
         snprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
@@ -232,8 +231,8 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     /* Print final node pointer */
     snprintf(temp_str, sizeof(temp_str), "Node pointer #%u: (all/node/addr)", u);
     fprintf(stream, "%*s%-*s (%" PRIuHSIZE "/%u/%" PRIuHADDR ")\n", indent + 3, "", MAX(0, fwidth - 3),
-              temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
-              internal->node_ptrs[u].addr);
+            temp_str, internal->node_ptrs[u].all_nrec, internal->node_ptrs[u].node_nrec,
+            internal->node_ptrs[u].addr);
 
 done:
     if (hdr && H5B2__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
@@ -305,12 +304,12 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
      * Print the values.
      */
     fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Tree type ID:", hdr->cls->name,
-              (unsigned)hdr->cls->id);
+            (unsigned)hdr->cls->id);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Size of node:", (unsigned)hdr->node_size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
+            "Size of raw (disk) record:", (unsigned)hdr->rrec_size);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Dirty flag:", leaf->cache_info.is_dirty ? "True" : "False");
+            "Dirty flag:", leaf->cache_info.is_dirty ? "True" : "False");
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of records in node:", leaf->nrec);
 
     /* Print all node pointers and records */

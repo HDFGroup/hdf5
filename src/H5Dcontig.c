@@ -1098,7 +1098,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     if ((addr + len) == sieve_start) {
                         /* Move existing sieve information to correct location */
                         memmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
-                                  dset_contig->sieve_size);
+                                dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
                         H5MM_memcpy(dset_contig->sieve_buf, buf, len);

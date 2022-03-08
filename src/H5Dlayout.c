@@ -526,8 +526,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
 
         for (u = 0; u < efl->nused; ++u) {
             /* Insert file name into heap */
-            if (H5HL_insert(file, heap, strlen(efl->slot[u].name) + 1, efl->slot[u].name, &name_offset) <
-                0) {
+            if (H5HL_insert(file, heap, strlen(efl->slot[u].name) + 1, efl->slot[u].name, &name_offset) < 0) {
                 H5HL_unprotect(heap);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
             }

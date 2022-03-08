@@ -318,7 +318,7 @@ main(int argc, char **argv)
 
         if (ret < 0)
             fprintf(stderr, "node %d, read error, loc = %" PRId64 ": %s\n", mynod, mynod * opt_block,
-                      strerror(myerrno));
+                    strerror(myerrno));
 
         /* if the user wanted to check correctness, compare the write
          * buffer to the read buffer */
@@ -431,7 +431,7 @@ parse_args(int argc, char **argv)
                     opt_threshold = (hsize_t)atoi(p + 1);
             }
                 fprintf(stdout, "alignment/threshold=%" PRIuHSIZE "/%" PRIuHSIZE "\n", opt_alignment,
-                          opt_threshold);
+                        opt_threshold);
                 break;
             case '2': /* use 2-files, i.e., split file driver */
                 opt_split_vfd = 1;
@@ -658,12 +658,12 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 
             if (mpi_rank == 0)
                 printf("*** Hint ***\n"
-                         "You can use environment variable HDF5_PARAPREFIX to "
-                         "run parallel test files in a\n"
-                         "different directory or to add file type prefix. e.g.,\n"
-                         "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                         "   export HDF5_PARAPREFIX\n"
-                         "*** End of Hint ***\n");
+                       "You can use environment variable HDF5_PARAPREFIX to "
+                       "run parallel test files in a\n"
+                       "different directory or to add file type prefix. e.g.,\n"
+                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                       "   export HDF5_PARAPREFIX\n"
+                       "*** End of Hint ***\n");
 
             explained = TRUE;
 #ifdef HDF5_PARAPREFIX

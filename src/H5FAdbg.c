@@ -116,18 +116,18 @@ H5FA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
+            "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
+            "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. # of elements in data block page:",
-              (unsigned)((size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits));
+            (unsigned)((size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits));
 
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of elements in Fixed Array:", hdr->stats.nelmts);
+            "Number of elements in Fixed Array:", hdr->stats.nelmts);
 
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Fixed Array Data Block Address:", hdr->dblk_addr);
+            "Fixed Array Data Block Address:", hdr->dblk_addr);
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -196,10 +196,10 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of Data Block:", dblock->addr);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Data Block size:", dblock->size);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of elements in Data Block:", hdr->cparam.nelmts);
+            "Number of elements in Data Block:", hdr->cparam.nelmts);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Number of pages in Data Block:", dblock->npages);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Number of elements per Data Block page:", dblock->dblk_page_nelmts);
+            "Number of elements per Data Block page:", dblock->dblk_page_nelmts);
 
     if (dblock->npages) {         /* paging */
         size_t  dblk_page_nelmts; /* # of elements in a data block page */

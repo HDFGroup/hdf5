@@ -78,7 +78,7 @@
 
 /* Define a code template for comparing string keys for the "CMP" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_STRING_CMP(SLIST, TYPE, PNODE, PKEY, HASHVAL)                                            \
-    (((PNODE)->hashval == HASHVAL) ? (strcmp((const char *)(PNODE)->key, (const char *)PKEY) < 0)          \
+    (((PNODE)->hashval == HASHVAL) ? (strcmp((const char *)(PNODE)->key, (const char *)PKEY) < 0)            \
                                    : ((PNODE)->hashval < HASHVAL))
 
 /* Define a code template for comparing H5_obj_t keys for the "CMP" in the H5SL_LOCATE macro */
@@ -159,17 +159,17 @@
         /* Check if we need to increase allocation of forward pointers */                                    \
         if (LVL + 1 >= 1u << X->log_nalloc) {                                                                \
             H5SL_node_t **_tmp;                                                                              \
-            assert(LVL + 1 == 1U << X->log_nalloc);                                                        \
+            assert(LVL + 1 == 1U << X->log_nalloc);                                                          \
             /* Double the amount of allocated space */                                                       \
             X->log_nalloc++;                                                                                 \
                                                                                                              \
             /* Check if we need to create a new factory */                                                   \
             if (X->log_nalloc >= H5SL_fac_nused_g) {                                                         \
-                assert(X->log_nalloc == H5SL_fac_nused_g);                                                 \
+                assert(X->log_nalloc == H5SL_fac_nused_g);                                                   \
                                                                                                              \
                 /* Check if we need to allocate space for the factory pointer*/                              \
                 if (H5SL_fac_nused_g >= H5SL_fac_nalloc_g) {                                                 \
-                    assert(H5SL_fac_nused_g == H5SL_fac_nalloc_g);                                         \
+                    assert(H5SL_fac_nused_g == H5SL_fac_nalloc_g);                                           \
                     /* Double the size of the array of factory pointers */                                   \
                     H5SL_fac_nalloc_g *= 2;                                                                  \
                     if (NULL == (H5SL_fac_g = (H5FL_fac_head_t **)H5MM_realloc(                              \
@@ -201,7 +201,7 @@
         /* Check if we can reduce the allocation of forward pointers */                                      \
         if (LVL <= 1u << (X->log_nalloc - 1)) {                                                              \
             H5SL_node_t **_tmp;                                                                              \
-            assert(LVL == 1U << (X->log_nalloc - 1));                                                      \
+            assert(LVL == 1U << (X->log_nalloc - 1));                                                        \
             X->log_nalloc--;                                                                                 \
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \
@@ -225,14 +225,14 @@
         H5SL_GROW(X, _lvl, ERR);                                                                             \
                                                                                                              \
         if (_lvl == (size_t)SLIST->curr_level) {                                                             \
-            assert(PREV == SLIST->header);                                                                 \
+            assert(PREV == SLIST->header);                                                                   \
             /* Grow the head */                                                                              \
             H5SL_GROW(PREV, _lvl, ERR)                                                                       \
             SLIST->curr_level++;                                                                             \
             X->forward[_lvl + 1] = NULL;                                                                     \
         }                                                                                                    \
         else {                                                                                               \
-            assert(_lvl < (size_t)SLIST->curr_level);                                                      \
+            assert(_lvl < (size_t)SLIST->curr_level);                                                        \
             X->forward[_lvl + 1] = PREV->forward[_lvl + 1];                                                  \
         }                                                                                                    \
         PREV->forward[_lvl + 1] = X;                                                                         \
@@ -244,7 +244,7 @@
     {                                                                                                        \
         size_t _lvl = X->level;                                                                              \
                                                                                                              \
-        assert(PREV->forward[_lvl] == X);                                                                  \
+        assert(PREV->forward[_lvl] == X);                                                                    \
         PREV->forward[_lvl] = X->forward[_lvl];                                                              \
         H5SL_SHRINK(X, _lvl);                                                                                \
     }
@@ -288,12 +288,12 @@
                 }                                                                                            \
                 X = X->forward[_i];                                                                          \
             }                                                                                                \
-            assert(!_drop->forward[_i] ||                                                                  \
-                     !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));     \
+            assert(!_drop->forward[_i] ||                                                                    \
+                   !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));       \
                                                                                                              \
             /* Promote the middle node if necessary */                                                       \
             if (_count == 3) {                                                                               \
-                assert(X == _last->forward[_i]->forward[_i]);                                              \
+                assert(X == _last->forward[_i]->forward[_i]);                                                \
                 H5SL_PROMOTE(SLIST, X, _last, NULL)                                                          \
             }                                                                                                \
                                                                                                              \
@@ -352,7 +352,7 @@
                 /* If we have already found the node to drop into and there */                               \
                 /* is more than one node in this gap, we can stop searching */                               \
                 if (_drop) {                                                                                 \
-                    assert(_count >= 1);                                                                   \
+                    assert(_count >= 1);                                                                     \
                     _count = 2;                                                                              \
                     break;                                                                                   \
                 }                                                                                            \
@@ -379,9 +379,9 @@
                 }                                                                                            \
                 X = X->forward[_i];                                                                          \
             }                                                                                                \
-            assert(_count >= 1 && _count <= 3);                                                            \
-            assert(!_drop->forward[_i] ||                                                                  \
-                     !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));     \
+            assert(_count >= 1 && _count <= 3);                                                              \
+            assert(!_drop->forward[_i] ||                                                                    \
+                   !H5_GLUE3(H5SL_LOCATE_, CMP, _CMP)(SLIST, TYPE, _drop->forward[_i], KEY, HASHVAL));       \
                                                                                                              \
             /* Check if we need to adjust node heights */                                                    \
             if (_count == 1) {                                                                               \
@@ -403,8 +403,8 @@
                     }                                                                                        \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
-                        assert(_i == SLIST->curr_level - 1);                                               \
-                        assert((size_t)SLIST->curr_level == _head->level);                                 \
+                        assert(_i == SLIST->curr_level - 1);                                                 \
+                        assert((size_t)SLIST->curr_level == _head->level);                                   \
                                                                                                              \
                         H5SL_SHRINK(_head, (size_t)(_i + 1))                                                 \
                         SLIST->curr_level--;                                                                 \
@@ -418,7 +418,7 @@
                     X = _llast->forward[_i];                                                                 \
                     for (_count = 1; _count < 3 && X->forward[_i] != _last; _count++)                        \
                         X = X->forward[_i];                                                                  \
-                    assert(X->forward[_i] == _last);                                                       \
+                    assert(X->forward[_i] == _last);                                                         \
                                                                                                              \
                     /* Demote the separator node */                                                          \
                     H5SL_DEMOTE(_last, _llast)                                                               \
@@ -428,8 +428,8 @@
                         H5SL_PROMOTE(SLIST, X, _llast, NULL)                                                 \
                     else if (!_head->forward[_i + 1]) {                                                      \
                         /* shrink the header */                                                              \
-                        assert(_i == SLIST->curr_level - 1);                                               \
-                        assert((size_t)SLIST->curr_level == _head->level);                                 \
+                        assert(_i == SLIST->curr_level - 1);                                                 \
+                        assert((size_t)SLIST->curr_level == _head->level);                                   \
                                                                                                              \
                         H5SL_SHRINK(_head, (size_t)(_i + 1))                                                 \
                         SLIST->curr_level--;                                                                 \
@@ -456,7 +456,7 @@
                 _next->item    = X->item;                                                                    \
                 _next->hashval = X->hashval;                                                                 \
             }                                                                                                \
-            assert(!X->level);                                                                             \
+            assert(!X->level);                                                                               \
                                                                                                              \
             /* Remove the node */                                                                            \
             X->backward->forward[0] = X->forward[0];                                                         \
@@ -1252,7 +1252,7 @@ H5SL_remove_first(H5SL_t *slist)
                  * 1-2-3 condition */
                 if (tmp->forward[i]->forward[i] != next) {
                     assert(tmp->forward[i]->forward[i]->forward[i] == next ||
-                             tmp->forward[i]->forward[i]->forward[i]->forward[i] == next);
+                           tmp->forward[i]->forward[i]->forward[i]->forward[i] == next);
                     tmp = tmp->forward[i];
                     H5SL_PROMOTE(slist, tmp, head, NULL);
                     /* In this case, since there is a node of height = i+1 here

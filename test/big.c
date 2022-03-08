@@ -600,17 +600,17 @@ static void
 usage(void)
 {
     fprintf(stdout,
-              "Usage: big [-h] [-c] [-fsize <fsize>}\n"
-              "\t-h\tPrint the help page\n"
-              "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
-              "\t\tmany big files and may fill up the file system.\n"
-              "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
-              "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
-              "Examples:\n"
-              "\t big -fsize 2.1e9 \t# test with file size just under 2GB\n"
-              "\t big -fsize 2.2e9 \t# test with file size just above 2GB\n"
-              "\t Be sure the file system can support the file size requested\n",
-              (hsize_t)FAMILY_SIZE);
+            "Usage: big [-h] [-c] [-fsize <fsize>}\n"
+            "\t-h\tPrint the help page\n"
+            "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
+            "\t\tmany big files and may fill up the file system.\n"
+            "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
+            "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
+            "Examples:\n"
+            "\t big -fsize 2.1e9 \t# test with file size just under 2GB\n"
+            "\t big -fsize 2.2e9 \t# test with file size just above 2GB\n"
+            "\t Be sure the file system can support the file size requested\n",
+            (hsize_t)FAMILY_SIZE);
 }
 
 static int

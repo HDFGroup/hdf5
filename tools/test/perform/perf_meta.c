@@ -410,8 +410,7 @@ create_attrs_1(void)
             attr_t.avg = attr_t.total / (NUM_ATTRS * NUM_DSETS);
 
         /* Print out the performance result */
-        fprintf(stderr, "1.  Create %d attributes for each of %d existing datasets\n", NUM_ATTRS,
-                  NUM_DSETS);
+        fprintf(stderr, "1.  Create %d attributes for each of %d existing datasets\n", NUM_ATTRS, NUM_DSETS);
         print_perf(open_t, close_t, attr_t);
     }
 
@@ -624,7 +623,7 @@ create_attrs_3(void)
 
         /* Print out the performance result */
         fprintf(stderr, "3.  Create %d attributes for each of %d existing datasets for %d times\n",
-                  BATCH_ATTRS, NUM_DSETS, loop_num);
+                BATCH_ATTRS, NUM_DSETS, loop_num);
         print_perf(open_t, close_t, attr_t);
     }
 
@@ -737,12 +736,12 @@ void
 print_perf(p_time open_t, p_time close_t, p_time attr_t)
 {
     fprintf(stderr, "\t%s:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", open_t.func, open_t.avg, open_t.max,
-              open_t.min);
+            open_t.min);
     fprintf(stderr, "\tH5Dclose:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", close_t.avg, close_t.max,
-              close_t.min);
+            close_t.min);
     if (NUM_ATTRS)
-        fprintf(stderr, "\tH5A(create & close):\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", attr_t.avg,
-                  attr_t.max, attr_t.min);
+        fprintf(stderr, "\tH5A(create & close):\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", attr_t.avg, attr_t.max,
+                attr_t.min);
 }
 
 /*-------------------------------------------------------------------------

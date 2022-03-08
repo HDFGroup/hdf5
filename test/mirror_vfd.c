@@ -63,8 +63,8 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 #define LOGPRINT(lvl, ...)                                                                                   \
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
-            fprintf(g_log_stream, __VA_ARGS__);                                                            \
-            fflush(g_log_stream);                                                                          \
+            fprintf(g_log_stream, __VA_ARGS__);                                                              \
+            fflush(g_log_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -150,8 +150,8 @@ _populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, ch
     }
 
     if (snprintf(_path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
-                   (dirname[strlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
-                   _basename) > H5FD_SPLITTER_PATH_MAX) {
+                 (dirname[strlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
+                 _basename) > H5FD_SPLITTER_PATH_MAX) {
         TEST_ERROR;
     }
 
@@ -288,16 +288,16 @@ error:
         }                                                                                                    \
         if (_x != (len)) {                                                                                   \
             size_t _y = 0;                                                                                   \
-            printf("First bytes differ at %zu\n", _x);                                                     \
-            printf("exp  ");                                                                               \
+            printf("First bytes differ at %zu\n", _x);                                                       \
+            printf("exp  ");                                                                                 \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                printf("%02X", (unsigned char)(exp)[_y]);                                                  \
+                printf("%02X", (unsigned char)(exp)[_y]);                                                    \
             }                                                                                                \
-            printf("\nact  ");                                                                             \
+            printf("\nact  ");                                                                               \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                printf("%02X", (unsigned char)(act)[_y]);                                                  \
+                printf("%02X", (unsigned char)(act)[_y]);                                                    \
             }                                                                                                \
-            printf("\n");                                                                                  \
+            printf("\n");                                                                                    \
         }                                                                                                    \
     } while (0); /* end PRINT_BUFFER_DIFF */
 
@@ -1785,7 +1785,7 @@ _verify_datasets(unsigned min_dset, unsigned max_dset, hid_t *filespace_ids, hid
                         if ((unsigned)data_chunk[k][l] !=
                             ((DSET_DIM * DSET_DIM * m) + (DSET_DIM * (i + k)) + j + l)) {
                             snprintf(mesg, MIRR_MESG_SIZE, "      MISMATCH [%d][%d][%d][%d][%d]\n", i, j, m,
-                                       k, l);
+                                     k, l);
                             FAIL_PUTS_ERROR(mesg);
                         }
                     }

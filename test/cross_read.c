@@ -106,7 +106,7 @@ check_data_i(const char *dsetname, hid_t fid)
                 if (!nerrors++) {
                     H5_FAILED();
                     printf("element [%d][%d] is %lld but should have been %lld\n", (int)i, (int)j,
-                             data_out[i][j], data_in[i][j]);
+                           data_out[i][j], data_in[i][j]);
                 } /* end if */
 
     /* Close/release resources. */
@@ -179,8 +179,8 @@ check_data_f(const char *dsetname, hid_t fid)
             if (!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], 0.001))
                 if (!nerrors++) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %g but should have been %g\n", (int)i, (int)j,
-                             data_out[i][j], data_in[i][j]);
+                    printf("element [%d][%d] is %g but should have been %g\n", (int)i, (int)j, data_out[i][j],
+                           data_in[i][j]);
                 } /* end if */
 
     /* Close/release resources. */

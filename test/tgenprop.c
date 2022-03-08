@@ -693,7 +693,7 @@ test_genprop_basic_list(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(prop2_value, *PROP2_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
+               (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
     /* Close list */
     ret = H5Pclose(lid1);
@@ -786,7 +786,7 @@ test_genprop_basic_list_prop(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(prop2_value, *PROP2_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
+               (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
     /* Check values of temporary properties (set with regular values) */
     ret = H5Pget(lid1, PROP3_NAME, &prop3_value);
@@ -798,7 +798,7 @@ test_genprop_basic_list_prop(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_DBL_ABS_EQUAL(prop4_value, *PROP4_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
+               *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
     /* Delete permanent property */
     ret = H5Premove(lid1, PROP2_NAME);
@@ -835,7 +835,7 @@ test_genprop_basic_list_prop(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_DBL_ABS_EQUAL(prop4_value, *PROP4_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
+               *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
     /* Close list */
     ret = H5Pclose(lid1);
@@ -1243,7 +1243,7 @@ test_genprop_list_callback(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(prop2_value, *PROP2_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
+               (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
     /* Check values of temporary properties (set with regular values) */
     ret = H5Pget(lid1, PROP3_NAME, &prop3_value);
@@ -1258,7 +1258,7 @@ test_genprop_list_callback(void)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_DBL_ABS_EQUAL(prop4_value, *PROP4_DEF_VALUE))
         printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Pget",
-                 *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
+               *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
     /* Verify get callback information for properties tracked */
     VERIFY(prop1_cb_info.get_count, 1, "H5Pget");

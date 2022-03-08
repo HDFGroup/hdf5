@@ -746,8 +746,8 @@
                 case H5T_CONV_CONV:                                                                          \
                     /* Initialize source & destination strides */                                            \
                     if (buf_stride) {                                                                        \
-                        assert(buf_stride >= sizeof(ST));                                                  \
-                        assert(buf_stride >= sizeof(DT));                                                  \
+                        assert(buf_stride >= sizeof(ST));                                                    \
+                        assert(buf_stride >= sizeof(DT));                                                    \
                         s_stride = d_stride = (ssize_t)buf_stride;                                           \
                     }                                                                                        \
                     else {                                                                                   \
@@ -871,13 +871,13 @@ done:                                                                           
 #define H5T_CONV_SET_PREC_Y                                                                                  \
     /* Get source & destination precisions into a variable */                                                \
     tclass = st->shared->type;                                                                               \
-    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                  \
+    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                    \
     if (tclass == H5T_INTEGER)                                                                               \
         sprec = st->shared->u.atomic.prec;                                                                   \
     else                                                                                                     \
         sprec = 1 + st->shared->u.atomic.u.f.msize;                                                          \
     tclass = dt->shared->type;                                                                               \
-    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                  \
+    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                    \
     if (tclass == H5T_INTEGER)                                                                               \
         dprec = dt->shared->u.atomic.prec;                                                                   \
     else                                                                                                     \
@@ -983,12 +983,12 @@ done:                                                                           
 #define CI_PRINT_STATS(STYPE, DTYPE)                                                                         \
     {                                                                                                        \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {                                       \
-            fprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);              \
+            fprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                   \
+                    ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);                \
         }                                                                                                    \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->d_aligned) {                                       \
-            fprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);              \
+            fprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                   \
+                    ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);                \
         }                                                                                                    \
     }
 
@@ -1755,10 +1755,10 @@ H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf)
                     assert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                           (sp >= dp && sp < dp + dst->shared->size));
                 else
                     assert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                           (sp < dp && sp + src->shared->size <= dp));
 #endif
 
                 /*
@@ -2850,9 +2850,8 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
         case H5T_CONV_FREE:
 #ifdef H5T_DEBUG
             if (H5DEBUG(T)) {
-                fprintf(H5DEBUG(T), "      Using %s mapping function%s\n",
-                          priv->length ? "O(1)" : "O(log N)",
-                          priv->length ? "" : ", where N is the number of enum members");
+                fprintf(H5DEBUG(T), "      Using %s mapping function%s\n", priv->length ? "O(1)" : "O(log N)",
+                        priv->length ? "" : ", where N is the number of enum members");
             }
 #endif
             if (priv) {
@@ -2950,7 +2949,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     while (lt < rt) {
                         md  = (lt + rt) / 2;
                         cmp = memcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
-                                       src->shared->size);
+                                     src->shared->size);
                         if (cmp < 0)
                             rt = md;
                         else if (cmp > 0)
@@ -3388,7 +3387,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
                                 if (bg_seq_len < seq_len)
                                     memset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
-                                             (seq_len - bg_seq_len) * dst_base_size);
+                                           (seq_len - bg_seq_len) * dst_base_size);
                             } /* end if */
 
                             /* Convert VL sequence */
@@ -3938,11 +3937,11 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                           (sp >= dp && sp < dp + dst->shared->size));
                 }
                 else {
                     assert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                           (sp < dp && sp + src->shared->size <= dp));
                 }
 #endif
 
@@ -4205,13 +4204,13 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                  */
                 if (dst->shared->u.atomic.offset > 0) {
                     assert(H5T_PAD_ZERO == dst->shared->u.atomic.lsb_pad ||
-                             H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad);
+                           H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset,
                                  (hbool_t)(H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad));
                 }
                 if (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec != 8 * dst->shared->size) {
                     assert(H5T_PAD_ZERO == dst->shared->u.atomic.msb_pad ||
-                             H5T_PAD_ONE == dst->shared->u.atomic.msb_pad);
+                           H5T_PAD_ONE == dst->shared->u.atomic.msb_pad);
                     H5T__bit_set(d, dst->shared->u.atomic.offset + dst->shared->u.atomic.prec,
                                  8 * dst->shared->size -
                                      (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec),
@@ -4349,19 +4348,19 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /*
@@ -4402,11 +4401,11 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
                     assert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
 
@@ -4972,11 +4971,11 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                           (sp >= dp && sp < dp + dst->shared->size));
                 }
                 else {
                     assert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                           (sp < dp && sp + src->shared->size <= dp));
                 }
 #endif
 
@@ -8451,19 +8450,19 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /* Allocate enough space for the buffer holding temporary
@@ -8502,11 +8501,11 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
                     assert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
                 /*
@@ -9079,19 +9078,19 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /* Allocate enough space for the buffer holding temporary
@@ -9135,11 +9134,11 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
                     assert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
                     assert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
 

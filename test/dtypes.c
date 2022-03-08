@@ -70,8 +70,8 @@
         FAIL_STACK_ERROR                                                                                     \
     if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                                                            \
         H5_FAILED();                                                                                         \
-        printf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                        \
-                 (long long)H5I_nmembers(H5I_DATATYPE));                                                     \
+        printf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                          \
+               (long long)H5I_nmembers(H5I_DATATYPE));                                                       \
         goto error;                                                                                          \
     }
 
@@ -835,9 +835,9 @@ test_compound_2(void)
             H5_FAILED();
             printf("    i=%d\n", i);
             printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", s_ptr->a, s_ptr->b, s_ptr->c[0],
-                     s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
+                   s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
             printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", d_ptr->a, d_ptr->b, d_ptr->c[0],
-                     d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->d, d_ptr->e);
+                   d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->d, d_ptr->e);
             goto error;
         }
     }
@@ -959,9 +959,9 @@ test_compound_3(void)
             H5_FAILED();
             printf("    i=%d\n", i);
             printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", s_ptr->a, s_ptr->b, s_ptr->c[0],
-                     s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
-            printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", d_ptr->a, d_ptr->c[0], d_ptr->c[1],
-                     d_ptr->c[2], d_ptr->c[3], d_ptr->e);
+                   s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
+            printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", d_ptr->a, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+                   d_ptr->c[3], d_ptr->e);
             goto error;
         }
     }
@@ -1089,9 +1089,9 @@ test_compound_4(void)
             H5_FAILED();
             printf("    i=%d\n", i);
             printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", s_ptr->a, s_ptr->b, s_ptr->c[0],
-                     s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
+                   s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->d, s_ptr->e);
             printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", d_ptr->a, d_ptr->b, d_ptr->c[0],
-                     d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->d, d_ptr->e);
+                   d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->d, d_ptr->e);
             goto error;
         }
     }
@@ -2350,22 +2350,22 @@ test_compound_11(void)
     for (u = 0; u < NTESTELEM; u++) {
         if (!H5_DBL_ABS_EQUAL(((big_t *)buf_orig)[u].d1, ((little_t *)buf)[u].d1)) {
             printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
+                   ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].i1 != ((little_t *)buf)[u].i1) {
             printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
+                   ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
     }     /* end for */
@@ -2401,22 +2401,22 @@ test_compound_11(void)
     for (u = 0; u < NTESTELEM; u++) {
         if (!H5_DBL_ABS_EQUAL(((big_t *)buf_orig)[u].d1, ((little_t *)buf)[u].d1)) {
             printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
+                   ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].i1 != ((little_t *)buf)[u].i1) {
             printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
+                   ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
     }     /* end for */
@@ -2442,22 +2442,22 @@ test_compound_11(void)
     for (u = 0; u < NTESTELEM; u++) {
         if (!H5_DBL_ABS_EQUAL(((big_t *)buf_orig)[u].d1, ((little_t *)buf)[u].d1)) {
             printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
+                   ((big_t *)buf_orig)[u].d1, (unsigned)u, ((little_t *)buf)[u].d1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].i1 != ((little_t *)buf)[u].i1) {
             printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
+                   ((big_t *)buf_orig)[u].i1, (unsigned)u, ((little_t *)buf)[u].i1);
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
         else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
-                     ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
+                   ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
     }     /* end for */

@@ -774,7 +774,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
     /* If the file image exists and this is an open, make sure the file doesn't exist */
     assert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
-             ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
+           ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
     memset(&sb, 0, sizeof(sb));
     if ((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if (HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW) >= 0)

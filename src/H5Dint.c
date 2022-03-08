@@ -1909,7 +1909,7 @@ H5D_close(H5D_t *dataset)
                 size_t i, j;
 
                 assert(dataset->shared->layout.storage.u.virt.list ||
-                         (dataset->shared->layout.storage.u.virt.list_nused == 0));
+                       (dataset->shared->layout.storage.u.virt.list_nused == 0));
 
                 /* Close source datasets */
                 for (i = 0; i < dataset->shared->layout.storage.u.virt.list_nused; i++) {
@@ -1925,7 +1925,7 @@ H5D_close(H5D_t *dataset)
                     for (j = 0; j < dataset->shared->layout.storage.u.virt.list[i].sub_dset_nused; j++)
                         if (dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) {
                             assert(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset !=
-                                     dataset);
+                                   dataset);
                             if (H5D_close(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) <
                                 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL,
@@ -3157,7 +3157,7 @@ H5D__flush_sieve_buf(H5D_t *dataset)
     /* Flush the raw data buffer, if we have a dirty one */
     if (dataset->shared->cache.contig.sieve_buf && dataset->shared->cache.contig.sieve_dirty) {
         assert(dataset->shared->layout.type !=
-                 H5D_COMPACT); /* We should never have a sieve buffer for compact storage */
+               H5D_COMPACT); /* We should never have a sieve buffer for compact storage */
 
         /* Write dirty data sieve buffer to file */
         if (H5F_shared_block_write(

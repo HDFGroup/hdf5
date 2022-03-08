@@ -76,8 +76,8 @@ check_options(diff_opt_t *opts)
         printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
         printf("use no more than one.\n");
         printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
-                 "Reference Manual'.\n",
-                 PROGRAMNAME);
+               "Reference Manual'.\n",
+               PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
     }
 }

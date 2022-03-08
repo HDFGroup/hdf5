@@ -1144,7 +1144,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)                                                            \
     {                                                                                                        \
         casttype _tmp_overflow = (casttype)(var);                                                            \
-        assert((var) == (vartype)_tmp_overflow);                                                           \
+        assert((var) == (vartype)_tmp_overflow);                                                             \
     }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1158,7 +1158,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        assert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1168,8 +1168,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        assert(_tmp_src >= 0);                                                                             \
-        assert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1179,8 +1179,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        assert(_tmp_dst >= 0);                                                                             \
-        assert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_dst >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1188,8 +1188,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        assert(_tmp_src >= 0);                                                                             \
-        assert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1220,11 +1220,12 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #if defined(H5_HAVE_WINDOW_PATH)
 
 /* directory delimiter for Windows: slash and backslash are acceptable on Windows */
-#define H5_DIR_SLASH_SEPC        '/'
-#define H5_DIR_SEPC              '\\'
-#define H5_DIR_SEPS              "\\"
-#define H5_CHECK_DELIMITER(SS)   ((SS == H5_DIR_SEPC) || (SS == H5_DIR_SLASH_SEPC))
-#define H5_CHECK_ABSOLUTE(NAME)  ((isalpha((int)(unsigned char)NAME[0])) && (NAME[1] == ':') && (H5_CHECK_DELIMITER(NAME[2])))
+#define H5_DIR_SLASH_SEPC      '/'
+#define H5_DIR_SEPC            '\\'
+#define H5_DIR_SEPS            "\\"
+#define H5_CHECK_DELIMITER(SS) ((SS == H5_DIR_SEPC) || (SS == H5_DIR_SLASH_SEPC))
+#define H5_CHECK_ABSOLUTE(NAME)                                                                              \
+    ((isalpha((int)(unsigned char)NAME[0])) && (NAME[1] == ':') && (H5_CHECK_DELIMITER(NAME[2])))
 #define H5_CHECK_ABS_DRIVE(NAME) ((isalpha((int)(unsigned char)NAME[0])) && (NAME[1] == ':'))
 #define H5_CHECK_ABS_PATH(NAME)  (H5_CHECK_DELIMITER(NAME[0]))
 
@@ -1232,8 +1233,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         char *slash, *backslash;                                                                             \
                                                                                                              \
-        slash     = strrchr(NAME, H5_DIR_SLASH_SEPC);                                                      \
-        backslash = strrchr(NAME, H5_DIR_SEPC);                                                            \
+        slash     = strrchr(NAME, H5_DIR_SLASH_SEPC);                                                        \
+        backslash = strrchr(NAME, H5_DIR_SEPC);                                                              \
         if (backslash > slash)                                                                               \
             (ptr = backslash);                                                                               \
         else                                                                                                 \
@@ -1456,34 +1457,43 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *        Handles H5XY_.
  */
 #define H5_IS_API(S)                                                                                         \
-    ('_' != ((const char *)S)[2]                  /* underscore at position 2     */                         \
-     && '_' != ((const char *)S)[3]               /* underscore at position 3     */                         \
-     && !(                                        /* NOT              */                                     \
-          ((const char *)S)[4]                    /* pos 4 exists     */                                     \
-          && (isupper((int)(unsigned char)S[3]) || isdigit((int)(unsigned char)S[3])) /* pos 3 dig | uc   */                                     \
-          && '_' == ((const char *)S)[4]          /* pos 4 underscore */                                     \
+    ('_' != ((const char *)S)[2]    /* underscore at position 2     */                                       \
+     && '_' != ((const char *)S)[3] /* underscore at position 3     */                                       \
+     && !(                          /* NOT              */                                                   \
+          ((const char *)S)[4]      /* pos 4 exists     */                                                   \
+          && (isupper((int)(unsigned char)S[3]) || isdigit((int)(unsigned char)S[3])) /* pos 3 dig | uc   */ \
+          && '_' == ((const char *)S)[4]                                              /* pos 4 underscore */ \
           ))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S)                                                                                         \
-    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) && islower((int)(unsigned char)S[2])) ||                                            \
-     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) && islower((int)(unsigned char)S[3])) ||                                            \
-     (!S[4] || ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) && islower((int)(unsigned char)S[4]))))
+    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) &&                            \
+      islower((int)(unsigned char)S[2])) ||                                                                  \
+     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) &&                            \
+      islower((int)(unsigned char)S[3])) ||                                                                  \
+     (!S[4] || ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) &&                  \
+                islower((int)(unsigned char)S[4]))))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a private library function */
 #define H5_IS_PRIV(S)                                                                                        \
-    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) && '_' == S[2] && islower((int)(unsigned char)S[3])) ||                             \
-     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) && '_' == S[3] && islower((int)(unsigned char)S[4])) ||                             \
-     ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) && '_' == S[4] && islower((int)(unsigned char)S[5])))
+    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) && '_' == S[2] &&             \
+      islower((int)(unsigned char)S[3])) ||                                                                  \
+     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) && '_' == S[3] &&             \
+      islower((int)(unsigned char)S[4])) ||                                                                  \
+     ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) && '_' == S[4] &&             \
+      islower((int)(unsigned char)S[5])))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a package private function */
 #define H5_IS_PKG(S)                                                                                         \
-    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) && '_' == S[2] && '_' == S[3] && islower((int)(unsigned char)S[4])) ||              \
-     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) && '_' == S[3] && '_' == S[4] && islower((int)(unsigned char)S[5])) ||              \
-     ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) && '_' == S[4] && '_' == S[5] && islower((int)(unsigned char)S[6])))
+    (((isdigit((int)(unsigned char)S[1]) || isupper((int)(unsigned char)S[1])) && '_' == S[2] &&             \
+      '_' == S[3] && islower((int)(unsigned char)S[4])) ||                                                   \
+     ((isdigit((int)(unsigned char)S[2]) || isupper((int)(unsigned char)S[2])) && '_' == S[3] &&             \
+      '_' == S[4] && islower((int)(unsigned char)S[5])) ||                                                   \
+     ((isdigit((int)(unsigned char)S[3]) || isupper((int)(unsigned char)S[3])) && '_' == S[4] &&             \
+      '_' == S[5] && islower((int)(unsigned char)S[6])))
 
 /* global library version information string */
 extern char H5_lib_vers_info_g[];
@@ -1573,9 +1583,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         if (!func_check) {                                                                                   \
             /* Check function naming status */                                                               \
-            assert(asrt &&                                                                                 \
-                     "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "   \
-                     "H5private.h (this is usually due to an incorrect number of underscores)");             \
+            assert(asrt &&                                                                                   \
+                   "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "     \
+                   "H5private.h (this is usually due to an incorrect number of underscores)");               \
                                                                                                              \
             /* Don't check again */                                                                          \
             func_check = TRUE;                                                                               \

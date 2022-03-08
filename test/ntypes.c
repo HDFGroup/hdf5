@@ -1884,14 +1884,14 @@ test_vl_dtype(hid_t file)
         if (wdata[i].len != rdata[i].len) {
             H5_FAILED();
             printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
-                     (int)wdata[i].len, (int)i, (int)rdata[i].len);
+                   (int)wdata[i].len, (int)i, (int)rdata[i].len);
             goto error;
         } /* end if */
         for (t1 = (hvl_t *)wdata[i].p, t2 = (hvl_t *)rdata[i].p, j = 0; j < rdata[i].len; j++, t1++, t2++) {
             if (t1->len != t2->len) {
                 H5_FAILED();
                 printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
-                         (int)wdata[i].len, (int)i, (int)rdata[i].len);
+                       (int)wdata[i].len, (int)i, (int)rdata[i].len);
                 goto error;
             } /* end if */
 
@@ -1908,7 +1908,7 @@ test_vl_dtype(hid_t file)
                 if (((unsigned int *)t1->p)[k] != ((unsigned int *)tmp)[k]) {
                     H5_FAILED();
                     printf("    VL data don't match!, wdata[%u].p=%d, rdata[%u].p=%u\n", (unsigned)i,
-                             ((unsigned int *)t1->p)[k], (unsigned)i, ((unsigned int *)tmp)[k]);
+                           ((unsigned int *)t1->p)[k], (unsigned)i, ((unsigned int *)tmp)[k]);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -2061,13 +2061,13 @@ test_vlstr_dtype(hid_t file)
         if (strlen(wdata[i]) != strlen(rdata[i])) {
             H5_FAILED();
             printf("    VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                     (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                   (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             goto error;
         } /* end if */
         if (strcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
-            printf("    VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
-                     (int)i, rdata[i]);
+            printf("    VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
+                   rdata[i]);
             goto error;
         } /* end if */
     }     /* end for */
@@ -2194,13 +2194,13 @@ test_str_dtype(hid_t file)
         if (strlen(wdata[i]) != strlen(rdata[i])) {
             H5_FAILED();
             printf("    data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                     (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                   (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             goto error;
         } /* end if */
         if (strcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
             printf("    data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
-                     rdata[i]);
+                   rdata[i]);
             goto error;
         } /* end if */
     }     /* end for */

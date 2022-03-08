@@ -1461,8 +1461,8 @@ h5tools_escape(char *s /*in,out*/, size_t size)
 
             memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
             memcpy(s + i, escape, esc_size);             /*insert*/
-            n += esc_size - 1;                             /* adjust total string size */
-            i += esc_size;                                 /* adjust string position */
+            n += esc_size - 1;                           /* adjust total string size */
+            i += esc_size;                               /* adjust string position */
         }
     }
 
@@ -1532,7 +1532,7 @@ h5tools_str_replace(const char *string, const char *substr, const char *replacem
         memcpy(newstr, oldstr, (size_t)(tok - oldstr));
         memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
         memcpy(newstr + (tok - oldstr) + strlen(replacement), tok + strlen(substr),
-                 strlen(oldstr) - strlen(substr) - (size_t)(tok - oldstr));
+               strlen(oldstr) - strlen(substr) - (size_t)(tok - oldstr));
         memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
         /* move back head right after the last replacement */
         head = newstr + (tok - oldstr) + strlen(replacement);

@@ -92,10 +92,10 @@
 #ifdef H5R_DEBUG
 #define H5R_LOG_DEBUG(...)                                                                                   \
     do {                                                                                                     \
-        fprintf(stdout, " # %s(): ", __func__);                                                            \
-        fprintf(stdout, __VA_ARGS__);                                                                      \
-        fprintf(stdout, "\n");                                                                             \
-        fflush(stdout);                                                                                    \
+        fprintf(stdout, " # %s(): ", __func__);                                                              \
+        fprintf(stdout, __VA_ARGS__);                                                                        \
+        fprintf(stdout, "\n");                                                                               \
+        fflush(stdout);                                                                                      \
     } while (0)
 static const char *
 H5R__print_token(const H5O_token_t token)
@@ -104,13 +104,12 @@ H5R__print_token(const H5O_token_t token)
 
     /* Print the raw token. */
     snprintf(string, 64, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
-               (unsigned char)token.__data[15], (unsigned char)token.__data[14],
-               (unsigned char)token.__data[13], (unsigned char)token.__data[12],
-               (unsigned char)token.__data[11], (unsigned char)token.__data[10],
-               (unsigned char)token.__data[9], (unsigned char)token.__data[8], (unsigned char)token.__data[7],
-               (unsigned char)token.__data[6], (unsigned char)token.__data[5], (unsigned char)token.__data[4],
-               (unsigned char)token.__data[3], (unsigned char)token.__data[2], (unsigned char)token.__data[1],
-               (unsigned char)token.__data[0]);
+             (unsigned char)token.__data[15], (unsigned char)token.__data[14],
+             (unsigned char)token.__data[13], (unsigned char)token.__data[12],
+             (unsigned char)token.__data[11], (unsigned char)token.__data[10], (unsigned char)token.__data[9],
+             (unsigned char)token.__data[8], (unsigned char)token.__data[7], (unsigned char)token.__data[6],
+             (unsigned char)token.__data[5], (unsigned char)token.__data[4], (unsigned char)token.__data[3],
+             (unsigned char)token.__data[2], (unsigned char)token.__data[1], (unsigned char)token.__data[0]);
 
     return string;
 }

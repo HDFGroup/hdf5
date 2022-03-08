@@ -1229,7 +1229,7 @@ test_strings(void)
         goto out;
     }
     if (strcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET "
-                         "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
+                       "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1264,7 +1264,7 @@ test_strings(void)
         goto out;
     }
     if (strcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      "
-                         "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
+                       "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1281,9 +1281,9 @@ test_strings(void)
         goto out;
     }
     if (strncmp(dt_str,
-                  "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
-                  "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len - 1) != 0) {
+                "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
+                "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
+                str_len - 1) != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1304,9 +1304,9 @@ test_strings(void)
         goto out;
     str_len = strlen(dt_str);
     if (strncmp(dt_str,
-                  "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
-                  "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len) != 0) {
+                "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
+                "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
+                str_len) != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1365,9 +1365,8 @@ test_opaques(void)
         free(dt_str);
         goto out;
     }
-    if (strcmp(
-            dt_str,
-            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
+    if (strcmp(dt_str,
+               "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
         0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
@@ -1446,8 +1445,8 @@ test_enums(void)
         goto out;
     }
     if (strcmp(dt_str,
-                 "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
-                 "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
+               "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
+               "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
 
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
@@ -1572,8 +1571,8 @@ test_arrays(void)
         goto out;
     }
     if (strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n      "
-                         "      H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE "
-                         "\"arr_compound_2\" : 1;\n         }\n      }\n   }") != 0) {
+                       "      H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE "
+                       "\"arr_compound_2\" : 1;\n         }\n      }\n   }") != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1633,7 +1632,7 @@ test_compounds(void)
         goto out;
     }
     if (strcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE "
-                         "\"two_field\" : 6;\n   }") != 0) {
+                       "\"two_field\" : 6;\n   }") != 0) {
         printf("dt=\n%s\n", dt_str);
         free(dt_str);
         goto out;
@@ -1767,7 +1766,7 @@ test_compound_bug(void)
     if ((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
     if (strcmp(memb_name, "desc____________________________________________________________________________"
-                            "_____________") != 0) {
+                          "_____________") != 0) {
         H5free_memory(memb_name);
         goto out;
     }

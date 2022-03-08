@@ -819,7 +819,7 @@ test_h5s_zero_dim(void)
                     if (rdata_real[i][j][k] != wdata_real[i][j][k]) {
                         H5_FAILED();
                         printf("element [%d][%d][%d] is %d but should have been %d\n", i, j, k,
-                                 rdata_real[i][j][k], wdata_real[i][j][k]);
+                               rdata_real[i][j][k], wdata_real[i][j][k]);
                     }
                 }
             }
@@ -1046,7 +1046,7 @@ test_h5s_zero_dim(void)
                     if (rdata_real[i][j][k] != wdata_real[i][j][k]) {
                         H5_FAILED();
                         printf("element [%d][%d][%d] is %d but should have been %d\n", i, j, k,
-                                 rdata_real[i][j][k], wdata_real[i][j][k]);
+                               rdata_real[i][j][k], wdata_real[i][j][k]);
                     }
                 }
             }
@@ -2453,7 +2453,7 @@ test_h5s_compound_scalar_read(void)
         printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1, rdata.c1);
         printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n", space4_data.u, rdata.u);
         printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n", (double)space4_data.f,
-                 (double)rdata.f);
+               (double)rdata.f);
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1,
                       rdata.c2);
     } /* end if */

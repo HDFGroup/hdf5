@@ -200,7 +200,7 @@ main(void)
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
             snprintf(msg, sizeof(msg),
-                       "Testing ENCODE/DECODE with file version bounds: (%s, %s):", low_string, high_string);
+                     "Testing ENCODE/DECODE with file version bounds: (%s, %s):", low_string, high_string);
             puts(msg);
 
             if (VERBOSE_MED)

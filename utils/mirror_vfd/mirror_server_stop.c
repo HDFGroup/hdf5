@@ -61,14 +61,14 @@ static void
 usage(void)
 {
     printf("mirror_server_halten_sie [options]\n"
-             "System-independent Mirror Server shutdown program.\n"
-             "Sends shutdown message to Mirror Server at given IP:port\n"
-             "\n"
-             "Options:\n"
-             "    -h | --help Print this usage message and exit.\n"
-             "    --ip=ADDR   IP Address of remote server (default %s)\n"
-             "    --port=PORT Handshake port of remote server (default %d)\n",
-             MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
+           "System-independent Mirror Server shutdown program.\n"
+           "Sends shutdown message to Mirror Server at given IP:port\n"
+           "\n"
+           "Options:\n"
+           "    -h | --help Print this usage message and exit.\n"
+           "    --ip=ADDR   IP Address of remote server (default %s)\n"
+           "    --port=PORT Handshake port of remote server (default %d)\n",
+           MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
 } /* end usage() */
 
 /* ----------------------------------------------------------------------------

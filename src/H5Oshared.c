@@ -708,13 +708,13 @@ H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth
         case H5O_SHARE_TYPE_COMMITTED:
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Object address:", mesg->u.loc.oh_addr);
+                    "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "SOHM");
             fprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
-                      "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
+                    "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
             break;
 
         case H5O_SHARE_TYPE_HERE:
@@ -723,7 +723,7 @@ H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth
 
         default:
             fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Shared Message type:", "Unknown",
-                      (unsigned)mesg->type);
+                    (unsigned)mesg->type);
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

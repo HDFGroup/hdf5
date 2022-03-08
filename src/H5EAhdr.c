@@ -268,7 +268,7 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
 
         /* Zero out new elements allocated */
         memset(new_fac + hdr->elmt_fac.nalloc, 0,
-                 (new_nalloc - hdr->elmt_fac.nalloc) * sizeof(H5FL_fac_head_ptr_t));
+               (new_nalloc - hdr->elmt_fac.nalloc) * sizeof(H5FL_fac_head_ptr_t));
 
         /* Update information about element factories in header */
         hdr->elmt_fac.nalloc = new_nalloc;

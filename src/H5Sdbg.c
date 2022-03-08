@@ -99,7 +99,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
         case H5S_NO_CLASS:
         default:
             fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
-                      "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
+                    "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
             break;
     } /* end switch */
 

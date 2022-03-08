@@ -1378,7 +1378,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsi
      */
 #ifdef H5_HAVE_PARALLEL
     assert(0 == (flags &
-                   (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG))));
+                 (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG))));
 #else  /* H5_HAVE_PARALLEL */
     assert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG))));
 #endif /* H5_HAVE_PARALLEL */

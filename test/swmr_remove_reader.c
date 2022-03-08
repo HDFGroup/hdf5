@@ -135,7 +135,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
             fprintf(stderr, "*** ERROR ***\n");
             fprintf(stderr, "Incorrect record value!\n");
             fprintf(stderr, "Symbol = '%s', # of records = %lld, record->rec_id = %llx\n", sym_name,
-                      (long long)snpoints, (unsigned long long)record->rec_id);
+                    (long long)snpoints, (unsigned long long)record->rec_id);
             return -1;
         } /* end if */
     }     /* end if */

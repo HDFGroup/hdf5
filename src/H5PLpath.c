@@ -680,8 +680,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 done:
     if (dirp)
         if (HDclosedir(dirp) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s",
-                        strerror(errno))
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s", strerror(errno))
 
     path = (char *)H5MM_xfree(path);
 

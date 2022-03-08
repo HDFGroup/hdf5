@@ -279,7 +279,7 @@ print_metadata_retries_info(hid_t fid)
         for (j = 0; j < info.nbins; j++) {
             if (info.retries[i][j])
                 fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", power, (power * 10) - 1,
-                          info.retries[i][j]);
+                        info.retries[i][j]);
             power *= 10;
         } /* end for */
     }     /* end for */

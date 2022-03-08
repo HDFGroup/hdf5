@@ -137,7 +137,7 @@ test_mpio_overlap_writes(char *filename)
                 expected = (unsigned char)(mpi_off + i);
                 if ((expected != buf[i]) && (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)) {
                     printf("proc %d: found data error at [%ld], expect %u, got %u\n", mpi_rank,
-                             (long)(mpi_off + i), expected, buf[i]);
+                           (long)(mpi_off + i), expected, buf[i]);
                 }
             }
             if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
@@ -216,10 +216,10 @@ test_mpio_gb_file(char *filename)
      */
     if (MAINPROCESS) { /* only process 0 needs to check it*/
         printf("MPI_Offset is %s %d bytes integral type\n", is_signed ? "signed" : "unsigned",
-                 (int)sizeof(MPI_Offset));
+               (int)sizeof(MPI_Offset));
         if (sizeof_mpi_offset <= 4 && is_signed) {
             printf("Skipped 2GB range test "
-                     "because MPI_Offset cannot support it\n");
+                   "because MPI_Offset cannot support it\n");
         }
         else {
             /* verify correctness of assigning 2GB sizes */
@@ -241,7 +241,7 @@ test_mpio_gb_file(char *filename)
 
         if (sizeof_mpi_offset <= 4) {
             printf("Skipped 4GB range test "
-                     "because MPI_Offset cannot support it\n");
+                   "because MPI_Offset cannot support it\n");
         }
         else {
             /* verify correctness of assigning 4GB sizes */
@@ -270,7 +270,7 @@ test_mpio_gb_file(char *filename)
 
     if (sizeof_mpi_offset <= 4) {
         printf("Skipped GB file range test "
-                 "because MPI_Offset cannot support it\n");
+               "because MPI_Offset cannot support it\n");
     }
     else {
         buf = (char *)malloc(MB);
@@ -297,8 +297,7 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + mpi_rank) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    fprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, mpi_off,
-                              mpi_off);
+                    fprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
                     *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
@@ -337,8 +336,7 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + (mpi_size - mpi_rank - 1)) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    fprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, mpi_off,
-                              mpi_off);
+                    fprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
                 expected = (int8_t)(i * mpi_size + (mpi_size - mpi_rank - 1));
@@ -346,7 +344,7 @@ test_mpio_gb_file(char *filename)
                 for (j = 0; j < MB; j++) {
                     if ((*(buf + j) != expected) && (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)) {
                         printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n", mpi_rank,
-                                 (long)mpi_off, j, expected, *(buf + j));
+                               (long)mpi_off, j, expected, *(buf + j));
                     }
                 }
                 if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
@@ -527,7 +525,7 @@ test_mpio_1wMr(char *filename, int special_request)
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
             printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
-                     mpi_err_str);
+                   mpi_err_str);
             return 1;
         };
     };
@@ -579,7 +577,7 @@ test_mpio_1wMr(char *filename, int special_request)
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
         PRINTID;
         printf("MPI_File_read_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
-                 mpi_err_str);
+               mpi_err_str);
         return 1;
     };
     for (i = 0; i < DIMSIZE; i++) {
@@ -936,7 +934,7 @@ test_mpio_special_collective(char *filename)
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
         printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, bufcount,
-                 mpi_err_str);
+               mpi_err_str);
         return 1;
     } /* end if */
 

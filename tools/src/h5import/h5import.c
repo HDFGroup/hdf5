@@ -1199,7 +1199,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 
 #ifdef H5DEBUGIMPORT
                     printf("processStrHDFData DATATYPE STRING[%llu] store %s\n", (unsigned long long)line,
-                             str2);
+                           str2);
 #endif
                     if ((fspace_id = H5Dget_space(dset_id)) < 0)
                         goto out;
@@ -1496,7 +1496,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASET %s found\n", temp);
 #endif
-            }                                      /* if(!strcmp("DATASET", key))  PATH */
+            }                                    /* if(!strcmp("DATASET", key))  PATH */
             else if (!strcmp("DATATYPE", key)) { /* INPUT-CLASS */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATATYPE key\n");
@@ -1611,9 +1611,9 @@ processConfigurationFile(char *infile, struct Input *in)
                         if (!strcmp("}", temp)) { /* end bracket */
                             get_next_prop = 0;
                         }
-                    }                               /* while (get_next_prop) */
-                }                                   /* if(kindex == 5)  STRING */
-            }                                       /* else if(!strcmp("DATATYPE", key))  INPUT-CLASS */
+                    }                             /* while (get_next_prop) */
+                }                                 /* if(kindex == 5)  STRING */
+            }                                     /* else if(!strcmp("DATATYPE", key))  INPUT-CLASS */
             else if (!strcmp("DATASPACE", key)) { /* RANK and DIMENSIONS */
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
 
@@ -1626,11 +1626,11 @@ processConfigurationFile(char *infile, struct Input *in)
                 }
                 if (!strcmp("SCALAR", temp)) { /* SCALAR */
                     in->rank = 0;
-                }                                   /* if(!strcmp("SCALAR", key)) */
+                }                                 /* if(!strcmp("SCALAR", key)) */
                 else if (!strcmp("NULL", temp)) { /* NULL */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
-                }                                     /* else if(!strcmp("NULL", key)) */
+                }                                   /* else if(!strcmp("NULL", key)) */
                 else if (!strcmp("SIMPLE", temp)) { /* SIMPLE */
                     int icount = 0;
 #ifdef H5DEBUGIMPORT
@@ -2056,8 +2056,8 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
-                        }                           /* if(!strcmp("(", key))  start paren */
-                    }                               /* if(!strcmp("COUNT", temp))  COUNT */
+                        }                         /* if(!strcmp("(", key))  start paren */
+                    }                             /* if(!strcmp("COUNT", temp))  COUNT */
                     if (!strcmp("BLOCK", temp)) { /* BLOCK */
                         int icount = 0;
                         if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
@@ -2124,8 +2124,8 @@ processConfigurationFile(char *infile, struct Input *in)
                     if (!strcmp("}", temp)) { /* end bracket */
                         get_next_prop = 0;
                     }
-                }                              /* while (get_next_prop) */
-            }                                  /* else if(!strcmp("SUBSET", key)) */
+                }                            /* while (get_next_prop) */
+            }                                /* else if(!strcmp("SUBSET", key)) */
             else if (!strcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATA key\n");
@@ -4808,7 +4808,7 @@ help(char *name)
     (void)fprintf(stdout, "\t   SYNTAX:\n");
     (void)fprintf(stdout, "\t   %s -h[elp], OR\n", name);
     (void)fprintf(stdout, "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]",
-                    name);
+                  name);
     (void)fprintf(stdout, "\t\t\t\t      -o[utfile] <outfile>\n\n");
     (void)fprintf(stdout, "\t   PURPOSE:\n");
     (void)fprintf(stdout, "\t   To convert data stored in one or more ASCII or binary files\n");
@@ -5088,5 +5088,5 @@ usage(char *name)
     (void)fprintf(stdout, "\nUsage:\t%s -h[elp], OR\n", name);
     (void)fprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
-                    name);
+                  name);
 }

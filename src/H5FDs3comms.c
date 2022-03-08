@@ -1268,7 +1268,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
         ret = snprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=%" PRIuHADDR "-%" PRIuHADDR,
-                         offset, offset + len - 1);
+                       offset, offset + len - 1);
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
@@ -1404,7 +1404,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 
         ret = snprintf(authorization, 512, "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s",
-                         buffer2, signed_headers, buffer1);
+                       buffer2, signed_headers, buffer1);
         if (ret <= 0 || ret >= 512)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 authorization string");
 
@@ -1654,7 +1654,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
     /* TODO: compiler warning */
     ret = snprintf(canonical_request_dest, (cr_size - 1), "%s\n%s\n%s\n", http_request->verb,
-                     http_request->resource, query_params);
+                   http_request->resource, query_params);
     if (ret < 0 || (size_t)ret >= cr_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to compose canonical request first line");
 
@@ -1751,7 +1751,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
 
     for (i = 0; i < msg_len; i++) {
         int chars_written = snprintf(&(dest[i * 2]), 3, /* 'X', 'X', '\n' */
-                                       (lowercase == TRUE) ? "%02x" : "%02X", msg[i]);
+                                     (lowercase == TRUE) ? "%02x" : "%02X", msg[i]);
         if (chars_written != 2)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem while writing hex chars for %c", msg[i]);
     }
@@ -2237,7 +2237,8 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     /* check for restrictions */
     for (i = 0; i < len; i++) {
         /* scheme = [a-zA-Z+-.]+ (terminated by ":") */
-        if (!isalpha((int)(unsigned char)curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
+        if (!isalpha((int)(unsigned char)curstr[i]) && '+' != curstr[i] && '-' != curstr[i] &&
+            '.' != curstr[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid SCHEME construction");
     }
 

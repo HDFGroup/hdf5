@@ -243,7 +243,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                 /* Clear status_flags in the superblock for the vfd buffer: file locking is using status_flags
                  */
                 memset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0,
-                         (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
+                       (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
                 /* Does the comparison */
                 if (memcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
                     FAIL_PUTS_ERROR("comparison of TMP vfd and user buffer failed");

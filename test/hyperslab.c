@@ -238,11 +238,11 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
                                         AT();
                                         printf("   acc != ref_value\n");
                                         printf("   i=%lu, j=%lu, k=%lu, "
-                                                 "dx=%lu, dy=%lu, dz=%lu, "
-                                                 "fill=%d\n",
-                                                 (unsigned long)i, (unsigned long)j, (unsigned long)k,
-                                                 (unsigned long)dx, (unsigned long)dy, (unsigned long)dz,
-                                                 fill_value);
+                                               "dx=%lu, dy=%lu, dz=%lu, "
+                                               "fill=%d\n",
+                                               (unsigned long)i, (unsigned long)j, (unsigned long)k,
+                                               (unsigned long)dx, (unsigned long)dy, (unsigned long)dz,
+                                               fill_value);
                                         print_ref(nx, ny, nz);
                                         printf("\n   Result is:\n");
                                         print_array(dst, nx, ny, nz);
@@ -472,9 +472,9 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                     AT();
                                     printf("   acc != ref_value\n");
                                     printf("   i=%lu, j=%lu, k=%lu, "
-                                             "dx=%lu, dy=%lu, dz=%lu\n",
-                                             (unsigned long)i, (unsigned long)j, (unsigned long)k,
-                                             (unsigned long)dx, (unsigned long)dy, (unsigned long)dz);
+                                           "dx=%lu, dy=%lu, dz=%lu\n",
+                                           (unsigned long)i, (unsigned long)j, (unsigned long)k,
+                                           (unsigned long)dx, (unsigned long)dy, (unsigned long)dz);
                                     print_ref(nx, ny, nz);
                                     printf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
@@ -508,11 +508,11 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                      */
                                     AT();
                                     printf("   acc != ref_value + nx*ny*nz - "
-                                             "dx*dy*dz\n");
+                                           "dx*dy*dz\n");
                                     printf("   i=%lu, j=%lu, k=%lu, "
-                                             "dx=%lu, dy=%lu, dz=%lu\n",
-                                             (unsigned long)i, (unsigned long)j, (unsigned long)k,
-                                             (unsigned long)dx, (unsigned long)dy, (unsigned long)dz);
+                                           "dx=%lu, dy=%lu, dz=%lu\n",
+                                           (unsigned long)i, (unsigned long)j, (unsigned long)k,
+                                           (unsigned long)dx, (unsigned long)dy, (unsigned long)dz);
                                     print_ref(nx, ny, nz);
                                     printf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
@@ -635,7 +635,7 @@ test_multifill(size_t nx)
                 for (j = 0; j < sizeof(fill); j++)
                     printf(" %02x", ((uint8_t *)&fill)[j]);
                 printf("\n   dst[%lu]={%d,%g,%d}\n   ", (unsigned long)i, dst[i].left, dst[i].mid,
-                         dst[i].right);
+                       dst[i].right);
                 for (j = 0; j < sizeof(dst[i]); j++)
                     printf(" %02x", ((uint8_t *)(dst + i))[j]);
                 printf("\n");
@@ -870,7 +870,7 @@ test_sub_super(size_t nx, size_t ny)
     char     s[256];
 
     sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)(2 * nx),
-              (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
+            (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
     printf("%-70s", s);
     fflush(stdout);
 
@@ -903,7 +903,7 @@ test_sub_super(size_t nx, size_t ny)
                 if (!isatty(1)) {
                     AT();
                     printf("   full[%lu][%lu] != half[%lu][%lu]\n", (unsigned long)i * 2,
-                             (unsigned long)j * 2, (unsigned long)i, (unsigned long)j);
+                           (unsigned long)j * 2, (unsigned long)i, (unsigned long)j);
                     printf("   full is:\n");
                     print_array(full, 2 * nx, 2 * ny, (size_t)1);
                     printf("\n     half is:\n");
@@ -920,7 +920,7 @@ test_sub_super(size_t nx, size_t ny)
      * dimension.
      */
     sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx, (unsigned long)ny,
-              (unsigned long)(2 * nx), (unsigned long)(2 * ny));
+            (unsigned long)(2 * nx), (unsigned long)(2 * ny));
     printf("%-70s", s);
     fflush(stdout);
 
@@ -947,16 +947,16 @@ test_sub_super(size_t nx, size_t ny)
         for (j = 0; j < ny; j++) {
             if (half[i * ny + j] != twice[4 * i * ny + 2 * j])
                 sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2, (unsigned long)j * 2);
+                        (unsigned long)i * 2, (unsigned long)j * 2);
             else if (half[i * ny + j] != twice[4 * i * ny + 2 * j + 1])
                 sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2, (unsigned long)j * 2 + 1);
+                        (unsigned long)i * 2, (unsigned long)j * 2 + 1);
             else if (half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j])
                 sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2 + 1, (unsigned long)j * 2);
+                        (unsigned long)i * 2 + 1, (unsigned long)j * 2);
             else if (half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j + 1])
                 sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
+                        (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
             if (s[0]) {
                 H5_FAILED()
                 if (!isatty(1)) {
@@ -1078,8 +1078,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     hsize_t  new_coords[ARRAY_OFFSET_NDIMS]; /* X, Y & X coordinates of offset */
     char     s[256];
 
-    sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z, (unsigned long)y,
-              (unsigned long)x);
+    sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z, (unsigned long)y, (unsigned long)x);
     TESTING(s);
 
     /* Initialize */
@@ -1117,8 +1116,8 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
         /* Check computed coordinates */
         for (v = 0; v < ARRAY_OFFSET_NDIMS; v++)
             if (coords[v] != new_coords[v]) {
-                fprintf(stderr, "coords[%zu]=%" PRIuHSIZE ", new_coords[%zu]=%" PRIuHSIZE "\n", v,
-                          coords[v], v, new_coords[v]);
+                fprintf(stderr, "coords[%zu]=%" PRIuHSIZE ", new_coords[%zu]=%" PRIuHSIZE "\n", v, coords[v],
+                        v, new_coords[v]);
                 TEST_ERROR;
             } /* end if */
     }         /* end for */

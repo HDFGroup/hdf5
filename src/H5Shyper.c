@@ -297,11 +297,11 @@ H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned de
 
     while (span) {
         fprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", __func__,
-                  depth * 2, "", depth, (void *)span, span->low, span->high, (void *)span->next);
+                depth * 2, "", depth, (void *)span, span->low, span->high, (void *)span->next);
         if (span->down) {
             fprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
-                      __func__, (depth + 1) * 2, "", (void *)span->down, span->down->count,
-                      span->down->low_bounds[0], span->down->high_bounds[0], (void *)span->down->head);
+                    __func__, (depth + 1) * 2, "", (void *)span->down, span->down->count,
+                    span->down->low_bounds[0], span->down->high_bounds[0], (void *)span->down->head);
             H5S__hyper_print_spans_helper(f, span->down->head, depth + 1);
         } /* end if */
         span = span->next;
@@ -316,9 +316,9 @@ H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
     FUNC_ENTER_STATIC_NOERR
 
     if (span_lst != NULL) {
-        fprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
-                  __func__, (void *)span_lst, span_lst->count, span_lst->low_bounds[0],
-                  span_lst->high_bounds[0], (void *)span_lst->head);
+        fprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n", __func__,
+                (void *)span_lst, span_lst->count, span_lst->low_bounds[0], span_lst->high_bounds[0],
+                (void *)span_lst->head);
         H5S__hyper_print_spans_helper(f, span_lst->head, 0);
     } /* end if */
 
@@ -414,8 +414,8 @@ H5S__hyper_print_spans_dfs(FILE *f, const H5S_hyper_span_info_t *span_lst, unsig
     for (u = 0; u < depth; u++)
         fprintf(f, "\t");
     fprintf(f, "DIM[%u]: ref_count=%u, #elems=%u, head=%p, tail=%p, actual_tail=%p, matched=%d\n", depth,
-              span_lst->count, num_elems, (void *)span_lst->head, (void *)span_lst->tail, (void *)actual_tail,
-              (span_lst->tail == actual_tail));
+            span_lst->count, num_elems, (void *)span_lst->head, (void *)span_lst->tail, (void *)actual_tail,
+            (span_lst->tail == actual_tail));
 
     for (u = 0; u < depth; u++)
         fprintf(f, "\t");
@@ -437,7 +437,7 @@ H5S__hyper_print_spans_dfs(FILE *f, const H5S_hyper_span_info_t *span_lst, unsig
         for (u = 0; u < depth; u++)
             fprintf(f, "\t");
         fprintf(f, "ELEM[%u]: ptr=%p, low=%" PRIuHSIZE ", high=%" PRIuHSIZE ", down=%p\n", elem_idx++,
-                  (void *)cur_elem, cur_elem->low, cur_elem->high, (void *)cur_elem->down);
+                (void *)cur_elem, cur_elem->low, cur_elem->high, (void *)cur_elem->down);
         if (cur_elem->down)
             H5S__hyper_print_spans_dfs(f, cur_elem->down, depth + 1, dims);
         cur_elem = cur_elem->next;
@@ -475,7 +475,7 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
 
     fprintf(f, "=======================\n");
     fprintf(f, "SPACE: span_lst=%p, #dims=%u, offset_changed=%d\n", (void *)hslab->span_lst, dims,
-              space->select.offset_changed);
+            space->select.offset_changed);
 
     fprintf(f, "       offset=[");
     for (u = 0; u < dims - 1; u++)
@@ -1951,7 +1951,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
 
     /* Sanity check that there aren't any "remainder" sequences in process */
     assert(!((iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start) % tdiminfo[fast_dim].stride != 0 ||
-               ((iter->u.hyp.off[fast_dim] != tdiminfo[fast_dim].start) && tdiminfo[fast_dim].count == 1)));
+             ((iter->u.hyp.off[fast_dim] != tdiminfo[fast_dim].start) && tdiminfo[fast_dim].count == 1)));
 
     /* We've cleared the "remainder" of the previous fastest dimension
      * sequence before calling this routine, so we must be at the beginning of
@@ -7462,7 +7462,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
-                             (span_a->down == NULL && span_b->down == NULL));
+                           (span_a->down == NULL && span_b->down == NULL));
 
                     /* If there are no down spans, just add the overlapping area to the a_and_b list */
                     if (span_a->down == NULL) {
@@ -7573,7 +7573,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
-                             (span_a->down == NULL && span_b->down == NULL));
+                           (span_a->down == NULL && span_b->down == NULL));
 
                     /* If there are no down spans, just add the overlapping area to the a_and_b list */
                     if (span_a->down == NULL) {
@@ -7677,7 +7677,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
-                             (span_a->down == NULL && span_b->down == NULL));
+                           (span_a->down == NULL && span_b->down == NULL));
 
                     /* If there are no down spans, just add the overlapping area to the a_and_b list */
                     if (span_a->down == NULL) {
@@ -7791,7 +7791,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
-                             (span_a->down == NULL && span_b->down == NULL));
+                           (span_a->down == NULL && span_b->down == NULL));
 
                     /* If there are no down spans, just add the overlapping area to the a_and_b list */
                     if (span_a->down == NULL) {
@@ -9153,7 +9153,7 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
 
         /* Make certain we've exhausted our comparisons */
         assert((NULL == span1 && (NULL != span2 && NULL == span2->next)) ||
-                 ((NULL != span1 && NULL == span1->next) && NULL == span2));
+               ((NULL != span1 && NULL == span1->next) && NULL == span2));
     } /* end of */
 
 done:
@@ -9993,7 +9993,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
                     int_stride[u] = 1;
                 else {
                     assert((stride[u] > block[u]) ||
-                             ((stride[u] == block[u]) && (count[u] == H5S_UNLIMITED)));
+                           ((stride[u] == block[u]) && (count[u] == H5S_UNLIMITED)));
                     int_stride[u] = stride[u];
                 } /* end else */
                 int_count[u] = count[u];
@@ -12104,7 +12104,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     assert(clip_space->select.sel_info.hslab->unlim_dim >= 0);
     assert(match_space->select.sel_info.hslab->unlim_dim >= 0);
     assert(clip_space->select.sel_info.hslab->num_elem_non_unlim ==
-             match_space->select.sel_info.hslab->num_elem_non_unlim);
+           match_space->select.sel_info.hslab->num_elem_non_unlim);
 
     match_diminfo =
         &match_space->select.sel_info.hslab->diminfo.opt[match_space->select.sel_info.hslab->unlim_dim];
@@ -12131,7 +12131,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
             (match_clip_size - match_diminfo->start)) {
             /* Subtract slices missing from last block */
             assert((((match_diminfo->stride * (count - (hsize_t)1)) + block) -
-                      (match_clip_size - match_diminfo->start)) < num_slices);
+                    (match_clip_size - match_diminfo->start)) < num_slices);
             num_slices -= ((match_diminfo->stride * (count - (hsize_t)1)) + block) -
                           (match_clip_size - match_diminfo->start);
         } /* end if */

@@ -2038,8 +2038,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2073,8 +2072,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2107,7 +2105,7 @@ smoke_check_9(int express_test, unsigned paged)
 
     if (show_progress) /* 8 */
         fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++,
-                  (int)pass);
+                (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2139,8 +2137,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2164,8 +2161,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2202,8 +2198,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2230,8 +2225,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
@@ -2340,8 +2334,7 @@ smoke_check_10(int express_test, unsigned paged)
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2373,8 +2366,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2406,8 +2398,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2439,8 +2430,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2464,8 +2454,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2492,8 +2481,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2517,8 +2505,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2545,8 +2532,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
-                  (int)pass);
+        fprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
@@ -4495,8 +4481,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
 
             pass = FALSE;
-            snprintf(msg, (size_t)128, "bad data in spec[%u] on entry to multi entry test #%d.", u,
-                       test_num);
+            snprintf(msg, (size_t)128, "bad data in spec[%u] on entry to multi entry test #%d.", u, test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4528,7 +4513,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
         if (!pass) {
 
             snprintf(msg, (size_t)128, "flush with flags 0x%x failed in multi entry test #%d.", flush_flags,
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4557,7 +4542,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Bad status on entry %u after flush in multi entry test #%d.", u,
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4572,7 +4557,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in multi entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4592,7 +4577,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in multi entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4683,7 +4668,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "bad data in spec[%u] on entry to pe multi entry test #%d.", u,
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4720,7 +4705,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         if (!pass) {
 
             snprintf(msg, (size_t)128, "flush with flags 0x%x failed in pe multi entry test #%d.",
-                       flush_flags, test_num);
+                     flush_flags, test_num);
             failure_mssg = msg;
         }
     }
@@ -4750,7 +4735,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Bad status on entry %u after flush in pe multi entry test #%d.", u,
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4765,7 +4750,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in pe multi entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4784,8 +4769,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = FALSE;
-            snprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after cleanup in pe multi entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in pe multi entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8131,7 +8116,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size before flush in flush op test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8144,7 +8129,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "flush with flags 0x%x failed in flush op test #%d.", flush_flags,
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8189,8 +8174,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             if (check[i].in_cache != entry_in_cache(cache_ptr, check[i].entry_type, check[i].entry_index)) {
 
                 pass = FALSE;
-                snprintf(msg, (size_t)128, "Check1 failed on entry %d after flush op test #%d.", i,
-                           test_num);
+                snprintf(msg, (size_t)128, "Check1 failed on entry %d after flush op test #%d.", i, test_num);
                 failure_mssg = msg;
             }
 
@@ -8313,8 +8297,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
                 }
 #endif
                 pass = FALSE;
-                snprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i,
-                           test_num);
+                snprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i, test_num);
                 failure_mssg = msg;
             }
             i++;
@@ -8331,7 +8314,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in flush op test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8350,8 +8333,8 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
                  (cache_ptr->clean_index_size != 0) || (cache_ptr->dirty_index_size != 0)) {
 
             pass = FALSE;
-            snprintf(msg, (size_t)128,
-                       "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -12236,8 +12219,8 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
         if (!pass) { /* construct and set actual failure message */
 
-            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.",
-                       flush_flags, test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.", flush_flags,
+                     test_num);
 
             failure_mssg = msg;
         }
@@ -12258,7 +12241,7 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 #endif
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected entry status after flush in single entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
         else if ((((flush_flags & H5C__FLUSH_INVALIDATE_FLAG) == 0) &&
@@ -12268,7 +12251,7 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in single entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -12287,7 +12270,7 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
             pass = FALSE;
             snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in single entry test #%d.",
-                       test_num);
+                     test_num);
             failure_mssg = msg;
         }
         else {
@@ -12351,8 +12334,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = FALSE;
-        snprintf(msg, (size_t)128, "cache not empty at beginning of pinned single entry test #%d.",
-                   test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of pinned single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((entry_type < 0) || (entry_type >= NUMBER_OF_ENTRY_TYPES) || (entry_idx < 0) ||
@@ -12397,7 +12379,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
         if (!pass) { /* construct and set the correct failure message */
 
             snprintf(msg, (size_t)128, "flush with flags 0x%x failed in pinned single entry test #%d.",
-                       flush_flags, test_num);
+                     flush_flags, test_num);
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized != expected_deserialized) ||
@@ -12415,8 +12397,8 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
               (int)expected_destroyed);
 #endif
             pass = FALSE;
-            snprintf(msg, (size_t)128,
-                       "Unexpected entry status after flush in pinned single entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected entry status after flush in pinned single entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
         else if ((((flush_flags & H5C__FLUSH_INVALIDATE_FLAG) == 0) &&
@@ -12426,7 +12408,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
             pass = FALSE;
             snprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after flush in pinned single entry test #%d.", test_num);
+                     "Unexpected cache len/size after flush in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
     }
@@ -12454,15 +12436,14 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
         if (!pass) {
 
-            snprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = FALSE;
             snprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after cleanup in pinned single entry test #%d.", test_num);
+                     "Unexpected cache len/size after cleanup in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else {
@@ -13565,7 +13546,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
 
                         pass = FALSE;
                         snprintf(msg, (size_t)128, "Pinned entry not in pel after move in test #%u.",
-                                   test_num);
+                                 test_num);
                         failure_mssg = msg;
                     }
                 } /* end else */
@@ -13588,8 +13569,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
                 if ((entry_ptr->header.prev != NULL) ||
                     (cache_ptr->LRU_head_ptr != (H5C_cache_entry_t *)entry_ptr)) {
                     pass = FALSE;
-                    snprintf(msg, (size_t)128, "Entry not at head of LRU after move in test #%u.",
-                               test_num);
+                    snprintf(msg, (size_t)128, "Entry not at head of LRU after move in test #%u.", test_num);
                     failure_mssg = msg;
                 }
             } /* end else */
@@ -13599,8 +13579,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             if (!(entry_ptr->header.is_protected)) {
 
                 pass = FALSE;
-                snprintf(msg, (size_t)128, "Protected entry not protected after move in test #%u.",
-                           test_num);
+                snprintf(msg, (size_t)128, "Protected entry not protected after move in test #%u.", test_num);
                 failure_mssg = msg;
             }
 
@@ -13612,7 +13591,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
 
                 pass = FALSE;
                 snprintf(msg, (size_t)128, "Unprotected entry not unprotected after move in test #%u.",
-                           test_num);
+                         test_num);
                 failure_mssg = msg;
             }
         } /* end else */

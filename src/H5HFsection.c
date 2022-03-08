@@ -1181,7 +1181,7 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
                 assert(dblock->size > sect->sect_info.size);
                 assert(H5F_addr_lt(dblock->block_off, sect->sect_info.addr));
                 assert(H5F_addr_ge((dblock->block_off + dblock->size),
-                                     (sect->sect_info.addr + sect->sect_info.size)));
+                                   (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
                 status = H5AC_unprotect(iblock->hdr->f, H5AC_FHEAP_DBLOCK, dblock_addr, dblock,
@@ -1361,7 +1361,7 @@ H5HF__sect_row_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned *entr
     assert(hdr);
     assert(sect);
     assert(sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-             sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+           sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
     assert(sect->sect_info.state == H5FS_SECT_LIVE);
     assert(entry_p);
 
@@ -1471,7 +1471,7 @@ H5HF__sect_row_get_iblock(H5HF_free_section_t *sect)
      */
     assert(sect);
     assert(sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-             sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+           sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
     assert(sect->sect_info.state == H5FS_SECT_LIVE);
 
     ret_value = H5HF__sect_indirect_get_iblock(sect->u.row.under);
@@ -2900,7 +2900,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
                 if (sect->u.indirect.dir_nrows > 0) {
                     assert(sect->u.indirect.dir_rows);
                     memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[1],
-                              sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
+                            sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
                     assert(sect->u.indirect.dir_rows[0]);
 
                     /* Make new "first row" in indirect section */
@@ -2994,7 +2994,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             H5MM_memcpy(&peer_sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[0],
                         (sizeof(H5HF_free_section_t *) * peer_dir_nrows));
             memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[peer_dir_nrows],
-                      (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
+                    (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
             sect->u.indirect.dir_nrows -= peer_dir_nrows;
             assert(row_sect == sect->u.indirect.dir_rows[0]);
 
@@ -3029,7 +3029,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             /* Make certain we've tracked the sections' dependents correctly */
             assert(sect->u.indirect.rc == (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
             assert(peer_sect->u.indirect.rc ==
-                     (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
+                   (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
 
             /* Reset the peer_sect variable, to indicate that it has been hooked into the data structures
              * correctly and shouldn't be freed */
@@ -3147,7 +3147,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             /* Adjust indirect entry information */
             sect->u.indirect.indir_nents--;
             memmove(&sect->u.indirect.indir_ents[0], &sect->u.indirect.indir_ents[1],
-                      sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
+                    sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
             assert(sect->u.indirect.indir_ents[0]);
 
             /* Make new "first row" in new first indirect child section */
@@ -3254,10 +3254,9 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             /* (Note modified on current section's ref. count, since we haven't
              *  detached the child section yet)
              */
-            assert((sect->u.indirect.rc - 1) ==
-                     (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
+            assert((sect->u.indirect.rc - 1) == (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
             assert(peer_sect->u.indirect.rc ==
-                     (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
+                   (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
 
             /* Make new "first row" in peer section */
             if (H5HF__sect_indirect_first(hdr, peer_sect->u.indirect.indir_ents[0]) < 0)
@@ -4027,7 +4026,7 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
 
             tmp_row_sect = sect->u.indirect.dir_rows[u];
             assert(tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ||
-                     tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
+                   tmp_row_sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW);
             assert(tmp_row_sect->u.row.under == sect);
             assert(tmp_row_sect->u.row.row == (start_row + u));
             if (u > 0) {

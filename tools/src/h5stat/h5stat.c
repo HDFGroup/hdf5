@@ -223,15 +223,14 @@ usage(const char *prog)
     fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
     fprintf(stdout, "     -d, --dset            Print dataset information\n");
     fprintf(stdout, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    fprintf(stdout,
-              "                           information for small datasets.  N is an integer greater\n");
+    fprintf(stdout, "                           information for small datasets.  N is an integer greater\n");
     fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
     fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
     fprintf(stdout, "     -A, --attribute       Print attribute information\n");
     fprintf(stdout, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
     fprintf(stdout,
-              "                           information for small # of attributes.  N is an integer greater\n");
+            "                           information for small # of attributes.  N is an integer greater\n");
     fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     fprintf(stdout, "     -s, --freespace       Print free space information\n");
     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
@@ -515,7 +514,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         if ((bin + 1) > iter->dset_dim_nbins) {
             /* Allocate more storage for info about dataset's datatype */
             if ((iter->dset_dim_bins = (unsigned long *)realloc(iter->dset_dim_bins,
-                                                                  (bin + 1) * sizeof(unsigned long))) == NULL)
+                                                                (bin + 1) * sizeof(unsigned long))) == NULL)
                 H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
             /* Initialize counts for intermediate bins */
@@ -1142,11 +1141,11 @@ print_file_metadata(const iter_t *iter)
 
     fprintf(stdout, "\tObject headers: (total/unused)\n");
     fprintf(stdout, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
-              iter->group_ohdr_info.free_size);
+            iter->group_ohdr_info.free_size);
     fprintf(stdout, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
-              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+            iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
     fprintf(stdout, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
-              iter->dtype_ohdr_info.free_size);
+            iter->dtype_ohdr_info.free_size);
 
     fprintf(stdout, "\tGroups:\n");
     fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
@@ -1219,8 +1218,7 @@ print_group_info(const iter_t *iter)
     power = 1;
     for (u = 1; u < iter->group_nbins; u++) {
         if (iter->group_bins[u] > 0) {
-            printf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
-                     iter->group_bins[u]);
+            printf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1, iter->group_bins[u]);
             total += iter->group_bins[u];
         } /* end if */
         power *= 10;
@@ -1248,7 +1246,7 @@ print_group_metadata(const iter_t *iter)
     printf("File space information for groups' metadata (in bytes):\n");
 
     fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
-              iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
+            iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
 
     fprintf(stdout, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
     fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
@@ -1307,8 +1305,8 @@ print_dataset_info(const iter_t *iter)
             power = 1;
             for (u = 1; u < iter->dset_dim_nbins; u++) {
                 if (iter->dset_dim_bins[u] > 0) {
-                    printf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power,
-                             (power * 10) - 1, iter->dset_dim_bins[u]);
+                    printf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
+                           iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
                 power *= 10;
@@ -1318,16 +1316,15 @@ print_dataset_info(const iter_t *iter)
 
         printf("Dataset storage information:\n");
         fprintf(stdout, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
-        fprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n",
-                  iter->dset_external_storage_size);
+        fprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n", iter->dset_external_storage_size);
 
         printf("Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
             printf("\tDataset layout counts[%s]: %lu\n",
-                     (u == H5D_COMPACT
-                          ? "COMPACT"
-                          : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
-                     iter->dset_layouts[u]);
+                   (u == H5D_COMPACT
+                        ? "COMPACT"
+                        : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
+                   iter->dset_layouts[u]);
         printf("\tNumber of external files : %lu\n", iter->nexternal);
 
         printf("Dataset filters information:\n");
@@ -1364,7 +1361,7 @@ print_dset_metadata(const iter_t *iter)
     printf("File space information for datasets' metadata (in bytes):\n");
 
     fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
-              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+            iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
     fprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
     fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
@@ -1400,9 +1397,9 @@ print_dset_dtype_meta(const iter_t *iter)
             H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
             printf("\tDataset datatype #%u:\n", u);
             printf("\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count,
-                     iter->dset_type_info[u].named);
+                   iter->dset_type_info[u].named);
             printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
-                     (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
+                   (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
             H5Tclose(iter->dset_type_info[u].tid);
             total += iter->dset_type_info[u].count;
         } /* end for */
@@ -1449,7 +1446,7 @@ print_attr_info(const iter_t *iter)
     for (u = 1; u < iter->attr_nbins; u++) {
         if (iter->attr_bins[u] > 0) {
             printf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
-                     iter->attr_bins[u]);
+                   iter->attr_bins[u]);
             total += iter->attr_bins[u];
         } /* end if */
         power *= 10;
@@ -1543,12 +1540,12 @@ print_storage_summary(const iter_t *iter)
 
     percent = ((double)iter->free_space / (double)iter->filesize) * 100.0;
     fprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
-              iter->free_space, percent);
+            iter->free_space, percent);
 
     if (iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
         unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
         fprintf(stdout, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
-                  unaccount);
+                unaccount);
     }
     else {
         unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
@@ -1556,7 +1553,7 @@ print_storage_summary(const iter_t *iter)
     }
 
     fprintf(stdout, "Total space: %" PRIuHSIZE " bytes\n",
-              total_meta + iter->dset_storage_size + iter->free_space + unaccount);
+            total_meta + iter->dset_storage_size + iter->free_space + unaccount);
 
     if (iter->nexternal)
         fprintf(stdout, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
@@ -1750,8 +1747,7 @@ main(int argc, char *argv[])
         } /* end else */
 
         iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
-        iter.num_small_attrs =
-            (unsigned long *)calloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
+        iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
         iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
         if (iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {

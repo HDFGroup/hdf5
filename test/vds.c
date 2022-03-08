@@ -46,8 +46,8 @@ const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1",
 /* Print config directly to output */
 #define PRINT_CONFIG(...)                                                                                    \
     {                                                                                                        \
-        printf("Config: " __VA_ARGS__);                                                                    \
-        puts("");                                                                                          \
+        printf("Config: " __VA_ARGS__);                                                                      \
+        puts("");                                                                                            \
     }
 
 #else /* VDS_TEST_VERBOSE */
@@ -59,7 +59,7 @@ char vds_test_str_g[128]   = "";
 /* Replacement for TESTING_2 for non-verbose-output */
 #define TESTING_2_SUPPRESSED(WHAT)                                                                           \
     {                                                                                                        \
-        snprintf(vds_test_str_g, sizeof(vds_test_str_g), WHAT);                                            \
+        snprintf(vds_test_str_g, sizeof(vds_test_str_g), WHAT);                                              \
     }
 
 /* Suppress output from PASSED() */
@@ -412,8 +412,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
         if (config == TEST_API_REOPEN_FILE) {
             if (ninfo.meta_size.obj.heap_size != exp_meta_size) {
                 printf("VDS metadata size: %llu Expected: %llu\n",
-                         (long long unsigned)ninfo.meta_size.obj.heap_size,
-                         (long long unsigned)exp_meta_size);
+                       (long long unsigned)ninfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
                 TEST_ERROR
             }
         }
@@ -12346,8 +12345,8 @@ main(void)
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
             snprintf(msg, sizeof(msg),
-                       "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
-                       high_string);
+                     "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
+                     high_string);
             puts(msg);
 
             for (test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS;

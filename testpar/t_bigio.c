@@ -132,12 +132,12 @@ point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], s
 
     if (VERBOSE_MED) {
         printf("start[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "count[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "stride[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "block[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "total datapoints=%" PRIuHSIZE "\n",
-                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1],
-                 block[0] * block[1] * count[0] * count[1]);
+               "count[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "stride[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "block[]=(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "total datapoints=%" PRIuHSIZE "\n",
+               start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1],
+               block[0] * block[1] * count[0] * count[1]);
         k = 0;
         for (i = 0; i < num_points; i++) {
             printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
@@ -186,10 +186,10 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
     if (VERBOSE_MED) {
         printf("verify_data dumping:::\n");
         printf("start(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "count(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "stride(%" PRIuHSIZE ", %" PRIuHSIZE "), "
-                 "block(%" PRIuHSIZE ", %" PRIuHSIZE ")\n",
-                 start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1]);
+               "count(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "stride(%" PRIuHSIZE ", %" PRIuHSIZE "), "
+               "block(%" PRIuHSIZE ", %" PRIuHSIZE ")\n",
+               start[0], start[1], count[0], count[1], stride[0], stride[1], block[0], block[1]);
         printf("original values:\n");
         dataset_print(start, block, original);
         printf("compared values:\n");
@@ -202,9 +202,9 @@ verify_data(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
             if (*dataset != *original) {
                 if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
                     printf("Dataset Verify failed at [%" PRIuHSIZE "][%" PRIuHSIZE "]"
-                             "(row %" PRIuHSIZE ", col %" PRIuHSIZE "): "
-                             "expect %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
-                             i, j, i + start[0], j + start[1], *(original), *(dataset));
+                           "(row %" PRIuHSIZE ", col %" PRIuHSIZE "): "
+                           "expect %" PRIuHSIZE ", got %" PRIuHSIZE "\n",
+                           i, j, i + start[0], j + start[1], *(original), *(dataset));
                 }
                 dataset++;
                 original++;
@@ -313,11 +313,11 @@ ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t
     }
     if (VERBOSE_MED) {
         printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -402,9 +402,9 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
     if (VERBOSE_MED) {
         printf("dataset_vrfy dumping:::\n");
         printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1]);
         printf("original values:\n");
         ccdataset_print(start, block, original);
         printf("compared values:\n");
@@ -431,7 +431,7 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
                     if (*dataptr != *oriptr) {
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
                             printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
-                                     (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
+                                   (unsigned long)i, (unsigned long)j, *(oriptr), *(dataptr));
                         }
                     }
                 }

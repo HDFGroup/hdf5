@@ -77,8 +77,7 @@ pause_proc(void)
     if (MAINPROCESS)
         while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop) {
             if (!loops++) {
-                printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid,
-                         pid);
+                printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid, pid);
             }
             printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
             fflush(stdout);
@@ -105,15 +104,15 @@ static void
 usage(void)
 {
     printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-             "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+           "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-m<n_datasets>"
-             "\tset number of datasets for the multiple dataset test\n");
+           "\tset number of datasets for the multiple dataset test\n");
     printf("\t-n<n_groups>"
-             "\tset number of groups for the multiple group test\n");
+           "\tset number of groups for the multiple group test\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
     printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", ROW_FACTOR,
-             COL_FACTOR);
+           COL_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
     printf("\n");
 }
@@ -507,8 +506,8 @@ main(int argc, char **argv)
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS) {
         printf("===================================\n"
-                 "   Using Independent I/O with file set view to replace collective I/O \n"
-                 "===================================\n");
+               "   Using Independent I/O with file set view to replace collective I/O \n"
+               "===================================\n");
     }
 
     /* Perform requested testing */

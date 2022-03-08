@@ -638,10 +638,10 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
                                 if (verbose) {
 
                                     fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                              data_chunk[k][l],
-                                              ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
+                                            data_chunk[k][l],
+                                            ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
                                     fprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
-                                              l);
+                                            l);
                                 }
                             }
                         }
@@ -1597,11 +1597,11 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
                             if (verbose) {
 
                                 fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                          data_chunk[0][k][l],
-                                          ((DSET_SIZE * DSET_SIZE * mpi_rank) + (DSET_SIZE * (i + k)) + j +
-                                           l + dset_num));
+                                        data_chunk[0][k][l],
+                                        ((DSET_SIZE * DSET_SIZE * mpi_rank) + (DSET_SIZE * (i + k)) + j + l +
+                                         dset_num));
                                 fprintf(stdout, "dset_num = %d, i = %d, j = %d, k = %d, l = %d\n", dset_num,
-                                          i, j, k, l);
+                                        i, j, k, l);
                             }
                         }
                     }
@@ -1988,11 +1988,11 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
                             if (verbose) {
 
                                 fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                          data_chunk[0][k][l],
-                                          ((DSET_SIZE * DSET_SIZE * mpi_rank) + (DSET_SIZE * (i + k)) + j +
-                                           l + dset_num));
+                                        data_chunk[0][k][l],
+                                        ((DSET_SIZE * DSET_SIZE * mpi_rank) + (DSET_SIZE * (i + k)) + j + l +
+                                         dset_num));
                                 fprintf(stdout, "dset_num = %d, i = %d, j = %d, k = %d, l = %d\n", dset_num,
-                                          i, j, k, l);
+                                        i, j, k, l);
                             }
                         }
                     }
@@ -2333,12 +2333,11 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
                                 if (verbose) {
 
                                     fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", j, k,
-                                              data_chunk[0][j][k],
-                                              ((DSET_SIZE * DSET_SIZE * i) + (DSET_SIZE * (j + l)) + k + m +
-                                               dset_num));
-                                    fprintf(stdout,
-                                              "dset_num = %d, i = %d, j = %d, k = %d, l = %d, m = %d\n",
-                                              dset_num, i, j, k, l, m);
+                                            data_chunk[0][j][k],
+                                            ((DSET_SIZE * DSET_SIZE * i) + (DSET_SIZE * (j + l)) + k + m +
+                                             dset_num));
+                                    fprintf(stdout, "dset_num = %d, i = %d, j = %d, k = %d, l = %d, m = %d\n",
+                                            dset_num, i, j, k, l, m);
                                 }
                             }
                         }
@@ -2573,10 +2572,10 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
                                 if (verbose) {
 
                                     fprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n", k, l,
-                                              data_chunk[k][l],
-                                              ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
+                                            data_chunk[k][l],
+                                            ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l));
                                     fprintf(stdout, "m = %d, i = %d, j = %d, k = %d, l = %d\n", m, i, j, k,
-                                              l);
+                                            l);
                                 }
                             }
                         }

@@ -513,7 +513,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     } /* end else */
 
     assert((size_t)(chunk_image - oh->chunk[0].image) ==
-             (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+           (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Serialize messages for this chunk */
     if (H5O__chunk_serialize(f, oh, (unsigned)0) < 0)
@@ -781,7 +781,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
          * the same as the one being brought in from disk.
          */
         assert(0 == memcmp(image, udata->oh->chunk[chk_proxy->chunkno].image,
-                               udata->oh->chunk[chk_proxy->chunkno].size));
+                           udata->oh->chunk[chk_proxy->chunkno].size));
     } /* end else */
 
     /* Increment reference count of object header */
@@ -913,10 +913,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                             H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                           H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
-                             (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
+                           (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     /* Add flush dependency from chunk containing the continuation message
                      * that points to this chunk (either oh or another chunk proxy object)
@@ -971,10 +971,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                             H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                           H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
-                             (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
+                           (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     if (H5AC_destroy_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
@@ -1646,7 +1646,7 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
     if (oh->version > H5O_VERSION_1)
         /* Make certain the magic # is present */
         assert(!memcmp(oh->chunk[chunkno].image, (chunkno == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC),
-                           H5_SIZEOF_MAGIC));
+                       H5_SIZEOF_MAGIC));
     else
         /* Gaps should never occur in version 1 of the format */
         assert(oh->chunk[chunkno].gap == 0);
@@ -1659,8 +1659,8 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
         /* Check for gap in chunk & zero it out */
         if (oh->chunk[chunkno].gap)
             memset((oh->chunk[chunkno].image + oh->chunk[chunkno].size) -
-                         (H5O_SIZEOF_CHKSUM + oh->chunk[chunkno].gap),
-                     0, oh->chunk[chunkno].gap);
+                       (H5O_SIZEOF_CHKSUM + oh->chunk[chunkno].gap),
+                   0, oh->chunk[chunkno].gap);
 
         /* Compute metadata checksum */
         metadata_chksum =

@@ -164,21 +164,21 @@ static void
 usage(void)
 {
     fprintf(stdout,
-              "mirror_server [options]\n"
-              "\n"
-              "Application for providing Mirror Writer process to "
-              " Mirror VFD on file-open.\n"
-              "Listens on a dedicated socket; forks as a Writer upon receipt"
-              " of a valid OPEN xmit.\n"
-              "\n"
-              "Options:\n"
-              "--help [-h]         : Print this help message and quit.\n"
-              "--logpath=PATH      : File path for logging output "
-              "(default none, to stdout).\n"
-              "--port=PORT         : Primary port (default %d).\n"
-              "--verbosity=NUM     : Debug printing level "
-              "0..4, (default %d).\n",
-              DEFAULT_PORT, MIRROR_LOG_DEFAULT_VERBOSITY);
+            "mirror_server [options]\n"
+            "\n"
+            "Application for providing Mirror Writer process to "
+            " Mirror VFD on file-open.\n"
+            "Listens on a dedicated socket; forks as a Writer upon receipt"
+            " of a valid OPEN xmit.\n"
+            "\n"
+            "Options:\n"
+            "--help [-h]         : Print this help message and quit.\n"
+            "--logpath=PATH      : File path for logging output "
+            "(default none, to stdout).\n"
+            "--port=PORT         : Primary port (default %d).\n"
+            "--verbosity=NUM     : Debug printing level "
+            "0..4, (default %d).\n",
+            DEFAULT_PORT, MIRROR_LOG_DEFAULT_VERBOSITY);
 } /* end usage() */
 
 /* ---------------------------------------------------------------------------

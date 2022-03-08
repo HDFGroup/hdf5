@@ -1653,7 +1653,7 @@ H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     for (u = 0; u < space->extent.rank; u++) {
         /* Sanity check */
         assert(space->select.sel_info.pnt_lst->low_bounds[u] <=
-                 space->select.sel_info.pnt_lst->high_bounds[u]);
+               space->select.sel_info.pnt_lst->high_bounds[u]);
 
         /* Check for offset moving selection negative */
         if (((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] + space->select.offset[u]) < 0)

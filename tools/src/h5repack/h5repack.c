@@ -683,7 +683,7 @@ check_options(pack_opt_t *options)
                     case H5Z_FILTER_SZIP:
                     case H5Z_FILTER_DEFLATE:
                         printf(" All with %s, parameter %d\n", get_sfilter(filtn),
-                                 options->filter_g[k].cd_values[0]);
+                               options->filter_g[k].cd_values[0]);
                         break;
                     default:
                         printf(" User Defined %d\n", filtn);
@@ -704,7 +704,7 @@ check_options(pack_opt_t *options)
                 if (pack.filter[j].filtn >= 0) {
                     if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
                         printf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
-                                 pack.filter[j].filtn);
+                               pack.filter[j].filtn);
                     }
                     else {
                         printf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
@@ -740,7 +740,7 @@ check_options(pack_opt_t *options)
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
         if (options->verbose > 0) {
             printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
-                     options->ublock_filename);
+                   options->ublock_filename);
             options->ublock_size = 1024;
         }
     }

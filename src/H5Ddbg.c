@@ -78,8 +78,7 @@ H5Ddebug(hid_t dset_id)
     if (H5D_CHUNKED == dset->shared->layout.type)
         (void)H5D__chunk_dump_index(dset, stdout);
     else if (H5D_CONTIGUOUS == dset->shared->layout.type)
-        fprintf(stdout, "    %-10s %" PRIuHADDR "\n",
-                  "Address:", dset->shared->layout.storage.u.contig.addr);
+        fprintf(stdout, "    %-10s %" PRIuHADDR "\n", "Address:", dset->shared->layout.storage.u.contig.addr);
 
 done:
     FUNC_LEAVE_API(ret_value)

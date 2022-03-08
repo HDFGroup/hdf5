@@ -102,37 +102,37 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  */
 #define TESTING(WHAT)                                                                                        \
     {                                                                                                        \
-        printf("Testing %-62s", WHAT);                                                                     \
-        fflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
-        printf("  Testing %-60s", WHAT);                                                                   \
-        fflush(stdout);                                                                                    \
+        printf("  Testing %-60s", WHAT);                                                                     \
+        fflush(stdout);                                                                                      \
     }
 #define PASSED()                                                                                             \
     do {                                                                                                     \
-        puts(" PASSED");                                                                                   \
-        fflush(stdout);                                                                                    \
+        puts(" PASSED");                                                                                     \
+        fflush(stdout);                                                                                      \
     } while (0)
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
-        puts("*FAILED*");                                                                                  \
-        fflush(stdout);                                                                                    \
+        puts("*FAILED*");                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define H5_WARNING()                                                                                         \
     {                                                                                                        \
-        puts("*WARNING*");                                                                                 \
-        fflush(stdout);                                                                                    \
+        puts("*WARNING*");                                                                                   \
+        fflush(stdout);                                                                                      \
     }
 #define SKIPPED()                                                                                            \
     {                                                                                                        \
-        puts(" -SKIP-");                                                                                   \
-        fflush(stdout);                                                                                    \
+        puts(" -SKIP-");                                                                                     \
+        fflush(stdout);                                                                                      \
     }
 #define PUTS_ERROR(s)                                                                                        \
     {                                                                                                        \
-        puts(s);                                                                                           \
+        puts(s);                                                                                             \
         AT();                                                                                                \
         goto error;                                                                                          \
     }
@@ -158,7 +158,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     {                                                                                                        \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        puts(s);                                                                                           \
+        puts(s);                                                                                             \
         goto error;                                                                                          \
     }
 

@@ -644,7 +644,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Make sure we filled the chunk, except for room at the end for a checksum */
     assert(current_pos + dst_oh_gap + dst_oh_null + H5O_SIZEOF_CHKSUM_OH(oh_dst) ==
-             (size_t)dst_oh_size + oh_dst->chunk[0].image);
+           (size_t)dst_oh_size + oh_dst->chunk[0].image);
 
     /* Set the dest. object location to the first chunk address */
     assert(H5F_addr_defined(addr_new));

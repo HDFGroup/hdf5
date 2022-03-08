@@ -131,8 +131,8 @@ test_h5s_basic()
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
         verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
 
         // Create simple dataspace sid2
         hsize_t   max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
@@ -150,8 +150,8 @@ test_h5s_basic()
         // Retrieves dimension size and max size of dataspace sid2 and
         // verify them
         ndims = sid2.getSimpleExtentDims(tdims, tmax);
-        verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
-                   "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
+        verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+                   __LINE__, __FILE__);
         verify_val(memcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
                    __LINE__, __FILE__);
 

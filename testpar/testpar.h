@@ -50,13 +50,13 @@
             MESG(mesg);                                                                                      \
         }                                                                                                    \
         else {                                                                                               \
-            printf("Proc %d: ", rankvar);                                                                  \
-            printf("*** Parallel ERROR ***\n");                                                            \
-            printf("    VRFY (%s) failed at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);             \
+            printf("Proc %d: ", rankvar);                                                                    \
+            printf("*** Parallel ERROR ***\n");                                                              \
+            printf("    VRFY (%s) failed at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);               \
             ++nerrors;                                                                                       \
             fflush(stdout);                                                                                  \
             if (!VERBOSE_MED) {                                                                              \
-                printf("aborting MPI processes\n");                                                        \
+                printf("aborting MPI processes\n");                                                          \
                 MPI_Abort(MPI_COMM_WORLD, 1);                                                                \
             }                                                                                                \
         }                                                                                                    \
@@ -76,9 +76,9 @@
             MESG(mesg);                                                                                      \
         }                                                                                                    \
         else {                                                                                               \
-            printf("Proc %d: ", mpi_rank);                                                                 \
-            printf("*** PHDF5 REMARK (not an error) ***\n");                                               \
-            printf("        Condition (%s) failed at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);    \
+            printf("Proc %d: ", mpi_rank);                                                                   \
+            printf("*** PHDF5 REMARK (not an error) ***\n");                                                 \
+            printf("        Condition (%s) failed at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);      \
             fflush(stdout);                                                                                  \
         }                                                                                                    \
     } while (0)
@@ -86,10 +86,10 @@
 #define MPI_BANNER(mesg)                                                                                     \
     do {                                                                                                     \
         if (VERBOSE_MED || MAINPROCESS) {                                                                    \
-            printf("--------------------------------\n");                                                  \
-            printf("Proc %d: ", mpi_rank);                                                                 \
-            printf("*** %s\n", mesg);                                                                      \
-            printf("--------------------------------\n");                                                  \
+            printf("--------------------------------\n");                                                    \
+            printf("Proc %d: ", mpi_rank);                                                                   \
+            printf("*** %s\n", mesg);                                                                        \
+            printf("--------------------------------\n");                                                    \
         }                                                                                                    \
     } while (0)
 

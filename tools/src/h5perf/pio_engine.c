@@ -62,8 +62,8 @@
     }
 #define ERRMSG(mesg)                                                                                         \
     {                                                                                                        \
-        fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                                                      \
-        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);   \
+        fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                                                        \
+        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);     \
     }
 
 /* verify: if val is false (0), print mesg. */
@@ -227,34 +227,34 @@ do_pio(parameters param)
     }
     if ((buf_size % blk_size) != 0) {
         fprintf(stderr,
-                  "Transfer buffer size (%zu) must be a multiple of the "
-                  "interleaved I/O block size (%zu)\n",
-                  buf_size, blk_size);
+                "Transfer buffer size (%zu) must be a multiple of the "
+                "interleaved I/O block size (%zu)\n",
+                buf_size, blk_size);
         GOTOERROR(FAIL);
     }
     if ((snbytes % pio_mpi_nprocs_g) != 0) {
         fprintf(stderr,
-                  "Dataset size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                  "number of processes (%d)\n",
-                  (long long)snbytes, pio_mpi_nprocs_g);
+                "Dataset size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                "number of processes (%d)\n",
+                (long long)snbytes, pio_mpi_nprocs_g);
         GOTOERROR(FAIL);
     }
 
     if (!param.dim2d) {
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
             fprintf(stderr,
-                      "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "transfer buffer size (%zu)\n",
-                      (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
+                    "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                    "transfer buffer size (%zu)\n",
+                    (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
         }
     }
     else {
         if (((size_t)snbytes % buf_size) != 0) {
             fprintf(stderr,
-                      "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "transfer buffer size (%zu)\n",
-                      (long long)snbytes, buf_size);
+                    "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                    "transfer buffer size (%zu)\n",
+                    (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
         }
     }
@@ -624,18 +624,18 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
         HDprint_rank(output);
         if (!parms->dim2d) {
             fprintf(output,
-                      "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
-                      buf_size, (long long)bytes_begin[0], (long long)bytes_count);
+                    "Debug(do_write): "
+                    "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
+                    "d\n",
+                    buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             fprintf(output,
-                      "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
-                      buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
-                      (long long)bytes_count);
+                    "Debug(do_write): "
+                    "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
+                    "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                    buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
+                    (long long)bytes_count);
         }
     }
 
@@ -1639,18 +1639,18 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
         HDprint_rank(output);
         if (!parms->dim2d) {
             fprintf(output,
-                      "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
-                      buf_size, (long long)bytes_begin[0], (long long)bytes_count);
+                    "Debug(do_write): "
+                    "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
+                    "d\n",
+                    buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             fprintf(output,
-                      "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
-                      buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
-                      (long long)bytes_count);
+                    "Debug(do_write): "
+                    "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
+                    "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                    buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
+                    (long long)bytes_count);
         }
     }
 
@@ -2380,9 +2380,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                             /* report at most 20 errors */
                             HDprint_rank(output);
                             fprintf(output,
-                                      "read data error, expected (%d), "
-                                      "got (%d)\n",
-                                      pio_mpi_rank_g + 1, (int)*(ucharptr - 1));
+                                    "read data error, expected (%d), "
+                                    "got (%d)\n",
+                                    pio_mpi_rank_g + 1, (int)*(ucharptr - 1));
                         } /* end if */
                     }     /* end if */
                 }         /* end for */

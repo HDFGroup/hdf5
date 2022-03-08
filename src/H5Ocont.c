@@ -261,7 +261,7 @@ H5O__cont_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Continuation address:", cont->addr);
 
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Continuation size in bytes:", (unsigned long)(cont->size));
+            "Continuation size in bytes:", (unsigned long)(cont->size));
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Points to chunk number:", (int)(cont->chunkno));
 
     FUNC_LEAVE_NOAPI(SUCCEED)

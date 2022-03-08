@@ -751,9 +751,8 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name /*ou
 
     /* Compose the full file name */
     snprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s",
-               prefix, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
-               ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS),
-               file_name);
+             prefix, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+             ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2869,7 +2868,7 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
         } /* end if */
         else if (!all_zero)
             assert(0 == **pp); /*overflow */
-    }                            /* end for */
+    }                          /* end for */
 
     /* If 'all_zero' is still TRUE, the address was entirely composed of '0xff'
      *  bytes, which is the encoded form of 'HADDR_UNDEF', so set the destination

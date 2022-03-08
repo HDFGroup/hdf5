@@ -172,7 +172,7 @@ test_plists(const char *filename_prefix)
         for (config_2 = config_1 + 1; config_2 < NCONFIG; config_2++) {
             /* Generate filename for file 1 */
             if (snprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
-                           config_1 & CONFIG_64 ? "64" : "32", config_1 & CONFIG_LE ? "le" : "be") < 0)
+                         config_1 & CONFIG_64 ? "64" : "32", config_1 & CONFIG_LE ? "le" : "be") < 0)
                 TEST_ERROR
 
             /* Read file 1 */
@@ -188,7 +188,7 @@ test_plists(const char *filename_prefix)
 
             /* Generate filename for file 2 */
             if (snprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
-                           config_2 & CONFIG_64 ? "64" : "32", config_2 & CONFIG_LE ? "le" : "be") < 0)
+                         config_2 & CONFIG_64 ? "64" : "32", config_2 & CONFIG_LE ? "le" : "be") < 0)
                 TEST_ERROR
 
             /* Read file 1 */

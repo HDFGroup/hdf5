@@ -249,12 +249,12 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
     fprintf(stderr, "Unexpected error stack entry!\n");
     fprintf(stderr, "Stack entry: %d\n", n);
     fprintf(stderr,
-              "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
-              ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
-              err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
-              err_desc->desc);
+            "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
+            ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
+            err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
+            err_desc->desc);
     fprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
-              expected_g[n].min_num);
+            expected_g[n].min_num);
     error_flag_g = -1;
 
     return SUCCEED;

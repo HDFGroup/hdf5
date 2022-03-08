@@ -759,7 +759,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     assert(type_info);
     assert(type_info->cmpd_subset);
     assert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
-             H5T_SUBSET_DST == type_info->cmpd_subset->subset);
+           H5T_SUBSET_DST == type_info->cmpd_subset->subset);
     assert(user_buf);
 
     /* Get info from API context */

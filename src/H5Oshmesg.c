@@ -230,7 +230,7 @@ H5O__shmesg_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
     fprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
-              "Shared message table address:", mesg->addr);
+            "Shared message table address:", mesg->addr);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of indexes:", mesg->nindexes);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

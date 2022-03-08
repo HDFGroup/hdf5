@@ -113,7 +113,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     assert(cparam);
     assert(cparam->cls);
     assert((cparam->cls->crt_context && cparam->cls->dst_context) ||
-             (NULL == cparam->cls->crt_context && NULL == cparam->cls->dst_context));
+           (NULL == cparam->cls->crt_context && NULL == cparam->cls->dst_context));
     assert(cparam->node_size > 0);
     assert(cparam->rrec_size > 0);
     assert(cparam->merge_percent > 0 && cparam->merge_percent <= 100);

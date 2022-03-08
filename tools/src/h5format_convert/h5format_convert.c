@@ -250,9 +250,8 @@ convert(hid_t fid, const char *dname)
 
             if (idx_type == H5D_CHUNK_IDX_BTREE) {
                 if (verbose_g)
-                    fprintf(
-                        stdout,
-                        "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
+                    fprintf(stdout,
+                            "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
                 h5tools_setstatus(EXIT_SUCCESS);
                 goto done;
             }

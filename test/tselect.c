@@ -1386,10 +1386,10 @@ test_select_hyper_stride(hid_t xfer_plist)
         tbuf  = wbuf + loc1[i];
         tbuf2 = rbuf + loc2[i];
         if (*tbuf != *tbuf2) {
-            printf("%d: hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n", __LINE__, i,
-                     (int)loc1[i], i, (int)loc2[i]);
+            printf("%d: hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n", __LINE__, i, (int)loc1[i],
+                   i, (int)loc2[i]);
             printf("wbuf=%p, tbuf=%p, rbuf=%p, tbuf2=%p\n", (void *)wbuf, (void *)tbuf, (void *)rbuf,
-                     (void *)tbuf2);
+                   (void *)tbuf2);
             TestErrPrintf("*tbuf=%u, *tbuf2=%u\n", (unsigned)*tbuf, (unsigned)*tbuf2);
         } /* end if */
     }     /* end for */
@@ -1584,8 +1584,8 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t),
-                                (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
+    rbuf =
+        (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1730,8 +1730,8 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     /* Allocate write & read buffers */
     wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t),
-                                (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
+    rbuf =
+        (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -5750,13 +5750,13 @@ test_select_hyper_and_2d(void)
             if ((i >= 5 && i <= 9) && (j >= 5 && j <= 9)) {
                 if (*tbuf != *tbuf2)
                     printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -5891,13 +5891,13 @@ test_select_hyper_xor_2d(void)
                 ((i >= 10 && i <= 14) && (j >= 5 && j <= 14))) {
                 if (*tbuf != *tbuf2)
                     printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -6030,13 +6030,13 @@ test_select_hyper_notb_2d(void)
             if (((i >= 0 && i <= 4) && (j >= 0 && j <= 9)) || ((i >= 5 && i <= 9) && (j >= 0 && j <= 4))) {
                 if (*tbuf != *tbuf2)
                     printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -6265,7 +6265,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     wbuf = (int *)malloc(sizeof(int) * SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5);
     CHECK_PTR(wbuf, "malloc");
     rbuf = (int *)calloc(sizeof(int),
-                           (size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5));
+                         (size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -10862,15 +10862,13 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
     assert(edge_size > 0);
     assert(edge_size <= 1000);
 
-    snprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n",
-               test_num);
+    snprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    snprintf(test_desc_1, sizeof(test_desc_1),
-               "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n", small_rank, large_rank, offset,
-               (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3],
-               (int)dim_selected[4]);
+    snprintf(test_desc_1, sizeof(test_desc_1), "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n",
+             small_rank, large_rank, offset, (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2],
+             (int)dim_selected[3], (int)dim_selected[4]);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11123,15 +11121,15 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
     assert(dims_selected <= large_rank);
 
     snprintf(test_desc_0, sizeof(test_desc_0),
-               "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
+             "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     snprintf(test_desc_1, sizeof(test_desc_1),
-               "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n",
-               small_rank, large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
-               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-               dims_selected);
+             "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
+             large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
+             (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
+             dims_selected);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11668,15 +11666,14 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
     assert(dims_selected <= large_rank);
 
     snprintf(test_desc_0, sizeof(test_desc_0),
-               "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
+             "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, (test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     snprintf(test_desc_1, sizeof(test_desc_1),
-               "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
-               large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0],
-               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-               dims_selected);
+             "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
+             large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0], (int)dim_selected[1],
+             (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4], dims_selected);
     MESSAGE(7, (test_desc_1));
 
     /* copy the edge size into the dims array */

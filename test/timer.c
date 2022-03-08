@@ -391,8 +391,7 @@ main(void)
     nerrors += test_timer_functionality() < 0 ? 1 : 0;
 
     if (nerrors) {
-        printf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors,
-                 nerrors > 1 ? "S" : "");
+        printf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return 1;
     }
     else {

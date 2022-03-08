@@ -1481,7 +1481,8 @@ H5Z_xform_create(const char *expr)
             if ((i > 0) && (i < (strlen(expr) - 1))) {
                 if (((expr[i] == 'E') || (expr[i] == 'e')) &&
                     (isdigit((int)(unsigned char)expr[i - 1]) || (expr[i - 1] == '.')) &&
-                    (isdigit((int)(unsigned char)expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    (isdigit((int)(unsigned char)expr[i + 1]) || (expr[i + 1] == '-') ||
+                     (expr[i + 1] == '+')))
                     continue;
             } /* end if */
 

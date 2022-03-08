@@ -116,29 +116,29 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
+            "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
+            "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Log2(Max. # of elements in array):", (unsigned)hdr->cparam.max_nelmts_bits);
+            "Log2(Max. # of elements in array):", (unsigned)hdr->cparam.max_nelmts_bits);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "# of elements in index block:", (unsigned)hdr->cparam.idx_blk_elmts);
+            "# of elements in index block:", (unsigned)hdr->cparam.idx_blk_elmts);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Min. # of data block pointers for a super block:",
-              (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Log2(Max. # of elements in data block page):",
-              (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
+            "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Min. # of data block pointers for a super block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Log2(Max. # of elements in data block page):", (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
+            "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
+            "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of data blocks created:", hdr->stats.stored.ndata_blks);
+            "Number of data blocks created:", hdr->stats.stored.ndata_blks);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Number of elements 'realized':", hdr->stats.stored.nelmts);
+            "Number of elements 'realized':", hdr->stats.stored.nelmts);
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Index Block Address:", hdr->idx_blk_addr);
+            "Index Block Address:", hdr->idx_blk_addr);
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -209,9 +209,9 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Index Block size:", iblock->size);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of data block addresses in index block:", iblock->ndblk_addrs);
+            "# of data block addresses in index block:", iblock->ndblk_addrs);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of super block addresses in index block:", iblock->nsblk_addrs);
+            "# of super block addresses in index block:", iblock->nsblk_addrs);
 
     /* Check if there are any elements in index block */
     if (hdr->cparam.idx_blk_elmts > 0) {
@@ -239,7 +239,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             /* Print address */
             snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      iblock->dblk_addrs[u]);
+                    iblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
 
@@ -254,7 +254,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             /* Print address */
             snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      iblock->sblk_addrs[u]);
+                    iblock->sblk_addrs[u]);
         } /* end for */
     }     /* end if */
 
@@ -328,9 +328,9 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of data block addresses in super block:", sblock->ndblks);
+            "# of data block addresses in super block:", sblock->ndblks);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
+            "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
 
     /* Check if there are any data block addresses in super block */
     if (sblock->ndblks > 0) {
@@ -343,7 +343,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             /* Print address */
             snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
-                      sblock->dblk_addrs[u]);
+                    sblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
 

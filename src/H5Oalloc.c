@@ -156,8 +156,8 @@ H5O__add_gap(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t *oh, unsigned chunkno, hbool_
 
         /* Slide raw message info forward in chunk image */
         memmove(new_gap_loc, new_gap_loc + new_gap_size,
-                  (size_t)((oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh))) -
-                           (new_gap_loc + new_gap_size)));
+                (size_t)((oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh))) -
+                         (new_gap_loc + new_gap_size)));
 
         /* Add existing gap size to new gap size */
         new_gap_size += oh->chunk[chunkno].gap;
@@ -637,8 +637,8 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     /* Move chunk 0 data up if the size flags changed */
     if (adjust_size_flags)
         memmove(oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh),
-                  oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
-                  old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
+                oh->chunk[0].image + H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh) - extra_prfx_size,
+                old_size - (size_t)H5O_SIZEOF_HDR(oh) + extra_prfx_size);
 
     /* Spin through existing messages, adjusting them */
     for (u = 0; u < oh->nmesgs; u++) {
@@ -1051,7 +1051,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
 
                 /* Absorb a null message after the moved message */
                 assert((null_msg->raw + null_msg->raw_size) ==
-                         (old_null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)));
+                       (old_null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)));
                 null_msg->raw_size += found_msg->null_size;
 
                 /* Release any information/memory for message */
@@ -1060,7 +1060,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
                 /* Remove null message from list of messages */
                 if (found_msg->null_msgno < (oh->nmesgs - 1))
                     memmove(old_null_msg, old_null_msg + 1,
-                              ((oh->nmesgs - 1) - found_msg->null_msgno) * sizeof(H5O_mesg_t));
+                            ((oh->nmesgs - 1) - found_msg->null_msgno) * sizeof(H5O_mesg_t));
 
                 /* Decrement # of messages */
                 /* (Don't bother reducing size of message array for now -QAK) */
@@ -1381,7 +1381,7 @@ H5O__release_mesg(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg, hbool_t adj_link)
     /* Change message type to nil and zero it */
     mesg->type = H5O_MSG_NULL;
     assert(mesg->raw + mesg->raw_size <= (oh->chunk[mesg->chunkno].image + oh->chunk[mesg->chunkno].size) -
-                                               (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[mesg->chunkno].gap));
+                                             (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[mesg->chunkno].gap));
     memset(mesg->raw, 0, mesg->raw_size);
 
     /* Clear message flags */
@@ -1537,7 +1537,7 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
                 H5O__msg_free_mesg(cont_msg);
                 if (cont_u < (oh->nmesgs - 1))
                     memmove(&oh->mesg[cont_u], &oh->mesg[cont_u + 1],
-                              ((oh->nmesgs - 1) - cont_u) * sizeof(H5O_mesg_t));
+                            ((oh->nmesgs - 1) - cont_u) * sizeof(H5O_mesg_t));
                 oh->nmesgs--;
             } /* end else */
 
@@ -1555,7 +1555,7 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
                         /* Remove from message list */
                         if (v < (oh->nmesgs - 1))
                             memmove(&oh->mesg[v], &oh->mesg[v + 1],
-                                      ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
+                                    ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
                         oh->nmesgs--;
                     } /* end if */
                 }     /* end if */
@@ -1648,8 +1648,8 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
 
                                 /* Copy raw data for non-null message to new location */
                                 memmove(curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
-                                          nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
-                                          nonnull_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
+                                        nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh),
+                                        nonnull_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
 
                                 /* Adjust non-null message's offset in chunk */
                                 nonnull_msg->raw = curr_msg->raw;
@@ -1760,10 +1760,9 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
                                 /* Sanity checks */
                                 assert(null_chk_mdc_obj);
                                 assert(((H5C_cache_entry_t *)null_chk_mdc_obj)->magic ==
-                                         H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                                       H5C__H5C_CACHE_ENTRY_T_MAGIC);
                                 assert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type);
-                                assert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id ==
-                                         H5AC_OHDR_CHK_ID);
+                                assert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID);
 
                                 /* Create flush dependency on new continuation
                                  * message chunk */
@@ -2057,7 +2056,7 @@ H5O__merge_null(H5F_t *f, H5O_t *oh)
                             /* Remove second message from list of messages */
                             if (v < (oh->nmesgs - 1))
                                 memmove(&oh->mesg[v], &oh->mesg[v + 1],
-                                          ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
+                                        ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
 
                             /* Decrement # of messages */
                             /* (Don't bother reducing size of message array for now -QAK) */
@@ -2199,7 +2198,7 @@ H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
                 /* Remove chunk from list of chunks */
                 if (null_msg->chunkno < (oh->nchunks - 1)) {
                     memmove(&oh->chunk[null_msg->chunkno], &oh->chunk[null_msg->chunkno + 1],
-                              ((oh->nchunks - 1) - null_msg->chunkno) * sizeof(H5O_chunk_t));
+                            ((oh->nchunks - 1) - null_msg->chunkno) * sizeof(H5O_chunk_t));
 
                     /* Adjust chunk number for any chunk proxies that are in the cache */
                     for (u = null_msg->chunkno; u < (oh->nchunks - 1); u++) {
@@ -2233,7 +2232,7 @@ H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
                 /* Remove null message from list of messages */
                 if (null_msg_no < (oh->nmesgs - 1))
                     memmove(&oh->mesg[null_msg_no], &oh->mesg[null_msg_no + 1],
-                              ((oh->nmesgs - 1) - null_msg_no) * sizeof(H5O_mesg_t));
+                            ((oh->nmesgs - 1) - null_msg_no) * sizeof(H5O_mesg_t));
 
                 /* Decrement # of messages */
                 /* (Don't bother reducing size of message array for now -QAK) */
@@ -2411,7 +2410,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
 
                 /* Slide down the raw data */
                 memmove(curr_msg->raw - sizeof_msghdr, src,
-                          (size_t)(old_image + new_size - sizeof_chksum - src));
+                        (size_t)(old_image + new_size - sizeof_chksum - src));
 
                 /* Update the raw data pointers for messages after this one */
                 for (v = 0, curr_msg2 = &oh->mesg[0]; v < oh->nmesgs; v++, curr_msg2++)
@@ -2487,8 +2486,8 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
 
         /* Slide chunk 0 data down */
         memmove(chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum,
-                  chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum + less_prfx_size,
-                  new_size - (size_t)H5O_SIZEOF_HDR(oh));
+                chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum + less_prfx_size,
+                new_size - (size_t)H5O_SIZEOF_HDR(oh));
 
         /* Adjust chunk size */
         new_size -= less_prfx_size;

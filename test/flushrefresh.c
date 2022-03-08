@@ -71,21 +71,21 @@ FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
     {                                                                                                        \
-        errorfile = fopen(ERRFILE, "w+");                                                                  \
-        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
-        fflush(errorfile);                                                                                 \
-        fclose(errorfile);                                                                                 \
+        errorfile = fopen(ERRFILE, "w+");                                                                    \
+        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
+        fflush(errorfile);                                                                                   \
+        fclose(errorfile);                                                                                   \
         TEST_ERROR;                                                                                          \
     }
 
 #define CLEANUP_FILES                                                                                        \
     {                                                                                                        \
-        remove(ERRFILE);                                                                                   \
-        remove(FILENAME);                                                                                  \
-        remove(SIGNAL_TO_SCRIPT);                                                                          \
-        remove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
-        remove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
-        remove(SIGNAL_FROM_SCRIPT);                                                                        \
+        remove(ERRFILE);                                                                                     \
+        remove(FILENAME);                                                                                    \
+        remove(SIGNAL_TO_SCRIPT);                                                                            \
+        remove(SIGNAL_BETWEEN_PROCESSES_1);                                                                  \
+        remove(SIGNAL_BETWEEN_PROCESSES_2);                                                                  \
+        remove(SIGNAL_FROM_SCRIPT);                                                                          \
     }
 
 /* ===================== */
@@ -162,8 +162,7 @@ main(int argc, char *argv[])
                 TEST_ERROR;
         } /* end if */
         else {
-            fprintf(stdout,
-                      "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
+            fprintf(stdout, "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
 
             /* Test script is expecting some signals, so send them out to end it. */
             if (end_verification() < 0)
@@ -1097,13 +1096,12 @@ flush_verification(const char *obj_pathname, const char *expected)
     else if (strcmp(expected, NOT_FLUSHED) == 0) {
         if ((oid > 0) || (status > 0)) {
             fprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
-                      obj_pathname);
+                    obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else {
-        fprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n",
-                  expected);
+        fprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n", expected);
         PROCESS_ERROR;
     } /* end if */
 
@@ -1345,11 +1343,11 @@ refresh_verification(const char *obj_pathname)
 
     if (!ok) {
         printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
-                 (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
-                 (int)flushed_ninfo.hdr.space.total);
+               (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
+               (int)flushed_ninfo.hdr.space.total);
         printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
-                 (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
-                 (int)refreshed_ninfo.hdr.space.total);
+               (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
+               (int)refreshed_ninfo.hdr.space.total);
         PROCESS_ERROR;
     }
 

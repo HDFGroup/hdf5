@@ -1048,8 +1048,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'V': /* H5FD_class_value_t */
                         {
-                            H5FD_class_value_t class_val =
-                                (H5FD_class_value_t)va_arg(ap, H5FD_class_value_t);
+                            H5FD_class_value_t class_val = (H5FD_class_value_t)va_arg(ap, H5FD_class_value_t);
 
                             switch (class_val) {
                                 case H5_VFD_INVALID:
@@ -2042,8 +2041,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5L_elink_traverse_t */
                         {
-                            H5L_elink_traverse_t elt =
-                                (H5L_elink_traverse_t)va_arg(ap, H5L_elink_traverse_t);
+                            H5L_elink_traverse_t elt = (H5L_elink_traverse_t)va_arg(ap, H5L_elink_traverse_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)elt);
                         } /* end block */
@@ -3045,8 +3043,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'C': /* H5VL_class_value_t */
                         {
-                            H5VL_class_value_t class_val =
-                                (H5VL_class_value_t)va_arg(ap, H5VL_class_value_t);
+                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, H5VL_class_value_t);
 
                             if (H5_VOL_NATIVE == class_val)
                                 H5RS_acat(rs, "H5_VOL_NATIVE");

@@ -726,8 +726,8 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
             rd_c.z != '\0') {
             H5_FAILED();
             puts("    Got wrong fill value");
-            printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n", (double)rd_c.a, rd_c.y,
-                     rd_c.x, rd_c.z);
+            printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n", (double)rd_c.a, rd_c.y, rd_c.x,
+                   rd_c.z);
         }
         if (H5Dclose(dset9) < 0)
             goto error;
@@ -821,7 +821,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         H5_FAILED();
         puts("    Got wrong fill value");
         printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n", (double)rd_c.a, rd_c.y, rd_c.x,
-                 rd_c.z);
+               rd_c.z);
     }
     if (H5Dclose(dset8) < 0)
         goto error;
@@ -935,11 +935,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                 H5_FAILED();
                 fprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 fprintf(stdout,
-                          "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
-                          "}, read: %u, "
-                          "Fill value: %u\n",
-                          hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], val_rd,
-                          fillval);
+                        "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
+                        "}, read: %u, "
+                        "Fill value: %u\n",
+                        hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], val_rd,
+                        fillval);
                 goto error;
             }
             /* case for compound datatype */
@@ -953,12 +953,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                 H5_FAILED();
                 fprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 fprintf(stdout,
-                          "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
-                          "}, read: %f, %d, %f, %c"
-                          "Fill value: %f, %d, %f, %c\n",
-                          hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4],
-                          (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)fill_c.a, fill_c.x, fill_c.y,
-                          fill_c.z);
+                        "    Elmt={%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE ",%" PRIuHSIZE
+                        "}, read: %f, %d, %f, %c"
+                        "Fill value: %f, %d, %f, %c\n",
+                        hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], (double)rd_c.a,
+                        rd_c.x, rd_c.y, rd_c.z, (double)fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                 goto error;
             }
         }
@@ -996,11 +995,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     fprintf(stdout,
-                              "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                              ", %" PRIuHSIZE "}, read: %u, "
-                              "Fill value: %u\n",
-                              hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], buf[u],
-                              fillval);
+                            "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                            ", %" PRIuHSIZE "}, read: %u, "
+                            "Fill value: %u\n",
+                            hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4], buf[u],
+                            fillval);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -1023,12 +1022,12 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     fprintf(stdout,
-                              "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                              ", %" PRIuHSIZE "}, read: %f, %d, %f, %c"
-                              "Fill value: %f, %d, %f, %c\n",
-                              hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4],
-                              (double)buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z, (double)fill_c.a,
-                              fill_c.x, fill_c.y, fill_c.z);
+                            "    Elmt={%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                            ", %" PRIuHSIZE "}, read: %f, %d, %f, %c"
+                            "Fill value: %f, %d, %f, %c\n",
+                            hs_offset[0], hs_offset[1], hs_offset[2], hs_offset[3], hs_offset[4],
+                            (double)buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z, (double)fill_c.a,
+                            fill_c.x, fill_c.y, fill_c.z);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -1093,9 +1092,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
-                             "should be: %u\n",
-                             (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
-                             (long)hs_offset[4], val_rd, should_be);
+                           "should be: %u\n",
+                           (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
+                           (long)hs_offset[4], val_rd, should_be);
                     goto error;
                 }
             }
@@ -1105,9 +1104,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
-                             "should be: %u\n",
-                             (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
-                             (long)hs_offset[4], val_rd, should_be);
+                           "should be: %u\n",
+                           (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
+                           (long)hs_offset[4], val_rd, should_be);
                     goto error;
                 }
             }
@@ -1137,10 +1136,10 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
-                             "should be: %f,%d,%f,%c\n",
-                             (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
-                             (long)hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z,
-                             (double)should_be_c.a, should_be_c.x, should_be_c.y, should_be_c.z);
+                           "should be: %f,%d,%f,%c\n",
+                           (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
+                           (long)hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
+                           should_be_c.x, should_be_c.y, should_be_c.z);
                     goto error;
                 }
             } /* end for fill_time == H5D_FILL_TIME_ALLOC */
@@ -1154,10 +1153,10 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
                     H5_FAILED();
                     fprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
-                             "should be: %f,%d,%f,%c\n",
-                             (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
-                             (long)hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z,
-                             (double)should_be_c.a, should_be_c.x, should_be_c.y, should_be_c.z);
+                           "should be: %f,%d,%f,%c\n",
+                           (long)hs_offset[0], (long)hs_offset[1], (long)hs_offset[2], (long)hs_offset[3],
+                           (long)hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
+                           should_be_c.x, should_be_c.y, should_be_c.z);
                     goto error;
                 }
             } /* end for fill_time == H5D_FILL_TIME_NEVER */
@@ -1449,10 +1448,10 @@ test_extend_verify_integer(unsigned lineno, const hsize_t *offset, const void *_
     if (*test_val != *compare_val) {
         fprintf(stdout, "%u: Value read was not expected.\n", lineno);
         fprintf(stdout,
-                  "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                  "}, read: %d, "
-                  "expected: %d\n",
-                  offset[0], offset[1], offset[2], offset[3], offset[4], *test_val, *compare_val);
+                "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                "}, read: %d, "
+                "expected: %d\n",
+                offset[0], offset[1], offset[2], offset[3], offset[4], *test_val, *compare_val);
         goto error;
     } /* end if */
 
@@ -1541,11 +1540,11 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset, const void *_
         strcmp(test_val->b, compare_val->b) != 0 || (test_val->y != compare_val->y)) {
         fprintf(stdout, "%u: Value read was not expected.\n", lineno);
         fprintf(stdout,
-                  "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                  "}, read: {%d, '%s', '%s', %d} "
-                  "expected: {%d, '%s', '%s', %d}\n",
-                  offset[0], offset[1], offset[2], offset[3], offset[4], test_val->x, test_val->a,
-                  test_val->b, test_val->y, compare_val->x, compare_val->a, compare_val->b, compare_val->y);
+                "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+                "}, read: {%d, '%s', '%s', %d} "
+                "expected: {%d, '%s', '%s', %d}\n",
+                offset[0], offset[1], offset[2], offset[3], offset[4], test_val->x, test_val->a, test_val->b,
+                test_val->y, compare_val->x, compare_val->a, compare_val->b, compare_val->y);
         goto error;
     } /* end if */
 
@@ -2244,8 +2243,8 @@ test_compatible(void)
 
     if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         printf("    Could not open file %s. Try set $srcdir to point at the "
-                 "source directory of test\n",
-                 testfile);
+               "source directory of test\n",
+               testfile);
         goto error;
     }
 
@@ -2458,8 +2457,8 @@ test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t 
             H5_FAILED();
             fprintf(stdout, "%u: Allocated chunk value read was not correct.\n", (unsigned)__LINE__);
             printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n", (long)r_values[0],
-                     (long)r_values[1], (long)r_values[2], (long)r_values[3], (long)w_values[0],
-                     (long)fillval, (long)fillval, (long)fillval);
+                   (long)r_values[1], (long)r_values[2], (long)r_values[3], (long)w_values[0], (long)fillval,
+                   (long)fillval, (long)fillval);
             goto error;
         }
         /* check unallocated chunk */
@@ -2468,8 +2467,8 @@ test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t 
             H5_FAILED();
             fprintf(stdout, "%u: Unallocated chunk value read was not correct.\n", (unsigned)__LINE__);
             printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n", (long)f_values[0],
-                     (long)f_values[1], (long)f_values[2], (long)f_values[3], (long)fillval, (long)fillval,
-                     (long)fillval, (long)fillval);
+                   (long)f_values[1], (long)f_values[2], (long)f_values[3], (long)fillval, (long)fillval,
+                   (long)fillval, (long)fillval);
             goto error;
         }
         /* for the "never fill" case expect to get trash values, so skip */

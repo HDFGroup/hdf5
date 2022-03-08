@@ -328,7 +328,7 @@ compact_dataset(void)
             if (!H5_DBL_ABS_EQUAL(inme[(i * size) + j], outme[(i * size) + j]))
                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     printf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j,
-                             outme[(i * size) + j], inme[(i * size) + j]);
+                           outme[(i * size) + j], inme[(i * size) + j]);
 
     H5Pclose(plist);
     H5Pclose(dxpl);
@@ -768,13 +768,13 @@ dataset_fillvalue(void)
                             if (*twdata != *trdata)
                                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                                     printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n",
-                                             i, j, k, l, *twdata, *trdata);
+                                           i, j, k, l, *twdata, *trdata);
                         } /* end if */
                         else {
                             if (*trdata != 0)
                                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n",
-                                             i, j, k, l, *trdata);
+                                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,
+                                           j, k, l, *trdata);
                         } /* end else */
         if (err_num > MAX_ERR_REPORT && !VERBOSE_MED)
             printf("[more errors ...]\n");
@@ -1431,8 +1431,8 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
             if (*indata != *outdata)
                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     printf("Dataset Verify failed at [%lu][%lu](row %lu, col%lu): expect %d, got %d\n",
-                             (unsigned long)i, (unsigned long)j, (unsigned long)i, (unsigned long)j, *outdata,
-                             *indata);
+                           (unsigned long)i, (unsigned long)j, (unsigned long)i, (unsigned long)j, *outdata,
+                           *indata);
         }
     if (err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
@@ -2333,9 +2333,9 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                     for (j = 0; j < LOCAL_DATA_SIZE; j++)
                         if (!H5_DBL_ABS_EQUAL(data_read[j], data[j])) {
                             fprintf(stdout,
-                                      "%0d:%s: Reading datasets value failed in "
-                                      "Dataset %d, at position %d: expect %f, got %f.\n",
-                                      mpi_rank, fcn_name, i, j, data[j], data_read[j]);
+                                    "%0d:%s: Reading datasets value failed in "
+                                    "Dataset %d, at position %d: expect %f, got %f.\n",
+                                    mpi_rank, fcn_name, i, j, data[j], data_read[j]);
                             nerrors++;
                         }
                     for (j = 0; j < LOCAL_DATA_SIZE; j++)
@@ -2384,7 +2384,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                     VRFY((tri_err >= 0), "H5Tequal failed.\n");
                     if (tri_err == 0) {
                         fprintf(stdout, "%0d:%s: Mismatched Attribute type of Dataset %d.\n", mpi_rank,
-                                  fcn_name, i);
+                                fcn_name, i);
                         nerrors++;
                     }
                     else {
@@ -2395,9 +2395,9 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         for (j = 0; j < LOCAL_DATA_SIZE; j++)
                             if (!H5_DBL_ABS_EQUAL(att_read[j], att[j])) {
                                 fprintf(stdout,
-                                          "%0d:%s: Mismatched attribute data read in Dataset %d, at position "
-                                          "%d: expect %f, got %f.\n",
-                                          mpi_rank, fcn_name, i, j, att[j], att_read[j]);
+                                        "%0d:%s: Mismatched attribute data read in Dataset %d, at position "
+                                        "%d: expect %f, got %f.\n",
+                                        mpi_rank, fcn_name, i, j, att[j], att_read[j]);
                                 nerrors++;
                             }
                         for (j = 0; j < LOCAL_DATA_SIZE; j++) {
@@ -2434,8 +2434,8 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                     tri_err = H5Tequal(lg_att_type[i], H5T_NATIVE_DOUBLE);
                     VRFY((tri_err >= 0), "H5Tequal failed.\n");
                     if (tri_err == 0) {
-                        fprintf(stdout, "%0d:%s: Mismatched Large attribute type of Dataset %d.\n",
-                                  mpi_rank, fcn_name, i);
+                        fprintf(stdout, "%0d:%s: Mismatched Large attribute type of Dataset %d.\n", mpi_rank,
+                                fcn_name, i);
                         nerrors++;
                     }
                     else {
@@ -2446,9 +2446,9 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         for (j = 0; j < LARGE_ATTR_SIZE; j++)
                             if (!H5_DBL_ABS_EQUAL(lg_att_read[j], lg_att[j])) {
                                 fprintf(stdout,
-                                          "%0d:%s: Mismatched large attribute data read in Dataset %d, at "
-                                          "position %d: expect %f, got %f.\n",
-                                          mpi_rank, fcn_name, i, j, lg_att[j], lg_att_read[j]);
+                                        "%0d:%s: Mismatched large attribute data read in Dataset %d, at "
+                                        "position %d: expect %f, got %f.\n",
+                                        mpi_rank, fcn_name, i, j, lg_att[j], lg_att_read[j]);
                                 nerrors++;
                             }
                         for (j = 0; j < LARGE_ATTR_SIZE; j++) {

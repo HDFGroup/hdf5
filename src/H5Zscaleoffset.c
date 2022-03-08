@@ -165,7 +165,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             } while (_size_rem);                                                                             \
         } /* end if */                                                                                       \
         else {                                                                                               \
-            assert(H5T_native_order_g == H5T_ORDER_BE);                                                    \
+            assert(H5T_native_order_g == H5T_ORDER_BE);                                                      \
                                                                                                              \
             /* Copy 4 bytes at a time to each cd value, but start at the end                                 \
              * (highest address) of fill_val */                                                              \
@@ -184,7 +184,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                     _fv_p -= _size_rem;                                                                      \
             } /* end while */                                                                                \
                                                                                                              \
-            assert(_fv_p == (char *)&(fill_val));                                                          \
+            assert(_fv_p == (char *)&(fill_val));                                                            \
             if (_size_rem) {                                                                                 \
                 /* Amount left to copy is smaller than a cd_value, initialize                                \
                  * _cd_value as it will not be fully overwritten and copy to the end                         \
@@ -292,7 +292,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             } while (_size_rem);                                                                             \
         } /* end if */                                                                                       \
         else {                                                                                               \
-            assert(H5T_native_order_g == H5T_ORDER_BE);                                                    \
+            assert(H5T_native_order_g == H5T_ORDER_BE);                                                      \
                                                                                                              \
             /* Copy 4 bytes at a time to each cd value, but start at the end                                 \
              * (highest address) of fill_val */                                                              \
@@ -311,7 +311,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                     _fv_p -= _size_rem;                                                                      \
             } /* end while */                                                                                \
                                                                                                              \
-            assert(_fv_p == (char *)&(fill_val));                                                          \
+            assert(_fv_p == (char *)&(fill_val));                                                            \
             if (_size_rem) {                                                                                 \
                 /* Amount left to copy is smaller than a cd_value, initialize                                \
                  * _cd_value as it will not be fully overwritten and copy to the end                         \
@@ -364,12 +364,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                                 \
     {                                                                                                        \
         i = 0;                                                                                               \
-        while (i < d_nelmts && fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                      \
+        while (i < d_nelmts && fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                          \
             i++;                                                                                             \
         if (i < d_nelmts)                                                                                    \
             min = max = buf[i];                                                                              \
         for (; i < d_nelmts; i++) {                                                                          \
-            if (fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                                     \
+            if (fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                                         \
                 continue; /* ignore fill value */                                                            \
             if (buf[i] > max)                                                                                \
                 max = buf[i];                                                                                \
@@ -586,7 +586,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (H5T_native_order_g == H5T_ORDER_LE)                                                          \
                 H5MM_memcpy(minval, &min, sizeof(type));                                                     \
             else {                                                                                           \
-                assert(H5T_native_order_g == H5T_ORDER_BE);                                                \
+                assert(H5T_native_order_g == H5T_ORDER_BE);                                                  \
                 H5MM_memcpy(((char *)minval) + (sizeof(long long) - sizeof(type)), &min, sizeof(type));      \
             } /* end else */                                                                                 \
         else                                                                                                 \
@@ -670,7 +670,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (H5T_native_order_g == H5T_ORDER_LE)                                                          \
                 H5MM_memcpy(&min, &minval, sizeof(type));                                                    \
             else {                                                                                           \
-                assert(H5T_native_order_g == H5T_ORDER_BE);                                                \
+                assert(H5T_native_order_g == H5T_ORDER_BE);                                                  \
                 H5MM_memcpy(&min, ((char *)&minval) + (sizeof(long long) - sizeof(type)), sizeof(type));     \
             } /* end else */                                                                                 \
         else                                                                                                 \
@@ -1566,11 +1566,11 @@ H5Z__scaleoffset_precompress_fd(void *data, unsigned d_nelmts, enum H5Z_scaleoff
     FUNC_ENTER_STATIC
 
     if (type == t_float)
-        H5Z_scaleoffset_precompress_3(float, powf, fabsf, roundf, lroundf, llroundf, data, d_nelmts,
-                                      filavail, cd_values, minbits, minval, D_val);
+        H5Z_scaleoffset_precompress_3(float, powf, fabsf, roundf, lroundf, llroundf, data, d_nelmts, filavail,
+                                      cd_values, minbits, minval, D_val);
     else if (type == t_double)
-        H5Z_scaleoffset_precompress_3(double, pow, fabs, round, lround, llround, data, d_nelmts,
-                                      filavail, cd_values, minbits, minval, D_val);
+        H5Z_scaleoffset_precompress_3(double, pow, fabs, round, lround, llround, data, d_nelmts, filavail,
+                                      cd_values, minbits, minval, D_val);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

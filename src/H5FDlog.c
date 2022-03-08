@@ -732,16 +732,16 @@ H5FD__log_close(H5FD_t *_file)
             while (addr < file->eoa) {
                 if (file->nwrite[addr] != last_val) {
                     fprintf(file->logfp,
-                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
-                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                            "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
+                            last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nwrite[addr];
                     last_addr = addr;
                 }
                 addr++;
             }
             fprintf(file->logfp,
-                      "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
-                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
+                    last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         }
 
         /* Dump the read I/O information */
@@ -753,16 +753,16 @@ H5FD__log_close(H5FD_t *_file)
             while (addr < file->eoa) {
                 if (file->nread[addr] != last_val) {
                     fprintf(file->logfp,
-                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
-                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                            "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
+                            last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nread[addr];
                     last_addr = addr;
                 }
                 addr++;
             }
             fprintf(file->logfp,
-                      "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
-                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n", last_addr,
+                    (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         }
 
         /* Dump the I/O flavor information */
@@ -774,15 +774,15 @@ H5FD__log_close(H5FD_t *_file)
             while (addr < file->eoa) {
                 if (file->flavor[addr] != last_val) {
                     fprintf(file->logfp,
-                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
-                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+                            "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
+                            last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
                     last_val  = file->flavor[addr];
                     last_addr = addr;
                 }
                 addr++;
             }
             fprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
-                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+                    last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
         }
 
         /* Free the logging information */
@@ -953,8 +953,8 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
 
         if (file->fa.flags & H5FD_LOG_ALLOC)
             fprintf(file->logfp,
-                      "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr,
-                      (haddr_t)((addr + size) - 1), size, flavors[type]);
+                    "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr,
+                    (haddr_t)((addr + size) - 1), size, flavors[type]);
     }
 
     /* Set return value */
@@ -993,7 +993,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         /* Log the file memory freed */
         if (file->fa.flags & H5FD_LOG_FREE)
             fprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n",
-                      addr, (haddr_t)((addr + size) - 1), size, flavors[type]);
+                    addr, (haddr_t)((addr + size) - 1), size, flavors[type]);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1060,8 +1060,8 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             /* Log the extension like an allocation */
             if (file->fa.flags & H5FD_LOG_ALLOC)
                 fprintf(file->logfp,
-                          "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n",
-                          file->eoa, addr, size, flavors[type]);
+                        "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n",
+                        file->eoa, addr, size, flavors[type]);
         }
 
         /* Check for decreasing file size */
@@ -1078,8 +1078,8 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             /* Log the shrink like a free */
             if (file->fa.flags & H5FD_LOG_FREE)
                 fprintf(file->logfp,
-                          "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n",
-                          file->eoa, addr, size, flavors[type]);
+                        "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n", file->eoa,
+                        addr, size, flavors[type]);
         }
     }
 
@@ -1283,7 +1283,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
             if (file->fa.flags & H5FD_LOG_LOC_READ)
                 fprintf(file->logfp, "Error! Reading: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n",
-                          orig_addr, (orig_addr + orig_size) - 1, orig_size);
+                        orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
@@ -1325,15 +1325,15 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     /* Log information about the read */
     if (file->fa.flags & H5FD_LOG_LOC_READ) {
         fprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Read", orig_addr,
-                  (orig_addr + orig_size) - 1, orig_size, flavors[type]);
+                (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
         /* Verify that we are reading in the type of data we allocated in this location */
         if (file->flavor) {
             assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[orig_addr] ||
-                     (H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT);
+                   (H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT);
             assert(type == H5FD_MEM_DEFAULT ||
-                     type == (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] ||
-                     (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] == H5FD_MEM_DEFAULT);
+                   type == (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] ||
+                   (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] == H5FD_MEM_DEFAULT);
         }
 
         /* Add the read time, if we're tracking that.
@@ -1398,9 +1398,9 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     /* Verify that we are writing out the type of data we allocated in this location */
     if (file->flavor) {
         assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[addr] ||
-                 (H5FD_mem_t)file->flavor[addr] == H5FD_MEM_DEFAULT);
+               (H5FD_mem_t)file->flavor[addr] == H5FD_MEM_DEFAULT);
         assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[(addr + size) - 1] ||
-                 (H5FD_mem_t)file->flavor[(addr + size) - 1] == H5FD_MEM_DEFAULT);
+               (H5FD_mem_t)file->flavor[(addr + size) - 1] == H5FD_MEM_DEFAULT);
     }
 
     /* Check for overflow conditions */
@@ -1505,7 +1505,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 
             if (file->fa.flags & H5FD_LOG_LOC_WRITE)
                 fprintf(file->logfp, "Error! Writing: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n",
-                          orig_addr, (orig_addr + orig_size) - 1, orig_size);
+                        orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
@@ -1541,7 +1541,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     /* Log information about the write */
     if (file->fa.flags & H5FD_LOG_LOC_WRITE) {
         fprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr,
-                  (orig_addr + orig_size) - 1, orig_size, flavors[type]);
+                (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
         /* Check if this is the first write into a "default" section, grabbed by the metadata aggregation
          * algorithm */

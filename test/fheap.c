@@ -273,44 +273,44 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
         FAIL_STACK_ERROR
     if (heap_stats.man_nobjs != state->man_nobjs) {
         fprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
-                  heap_stats.man_nobjs, state->man_nobjs);
+                heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
         fprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_size, state->man_size);
+                heap_stats.man_size, state->man_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
         fprintf(stdout,
-                  "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_alloc_size, state->man_alloc_size);
+                "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
+                heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
         fprintf(stdout,
-                  "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
-                  heap_stats.man_free_space, state->man_free_space);
+                "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
+                heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
         fprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
-                  heap_stats.huge_nobjs, state->huge_nobjs);
+                heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
         fprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
-                  heap_stats.huge_size, state->huge_size);
+                heap_stats.huge_size, state->huge_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
         fprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
-                  heap_stats.tiny_nobjs, state->tiny_nobjs);
+                heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
         fprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
-                  heap_stats.tiny_size, state->tiny_size);
+                heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR
     } /* end if */
 
@@ -16746,7 +16746,7 @@ main(void)
                         case 2:
                             small_cparam.id_len = 37;
                             puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
-                                   "'tiny' objects");
+                                 "'tiny' objects");
                             tparam.actual_id_len = 37;
                             break;
 

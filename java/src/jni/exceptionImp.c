@@ -74,17 +74,17 @@ typedef struct H5E_num_t {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
                                                                                                              \
         if (NULL == (jm = ENVPTR->GetMethodID(ENVONLY, jc, "<init>", "(Ljava/lang/String;)V"))) {            \
-            printf("THROWEXCEPTION FATAL ERROR: GetMethodID failed\n");                                    \
+            printf("THROWEXCEPTION FATAL ERROR: GetMethodID failed\n");                                      \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
                                                                                                              \
         if (NULL == (ex = ENVPTR->NewObjectA(ENVONLY, jc, jm, (jvalue *)(args)))) {                          \
-            printf("THROWEXCEPTION FATAL ERROR: Class %s: Creation failed\n", (className));                \
+            printf("THROWEXCEPTION FATAL ERROR: Class %s: Creation failed\n", (className));                  \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
                                                                                                              \
         if (ENVPTR->Throw(ENVONLY, (jthrowable)ex) < 0) {                                                    \
-            printf("THROWEXCEPTION FATAL ERROR: Class %s: Throw failed\n", (className));                   \
+            printf("THROWEXCEPTION FATAL ERROR: Class %s: Throw failed\n", (className));                     \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
     }

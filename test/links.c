@@ -5823,7 +5823,7 @@ delete_by_idx_deprec(hid_t fapl)
                         snprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 1));
                     else
                         snprintf(objname, sizeof(objname), "filler %02u",
-                                   ((max_compact * 2) - ((u * 2) + 2)));
+                                 ((max_compact * 2) - ((u * 2) + 2)));
                     if (strcmp(objname, tmpname) != 0)
                         TEST_ERROR
                 } /* end for */
@@ -5857,7 +5857,7 @@ delete_by_idx_deprec(hid_t fapl)
                         snprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 3));
                     else
                         snprintf(objname, sizeof(objname), "filler %02u",
-                                   ((max_compact * 2) - ((u * 2) + 4)));
+                                 ((max_compact * 2) - ((u * 2) + 4)));
                     if (strcmp(objname, tmpname) != 0)
                         TEST_ERROR
                 } /* end for */
@@ -6714,7 +6714,7 @@ link_iterate_old_deprec_cb(hid_t group_id, const char *link_name, const H5L_info
 
     /* Verify name of link */
     snprintf(objname, sizeof(objname), "filler %02u",
-               (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
+             (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
     if (strcmp(link_name, objname) != 0)
         return H5_ITER_ERROR;
 
@@ -10221,8 +10221,7 @@ external_link_win2(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* set up name for target link: "/CWD/tmp_links/extlinks11" */
-    strcpy(tmpname,
-             &cwdpath[2]); /* stripped the drive letter to make it relative drive but absolute path */
+    strcpy(tmpname, &cwdpath[2]); /* stripped the drive letter to make it relative drive but absolute path */
     strcat(tmpname, "/");
     strcat(tmpname, FILENAME[31]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
@@ -18867,7 +18866,7 @@ delete_by_idx(hid_t fapl)
                         snprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 1));
                     else
                         snprintf(objname, sizeof(objname), "filler %02u",
-                                   ((max_compact * 2) - ((u * 2) + 2)));
+                                 ((max_compact * 2) - ((u * 2) + 2)));
                     if (strcmp(objname, tmpname) != 0)
                         TEST_ERROR
                 } /* end for */
@@ -18901,7 +18900,7 @@ delete_by_idx(hid_t fapl)
                         snprintf(objname, sizeof(objname), "filler %02u", ((u * 2) + 3));
                     else
                         snprintf(objname, sizeof(objname), "filler %02u",
-                                   ((max_compact * 2) - ((u * 2) + 4)));
+                                 ((max_compact * 2) - ((u * 2) + 4)));
                     if (strcmp(objname, tmpname) != 0)
                         TEST_ERROR
                 } /* end for */
@@ -19800,7 +19799,7 @@ link_iterate_old_cb(hid_t group_id, const char *link_name, const H5L_info2_t *in
 
     /* Verify name of link */
     snprintf(objname, sizeof(objname), "filler %02u",
-               (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
+             (info ? (unsigned)op_data->curr : (unsigned)((op_data->ncalled - 1) + op_data->nskipped)));
     if (strcmp(link_name, objname) != 0)
         return H5_ITER_ERROR;
 

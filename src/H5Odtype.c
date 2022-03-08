@@ -926,7 +926,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 /* Sanity check */
                 /* (compound datatypes w/array members must be encoded w/version >= 2) */
                 assert(dt->shared->u.compnd.memb[i].type->shared->type != H5T_ARRAY ||
-                         dt->shared->version >= H5O_DTYPE_VERSION_2);
+                       dt->shared->version >= H5O_DTYPE_VERSION_2);
 
                 /* Check that the version is at least as great as the member */
                 assert(dt->shared->version >= dt->shared->u.compnd.memb[i].type->shared->version);
@@ -1448,7 +1448,7 @@ H5O__dtype_set_share(void *_mesg /*in,out*/, const H5O_shared_t *sh)
 
     /* Make sure we're not sharing a committed type in the heap */
     assert(sh->type == H5O_SHARE_TYPE_COMMITTED ||
-             (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
+           (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
 
     /* Copy the shared information */
     if (H5O_set_shared(&(dt->sh_loc), sh) < 0)
@@ -1738,18 +1738,18 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type class:", s);
 
     fprintf(stream, "%*s%-*s %lu byte%s\n", indent, "", fwidth, "Size:", (unsigned long)(dt->shared->size),
-              1 == dt->shared->size ? "" : "s");
+            1 == dt->shared->size ? "" : "s");
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", dt->shared->version);
 
     if (H5T_COMPOUND == dt->shared->type) {
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Number of members:", dt->shared->u.compnd.nmembs);
+                "Number of members:", dt->shared->u.compnd.nmembs);
         for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
             snprintf(buf, sizeof(buf), "Member %u:", i);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, buf, dt->shared->u.compnd.memb[i].name);
             fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "Byte offset:", (unsigned long)(dt->shared->u.compnd.memb[i].offset));
+                    "Byte offset:", (unsigned long)(dt->shared->u.compnd.memb[i].offset));
             H5O__dtype_debug(f, dt->shared->u.compnd.memb[i].type, stream, indent + 3, MAX(0, fwidth - 3));
         } /* end for */
     }     /* end if */
@@ -1757,15 +1757,15 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
         fprintf(stream, "%*s%s\n", indent, "", "Base type:");
         H5O__dtype_debug(f, dt->shared->parent, stream, indent + 3, MAX(0, fwidth - 3));
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Number of members:", dt->shared->u.enumer.nmembs);
+                "Number of members:", dt->shared->u.enumer.nmembs);
         for (i = 0; i < dt->shared->u.enumer.nmembs; i++) {
             snprintf(buf, sizeof(buf), "Member %u:", i);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, buf, dt->shared->u.enumer.name[i]);
             fprintf(stream, "%*s%-*s 0x", indent, "", fwidth, "Raw bytes of value:");
             for (k = 0; k < dt->shared->parent->shared->size; k++)
                 fprintf(stream, "%02x",
-                          (unsigned)*((uint8_t *)dt->shared->u.enumer.value +
-                                      (i * dt->shared->parent->shared->size) + k));
+                        (unsigned)*((uint8_t *)dt->shared->u.enumer.value +
+                                    (i * dt->shared->parent->shared->size) + k));
             fprintf(stream, "\n");
         } /* end for */
     }     /* end else if */
@@ -1805,8 +1805,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
 
             case H5T_CSET_ERROR:
             default:
-                snprintf(buf, sizeof(buf), "Unknown character set: %d",
-                           (int)(dt->shared->u.atomic.u.s.cset));
+                snprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(dt->shared->u.atomic.u.s.cset));
                 s = buf;
                 break;
         } /* end switch */
@@ -1844,8 +1843,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
 
             case H5T_STR_ERROR:
             default:
-                snprintf(buf, sizeof(buf), "Unknown string padding: %d",
-                           (int)(dt->shared->u.atomic.u.s.pad));
+                snprintf(buf, sizeof(buf), "Unknown string padding: %d", (int)(dt->shared->u.atomic.u.s.pad));
                 s = buf;
                 break;
         } /* end switch */
@@ -2004,12 +2002,12 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Byte order:", s);
 
         fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
-                  "Precision:", (unsigned long)(dt->shared->u.atomic.prec),
-                  1 == dt->shared->u.atomic.prec ? "" : "s");
+                "Precision:", (unsigned long)(dt->shared->u.atomic.prec),
+                1 == dt->shared->u.atomic.prec ? "" : "s");
 
         fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
-                  "Offset:", (unsigned long)(dt->shared->u.atomic.offset),
-                  1 == dt->shared->u.atomic.offset ? "" : "s");
+                "Offset:", (unsigned long)(dt->shared->u.atomic.offset),
+                1 == dt->shared->u.atomic.offset ? "" : "s");
 
         switch (dt->shared->u.atomic.lsb_pad) {
             case H5T_PAD_ZERO:
@@ -2100,22 +2098,22 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Normalization:", s);
 
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Sign bit location:", (unsigned long)(dt->shared->u.atomic.u.f.sign));
+                    "Sign bit location:", (unsigned long)(dt->shared->u.atomic.u.f.sign));
 
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Exponent location:", (unsigned long)(dt->shared->u.atomic.u.f.epos));
+                    "Exponent location:", (unsigned long)(dt->shared->u.atomic.u.f.epos));
 
             fprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
-                      "Exponent bias:", (unsigned long)(dt->shared->u.atomic.u.f.ebias));
+                    "Exponent bias:", (unsigned long)(dt->shared->u.atomic.u.f.ebias));
 
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Exponent size:", (unsigned long)(dt->shared->u.atomic.u.f.esize));
+                    "Exponent size:", (unsigned long)(dt->shared->u.atomic.u.f.esize));
 
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Mantissa location:", (unsigned long)(dt->shared->u.atomic.u.f.mpos));
+                    "Mantissa location:", (unsigned long)(dt->shared->u.atomic.u.f.mpos));
 
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Mantissa size:", (unsigned long)(dt->shared->u.atomic.u.f.msize));
+                    "Mantissa size:", (unsigned long)(dt->shared->u.atomic.u.f.msize));
 
         } /* end if */
         else if (H5T_INTEGER == dt->shared->type) {

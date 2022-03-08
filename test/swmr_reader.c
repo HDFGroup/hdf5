@@ -130,9 +130,9 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_na
                 fprintf(verbose_file, "*** ERROR ***\n");
                 fprintf(verbose_file, "Incorrect record value!\n");
                 fprintf(verbose_file,
-                          "Time = %llu.%llu, Symbol = '%s', # of records = %lld, record->rec_id = %llu\n",
-                          (unsigned long long)tv.tv_sec, (unsigned long long)tv.tv_usec, sym_name,
-                          (long long)snpoints, (unsigned long long)record->rec_id);
+                        "Time = %llu.%llu, Symbol = '%s', # of records = %lld, record->rec_id = %llu\n",
+                        (unsigned long long)tv.tv_sec, (unsigned long long)tv.tv_usec, sym_name,
+                        (long long)snpoints, (unsigned long long)record->rec_id);
             } /* end if */
             return -1;
         } /* end if */

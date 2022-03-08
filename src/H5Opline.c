@@ -651,7 +651,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
     assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
-              pline->nalloc);
+            pline->nalloc);
 
     /* Loop over all the filters */
     for (i = 0; i < pline->nused; i++) {
@@ -660,16 +660,16 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
         snprintf(name, sizeof(name), "Filter at position %zu", i);
         fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
         fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Filter identification:", (unsigned)(pline->filter[i].id));
+                "Filter identification:", (unsigned)(pline->filter[i].id));
         if (pline->filter[i].name)
             fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "Filter name:", pline->filter[i].name);
+                    "Filter name:", pline->filter[i].name);
         else
             fprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
         fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Flags:", pline->filter[i].flags);
+                "Flags:", pline->filter[i].flags);
         fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Num CD values:", pline->filter[i].cd_nelmts);
+                "Num CD values:", pline->filter[i].cd_nelmts);
 
         /* Filter parameters */
         for (j = 0; j < pline->filter[i].cd_nelmts; j++) {
@@ -677,7 +677,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
 
             snprintf(field_name, sizeof(field_name), "CD value %lu", (unsigned long)j);
             fprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
-                      pline->filter[i].cd_values[j]);
+                    pline->filter[i].cd_values[j]);
         } /* end for */
     }     /* end for */
 

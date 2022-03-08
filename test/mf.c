@@ -169,27 +169,26 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state)
 
     if (frspace_stats.tot_space != state->tot_space) {
         fprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_space, state->tot_space);
+                frspace_stats.tot_space, state->tot_space);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.tot_sect_count != state->tot_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_sect_count, state->tot_sect_count);
+                "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.tot_sect_count, state->tot_sect_count);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.serial_sect_count != state->serial_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.serial_sect_count, state->serial_sect_count);
+                "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
+                "\n",
+                frspace_stats.serial_sect_count, state->serial_sect_count);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.ghost_sect_count != state->ghost_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.ghost_sect_count, state->ghost_sect_count);
+                "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.ghost_sect_count, state->ghost_sect_count);
         TEST_ERROR
     } /* end if */
 
@@ -6573,11 +6572,11 @@ error:
 #define MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)                                           \
     {                                                                                                        \
         H5FD_mem_t mt;                                                                                       \
-        memset(memb_map, 0, sizeof memb_map);                                                              \
-        memset(memb_fapl, 0, sizeof memb_fapl);                                                            \
-        memset(memb_name, 0, sizeof memb_name);                                                            \
-        memset(memb_addr, 0, sizeof memb_addr);                                                            \
-        memset(sv, 0, sizeof sv);                                                                          \
+        memset(memb_map, 0, sizeof memb_map);                                                                \
+        memset(memb_fapl, 0, sizeof memb_fapl);                                                              \
+        memset(memb_name, 0, sizeof memb_name);                                                              \
+        memset(memb_addr, 0, sizeof memb_addr);                                                              \
+        memset(sv, 0, sizeof sv);                                                                            \
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {                                            \
             memb_map[mt]  = H5FD_MEM_SUPER;                                                                  \
             memb_fapl[mt] = H5P_DEFAULT;                                                                     \
@@ -6586,22 +6585,22 @@ error:
         memb_map[H5FD_MEM_DRAW]  = H5FD_MEM_DRAW;                                                            \
         memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;                                                           \
         memb_map[H5FD_MEM_LHEAP] = H5FD_MEM_LHEAP;                                                           \
-        sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');                                                     \
+        sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');                                                       \
         memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];                                                      \
         memb_addr[H5FD_MEM_SUPER] = 0;                                                                       \
-        sprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');                                                     \
+        sprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');                                                       \
         memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];                                                      \
         memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 6;                                                           \
-        sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');                                                      \
+        sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');                                                        \
         memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];                                                        \
         memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 3;                                                            \
-        sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');                                                     \
+        sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');                                                       \
         memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];                                                      \
         memb_addr[H5FD_MEM_GHEAP] = HADDR_MAX / 2;                                                           \
-        sprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');                                                     \
+        sprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');                                                       \
         memb_name[H5FD_MEM_LHEAP] = sv[H5FD_MEM_LHEAP];                                                      \
         memb_addr[H5FD_MEM_LHEAP] = HADDR_MAX * 2 / 3;                                                       \
-        sprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');                                                      \
+        sprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');                                                        \
         memb_name[H5FD_MEM_OHDR] = sv[H5FD_MEM_OHDR];                                                        \
         memb_addr[H5FD_MEM_OHDR] = HADDR_MAX * 5 / 6;                                                        \
     }

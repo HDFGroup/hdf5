@@ -45,10 +45,10 @@
 #ifdef H5T_REF_DEBUG
 #define H5T_REF_LOG_DEBUG(...)                                                                               \
     do {                                                                                                     \
-        fprintf(stdout, " # %s(): ", __func__);                                                            \
-        fprintf(stdout, __VA_ARGS__);                                                                      \
-        fprintf(stdout, "\n");                                                                             \
-        fflush(stdout);                                                                                    \
+        fprintf(stdout, " # %s(): ", __func__);                                                              \
+        fprintf(stdout, __VA_ARGS__);                                                                        \
+        fprintf(stdout, "\n");                                                                               \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5T_REF_LOG_DEBUG(...)                                                                               \

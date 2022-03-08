@@ -300,7 +300,7 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
 
     if (pos < count)
         memmove(&option->separators[low + 1], &option->separators[low],
-                  sizeof(*option->separators) * (uint64_t)(count - pos));
+                sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
     return 0;
@@ -450,8 +450,8 @@ print_file(mfu_flist flist, uint64_t idx)
         const char *size_units;
         mfu_format_bytes(size, &size_tmp, &size_units);
 
-        printf("%s %s %s %7.3f %3s %s %s\n", mode_format, username, groupname, size_tmp, size_units,
-                 modify_s, file);
+        printf("%s %s %s %7.3f %3s %s %s\n", mode_format, username, groupname, size_tmp, size_units, modify_s,
+               file);
     }
     else {
         /* get type */
@@ -1034,7 +1034,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                         thisbuft->chars += read_bytes;
 #ifdef VERBOSE
                         printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
-                                 buft_count);
+                               buft_count);
 #endif
                         bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                         assert(thisbuft != NULL);
@@ -1072,11 +1072,11 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 if (processing_inputfile)
                     log_instance = current_input_index;
                 snprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d",
-                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
+                         HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
             }
             else {
-                snprintf(logpath, sizeof(logpath), "%s/%s_%s.log",
-                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+                snprintf(logpath, sizeof(logpath), "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)),
+                         logbase, thisapp);
             }
         }
         else {
@@ -1086,10 +1086,10 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                     log_instance = current_input_index;
                 if (txtlog[log_len - 1] == '/')
                     snprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp,
-                               log_instance);
+                             log_instance);
                 else
                     snprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp,
-                               log_instance);
+                             log_instance);
             }
             else {
                 if (txtlog[log_len - 1] == '/')
@@ -1192,7 +1192,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             fname_arg = mfu_flist_file_get_name(flist_arg, idx);
             if (fname_arg == NULL) {
                 printf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank,
-                         file_substituted, idx);
+                       file_substituted, idx);
                 argv[k] = HDstrdup(fname);
             }
             else {

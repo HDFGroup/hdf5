@@ -1162,7 +1162,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
 
             /* Chunk # of dims & size */
             fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Number of dimensions:", (unsigned long)(mesg->u.chunk.ndims));
+                    "Number of dimensions:", (unsigned long)(mesg->u.chunk.ndims));
             fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
             for (u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
                 fprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
@@ -1200,43 +1200,42 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
                     fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Index Type:", "Unknown",
-                              (unsigned)mesg->u.chunk.idx_type);
+                            (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Index address:", mesg->storage.u.chunk.idx_addr);
+                    "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Data address:", mesg->storage.u.contig.addr);
+                    "Data address:", mesg->storage.u.contig.addr);
             fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.contig.size);
+                    "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.compact.size);
+            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.compact.size);
             break;
 
         case H5D_VIRTUAL:
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Virtual");
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
+                    "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
             fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-                      "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
+                    "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
             for (u = 0; u < mesg->storage.u.virt.list_nused; u++) {
                 fprintf(stream, "%*sMapping %zu:\n", indent, "", u);
                 fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Virtual selection:", "<Not yet implemented>");
+                        "Virtual selection:", "<Not yet implemented>");
                 fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source file name:", mesg->storage.u.virt.list[u].source_file_name);
+                        "Source file name:", mesg->storage.u.virt.list[u].source_file_name);
                 fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source dataset name:", mesg->storage.u.virt.list[u].source_dset_name);
+                        "Source dataset name:", mesg->storage.u.virt.list[u].source_dset_name);
                 fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source selection:", "<Not yet implemented>");
+                        "Source selection:", "<Not yet implemented>");
             } /* end for */
             break;
 
@@ -1244,7 +1243,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
         case H5D_NLAYOUTS:
         default:
             fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Type:", "Unknown",
-                      (unsigned)mesg->type);
+                    (unsigned)mesg->type);
             break;
     } /* end switch */
 

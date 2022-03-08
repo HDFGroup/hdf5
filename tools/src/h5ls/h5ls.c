@@ -2607,7 +2607,7 @@ is_valid_args(void)
 
     if (no_dangling_link_g && !follow_symlink_g) {
         fprintf(rawerrorstream,
-                  "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
+                "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
         ret = FALSE;
         goto out;
     }
@@ -2845,8 +2845,8 @@ main(int argc, char *argv[])
             start = strchr(argv[argno], '=');
             if (start == NULL) {
                 fprintf(rawerrorstream,
-                          "Error: Unable to parse null credentials tuple\n"
-                          "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
+                        "Error: Unable to parse null credentials tuple\n"
+                        "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }

@@ -245,12 +245,12 @@ TEST_sect_merging(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2, voi
     /* Check arguments. */
     assert(sect1);
     assert(((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
-             ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
-             ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
+           ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
+           ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
     assert(sect2);
     assert((sect2->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
-             (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
-             (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
+           (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
+           (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
     assert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
@@ -401,27 +401,26 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, frspace_state_t *state)
 
     if (frspace_stats.tot_space != state->tot_space) {
         fprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_space, state->tot_space);
+                frspace_stats.tot_space, state->tot_space);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.tot_sect_count != state->tot_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_sect_count, state->tot_sect_count);
+                "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.tot_sect_count, state->tot_sect_count);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.serial_sect_count != state->serial_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.serial_sect_count, state->serial_sect_count);
+                "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
+                "\n",
+                frspace_stats.serial_sect_count, state->serial_sect_count);
         TEST_ERROR
     } /* end if */
     if (frspace_stats.ghost_sect_count != state->ghost_sect_count) {
         fprintf(stdout,
-                  "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.ghost_sect_count, state->ghost_sect_count);
+                "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.ghost_sect_count, state->ghost_sect_count);
         TEST_ERROR
     } /* end if */
 

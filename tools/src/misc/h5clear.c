@@ -69,17 +69,14 @@ usage(const char *prog)
     fprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
     fprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
     fprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    fprintf(stdout,
-              "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
+    fprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
     fprintf(stdout, "                             the file <file_name>.\n");
     fprintf(stdout,
-              "                             C is >= 0; C is optional and will default to 1M when not set.\n");
-    fprintf(
-        stdout,
-        "                             This option helps to repair a crashed file where the stored EOA\n");
-    fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+            "                             C is >= 0; C is optional and will default to 1M when not set.\n");
     fprintf(stdout,
-              "                             The file’s EOA and EOF will be the same after applying\n");
+            "                             This option helps to repair a crashed file where the stored EOA\n");
+    fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+    fprintf(stdout, "                             The file’s EOA and EOF will be the same after applying\n");
     fprintf(stdout, "                             this option to the file.\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "Examples of use:\n");

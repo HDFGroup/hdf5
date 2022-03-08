@@ -189,7 +189,7 @@ parse_option(int argc, char *const argv[])
     /* verify partition size must be >= blocksize */
     if (part_size_g < blocksize_g) {
         fprintf(stderr, "Blocksize %d should not be bigger than partition size %d\n", blocksize_g,
-                  part_size_g);
+                part_size_g);
         Hgoto_error(-1);
     }
 

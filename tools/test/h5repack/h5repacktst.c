@@ -4149,7 +4149,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         dbuf = (double *)malloc(size);
         if (NULL == dbuf) {
             printf("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n",
-                     (int)size / 1000000);
+                   (int)size / 1000000);
             goto out;
         }
 

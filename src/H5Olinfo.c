@@ -549,18 +549,18 @@ H5O__linfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Track creation order of links:", linfo->track_corder ? "TRUE" : "FALSE");
+            "Track creation order of links:", linfo->track_corder ? "TRUE" : "FALSE");
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Index creation order of links:", linfo->index_corder ? "TRUE" : "FALSE");
+            "Index creation order of links:", linfo->index_corder ? "TRUE" : "FALSE");
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
     fprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth,
-              "Max. creation order value:", linfo->max_corder);
+            "Max. creation order value:", linfo->max_corder);
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "'Dense' link storage fractal heap address:", linfo->fheap_addr);
+            "'Dense' link storage fractal heap address:", linfo->fheap_addr);
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
+            "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "'Dense' link storage creation order index v2 B-tree address:", linfo->corder_bt2_addr);
+            "'Dense' link storage creation order index v2 B-tree address:", linfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__linfo_debug() */

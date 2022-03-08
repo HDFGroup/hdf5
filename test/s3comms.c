@@ -96,7 +96,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -311,7 +311,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -359,7 +359,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -1242,7 +1242,7 @@ test_HMAC_SHA256(void)
             "AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
             "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972",
             strlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
-                     "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
+                   "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
             "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
             SHA256_DIGEST_LENGTH * 2 + 1, /* +1 for null terminator */
         },
@@ -1786,7 +1786,7 @@ test_s3r_get_filesize(void)
     }
 
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     JSVERIFY(0, H5FD_s3comms_s3r_get_filesize(NULL), "filesize of the null handle should be 0")
 
@@ -1856,13 +1856,13 @@ test_s3r_open(void)
      ******************/
 
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                              s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_RESTRICTED));
+                                            s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_RESTRICTED));
 
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_MISSING));
+                                            S3_TEST_RESOURCE_MISSING));
 
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     /* Set given bucket url with invalid/inactive port number for badport.
      * Note, this sort of micro-management of parsed_url_t is not advised
@@ -1880,8 +1880,8 @@ test_s3r_open(void)
         FAIL_IF(5 < snprintf(purl->port, 5, "1234"))
     }
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven_badport, S3_TEST_MAX_URL_SIZE, "%s://%s:%s/%s",
-                                              purl->scheme, purl->host, purl->port,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+                                            purl->scheme, purl->host, purl->port,
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl_ready = TRUE;
@@ -2052,7 +2052,7 @@ test_s3r_read(void)
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl_ready = TRUE;
     FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     for (i = 0; i < S3COMMS_TEST_BUFFER_SIZE; i++)
         buffer[i] = '\0';
@@ -2611,7 +2611,7 @@ main(void)
     bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
         printf("WARNING: S3 bucket url is not defined in environment "
-                 "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
+               "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
         strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);

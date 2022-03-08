@@ -679,7 +679,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
     /* Move entries down to make room for new entry */
     assert(idx >= 0);
     memmove(insert_into->entry + idx + 1, insert_into->entry + idx,
-              (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
+            (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
     H5G__ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
@@ -1478,12 +1478,11 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
     } /* end if */
     else {
         fprintf(stream, "%*sSymbol Table Node...\n", indent, "");
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                  "Dirty:", sn->cache_info.is_dirty ? "Yes" : "No");
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Dirty:", sn->cache_info.is_dirty ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Size of Node (in bytes):", (unsigned)sn->node_size);
+                "Size of Node (in bytes):", (unsigned)sn->node_size);
         fprintf(stream, "%*s%-*s %u of %u\n", indent, "", fwidth, "Number of Symbols:", sn->nsyms,
-                  (unsigned)(2 * H5F_SYM_LEAF_K(f)));
+                (unsigned)(2 * H5F_SYM_LEAF_K(f)));
 
         indent += 3;
         fwidth = MAX(0, fwidth - 3);
@@ -1498,7 +1497,7 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
             } /* end if */
             else
                 fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
-                          "Warning: Invalid heap address given, name not displayed!");
+                        "Warning: Invalid heap address given, name not displayed!");
 
             H5G__ent_debug(sn->entry + u, stream, indent, fwidth, heap);
         } /* end for */

@@ -837,23 +837,23 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
     } /* end switch */
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Character Set of Name:", s);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Object opened:", mesg->obj_opened ? "TRUE" : "FALSE");
+            "Object opened:", mesg->obj_opened ? "TRUE" : "FALSE");
     fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if (mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Creation Index:", (unsigned)mesg->shared->crt_idx);
+                "Creation Index:", (unsigned)mesg->shared->crt_idx);
 
     fprintf(stream, "%*sDatatype...\n", indent, "");
     fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth - 3),
-              "Encoded Size:", (unsigned long)(mesg->shared->dt_size));
+            "Encoded Size:", (unsigned long)(mesg->shared->dt_size));
     if ((H5O_MSG_DTYPE->debug)(f, mesg->shared->dt, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to display datatype message info")
 
     fprintf(stream, "%*sDataspace...\n", indent, "");
     fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth - 3),
-              "Encoded Size:", (unsigned long)(mesg->shared->ds_size));
+            "Encoded Size:", (unsigned long)(mesg->shared->ds_size));
     if (H5S_debug(f, mesg->shared->ds, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to display dataspace message info")
 

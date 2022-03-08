@@ -333,63 +333,61 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
     /* Compare information */
     if (earray_stats.stored.max_idx_set != state->max_idx_set) {
         fprintf(stdout,
-                  "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n",
-                  earray_stats.stored.max_idx_set, state->max_idx_set);
+                "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n",
+                earray_stats.stored.max_idx_set, state->max_idx_set);
         TEST_ERROR
     } /* end if */
     if (earray_stats.stored.nelmts != state->nelmts) {
         fprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
-                  earray_stats.stored.nelmts, state->nelmts);
+                earray_stats.stored.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.hdr_size != state->hdr_size) {
-        fprintf(stdout,
-                  "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
-                  earray_stats.computed.hdr_size, state->hdr_size);
+        fprintf(stdout, "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                earray_stats.computed.hdr_size, state->hdr_size);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.nindex_blks != state->nindex_blks) {
         fprintf(stdout,
-                  "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n",
-                  earray_stats.computed.nindex_blks, state->nindex_blks);
+                "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n",
+                earray_stats.computed.nindex_blks, state->nindex_blks);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.index_blk_size != state->index_blk_size) {
         fprintf(stdout,
-                  "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.computed.index_blk_size, state->index_blk_size);
+                "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE
+                "\n",
+                earray_stats.computed.index_blk_size, state->index_blk_size);
         TEST_ERROR
     } /* end if */
     if (earray_stats.stored.ndata_blks != state->ndata_blks) {
         fprintf(stdout,
-                  "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n",
-                  earray_stats.stored.ndata_blks, state->ndata_blks);
+                "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n",
+                earray_stats.stored.ndata_blks, state->ndata_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.data_blk_size != state->data_blk_size) {
         fprintf(stdout,
-                  "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.stored.data_blk_size, state->data_blk_size);
+                "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE "\n",
+                earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR
     }  /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
         fprintf(stdout,
-                  "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n",
-                  earray_stats.stored.nsuper_blks, state->nsuper_blks);
+                "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n",
+                earray_stats.stored.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.super_blk_size != state->super_blk_size) {
         fprintf(stdout,
-                  "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.stored.super_blk_size, state->super_blk_size);
+                "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE
+                "\n",
+                earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR
     }  /* end if */
 #endif /* NOT_YET */
@@ -2543,16 +2541,15 @@ main(void)
                     /* Test first element in data block */
                     nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    snprintf(test_str, sizeof(test_str),
-                               "setting first element of array's data block #%llu",
-                               (unsigned long long)ndblks);
+                    snprintf(test_str, sizeof(test_str), "setting first element of array's data block #%llu",
+                             (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
                     snprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
-                               (unsigned long long)ndblks);
+                             (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Increment data block being tested */

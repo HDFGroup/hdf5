@@ -2088,7 +2088,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
         assert(mesg->raw >= oh->chunk[mesg->chunkno].image);
         assert(mesg->raw_size == H5O_ALIGN_OH(oh, mesg->raw_size));
         assert(mesg->raw + mesg->raw_size <=
-                 oh->chunk[mesg->chunkno].image + (oh->chunk[mesg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
+               oh->chunk[mesg->chunkno].image + (oh->chunk[mesg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
 #ifndef NDEBUG
         /* Sanity check that the message won't overwrite past it's allocated space */
         {

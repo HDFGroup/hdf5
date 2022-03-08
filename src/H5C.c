@@ -559,7 +559,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
     switch (status) {
         case in_spec:
             fprintf(stdout, "%sAuto cache resize -- no change. (hit rate = %lf)\n", cache_ptr->prefix,
-                      hit_rate);
+                    hit_rate);
             break;
 
         case increase:
@@ -567,21 +567,20 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             assert(old_max_cache_size < new_max_cache_size);
 
             fprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
-                      cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
+                    cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
 
             fprintf(stdout, "%scache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
-                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+                    old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case flash_increase:
             assert(old_max_cache_size < new_max_cache_size);
 
             fprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
-                      (int)((cache_ptr->resize_ctl).flash_incr_mode),
-                      cache_ptr->flash_size_increase_threshold);
+                    (int)((cache_ptr->resize_ctl).flash_incr_mode), cache_ptr->flash_size_increase_threshold);
 
             fprintf(stdout, "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
-                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+                    old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case decrease:
@@ -590,68 +589,68 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             switch ((cache_ptr->resize_ctl).decr_mode) {
                 case H5C_decr__off:
                     fprintf(stdout, "%sAuto cache resize -- decrease off.  HR = %lf\n", cache_ptr->prefix,
-                              hit_rate);
+                            hit_rate);
                     break;
 
                 case H5C_decr__threshold:
                     assert(hit_rate > (cache_ptr->resize_ctl).upper_hr_threshold);
 
                     fprintf(stdout, "%sAuto cache resize -- decrease by threshold.  HR = %lf > %6.5lf\n",
-                              cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).upper_hr_threshold);
+                            cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).upper_hr_threshold);
 
                     fprintf(stdout, "%sout of bounds high (%6.5lf).\n", cache_ptr->prefix,
-                              (cache_ptr->resize_ctl).upper_hr_threshold);
+                            (cache_ptr->resize_ctl).upper_hr_threshold);
                     break;
 
                 case H5C_decr__age_out:
                     fprintf(stdout, "%sAuto cache resize -- decrease by ageout.  HR = %lf\n",
-                              cache_ptr->prefix, hit_rate);
+                            cache_ptr->prefix, hit_rate);
                     break;
 
                 case H5C_decr__age_out_with_threshold:
                     assert(hit_rate > (cache_ptr->resize_ctl).upper_hr_threshold);
 
                     fprintf(stdout,
-                              "%sAuto cache resize -- decrease by ageout with threshold. HR = %lf > %6.5lf\n",
-                              cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).upper_hr_threshold);
+                            "%sAuto cache resize -- decrease by ageout with threshold. HR = %lf > %6.5lf\n",
+                            cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).upper_hr_threshold);
                     break;
 
                 default:
                     fprintf(stdout, "%sAuto cache resize -- decrease by unknown mode.  HR = %lf\n",
-                              cache_ptr->prefix, hit_rate);
+                            cache_ptr->prefix, hit_rate);
             }
 
             fprintf(stdout, "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
-                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+                    old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case at_max_size:
             fprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
-                      cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
+                    cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
             fprintf(stdout, "%s    cache already at maximum size so no change.\n", cache_ptr->prefix);
             break;
 
         case at_min_size:
             fprintf(stdout, "%sAuto cache resize -- hit rate (%lf) -- can't decrease.\n", cache_ptr->prefix,
-                      hit_rate);
+                    hit_rate);
             fprintf(stdout, "%s    cache already at minimum size.\n", cache_ptr->prefix);
             break;
 
         case increase_disabled:
             fprintf(stdout, "%sAuto cache resize -- increase disabled -- HR = %lf.", cache_ptr->prefix,
-                      hit_rate);
+                    hit_rate);
             break;
 
         case decrease_disabled:
             fprintf(stdout, "%sAuto cache resize -- decrease disabled -- HR = %lf.\n", cache_ptr->prefix,
-                      hit_rate);
+                    hit_rate);
             break;
 
         case not_full:
             assert(hit_rate < (cache_ptr->resize_ctl).lower_hr_threshold);
 
             fprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
-                      cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
+                    cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
             fprintf(stdout, "%s    cache not full so no increase in size.\n", cache_ptr->prefix);
             break;
 
@@ -880,7 +879,7 @@ H5C_dest(H5F_t *f)
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0) {
 
         fprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
-                  cache_ptr->get_entry_ptr_from_addr_counter);
+                cache_ptr->get_entry_ptr_from_addr_counter);
     }
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -3581,7 +3580,7 @@ H5C_unsettle_entry_ring(void *_entry)
     assert(entry);
     assert(entry->ring != H5C_RING_UNDEFINED);
     assert((H5C_RING_USER == entry->ring) || (H5C_RING_RDFSM == entry->ring) ||
-             (H5C_RING_MDFSM == entry->ring));
+           (H5C_RING_MDFSM == entry->ring));
     cache = entry->cache_ptr;
     assert(cache);
     assert(cache->magic == H5C__H5C_T_MAGIC);
@@ -4040,7 +4039,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
     /* Remove parent entry from child's parent array */
     if (u < (child_entry->flush_dep_nparents - 1))
         memmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
-                  (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
+                (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
     child_entry->flush_dep_nparents--;
 
     /* Adjust parent entry's nchildren and unpin parent if it goes to zero */
@@ -4300,7 +4299,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Auto cache resize disabled")
 
     assert(((cache_ptr->resize_ctl).incr_mode != H5C_incr__off) ||
-             ((cache_ptr->resize_ctl).decr_mode != H5C_decr__off));
+           ((cache_ptr->resize_ctl).decr_mode != H5C_decr__off));
 
     if (H5C_get_cache_hit_rate(cache_ptr, &hit_rate) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get hit rate")
@@ -5800,10 +5799,10 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         if (node_ptr == NULL) {
 
             assert(cache_ptr->slist_len ==
-                     (uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase));
+                   (uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase));
 
             assert(cache_ptr->slist_size ==
-                     (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
+                   (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
         } /* end if */
 #endif    /* H5C_DO_SANITY_CHECKS */
 
@@ -6284,9 +6283,9 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 #if H5C_DO_SANITY_CHECKS
         /* Verify that the slist size and length are as expected. */
         assert((uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase) ==
-                 cache_ptr->slist_len);
+               cache_ptr->slist_len);
         assert((size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase) ==
-                 cache_ptr->slist_size);
+               cache_ptr->slist_size);
 #endif /* H5C_DO_SANITY_CHECKS */
 
     } /* while */
@@ -7679,16 +7678,16 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
 
         /* NEED: work on a better assert for corked entries */
         assert((entries_examined > (2 * initial_list_len)) ||
-                 ((cache_ptr->pl_size + cache_ptr->pel_size + cache_ptr->min_clean_size) >
-                  cache_ptr->max_cache_size) ||
-                 ((cache_ptr->clean_index_size + empty_space) >= cache_ptr->min_clean_size) ||
-                 ((num_corked_entries)));
+               ((cache_ptr->pl_size + cache_ptr->pel_size + cache_ptr->min_clean_size) >
+                cache_ptr->max_cache_size) ||
+               ((cache_ptr->clean_index_size + empty_space) >= cache_ptr->min_clean_size) ||
+               ((num_corked_entries)));
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
         assert((entries_examined > (2 * initial_list_len)) ||
-                 (cache_ptr->cLRU_list_size <= cache_ptr->clean_index_size));
+               (cache_ptr->cLRU_list_size <= cache_ptr->clean_index_size));
         assert((entries_examined > (2 * initial_list_len)) ||
-                 (cache_ptr->dLRU_list_size <= cache_ptr->dirty_index_size));
+               (cache_ptr->dLRU_list_size <= cache_ptr->dirty_index_size));
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     }
@@ -8213,7 +8212,7 @@ H5C__mark_flush_dep_dirty(H5C_cache_entry_t *entry)
     for (u = 0; u < entry->flush_dep_nparents; u++) {
         /* Sanity check */
         assert(entry->flush_dep_parent[u]->flush_dep_ndirty_children <
-                 entry->flush_dep_parent[u]->flush_dep_nchildren);
+               entry->flush_dep_parent[u]->flush_dep_nchildren);
 
         /* Adjust the parent's number of dirty children */
         entry->flush_dep_parent[u]->flush_dep_ndirty_children++;
@@ -8360,7 +8359,7 @@ H5C__mark_flush_dep_unserialized(H5C_cache_entry_t *entry_ptr)
         assert(entry_ptr->flush_dep_parent);
         assert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         assert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children <
-                 entry_ptr->flush_dep_parent[u]->flush_dep_nchildren);
+               entry_ptr->flush_dep_parent[u]->flush_dep_nchildren);
 
         /* increment parents number of usserialized children */
         entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children++;
@@ -9103,7 +9102,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
     assert(0 == memcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
-                           H5C_IMAGE_EXTRA_SPACE));
+                       H5C_IMAGE_EXTRA_SPACE));
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     entry_ptr->image_up_to_date = TRUE;

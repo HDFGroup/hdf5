@@ -336,8 +336,8 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
             /* Verify that read chunk is the same as the corresponding written one */
             if (memcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
                 fprintf(stderr,
-                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
-                          offset[0], offset[1]);
+                        "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                        offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -2095,7 +2095,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
                 printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", ii, jj);
                 printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[ii][jj],
-                         read_direct_buf[ii][jj]);
+                       read_direct_buf[ii][jj]);
                 TEST_ERROR;
             }
 

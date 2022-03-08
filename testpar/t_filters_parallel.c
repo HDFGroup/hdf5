@@ -475,9 +475,9 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -631,9 +631,9 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -778,9 +778,9 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -939,9 +939,9 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -1108,10 +1108,10 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
 
         if (VERBOSE_MED) {
             printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                     block[1]);
+                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                   ", %" PRIuHSIZE " ]\n",
+                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                   block[1]);
             fflush(stdout);
         }
 
@@ -1261,10 +1261,10 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
 
         if (VERBOSE_MED) {
             printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                     block[1]);
+                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                   ", %" PRIuHSIZE " ]\n",
+                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                   block[1]);
             fflush(stdout);
         }
 
@@ -1425,10 +1425,10 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
 
         if (VERBOSE_MED) {
             printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                     block[1]);
+                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                   ", %" PRIuHSIZE " ]\n",
+                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                   block[1]);
             fflush(stdout);
         }
 
@@ -1592,10 +1592,10 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
 
         if (VERBOSE_MED) {
             printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                     ", %" PRIuHSIZE " ]\n",
-                     mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                     block[1]);
+                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                   ", %" PRIuHSIZE " ]\n",
+                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
+                   block[1]);
             fflush(stdout);
         }
 
@@ -1739,9 +1739,9 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -1776,9 +1776,8 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
 
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    memset(correct_buf +
-                 ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*data));
+    memset(correct_buf + ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+           0, segment_length * sizeof(*data));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -2174,9 +2173,9 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -2345,9 +2344,9 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -2516,11 +2515,11 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ]\n",
-                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-                 start[2], block[0], block[1], block[2]);
+               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
+               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+               " ]\n",
+               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
+               start[2], block[0], block[1], block[2]);
         fflush(stdout);
     }
 
@@ -2678,11 +2677,11 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ]\n",
-                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-                 start[2], block[0], block[1], block[2]);
+               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
+               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+               " ]\n",
+               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
+               start[2], block[0], block[1], block[2]);
         fflush(stdout);
     }
 
@@ -2839,11 +2838,11 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ]\n",
-                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-                 start[2], block[0], block[1], block[2]);
+               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
+               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+               " ]\n",
+               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
+               start[2], block[0], block[1], block[2]);
         fflush(stdout);
     }
 
@@ -2951,7 +2950,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -3027,9 +3026,9 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -3132,7 +3131,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
 
     if (MAINPROCESS)
         puts("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -3208,9 +3207,9 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -3325,7 +3324,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype "
-               "conversion");
+             "conversion");
 
     /* Skip for MPI communicator size of 1 */
     if (mpi_size == 1) {
@@ -3415,9 +3414,9 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -3523,8 +3522,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        puts(
-            "Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+        puts("Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
 
     /* Skip for MPI communicator size of 1 */
     if (mpi_size == 1) {
@@ -3614,9 +3612,9 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -3830,9 +3828,9 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -4030,9 +4028,9 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -4231,9 +4229,9 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -4361,7 +4359,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
     memset(correct_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*correct_buf));
+           0, segment_length * sizeof(*correct_buf));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4458,9 +4456,9 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -5037,9 +5035,9 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -5263,9 +5261,9 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -5488,9 +5486,9 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -5707,9 +5705,9 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -5927,9 +5925,9 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -6035,7 +6033,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6165,9 +6163,9 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -6262,7 +6260,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
 
     if (MAINPROCESS)
         puts("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6398,9 +6396,9 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -6495,7 +6493,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
-               "conversion");
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6633,9 +6631,9 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -6875,9 +6873,9 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
 
     if (VERBOSE_MED) {
         printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7163,11 +7161,11 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], offset[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-                 " ]\n",
-                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0],
-                 offset[1], offset[2], block[0], block[1], block[2]);
+               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], offset[ %" PRIuHSIZE
+               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
+               " ]\n",
+               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0], offset[1],
+               offset[2], block[0], block[1], block[2]);
         fflush(stdout);
     }
 
@@ -7332,9 +7330,9 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7480,9 +7478,9 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7554,9 +7552,9 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7683,9 +7681,9 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7758,9 +7756,9 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -7926,9 +7924,9 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8003,9 +8001,9 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8074,9 +8072,9 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8139,9 +8137,9 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8293,9 +8291,9 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8348,9 +8346,9 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8517,9 +8515,9 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8599,9 +8597,9 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 
     if (VERBOSE_MED) {
         printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                 ", %" PRIuHSIZE " ]\n",
-                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
         fflush(stdout);
     }
 
@@ -8770,9 +8768,9 @@ main(int argc, char **argv)
 
                 if (MAINPROCESS)
                     printf("== Running tests with filter '%s' using '%s' and '%s' allocation time ==\n\n",
-                             filterNames[cur_filter_idx],
-                             H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O" : "Multi-Chunk I/O",
-                             alloc_time);
+                           filterNames[cur_filter_idx],
+                           H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O" : "Multi-Chunk I/O",
+                           alloc_time);
 
                 /* Make sure current filter is available before testing with it */
                 filter_avail = H5Zfilter_avail(cur_filter);
@@ -8781,7 +8779,7 @@ main(int argc, char **argv)
                 if (!filter_avail) {
                     if (MAINPROCESS)
                         printf(" ** SKIPPED tests with filter '%s' - filter unavailable **\n\n",
-                                 filterNames[cur_filter_idx]);
+                               filterNames[cur_filter_idx]);
                     continue;
                 }
 
@@ -8792,7 +8790,7 @@ main(int argc, char **argv)
                 if (0 == (filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED)) {
                     if (MAINPROCESS)
                         printf(" ** SKIPPED tests with filter '%s' - filter not encode-enabled **\n\n",
-                                 filterNames[cur_filter_idx]);
+                               filterNames[cur_filter_idx]);
                     continue;
                 }
 
@@ -8811,8 +8809,8 @@ main(int argc, char **argv)
                 VRFY((file_id >= 0), "H5Fopen succeeded");
 
                 snprintf(group_name, sizeof(group_name), "%s_%s_%s", filterNames[cur_filter_idx],
-                           H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
-                           alloc_time);
+                         H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
+                         alloc_time);
 
                 group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                 VRFY((group_id >= 0), "H5Gcreate2 succeeded");

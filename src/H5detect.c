@@ -224,7 +224,7 @@ precision(detected_t *d)
         int            _i, _j;                                                                               \
         unsigned char *_x;                                                                                   \
                                                                                                              \
-        memset(&INFO, 0, sizeof(INFO));                                                                    \
+        memset(&INFO, 0, sizeof(INFO));                                                                      \
         INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
@@ -233,16 +233,16 @@ precision(detected_t *d)
                                                                                                              \
         for (_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(DETECT_TYPE); _i++) {                    \
             _j = (*_x++) - 1;                                                                                \
-            assert(_j < (signed)sizeof(DETECT_TYPE));                                                      \
+            assert(_j < (signed)sizeof(DETECT_TYPE));                                                        \
             INFO.perm[_i] = _j;                                                                              \
         } /* end for */                                                                                      \
                                                                                                              \
         INFO.sign = ('U' != *(#VAR));                                                                        \
         precision(&(INFO));                                                                                  \
         ALIGNMENT(TYPE, INFO);                                                                               \
-        if (!strcmp(INFO.varname, "SCHAR") || !strcmp(INFO.varname, "SHORT") ||                          \
-            !strcmp(INFO.varname, "INT") || !strcmp(INFO.varname, "LONG") ||                             \
-            !strcmp(INFO.varname, "LLONG")) {                                                              \
+        if (!strcmp(INFO.varname, "SCHAR") || !strcmp(INFO.varname, "SHORT") ||                              \
+            !strcmp(INFO.varname, "INT") || !strcmp(INFO.varname, "LONG") ||                                 \
+            !strcmp(INFO.varname, "LLONG")) {                                                                \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
         }                                                                                                    \
     }
@@ -280,12 +280,12 @@ precision(detected_t *d)
         int           _i, _j, _last = (-1);                                                                  \
         const char *  _mesg;                                                                                 \
                                                                                                              \
-        memset(&INFO, 0, sizeof(INFO));                                                                    \
+        memset(&INFO, 0, sizeof(INFO));                                                                      \
         INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
         /* Initialize padding mask */                                                                        \
-        memset(_pad_mask, 0, sizeof(_pad_mask));                                                           \
+        memset(_pad_mask, 0, sizeof(_pad_mask));                                                             \
                                                                                                              \
         /* Padding bits.  Set a variable to 4.0, then flip each bit and see if                               \
          * the modified variable is equal ("==") to the original.  Build a                                   \
@@ -295,11 +295,11 @@ precision(detected_t *d)
          * and interfere with detection of the various properties below unless we                            \
          * know to ignore them. */                                                                           \
         _v1 = (TYPE)4.0L;                                                                                    \
-        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                   \
+        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                     \
         for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
+                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                     \
                 H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
@@ -312,8 +312,8 @@ precision(detected_t *d)
             _v3 = _v1;                                                                                       \
             _v1 += _v2;                                                                                      \
             _v2 /= (TYPE)256.0L;                                                                             \
-            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                               \
-            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                               \
+            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                 \
+            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                                 \
             _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                            \
             if (_j >= 0) {                                                                                   \
                 INFO.perm[_i] = _j;                                                                          \
@@ -322,7 +322,7 @@ precision(detected_t *d)
         }                                                                                                    \
         fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);                                    \
                                                                                                              \
-        if (!strcmp(_mesg, "VAX"))                                                                         \
+        if (!strcmp(_mesg, "VAX"))                                                                           \
             INFO.is_vax = TRUE;                                                                              \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
@@ -352,8 +352,8 @@ precision(detected_t *d)
         INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                       \
         precision(&(INFO));                                                                                  \
         ALIGNMENT(TYPE, INFO);                                                                               \
-        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                         \
-            !strcmp(INFO.varname, "LDOUBLE")) {                                                            \
+        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                             \
+            !strcmp(INFO.varname, "LDOUBLE")) {                                                              \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
         }                                                                                                    \
     }
@@ -389,11 +389,11 @@ precision(detected_t *d)
         char *volatile _buf    = NULL;                                                                       \
         TYPE            _val   = 1, _val2;                                                                   \
         volatile size_t _ano   = 0;                                                                          \
-        void (*_handler)(int)  = signal(SIGBUS, sigbus_handler);                                           \
-        void (*_handler2)(int) = signal(SIGSEGV, sigsegv_handler);                                         \
-        void (*_handler3)(int) = signal(SIGILL, sigill_handler);                                           \
+        void (*_handler)(int)  = signal(SIGBUS, sigbus_handler);                                             \
+        void (*_handler2)(int) = signal(SIGSEGV, sigsegv_handler);                                           \
+        void (*_handler3)(int) = signal(SIGILL, sigill_handler);                                             \
                                                                                                              \
-        _buf = (char *)malloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                \
+        _buf = (char *)malloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                  \
         if (H5SETJMP(jbuf_g))                                                                                \
             _ano++;                                                                                          \
         if (_ano < NELMTS(align_g)) {                                                                        \
@@ -404,15 +404,15 @@ precision(detected_t *d)
             /*              pointer values when pointing to non-word aligned */                              \
             /*              locations with pointers that are supposed to be */                               \
             /*              word aligned. -QAK */                                                            \
-            memset(_buf, 0xff, sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                               \
+            memset(_buf, 0xff, sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                 \
             /*How to handle VAX types?*/                                                                     \
             if (INFO.perm[0]) /* Big-Endian */                                                               \
-                memcpy(_buf + align_g[_ano] + (INFO.size - ((INFO.offset + INFO.precision) / 8)),          \
-                         ((char *)&_val) + (INFO.size - ((INFO.offset + INFO.precision) / 8)),               \
-                         (size_t)(INFO.precision / 8));                                                      \
+                memcpy(_buf + align_g[_ano] + (INFO.size - ((INFO.offset + INFO.precision) / 8)),            \
+                       ((char *)&_val) + (INFO.size - ((INFO.offset + INFO.precision) / 8)),                 \
+                       (size_t)(INFO.precision / 8));                                                        \
             else /* Little-Endian */                                                                         \
-                memcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
-                         (size_t)(INFO.precision / 8));                                                      \
+                memcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),        \
+                       (size_t)(INFO.precision / 8));                                                        \
             _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
             H5_GCC_CLANG_DIAG_OFF("float-equal")                                                             \
             if (_val != _val2)                                                                               \
@@ -425,10 +425,10 @@ precision(detected_t *d)
             (INFO.align) = 0;                                                                                \
             fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);                                \
         }                                                                                                    \
-        free(_buf);                                                                                        \
-        signal(SIGBUS, _handler);   /*restore original handler*/                                           \
-        signal(SIGSEGV, _handler2); /*restore original handler*/                                           \
-        signal(SIGILL, _handler3);  /*restore original handler*/                                           \
+        free(_buf);                                                                                          \
+        signal(SIGBUS, _handler);   /*restore original handler*/                                             \
+        signal(SIGSEGV, _handler2); /*restore original handler*/                                             \
+        signal(SIGILL, _handler3);  /*restore original handler*/                                             \
     }
 
 /*-------------------------------------------------------------------------
@@ -665,8 +665,8 @@ H5T__init_native(void)\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-                d[i].offset,                            /*offset        */
-                d[i].precision);                        /*precision        */
+                d[i].offset,                          /*offset        */
+                d[i].precision);                      /*precision        */
         /*assert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
 
         if (0 == d[i].msize) {
@@ -705,9 +705,9 @@ H5T__init_native(void)\n\
 
         /* Variables for alignment of compound datatype */
         if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
-            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
-            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
-            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
+            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") || !strcmp(d[i].varname, "LLONG") ||
+            !strcmp(d[i].varname, "FLOAT") || !strcmp(d[i].varname, "DOUBLE") ||
+            !strcmp(d[i].varname, "LDOUBLE")) {
             fprintf(rawoutstream, "    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }

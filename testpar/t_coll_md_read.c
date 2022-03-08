@@ -141,7 +141,7 @@ test_partial_no_selection_coll_md_read(void)
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
     data = calloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                           sizeof(int));
+                         sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -165,7 +165,7 @@ test_partial_no_selection_coll_md_read(void)
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
     read_buf = malloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                        sizeof(int));
+                      sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     /*
@@ -187,8 +187,8 @@ test_partial_no_selection_coll_md_read(void)
      */
     if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
         VRFY((!memcmp(data, read_buf,
-                        count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                            sizeof(int))),
+                      count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                          sizeof(int))),
              "memcmp succeeded");
     }
 
