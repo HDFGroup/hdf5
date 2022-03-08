@@ -94,7 +94,7 @@ H5O__reset_info1(H5O_info1_t *oinfo)
     FUNC_ENTER_STATIC_NOERR;
 
     /* Reset the passed-in info struct */
-    HDmemset(oinfo, 0, sizeof(H5O_info1_t));
+    memset(oinfo, 0, sizeof(H5O_info1_t));
     oinfo->type = H5O_TYPE_UNKNOWN;
     oinfo->addr = HADDR_UNDEF;
 
@@ -127,8 +127,8 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(oinfo2);
-    HDassert(op_data);
+    assert(oinfo2);
+    assert(op_data);
 
     /* Reset the legacy info struct */
     if (H5O__reset_info1(&oinfo) < 0)
@@ -226,8 +226,8 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Reset the passed-in info struct */
     if (H5O__reset_info1(oinfo) < 0)

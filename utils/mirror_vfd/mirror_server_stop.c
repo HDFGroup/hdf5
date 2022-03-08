@@ -60,7 +60,7 @@ struct mshs_opts {
 static void
 usage(void)
 {
-    HDprintf("mirror_server_halten_sie [options]\n"
+    printf("mirror_server_halten_sie [options]\n"
              "System-independent Mirror Server shutdown program.\n"
              "Sends shutdown message to Mirror Server at given IP:port\n"
              "\n"
@@ -89,20 +89,20 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
     opts->magic  = MSHS_OPTS_MAGIC;
     opts->help   = 0;
     opts->portno = MSHS_DEFAULT_PORTNO;
-    HDstrncpy(opts->ip, MSHS_DEFAULT_IP, MSHS_IP_STR_SIZE);
+    strncpy(opts->ip, MSHS_DEFAULT_IP, MSHS_IP_STR_SIZE);
 
     for (i = 1; i < argc; i++) { /* start with first possible option argument */
-        if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
+        if (!strncmp(argv[i], "-h", 3) || !strncmp(argv[i], "--help", 7)) {
             opts->help = 1;
         }
-        else if (!HDstrncmp(argv[i], "--ip=", 5)) {
-            HDstrncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
+        else if (!strncmp(argv[i], "--ip=", 5)) {
+            strncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
         }
-        else if (!HDstrncmp(argv[i], "--port=", 7)) {
-            opts->portno = HDatoi(argv[i] + 7);
+        else if (!strncmp(argv[i], "--port=", 7)) {
+            opts->portno = atoi(argv[i] + 7);
         }
         else {
-            HDprintf("Unrecognized option: '%s'\n", argv[i]);
+            printf("Unrecognized option: '%s'\n", argv[i]);
             usage();
             opts->magic++; /* invalidate for sanity */
             return -1;
@@ -110,8 +110,8 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
     } /* end for each argument from command line */
 
     /* auto-replace 'localhost' with numeric IP */
-    if (!HDstrncmp(opts->ip, "localhost", 10)) { /* include null terminator */
-        HDstrncpy(opts->ip, "127.0.0.1", MSHS_IP_STR_SIZE);
+    if (!strncmp(opts->ip, "localhost", 10)) { /* include null terminator */
+        strncpy(opts->ip, "127.0.0.1", MSHS_IP_STR_SIZE);
     }
 
     return 0;
@@ -132,33 +132,33 @@ send_shutdown(struct mshs_opts *opts)
     struct sockaddr_in target_addr;
 
     if (opts->magic != MSHS_OPTS_MAGIC) {
-        HDprintf("invalid options structure\n");
+        printf("invalid options structure\n");
         return -1;
     }
 
     live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0) {
-        HDprintf("ERROR socket()\n");
+        printf("ERROR socket()\n");
         return -1;
     }
 
     target_addr.sin_family      = AF_INET;
     target_addr.sin_port        = HDhtons((uint16_t)opts->portno);
     target_addr.sin_addr.s_addr = HDinet_addr(opts->ip);
-    HDmemset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
+    memset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
 
     if (HDconnect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
-        HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR connect() (%d)\n%s\n", errno, strerror(errno));
         return -1;
     }
 
     if (HDwrite(live_socket, "SHUTDOWN", 9) == -1) {
-        HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR write() (%d)\n%s\n", errno, strerror(errno));
         return -1;
     }
 
     if (HDclose(live_socket) < 0) {
-        HDprintf("ERROR close() can't close socket\n");
+        printf("ERROR close() can't close socket\n");
         return -1;
     }
 
@@ -172,21 +172,21 @@ main(int argc, char **argv)
     struct mshs_opts opts;
 
     if (parse_args(argc, argv, &opts) < 0) {
-        HDprintf("Unable to parse arguments\n");
-        HDexit(EXIT_FAILURE);
+        printf("Unable to parse arguments\n");
+        exit(EXIT_FAILURE);
     }
 
     if (opts.help) {
         usage();
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (send_shutdown(&opts) < 0) {
-        HDprintf("Unable to send shutdown command\n");
-        HDexit(EXIT_FAILURE);
+        printf("Unable to send shutdown command\n");
+        exit(EXIT_FAILURE);
     }
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */
 
 #else /* H5_HAVE_MIRROR_VFD */
@@ -195,8 +195,8 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    HDprintf("Mirror VFD not built -- unable to perform shutdown.\n");
-    HDexit(EXIT_FAILURE);
+    printf("Mirror VFD not built -- unable to perform shutdown.\n");
+    exit(EXIT_FAILURE);
 }
 
 #endif /* H5_HAVE_MIRROR_VFD */

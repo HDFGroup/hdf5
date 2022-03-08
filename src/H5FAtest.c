@@ -154,7 +154,7 @@ H5FA__test_dst_context(void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Release context structure */
     ctx = H5FL_FREE(H5FA__test_ctx_t, ctx);
@@ -182,8 +182,8 @@ H5FA__test_fill(void *nat_blk, size_t nelmts)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(nat_blk);
-    HDassert(nelmts);
+    assert(nat_blk);
+    assert(nelmts);
 
     H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
@@ -213,10 +213,10 @@ H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUS
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Encode native elements into raw elements */
     while (nelmts) {
@@ -258,10 +258,10 @@ H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNU
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Decode raw elements into native elements */
     while (nelmts) {
@@ -299,12 +299,12 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(stream);
-    HDassert(elmt);
+    assert(stream);
+    assert(elmt);
 
     /* Print element */
-    HDsnprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+    snprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
+    fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
               (unsigned long long)*(const uint64_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -363,8 +363,8 @@ H5FA__get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(fa);
-    HDassert(cparam);
+    assert(fa);
+    assert(cparam);
 
     /* Get fixed array creation parameters */
     cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
@@ -393,8 +393,8 @@ H5FA__cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(cparam1);
-    HDassert(cparam2);
+    assert(cparam1);
+    assert(cparam2);
 
     /* Compare creation parameters for array */
     if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)

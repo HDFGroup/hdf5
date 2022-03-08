@@ -38,6 +38,9 @@ struct timezone {
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
+/*
+ * POSIX functions that we emulate (roughly?) on Windows.
+ */
 #define HDaccess(F, M)       _access(F, M)
 #define HDchdir(S)           _chdir(S)
 #define HDclose(F)           _close(F)
@@ -52,10 +55,9 @@ struct timezone {
 #define HDgetdrive()         _getdrive()
 #define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define HDisatty(F)          _isatty(F)
+#define isatty(F)          _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
-#define HDmemset(X, C, Z)    memset((void *)(X), C, Z) /* Cast avoids MSVC warning */
 #define HDmkdir(S, M)        _mkdir(S)
 #define HDoff_t              __int64
 
@@ -69,13 +71,11 @@ struct timezone {
 #endif
 
 #define HDread(F, M, Z)       _read(F, M, Z)
-#define HDremove(S)           Wremove_utf8(S)
+#define remove(S)           Wremove_utf8(S)
 #define HDrmdir(S)            _rmdir(S)
 #define HDsetenv(N, V, O)     Wsetenv(N, V, O)
-#define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, (Z > 1 ? Z : 2))
-#define HDsleep(S)            Sleep(S * 1000)
+#define sleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
-#define HDstrcasecmp(A, B)    _stricmp(A, B)
 #define HDstrdup(S)           _strdup(S)
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()
@@ -85,8 +85,22 @@ struct timezone {
 
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F, L) _chsize_s(F, L)
+#endif /* H5_HAVE_MINGW */
+
+/*
+ * The following are standard C functions that have oddball implementations
+ * for HDF5 on Windows.
+ */
+
+#ifndef H5_HAVE_MINGW
 #define HDfseek(F, O, W)  _fseeki64(F, O, W)
 #endif /* H5_HAVE_MINGW */
+
+/* strcasecmp is a POSIX function whose semantics our Windows implementation
+ * does not replicate.  strcasecmp is used only a handful of times.  We
+ * probably can just poison it everywhere and provide a portable alternative.
+ */
+#define HDstrcasecmp(A, B)    _stricmp(A, B)
 
 #ifdef __cplusplus
 extern "C" {

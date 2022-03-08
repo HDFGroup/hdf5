@@ -849,17 +849,17 @@ Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env, jclass clss, jlong attr_id, jlo
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (cstr = (char *)HDmalloc(str_len + 1)))
+    if (NULL == (cstr = (char *)malloc(str_len + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
 
-    if (NULL == (c_buf = (char *)HDmalloc((size_t)n * str_len)))
+    if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_string: memory allocation failed");
 
     if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, c_buf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     for (i = 0, pos = 0; i < n; i++) {
-        HDmemcpy(cstr, c_buf + pos, str_len);
+        memcpy(cstr, c_buf + pos, str_len);
         cstr[str_len] = '\0';
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, cstr))) {
@@ -878,9 +878,9 @@ Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env, jclass clss, jlong attr_id, jlo
 
 done:
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     if (cstr)
-        HDfree(cstr);
+        free(cstr);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1string */
@@ -914,7 +914,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jl
     if (!(str_len = H5Tget_size((hid_t)mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (c_buf = (char *)HDmalloc((size_t)n * str_len)))
+    if (NULL == (c_buf = (char *)malloc((size_t)n * str_len)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Awrite_string: memory allocation failed");
 
     for (i = 0; i < (size_t)n; i++) {
@@ -924,7 +924,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jl
             /*
              * If the string object was NULL, skip it.
              */
-            HDmemset(&c_buf[i * str_len], 0, str_len);
+            memset(&c_buf[i * str_len], 0, str_len);
             continue;
         }
 
@@ -935,7 +935,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jl
 
         PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL, "H5Awrite_string: string not pinned");
 
-        HDstrncpy(&c_buf[i * str_len], utf8, str_len);
+        strncpy(&c_buf[i * str_len], utf8, str_len);
 
         UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
         utf8 = NULL;
@@ -950,7 +950,7 @@ done:
     if (utf8)
         UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Awrite_1string */
@@ -1044,7 +1044,7 @@ H5AreadVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL_str: buf length < 0");
     }
 
-    if (NULL == (strs = (char **)HDcalloc((size_t)n, sizeof(char *))))
+    if (NULL == (strs = (char **)calloc((size_t)n, sizeof(char *))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                "H5AreadVL_str: failed to allocate variable length string read buffer");
 
@@ -1077,7 +1077,7 @@ done:
                 H5free_memory(strs[i]);
         }
 
-        HDfree(strs);
+        free(strs);
     }
 
     return status;
@@ -1102,7 +1102,7 @@ H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     void *  readBuf = NULL;
     herr_t  status  = FAIL;
 
-    HDmemset(&h5str, 0, sizeof(h5str_t));
+    memset(&h5str, 0, sizeof(h5str_t));
 
     /* Get size of string array */
     if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -1117,7 +1117,7 @@ H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     if (!(typeSize = H5Tget_size(tid)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (readBuf = HDcalloc((size_t)n, typeSize)))
+    if (NULL == (readBuf = calloc((size_t)n, typeSize)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadVL_asstr: failed to allocate read buffer");
 
     if ((status = H5Aread(aid, tid, readBuf)) < 0)
@@ -1150,7 +1150,7 @@ done:
         h5str_free(&h5str);
     if (readBuf) {
         H5Treclaim(tid, sid, H5P_DEFAULT, readBuf);
-        HDfree(readBuf);
+        free(readBuf);
     }
     if (sid >= 0)
         H5Sclose(sid);
@@ -1248,7 +1248,7 @@ H5AwriteVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL_str: buf length < 0");
     }
 
-    if (NULL == (writeBuf = (char **)HDcalloc((size_t)size + 1, sizeof(char *))))
+    if (NULL == (writeBuf = (char **)calloc((size_t)size + 1, sizeof(char *))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                "H5AwriteVL_str: failed to allocate variable length string write buffer");
 
@@ -1270,10 +1270,10 @@ H5AwriteVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
 
         PIN_JAVA_STRING(ENVONLY, obj, utf8, NULL, "H5AwriteVL_str: string not pinned");
 
-        if (NULL == (writeBuf[i] = (char *)HDmalloc((size_t)length + 1)))
+        if (NULL == (writeBuf[i] = (char *)malloc((size_t)length + 1)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL_str: failed to allocate string buffer");
 
-        HDstrncpy(writeBuf[i], utf8, (size_t)length);
+        strncpy(writeBuf[i], utf8, (size_t)length);
         writeBuf[i][length] = '\0';
 
         UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
@@ -1291,10 +1291,10 @@ done:
     if (writeBuf) {
         for (i = 0; i < size; i++) {
             if (writeBuf[i])
-                HDfree(writeBuf[i]);
+                free(writeBuf[i]);
         }
 
-        HDfree(writeBuf);
+        free(writeBuf);
     }
 
     return (jint)status;
@@ -1330,7 +1330,7 @@ H5AwriteVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     if (!(typeSize = H5Tget_size(tid)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (writeBuf = HDcalloc((size_t)n, typeSize)))
+    if (NULL == (writeBuf = calloc((size_t)n, typeSize)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL_asstr: failed to allocate write buffer");
 
     /*
@@ -1346,7 +1346,7 @@ H5AwriteVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
             /*
              * If the string object was NULL, skip it.
              */
-            HDmemset(&(((char *)writeBuf)[i * typeSize]), 0, typeSize);
+            memset(&(((char *)writeBuf)[i * typeSize]), 0, typeSize);
             continue;
         }
 
@@ -1379,7 +1379,7 @@ done:
         UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
     if (writeBuf) {
         H5Treclaim(tid, sid, H5P_DEFAULT, writeBuf);
-        HDfree(writeBuf);
+        free(writeBuf);
     }
     if (sid >= 0)
         H5Sclose(sid);
@@ -1404,14 +1404,14 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *env, jclass clss, jlong attr_id, j
 
     UNUSED(clss);
 
-    HDmemset(&h5str, 0, sizeof(h5str_t));
+    memset(&h5str, 0, sizeof(h5str_t));
 
     if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
     }
 
-    if (NULL == (ref_data = (H5R_ref_t *)HDcalloc(1, (size_t)n * sizeof(H5R_ref_t))))
+    if (NULL == (ref_data = (H5R_ref_t *)calloc(1, (size_t)n * sizeof(H5R_ref_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate read buffer");
 
     if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, ref_data)) < 0)
@@ -1441,7 +1441,7 @@ done:
     if (h5str.s)
         h5str_free(&h5str);
     if (ref_data)
-        HDfree(ref_data);
+        free(ref_data);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref */
@@ -1501,7 +1501,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name(JNIEnv *env, jclass clss, jlong attr_id)
     if ((buf_size = H5Aget_name((hid_t)attr_id, 0, NULL)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (attrName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (attrName = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aget_name: failed to allocate attribute name buffer");
 
     if (H5Aget_name((hid_t)attr_id, (size_t)buf_size + 1, attrName) < 0)
@@ -1513,7 +1513,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name(JNIEnv *env, jclass clss, jlong attr_id)
 
 done:
     if (attrName)
-        HDfree(attrName);
+        free(attrName);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Aget_1name */
@@ -1857,7 +1857,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
                                 (hsize_t)n, (char *)NULL, (size_t)0, (hid_t)lapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (attrName = (char *)HDmalloc(sizeof(char) * (size_t)status_size + 1)))
+    if (NULL == (attrName = (char *)malloc(sizeof(char) * (size_t)status_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aget_name_by_idx: failed to allocate buffer for attribute name");
 
     if ((H5Aget_name_by_idx((hid_t)loc_id, objName, (H5_index_t)idx_type, (H5_iter_order_t)order, (hsize_t)n,
@@ -1870,7 +1870,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
 
 done:
     if (attrName)
-        HDfree(attrName);
+        free(attrName);
     if (objName)
         UNPIN_JAVA_STRING(ENVONLY, obj_name, objName);
 

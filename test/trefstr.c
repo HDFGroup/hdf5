@@ -242,7 +242,7 @@ test_refstr_wrap(void)
     MESSAGE(5, ("Testing Wrapping Ref-Counted Strings\n"));
 
     /* Initialize buffer */
-    HDstrcpy(buf, "foo");
+    strcpy(buf, "foo");
 
     /* Wrap ref-counted string around existing buffer */
     rs = H5RS_wrap(buf);
@@ -252,8 +252,8 @@ test_refstr_wrap(void)
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
     CHECK_PTR_EQ(s, buf, "wrapping");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Increment reference count (should duplicate string) */
     ret = H5RS_incr(rs);
@@ -268,7 +268,7 @@ test_refstr_wrap(void)
     if (s == buf)
         TestErrPrintf("%d: Should not have gotten the same pointer from reference-counted string!\n",
                       __LINE__);
-    cmp = HDstrcmp(s, buf);
+    cmp = strcmp(s, buf);
     if (cmp <= 0)
         TestErrPrintf("%d: string comparison incorrect!\n", __LINE__);
 
@@ -309,9 +309,9 @@ test_refstr_asprintf_cat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDsnprintf(buf, sizeof(buf), "%d-%s", (int)10, "foo");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    snprintf(buf, sizeof(buf), "%d-%s", (int)10, "foo");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Append more output to ref-counted string */
     ret = H5RS_asprintf_cat(rs, "-%f", (double)20.0);
@@ -320,9 +320,9 @@ test_refstr_asprintf_cat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDsnprintf(buf, sizeof(buf), "%d-%s-%f", (int)10, "foo", (double)20.0);
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    snprintf(buf, sizeof(buf), "%d-%s-%f", (int)10, "foo", (double)20.0);
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Decrement reference count for string */
     ret = H5RS_decr(rs);
@@ -360,9 +360,9 @@ test_refstr_acat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDsnprintf(buf, sizeof(buf), "%s", "foo");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    snprintf(buf, sizeof(buf), "%s", "foo");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Append another string to ref-counted string */
     ret = H5RS_acat(rs, "bar");
@@ -371,14 +371,14 @@ test_refstr_acat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDsnprintf(buf, sizeof(buf), "%s", "foobar");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    snprintf(buf, sizeof(buf), "%s", "foobar");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Append a large string to ref-counted string */
-    large_str = HDmalloc(1024);
-    CHECK_PTR(large_str, "HDmalloc");
-    HDmemset(large_str, 'a', 1024);
+    large_str = malloc(1024);
+    CHECK_PTR(large_str, "malloc");
+    memset(large_str, 'a', 1024);
     large_str[1023] = '\0';
     ret             = H5RS_acat(rs, large_str);
     CHECK(ret, FAIL, "H5RS_acat");
@@ -386,22 +386,22 @@ test_refstr_acat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDsnprintf(buf, sizeof(buf), "%s", "foobar");
-    large_str2 = HDmalloc(1024 + 6);
-    CHECK_PTR(large_str2, "HDmalloc");
-    HDstrcpy(large_str2, "foobar");
-    HDmemset(&large_str2[6], 'a', 1024);
+    snprintf(buf, sizeof(buf), "%s", "foobar");
+    large_str2 = malloc(1024 + 6);
+    CHECK_PTR(large_str2, "malloc");
+    strcpy(large_str2, "foobar");
+    memset(&large_str2[6], 'a', 1024);
     large_str2[1029] = '\0';
-    cmp              = HDstrcmp(s, large_str2);
-    VERIFY(cmp, 0, "HDstrcmp");
+    cmp              = strcmp(s, large_str2);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Decrement reference count for string */
     ret = H5RS_decr(rs);
     CHECK(ret, FAIL, "H5RS_decr");
 
     /* Free large strings */
-    HDfree(large_str);
-    HDfree(large_str2);
+    free(large_str);
+    free(large_str2);
 } /* end test_refstr_acat() */
 
 /****************************************************************
@@ -433,9 +433,9 @@ test_refstr_ancat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDstrcpy(buf, "fo");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    strcpy(buf, "fo");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Append another string to ref-counted string */
     ret = H5RS_ancat(rs, "bar", 2);
@@ -444,9 +444,9 @@ test_refstr_ancat(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDstrcpy(buf, "foba");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    strcpy(buf, "foba");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Decrement reference count for string */
     ret = H5RS_decr(rs);
@@ -482,9 +482,9 @@ test_refstr_aputc(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDstrcpy(buf, "f");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    strcpy(buf, "f");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Append another character to ref-counted string */
     ret = H5RS_aputc(rs, 'o');
@@ -493,9 +493,9 @@ test_refstr_aputc(void)
     /* Get pointer to raw string in ref-counted string */
     s = H5RS_get_str(rs);
     CHECK_PTR(s, "H5RS_get_str");
-    HDstrcpy(buf, "fo");
-    cmp = HDstrcmp(s, buf);
-    VERIFY(cmp, 0, "HDstrcmp");
+    strcpy(buf, "fo");
+    cmp = strcmp(s, buf);
+    VERIFY(cmp, 0, "strcmp");
 
     /* Decrement reference count for string */
     ret = H5RS_decr(rs);

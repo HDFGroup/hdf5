@@ -117,7 +117,7 @@ static herr_t
 init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     cparam->cls                       = H5FA_CLS_TEST;
     cparam->raw_elmt_size             = ELMT_SIZE;
@@ -178,19 +178,19 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+        fprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
                   farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
+        fprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
                   farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+        fprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
                   farray_stats.nelmts, state->nelmts);
         TEST_ERROR
     }
@@ -217,8 +217,8 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
     size_t dblk_page_nelmts; /* # of elements per page */
 
     /* Sanity check */
-    HDassert(cparam);
-    HDassert(state);
+    assert(cparam);
+    assert(state);
 
     /* Compute the state of the fixed array */
     state->hdr_size = FA_HDR_SIZE;
@@ -321,7 +321,7 @@ create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_add
         TEST_ERROR
 
     /* Check array stats */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = FA_HDR_SIZE;
     state.nelmts   = cparam->nelmts;
     if (check_stats(*fa, &state))
@@ -349,7 +349,7 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
     H5FA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
+    memset(&test_cparam, 0, sizeof(H5FA_create_t));
     if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
@@ -438,7 +438,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         H5FA_create_t test_cparam; /* Creation parameters for array */
 
         /* Set invalid element size */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
         H5E_BEGIN_TRY
         {
@@ -455,7 +455,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements bits */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 0;
         H5E_BEGIN_TRY
         {
@@ -472,7 +472,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.nelmts = 0;
         H5E_BEGIN_TRY
         {
@@ -492,7 +492,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    HDputs("    Not tested when assertions are disabled");
+    puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -983,8 +983,8 @@ fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_para
     fiter_fw_t *fiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_fw_t *)HDmalloc(sizeof(fiter_fw_t));
-    HDassert(fiter);
+    fiter = (fiter_fw_t *)malloc(sizeof(fiter_fw_t));
+    assert(fiter);
 
     /* Initialize the element iteration object */
     fiter->idx = 0;
@@ -1010,7 +1010,7 @@ fiter_fw_next(void *_fiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx++;
@@ -1032,10 +1032,10 @@ static int
 fiter_term(void *fiter)
 {
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_term() */
@@ -1069,8 +1069,8 @@ fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNU
     fiter_rv_t *fiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rv_t *)HDmalloc(sizeof(fiter_rv_t));
-    HDassert(fiter);
+    fiter = (fiter_rv_t *)malloc(sizeof(fiter_rv_t));
+    assert(fiter);
 
     /* Initialize reverse iteration info */
     fiter->idx = cparam->nelmts - 1;
@@ -1096,7 +1096,7 @@ fiter_rv_next(void *_fiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx--;
@@ -1135,12 +1135,12 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rnd_t *)HDmalloc(sizeof(fiter_rnd_t));
-    HDassert(fiter);
+    fiter = (fiter_rnd_t *)malloc(sizeof(fiter_rnd_t));
+    assert(fiter);
 
     /* Allocate space for the array of shuffled indices */
-    fiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(fiter->idx);
+    fiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(fiter->idx);
 
     /* Initialize reverse iteration info */
     fiter->pos = 0;
@@ -1181,7 +1181,7 @@ fiter_rnd_next(void *_fiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx[fiter->pos];
@@ -1206,14 +1206,14 @@ fiter_rnd_term(void *_fiter)
     fiter_rnd_t *fiter = (fiter_rnd_t *)_fiter;
 
     /* Sanity check */
-    HDassert(fiter);
-    HDassert(fiter->idx);
+    assert(fiter);
+    assert(fiter->idx);
 
     /* Free shuffled index array */
-    HDfree(fiter->idx);
+    free(fiter->idx);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_rnd_term() */
@@ -1249,8 +1249,8 @@ fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     fiter_cyc_t *fiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_cyc_t *)HDmalloc(sizeof(fiter_cyc_t));
-    HDassert(fiter);
+    fiter = (fiter_cyc_t *)malloc(sizeof(fiter_cyc_t));
+    assert(fiter);
 
     /* Initialize reverse iteration info */
     fiter->pos = 0;
@@ -1278,7 +1278,7 @@ fiter_cyc_next(void *_fiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->pos;
@@ -1357,7 +1357,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
     hsize_t        fa_nelmts;             /* # of elements in fixed array */
     haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
 
-    HDassert(nelmts);
+    assert(nelmts);
     /*
      * Display testing message
      */
@@ -1386,7 +1386,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1457,7 +1457,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
     } /* end for */
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR
@@ -1541,7 +1541,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         TEST_ERROR
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1566,7 +1566,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         FAIL_STACK_ERROR
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR
@@ -1643,7 +1643,7 @@ main(void)
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -1677,19 +1677,19 @@ main(void)
     for (curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
-        HDmemset(&tparam, 0, sizeof(tparam));
+        memset(&tparam, 0, sizeof(tparam));
         tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
         switch (curr_test) {
             /* "Normal" testing parameters */
             case FARRAY_TEST_NORMAL:
-                HDputs("Testing with NORMAL PARAMETERS");
+                puts("Testing with NORMAL PARAMETERS");
                 break;
 
             /* "Re-open array" testing parameters */
             case FARRAY_TEST_REOPEN:
-                HDputs("Testing with reopen array flag set");
+                puts("Testing with reopen array flag set");
                 tparam.reopen_array = FARRAY_TEST_REOPEN;
                 break;
 
@@ -1716,25 +1716,25 @@ main(void)
             switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case FARRAY_ITER_FW:
-                    HDputs("Testing with forward iteration");
+                    puts("Testing with forward iteration");
                     tparam.fiter = &fa_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case FARRAY_ITER_RV:
-                    HDputs("Testing with reverse iteration");
+                    puts("Testing with reverse iteration");
                     tparam.fiter = &fa_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case FARRAY_ITER_RND:
-                    HDputs("Testing with random iteration");
+                    puts("Testing with random iteration");
                     tparam.fiter = &fa_iter_rnd;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case FARRAY_ITER_CYC:
-                    HDputs("Testing with cyclic iteration");
+                    puts("Testing with cyclic iteration");
                     tparam.fiter = &fa_iter_cyc;
                     break;
 
@@ -1788,15 +1788,15 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All fixed array tests passed.");
+    puts("All fixed array tests passed.");
 
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {
@@ -1807,5 +1807,5 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

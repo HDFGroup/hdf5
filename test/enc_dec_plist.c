@@ -52,7 +52,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
         VERIFY(ret, SUCCEED, "H5Pencode2");
 
         /* Allocate the buffer for encoding */
-        if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+        if (NULL == (temp_buf = (void *)malloc(temp_size)))
             TEST_ERROR
 
         /* Encode the property list to the buffer */
@@ -73,7 +73,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
 
         /* Free the buffer */
         if (temp_buf)
-            HDfree(temp_buf);
+            free(temp_buf);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* Test H5Pencode1() */
@@ -82,7 +82,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
         if (H5Pencode1(orig_pl, NULL, &temp_size) < 0)
             STACK_ERROR
 
-        if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+        if (NULL == (temp_buf = (void *)malloc(temp_size)))
             TEST_ERROR
 
         if (H5Pencode1(orig_pl, temp_buf, &temp_size) < 0)
@@ -98,7 +98,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
             STACK_ERROR
 
         if (temp_buf)
-            HDfree(temp_buf);
+            free(temp_buf);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }
 
@@ -110,7 +110,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
 
 error:
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 
     H5E_BEGIN_TRY
     {
@@ -199,12 +199,12 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg),
+            snprintf(msg, sizeof(msg),
                        "Testing ENCODE/DECODE with file version bounds: (%s, %s):", low_string, high_string);
-            HDputs(msg);
+            puts(msg);
 
             if (VERBOSE_MED)
-                HDprintf("Encode/Decode DCPLs\n");
+                printf("Encode/Decode DCPLs\n");
 
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("Default DCPL Encoding/Decoding");
@@ -678,6 +678,6 @@ main(void)
     return 0;
 
 error:
-    HDprintf("***** Plist Encode/Decode tests FAILED! *****\n");
+    printf("***** Plist Encode/Decode tests FAILED! *****\n");
     return 1;
 }

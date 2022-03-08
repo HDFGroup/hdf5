@@ -132,7 +132,7 @@ H5HG__create(H5F_t *f, size_t size)
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(f);
+    assert(f);
     if (size < H5HG_MINSIZE)
         size = H5HG_MINSIZE;
     size = H5HG_ALIGN(size);
@@ -149,7 +149,7 @@ H5HG__create(H5F_t *f, size_t size)
 
     if (NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
-    HDmemset(heap->chunk, 0, size);
+    memset(heap->chunk, 0, size);
     heap->nalloc = H5HG_NOBJS(f, size);
     heap->nused  = 1; /* account for index 0, which is used for the free object */
     if (NULL == (heap->obj = H5FL_SEQ_MALLOC(H5HG_obj_t, heap->nalloc)))
@@ -172,13 +172,13 @@ H5HG__create(H5F_t *f, size_t size)
     n = (size_t)H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
 #ifdef OLD_WAY
     /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    HDmemset(p, 0, n);
+    memset(p, 0, n);
 #endif /* OLD_WAY */
     p += n;
 
     /* The freespace object */
     heap->obj[0].size = size - H5HG_SIZEOF_HDR(f);
-    HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
     heap->obj[0].nrefs = 0;
     heap->obj[0].begin = p;
     UINT16ENCODE(p, 0); /*object ID*/
@@ -187,7 +187,7 @@ H5HG__create(H5F_t *f, size_t size)
     H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
 #ifdef OLD_WAY
     /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    HDmemset(p, 0, (size_t)((heap->chunk + heap->size) - p));
+    memset(p, 0, (size_t)((heap->chunk + heap->size) - p));
 #endif /* OLD_WAY */
 
     /* Add this heap to the beginning of the CWFS list */
@@ -242,11 +242,11 @@ H5HG__protect(H5F_t *f, haddr_t addr, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Lock the heap into memory */
     if (NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, H5AC_GHEAP, addr, f, flags)))
@@ -291,9 +291,9 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(heap);
-    HDassert(heap->obj[0].size >= need);
-    HDassert(heap_flags_ptr);
+    assert(heap);
+    assert(heap->obj[0].size >= need);
+    assert(heap_flags_ptr);
 
     /*
      * Find an ID for the new object. ID zero is reserved for the free space
@@ -307,7 +307,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
                 break;
     } /* end else */
 
-    HDassert(idx < heap->nused);
+    assert(idx < heap->nused);
 
     /* Check if we need more room to store heap objects */
     if (idx >= heap->nalloc) {
@@ -317,19 +317,19 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
         /* Determine the new number of objects to index */
         /* nalloc is *not* guaranteed to be a power of 2! - NAF 10/26/09 */
         new_alloc = MIN(MAX(heap->nalloc * 2, (idx + 1)), (H5HG_MAXIDX + 1));
-        HDassert(idx < new_alloc);
+        assert(idx < new_alloc);
 
         /* Reallocate array of objects */
         if (NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, 0, "memory allocation failed")
 
         /* Clear newly allocated space */
-        HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+        memset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
 
         /* Update heap information */
         heap->nalloc = new_alloc;
         heap->obj    = new_obj;
-        HDassert(heap->nalloc > heap->nused);
+        assert(heap->nalloc > heap->nused);
     } /* end if */
 
     /* Initialize the new object */
@@ -362,7 +362,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
         UINT16ENCODE(p, 0); /*nrefs*/
         UINT32ENCODE(p, 0); /*reserved*/
         H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
-        HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+        assert(H5HG_ISALIGNED(heap->obj[0].size));
     } /* end else-if */
     else {
         /*
@@ -371,7 +371,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
          */
         heap->obj[0].size -= need;
         heap->obj[0].begin += need;
-        HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+        assert(H5HG_ISALIGNED(heap->obj[0].size));
     }
 
     /* Mark the heap as dirty */
@@ -415,8 +415,8 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* Protect the heap */
     if (NULL == (heap = H5HG__protect(f, addr, H5AC__NO_FLAGS_SET)))
@@ -425,7 +425,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
     /* Re-allocate the heap information in memory */
     if (NULL == (new_chunk = H5FL_BLK_REALLOC(gheap_chunk, heap->chunk, (heap->size + need))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed")
-    HDmemset(new_chunk + heap->size, 0, need);
+    memset(new_chunk + heap->size, 0, need);
 
     /* Adjust the size of the heap */
     old_size = heap->size;
@@ -452,7 +452,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
     UINT16ENCODE(p, 0); /*nrefs*/
     UINT32ENCODE(p, 0); /*reserved*/
     H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
-    HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /* Resize the heap in the cache */
     if (H5AC_resize_entry(heap, heap->size) < 0)
@@ -503,9 +503,9 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(0 == size || obj);
-    HDassert(hobj);
+    assert(f);
+    assert(0 == size || obj);
+    assert(hobj);
 
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
@@ -528,7 +528,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         if (!H5F_addr_defined(addr))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to allocate a global heap collection")
     } /* end if */
-    HDassert(H5F_addr_defined(addr));
+    assert(H5F_addr_defined(addr));
 
     if (NULL == (heap = H5HG__protect(f, addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
@@ -542,7 +542,7 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         H5MM_memcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
 #ifdef OLD_WAY
         /* Don't bother zeroing out the rest of the info in the heap -QAK */
-        HDmemset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
+        memset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
                  need - (H5HG_SIZEOF_OBJHDR(f) + size));
 #endif /* OLD_WAY */
     }  /* end if */
@@ -588,15 +588,15 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, NULL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(hobj);
+    assert(f);
+    assert(hobj);
 
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect global heap")
 
-    HDassert(hobj->idx < heap->nused);
-    HDassert(heap->obj[hobj->idx].begin);
+    assert(hobj->idx < heap->nused);
+    assert(heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
     p    = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR(f);
 
@@ -659,8 +659,8 @@ H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust)
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(hobj);
+    assert(f);
+    assert(hobj);
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
@@ -669,8 +669,8 @@ H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     if (adjust != 0) {
-        HDassert(hobj->idx < heap->nused);
-        HDassert(heap->obj[hobj->idx].begin);
+        assert(hobj->idx < heap->nused);
+        assert(heap->obj[hobj->idx].begin);
         if ((heap->obj[hobj->idx].nrefs + adjust) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range")
         if ((heap->obj[hobj->idx].nrefs + adjust) > H5HG_MAXLINK)
@@ -711,16 +711,16 @@ H5HG_get_obj_size(H5F_t *f, H5HG_t *hobj, size_t *obj_size)
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(hobj);
-    HDassert(obj_size);
+    assert(f);
+    assert(hobj);
+    assert(obj_size);
 
     /* Load the heap */
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
-    HDassert(hobj->idx < heap->nused);
-    HDassert(heap->obj[hobj->idx].begin);
+    assert(hobj->idx < heap->nused);
+    assert(heap->obj[hobj->idx].begin);
 
     /* Set object size */
     *obj_size = heap->obj[hobj->idx].size;
@@ -757,8 +757,8 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(hobj);
+    assert(f);
+    assert(hobj);
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
@@ -766,7 +766,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
-    HDassert(hobj->idx < heap->nused);
+    assert(hobj->idx < heap->nused);
 
     /* When the application selects the same location to rewrite the VL element by using H5Sselect_elements,
      * it can happen that the entry has been removed by first rewrite.  Here we simply skip the removal of
@@ -790,7 +790,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     } /* end if */
     else
         heap->obj[0].size += need;
-    HDmemmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
+    memmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
     if (heap->obj[0].size >= H5HG_SIZEOF_OBJHDR(f)) {
         p = heap->obj[0].begin;
         UINT16ENCODE(p, 0); /*id*/
@@ -798,7 +798,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
         UINT32ENCODE(p, 0); /*reserved*/
         H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
     } /* end if */
-    HDmemset(heap->obj + hobj->idx, 0, sizeof(H5HG_obj_t));
+    memset(heap->obj + hobj->idx, 0, sizeof(H5HG_obj_t));
     flags |= H5AC__DIRTIED_FLAG;
 
     if ((heap->obj[0].size + H5HG_SIZEOF_HDR(f)) == heap->size) {
@@ -847,7 +847,7 @@ H5HG__free(H5HG_heap_t *heap)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Remove the heap from the CWFS list */
     if (H5F_cwfs_remove_heap(heap->shared, heap) < 0)

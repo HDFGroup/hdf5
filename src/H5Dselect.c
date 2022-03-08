@@ -100,10 +100,10 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(io_info->dset);
-    HDassert(io_info->store);
-    HDassert(io_info->u.rbuf);
+    assert(io_info);
+    assert(io_info->dset);
+    assert(io_info->store);
+    assert(io_info->u.rbuf);
 
     /* Check for only one element in selection */
     if (nelmts == 1) {
@@ -133,7 +133,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
         } /* end if */
         else {
-            HDassert(io_info->op_type == H5D_IO_OP_WRITE);
+            assert(io_info->op_type == H5D_IO_OP_WRITE);
             if ((tmp_file_len = (*io_info->layout_ops.writevv)(
                      io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
                      &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
@@ -141,7 +141,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
         } /* end else */
 
         /* Decrement number of elements left to process */
-        HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+        assert(((size_t)tmp_file_len % elmt_size) == 0);
     } /* end if */
     else {
         size_t mem_nelem;  /* Number of elements used in memory sequences */
@@ -217,7 +217,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
                     HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
             } /* end if */
             else {
-                HDassert(io_info->op_type == H5D_IO_OP_WRITE);
+                assert(io_info->op_type == H5D_IO_OP_WRITE);
                 if ((tmp_file_len = (*io_info->layout_ops.writevv)(io_info, file_nseq, &curr_file_seq,
                                                                    file_len, file_off, mem_nseq,
                                                                    &curr_mem_seq, mem_len, mem_off)) < 0)
@@ -225,7 +225,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
             } /* end else */
 
             /* Decrement number of elements left to process */
-            HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+            assert(((size_t)tmp_file_len % elmt_size) == 0);
             if (elmt_size == 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "Resulted in division by zero")
             nelmts -= ((size_t)tmp_file_len / elmt_size);

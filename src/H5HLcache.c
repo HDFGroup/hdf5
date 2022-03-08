@@ -156,12 +156,12 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(heap);
-    HDassert(image);
-    HDassert(udata);
+    assert(heap);
+    assert(image);
+    assert(udata);
 
     /* Check magic number */
-    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -213,8 +213,8 @@ H5HL__fl_deserialize(H5HL_t *heap)
     FUNC_ENTER_STATIC
 
     /* check arguments */
-    HDassert(heap);
-    HDassert(!heap->freelist);
+    assert(heap);
+    assert(!heap->freelist);
 
     /* Build free list */
     free_block = heap->free_block;
@@ -281,13 +281,13 @@ H5HL__fl_serialize(const H5HL_t *heap)
     FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Serialize the free list into the heap data's image */
     for (fl = heap->freelist; fl; fl = fl->next) {
         uint8_t *image; /* Pointer into raw data buffer */
 
-        HDassert(fl->offset == H5HL_ALIGN(fl->offset));
+        assert(fl->offset == H5HL_ALIGN(fl->offset));
         image = heap->dblk_image + fl->offset;
 
         if (fl->next)
@@ -322,7 +322,7 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(image_len);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = H5HL_SPEC_READ_SIZE;
@@ -356,10 +356,10 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(actual_len);
-    HDassert(*actual_len == image_len);
+    assert(image);
+    assert(udata);
+    assert(actual_len);
+    assert(*actual_len == image_len);
 
     /* Deserialize the heap's header */
     if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, udata) < 0)
@@ -407,14 +407,14 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->sizeof_size > 0);
-    HDassert(udata->sizeof_addr > 0);
-    HDassert(udata->sizeof_prfx > 0);
-    HDassert(H5F_addr_defined(udata->prfx_addr));
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->sizeof_size > 0);
+    assert(udata->sizeof_addr > 0);
+    assert(udata->sizeof_prfx > 0);
+    assert(H5F_addr_defined(udata->prfx_addr));
+    assert(dirty);
 
     /* Allocate space in memory for the heap */
     if (NULL == (heap = H5HL__new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
@@ -499,10 +499,10 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(image_len);
+    assert(prfx);
+    assert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(image_len);
 
     /* Set the prefix's size */
     *image_len = prfx->heap->prfx_size;
@@ -544,23 +544,23 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
-    HDassert(prfx->heap);
+    assert(f);
+    assert(image);
+    assert(prfx);
+    assert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(prfx->heap);
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
-    HDassert(heap);
+    assert(heap);
 
     /* Compute the buffer size */
     buf_size = heap->prfx_size;
     if (heap->single_cache_obj)
         buf_size += heap->dblk_size;
-    HDassert(len == buf_size);
+    assert(len == buf_size);
 
     /* Update the free block value from the free list */
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
@@ -586,7 +586,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
              * the prefix and the data block due to alignment constraints.
              */
             gap = heap->prfx_size - (size_t)(image - (uint8_t *)_image);
-            HDmemset(image, 0, gap);
+            memset(image, 0, gap);
             image += gap;
         }
 
@@ -597,14 +597,14 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
         H5MM_memcpy(image, heap->dblk_image, heap->dblk_size);
 
         /* Sanity check */
-        HDassert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
+        assert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
     }
     else {
         /* Sanity check */
-        HDassert((size_t)(image - (uint8_t *)_image) <= len);
+        assert((size_t)(image - (uint8_t *)_image) <= len);
 
         /* Clear rest of local heap */
-        HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+        memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -641,10 +641,10 @@ H5HL__cache_prefix_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    assert(prfx);
+    assert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
+    assert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
 
     /* Destroy local heap prefix */
     if (H5HL__prfx_dest(prfx) < 0)
@@ -677,9 +677,9 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(heap);
-    HDassert(heap->dblk_size > 0);
-    HDassert(image_len);
+    assert(heap);
+    assert(heap->dblk_size > 0);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = heap->dblk_size;
@@ -712,13 +712,13 @@ H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, h
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(heap);
-    HDassert(heap->dblk_size == len);
-    HDassert(!heap->single_cache_obj);
-    HDassert(NULL == heap->dblk);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(heap);
+    assert(heap->dblk_size == len);
+    assert(!heap->single_cache_obj);
+    assert(NULL == heap->dblk);
+    assert(dirty);
 
     /* Allocate space in memory for the heap data block */
     if (NULL == (dblk = H5HL__dblk_new(heap)))
@@ -771,12 +771,12 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
-    HDassert(dblk->heap);
-    HDassert(dblk->heap->dblk_size > 0);
-    HDassert(image_len);
+    assert(dblk);
+    assert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk->heap);
+    assert(dblk->heap->dblk_size > 0);
+    assert(image_len);
 
     *image_len = dblk->heap->dblk_size;
 
@@ -807,15 +807,15 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
-    HDassert(dblk->heap);
+    assert(f);
+    assert(image);
+    assert(dblk);
+    assert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk->heap);
     heap = dblk->heap;
-    HDassert(heap->dblk_size == len);
-    HDassert(!heap->single_cache_obj);
+    assert(heap->dblk_size == len);
+    assert(!heap->single_cache_obj);
 
     /* Update the free block value from the free list */
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
@@ -852,7 +852,7 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(dblk);
+    assert(dblk);
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -861,8 +861,8 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             /* Sanity checks */
-            HDassert(dblk->heap);
-            HDassert(dblk->heap->prfx);
+            assert(dblk->heap);
+            assert(dblk->heap->prfx);
 
             /* Pin the heap's prefix */
             if (FAIL == H5AC_pin_protected_entry(dblk->heap->prfx))
@@ -881,8 +881,8 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* Sanity checks */
-            HDassert(dblk->heap);
-            HDassert(dblk->heap->prfx);
+            assert(dblk->heap);
+            assert(dblk->heap->prfx);
 
             /* Unpin the local heap prefix */
             if (FAIL == H5AC_unpin_entry(dblk->heap->prfx))
@@ -924,9 +924,9 @@ H5HL__cache_datablock_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
+    assert(dblk);
+    assert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
 
     /* Destroy the data block */
     if (H5HL__dblk_dest(dblk) < 0)

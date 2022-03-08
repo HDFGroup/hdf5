@@ -96,7 +96,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /*
      * Allocate file and memory data structures.
@@ -105,7 +105,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap direct block")
 
     /* Reset the metadata cache info for the heap header */
-    HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
     dblock->hdr = hdr;
@@ -135,7 +135,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* XXX: Change to using free-list factories */
     if ((dblock->blk = H5FL_BLK_MALLOC(direct_block, dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(dblock->blk, 0, dblock->size);
+    memset(dblock->blk, 0, dblock->size);
 
     dblock->write_buf  = NULL;
     dblock->write_size = 0;
@@ -227,8 +227,8 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(dblock);
+    assert(hdr);
+    assert(dblock);
 
     /* Check for I/O filters on this heap */
     if (hdr->filter_len > 0) {
@@ -258,11 +258,11 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
     /* Check for root direct block */
     if (hdr->man_dtable.curr_root_rows == 0) {
         /* Sanity check */
-        HDassert(hdr->man_dtable.table_addr == dblock_addr);
-        HDassert(hdr->man_dtable.cparam.start_block_size == dblock->size);
+        assert(hdr->man_dtable.table_addr == dblock_addr);
+        assert(hdr->man_dtable.cparam.start_block_size == dblock->size);
 
         /* Sanity check block iterator */
-        HDassert(!H5HF__man_iter_ready(&hdr->next_block));
+        assert(!H5HF__man_iter_ready(&hdr->next_block));
 
         /* Reset header information back to "empty heap" state */
         if (H5HF__hdr_empty(hdr) < 0)
@@ -339,15 +339,15 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(request > 0);
+    assert(hdr);
+    assert(request > 0);
 
     /* Compute the min. size of the direct block needed to fulfill the request */
     if (request < hdr->man_dtable.cparam.start_block_size)
         min_dblock_size = hdr->man_dtable.cparam.start_block_size;
     else {
         min_dblock_size = ((size_t)1) << (1 + H5VM_log2_gen((uint64_t)request));
-        HDassert(min_dblock_size <= hdr->man_dtable.cparam.max_direct_size);
+        assert(min_dblock_size <= hdr->man_dtable.cparam.max_direct_size);
     } /* end else */
 
     /* Adjust the size of block needed to fulfill request, with overhead */
@@ -389,12 +389,12 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         /* Retrieve information about current iterator position */
         if (H5HF__man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
-        HDassert(next_row < iblock->nrows);
+        assert(next_row < iblock->nrows);
         H5_CHECKED_ASSIGN(next_size, size_t, hdr->man_dtable.row_block_size[next_row], hsize_t);
 
         /* Check for skipping over blocks */
         if (min_dblock_size > next_size) {
-            HDfprintf(
+            fprintf(
                 stderr,
                 "%s: Skipping direct block sizes not supported, min_dblock_size = %zu, next_size = %zu\n",
                 __func__, min_dblock_size, next_size);
@@ -440,12 +440,12 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(dblock_addr));
-    HDassert(dblock_size > 0);
+    assert(hdr);
+    assert(H5F_addr_defined(dblock_addr));
+    assert(dblock_size > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up parent info */
     udata.par_info.hdr    = hdr;
@@ -468,7 +468,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
         } /* end if */
         else {
             /* Sanity check */
-            HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
+            assert(H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
 
             /* Set up parameters to read filtered direct block */
             udata.odi_size    = par_iblock->filt_ents[par_entry].size;
@@ -524,13 +524,13 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(hdr->man_dtable.curr_root_rows); /* Only works for heaps with indirect root block */
-    HDassert(ret_iblock);
-    HDassert(ret_did_protect);
+    assert(hdr);
+    assert(hdr->man_dtable.curr_root_rows); /* Only works for heaps with indirect root block */
+    assert(ret_iblock);
+    assert(ret_did_protect);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Look up row & column for object */
     if (H5HF__dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
@@ -553,7 +553,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
 
         /* Compute # of rows in child indirect block */
         nrows = (H5VM_log2_gen(hdr->man_dtable.row_block_size[row]) - hdr->man_dtable.first_row_bits) + 1;
-        HDassert(nrows < iblock->nrows); /* child must be smaller than parent */
+        assert(nrows < iblock->nrows); /* child must be smaller than parent */
 
         /* Compute indirect block's entry */
         entry = (row * hdr->man_dtable.cparam.width) + col;
@@ -586,7 +586,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         /* Look up row & column in new indirect block for object */
         if (H5HF__dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
-        HDassert(row < iblock->nrows); /* child must be smaller than parent */
+        assert(row < iblock->nrows); /* child must be smaller than parent */
     }                                  /* end while */
 
     /* Set return parameters */
@@ -627,9 +627,9 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(dblock_addr));
-    HDassert(dblock_size > 0);
+    assert(f);
+    assert(H5F_addr_defined(dblock_addr));
+    assert(dblock_size > 0);
 
     /* Check the direct block's status in the metadata cache */
     if (H5AC_get_entry_status(f, dblock_addr, &dblock_status) < 0)
@@ -638,8 +638,8 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
     /* If the direct block is in the cache, expunge it now */
     if (dblock_status & H5AC_ES__IN_CACHE) {
         /* Sanity checks on direct block */
-        HDassert(!(dblock_status & H5AC_ES__IS_PINNED));
-        HDassert(!(dblock_status & H5AC_ES__IS_PROTECTED));
+        assert(!(dblock_status & H5AC_ES__IS_PINNED));
+        assert(!(dblock_status & H5AC_ES__IS_PROTECTED));
 
         /* Evict the direct block from the metadata cache */
         if (H5AC_expunge_entry(f, H5AC_FHEAP_DBLOCK, dblock_addr, H5AC__NO_FLAGS_SET) < 0)
@@ -689,10 +689,10 @@ H5HF__man_dblock_dest(H5HF_direct_t *dblock)
     /*
      * Check arguments.
      */
-    HDassert(dblock);
+    assert(dblock);
 
     /* Decrement reference count on shared fractal heap info */
-    HDassert(dblock->hdr != NULL);
+    assert(dblock->hdr != NULL);
     if (H5HF__hdr_decr(dblock->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
     if (dblock->parent)

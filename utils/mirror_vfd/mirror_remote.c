@@ -44,15 +44,15 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
     }
     else if (level <= verbosity) {
         if (custom == TRUE && info->prefix[0] != '\0') {
-            HDfprintf(stream, "%s", info->prefix);
+            fprintf(stream, "%s", info->prefix);
         }
 
         switch (level) {
             case (V_ERR):
-                HDfprintf(stream, "ERROR ");
+                fprintf(stream, "ERROR ");
                 break;
             case (V_WARN):
-                HDfprintf(stream, "WARNING ");
+                fprintf(stream, "WARNING ");
                 break;
             default:
                 break;
@@ -60,13 +60,13 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
 
         if (format != NULL) {
             va_list args;
-            HDva_start(args, format);
-            HDvfprintf(stream, format, args);
-            HDva_end(args);
+            va_start(args, format);
+            vfprintf(stream, format, args);
+            va_end(args);
         }
 
-        HDfprintf(stream, "\n");
-        HDfflush(stream);
+        fprintf(stream, "\n");
+        fflush(stream);
     } /* end if sufficiently verbose to print */
 } /* end mirror_log() */
 
@@ -99,7 +99,7 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
         /* print whole lines */
         while ((n_bytes - bytes_written) >= 32) {
             b = buf + bytes_written; /* point to region in buffer */
-            HDfprintf(stream,
+            fprintf(stream,
                       "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"
                       " %02X%02X%02X%02X %02X%02X%02X%02X"
                       " %02X%02X%02X%02X %02X%02X%02X%02X"
@@ -112,28 +112,28 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
 
         /* start partial line */
         if (n_bytes > bytes_written) {
-            HDfprintf(stream, "%04zX ", bytes_written);
+            fprintf(stream, "%04zX ", bytes_written);
         }
 
         /* partial line blocks */
         while ((n_bytes - bytes_written) >= 4) {
-            HDfprintf(stream, " %02X%02X%02X%02X", buf[bytes_written], buf[bytes_written + 1],
+            fprintf(stream, " %02X%02X%02X%02X", buf[bytes_written], buf[bytes_written + 1],
                       buf[bytes_written + 2], buf[bytes_written + 3]);
             bytes_written += 4;
         }
 
         /* block separator before partial block */
         if (n_bytes > bytes_written) {
-            HDfprintf(stream, " ");
+            fprintf(stream, " ");
         }
 
         /* partial block individual bytes */
         while (n_bytes > bytes_written) {
-            HDfprintf(stream, "%02X", buf[bytes_written++]);
+            fprintf(stream, "%02X", buf[bytes_written++]);
         }
 
         /* end partial line */
-        HDfprintf(stream, "\n");
+        fprintf(stream, "\n");
     } /* end if suitably verbose to log */
 } /* end mirror_log_bytes() */
 
@@ -151,7 +151,7 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
 {
     loginfo_t *info = NULL;
 
-    info = (loginfo_t *)HDmalloc(sizeof(loginfo_t));
+    info = (loginfo_t *)malloc(sizeof(loginfo_t));
     if (info != NULL) {
         info->magic     = MIRROR_LOG_INFO_MAGIC;
         info->verbosity = verbosity;
@@ -159,17 +159,17 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
         info->prefix[0] = '\0';
 
         if (prefix && *prefix) {
-            HDstrncpy(info->prefix, prefix, MIRROR_LOG_PREFIX_MAX);
+            strncpy(info->prefix, prefix, MIRROR_LOG_PREFIX_MAX);
         }
 
         if (path && *path) {
             FILE *f = NULL;
-            f       = HDfopen(path, "w");
+            f       = fopen(path, "w");
             if (NULL == f) {
-                HDfprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
+                fprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
                           path);
                 info->magic += 1;
-                HDfree(info);
+                free(info);
             }
             else {
                 info->stream = f;
@@ -197,12 +197,12 @@ mirror_log_term(loginfo_t *info)
         return FAIL;
     }
     if (info->stream != stderr || info->stream != stdout) {
-        if (HDfclose(info->stream) < 0) {
+        if (fclose(info->stream) < 0) {
             return FAIL;
         }
     }
     info->magic += 1;
-    HDfree(info);
+    free(info);
     return SUCCEED;
 } /* end mirror_log_term() */
 

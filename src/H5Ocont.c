@@ -93,8 +93,8 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate space for the message */
     if (NULL == (cont = H5FL_MALLOC(H5O_cont_t)))
@@ -132,11 +132,11 @@ H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(cont);
-    HDassert(H5F_addr_defined(cont->addr));
-    HDassert(cont->size > 0);
+    assert(f);
+    assert(p);
+    assert(cont);
+    assert(H5F_addr_defined(cont->addr));
+    assert(cont->size > 0);
 
     /* encode */
     H5F_addr_encode(f, &p, cont->addr);
@@ -192,7 +192,7 @@ H5O__cont_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_cont_t, mesg);
 
@@ -220,8 +220,8 @@ H5O__cont_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     /* Notify the cache that the chunk has been deleted */
     /* (releases the space for the chunk) */
@@ -252,17 +252,17 @@ H5O__cont_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(cont);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(cont);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Continuation address:", cont->addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Continuation address:", cont->addr);
 
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Continuation size in bytes:", (unsigned long)(cont->size));
-    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Points to chunk number:", (int)(cont->chunkno));
+    fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth, "Points to chunk number:", (int)(cont->chunkno));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__cont_debug() */

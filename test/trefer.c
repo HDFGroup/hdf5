@@ -111,10 +111,10 @@ test_reference_params(void)
     MESSAGE(5, ("Testing Reference Parameters\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    tbuf = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
+    wbuf = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    rbuf = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    tbuf = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    obuf = calloc(sizeof(unsigned), SPACE1_DIM1);
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -306,10 +306,10 @@ test_reference_params(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(tbuf);
-    HDfree(obuf);
+    free(wbuf);
+    free(rbuf);
+    free(tbuf);
+    free(obuf);
 } /* test_reference_params() */
 
 /****************************************************************
@@ -340,10 +340,10 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    ibuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
-    obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
+    wbuf = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    rbuf = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    ibuf = calloc(sizeof(unsigned), SPACE1_DIM1);
+    obuf = calloc(sizeof(unsigned), SPACE1_DIM1);
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -540,10 +540,10 @@ test_reference_obj(void)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(ibuf);
-    HDfree(obuf);
+    free(wbuf);
+    free(rbuf);
+    free(ibuf);
+    free(obuf);
 } /* test_reference_obj() */
 
 /****************************************************************
@@ -577,9 +577,9 @@ test_reference_vlen_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions within VLEN type\n"));
 
     /* Allocate write & read buffers */
-    wbuf = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    ibuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
-    obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
+    wbuf = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    ibuf = calloc(sizeof(unsigned), SPACE1_DIM1);
+    obuf = calloc(sizeof(unsigned), SPACE1_DIM1);
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -806,10 +806,10 @@ test_reference_vlen_obj(void)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(ibuf);
-    HDfree(obuf);
+    free(wbuf);
+    free(rbuf);
+    free(ibuf);
+    free(obuf);
 } /* test_reference_vlen_obj() */
 
 /****************************************************************
@@ -841,8 +841,8 @@ test_reference_cmpnd_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions within compound type\n"));
 
     /* Allocate write & read buffers */
-    ibuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
-    obuf = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
+    ibuf = calloc(sizeof(unsigned), SPACE1_DIM1);
+    obuf = calloc(sizeof(unsigned), SPACE1_DIM1);
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -942,7 +942,7 @@ test_reference_cmpnd_obj(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Reset buffer for writing */
-    HDmemset(&cmpnd_wbuf, 0, sizeof(cmpnd_wbuf));
+    memset(&cmpnd_wbuf, 0, sizeof(cmpnd_wbuf));
 
     /* Create reference to dataset */
     ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &cmpnd_wbuf.ref0);
@@ -1097,8 +1097,8 @@ test_reference_cmpnd_obj(void)
     CHECK(ret, FAIL, "H5Rdestroy");
 
     /* Free memory buffers */
-    HDfree(ibuf);
-    HDfree(obuf);
+    free(ibuf);
+    free(obuf);
 } /* test_reference_cmpnd_obj() */
 
 /****************************************************************
@@ -1150,10 +1150,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf  = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    wbuf  = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    rbuf  = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    dwbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
 
     for (tu8 = dwbuf, i = 0; i < (SPACE2_DIM1 * SPACE2_DIM2); i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -1424,7 +1424,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
 
         /* allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) * 2);
+        coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) * 2);
 
         ret = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
@@ -1432,7 +1432,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(coords[1], 2, "Hyperslab Coordinates");
         VERIFY(coords[2], 7, "Hyperslab Coordinates");
         VERIFY(coords[3], 7, "Hyperslab Coordinates");
-        HDfree(coords);
+        free(coords);
         ret = H5Sget_select_bounds(sid2, low, high);
         CHECK(ret, FAIL, "H5Sget_select_bounds");
         VERIFY(low[0], 2, "Selection Bounds");
@@ -1455,7 +1455,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, SPACE2_DIM2, "H5Sget_select_elem_npoints");
 
         /* allocate space for the element points */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t));
+        coords = (hsize_t *)malloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t));
 
         ret = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
@@ -1479,7 +1479,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(coords[17], coord1[8][1], "Element Coordinates");
         VERIFY(coords[18], coord1[9][0], "Element Coordinates");
         VERIFY(coords[19], coord1[9][1], "Element Coordinates");
-        HDfree(coords);
+        free(coords);
         ret = H5Sget_select_bounds(sid2, low, high);
         CHECK(ret, FAIL, "H5Sget_select_bounds");
         VERIFY(low[0], 0, "Selection Bounds");
@@ -1556,10 +1556,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 
 } /* test_reference_region() */
 
@@ -1606,10 +1606,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = HDcalloc(sizeof(H5R_ref_t), (size_t)SPACE1_DIM1);
-    rbuf  = HDcalloc(sizeof(H5R_ref_t), (size_t)SPACE1_DIM1);
-    dwbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
-    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
+    wbuf  = calloc(sizeof(H5R_ref_t), (size_t)SPACE1_DIM1);
+    rbuf  = calloc(sizeof(H5R_ref_t), (size_t)SPACE1_DIM1);
+    dwbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
+    drbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
 
     for (tu8 = dwbuf, i = 0; i < SPACE3_DIM1; i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -1784,7 +1784,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 15, "H5Sget_select_hyper_nblocks");
 
         /* allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) * 2);
+        coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) * 2);
 
         ret = H5Sget_select_hyper_blocklist(sid3, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
@@ -1818,7 +1818,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(coords[27], 68, "Hyperslab Coordinates");
         VERIFY(coords[28], 72, "Hyperslab Coordinates");
         VERIFY(coords[29], 73, "Hyperslab Coordinates");
-        HDfree(coords);
+        free(coords);
         ret = H5Sget_select_bounds(sid3, low, high);
         CHECK(ret, FAIL, "H5Sget_select_bounds");
         VERIFY(low[0], 2, "Selection Bounds");
@@ -1839,7 +1839,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(ret, 10, "H5Sget_select_elem_npoints");
 
         /* allocate space for the element points */
-        coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t));
+        coords = (hsize_t *)malloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t));
 
         ret = H5Sget_select_elem_pointlist(sid3, (hsize_t)0, (hsize_t)ret, coords);
         CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
@@ -1853,7 +1853,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
         VERIFY(coords[7], coord1[7][0], "Element Coordinates");
         VERIFY(coords[8], coord1[8][0], "Element Coordinates");
         VERIFY(coords[9], coord1[9][0], "Element Coordinates");
-        HDfree(coords);
+        free(coords);
         ret = H5Sget_select_bounds(sid3, low, high);
         CHECK(ret, FAIL, "H5Sget_select_bounds");
         VERIFY(low[0], 3, "Selection Bounds");
@@ -1897,10 +1897,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
 
 } /* test_reference_region_1D() */
 
@@ -2016,19 +2016,19 @@ test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2
 
     /* Simple check for correct names */
     if (*count == 0) {
-        if (HDstrcmp(name, DSETNAME2) == 0)
+        if (strcmp(name, DSETNAME2) == 0)
             ret_value = 0;
         else
             ret_value = -1;
     } /* end if */
     else if (*count == 1) {
-        if (HDstrcmp(name, GROUPNAME2) == 0)
+        if (strcmp(name, GROUPNAME2) == 0)
             ret_value = 0;
         else
             ret_value = -1;
     } /* end if */
     else if (*count == 2) {
-        if (HDstrcmp(name, GROUPNAME3) == 0)
+        if (strcmp(name, GROUPNAME3) == 0)
             ret_value = 0;
         else
             ret_value = -1;
@@ -2750,10 +2750,10 @@ test_reference_compat_conv(void)
     MESSAGE(5, ("Testing Deprecated Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf_obj = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
-    rbuf_obj = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg = HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf_reg = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    wbuf_obj = (hobj_ref_t *)calloc(sizeof(hobj_ref_t), SPACE1_DIM1);
+    rbuf_obj = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    wbuf_reg = calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf_reg = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE_REF_COMPAT, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -3020,10 +3020,10 @@ test_reference_compat_conv(void)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf_obj);
-    HDfree(rbuf_obj);
-    HDfree(wbuf_reg);
-    HDfree(rbuf_reg);
+    free(wbuf_obj);
+    free(rbuf_obj);
+    free(wbuf_reg);
+    free(rbuf_reg);
 } /* test_reference_compat() */
 
 /****************************************************************
@@ -3062,17 +3062,17 @@ test_reference_perf(void)
     MESSAGE(5, ("Testing Object Reference Performance\n"));
 
     /* Allocate write & read buffers */
-    wbuf            = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    obuf            = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
-    ibuf            = HDcalloc(sizeof(unsigned), SPACE1_DIM1);
-    wbuf_deprec     = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
-    rbuf            = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf_deprec     = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
-    tbuf            = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg        = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    rbuf_reg        = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg_deprec = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf_reg_deprec = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wbuf            = calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    obuf            = calloc(sizeof(unsigned), SPACE1_DIM1);
+    ibuf            = calloc(sizeof(unsigned), SPACE1_DIM1);
+    wbuf_deprec     = (hobj_ref_t *)calloc(sizeof(hobj_ref_t), SPACE1_DIM1);
+    rbuf            = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    rbuf_deprec     = (hobj_ref_t *)calloc(sizeof(hobj_ref_t), SPACE1_DIM1);
+    tbuf            = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    wbuf_reg        = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    rbuf_reg        = (H5R_ref_t *)calloc(sizeof(H5R_ref_t), SPACE1_DIM1);
+    wbuf_reg_deprec = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf_reg_deprec = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -3154,7 +3154,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
@@ -3173,7 +3173,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3192,7 +3192,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf_deprec[0], fid1, "/Group1/Dataset1", H5R_OBJECT1, H5I_INVALID_HID);
@@ -3208,7 +3208,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3230,7 +3230,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Store first dataset region */
     ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf_reg[0]);
@@ -3246,7 +3246,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3266,7 +3266,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     t = 0;
     for (i = 0; i < MAX_ITER_WRITE; i++) {
@@ -3278,7 +3278,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3312,7 +3312,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -3358,7 +3358,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3380,7 +3380,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_reg);
@@ -3404,7 +3404,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3431,17 +3431,17 @@ test_reference_perf(void)
     }
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(wbuf_reg);
-    HDfree(rbuf_reg);
-    HDfree(wbuf_deprec);
-    HDfree(rbuf_deprec);
-    HDfree(wbuf_reg_deprec);
-    HDfree(rbuf_reg_deprec);
-    HDfree(tbuf);
-    HDfree(ibuf);
-    HDfree(obuf);
+    free(wbuf);
+    free(rbuf);
+    free(wbuf_reg);
+    free(rbuf_reg);
+    free(wbuf_deprec);
+    free(rbuf_deprec);
+    free(wbuf_reg_deprec);
+    free(rbuf_reg_deprec);
+    free(tbuf);
+    free(ibuf);
+    free(obuf);
 } /* test_reference_perf() */
 
 /****************************************************************
@@ -3459,7 +3459,7 @@ test_reference(void)
     MESSAGE(5, ("Testing References\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -3483,7 +3483,7 @@ test_reference(void)
     }     /* end low bound */
 
     /* The following test is currently broken with the Direct VFD */
-    if (HDstrcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(env_h5_drvr, "direct") != 0) {
         test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     }
 
@@ -3513,16 +3513,16 @@ test_reference(void)
 void
 cleanup_reference(void)
 {
-    HDremove(FILE_REF_PARAM);
-    HDremove(FILE_REF_OBJ);
-    HDremove(FILE_REF_VL_OBJ);
-    HDremove(FILE_REF_CMPND_OBJ);
-    HDremove(FILE_REF_REG);
-    HDremove(FILE_REF_REG_1D);
-    HDremove(FILE_REF_OBJ_DEL);
-    HDremove(FILE_REF_GRP);
-    HDremove(FILE_REF_ATTR);
-    HDremove(FILE_REF_EXT1);
-    HDremove(FILE_REF_EXT2);
-    HDremove(FILE_REF_COMPAT);
+    remove(FILE_REF_PARAM);
+    remove(FILE_REF_OBJ);
+    remove(FILE_REF_VL_OBJ);
+    remove(FILE_REF_CMPND_OBJ);
+    remove(FILE_REF_REG);
+    remove(FILE_REF_REG_1D);
+    remove(FILE_REF_OBJ_DEL);
+    remove(FILE_REF_GRP);
+    remove(FILE_REF_ATTR);
+    remove(FILE_REF_EXT1);
+    remove(FILE_REF_EXT2);
+    remove(FILE_REF_COMPAT);
 }

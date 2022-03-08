@@ -572,7 +572,7 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Set property to default value */
-    HDmemset(ginfo, 0, sizeof(H5O_ginfo_t));
+    memset(ginfo, 0, sizeof(H5O_ginfo_t));
     *ginfo = H5G_def_ginfo_g;
 
     UINT32DECODE(*pp, ginfo->lheap_size_hint)
@@ -668,7 +668,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
 
     /* Set property to default value */
-    HDmemset(linfo, 0, sizeof(H5O_linfo_t));
+    memset(linfo, 0, sizeof(H5O_linfo_t));
     *linfo = H5G_def_linfo_g;
 
     H5_DECODE_UNSIGNED(*pp, crt_order_flags)

@@ -123,7 +123,7 @@ H5D__layout_contig_size_test(hid_t did, hsize_t *size)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (size) {
-        HDassert(dset->shared->layout.type == H5D_CONTIGUOUS);
+        assert(dset->shared->layout.type == H5D_CONTIGUOUS);
         *size = dset->shared->layout.storage.u.contig.size;
     } /* end if */
 
@@ -163,7 +163,7 @@ H5D__layout_compact_dirty_test(hid_t did, hbool_t *dirty)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (dirty) {
-        HDassert(dset->shared->layout.type == H5D_COMPACT);
+        assert(dset->shared->layout.type == H5D_COMPACT);
         *dirty = dset->shared->layout.storage.u.compact.dirty;
     } /* end if */
 
@@ -198,7 +198,7 @@ H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(layout_type);
+    assert(layout_type);
 
     /* Check args */
     if (NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
@@ -283,12 +283,12 @@ H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (nbytes_used) {
-        HDassert(dset->shared->layout.type == H5D_CHUNKED);
+        assert(dset->shared->layout.type == H5D_CHUNKED);
         *nbytes_used = dset->shared->cache.chunk.nbytes_used;
     } /* end if */
 
     if (nused) {
-        HDassert(dset->shared->layout.type == H5D_CHUNKED);
+        assert(dset->shared->layout.type == H5D_CHUNKED);
         *nused = dset->shared->cache.chunk.nused;
     } /* end if */
 

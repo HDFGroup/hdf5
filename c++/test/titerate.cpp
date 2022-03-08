@@ -79,7 +79,7 @@ static void printelems(const Group &group, const H5std_string &dsname, const H5s
 static int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
+    return (strcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
 }
 
 /*-------------------------------------------------------------------------
@@ -96,7 +96,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
     static int count  = 0;
     static int count2 = 0;
 
-    HDstrcpy(info->name, name);
+    strcpy(info->name, name);
 
     switch (info->command) {
         case RET_ZERO:
@@ -180,7 +180,7 @@ test_iter_group(FileAccPropList &fapl)
         check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
 
         /* Sort the dataset names */
-        HDqsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
+        qsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
 
@@ -268,7 +268,7 @@ test_iter_group(FileAccPropList &fapl)
 
         /* Free the dataset names */
         for (int i = 0; i < NDATASETS + 2; i++)
-            HDfree(lnames[i]);
+            free(lnames[i]);
 
         // Everything will be closed as they go out of scope
 
@@ -305,7 +305,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -331,7 +331,7 @@ test_iter_group(FileAccPropList &fapl)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if(strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     verify_val(ret, -1, "H5Literate", __LINE__, __FILE__);
@@ -476,6 +476,6 @@ test_iterate()
 extern "C" void
 cleanup_iterate()
 {
-    HDremove(FILE_ITERATE.c_str());
-    HDremove(FILE_NAME.c_str());
+    remove(FILE_ITERATE.c_str());
+    remove(FILE_NAME.c_str());
 } // cleanup_iterate

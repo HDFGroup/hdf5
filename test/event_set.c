@@ -696,11 +696,11 @@ main(void)
         goto error;
 
     /* Report status */
-    HDputs("All event set tests passed.");
+    puts("All event set tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDputs("***** EVENT SET TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    puts("***** EVENT SET TESTS FAILED *****");
+    exit(EXIT_FAILURE);
 } /* end main() */

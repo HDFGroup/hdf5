@@ -140,7 +140,7 @@ tts_dcreate_creator(void *_thread_data)
     hsize_t            dimsf[1]; /* dataset dimensions */
     struct thread_info thread_data;
 
-    HDmemcpy(&thread_data, _thread_data, sizeof(struct thread_info));
+    memcpy(&thread_data, _thread_data, sizeof(struct thread_info));
 
     /* define dataspace for dataset */
     dimsf[0]  = 1;

@@ -333,8 +333,8 @@ H5L_register(const H5L_class_t *cls)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(cls);
-    HDassert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
+    assert(cls);
+    assert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
 
     /* Is the link type already registered? */
     for (i = 0; i < H5L_table_used_g; i++)
@@ -385,7 +385,7 @@ H5L_unregister(H5L_type_t id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(id >= 0 && id <= H5L_TYPE_MAX);
+    assert(id >= 0 && id <= H5L_TYPE_MAX);
 
     /* Is the filter already registered? */
     for (i = 0; i < H5L_table_used_g; i++)
@@ -398,7 +398,7 @@ H5L_unregister(H5L_type_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
+    memmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
     H5L_table_used_g--;
 
 done:
@@ -423,7 +423,7 @@ H5L_is_registered(H5L_type_t id, hbool_t *is_registered)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(is_registered);
+    assert(is_registered);
 
     /* Is the link class already registered? */
     *is_registered = FALSE;
@@ -458,9 +458,9 @@ H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc, hid
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(new_loc);
-    HDassert(obj_loc);
-    HDassert(new_name && *new_name);
+    assert(new_loc);
+    assert(obj_loc);
+    assert(new_name && *new_name);
 
     /* The link callback will check that the object isn't being hard linked
      * into a different file, so we don't need to do it here (there could be
@@ -500,9 +500,9 @@ H5L_link_object(const H5G_loc_t *new_loc, const char *new_name, H5O_obj_create_t
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(new_loc);
-    HDassert(new_name && *new_name);
-    HDassert(ocrt_info);
+    assert(new_loc);
+    assert(new_name && *new_name);
+    assert(ocrt_info);
 
     /* The link callback will check that the object isn't being hard linked
      * into a different file, so we don't need to do it here (there could be
@@ -651,7 +651,7 @@ done:
         H5O_loc_t oloc; /* Object location for created object */
 
         /* Set up object location */
-        HDmemset(&oloc, 0, sizeof(oloc));
+        memset(&oloc, 0, sizeof(oloc));
         oloc.file = grp_loc->oloc->file;
         oloc.addr = udata->lnk->u.hard.addr;
 
@@ -711,10 +711,10 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
-    HDassert(lnk);
-    HDassert(lnk->type >= H5L_TYPE_HARD && lnk->type <= H5L_TYPE_MAX);
+    assert(link_loc);
+    assert(link_name && *link_name);
+    assert(lnk);
+    assert(lnk->type >= H5L_TYPE_HARD && lnk->type <= H5L_TYPE_MAX);
 
     /* Get normalized link name */
     if ((norm_link_name = H5G_normalize(link_name)) == NULL)
@@ -794,10 +794,10 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(cur_loc);
-    HDassert(cur_name && *cur_name);
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
+    assert(cur_loc);
+    assert(cur_name && *cur_name);
+    assert(link_loc);
+    assert(link_name && *link_name);
 
     /* Get normalized copy of the current name */
     if ((norm_cur_name = H5G_normalize(cur_name)) == NULL)
@@ -860,9 +860,9 @@ H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc, const char 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(link_loc);
-    HDassert(target_path && *target_path);
-    HDassert(link_name && *link_name);
+    assert(link_loc);
+    assert(target_path && *target_path);
+    assert(link_name && *link_name);
 
     /* Get normalized copy of the link target */
     if ((norm_target = H5G_normalize(target_path)) == NULL)
@@ -907,10 +907,10 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
-    HDassert(ud_data_size == 0 || ud_data);
+    assert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
+    assert(link_loc);
+    assert(link_name && *link_name);
+    assert(ud_data_size == 0 || ud_data);
 
     /* Initialize the link struct's pointer to its udata buffer */
     lnk.u.ud.udata = NULL;
@@ -961,14 +961,14 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(lnk);
+    assert(lnk);
 
     /* Check for soft link */
     if (H5L_TYPE_SOFT == lnk->type) {
         /* Copy to output buffer */
         if (size > 0 && buf) {
-            HDstrncpy((char *)buf, lnk->u.soft.name, size);
-            if (HDstrlen(lnk->u.soft.name) >= size)
+            strncpy((char *)buf, lnk->u.soft.name, size);
+            if (strlen(lnk->u.soft.name) >= size)
                 ((char *)buf)[size - 1] = '\0';
         } /* end if */
     }     /* end if */
@@ -1061,8 +1061,8 @@ H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf /*out*/, size_t s
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for retrieving information */
     udata.size = size;
@@ -1149,8 +1149,8 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for retrieving information */
     udata.idx_type = idx_type;
@@ -1237,8 +1237,8 @@ H5L__delete(const H5G_loc_t *loc, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Get normalized copy of the name */
     if ((norm_name = H5G_normalize(name)) == NULL)
@@ -1319,8 +1319,8 @@ H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for unlink operation */
     udata.idx_type = idx_type;
@@ -1375,7 +1375,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
 
     /* Give the object its new name */
     /* Casting away const okay -JML */
-    HDassert(udata->lnk->name == NULL);
+    assert(udata->lnk->name == NULL);
     udata->lnk->name = (char *)name;
 
     /* Insert the link into the group */
@@ -1516,7 +1516,7 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
 
         /* Make certain that the destination name is a full (not relative) path */
         if (*(udata->dst_name) != '/') {
-            HDassert(udata->dst_loc->path->full_path_r);
+            assert(udata->dst_loc->path->full_path_r);
 
             /* Create reference counted string for full dst path */
             if ((dst_name_r = H5G_build_fullpath_refstr_str(udata->dst_loc->path->full_path_r,
@@ -1525,7 +1525,7 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
         } /* end if */
         else
             dst_name_r = H5RS_wrap(udata->dst_name);
-        HDassert(dst_name_r);
+        assert(dst_name_r);
 
         /* Fix names up */
         if (H5G_name_replace(lnk, H5G_NAME_MOVE, obj_loc->oloc->file, obj_loc->path->full_path_r,
@@ -1595,10 +1595,10 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_l
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(src_loc);
-    HDassert(dst_loc);
-    HDassert(src_name && *src_name);
-    HDassert(dst_name && *dst_name);
+    assert(src_loc);
+    assert(dst_loc);
+    assert(src_name && *src_name);
+    assert(dst_name && *dst_name);
 
     /* Check for flags present in creation property list */
     if (lcpl_id != H5P_DEFAULT) {
@@ -1706,7 +1706,7 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
 
             /* Look for another separator */
             next = udata->sep;
-            if (NULL == (udata->sep = HDstrchr(udata->sep, '/')))
+            if (NULL == (udata->sep = strchr(udata->sep, '/')))
                 cb_func = H5L__exists_final_cb;
             else {
                 /* Chew through adjacent separators, if present */
@@ -1760,9 +1760,9 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(name);
-    HDassert(exists);
+    assert(loc);
+    assert(name);
+    assert(exists);
 
     /* Copy the name and skip leading '/'s */
     name_trav = name_copy = H5MM_strdup(name);
@@ -1775,7 +1775,7 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     else {
         /* Set up user data & correct callback */
         udata.exists = exists;
-        if (NULL == (udata.sep = HDstrchr(name_trav, '/')))
+        if (NULL == (udata.sep = strchr(name_trav, '/')))
             cb_func = H5L__exists_final_cb;
         else {
             /* Chew through adjacent separators, if present */
@@ -1822,12 +1822,12 @@ H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(name);
-    HDassert(exists);
+    assert(loc);
+    assert(name);
+    assert(exists);
 
     /* A path of "/" will always exist in a file */
-    if (0 == HDstrcmp(name, "/"))
+    if (0 == strcmp(name, "/"))
         *exists = TRUE;
     else {
         /* Traverse the group hierarchy to locate the object to get info about */
@@ -1977,9 +1977,9 @@ H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(linfo);
+    assert(loc);
+    assert(name && *name);
+    assert(linfo);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -2055,9 +2055,9 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(group_name && *group_name);
-    HDassert(link_name_len);
+    assert(loc);
+    assert(group_name && *group_name);
+    assert(link_name_len);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -2108,10 +2108,10 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(dst_file);
-    HDassert(src_lnk);
-    HDassert(dst_lnk);
-    HDassert(cpy_info);
+    assert(dst_file);
+    assert(src_lnk);
+    assert(dst_lnk);
+    assert(cpy_info);
 
     /* Expand soft or external link, if requested */
     if ((H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link) ||
@@ -2177,7 +2177,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
             tmp_src_oloc.file = src_oloc->file;
             tmp_src_oloc.addr = src_lnk->u.hard.addr;
         } /* end if */
-        HDassert(H5F_addr_defined(tmp_src_oloc.addr));
+        assert(H5F_addr_defined(tmp_src_oloc.addr));
 
         /* Copy the shared object from source to destination */
         /* Don't care about obj_type or udata because those are only important
@@ -2192,7 +2192,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 done:
     /* Check if we used a temporary src link */
     if (src_lnk != _src_lnk) {
-        HDassert(src_lnk == &tmp_src_lnk);
+        assert(src_lnk == &tmp_src_lnk);
         H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
     } /* end if */
     if (ret_value < 0)
@@ -2227,9 +2227,9 @@ H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(group_name);
-    HDassert(op);
+    assert(loc);
+    assert(group_name);
+    assert(op);
 
     /* Set up iteration beginning/end info */
     idx      = (idx_p == NULL ? 0 : *idx_p);

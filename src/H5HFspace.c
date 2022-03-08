@@ -97,7 +97,7 @@ H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check for creating free space info for the heap */
     if (H5F_addr_defined(hdr->fs_addr)) {
@@ -123,7 +123,7 @@ H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
                 (hdr->fspace = H5FS_create(hdr->f, &hdr->fs_addr, &fs_create, NELMTS(classes), classes, hdr,
                                            (hsize_t)H5HF_FSPACE_THRHD_DEF, (hsize_t)H5HF_FSPACE_ALIGN_DEF)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
-            HDassert(H5F_addr_defined(hdr->fs_addr));
+            assert(H5F_addr_defined(hdr->fs_addr));
         } /* end if */
     }     /* end else */
 
@@ -156,8 +156,8 @@ H5HF__space_add(H5HF_hdr_t *hdr, H5HF_free_section_t *node, unsigned flags)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(node);
+    assert(hdr);
+    assert(node);
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
@@ -199,9 +199,9 @@ H5HF__space_find(H5HF_hdr_t *hdr, hsize_t request, H5HF_free_section_t **node)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(request);
-    HDassert(node);
+    assert(hdr);
+    assert(request);
+    assert(node);
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
@@ -246,12 +246,12 @@ H5HF__space_revert_root_cb(H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_uda
     /*
      * Check arguments.
      */
-    HDassert(sect);
+    assert(sect);
 
     /* Only modify "live" single blocks... */
     if (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE && sect->sect_info.state == H5FS_SECT_LIVE) {
         /* Release hold on previous indirect block (we must have one) */
-        HDassert(sect->u.single.parent);
+        assert(sect->u.single.parent);
         if (H5HF__iblock_decr(sect->u.single.parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
                         "can't decrement reference count on section's indirect block")
@@ -289,7 +289,7 @@ H5HF__space_revert_root(const H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Only need to scan the sections if the free space has been initialized */
     if (hdr->fspace)
@@ -328,13 +328,13 @@ H5HF__space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(sect);
-    HDassert(root_iblock);
+    assert(sect);
+    assert(root_iblock);
 
     /* Sanity check sections */
     /* (If we are switching from a direct block for the root block of the heap, */
     /*	there should only be 'single' type sections. -QAK) */
-    HDassert(sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
+    assert(sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
 
     /* Increment ref. count on new root indirect block */
     if (H5HF__iblock_incr(root_iblock) < 0)
@@ -345,7 +345,7 @@ H5HF__space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
     if (sect->sect_info.state == H5FS_SECT_SERIALIZED)
         sect->sect_info.state = H5FS_SECT_LIVE; /* Mark "live" now */
     else
-        HDassert(!sect->u.single.parent);
+        assert(!sect->u.single.parent);
     sect->u.single.parent    = root_iblock;
     sect->u.single.par_entry = 0;
 
@@ -378,8 +378,8 @@ H5HF__space_create_root(const H5HF_hdr_t *hdr, H5HF_indirect_t *root_iblock)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(root_iblock);
+    assert(hdr);
+    assert(root_iblock);
 
     /* Only need to scan the sections if the free space has been initialized */
     if (hdr->fspace)
@@ -415,8 +415,8 @@ H5HF__space_size(H5HF_hdr_t *hdr, hsize_t *fs_size)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(fs_size);
+    assert(hdr);
+    assert(fs_size);
 
     /* Check if the free space for the heap has been initialized */
     if (!hdr->fspace)
@@ -458,9 +458,9 @@ H5HF__space_remove(H5HF_hdr_t *hdr, H5HF_free_section_t *node)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(hdr->fspace);
-    HDassert(node);
+    assert(hdr);
+    assert(hdr->fspace);
+    assert(node);
 
     /* Remove from the free space for the heap */
     if (H5FS_sect_remove(hdr->f, hdr->fspace, (H5FS_section_info_t *)node) < 0)
@@ -494,7 +494,7 @@ H5HF__space_close(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check if the free space was ever opened */
     if (hdr->fspace) {
@@ -544,7 +544,7 @@ H5HF__space_delete(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Delete the free space manager */
     if (H5FS_delete(hdr->f, hdr->fs_addr) < 0)
@@ -578,9 +578,9 @@ H5HF__space_sect_change_class(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, uint16
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(hdr->fspace);
-    HDassert(sect);
+    assert(hdr);
+    assert(hdr->fspace);
+    assert(sect);
 
     /* Notify the free space manager that a section has changed class */
     if (H5FS_sect_change_class(hdr->f, hdr->fspace, (H5FS_section_info_t *)sect, new_class) < 0)

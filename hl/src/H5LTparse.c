@@ -1751,7 +1751,7 @@ yyreduce:
                                 }
                             }
                             if((yyvsp[-2].sval)) {
-                                HDfree((yyvsp[-2].sval));
+                                free((yyvsp[-2].sval));
                                 (yyvsp[-2].sval) = NULL;
                             }
                             cmpd_stack[csindex].is_field = 0;
@@ -1766,7 +1766,7 @@ yyreduce:
 #line 205 "hl/src/H5LTparse.y" /* yacc.c:1646  */
     {
                             (yyval.sval) = HDstrdup(yylval.sval);
-                            HDfree(yylval.sval);
+                            free(yylval.sval);
                             yylval.sval = NULL;
                         }
 #line 1743 "hl/src/H5LTparse.c" /* yacc.c:1646  */
@@ -1836,7 +1836,7 @@ yyreduce:
 #line 253 "hl/src/H5LTparse.y" /* yacc.c:1646  */
     {  
                                 H5Tset_tag((yyvsp[-3].hid), yylval.sval);
-                                HDfree(yylval.sval);
+                                free(yylval.sval);
                                 yylval.sval = NULL;
                             }
 #line 1813 "hl/src/H5LTparse.c" /* yacc.c:1646  */
@@ -1980,7 +1980,7 @@ yyreduce:
     {
                                                 is_enum_memb = 1; /*indicate member of enum*/
                                                 enum_memb_symbol = HDstrdup(yylval.sval); 
-                                                HDfree(yylval.sval);
+                                                free(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
 #line 1957 "hl/src/H5LTparse.c" /* yacc.c:1646  */
@@ -2024,7 +2024,7 @@ yyreduce:
                                     }
 
                                     is_enum_memb = 0; 
-                                    if(enum_memb_symbol) HDfree(enum_memb_symbol);
+                                    if(enum_memb_symbol) free(enum_memb_symbol);
                                 }
 
                                 H5Tclose(super);

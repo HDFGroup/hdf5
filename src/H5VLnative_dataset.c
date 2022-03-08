@@ -83,9 +83,9 @@ H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, h
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(dset);
-    HDassert(file_space && NULL == *file_space);
-    HDassert(mem_space && NULL == *mem_space);
+    assert(dset);
+    assert(file_space && NULL == *file_space);
+    assert(mem_space && NULL == *mem_space);
 
     /* Set up file dataspace */
     if (H5S_ALL == file_space_id)
@@ -502,7 +502,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(dset);
+    assert(dset);
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -575,8 +575,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             H5VL_native_dataset_get_num_chunks_t *gnc_args = &opt_args->get_num_chunks;
             const H5S_t *                         space    = NULL;
 
-            HDassert(dset->shared);
-            HDassert(dset->shared->space);
+            assert(dset->shared);
+            assert(dset->shared->space);
 
             /* When default dataspace is given, use the dataset's dataspace */
             if (gnc_args->space_id == H5S_ALL)
@@ -601,8 +601,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             H5VL_native_dataset_get_chunk_info_by_idx_t *gcibi_args = &opt_args->get_chunk_info_by_idx;
             const H5S_t *                                space;
 
-            HDassert(dset->shared);
-            HDassert(dset->shared->space);
+            assert(dset->shared);
+            assert(dset->shared->space);
 
             /* When default dataspace is given, use the dataset's dataspace */
             if (gcibi_args->space_id == H5S_ALL)
@@ -627,7 +627,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD: {
             H5VL_native_dataset_get_chunk_info_by_coord_t *gcibc_args = &opt_args->get_chunk_info_by_coord;
 
-            HDassert(dset->shared);
+            assert(dset->shared);
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
@@ -711,7 +711,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dchunk_iter */
         case H5VL_NATIVE_DATASET_CHUNK_ITER: {
             /* Sanity check */
-            HDassert(dset->shared);
+            assert(dset->shared);
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)

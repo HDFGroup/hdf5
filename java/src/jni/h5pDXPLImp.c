@@ -301,7 +301,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
     if ((express_size = H5Pget_data_transform((hid_t)plist_id, (char *)NULL, (size_t)size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (express = (char *)HDmalloc(sizeof(char) * (size_t)express_size + 1)))
+    if (NULL == (express = (char *)malloc(sizeof(char) * (size_t)express_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: memory allocation failed");
 
     if (H5Pget_data_transform((hid_t)plist_id, express, (size_t)express_size + 1) < 0)
@@ -319,7 +319,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
 
 done:
     if (express)
-        HDfree(express);
+        free(express);
 
     return (jlong)express_size;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1data_1transform */

@@ -123,8 +123,8 @@ H5O__mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* decode */
     if (*p++ != H5O_MTIME_VERSION)
@@ -178,16 +178,16 @@ H5O__mtime_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* decode */
     for (i = 0; i < 14; i++)
-        if (!HDisdigit(p[i]))
+        if (!isdigit((int)(unsigned char)p[i]))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
-    HDmemset(&tm, 0, sizeof tm);
+    memset(&tm, 0, sizeof tm);
     tm.tm_year  = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 + (p[3] - '0') - 1900;
     tm.tm_mon   = (p[4] - '0') * 10 + (p[5] - '0') - 1;
     tm.tm_mday  = (p[6] - '0') * 10 + (p[7] - '0');
@@ -231,9 +231,9 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Version */
     *p++ = H5O_MTIME_VERSION;
@@ -271,13 +271,13 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* encode */
-    tm = HDgmtime(mesg);
-    HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
+    tm = gmtime(mesg);
+    sprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
               tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -308,7 +308,7 @@ H5O__mtime_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
     if (!dest && NULL == (dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -346,8 +346,8 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     FUNC_LEAVE_NOAPI(8)
 } /* end H5O__mtime_new_size() */
@@ -376,8 +376,8 @@ H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     FUNC_LEAVE_NOAPI(16)
 } /* end H5O__mtime_size() */
@@ -399,7 +399,7 @@ H5O__mtime_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(time_t, mesg);
 
@@ -428,17 +428,17 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* debug */
-    tm = HDlocaltime(mesg);
+    tm = localtime(mesg);
 
-    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_debug() */

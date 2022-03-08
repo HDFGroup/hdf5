@@ -44,11 +44,11 @@ main(int argc, char *argv[])
      * This is an integer index into the FILE_NAMES array.
      */
     if (argc != 2) {
-        HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
+        fprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
         return EXIT_FAILURE;
     }
 
-    file_number = HDatoi(argv[1]);
+    file_number = atoi(argv[1]);
     if (file_number < 0 || file_number >= N_SOURCES)
         TEST_ERROR
 
@@ -65,7 +65,7 @@ main(int argc, char *argv[])
 
     /* Create a data buffer that represents a plane */
     n_elements = PLANES[file_number][1] * PLANES[file_number][2];
-    if (NULL == (buffer = (int *)HDmalloc(n_elements * sizeof(int))))
+    if (NULL == (buffer = (int *)malloc(n_elements * sizeof(int))))
         TEST_ERROR
 
     /* Create the memory dataspace */
@@ -133,9 +133,9 @@ main(int argc, char *argv[])
         TEST_ERROR
     if (H5Fclose(fid) < 0)
         TEST_ERROR
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "SWMR writer exited successfully\n");
+    fprintf(stderr, "SWMR writer exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -153,11 +153,11 @@ error:
         if (fsid >= 0)
             (void)H5Sclose(fsid);
         if (buffer != NULL)
-            HDfree(buffer);
+            free(buffer);
     }
     H5E_END_TRY
 
-    HDfprintf(stderr, "ERROR: SWMR writer exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR writer exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

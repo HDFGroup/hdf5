@@ -100,7 +100,7 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate memory for the index block */
     if (NULL == (iblock = H5FL_CALLOC(H5EA_iblock_t)))
@@ -173,8 +173,8 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(stats_changed);
+    assert(hdr);
+    assert(stats_changed);
 
     /* Allocate the index block */
     if (NULL == (iblock = H5EA__iblock_alloc(hdr)))
@@ -229,8 +229,8 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     } /* end if */
 
     /* Update extensible array index block statistics */
-    HDassert(0 == hdr->stats.computed.nindex_blks);
-    HDassert(0 == hdr->stats.computed.index_blk_size);
+    assert(0 == hdr->stats.computed.nindex_blks);
+    assert(0 == hdr->stats.computed.index_blk_size);
     hdr->stats.computed.nindex_blks    = 1;
     hdr->stats.computed.index_blk_size = iblock->size;
 
@@ -288,10 +288,10 @@ H5EA__iblock_protect(H5EA_hdr_t *hdr, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Protect the index block */
     if (NULL ==
@@ -346,7 +346,7 @@ H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(iblock);
+    assert(iblock);
 
     /* Unprotect the index block */
     if (H5AC_unprotect(iblock->hdr->f, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, cache_flags) < 0)
@@ -379,8 +379,8 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->idx_blk_addr));
+    assert(hdr);
+    assert(H5F_addr_defined(hdr->idx_blk_addr));
 
     /* Protect index block */
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__NO_FLAGS_SET)))
@@ -465,21 +465,21 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(iblock);
+    assert(iblock);
 
     /* Check if shared header field has been initialized */
     if (iblock->hdr) {
         /* Check if we've got elements in the index block */
         if (iblock->elmts) {
             /* Free buffer for index block elements */
-            HDassert(iblock->hdr->cparam.idx_blk_elmts > 0);
+            assert(iblock->hdr->cparam.idx_blk_elmts > 0);
             iblock->elmts = H5FL_BLK_FREE(idx_blk_elmt_buf, iblock->elmts);
         } /* end if */
 
         /* Check if we've got data block addresses in the index block */
         if (iblock->dblk_addrs) {
             /* Free buffer for index block data block addresses */
-            HDassert(iblock->ndblk_addrs > 0);
+            assert(iblock->ndblk_addrs > 0);
             iblock->dblk_addrs  = H5FL_SEQ_FREE(haddr_t, iblock->dblk_addrs);
             iblock->ndblk_addrs = 0;
         } /* end if */
@@ -487,7 +487,7 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
         /* Check if we've got super block addresses in the index block */
         if (iblock->sblk_addrs) {
             /* Free buffer for index block super block addresses */
-            HDassert(iblock->nsblk_addrs > 0);
+            assert(iblock->nsblk_addrs > 0);
             iblock->sblk_addrs  = H5FL_SEQ_FREE(haddr_t, iblock->sblk_addrs);
             iblock->nsblk_addrs = 0;
         } /* end if */
@@ -500,7 +500,7 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock)
     } /* end if */
 
     /* Sanity check */
-    HDassert(NULL == iblock->top_proxy);
+    assert(NULL == iblock->top_proxy);
 
     /* Free the index block itself */
     iblock = H5FL_FREE(H5EA_iblock_t, iblock);

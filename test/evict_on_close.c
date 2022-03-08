@@ -152,7 +152,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create a data buffer for dataset writes */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Create file */
@@ -184,8 +184,8 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
-        if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        if (snprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR
 
         if ((gid2 = H5Gcreate2(gid1, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -279,8 +279,8 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
-        if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        if (snprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR
 
         if ((gid2 = H5Gcreate2(gid1, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -547,7 +547,7 @@ generate_eoc_test_file(hid_t fapl_id)
     if (H5Pclose(fapl_copy_id) < 0)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return fid;
@@ -565,7 +565,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(data);
+    free(data);
 
     H5_FAILED();
     return -1;
@@ -602,10 +602,10 @@ check_group_layout(hid_t fid, const char *group_name)
     before = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE BEFORE GROUP OPEN:\n");
+    printf("\nCACHE BEFORE GROUP OPEN:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", before);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
     /* Open the main group and get its tag */
@@ -620,8 +620,8 @@ check_group_layout(hid_t fid, const char *group_name)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
-        if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        if (snprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR
 
         if ((gid2 = H5Gopen2(gid1, subgroup_name, H5P_DEFAULT)) < 0)
@@ -642,11 +642,11 @@ check_group_layout(hid_t fid, const char *group_name)
     during = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE AFTER OPENING GROUPS (WHILE OPEN):\n");
+    printf("\nCACHE AFTER OPENING GROUPS (WHILE OPEN):\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("MAIN GROUP TAG: %#X\n", tag1);
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", during);
+    printf("MAIN GROUP TAG: %#X\n", tag1);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
 
     /* Close the main group */
@@ -657,10 +657,10 @@ check_group_layout(hid_t fid, const char *group_name)
     after = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE AFTER CLOSING GROUPS:\n");
+    printf("\nCACHE AFTER CLOSING GROUPS:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", after);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */
@@ -713,17 +713,17 @@ check_dset_scheme(hid_t fid, const char *dset_name)
         TEST_ERROR;
 
     /* Create the data buffer */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Record the number of cache entries */
     before = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE BEFORE DATASET OPEN:\n");
+    printf("\nCACHE BEFORE DATASET OPEN:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", before);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
     /* Open dataset and get the metadata tag */
@@ -743,11 +743,11 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     during = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE AFTER DATA READ (WHILE OPEN):\n");
+    printf("\nCACHE AFTER DATA READ (WHILE OPEN):\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("TAG: %#X\n", tag);
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", during);
+    printf("TAG: %#X\n", tag);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
 
     /* Close the dataset */
@@ -758,10 +758,10 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     after = file_ptr->shared->cache->index_len;
 
 #ifdef EOC_MANUAL_INSPECTION
-    HDprintf("\nCACHE AFTER DATASET CLOSE:\n");
+    printf("\nCACHE AFTER DATASET CLOSE:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", after);
+    printf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */
@@ -772,7 +772,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     if (before != after || before == during)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return SUCCEED;
@@ -888,7 +888,7 @@ main(void)
     hid_t    fid     = -1; /* file ID                              */
     unsigned nerrors = 0;  /* number of test errors                */
 
-    HDprintf("Testing evict-on-close cache behavior\n");
+    printf("Testing evict-on-close cache behavior\n");
 
     /* Initialize */
     h5_reset();
@@ -956,13 +956,13 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All evict-on-close tests passed.\n");
+    printf("All evict-on-close tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
-    HDprintf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+    printf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
     h5_delete_all_test_files(FILENAMES, fapl_id);
     H5E_BEGIN_TRY
@@ -972,7 +972,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* end main() */
 
@@ -1036,7 +1036,7 @@ main(void)
 {
     unsigned nerrors = 0; /* number of test errors                */
 
-    HDprintf("Testing evict-on-close cache behavior\n");
+    printf("Testing evict-on-close cache behavior\n");
 
     /* Initialize */
     h5_reset();
@@ -1047,16 +1047,16 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All evict-on-close tests passed.\n");
-    HDprintf("Note that EoC is not supported under parallel so most tests are skipped.\n");
+    printf("All evict-on-close tests passed.\n");
+    printf("Note that EoC is not supported under parallel so most tests are skipped.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
-    HDprintf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+    printf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* main() - parallel */
 

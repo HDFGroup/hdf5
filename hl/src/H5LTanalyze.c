@@ -1474,7 +1474,7 @@ case 55:
 YY_RULE_SETUP
 #line 109 "hl/src/H5LTanalyze.l"
 {
-                        H5LTyylval.ival = HDatoi(yytext);
+                        H5LTyylval.ival = atoi(yytext);
                         return NUMBER;
                  }
 	YY_BREAK
@@ -2543,10 +2543,10 @@ void yyfree (void * ptr )
 static char *
 trim_quotes(const char *quoted)
 {
-    size_t len = HDstrlen(quoted);
+    size_t len = strlen(quoted);
     char *trimmed;
 
-    HDassert(quoted[0] == '"' && quoted[len - 1] == '"');
+    assert(quoted[0] == '"' && quoted[len - 1] == '"');
 
     trimmed = HDstrdup(quoted + 1);
     trimmed[len - 2] = '\0';
@@ -2558,14 +2558,14 @@ static int my_yyinput(char *buf, int max_size)
 {
    int ret;
 
-   HDmemcpy(buf, myinput, input_len);
+   memcpy(buf, myinput, input_len);
    ret = (int)input_len;
    return ret;
 }
 
 int H5LTyyerror(const char *msg)
 {
-   HDprintf("ERROR: %s before \"%s\".\n", msg, yytext);
+   printf("ERROR: %s before \"%s\".\n", msg, yytext);
    return 0;
 }
 

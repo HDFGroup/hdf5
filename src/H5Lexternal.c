@@ -125,7 +125,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(p);
+    assert(p);
 
     /* Check external link version & flags */
     if (((*p >> 4) & 0x0F) > H5L_EXT_VERSION)
@@ -136,7 +136,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Gather some information from the external link's user data */
     file_name = (const char *)p;
-    fname_len = HDstrlen(file_name);
+    fname_len = strlen(file_name);
     obj_name  = (const char *)p + fname_len + 1;
 
     /* Get the plist structure */

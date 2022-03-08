@@ -85,26 +85,26 @@ main(int argc, char *argv[])
         else if (strcmp(argv[i], "-z") == 0)
             z = 1;
         else if (strcmp(argv[i], "-h") == 0) {
-            HDprintf("\nOPTONS:\n");
-            HDprintf("\t-f F:\tname of the test file (default: %s).\n", FNAME);
-            HDprintf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
-            HDprintf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
-            HDprintf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
-            HDprintf("\t-r N:\tnumber of rows in the large compound dataset (default: %d).\n", NROWS);
-            HDprintf("\t-s N:\tsize of dim0 in datasets (default: %d).\n", DIM0);
-            HDprintf("\t-c N:\tchunk size of dim0 (default: %d).\n", (DIM0 / 10 + 1));
-            HDprintf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
-            HDprintf("\t-l:\tuse latest format (default: no).\n");
-            HDprintf("\t-z:\tuse gzip compression (default: no).\n");
-            HDprintf("\t-h:\tthis help information.\n");
-            HDprintf("Example:\n");
-            HDprintf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 10000 -s 200 -c 20 -v 40 -l -z\n\n");
+            printf("\nOPTONS:\n");
+            printf("\t-f F:\tname of the test file (default: %s).\n", FNAME);
+            printf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
+            printf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
+            printf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
+            printf("\t-r N:\tnumber of rows in the large compound dataset (default: %d).\n", NROWS);
+            printf("\t-s N:\tsize of dim0 in datasets (default: %d).\n", DIM0);
+            printf("\t-c N:\tchunk size of dim0 (default: %d).\n", (DIM0 / 10 + 1));
+            printf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
+            printf("\t-l:\tuse latest format (default: no).\n");
+            printf("\t-z:\tuse gzip compression (default: no).\n");
+            printf("\t-h:\tthis help information.\n");
+            printf("Example:\n");
+            printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 10000 -s 200 -c 20 -v 40 -l -z\n\n");
             exit(0);
         }
     }
 
     if (strlen(fname) <= 0)
-        HDsprintf(fname, FNAME);
+        sprintf(fname, FNAME);
 
     create_perf_test_file(fname, ngrps, ndsets, nattrs, (hsize_t)nrows, (hsize_t)dim0, (hsize_t)chunk, vlen,
                           z, l);
@@ -324,7 +324,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     add_attrs(fid, 0);
 
-    HDsprintf(name, "a cmp ds of %d rows", nrows);
+    sprintf(name, "a cmp ds of %d rows", nrows);
     did = H5Dcreate(fid, name, cmp_tid, sid_large, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     H5Dwrite(did, cmp_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_comp_large);
     add_attrs(did, 0);
@@ -344,7 +344,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
     add_attrs(gid1, 0);
     for (i = 0; i < ngrps; i++) {
         /* create sub groups */
-        HDsprintf(name, "g%02d", i);
+        sprintf(name, "g%02d", i);
         gid2 = H5Gcreate(gid1, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (i < 10)
             add_attrs(gid2, 0);
@@ -357,14 +357,14 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
     add_attrs(gid1, 0);
     for (j = 0; j < ndsets; j += 12) {
         /* 1 add a null dataset */
-        HDsprintf(name, "%05d null dataset", j);
+        sprintf(name, "%05d null dataset", j);
         did = H5Dcreate(gid1, name, H5T_STD_I32LE, sid_null, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (!j)
             add_attrs(did, j);
         H5Dclose(did);
 
         /* 2 add scalar int point */
-        HDsprintf(name, "%05d scalar int point", j);
+        sprintf(name, "%05d scalar int point", j);
         did = H5Dcreate(gid1, name, H5T_NATIVE_INT, sid_scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &j);
         if (!j)
@@ -372,7 +372,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 3 scalar vlen string */
-        HDsprintf(name, "%05d scalar vlen string", j);
+        sprintf(name, "%05d scalar vlen string", j);
         did = H5Dcreate(gid1, name, tid_vlen_s, sid_scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(did, tid_vlen_s, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf_vlen_s[0]);
         if (!j)
@@ -380,7 +380,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 4 add fixed-length float array */
-        HDsprintf(name, "%05d fixed-length float array", j);
+        sprintf(name, "%05d fixed-length float array", j);
         did = H5Dcreate(gid1, name, tid_array_f, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, tid_array_f, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_float_a);
         if (!j)
@@ -388,7 +388,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 5 add fixed-length strings */
-        HDsprintf(name, "%05d fixed-length strings", j);
+        sprintf(name, "%05d fixed-length strings", j);
         did = H5Dcreate(gid1, name, tid_str, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, tid_str, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_str);
         if (!j)
@@ -396,7 +396,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 6 add compound data */
-        HDsprintf(name, "%05d compound data", j);
+        sprintf(name, "%05d compound data", j);
         did = H5Dcreate(gid1, name, cmp_tid, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, cmp_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_comp);
         if (!j)
@@ -404,7 +404,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 7 add 2D double */
-        HDsprintf(name, "%05d 2D double", j);
+        sprintf(name, "%05d 2D double", j);
         strcpy(tmp_name1, name);
         did = H5Dcreate(gid1, name, H5T_NATIVE_DOUBLE, sid_2d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_double2d[0]);
@@ -413,7 +413,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 8 add 1D int array */
-        HDsprintf(name, "%05d 1D int array", j);
+        sprintf(name, "%05d 1D int array", j);
         did = H5Dcreate(gid1, name, H5T_NATIVE_INT, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_int);
         if (!j)
@@ -421,7 +421,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 9 add vlen int array */
-        HDsprintf(name, "%05d vlen int array", j);
+        sprintf(name, "%05d vlen int array", j);
         strcpy(tmp_name2, name);
         did = H5Dcreate(gid1, name, tid_vlen_i, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, tid_vlen_i, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_vlen_i);
@@ -430,7 +430,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Dclose(did);
 
         /* 10 add vlen strings */
-        HDsprintf(name, "%05d vlen strings", j);
+        sprintf(name, "%05d vlen strings", j);
         strcpy(tmp_name3, name);
         did = H5Dcreate(gid1, name, tid_vlen_s, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite(did, tid_vlen_s, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_vlen_s);
@@ -441,7 +441,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         /* 11 add object refs */
         H5Rcreate(&buf_ref[0], gid1, ".", H5R_OBJECT, (hid_t)-1);
         H5Rcreate(&buf_ref[1], gid1, tmp_name3, H5R_OBJECT, (hid_t)-1);
-        HDsprintf(name, "%05d obj refs", j);
+        sprintf(name, "%05d obj refs", j);
         did = H5Dcreate(gid1, name, H5T_STD_REF_OBJ, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_ref);
         if (!j)
@@ -456,7 +456,7 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         H5Sselect_hyperslab(sid_1d, H5S_SELECT_SET, &start, &stride, &count, NULL);
         H5Rcreate(&buf_reg_ref[1], gid1, tmp_name2, H5R_DATASET_REGION, sid_1d);
         H5Sselect_none(sid_1d);
-        HDsprintf(name, "%05d region refs", j);
+        sprintf(name, "%05d region refs", j);
         did = H5Dcreate(gid1, name, H5T_STD_REF_DSETREG, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite(did, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_reg_ref);
         if (!j)
@@ -572,11 +572,11 @@ add_attrs(hid_t oid, int idx)
 
     /* 1 scalar point */
     sid = H5Screate(H5S_SCALAR);
-    HDsprintf(name, "%05d scalar int", idx);
+    sprintf(name, "%05d scalar int", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_UINT, sid, &i);
-    HDsprintf(name, "%05d scalar ulong", idx);
+    sprintf(name, "%05d scalar ulong", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_INT64, sid, &l);
-    HDsprintf(name, "%05d scalar str", idx);
+    sprintf(name, "%05d scalar str", idx);
     tid = H5Tcopy(H5T_C_S1);
     H5Tset_size(tid, H5T_VARIABLE);
     nattrs += add_attr(oid, name, tid, sid, &s[2]);
@@ -586,24 +586,24 @@ add_attrs(hid_t oid, int idx)
     /* 4 single point */
     sid = H5Screate_simple(1, dims1, NULL);
     H5Rcreate(&ref, oid, ".", H5R_OBJECT, (hid_t)-1);
-    HDsprintf(name, "%05d single float", idx);
+    sprintf(name, "%05d single float", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_FLOAT, sid, &f);
-    HDsprintf(name, "%05d single double", idx);
+    sprintf(name, "%05d single double", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_DOUBLE, sid, &d);
-    HDsprintf(name, "%05d single obj_ref", idx);
+    sprintf(name, "%05d single obj_ref", idx);
     nattrs += add_attr(oid, name, H5T_STD_REF_OBJ, sid, &ref);
     H5Sclose(sid);
 
     /* 7 fixed length 1D array */
     sid = H5Screate_simple(1, dims1, NULL);
     tid = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dims2);
-    HDsprintf(name, "%05d array float", idx);
+    sprintf(name, "%05d array float", idx);
     nattrs += add_attr(oid, name, tid, sid, &f_array[0]);
     H5Tclose(tid);
     tid = H5Tcopy(H5T_C_S1);
     H5Tset_size(tid, strlen(s[0]) + 1);
     tid1 = H5Tarray_create(tid, 1, dims2);
-    HDsprintf(name, "%05d array str", idx);
+    sprintf(name, "%05d array str", idx);
     nattrs += add_attr(oid, name, tid1, sid, s);
     H5Tclose(tid1);
     H5Tclose(tid);
@@ -612,7 +612,7 @@ add_attrs(hid_t oid, int idx)
     /* 9 fixed length 2D int arrays */
     sid = H5Screate_simple(1, dims2, NULL);
     tid = H5Tarray_create(H5T_NATIVE_INT, 2, dims3);
-    HDsprintf(name, "%05d array int 2D", idx);
+    sprintf(name, "%05d array int 2D", idx);
     nattrs += add_attr(oid, name, tid, sid, int3d[0][0]);
     H5Tclose(tid);
     H5Sclose(sid);
@@ -621,12 +621,12 @@ add_attrs(hid_t oid, int idx)
     sid = H5Screate_simple(1, dims2, NULL);
     tid = H5Tcopy(H5T_C_S1);
     H5Tset_size(tid, H5T_VARIABLE);
-    HDsprintf(name, "%05d vlen strings", idx);
+    sprintf(name, "%05d vlen strings", idx);
     nattrs += add_attr(oid, name, tid, sid, s_vlen);
     H5Tclose(tid);
     tid = H5Tvlen_create(H5T_NATIVE_INT);
     ;
-    HDsprintf(name, "%05d vlen int array", idx);
+    sprintf(name, "%05d vlen int array", idx);
     nattrs += add_attr(oid, name, tid, sid, i_vlen);
     H5Tclose(tid);
     H5Sclose(sid);
@@ -640,7 +640,7 @@ add_attrs(hid_t oid, int idx)
     offset += sizeof(H5T_NATIVE_INT);
     H5Tinsert(tid, "City", offset, tid1);
     offset += sizeof(char *);
-    HDsprintf(name, "%05d compound data", idx);
+    sprintf(name, "%05d compound data", idx);
     nattrs += add_attr(oid, name, tid, sid, cmp_data);
     H5Tclose(tid1);
     H5Tclose(tid);

@@ -142,7 +142,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_STATIC
 
-    HDassert(dtype);
+    assert(dtype);
 
     if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, FALSE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
@@ -669,7 +669,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     } /* end switch */
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 
@@ -725,7 +725,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_STATIC
 
-    HDassert(size > 0);
+    assert(size > 0);
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (size <= sizeof(float)) {
@@ -783,7 +783,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     } /* end switch */
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
     if ((ret_value = H5T_copy(dt, H5T_COPY_TRANSIENT)) == NULL)
@@ -884,7 +884,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
     }
 
     /* Create new native type */
-    HDassert(tid >= 0);
+    assert(tid >= 0);
     if (NULL == (dt = (H5T_t *)H5I_object(tid)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 

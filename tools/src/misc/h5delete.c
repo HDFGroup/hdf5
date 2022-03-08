@@ -25,7 +25,7 @@ static void usage(void);
 static void
 usage(void)
 {
-    HDfprintf(stderr, "Usage: h5delete [-f] <filename>\n");
+    fprintf(stderr, "Usage: h5delete [-f] <filename>\n");
 }
 
 int
@@ -37,7 +37,7 @@ main(int argc, char *argv[])
 
     switch (argc) {
         case 3:
-            if (HDstrcmp(argv[1], "-f") != 0) {
+            if (strcmp(argv[1], "-f") != 0) {
                 usage();
                 return EXIT_FAILURE;
             }
@@ -60,7 +60,7 @@ main(int argc, char *argv[])
     H5E_END_TRY;
 
     if (ret < 0 && !quiet)
-        HDfprintf(stderr, "Unable to delete storage at: %s\n", name);
+        fprintf(stderr, "Unable to delete storage at: %s\n", name);
 
     return ret < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }

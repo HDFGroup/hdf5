@@ -67,12 +67,12 @@ test_skiplist_init(void)
     size_t   u, v;      /* Local index variables */
 
     /* Allocate arrays */
-    rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    CHECK_PTR(rand_num, "HDmalloc");
-    sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    CHECK_PTR(sort_rand_num, "HDmalloc");
-    rev_sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    CHECK_PTR(rev_sort_rand_num, "HDmalloc");
+    rand_num = (int *)malloc(sizeof(int) * NUM_ELEMS);
+    CHECK_PTR(rand_num, "malloc");
+    sort_rand_num = (int *)malloc(sizeof(int) * NUM_ELEMS);
+    CHECK_PTR(sort_rand_num, "malloc");
+    rev_sort_rand_num = (int *)malloc(sizeof(int) * NUM_ELEMS);
+    CHECK_PTR(rev_sort_rand_num, "malloc");
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -98,16 +98,16 @@ test_skiplist_init(void)
     } /* end for */
 
     /* Copy random values to sorted array */
-    HDmemcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
+    memcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
-    HDqsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
+    qsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
 
     /* Copy random values to reverse sorted array */
-    HDmemcpy(rev_sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
+    memcpy(rev_sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
-    HDqsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);
+    qsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);
 } /* end test_skiplist_init() */
 
 /****************************************************************
@@ -1550,11 +1550,11 @@ test_skiplist_term(void)
 {
     /* Release arrays */
     if (rand_num)
-        HDfree(rand_num);
+        free(rand_num);
     if (sort_rand_num)
-        HDfree(sort_rand_num);
+        free(sort_rand_num);
     if (rev_sort_rand_num)
-        HDfree(rev_sort_rand_num);
+        free(rev_sort_rand_num);
 } /* end test_skiplist_term() */
 
 /****************************************************************

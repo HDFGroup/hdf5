@@ -104,7 +104,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1chunk(JNIEnv *env, jclass clss, jlong plist, jint nd
 
     PIN_BYTE_ARRAY(ENVONLY, dim, theArray, &isCopy, "H5Pset_chunk: dim array not pinned");
 
-    if (NULL == (da = lp = (hsize_t *)HDmalloc(rank * sizeof(hsize_t))))
+    if (NULL == (da = lp = (hsize_t *)malloc(rank * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pset_chunk: memory allocation failed");
 
     jlp = (jlong *)theArray;
@@ -119,7 +119,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1chunk(JNIEnv *env, jclass clss, jlong plist, jint nd
 
 done:
     if (da)
-        HDfree(da);
+        free(da);
     if (theArray)
         UNPIN_BYTE_ARRAY(ENVONLY, dim, theArray, JNI_ABORT);
 
@@ -155,7 +155,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk(JNIEnv *env, jclass clss, jlong plist, jint ma
 
     PIN_LONG_ARRAY(ENVONLY, dims, theArray, &isCopy, "H5Pget_chunk: input dims not pinned");
 
-    if (NULL == (da = (hsize_t *)HDmalloc((size_t)max_ndims * sizeof(hsize_t))))
+    if (NULL == (da = (hsize_t *)malloc((size_t)max_ndims * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_chunk: memory allocation failed");
 
     if ((status = H5Pget_chunk((hid_t)plist, (int)max_ndims, da)) < 0)
@@ -166,7 +166,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk(JNIEnv *env, jclass clss, jlong plist, jint ma
 
 done:
     if (da)
-        HDfree(da);
+        free(da);
     if (theArray)
         UNPIN_LONG_ARRAY(ENVONLY, dims, theArray, (status < 0) ? JNI_ABORT : 0);
 
@@ -576,7 +576,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter(JNIEnv *env, jclass clss, jlong plist, jint f
     if (NULL == cd_values)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter: cd_values is NULL");
 
-    if (NULL == (filter = (char *)HDmalloc(sizeof(char) * (size_t)namelen)))
+    if (NULL == (filter = (char *)malloc(sizeof(char) * (size_t)namelen)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter: flags array not pinned");
@@ -616,7 +616,7 @@ done:
     if (flagsArray)
         UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0);
     if (filter)
-        HDfree(filter);
+        free(filter);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1filter */
@@ -651,7 +651,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter2(JNIEnv *env, jclass clss, jlong plist, jint 
     if (NULL == filter_config)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter2: filter_config is NULL");
 
-    if (NULL == (filter = (char *)HDmalloc(sizeof(char) * (size_t)namelen)))
+    if (NULL == (filter = (char *)malloc(sizeof(char) * (size_t)namelen)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter2: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter2: flags array not pinned");
@@ -714,7 +714,7 @@ done:
     if (flagsArray)
         UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0);
     if (filter)
-        HDfree(filter);
+        free(filter);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1filter2 */
@@ -754,7 +754,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id(JNIEnv *env, jclass clss, jlong plist
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter_by_id: name is NULL");
 
-    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)bs)))
+    if (NULL == (aName = (char *)malloc(sizeof(char) * (size_t)bs)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter_by_id: flags not pinned");
@@ -800,7 +800,7 @@ done:
     if (flagsArray)
         UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0);
     if (aName)
-        HDfree(aName);
+        free(aName);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id */
@@ -842,7 +842,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id2(JNIEnv *env, jclass clss, jlong plis
     if (NULL == filter_config)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter_by_id2: filter_config is NULL");
 
-    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)bs)))
+    if (NULL == (aName = (char *)malloc(sizeof(char) * (size_t)bs)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id2: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter_by_id2: flags not pinned");
@@ -886,7 +886,7 @@ done:
     if (flagsArray)
         UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0);
     if (aName)
-        HDfree(aName);
+        free(aName);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id2 */
@@ -1103,7 +1103,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1external(JNIEnv *env, jclass clss, jlong plist, jint
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_external: size input array < 2");
 
     if (name_size > 0)
-        if (NULL == (file = (char *)HDmalloc(sizeof(char) * (size_t)name_size)))
+        if (NULL == (file = (char *)malloc(sizeof(char) * (size_t)name_size)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_external: memory allocation failed");
 
     if ((status = H5Pget_external((hid_t)plist, (unsigned)idx, (size_t)name_size, file, (off_t *)&o,
@@ -1134,7 +1134,7 @@ done:
     if (theArray)
         UNPIN_LONG_ARRAY(ENVONLY, size, theArray, (status < 0) ? JNI_ABORT : 0);
     if (file)
-        HDfree(file);
+        free(file);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1external */
@@ -1228,7 +1228,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname(JNIEnv *env, jclass clss, jlong dc
     if ((buf_size = H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t)idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (dname = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (dname = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_dsetname: memory allocation failed");
 
     if (H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t)idx, dname, (size_t)buf_size + 1) < 0)
@@ -1244,7 +1244,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname(JNIEnv *env, jclass clss, jlong dc
 
 done:
     if (dname)
-        HDfree(dname);
+        free(dname);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname */
@@ -1267,7 +1267,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename(JNIEnv *env, jclass clss, jlong dc
     if ((buf_size = H5Pget_virtual_filename((hid_t)dcpl_id, (size_t)idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (fname = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (fname = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_filename: memory allocation failed");
 
     if (H5Pget_virtual_filename((hid_t)dcpl_id, (size_t)idx, fname, (size_t)buf_size + 1) < 0)
@@ -1283,7 +1283,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename(JNIEnv *env, jclass clss, jlong dc
 
 done:
     if (fname)
-        HDfree(fname);
+        free(fname);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename */
@@ -1369,7 +1369,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix(JNIEnv *env, jclass clss, jlong dapl
     if ((prefix_size = H5Pget_virtual_prefix((hid_t)dapl_id, (char *)NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (pre = (char *)HDmalloc(sizeof(char) * (size_t)prefix_size + 1)))
+    if (NULL == (pre = (char *)malloc(sizeof(char) * (size_t)prefix_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_prefix: memory allocation failed");
 
     if (H5Pget_virtual_prefix((hid_t)dapl_id, (char *)pre, (size_t)prefix_size + 1) < 0)
@@ -1384,7 +1384,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix(JNIEnv *env, jclass clss, jlong dapl
 
 done:
     if (pre)
-        HDfree(pre);
+        free(pre);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix */

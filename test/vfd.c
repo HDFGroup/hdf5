@@ -81,9 +81,9 @@ static int __k;
 #define HEXPRINT(size, buf)                                                                                  \
     for (__k = 0; __k < (size); __k++) {                                                                     \
         if (__k % 16 == 0) {                                                                                 \
-            HDprintf("\n%04x", __k);                                                                         \
+            printf("\n%04x", __k);                                                                         \
         }                                                                                                    \
-        HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
+        printf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
     } /* end #define HEXPRINT() */
 
 /* Helper structure to pass around dataset information.
@@ -294,7 +294,7 @@ test_core(void)
 
     /* Make sure it's not present at the start of the test */
     if (HDaccess(filename, F_OK) != -1)
-        if (HDremove(filename) < 0)
+        if (remove(filename) < 0)
             FAIL_PUTS_ERROR("unable to remove backing store file");
 
     /* Create and close file w/ backing store off */
@@ -432,9 +432,9 @@ test_core(void)
         TEST_ERROR;
 
     /* Allocate memory for data set. */
-    if (NULL == (data_w = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    if (NULL == (data_w = (int *)malloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         FAIL_PUTS_ERROR("unable to allocate memory for input array");
-    if (NULL == (data_r = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    if (NULL == (data_r = (int *)malloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         FAIL_PUTS_ERROR("unable to allocate memory for output array");
 
     /* Initialize the buffers */
@@ -443,7 +443,7 @@ test_core(void)
     for (i = 0; i < CORE_DSET_DIM1; i++)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             *pw++ = val++;
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    memset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
 
     /* Create the dataspace */
     dims[0] = CORE_DSET_DIM1;
@@ -477,8 +477,8 @@ test_core(void)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             if (*pr++ != *pw++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -534,7 +534,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Read the data back from the dataset */
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    memset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
         TEST_ERROR;
 
@@ -545,8 +545,8 @@ test_core(void)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             if (*pw++ != *pr++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -567,8 +567,8 @@ test_core(void)
     if (H5Dclose(did) < 0)
         TEST_ERROR;
 
-    HDfree(data_w);
-    HDfree(data_r);
+    free(data_w);
+    free(data_r);
 
     /* Close and delete the file */
     if (H5Fclose(fid) < 0)
@@ -626,9 +626,9 @@ error:
     H5E_END_TRY;
 
     if (data_w)
-        HDfree(data_w);
+        free(data_w);
     if (data_r)
-        HDfree(data_r);
+        free(data_r);
 
     return -1;
 } /* end test_core() */
@@ -698,7 +698,7 @@ test_direct(void)
     if (file < 0) {
         H5Pclose(fapl);
         SKIPPED();
-        HDprintf("  Probably the file system doesn't support Direct I/O\n");
+        printf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -778,8 +778,8 @@ test_direct(void)
         for (j = 0; j < DSET1_DIM2; j++)
             if (*p1++ != *p2++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set 1.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -811,8 +811,8 @@ test_direct(void)
     for (i = 0; i < DSET2_DIM; i++)
         if (wdata2[i] != rdata2[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written in data set 2.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written in data set 2.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -825,8 +825,8 @@ test_direct(void)
     if (H5Dclose(dset2) < 0)
         TEST_ERROR;
 
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     /* Close and delete the file */
     if (H5Fclose(file) < 0)
@@ -853,9 +853,9 @@ error:
     H5E_END_TRY;
 
     if (proto_points)
-        HDfree(proto_points);
+        free(proto_points);
     if (proto_check)
-        HDfree(proto_check);
+        free(proto_check);
 
     return -1;
 #endif /*H5_HAVE_DIRECT*/
@@ -891,7 +891,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     int   i;
 
     /* Case 1: reopen file with 1st member file name and default property list */
-    HDsnprintf(first_name, sizeof(first_name), fname, 0);
+    snprintf(first_name, sizeof(first_name), fname, 0);
 
     H5E_BEGIN_TRY
     {
@@ -923,7 +923,7 @@ test_family_opens(char *fname, hid_t fa_pl)
         TEST_ERROR
 
     /* Case 4: reopen file with wrong name template */
-    HDstrcpy(wrong_name, fname);
+    strcpy(wrong_name, fname);
     for (i = 0; i < 1024; i++)
         if (wrong_name[i] == '5') {
             wrong_name[i] = '4';
@@ -979,9 +979,9 @@ test_family(void)
     TESTING("FAMILY file driver");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(FAMILY_NUMBER, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < FAMILY_NUMBER; i++)
         buf[i] = buf_data + (i * FAMILY_SIZE);
@@ -1125,8 +1125,8 @@ test_family(void)
     if (H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return SUCCEED;
@@ -1142,8 +1142,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 } /* end test_family() */
@@ -1196,19 +1196,19 @@ test_family_compat(void)
     h5_fixname(FILENAME[3], fapl, newname, sizeof(newname));
 
     pathname[0] = '\0';
-    HDstrcat(pathname, filename);
+    strcat(pathname, filename);
 
     /* The following code makes the copies of the family files in the source directory.
      * Since we're going to open the files with write mode, this protects the original
      * files.
      */
-    HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-    HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+    snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+    snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
 
     while (h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
         counter++;
-        HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-        HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+        snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+        snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
     } /* end while */
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
@@ -1291,9 +1291,9 @@ test_family_member_fapl(void)
     TESTING("Family member FAPL");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(FAMILY_NUMBER, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < FAMILY_NUMBER; i++)
         buf[i] = buf_data + (i * FAMILY_SIZE);
@@ -1356,8 +1356,8 @@ test_family_member_fapl(void)
     if (H5Pclose(fapl_id) == FAIL)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return SUCCEED;
@@ -1373,8 +1373,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 } /* end test_family_member_fapl() */
@@ -1407,8 +1407,8 @@ test_multi_opens(char *fname)
     char  sf_name[1024];    /*name string "multi_file-s.h5"*/
 
     /* Case: reopen with the name of super file and default property list */
-    HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
-    HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
+    snprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
+    snprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY
     {
@@ -1459,9 +1459,9 @@ test_multi(void)
     TESTING("MULTI file driver");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(MULTI_SIZE, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(MULTI_SIZE, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < MULTI_SIZE; i++)
         buf[i] = buf_data + (i * MULTI_SIZE);
@@ -1470,11 +1470,11 @@ test_multi(void)
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    HDmemset(memb_map, 0, sizeof(memb_map));
-    HDmemset(memb_fapl, 0, sizeof(memb_fapl));
-    HDmemset(memb_name, 0, sizeof(memb_name));
-    HDmemset(memb_addr, 0, sizeof(memb_addr));
-    HDmemset(sv, 0, sizeof(sv));
+    memset(memb_map, 0, sizeof(memb_map));
+    memset(memb_fapl, 0, sizeof(memb_fapl));
+    memset(memb_name, 0, sizeof(memb_name));
+    memset(memb_addr, 0, sizeof(memb_addr));
+    memset(sv, 0, sizeof(sv));
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_fapl[mt] = H5P_DEFAULT;
@@ -1484,19 +1484,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
+    sprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
@@ -1613,7 +1613,7 @@ test_multi(void)
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if (H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
+    if (H5Tset_size(atype, strlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if (H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1646,8 +1646,8 @@ test_multi(void)
     if (H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
 
@@ -1665,8 +1665,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 } /* end test_multi() */
@@ -1711,9 +1711,9 @@ test_multi_compat(void)
     TESTING("MULTI file driver backward compatibility");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(MULTI_SIZE, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(MULTI_SIZE, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < MULTI_SIZE; i++)
         buf[i] = buf_data + (i * MULTI_SIZE);
@@ -1722,23 +1722,23 @@ test_multi_compat(void)
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    HDmemset(memb_map, 0, sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
-    HDmemset(sv, 0, sizeof sv);
+    memset(memb_map, 0, sizeof memb_map);
+    memset(memb_fapl, 0, sizeof memb_fapl);
+    memset(memb_name, 0, sizeof memb_name);
+    memset(memb_addr, 0, sizeof memb_addr);
+    memset(sv, 0, sizeof sv);
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         memb_map[mt] = H5FD_MEM_SUPER;
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
@@ -1750,12 +1750,12 @@ test_multi_compat(void)
     /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory
      */
-    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+    sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    sprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
@@ -1840,8 +1840,8 @@ test_multi_compat(void)
     if (H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
 
@@ -1857,8 +1857,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 } /* end test_multi_compat() */
@@ -2282,9 +2282,9 @@ test_ros3(void)
     /* need a macro to compare instances of H5FD_ros3_fapl_t */
     if ((test_ros3_fa.version != ros3_fa_0.version) ||
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
-        (HDstrcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+        (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
@@ -2331,9 +2331,9 @@ error:
     {                                                                                                        \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDfprintf(stderr, mesg);                                                                             \
+        fprintf(stderr, mesg);                                                                             \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
-        HDfflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
     }
@@ -2355,7 +2355,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
     int                         ret_value    = 0;
     H5FD_splitter_vfd_config_t *fetched_info = NULL;
 
-    if (NULL == (fetched_info = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (fetched_info = calloc(1, sizeof(H5FD_splitter_vfd_config_t))))
         SPLITTER_TEST_FAULT("memory allocation for fetched_info struct failed");
 
     fetched_info->magic      = H5FD_SPLITTER_MAGIC;
@@ -2386,16 +2386,16 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
             SPLITTER_TEST_FAULT("Write-Only driver mismatch\n");
         }
     }
-    if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
-        HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
+    if ((strlen(info->wo_path) != strlen(fetched_info->wo_path)) ||
+        strncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
+        fprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
         SPLITTER_TEST_FAULT("Write-Only file path mismatch\n");
     }
 
 done:
-    HDfree(fetched_info);
+    free(fetched_info);
 
     return ret_value;
 } /* end compare_splitter_config_info() */
@@ -2432,9 +2432,9 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     FILE *                      logfile     = NULL;
     int                         ret_value   = 0;
 
-    if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (vfd_config = calloc(1, sizeof(H5FD_splitter_vfd_config_t))))
         SPLITTER_TEST_FAULT("memory allocation for vfd_config struct failed");
-    if (NULL == (filename_rw = HDcalloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
+    if (NULL == (filename_rw = calloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
         SPLITTER_TEST_FAULT("memory allocation for filename_rw string failed");
 
     vfd_config->magic          = H5FD_SPLITTER_MAGIC;
@@ -2545,7 +2545,7 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     }
 
     /* Verify existence of logfile if appropriate */
-    logfile = HDfopen(vfd_config->log_file_path, "r");
+    logfile = fopen(vfd_config->log_file_path, "r");
     if ((TRUE == provide_logfile_path && NULL == logfile) ||
         (FALSE == provide_logfile_path && NULL != logfile)) {
         SPLITTER_TEST_FAULT("no logfile when one was expected\n");
@@ -2566,10 +2566,10 @@ done:
     }
 
     if (logfile != NULL)
-        HDfclose(logfile);
+        fclose(logfile);
 
-    HDfree(vfd_config);
-    HDfree(filename_rw);
+    free(vfd_config);
+    free(filename_rw);
 
     return ret_value;
 } /* end run_splitter_test() */
@@ -2597,7 +2597,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     herr_t                      ret           = SUCCEED;
     int                         ret_value     = 0;
 
-    if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
+    if (NULL == (vfd_config = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
         FAIL_PUTS_ERROR("memory allocation for vfd_config struct failed");
     }
 
@@ -2609,7 +2609,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     vfd_config->ignore_wo_errs = FALSE;
     vfd_config->rw_fapl_id     = H5P_DEFAULT;
     vfd_config->wo_fapl_id     = fapl_id;
-    HDstrncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
+    strncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
     vfd_config->log_file_path[0] = '\0';
 
     H5E_BEGIN_TRY
@@ -2626,7 +2626,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     }
     split_fapl_id = H5I_INVALID_HID;
 
-    HDfree(vfd_config);
+    free(vfd_config);
 
     return ret_value;
 
@@ -2637,7 +2637,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(vfd_config);
+    free(vfd_config);
 
     return -1;
 } /* end driver_is_splitter_compatible() */
@@ -2664,9 +2664,9 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     hid_t                       file_id     = H5I_INVALID_HID;
     int                         ret_value   = 0;
 
-    if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (vfd_config = calloc(1, sizeof(H5FD_splitter_vfd_config_t))))
         SPLITTER_TEST_FAULT("memory allocation for vfd_config struct failed");
-    if (NULL == (filename_rw = HDcalloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
+    if (NULL == (filename_rw = calloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
         SPLITTER_TEST_FAULT("memory allocation for filename_rw string failed");
 
     vfd_config->magic          = H5FD_SPLITTER_MAGIC;
@@ -2719,7 +2719,7 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant W/O file unexpectedly successful\n");
     }
-    HDremove(vfd_config->wo_path);
+    remove(vfd_config->wo_path);
 
     /* Attempt R/O open when only R/W file exists
      * Should fail.
@@ -2773,8 +2773,8 @@ done:
         H5E_END_TRY;
     }
 
-    HDfree(vfd_config);
-    HDfree(filename_rw);
+    free(vfd_config);
+    free(filename_rw);
 
     return ret_value;
 } /* end splitter_RO_test() */
@@ -2827,9 +2827,9 @@ splitter_prepare_file_paths(H5FD_splitter_vfd_config_t *vfd_config, char *filena
 
     /* Delete any existing files on disk.
      */
-    HDremove(filename_rw_out);
-    HDremove(vfd_config->wo_path);
-    HDremove(vfd_config->log_file_path);
+    remove(filename_rw_out);
+    remove(vfd_config->wo_path);
+    remove(vfd_config->log_file_path);
 
 done:
     return ret_value;
@@ -2941,7 +2941,7 @@ splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def 
     if (sizeof((void *)buf) != sizeof(data->buf)) {
         SPLITTER_TEST_FAULT("invariant size of expected data does not match that received!\n");
     }
-    HDmemcpy(expected, data->buf, sizeof(expected));
+    memcpy(expected, data->buf, sizeof(expected));
 
     dset_id = H5Dopen2(file_id, data->dset_name, H5P_DEFAULT);
     if (dset_id < 0) {
@@ -3013,9 +3013,9 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     struct splitter_dataset_def data;                                     /* for comparison */
     int                         ret_value = 0;
 
-    if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (vfd_config = calloc(1, sizeof(H5FD_splitter_vfd_config_t))))
         SPLITTER_TEST_FAULT("memory allocation for vfd_config struct failed");
-    if (NULL == (filename_rw = HDcalloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
+    if (NULL == (filename_rw = calloc(H5FD_SPLITTER_PATH_MAX + 1, sizeof(char))))
         SPLITTER_TEST_FAULT("memory allocation for filename_rw string failed");
 
     /* pre-fill data buffer to write */
@@ -3105,7 +3105,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
     }
-    HDremove(vfd_config->wo_path);
+    remove(vfd_config->wo_path);
     if (file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("failed to remove W/O file\n");
     }
@@ -3179,8 +3179,8 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config->wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
-    HDremove(filename_rw);
-    HDremove(vfd_config->wo_path);
+    remove(filename_rw);
+    remove(vfd_config->wo_path);
 
     /*
      * H5Fcreate() with TRUNC access.
@@ -3210,8 +3210,8 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config->wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
-    HDremove(filename_rw);
-    HDremove(vfd_config->wo_path);
+    remove(filename_rw);
+    remove(vfd_config->wo_path);
 
     /*
      * H5Fcreate() with TRUNC access.
@@ -3241,8 +3241,8 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_compare_file_bytes(filename_rw, vfd_config->wo_path) < 0) {
         SPLITTER_TEST_FAULT("files are not byte-for-byte equivalent\n");
     }
-    HDremove(filename_rw);
-    HDremove(vfd_config->wo_path);
+    remove(filename_rw);
+    remove(vfd_config->wo_path);
 
     /* H5Fcreate with both files absent is tested elsewhere */
 
@@ -3264,8 +3264,8 @@ done:
         H5E_END_TRY;
     }
 
-    HDfree(vfd_config);
-    HDfree(filename_rw);
+    free(vfd_config);
+    free(filename_rw);
 
     return ret_value;
 } /* end splitter_tentative_open_test() */
@@ -3362,7 +3362,7 @@ test_splitter(void)
 
     if (!driver_is_splitter_compatible(child_fapl_id)) {
         SKIPPED();
-        HDprintf("  given driver is not Splitter W/O compatible.\n");
+        printf("  given driver is not Splitter W/O compatible.\n");
         return 0;
     }
 
@@ -3427,12 +3427,12 @@ static H5FD_t *
 H5FD__ctl_test_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags,
                         hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
 {
-    return HDcalloc(1, sizeof(H5FD_t));
+    return calloc(1, sizeof(H5FD_t));
 }
 static herr_t
 H5FD__ctl_test_vfd_close(H5FD_t H5_ATTR_UNUSED *_file)
 {
-    HDfree(_file);
+    free(_file);
     return SUCCEED;
 }
 static haddr_t
@@ -3635,7 +3635,7 @@ test_ctl(void)
     hid_t                       sub_fapl_id = H5I_INVALID_HID;
 
     TESTING("VFD ctl callback");
-    HDputs("");
+    puts("");
 
     /* Register VFD for test */
     if ((driver_id = H5FDregister(&H5FD_ctl_test_vfd_g)) < 0)
@@ -3735,7 +3735,7 @@ test_ctl(void)
     PASSED();
 
     /* Set up splitter VFD config */
-    if (NULL == (splitter_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (splitter_config = calloc(1, sizeof(H5FD_splitter_vfd_config_t))))
         TEST_ERROR;
 
     splitter_config->magic          = H5FD_SPLITTER_MAGIC;
@@ -3887,7 +3887,7 @@ test_ctl(void)
 
     TESTING_2("test cleanup")
 
-    HDfree(splitter_config);
+    free(splitter_config);
 
     if (H5FDunregister(driver_id) < 0)
         TEST_ERROR;
@@ -3904,7 +3904,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (splitter_config)
-            HDfree(splitter_config);
+            free(splitter_config);
         H5FDunregister(driver_id);
         H5Pclose(sub_fapl_id);
         H5Pclose(fapl_id);
@@ -3933,15 +3933,15 @@ main(void)
      * specific VFD to be set and HDF5_DRIVER being set can interfere
      * with that.
      */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr) {
-        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
-        HDexit(EXIT_SUCCESS);
+        printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
+        exit(EXIT_SUCCESS);
     }
 
     h5_reset();
 
-    HDprintf("Testing basic Virtual File Driver functionality.\n");
+    printf("Testing basic Virtual File Driver functionality.\n");
 
     nerrors += test_sec2() < 0 ? 1 : 0;
     nerrors += test_core() < 0 ? 1 : 0;
@@ -3959,11 +3959,11 @@ main(void)
     nerrors += test_ctl() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
     }
 
-    HDprintf("All Virtual File Driver tests passed.\n");
+    printf("All Virtual File Driver tests passed.\n");
 
     return EXIT_SUCCESS;
 } /* end main() */

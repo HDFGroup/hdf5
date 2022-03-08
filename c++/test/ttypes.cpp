@@ -1154,5 +1154,5 @@ extern "C" void
 cleanup_types()
 {
     for (int i = 0; i < 3; i++)
-        HDremove(FILENAME[i]);
+        remove(FILENAME[i]);
 } // cleanup_types

@@ -50,31 +50,31 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"i", requir
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "OPTIONS\n");
-    HDfprintf(stdout, "  -i in_file.h5    Specifies the input HDF5 file.\n");
-    HDfprintf(stdout, "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
-    HDfprintf(stdout, "                   Can be any file format except an HDF5 format.\n");
-    HDfprintf(stdout, "  -o out_file.h5   Specifies the output HDF5 file.\n");
-    HDfprintf(stdout, "                   If not specified, the user block will be concatenated in\n");
-    HDfprintf(stdout, "                   place to the input HDF5 file.\n");
-    HDfprintf(stdout, "  --clobber        Wipes out any existing user block before concatenating\n");
-    HDfprintf(stdout, "                   the given user block.\n");
-    HDfprintf(stdout, "                   The size of the new user block will be the larger of;\n");
-    HDfprintf(stdout, "                    - the size of existing user block in the input HDF5 file\n");
-    HDfprintf(stdout, "                    - the size of user block required by new input user file\n");
-    HDfprintf(stdout, "                   (size = 512 x 2N,  N is positive integer.)\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "  -h               Prints a usage message and exits.\n");
-    HDfprintf(stdout, "  -V               Prints the HDF5 library version and exits.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Exit Status:\n");
-    HDfprintf(stdout, "   0   Succeeded.\n");
-    HDfprintf(stdout, "   >0  An error occurred.\n");
+    fflush(stdout);
+    fprintf(stdout, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "OPTIONS\n");
+    fprintf(stdout, "  -i in_file.h5    Specifies the input HDF5 file.\n");
+    fprintf(stdout, "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
+    fprintf(stdout, "                   Can be any file format except an HDF5 format.\n");
+    fprintf(stdout, "  -o out_file.h5   Specifies the output HDF5 file.\n");
+    fprintf(stdout, "                   If not specified, the user block will be concatenated in\n");
+    fprintf(stdout, "                   place to the input HDF5 file.\n");
+    fprintf(stdout, "  --clobber        Wipes out any existing user block before concatenating\n");
+    fprintf(stdout, "                   the given user block.\n");
+    fprintf(stdout, "                   The size of the new user block will be the larger of;\n");
+    fprintf(stdout, "                    - the size of existing user block in the input HDF5 file\n");
+    fprintf(stdout, "                    - the size of user block required by new input user file\n");
+    fprintf(stdout, "                   (size = 512 x 2N,  N is positive integer.)\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  -h               Prints a usage message and exits.\n");
+    fprintf(stdout, "  -V               Prints the HDF5 library version and exits.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Exit Status:\n");
+    fprintf(stdout, "   0   Succeeded.\n");
+    fprintf(stdout, "   >0  An error occurred.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -90,7 +90,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -331,11 +331,11 @@ main(int argc, char *argv[])
 
 done:
     if (ub_file)
-        HDfree(ub_file);
+        free(ub_file);
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
 
     if (plist >= 0)
         H5Pclose(plist);
@@ -396,7 +396,7 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
         res = HDfstat(infid, &sbuf);
         if (res < 0) {
             error_msg("Can't stat file \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         howmuch = (ssize_t)sbuf.st_size;
@@ -433,12 +433,12 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
 
         if (nchars <= 0) {
             error_msg("Read error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         if (HDwrite(outfid, buf, (unsigned)nchars) < 0) {
             error_msg("Write error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         tot += nchars;

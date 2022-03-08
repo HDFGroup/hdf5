@@ -134,10 +134,10 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
     if (H5Oget_comment_by_name(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0)
         TEST_ERROR
-    if (HDstrcmp(comment, "hello world") != 0) {
+    if (strcmp(comment, "hello world") != 0) {
         H5_FAILED();
-        HDputs("    Read the wrong comment string from the group.");
-        HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
+        puts("    Read the wrong comment string from the group.");
+        printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR
     }
     if (H5Gclose(g1) < 0)
@@ -215,12 +215,12 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Group names */
-    name1 = (char *)HDmalloc((size_t)LONG_NAME_LEN);
+    name1 = (char *)malloc((size_t)LONG_NAME_LEN);
     for (i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i % 26);
     name1[LONG_NAME_LEN - 1] = '\0';
-    name2                    = (char *)HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
-    HDsprintf(name2, "%s/%s", name1, name1);
+    name2                    = (char *)malloc((size_t)((2 * LONG_NAME_LEN) + 2));
+    sprintf(name2, "%s/%s", name1, name1);
 
     /* Create groups */
     if ((g1 = H5Gcreate2(fid, name1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -247,8 +247,8 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Release name buffers */
-    HDfree(name2);
-    HDfree(name1);
+    free(name2);
+    free(name1);
 
     PASSED();
     return 0;
@@ -259,8 +259,8 @@ error:
         H5Gclose(g1);
         H5Gclose(g2);
         H5Fclose(fid);
-        HDfree(name2);
-        HDfree(name1);
+        free(name2);
+        free(name1);
     }
     H5E_END_TRY;
     return 1;
@@ -310,7 +310,7 @@ test_large(hid_t fcpl, hid_t fapl, hbool_t new_format)
         if (H5G__has_stab_test(cwg) != FALSE)
             TEST_ERROR
     for (i = 0; i < LARGE_NOBJS; i++) {
-        HDsprintf(name, "%05d%05d", (HDrandom() % 100000), i);
+        sprintf(name, "%05d%05d", (HDrandom() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if (H5Gclose(dir) < 0)
@@ -452,7 +452,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Create first "bottom" group */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
+    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
@@ -475,7 +475,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     /* Create several more bottom groups, to push the top group almost to a symbol table */
     /* (Start counting at '1', since we've already created one bottom group */
     for (u = 1; u < LIFECYCLE_MAX_COMPACT; u++) {
-        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
 
@@ -511,7 +511,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
@@ -545,7 +545,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Unlink objects from top group */
     while (u >= LIFECYCLE_MIN_DENSE) {
-        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
 
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR
@@ -562,7 +562,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Unlink one more object from the group, which should transform back to using links */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     u--;
@@ -576,11 +576,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Unlink last two objects from top group */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     u--;
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
@@ -669,9 +669,9 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Construct very long object name template */
-    if (NULL == (objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))))
+    if (NULL == (objname = (char *)malloc((size_t)(LONG_COMPACT_LENGTH + 1))))
         TEST_ERROR
-    HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
+    memset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
     /* Re-open file */
@@ -753,7 +753,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Free object name */
-    HDfree(objname);
+    free(objname);
     objname = NULL;
 
     /* Close top group */
@@ -789,7 +789,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 } /* end long_compact() */
@@ -841,7 +841,7 @@ read_old(void)
 
     /* Create a bunch of objects in the group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsprintf(objname, "Group %u", u);
+        sprintf(objname, "Group %u", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
 
@@ -865,7 +865,7 @@ read_old(void)
 
     /* Delete new objects from old group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsprintf(objname, "Group %u", u);
+        sprintf(objname, "Group %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -977,7 +977,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Create first "bottom" group */
-    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
@@ -998,7 +998,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR
 
     /* Unlink object from top group */
-    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
@@ -1282,7 +1282,7 @@ old_api(hid_t fapl)
     (void)fapl;
 
     SKIPPED();
-    HDputs("    Deprecated API symbols not enabled");
+    puts("    Deprecated API symbols not enabled");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     return 0;
@@ -1421,12 +1421,12 @@ main(void)
     int         nerrors                       = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1502,18 +1502,18 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All symbol table tests passed.");
+    puts("All symbol table tests passed.");
 
     /* Cleanup */
     if (GetTestCleanup()) {
-        HDremove(FILE_OLD_GROUPS_COPY);
-        HDremove(CORRUPT_STAB_TMP_FILE);
+        remove(FILE_OLD_GROUPS_COPY);
+        remove(CORRUPT_STAB_TMP_FILE);
     }
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 }

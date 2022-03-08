@@ -154,7 +154,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(oloc);
+    assert(oloc);
 
     /* Get object header for object */
     if (NULL == (oh = H5O_protect(oloc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -362,8 +362,8 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_connector
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(obj_loc);
-    HDassert(vol_connector);
+    assert(obj_loc);
+    assert(vol_connector);
 
     /* Get object's type */
     type = H5I_get_type(oid);

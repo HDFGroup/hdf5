@@ -233,12 +233,12 @@ H5T__set_offset(const H5T_t *dt, size_t offset)
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(dt);
-    HDassert(H5T_STRING != dt->shared->type || 0 == offset);
-    HDassert(H5T_REFERENCE != dt->shared->type);
-    HDassert(H5T_OPAQUE != dt->shared->type);
-    HDassert(H5T_COMPOUND != dt->shared->type);
-    HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
+    assert(dt);
+    assert(H5T_STRING != dt->shared->type || 0 == offset);
+    assert(H5T_REFERENCE != dt->shared->type);
+    assert(H5T_OPAQUE != dt->shared->type);
+    assert(H5T_COMPOUND != dt->shared->type);
+    assert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
         if (H5T__set_offset(dt->shared->parent, offset) < 0)

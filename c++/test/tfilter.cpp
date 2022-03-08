@@ -270,5 +270,5 @@ test_filters()
 extern "C" void
 cleanup_filters()
 {
-    HDremove(FILE1.c_str());
+    remove(FILE1.c_str());
 }

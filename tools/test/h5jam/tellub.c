@@ -38,11 +38,11 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg,
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s h5_file\n", prog);
-    HDfprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
-    HDfprintf(stdout, "       %s -h\n", prog);
-    HDfprintf(stdout, "           Print a usage message and exit\n");
+    fflush(stdout);
+    fprintf(stdout, "usage: %s h5_file\n", prog);
+    fprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
+    fprintf(stdout, "       %s -h\n", prog);
+    fprintf(stdout, "           Print a usage message and exit\n");
 } /* end usage() */
 
 /*-------------------------------------------------------------------------
@@ -86,7 +86,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -157,7 +157,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    HDprintf("%ld\n", (long)usize);
+    printf("%ld\n", (long)usize);
 
 done:
     H5Pclose(plist);

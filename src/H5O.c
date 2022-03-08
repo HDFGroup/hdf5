@@ -856,7 +856,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 /* Avoid compiler warning on 32-bit machines */
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
-    if (HDstrlen(new_name) > H5L_MAX_LINK_NAME_LEN)
+    if (strlen(new_name) > H5L_MAX_LINK_NAME_LEN)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "name too long")
 #endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
     if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
@@ -2236,7 +2236,7 @@ H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(are_disabled);
+    assert(are_disabled);
 
     if (H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, are_disabled) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");

@@ -97,10 +97,10 @@ H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Get current end-of-allocated space address */
     eoa = file->cls->get_eoa(file, type);
@@ -148,14 +148,14 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 
     FUNC_ENTER_PACKAGE
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)type, size);
+    fprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)type, size);
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Check for query driver and call it */
     if (file->cls->query)
@@ -204,14 +204,14 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 
     /* Post-condition sanity check */
     if (!file->paged_aggr && file->alignment > 1 && orig_size >= file->threshold)
-        HDassert(!(ret_value % file->alignment));
+        assert(!(ret_value % file->alignment));
 
     /* Convert absolute file offset to relative address */
     ret_value -= file->base_addr;
 
 done:
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: ret_value = %" PRIuHADDR "\n", __func__, ret_value);
+    fprintf(stderr, "%s: ret_value = %" PRIuHADDR "\n", __func__, ret_value);
 #endif /* H5FD_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__alloc_real() */
@@ -242,10 +242,10 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, H5F_t *f, hsize_t size, haddr_t *frag_
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the real 'alloc' routine */
     ret_value = H5FD__alloc_real(file, type, size, frag_addr, frag_size);
@@ -281,13 +281,13 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__,
+    fprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__,
               (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
 
@@ -305,7 +305,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     /* Check for file driver 'free' callback and call it if available */
     if (file->cls->free) {
 #ifdef H5FD_ALLOC_DEBUG
-        HDfprintf(stderr, "%s: Letting VFD free space\n", __func__);
+        fprintf(stderr, "%s: Letting VFD free space\n", __func__);
 #endif /* H5FD_ALLOC_DEBUG */
         if ((file->cls->free)(file, type, H5CX_get_dxpl(), addr, size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
@@ -318,11 +318,11 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
 
         eoa = file->cls->get_eoa(file, type);
 #ifdef H5FD_ALLOC_DEBUG
-        HDfprintf(stderr, "%s: eoa = %" PRIuHADDR "\n", __func__, eoa);
+        fprintf(stderr, "%s: eoa = %" PRIuHADDR "\n", __func__, eoa);
 #endif /* H5FD_ALLOC_DEBUG */
         if (eoa == (addr + size)) {
 #ifdef H5FD_ALLOC_DEBUG
-            HDfprintf(stderr, "%s: Reducing file size to = %" PRIuHADDR "\n", __func__, addr);
+            fprintf(stderr, "%s: Reducing file size to = %" PRIuHADDR "\n", __func__, addr);
 #endif /* H5FD_ALLOC_DEBUG */
             if (file->cls->set_eoa(file, type, addr) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "set end of space allocation request failed")
@@ -331,7 +331,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     else {
         /* leak memory */
 #ifdef H5FD_ALLOC_DEBUG
-        HDfprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
+        fprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
                   __func__, (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
     }  /* end else */
@@ -366,10 +366,10 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t addr, hsize_t size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the real 'free' routine */
     if (H5FD__free_real(file, type, addr, size) < 0)
@@ -410,11 +410,11 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(extra_requested > 0);
-    HDassert(f);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(extra_requested > 0);
+    assert(f);
 
     /* Retrieve the end of the address space */
     if (HADDR_UNDEF == (eoa = file->cls->get_eoa(file, type)))

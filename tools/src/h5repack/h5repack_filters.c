@@ -58,7 +58,7 @@ aux_copy_obj(hid_t        dcpl_id,        /* dataset creation property list */
     }
 
     objout->nfilters = nfilters;
-    HDstrcpy(objout->path, name);
+    strcpy(objout->path, name);
 
     if ((layout = H5Pget_layout(dcpl_id)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Pget_layout failed");
@@ -93,7 +93,7 @@ aux_find_obj(const char * name,        /* object name from traverse list */
     unsigned int i;
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        if (HDstrcmp(options->op_tbl->objs[i].path, name) == 0) {
+        if (strcmp(options->op_tbl->objs[i].path, name) == 0) {
             *obj = options->op_tbl->objs[i];
             return (int)i;
         }
@@ -105,7 +105,7 @@ aux_find_obj(const char * name,        /* object name from traverse list */
         if (pname[0] == '/')
             pname++;
 
-        if (HDstrcmp(pdest, pname) == 0) {
+        if (strcmp(pdest, pname) == 0) {
             *obj = options->op_tbl->objs[i];
             return (int)i;
         }

@@ -133,8 +133,8 @@ H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* H5B2 interface sanity check */
     HDcompile_assert(H5B2_NUM_BTREE_ID == NELMTS(H5B2_client_class_g));
@@ -201,8 +201,8 @@ H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
@@ -264,8 +264,8 @@ H5B2_insert(H5B2_t *bt2, void *udata)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(udata);
+    assert(bt2);
+    assert(udata);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -306,8 +306,8 @@ H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(udata);
+    assert(bt2);
+    assert(udata);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -334,7 +334,7 @@ H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     } /* end else */
 
     /* Sanity check */
-    HDassert(H5B2_UPDATE_UNKNOWN != status);
+    assert(H5B2_UPDATE_UNKNOWN != status);
 
     /* Use insert algorithm if nodes to leaf full */
     if (H5B2_UPDATE_INSERT_CHILD_FULL == status) {
@@ -348,7 +348,7 @@ H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     } /* end else-if */
     else {
         /* Sanity check */
-        HDassert(H5B2_UPDATE_MODIFY_DONE == status);
+        assert(H5B2_UPDATE_MODIFY_DONE == status);
     } /* end else */
 
 done:
@@ -375,8 +375,8 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
     /*
      * Check arguments.
      */
-    HDassert(bt2);
-    HDassert(addr_p);
+    assert(bt2);
+    assert(addr_p);
 
     /* Retrieve the header address for this v2 B-tree */
     *addr_p = bt2->hdr->addr;
@@ -409,8 +409,8 @@ H5B2_iterate(H5B2_t *bt2, H5B2_operator_t op, void *op_data)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(op);
+    assert(bt2);
+    assert(op);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -464,8 +464,8 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(found);
+    assert(bt2);
+    assert(found);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -687,7 +687,7 @@ H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_da
 
 done:
     if (parent) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
     } /* end if */
@@ -724,8 +724,8 @@ H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, voi
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(op);
+    assert(bt2);
+    assert(op);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -846,7 +846,7 @@ H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, voi
             } /* end if */
             else
                 /* Index that is greater than the number of records in the tree? */
-                HDassert(0 && "Index off end of tree??");
+                assert(0 && "Index off end of tree??");
         } /* end if */
 
         /* Decrement depth we're at in B-tree */
@@ -868,7 +868,7 @@ H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, voi
         } /* end if */
 
         /* Sanity check index */
-        HDassert(idx < leaf->nrec);
+        assert(idx < leaf->nrec);
 
         /* Make callback for correct record */
         if ((op)(H5B2_LEAF_NREC(leaf, hdr, idx), op_data) < 0) {
@@ -886,7 +886,7 @@ H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, voi
 
 done:
     if (parent) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
     } /* end if */
@@ -915,7 +915,7 @@ H5B2_remove(H5B2_t *bt2, void *udata, H5B2_remove_t op, void *op_data)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
+    assert(bt2);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -947,7 +947,7 @@ H5B2_remove(H5B2_t *bt2, void *udata, H5B2_remove_t op, void *op_data)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
                                 "can't destroy node's node pointer block factory")
 
-            HDassert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
+            assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
     }     /* end if */
@@ -988,7 +988,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_remove_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
+    assert(bt2);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -1028,7 +1028,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_remove_
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
                                 "can't destroy node's node pointer block factory")
 
-            HDassert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
+            assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
     }     /* end if */
@@ -1066,8 +1066,8 @@ H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(nrec);
+    assert(bt2);
+    assert(nrec);
 
     /* Get B-tree number of records */
     *nrec = bt2->hdr->root.all_nrec;
@@ -1108,8 +1108,8 @@ H5B2_neighbor(H5B2_t *bt2, H5B2_compare_t range, void *udata, H5B2_found_t op, v
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(op);
+    assert(bt2);
+    assert(op);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -1170,8 +1170,8 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(op);
+    assert(bt2);
+    assert(op);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -1264,7 +1264,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             /* Make callback for current record */
             if ((op)(H5B2_INT_NREC(internal, hdr, idx), op_data, &changed) < 0) {
                 /* Make certain that the callback didn't modify the value if it failed */
-                HDassert(changed == FALSE);
+                assert(changed == FALSE);
 
                 /* Unlock current node */
                 if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) <
@@ -1332,7 +1332,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             /* Make callback for current record */
             if ((op)(H5B2_LEAF_NREC(leaf, hdr, idx), op_data, &changed) < 0) {
                 /* Make certain that the callback didn't modify the value if it failed */
-                HDassert(changed == FALSE);
+                assert(changed == FALSE);
 
                 /* Unlock current node */
                 if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
@@ -1376,7 +1376,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
 
 done:
     if (parent) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
     } /* end if */
@@ -1406,8 +1406,8 @@ H5B2_close(H5B2_t *bt2)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(bt2->f);
+    assert(bt2);
+    assert(bt2->f);
 
     /* Decrement file reference & check if this is the last open v2 B-tree using the shared B-tree header */
     if (0 == H5B2__hdr_fuse_decr(bt2->hdr)) {
@@ -1429,7 +1429,7 @@ H5B2_close(H5B2_t *bt2)
         H5B2_hdr_t *hdr; /* Another pointer to v2 B-tree header */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(bt2_addr));
+        assert(H5F_addr_defined(bt2_addr));
 
 #ifndef NDEBUG
         {
@@ -1442,9 +1442,9 @@ H5B2_close(H5B2_t *bt2)
                             (unsigned long long)bt2_addr)
 
             /* Sanity checks on header */
-            HDassert(hdr_status & H5AC_ES__IN_CACHE);
-            HDassert(hdr_status & H5AC_ES__IS_PINNED);
-            HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+            assert(hdr_status & H5AC_ES__IN_CACHE);
+            assert(hdr_status & H5AC_ES__IS_PINNED);
+            assert(!(hdr_status & H5AC_ES__IS_PROTECTED));
         }
 #endif /* NDEBUG */
 
@@ -1516,8 +1516,8 @@ H5B2_delete(H5F_t *f, haddr_t addr, void *ctx_udata, H5B2_remove_t op, void *op_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* Lock the v2 B-tree header into memory */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, ctx_udata, H5AC__NO_FLAGS_SET)))
@@ -1573,10 +1573,10 @@ H5B2_depend(H5B2_t *bt2, H5AC_proxy_entry_t *parent)
     /*
      * Check arguments.
      */
-    HDassert(bt2);
-    HDassert(hdr);
-    HDassert(parent);
-    HDassert(hdr->parent == NULL || hdr->parent == parent);
+    assert(bt2);
+    assert(hdr);
+    assert(parent);
+    assert(hdr->parent == NULL || hdr->parent == parent);
 
     /*
      * Check to see if the flush dependency between the parent
@@ -1585,7 +1585,7 @@ H5B2_depend(H5B2_t *bt2, H5AC_proxy_entry_t *parent)
      */
     if (NULL == hdr->parent) {
         /* Sanity check */
-        HDassert(hdr->top_proxy);
+        assert(hdr->top_proxy);
 
         /* Set the shared v2 B-tree header's file context for this operation */
         hdr->f = bt2->f;
@@ -1620,8 +1620,8 @@ H5B2_patch_file(H5B2_t *bt2, H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(bt2);
-    HDassert(f);
+    assert(bt2);
+    assert(f);
 
     if (bt2->f != f || bt2->hdr->f != f)
         bt2->f = bt2->hdr->f = f;

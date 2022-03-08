@@ -224,7 +224,7 @@ test_array_compound_array()
 
         // Check the 2nd field's name
         H5std_string field2_name = ctype_check.getMemberName(1);
-        if (HDstrcmp(field2_name.c_str(), "f") != 0)
+        if (strcmp(field2_name.c_str(), "f") != 0)
             TestErrPrintf("Compound field name doesn't match!, field2_name=%s\n", field2_name.c_str());
 
         // Get the 2nd field's datatype
@@ -243,7 +243,7 @@ test_array_compound_array()
         verify_val(ndims, ARRAY1_RANK, "f2_atype_check.getArrayNDims", __LINE__, __FILE__);
 
         // Get the array dimensions
-        HDmemset(rdims1, 0, sizeof(rdims1));
+        memset(rdims1, 0, sizeof(rdims1));
         f2_atype_check.getArrayDims(rdims1);
 
         // Check the array dimensions
@@ -517,5 +517,5 @@ test_array()
 extern "C" void
 cleanup_array()
 {
-    HDremove(FILENAME.c_str());
+    remove(FILENAME.c_str());
 } // cleanup_array

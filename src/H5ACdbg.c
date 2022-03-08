@@ -80,9 +80,9 @@ H5AC_stats(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     /* at present, this can't fail */
     (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), FALSE);
@@ -113,9 +113,9 @@ H5AC_dump_cache(const H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.")
@@ -174,8 +174,8 @@ H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     if (H5C_get_entry_ptr_from_addr(cache_ptr, addr, entry_ptr_ptr) < 0)
@@ -221,8 +221,8 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     ret_value = H5C_flush_dependency_exists(cache_ptr, parent_addr, child_addr, fd_exists_ptr);
@@ -270,8 +270,8 @@ H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expecte
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     if (H5C_verify_entry_type(cache_ptr, addr, expected_type, in_cache_ptr, type_ok_ptr) < 0)
@@ -305,8 +305,8 @@ H5AC_get_serialization_in_progress(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     /* Set return value */
@@ -343,8 +343,8 @@ H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     ret_value = H5C_cache_is_clean(cache_ptr, inner_ring);

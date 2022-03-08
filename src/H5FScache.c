@@ -161,9 +161,9 @@ H5FS__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(udata->f);
-    HDassert(image_len);
+    assert(udata);
+    assert(udata->f);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = (size_t)H5FS_HEADER_SIZE(udata->f);
@@ -195,7 +195,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image);
+    assert(image);
 
     /* Get stored and computed checksums */
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
@@ -236,9 +236,9 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(udata->f);
+    assert(image);
+    assert(udata);
+    assert(udata->f);
 
     /* Allocate a new free space manager */
     if (NULL == (fspace = H5FS__new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
@@ -248,7 +248,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     fspace->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -308,7 +308,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (const uint8_t *)_image) <= len);
+    assert((size_t)(image - (const uint8_t *)_image) <= len);
 
     /* Set return value */
     ret_value = fspace;
@@ -343,10 +343,10 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(image_len);
+    assert(fspace);
+    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = fspace->hdr_size;
@@ -393,14 +393,14 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(new_addr);
-    HDassert(new_len);
-    HDassert(flags);
+    assert(f);
+    assert(fspace);
+    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(H5F_addr_defined(addr));
+    assert(new_addr);
+    assert(new_len);
+    assert(flags);
 
     if (fspace->sinfo) {
         H5AC_ring_t ring;
@@ -492,7 +492,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          */
         if (fspace->serial_sect_count > 0 && H5F_addr_defined(fspace->addr)) {
             /* Sanity check */
-            HDassert(fspace->sect_size > 0);
+            assert(fspace->sect_size > 0);
 
             if (!H5F_addr_defined(fspace->sect_addr)) { /* case 1 */
                 haddr_t tag = HADDR_UNDEF;
@@ -541,7 +541,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                     HGOTO_ERROR_TAG(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
                 H5_END_TAG
 
-                HDassert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
+                assert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
 
                 /* the metadata cache is now managing the section info,
                  * so set fspace->sinfo to NULL.
@@ -559,8 +559,8 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                  * be the case.  If not, we will have to add code to resize
                  * file space allocation for section info as well as moving it.
                  */
-                HDassert(fspace->sect_size > 0);
-                HDassert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
+                assert(fspace->sect_size > 0);
+                assert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
 
                 /* Allocate space for the section info in file */
                 if (HADDR_UNDEF ==
@@ -569,7 +569,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                                 "file allocation failed for free space sections")
 
                 fspace->alloc_sect_size = (size_t)fspace->sect_size;
-                HDassert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
+                assert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
 
                 /* Let the metadata cache know the section info moved */
                 if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
@@ -582,15 +582,15 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                  * be the case.  If not, we will have to add code to resize
                  * file space allocation for section info.
                  */
-                HDassert(fspace->sect_size > 0);
-                HDassert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
+                assert(fspace->sect_size > 0);
+                assert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
             } /* end else */
         }     /* end else */
         else {
             /* for one reason or another (see comment above) there should
              * not be any file space allocated for the section info.
              */
-            HDassert(!H5F_addr_defined(fspace->sect_addr));
+            assert(!H5F_addr_defined(fspace->sect_addr));
         } /* end else */
     }     /* end if */
     else if (H5F_addr_defined(fspace->sect_addr)) {
@@ -602,8 +602,8 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          * a nonsense section info address.
          */
         if (!H5F_POINT_OF_NO_RETURN(f)) {
-            HDassert(fspace->sect_size > 0);
-            HDassert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
+            assert(fspace->sect_size > 0);
+            assert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
         } /* end if */
 
         if (H5F_IS_TMP_ADDR(f, fspace->sect_addr)) {
@@ -621,9 +621,9 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             if (H5AC_get_entry_status(f, fspace->sect_addr, &sect_status) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info status")
 
-            HDassert(sect_status & H5AC_ES__IN_CACHE);
-            HDassert((sect_status & H5AC_ES__IS_PROTECTED) == 0);
-            HDassert((sect_status & H5AC_ES__IS_PINNED) == 0);
+            assert(sect_status & H5AC_ES__IN_CACHE);
+            assert((sect_status & H5AC_ES__IS_PROTECTED) == 0);
+            assert((sect_status & H5AC_ES__IS_PINNED) == 0);
 
             /* Allocate space for the section info in file */
             if (HADDR_UNDEF ==
@@ -633,7 +633,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
             /* Sanity check */
-            HDassert(!H5F_addr_eq(fspace->sect_addr, new_sect_addr));
+            assert(!H5F_addr_eq(fspace->sect_addr, new_sect_addr));
 
             /* Let the metadata cache know the section info moved */
             if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
@@ -649,8 +649,8 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     }      /* end else-if */
     else { /* there is no section info at present */
         /* do some sanity checks */
-        HDassert(fspace->serial_sect_count == 0);
-        HDassert(fspace->tot_sect_count == fspace->ghost_sect_count);
+        assert(fspace->serial_sect_count == 0);
+        assert(fspace->tot_sect_count == fspace->ghost_sect_count);
     } /* end else */
 
     /* what ever happened above, set *flags to 0 */
@@ -691,12 +691,12 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(fspace->hdr_size == len);
+    assert(f);
+    assert(image);
+    assert(fspace);
+    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(fspace->hdr_size == len);
 
     /* The section information does not always exits, and if it does,
      * it is not always in the cache.  To make matters more interesting,
@@ -706,10 +706,10 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
      * into real file space if necessary before this function was called.
      * The following asserts are a cursory check on this.
      */
-    HDassert((!H5F_addr_defined(fspace->sect_addr)) || (!H5F_IS_TMP_ADDR(f, fspace->sect_addr)));
+    assert((!H5F_addr_defined(fspace->sect_addr)) || (!H5F_IS_TMP_ADDR(f, fspace->sect_addr)));
 
     if (!H5F_POINT_OF_NO_RETURN(f))
-        HDassert((!H5F_addr_defined(fspace->sect_addr)) ||
+        assert((!H5F_addr_defined(fspace->sect_addr)) ||
                  ((fspace->sect_size > 0) && (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
 
     /* Magic number */
@@ -767,7 +767,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     UINT32ENCODE(image, metadata_chksum);
 
     /* sanity checks */
-    HDassert((size_t)(image - (uint8_t *)_image) == fspace->hdr_size);
+    assert((size_t)(image - (uint8_t *)_image) == fspace->hdr_size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__cache_hdr_serialize() */
@@ -793,7 +793,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(fspace);
+    assert(fspace);
 
     /* Determine which action to take */
     switch (action) {
@@ -821,7 +821,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
 #else  /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+            assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
     }  /* end switch */
 
@@ -855,12 +855,12 @@ H5FS__cache_hdr_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(fspace);
+    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
 
     /* We should not still be holding on to the free space section info */
-    HDassert(!fspace->sinfo);
+    assert(!fspace->sinfo);
 
     /* Destroy free space header */
     if (H5FS__hdr_dest(fspace) < 0)
@@ -893,11 +893,11 @@ H5FS__cache_sinfo_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(udata);
+    assert(udata);
     fspace = udata->fspace;
-    HDassert(fspace);
-    HDassert(fspace->sect_size > 0);
-    HDassert(image_len);
+    assert(fspace);
+    assert(fspace->sect_size > 0);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = (size_t)(fspace->sect_size);
@@ -929,7 +929,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(image);
+    assert(image);
 
     /* Get stored and computed checksums */
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
@@ -973,12 +973,12 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(image);
-    HDassert(udata);
+    assert(image);
+    assert(udata);
     fspace = udata->fspace;
-    HDassert(fspace);
-    HDassert(fspace->sect_size == len);
-    HDassert(dirty);
+    assert(fspace);
+    assert(fspace->sect_size == len);
+    assert(dirty);
 
     /* Allocate a new free space section info */
     if (NULL == (sinfo = H5FS__sinfo_new(udata->f, fspace)))
@@ -988,7 +988,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     H5_CHECKED_ASSIGN(old_sect_size, size_t, fspace->sect_size, hsize_t);
 
     /* Magic number */
-    if (HDmemcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1031,11 +1031,11 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
             /* The number of sections of this node's size */
             UINT64DECODE_VAR(image, node_count, sect_cnt_size);
-            HDassert(node_count);
+            assert(node_count);
 
             /* The size of the sections for this node */
             UINT64DECODE_VAR(image, sect_size, sinfo->sect_len_size);
-            HDassert(sect_size);
+            assert(sect_size);
 
             /* Loop over nodes of this size */
             for (u = 0; u < node_count; u++) {
@@ -1052,7 +1052,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
                 /* Call 'deserialize' callback for this section */
                 des_flags = 0;
-                HDassert(fspace->sect_cls[sect_type].deserialize);
+                assert(fspace->sect_cls[sect_type].deserialize);
                 if (NULL == (new_sect = (*fspace->sect_cls[sect_type].deserialize)(
                                  &fspace->sect_cls[sect_type], image, sect_addr, sect_size, &des_flags)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, NULL, "can't deserialize section")
@@ -1073,12 +1073,12 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
         } while (image < (((const uint8_t *)_image + old_sect_size) - H5FS_SIZEOF_CHKSUM));
 
         /* Sanity check */
-        HDassert((size_t)(image - (const uint8_t *)_image) <= (old_sect_size - H5FS_SIZEOF_CHKSUM));
-        HDassert(old_sect_size == fspace->sect_size);
-        HDassert(old_tot_sect_count == fspace->tot_sect_count);
-        HDassert(old_serial_sect_count == fspace->serial_sect_count);
-        HDassert(old_ghost_sect_count == fspace->ghost_sect_count);
-        HDassert(old_tot_space == fspace->tot_space);
+        assert((size_t)(image - (const uint8_t *)_image) <= (old_sect_size - H5FS_SIZEOF_CHKSUM));
+        assert(old_sect_size == fspace->sect_size);
+        assert(old_tot_sect_count == fspace->tot_sect_count);
+        assert(old_serial_sect_count == fspace->serial_sect_count);
+        assert(old_ghost_sect_count == fspace->ghost_sect_count);
+        assert(old_tot_space == fspace->tot_space);
     } /* end if */
 
     /* checksum verification already done in verify_chksum cb */
@@ -1089,7 +1089,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     UINT32DECODE(chksum_image, stored_chksum);
 
     /* Sanity check */
-    HDassert((image == chksum_image) ||
+    assert((image == chksum_image) ||
              ((size_t)((image - (const uint8_t *)_image) + (chksum_image - image)) == old_sect_size));
 
     /* Set return value */
@@ -1124,13 +1124,13 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    HDassert(sinfo->fspace);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(image_len);
+    assert(sinfo);
+    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
+    assert(sinfo->fspace);
+    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(image_len);
 
     /* Set the image length size */
     H5_CHECKED_ASSIGN(*image_len, size_t, sinfo->fspace->alloc_sect_size, hsize_t);
@@ -1166,28 +1166,28 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
+    assert(f);
+    assert(sinfo);
+    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
     fspace = sinfo->fspace;
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(fspace->cache_info.is_pinned);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_eq(fspace->sect_addr, addr));
-    HDassert(fspace->sect_size == len);
-    HDassert(new_addr);
-    HDassert(new_len);
-    HDassert(flags);
+    assert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(fspace->cache_info.is_pinned);
+    assert(H5F_addr_defined(addr));
+    assert(H5F_addr_eq(fspace->sect_addr, addr));
+    assert(fspace->sect_size == len);
+    assert(new_addr);
+    assert(new_len);
+    assert(flags);
 
     sinfo_addr = addr; /* this will change if we relocate the section data */
 
     /* Check for section info at temporary address */
     if (H5F_IS_TMP_ADDR(f, fspace->sect_addr)) {
         /* Sanity check */
-        HDassert(fspace->sect_size > 0);
-        HDassert(H5F_addr_eq(fspace->sect_addr, addr));
+        assert(fspace->sect_size > 0);
+        assert(H5F_addr_eq(fspace->sect_addr, addr));
 
         /* Allocate space for the section info in file */
         if (HADDR_UNDEF == (sinfo_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
@@ -1196,7 +1196,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
         fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
         /* Sanity check */
-        HDassert(!H5F_addr_eq(sinfo->fspace->sect_addr, sinfo_addr));
+        assert(!H5F_addr_eq(sinfo->fspace->sect_addr, sinfo_addr));
 
         /* Let the metadata cache know the section info moved */
         if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, sinfo_addr) < 0)
@@ -1251,16 +1251,16 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(image);
-    HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(sinfo->fspace->cache_info.is_pinned);
-    HDassert(sinfo->fspace->sect_size == len);
-    HDassert(sinfo->fspace->sect_cls);
+    assert(f);
+    assert(image);
+    assert(sinfo);
+    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
+    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(sinfo->fspace->cache_info.is_pinned);
+    assert(sinfo->fspace->sect_size == len);
+    assert(sinfo->fspace->sect_cls);
 
     /* Magic number */
     H5MM_memcpy(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1294,9 +1294,9 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     UINT32ENCODE(chksum_image, metadata_chksum);
 
     /* Sanity check */
-    HDassert((chksum_image == image) ||
+    assert((chksum_image == image) ||
              ((size_t)((image - (uint8_t *)_image) + (chksum_image - image)) == sinfo->fspace->sect_size));
-    HDassert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
+    assert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1323,7 +1323,7 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(sinfo);
+    assert(sinfo);
 
     /* Check if the file was opened with SWMR-write access */
     if (sinfo->fspace->swmr_write) {
@@ -1359,7 +1359,7 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
 #else     /* NDEBUG */
-                HDassert(0 && "Unknown action?!?");
+                assert(0 && "Unknown action?!?");
 #endif    /* NDEBUG */
         } /* end switch */
     }     /* end if */
@@ -1395,12 +1395,12 @@ H5FS__cache_sinfo_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(sinfo->fspace->cache_info.is_pinned);
+    assert(sinfo);
+    assert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
+    assert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
+    assert(sinfo->fspace->cache_info.is_pinned);
 
     /* Destroy free space info */
     if (H5FS__sinfo_dest(sinfo) < 0)
@@ -1434,9 +1434,9 @@ H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
     FUNC_ENTER_STATIC
 
     /* Check arguments. */
-    HDassert(sect);
-    HDassert(udata->sinfo);
-    HDassert(udata->image);
+    assert(sect);
+    assert(udata->sinfo);
+    assert(udata->image);
 
     /* Get section's class */
     sect_cls = &udata->sinfo->fspace->sect_cls[sect->type];
@@ -1458,7 +1458,7 @@ H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
             (*udata->image) += sect_cls->serial_size;
         } /* end if */
         else
-            HDassert(sect_cls->serial_size == 0);
+            assert(sect_cls->serial_size == 0);
     } /* end if */
 
 done:
@@ -1488,9 +1488,9 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
     FUNC_ENTER_STATIC
 
     /* Check arguments. */
-    HDassert(fspace_node);
-    HDassert(udata->sinfo);
-    HDassert(udata->image);
+    assert(fspace_node);
+    assert(udata->sinfo);
+    assert(udata->image);
 
     /* Check if this node has any serializable sections */
     if (fspace_node->serial_count > 0) {
@@ -1501,7 +1501,7 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
         UINT64ENCODE_VAR(*udata->image, fspace_node->sect_size, udata->sinfo->sect_len_size);
 
         /* Iterate through all the sections of this size */
-        HDassert(fspace_node->sect_list);
+        assert(fspace_node->sect_list);
         if (H5SL_iterate(fspace_node->sect_list, H5FS__sinfo_serialize_sect_cb, udata) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section nodes")
     } /* end if */

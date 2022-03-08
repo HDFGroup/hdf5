@@ -81,11 +81,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     VRFY(sid >= 0, "H5Screate_simple");
 
     /* Create buffers */
-    points = (int *)HDmalloc(size[0] * size[1] * sizeof(int));
-    VRFY(points != NULL, "HDmalloc");
+    points = (int *)malloc(size[0] * size[1] * sizeof(int));
+    VRFY(points != NULL, "malloc");
 
-    check = (int *)HDmalloc(hs_size[0] * hs_size[1] * sizeof(int));
-    VRFY(check != NULL, "HDmalloc");
+    check = (int *)malloc(hs_size[0] * hs_size[1] * sizeof(int));
+    VRFY(check != NULL, "malloc");
 
     /* Initialize writing buffer with random data */
     for (i = 0; i < size[0]; i++)
@@ -147,12 +147,12 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     for (i = 0; i < hs_size[0]; i++) {
         for (j = 0; j < hs_size[1]; j++) {
             if (points[i * size[1] + (size_t)hs_offset[1] + j] != check[i * hs_size[1] + j]) {
-                HDfprintf(stderr, "    Read different values than written.\n");
-                HDfprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
+                fprintf(stderr, "    Read different values than written.\n");
+                fprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
                           (unsigned long)(hs_offset[1] + j));
-                HDfprintf(stderr, "    At original: %d\n",
+                fprintf(stderr, "    At original: %d\n",
                           (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
-                HDfprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
+                fprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
                 VRFY(FALSE, "");
             }
         }
@@ -178,8 +178,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hrc = H5Fclose(file);
     VRFY(hrc >= 0, "H5Fclose");
 
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -231,7 +231,7 @@ test_filter_read(void)
     filename = GetTestParameters();
 
     if (VERBOSE_MED)
-        HDprintf("Parallel reading of dataset written with filters %s\n", filename);
+        printf("Parallel reading of dataset written with filters %s\n", filename);
 
     /*----------------------------------------------------------
      * STEP 0: Test without filters.

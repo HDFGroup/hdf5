@@ -48,7 +48,7 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
     H5Z__filter_deflate, /* The actual filter function	*/
 }};
 
-#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12)
+#define H5Z_DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12)
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate
@@ -75,9 +75,9 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(*buf_size > 0);
-    HDassert(buf);
-    HDassert(*buf);
+    assert(*buf_size > 0);
+    assert(buf);
+    assert(*buf);
 
     /* Check arguments */
     if (cd_nelmts != 1 || cd_values[0] > 9)
@@ -93,7 +93,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression")
 
         /* Set the uncompression parameters */
-        HDmemset(&z_strm, 0, sizeof(z_strm));
+        memset(&z_strm, 0, sizeof(z_strm));
         z_strm.next_in = (Bytef *)*buf;
         H5_CHECKED_ASSIGN(z_strm.avail_in, unsigned, nbytes, size_t);
         z_strm.next_out = (Bytef *)outbuf;

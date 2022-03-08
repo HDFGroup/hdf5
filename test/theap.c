@@ -89,12 +89,12 @@ test_heap_init(void)
     size_t u;         /* Local index variables */
 
     /* Allocate arrays */
-    rand_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    CHECK_PTR(rand_num, "HDmalloc");
-    inc_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    CHECK_PTR(inc_sort_num, "HDmalloc");
-    dec_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    CHECK_PTR(dec_sort_num, "HDmalloc");
+    rand_num = (test_obj *)malloc(sizeof(test_obj) * NUM_ELEMS);
+    CHECK_PTR(rand_num, "malloc");
+    inc_sort_num = (test_obj *)malloc(sizeof(test_obj) * NUM_ELEMS);
+    CHECK_PTR(inc_sort_num, "malloc");
+    dec_sort_num = (test_obj *)malloc(sizeof(test_obj) * NUM_ELEMS);
+    CHECK_PTR(dec_sort_num, "malloc");
 
     /* Create randomized set of numbers */
     curr_time = HDtime(NULL);
@@ -104,12 +104,12 @@ test_heap_init(void)
         rand_num[u].val = (int)(HDrandom() % 2001) - 1001;
 
     /* Sort random numbers into increasing order */
-    HDmemcpy(inc_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
-    HDqsort(inc_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_inc_sort);
+    memcpy(inc_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
+    qsort(inc_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_inc_sort);
 
     /* Sort random numbers into decreasing order */
-    HDmemcpy(dec_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
-    HDqsort(dec_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_dec_sort);
+    memcpy(dec_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
+    qsort(dec_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_dec_sort);
 } /* end test_heap_init() */
 
 /****************************************************************
@@ -1045,11 +1045,11 @@ test_heap_term(void)
 {
     /* Release arrays */
     if (rand_num)
-        HDfree(rand_num);
+        free(rand_num);
     if (inc_sort_num)
-        HDfree(inc_sort_num);
+        free(inc_sort_num);
     if (dec_sort_num)
-        HDfree(dec_sort_num);
+        free(dec_sort_num);
 } /* end test_heap_term() */
 
 /****************************************************************

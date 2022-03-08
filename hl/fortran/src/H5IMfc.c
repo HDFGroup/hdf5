@@ -67,7 +67,7 @@ h5immake_image_8bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -117,7 +117,7 @@ h5imread_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *buf)
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -178,9 +178,9 @@ h5immake_image_24bit_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_il != NULL)
-        HDfree(c_il);
+        free(c_il);
 
     return ret_value;
 }
@@ -228,7 +228,7 @@ h5imget_image_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *w
     /*
      * allocate buffer to hold name of an attribute
      */
-    if ((c_buf = (char *)HDmalloc((size_t)*ilen + 1)) == NULL)
+    if ((c_buf = (char *)malloc((size_t)*ilen + 1)) == NULL)
         goto done;
 
     /*
@@ -255,9 +255,9 @@ h5imget_image_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *w
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_buf != NULL)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -303,7 +303,7 @@ h5imis_image_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5IMis_image(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }
@@ -353,7 +353,7 @@ h5immake_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *dim
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -411,9 +411,9 @@ h5imlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *ilen
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_namepal != NULL)
-        HDfree(c_namepal);
+        free(c_namepal);
 
     return ret_value;
 }
@@ -471,9 +471,9 @@ h5imunlink_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *il
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     if (c_namepal != NULL)
-        HDfree(c_namepal);
+        free(c_namepal);
 
     return ret_value;
 }
@@ -529,7 +529,7 @@ h5imget_npalettes_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *np
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -588,7 +588,7 @@ h5imget_palette_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -641,7 +641,7 @@ h5imget_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *pal_numb
 
 done:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -687,7 +687,7 @@ h5imis_palette_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
     ret = H5IMis_palette(c_loc_id, c_name);
 
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
 
     return ret;
 }

@@ -390,7 +390,7 @@ H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_info, const v
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(connector);
+    assert(connector);
 
     /* Check for actual source info */
     if (src_info) {
@@ -467,8 +467,8 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value, const voi
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(connector);
-    HDassert(cmp_value);
+    assert(connector);
+    assert(cmp_value);
 
     /* Take care of cases where one or both pointers is NULL */
     if (info1 == NULL && info2 != NULL) {
@@ -493,8 +493,8 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value, const voi
             HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector info")
     } /* end if */
     else {
-        HDassert(connector->info_cls.size > 0);
-        *cmp_value = HDmemcmp(info1, info2, connector->info_cls.size);
+        assert(connector->info_cls.size > 0);
+        *cmp_value = memcmp(info1, info2, connector->info_cls.size);
     } /* end else */
 
 done:
@@ -556,7 +556,7 @@ H5VL_free_connector_info(hid_t connector_id, const void *info)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(connector_id > 0);
+    assert(connector_id > 0);
 
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -724,14 +724,14 @@ H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj, void **wrap_ctx)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(connector);
-    HDassert(obj);
-    HDassert(wrap_ctx);
+    assert(connector);
+    assert(obj);
+    assert(wrap_ctx);
 
     /* Allow the connector to copy or do it ourselves */
     if (connector->wrap_cls.get_wrap_ctx) {
         /* Sanity check */
-        HDassert(connector->wrap_cls.free_wrap_ctx);
+        assert(connector->wrap_cls.free_wrap_ctx);
 
         /* Invoke connector's callback */
         if ((connector->wrap_cls.get_wrap_ctx)(obj, wrap_ctx) < 0)
@@ -793,8 +793,8 @@ H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj, H5I_t
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(connector);
-    HDassert(obj);
+    assert(connector);
+    assert(obj);
 
     /* Only wrap object if there's a wrap context */
     if (wrap_ctx) {
@@ -860,8 +860,8 @@ H5VL_unwrap_object(const H5VL_class_t *connector, void *obj)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(connector);
-    HDassert(obj);
+    assert(connector);
+    assert(obj);
 
     /* Only unwrap object if there's an unwrap callback */
     if (connector->wrap_cls.wrap_object) {
@@ -927,7 +927,7 @@ H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(connector);
+    assert(connector);
 
     /* Only free wrap context, if it's non-NULL */
     if (wrap_ctx) {
@@ -1767,7 +1767,7 @@ H5VL_attr_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
@@ -2582,8 +2582,8 @@ H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **re
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
+    assert(obj);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.close)
@@ -2616,10 +2616,10 @@ H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(vol_obj->data);
-    HDassert(vol_obj->connector);
-    HDassert(vol_obj->connector->cls);
+    assert(vol_obj);
+    assert(vol_obj->data);
+    assert(vol_obj->connector);
+    assert(vol_obj->connector->cls);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -3164,7 +3164,7 @@ H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set up vol_obj_ptr */
     *vol_obj_ptr = vol_obj;
@@ -3535,11 +3535,11 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
 
     FUNC_ENTER_STATIC
 
-    HDassert(udata);
-    HDassert(udata->filename);
-    HDassert(udata->connector_prop);
-    HDassert(cls);
-    HDassert(plugin_type == H5PL_TYPE_VOL);
+    assert(udata);
+    assert(udata->filename);
+    assert(udata->connector_prop);
+    assert(cls);
+    assert(plugin_type == H5PL_TYPE_VOL);
 
     /* Silence compiler */
     (void)plugin_type;
@@ -3889,7 +3889,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
         if (args->op_type == H5VL_FILE_IS_ACCESSIBLE)
             fapl_id = args->args.is_accessible.fapl_id;
         else {
-            HDassert(args->op_type == H5VL_FILE_DELETE);
+            assert(args->op_type == H5VL_FILE_DELETE);
             fapl_id = args->args.del.fapl_id;
         }
 
@@ -3906,7 +3906,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
     /* Set wrapper info in API context, for all other operations */
     else {
         /* Sanity check */
-        HDassert(vol_obj);
+        assert(vol_obj);
 
         if (H5VL_set_vol_wrapper(vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
@@ -4121,8 +4121,8 @@ H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
+    assert(obj);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.close)
@@ -4766,8 +4766,8 @@ H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
+    assert(obj);
+    assert(cls);
 
     FUNC_ENTER_STATIC
 
@@ -6142,10 +6142,10 @@ H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(lvl >= H5VL_GET_CONN_LVL_CURR && lvl <= H5VL_GET_CONN_LVL_TERM);
-    HDassert(conn_cls);
+    assert(obj);
+    assert(cls);
+    assert(lvl >= H5VL_GET_CONN_LVL_CURR && lvl <= H5VL_GET_CONN_LVL_TERM);
+    assert(conn_cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->introspect_cls.get_conn_cls)
@@ -6254,8 +6254,8 @@ H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, unsigne
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(cls);
-    HDassert(cap_flags);
+    assert(cls);
+    assert(cap_flags);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->introspect_cls.get_cap_flags)
@@ -6423,9 +6423,9 @@ H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout, H5VL_re
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(req);
-    HDassert(cls);
-    HDassert(status);
+    assert(req);
+    assert(cls);
+    assert(status);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.wait)
@@ -6458,7 +6458,7 @@ H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_s
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -6527,8 +6527,8 @@ H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t c
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
+    assert(req);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.notify)
@@ -6562,7 +6562,7 @@ H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -6631,8 +6631,8 @@ H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
+    assert(req);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.cancel)
@@ -6665,7 +6665,7 @@ H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -6733,8 +6733,8 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
+    assert(req);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.specific)
@@ -6768,7 +6768,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -6838,8 +6838,8 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
+    assert(req);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.optional)
@@ -6873,7 +6873,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -6980,8 +6980,8 @@ H5VL__request_free(void *req, const H5VL_class_t *cls)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(req);
-    HDassert(cls);
+    assert(req);
+    assert(cls);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->request_cls.free)
@@ -7014,7 +7014,7 @@ H5VL_request_free(const H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
@@ -7081,10 +7081,10 @@ H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf, size_t size,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(size == 0 || buf);
-    HDassert(blob_id);
+    assert(obj);
+    assert(cls);
+    assert(size == 0 || buf);
+    assert(blob_id);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->blob_cls.put)
@@ -7118,9 +7118,9 @@ H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(size == 0 || buf);
-    HDassert(blob_id);
+    assert(vol_obj);
+    assert(size == 0 || buf);
+    assert(blob_id);
 
     /* Call the corresponding VOL callback */
     if (H5VL__blob_put(vol_obj->data, vol_obj->connector->cls, buf, size, blob_id, ctx) < 0)
@@ -7179,10 +7179,10 @@ H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id, void *bu
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(blob_id);
-    HDassert(buf);
+    assert(obj);
+    assert(cls);
+    assert(blob_id);
+    assert(buf);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->blob_cls.get)
@@ -7213,9 +7213,9 @@ H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(blob_id);
-    HDassert(buf);
+    assert(vol_obj);
+    assert(blob_id);
+    assert(buf);
 
     /* Call the corresponding VOL callback */
     if (H5VL__blob_get(vol_obj->data, vol_obj->connector->cls, blob_id, buf, size, ctx) < 0)
@@ -7277,9 +7277,9 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(blob_id);
+    assert(obj);
+    assert(cls);
+    assert(blob_id);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->blob_cls.specific)
@@ -7311,8 +7311,8 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(blob_id);
+    assert(vol_obj);
+    assert(blob_id);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
@@ -7374,9 +7374,9 @@ H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_opti
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(blob_id);
+    assert(obj);
+    assert(cls);
+    assert(blob_id);
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->blob_cls.optional)
@@ -7408,8 +7408,8 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_optional_ar
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(blob_id);
+    assert(vol_obj);
+    assert(blob_id);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
@@ -7473,9 +7473,9 @@ H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1, c
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(cmp_value);
+    assert(obj);
+    assert(cls);
+    assert(cmp_value);
 
     /* Take care of cases where one or both pointers is NULL */
     if (token1 == NULL && token2 != NULL)
@@ -7494,7 +7494,7 @@ H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1, c
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare object tokens")
         } /* end if */
         else
-            *cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+            *cmp_value = memcmp(token1, token2, sizeof(H5O_token_t));
     } /* end else */
 
 done:
@@ -7523,8 +7523,8 @@ H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(cmp_value);
+    assert(vol_obj);
+    assert(cmp_value);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__token_cmp(vol_obj->data, vol_obj->connector->cls, token1, token2, cmp_value) < 0)
@@ -7594,10 +7594,10 @@ H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, cons
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(token);
-    HDassert(token_str);
+    assert(obj);
+    assert(cls);
+    assert(token);
+    assert(token_str);
 
     /* Use the class's token serialization routine on the token if there is a
      *  callback, otherwise just set the token_str to NULL.
@@ -7632,9 +7632,9 @@ H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(token);
-    HDassert(token_str);
+    assert(vol_obj);
+    assert(token);
+    assert(token_str);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str) < 0)
@@ -7701,10 +7701,10 @@ H5VL__token_from_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, co
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(obj);
-    HDassert(cls);
-    HDassert(token_str);
-    HDassert(token);
+    assert(obj);
+    assert(cls);
+    assert(token_str);
+    assert(token);
 
     /* Use the class's token deserialization routine on the token if there is a
      *  callback, otherwise just set the token to H5_TOKEN_UNDEF.
@@ -7739,9 +7739,9 @@ H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const cha
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(token);
-    HDassert(token_str);
+    assert(vol_obj);
+    assert(token);
+    assert(token_str);
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token) < 0)

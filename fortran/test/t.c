@@ -51,7 +51,7 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_n
      */
     if (NULL == (c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen)))
         HGOTO_DONE(FAIL)
-    if (NULL == (c_full_name = (char *)HDmalloc((size_t)*full_namelen + 1)))
+    if (NULL == (c_full_name = (char *)malloc((size_t)*full_namelen + 1)))
         HGOTO_DONE(FAIL)
 
     /*
@@ -63,9 +63,9 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_n
 
 done:
     if (c_base_name)
-        HDfree(c_base_name);
+        free(c_base_name);
     if (c_full_name)
-        HDfree(c_full_name);
+        free(c_full_name);
 
     return ret_value;
 }
@@ -110,12 +110,12 @@ nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
     }
 */
     h5_fixname(c_base_name[0], c_fapl, filename, sizeof(filename));
-    HDremove(filename);
+    remove(filename);
     ret_value = 0;
 
 DONE:
     if (NULL != c_base_name[0])
-        HDfree(c_base_name[0]);
+        free(c_base_name[0]);
     return ret_value;
 }
 
@@ -134,7 +134,7 @@ DONE:
 void
 nh5_exit_c(int_f *status)
 {
-    HDexit((int)*status);
+    exit((int)*status);
 } /* h5_exit_c */
 
 /*----------------------------------------------------------------------------
@@ -152,6 +152,6 @@ void
 nh5_env_nocleanup_c(int_f *status)
 {
     *status = (int_f)0;
-    if (HDgetenv(HDF5_NOCLEANUP))
+    if (getenv(HDF5_NOCLEANUP))
         *status = (int_f)1;
 } /* h5_env_nocleanup_c */

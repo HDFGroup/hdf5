@@ -77,7 +77,7 @@ test_metadata(void)
     UINT32ENCODE(p, eu32); /* Encode the uint32 value */
 
     /* Check if we got what we asked for */
-    if (HDmemcmp(encode_buffer, compar_buffer, sizeof(compar_buffer)) != 0) {
+    if (memcmp(encode_buffer, compar_buffer, sizeof(compar_buffer)) != 0) {
         unsigned u; /* local counting variable */
 
         for (u = 0; u < sizeof(compar_buffer); u++) {

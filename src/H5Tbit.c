@@ -175,8 +175,8 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(buf);
-    HDassert(size);
+    assert(buf);
+    assert(size);
 
     if (shift_dist) {
         size_t abs_shift_dist = (size_t)ABS(shift_dist);
@@ -241,7 +241,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(8 * sizeof(val) >= size);
+    assert(8 * sizeof(val) >= size);
 
     H5T__bit_copy((uint8_t *)&val, (size_t)0, buf, offset, size);
     switch (H5T_native_order_g) {
@@ -262,7 +262,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
         case H5T_ORDER_MIXED:
         default:
             /* This function can't return errors */
-            HDassert(0 && "unknown byte order");
+            assert(0 && "unknown byte order");
     }
 
     /* Set return value */
@@ -287,7 +287,7 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(8 * sizeof(val) >= size);
+    assert(8 * sizeof(val) >= size);
 
     switch (H5T_native_order_g) {
         case H5T_ORDER_LE:
@@ -306,7 +306,7 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
         case H5T_ORDER_NONE:
         case H5T_ORDER_MIXED:
         default:
-            HDabort();
+            abort();
     }
 
     H5T__bit_copy(buf, offset, (uint8_t *)&val, (size_t)0, size);
@@ -395,7 +395,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Some functions call this with value=TRUE */
-    HDassert(TRUE == 1);
+    assert(TRUE == 1);
 
     switch (direction) {
         case H5T_BIT_LSB:
@@ -465,7 +465,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             break;
 
         default:
-            HDassert(0 && "Unknown bit search direction");
+            assert(0 && "Unknown bit search direction");
     } /* end switch */
 
 done:
@@ -492,7 +492,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
     /* Use FUNC_ENTER_PACKAGE_NOERR here to avoid performance issues */
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(buf);
+    assert(buf);
 
     start %= 8;
 
@@ -557,8 +557,8 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
     /* Use FUNC_ENTER_PACKAGE_NOERR here to avoid performance issues */
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(buf);
-    HDassert(size);
+    assert(buf);
+    assert(size);
 
     /* The first partial byte */
     if ((size + start - 1) / 8 > idx) {
@@ -632,8 +632,8 @@ H5T__bit_neg(uint8_t *buf, size_t start, size_t size)
     /* Use FUNC_ENTER_PACKAGE_NOERR here to avoid performance issues */
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(buf);
-    HDassert(size);
+    assert(buf);
+    assert(size);
 
     /* The first partial byte */
     tmp[0] = (uint8_t)~buf[idx];

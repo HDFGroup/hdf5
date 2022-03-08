@@ -317,13 +317,13 @@ main(int argc, char **argv)
         VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
         if (ret < 0)
-            HDfprintf(stderr, "node %d, read error, loc = %" PRId64 ": %s\n", mynod, mynod * opt_block,
+            fprintf(stderr, "node %d, read error, loc = %" PRId64 ": %s\n", mynod, mynod * opt_block,
                       strerror(myerrno));
 
         /* if the user wanted to check correctness, compare the write
          * buffer to the read buffer */
         if (opt_correct && memcmp(buf, buf2, (size_t)opt_block)) {
-            HDfprintf(stderr, "node %d, correctness test failed\n", mynod);
+            fprintf(stderr, "node %d, correctness test failed\n", mynod);
             my_correct = 0;
             MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
         }
@@ -426,11 +426,11 @@ parse_args(int argc, char **argv)
             {
                 char *p;
 
-                opt_alignment = (hsize_t)HDatoi(optarg);
-                if (NULL != (p = (char *)HDstrchr(optarg, '/')))
-                    opt_threshold = (hsize_t)HDatoi(p + 1);
+                opt_alignment = (hsize_t)atoi(optarg);
+                if (NULL != (p = (char *)strchr(optarg, '/')))
+                    opt_threshold = (hsize_t)atoi(p + 1);
             }
-                HDfprintf(stdout, "alignment/threshold=%" PRIuHSIZE "/%" PRIuHSIZE "\n", opt_alignment,
+                fprintf(stdout, "alignment/threshold=%" PRIuHSIZE "/%" PRIuHSIZE "\n", opt_alignment,
                           opt_threshold);
                 break;
             case '2': /* use 2-files, i.e., split file driver */
@@ -492,7 +492,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     int          len;
     static char *env = NULL;
 
-    HDassert(name);
+    assert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -500,14 +500,14 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     if (mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        HDassert(root < mpi_size);
+        assert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
         if (mpi_rank == root) {
-            env = HDgetenv(name);
+            env = getenv(name);
             if (env) {
-                len = (int)HDstrlen(env);
+                len = (int)strlen(env);
                 MPI_Bcast(&len, 1, MPI_INT, root, comm);
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
             }
@@ -521,16 +521,16 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             MPI_Bcast(&len, 1, MPI_INT, root, comm);
             if (len >= 0) {
                 if (env == NULL)
-                    env = (char *)HDmalloc((size_t)len + 1);
-                else if (HDstrlen(env) < (size_t)len)
-                    env = (char *)HDrealloc(env, (size_t)len + 1);
+                    env = (char *)malloc((size_t)len + 1);
+                else if (strlen(env) < (size_t)len)
+                    env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
                 env[len] = '\0';
             }
             else {
                 if (env)
-                    HDfree(env);
+                    free(env);
                 env = NULL;
             }
         }
@@ -541,8 +541,8 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     else {
         /* use original getenv */
         if (env)
-            HDfree(env);
-        env = HDgetenv(name);
+            free(env);
+        env = getenv(name);
     } /* end if */
 
     return env;
@@ -585,7 +585,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     /* figure out the suffix */
     if (H5P_DEFAULT != fapl) {
@@ -605,13 +605,13 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  * we are using the split driver since both of those
                  * use the multi VFD under the hood.
                  */
-                env = HDgetenv(HDF5_DRIVER);
+                env = getenv(HDF5_DRIVER);
 #ifdef HDF5_DRIVER
                 /* Use the environment variable, then the compile-time constant */
                 if (!env)
                     env = HDF5_DRIVER;
 #endif
-                if (env && !HDstrcmp(env, "split")) {
+                if (env && !strcmp(env, "split")) {
                     /* split VFD */
                     if (subst_for_superblock)
                         suffix = "-m.h5";
@@ -657,7 +657,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
             if (mpi_rank == 0)
-                HDprintf("*** Hint ***\n"
+                printf("*** Hint ***\n"
                          "You can use environment variable HDF5_PARAPREFIX to "
                          "run parallel test files in a\n"
                          "different directory or to add file type prefix. e.g.,\n"
@@ -676,7 +676,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
          * For serial:
          *      First use the environment variable, then try the constant
          */
-        prefix = HDgetenv("HDF5_PREFIX");
+        prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
         if (!prefix)
@@ -690,7 +690,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             /* This is a parallel system */
             char *subdir;
 
-            if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
+            if (!strcmp(prefix, HDF5_PARAPREFIX)) {
                 /*
                  * If the prefix specifies the HDF5_PARAPREFIX directory, then
                  * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
@@ -698,8 +698,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  */
                 char *user, *login;
 
-                user   = HDgetenv("USER");
-                login  = HDgetenv("LOGIN");
+                user   = getenv("USER");
+                login  = getenv("LOGIN");
                 subdir = (user ? user : login);
 
                 if (subdir) {
@@ -715,11 +715,11 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 
             if (!fullname[0]) {
                 /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, size);
+                strncpy(fullname, prefix, size);
                 fullname[size - 1] = '\0';
             }
 
-            if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
+            if (strlen(fullname) + strlen(base_name) + 1 < size) {
                 /*
                  * Append the base_name with a slash first. Multiple
                  * slashes are handled below.
@@ -734,10 +734,10 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                          * subdirectory.  Default to PREFIX's original
                          * prefix value.
                          */
-                        HDstrcpy(fullname, prefix);
+                        strcpy(fullname, prefix);
 
-                HDstrcat(fullname, "/");
-                HDstrcat(fullname, base_name);
+                strcat(fullname, "/");
+                strcat(fullname, base_name);
             }
             else {
                 /* Buffer is too small */
@@ -745,25 +745,25 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             }
         }
         else {
-            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
+            if (snprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
                 /* Buffer is too small */
                 return NULL;
         }
     }
-    else if (HDstrlen(base_name) >= size) {
+    else if (strlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */

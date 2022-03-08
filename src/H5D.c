@@ -1509,14 +1509,14 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
         if (0 ==
             (nelmts_gathered = H5D__gather_mem(src_buf, iter, MIN(dst_buf_nelmts, (size_t)nelmts), dst_buf)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "gather failed")
-        HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
+        assert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 
         /* Make callback to process dst_buf */
         if (op && op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure")
 
         nelmts -= (hssize_t)nelmts_gathered;
-        HDassert(op || (nelmts == 0));
+        assert(op || (nelmts == 0));
     } /* end while */
 
 done:

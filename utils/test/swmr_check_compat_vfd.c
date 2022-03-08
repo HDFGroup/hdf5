@@ -43,7 +43,7 @@ main(void)
 {
     char *driver = NULL;
 
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
 
     if (H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;

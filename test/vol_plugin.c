@@ -334,7 +334,7 @@ main(void)
 
     h5_reset();
 
-    HDputs("Testing VOL connector plugin functionality.");
+    puts("Testing VOL connector plugin functionality.");
 
     nerrors += test_registration_by_name() < 0 ? 1 : 0;
     nerrors += test_registration_by_value() < 0 ? 1 : 0;
@@ -342,12 +342,12 @@ main(void)
     nerrors += test_getters() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d VOL connector plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d VOL connector plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        exit(EXIT_FAILURE);
     }
 
-    HDputs("All VOL connector plugin tests passed.");
+    puts("All VOL connector plugin tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

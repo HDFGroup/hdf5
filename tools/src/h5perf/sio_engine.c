@@ -44,7 +44,7 @@
     }
 #define ERRMSG(mesg)                                                                                         \
     {                                                                                                        \
-        HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);   \
+        fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n", mesg, (int)__LINE__, __FILE__);   \
     }
 
 /* verify: if val is false (0), print mesg. */
@@ -157,7 +157,7 @@ do_sio(parameters param, results *res)
             break;
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
             GOTOERROR(FAIL);
     }
 
@@ -172,12 +172,12 @@ do_sio(parameters param, results *res)
 
         /* Validate transfer buffer size */
         if (param.buf_size[i] <= 0) {
-            HDfprintf(stderr, "Transfer buffer size[%d] (%zu) must be > 0\n", i, buf_size[i]);
+            fprintf(stderr, "Transfer buffer size[%d] (%zu) must be > 0\n", i, buf_size[i]);
             GOTOERROR(FAIL);
         }
 
         if ((param.dset_size[i] % param.buf_size[i]) != 0) {
-            HDfprintf(stderr,
+            fprintf(stderr,
                       "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
                       "transfer buffer size[%d] (%zu)\n",
                       param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
@@ -187,25 +187,25 @@ do_sio(parameters param, results *res)
 
     /* Allocate transfer buffer */
     if ((buffer = (char *)malloc(linear_buf_size)) == NULL) {
-        HDfprintf(stderr, "malloc for transfer buffer size (%zu) failed\n", linear_buf_size);
+        fprintf(stderr, "malloc for transfer buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     }
 
     if (sio_debug_level >= 4)
 
         /* output all of the times for all iterations */
-        HDfprintf(output, "Timer details:\n");
+        fprintf(output, "Timer details:\n");
 
     /*
      * Write performance measurement
      */
     /* Open file for write */
 
-    HDstrcpy(base_name, "#sio_tmp");
+    strcpy(base_name, "#sio_tmp");
     sio_create_filename(iot, base_name, fname, sizeof(fname), &param);
 
     if (sio_debug_level > 0)
-        HDfprintf(output, "data filename=%s\n", fname);
+        fprintf(output, "data filename=%s\n", fname);
 
     io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, SIO_CREATE | SIO_WRITE);
@@ -262,7 +262,7 @@ done:
             break;
         default:
             /* unknown request */
-            HDassert(0 && "Unknown IO type");
+            assert(0 && "Unknown IO type");
             break;
     }
 
@@ -310,13 +310,13 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             break;
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-            HDassert(0 && "Unknown IO type");
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            assert(0 && "Unknown IO type");
             break;
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = HDgetenv("HDF5_PREFIX");
+    prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
     if (!prefix)
@@ -330,8 +330,8 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
          * directory instead. */
         register char *user, *login, *subdir;
 
-        user   = HDgetenv("USER");
-        login  = HDgetenv("LOGIN");
+        user   = getenv("USER");
+        login  = getenv("LOGIN");
         subdir = (user ? user : login);
 
         if (subdir) {
@@ -345,11 +345,11 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         }
         else {
             /* We didn't append the prefix yet */
-            HDstrncpy(fullname, prefix, size);
+            strncpy(fullname, prefix, size);
             fullname[size - 1] = '\0';
         }
 
-        if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
+        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
@@ -359,11 +359,11 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                 if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    HDstrcpy(fullname, prefix);
+                    strcpy(fullname, prefix);
                 }
 
-            HDstrcat(fullname, "/");
-            HDstrcat(fullname, base_name);
+            strcat(fullname, "/");
+            strcat(fullname, base_name);
         }
         else {
             /* Buffer is too small */
@@ -375,15 +375,15 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -487,14 +487,14 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             /* Create the dataset transfer property list */
             h5dxpl = H5Pcreate(H5P_DATASET_XFER);
             if (h5dxpl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             break;
 
         default:
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
             GOTOERROR(FAIL);
             break;
     } /* end switch */
@@ -508,7 +508,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
             if (h5dcpl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -516,31 +516,31 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
                 /* Set the chunk size to be the same as the buffer size */
                 hrc = H5Pset_chunk(h5dcpl, rank, h5chunk);
                 if (hrc < 0) {
-                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
             }     /* end if */
 
-            HDsprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
+            sprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
             h5ds_id =
                 H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
             if (h5ds_id < 0) {
-                HDfprintf(stderr, "HDF5 Dataset Create failed\n");
+                fprintf(stderr, "HDF5 Dataset Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             hrc = H5Pclose(h5dcpl);
             /* verifying the close of the dcpl */
             if (hrc < 0) {
-                HDfprintf(stderr, "HDF5 Property List Close failed\n");
+                fprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
             break;
 
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
             GOTOERROR(FAIL);
             break;
     }
@@ -552,7 +552,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     hrc = dset_write(rank - 1, fd, parms, buffer);
 
     if (hrc < 0) {
-        HDfprintf(stderr, "Error in dataset write\n");
+        fprintf(stderr, "Error in dataset write\n");
         GOTOERROR(FAIL);
     }
 
@@ -566,7 +566,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Close failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -579,7 +579,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -590,7 +590,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
+            fprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -601,7 +601,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -662,7 +662,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 
                         for (k = 0; k < parms->rank; k++) {
 
-                            HDassert(h5offset[k] >= 0);
+                            assert(h5offset[k] >= 0);
                             if (dims[k] <= (hsize_t)h5offset[k]) {
                                 dims[k] = dims[k] + h5count[k];
                                 hrc     = H5Sset_extent_simple(h5dset_space_id, parms->rank, dims, maxdims);
@@ -685,8 +685,8 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 
                 default:
                     /* unknown request */
-                    HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
-                    HDassert(0 && "Unknown IO type");
+                    fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                    assert(0 && "Unknown IO type");
                     break;
             } /* switch (parms->io_type) */
         }
@@ -781,7 +781,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Allocate data verification buffer */
     if (NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
-        HDfprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
+        fprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     } /* end if */
 
@@ -832,14 +832,14 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             /* Create the dataset transfer property list */
             h5dxpl = H5Pcreate(H5P_DATASET_XFER);
             if (h5dxpl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
             break;
 
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
             GOTOERROR(FAIL);
             break;
     } /* end switch */
@@ -850,17 +850,17 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             break;
 
         case HDF5:
-            HDsprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
+            sprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
             h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
             if (h5ds_id < 0) {
-                HDfprintf(stderr, "HDF5 Dataset open failed\n");
+                fprintf(stderr, "HDF5 Dataset open failed\n");
                 GOTOERROR(FAIL);
             }
             break;
 
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
             GOTOERROR(FAIL);
             break;
     } /* end switch */
@@ -870,7 +870,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     hrc = dset_read(rank - 1, fd, parms, buffer, buffer2);
 
     if (hrc < 0) {
-        HDfprintf(stderr, "Error in dataset read\n");
+        fprintf(stderr, "Error in dataset read\n");
         GOTOERROR(FAIL);
     }
 
@@ -884,7 +884,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Close failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -897,7 +897,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -908,7 +908,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
+            fprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -919,7 +919,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         }
         else {
@@ -986,8 +986,8 @@ dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer, const 
 
                 default:
                     /* unknown request */
-                    HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
-                    HDassert(0 && "Unknown IO type");
+                    fprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                    assert(0 && "Unknown IO type");
                     break;
             } /* switch (parms->io_type) */
         }
@@ -1072,7 +1072,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
             if (fd->posixfd < 0) {
-                HDfprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+                fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
@@ -1083,7 +1083,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             fapl = set_vfd(param);
 
             if (fapl < 0) {
-                HDfprintf(stderr, "HDF5 Property List Create failed\n");
+                fprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -1104,14 +1104,14 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             }
 
             if (fd->h5fd < 0) {
-                HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+                fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
             break;
 
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
             GOTOERROR(FAIL);
             break;
     }
@@ -1168,15 +1168,15 @@ set_vfd(parameters *param)
         haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
-        HDmemset(memb_map, 0, sizeof memb_map);
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);
-        HDmemset(memb_name, 0, sizeof memb_name);
-        HDmemset(memb_addr, 0, sizeof memb_addr);
+        memset(memb_map, 0, sizeof memb_map);
+        memset(memb_fapl, 0, sizeof memb_fapl);
+        memset(memb_name, 0, sizeof memb_name);
+        memset(memb_addr, 0, sizeof memb_addr);
 
-        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+        assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+            sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
@@ -1189,8 +1189,8 @@ set_vfd(parameters *param)
         hsize_t fam_size = 1 * 1024 * 1024; /*100 MB*/
 
         /* Family of files, each 1MB and using the default driver */
-        /* if ((val=HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024); */
+        /* if ((val=strtok(NULL, " \t\n\r")))
+            fam_size = (hsize_t)(strtod(val, NULL) * 1024*1024); */
         if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT) < 0)
             return -1;
     }
@@ -1228,7 +1228,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
             rc = POSIXCLOSE(fd->posixfd);
 
             if (rc != 0) {
-                HDfprintf(stderr, "POSIX File Close failed\n");
+                fprintf(stderr, "POSIX File Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -1239,7 +1239,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
             hrc = H5Fclose(fd->h5fd);
 
             if (hrc < 0) {
-                HDfprintf(stderr, "HDF5 File Close failed\n");
+                fprintf(stderr, "HDF5 File Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -1248,7 +1248,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         default:
             /* unknown request */
-            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
             GOTOERROR(FAIL);
             break;
     }
@@ -1272,13 +1272,13 @@ do_cleanupfile(iotype iot, char *filename)
     hid_t driver;
 
     if (clean_file_g == -1)
-        clean_file_g = (HDgetenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
+        clean_file_g = (getenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
 
         switch (iot) {
             case POSIXIO:
-                HDremove(filename);
+                remove(filename);
                 break;
 
             case HDF5:
@@ -1286,12 +1286,12 @@ do_cleanupfile(iotype iot, char *filename)
 
                 if (driver == H5FD_FAMILY) {
                     for (j = 0; /*void*/; j++) {
-                        HDsnprintf(temp, sizeof temp, filename, j);
+                        snprintf(temp, sizeof temp, filename, j);
 
                         if (HDaccess(temp, F_OK) < 0)
                             break;
 
-                        HDremove(temp);
+                        remove(temp);
                     }
                 }
                 else if (driver == H5FD_CORE) {
@@ -1301,27 +1301,27 @@ do_cleanupfile(iotype iot, char *filename)
 
                     /* If the file was stored to disk with bacing store, remove it */
                     if (backing)
-                        HDremove(filename);
+                        remove(filename);
                 }
                 else if (driver == H5FD_MULTI) {
                     H5FD_mem_t mt;
-                    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                    assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
 
                     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                        HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-                        HDremove(temp); /*don't care if it fails*/
+                        snprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+                        remove(temp); /*don't care if it fails*/
                     }
                 }
                 else {
-                    HDremove(filename);
+                    remove(filename);
                 }
                 H5Pclose(fapl);
                 break;
 
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-                HDassert(0 && "Unknown IO type");
+                fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+                assert(0 && "Unknown IO type");
                 break;
         }
     }

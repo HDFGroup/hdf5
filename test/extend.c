@@ -116,9 +116,9 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
             for (k = 0; k < N2X; k++)
                 for (m = 0; m < N2Y; m++)
                     if (buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
-                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
+                        printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
                                  buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
@@ -219,9 +219,9 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
             for (k = 0; k < N2X; k++)
                 for (m = 0; m < N2Y; m++)
                     if (buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
-                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
+                        printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
                                  buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
@@ -272,16 +272,16 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Initialize buffer and space */
-    if (NULL == (buf1_data = (int *)HDcalloc(N1X * N1Y, sizeof(int))))
+    if (NULL == (buf1_data = (int *)calloc(N1X * N1Y, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf1 = (int **)HDcalloc(N1X, sizeof(buf1_data))))
+    if (NULL == (buf1 = (int **)calloc(N1X, sizeof(buf1_data))))
         TEST_ERROR;
     for (i = 0; i < N1X; i++)
         buf1[i] = buf1_data + (i * N1Y);
 
-    if (NULL == (buf2_data = (int *)HDcalloc(N2X * N2Y, sizeof(int))))
+    if (NULL == (buf2_data = (int *)calloc(N2X * N2Y, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf2 = (int **)HDcalloc(N2X, sizeof(buf2_data))))
+    if (NULL == (buf2 = (int **)calloc(N2X, sizeof(buf2_data))))
         TEST_ERROR;
     for (i = 0; i < N2X; i++)
         buf2[i] = buf2_data + (i * N2Y);
@@ -339,27 +339,27 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
+        exit(EXIT_FAILURE);
     } /* end if */
 
-    HDprintf("All extend tests passed.\n");
+    printf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    HDfree(buf1);
-    HDfree(buf1_data);
-    HDfree(buf2);
-    HDfree(buf2_data);
+    free(buf1);
+    free(buf1_data);
+    free(buf2);
+    free(buf2_data);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
-    HDfree(buf1);
-    HDfree(buf1_data);
-    HDfree(buf2);
-    HDfree(buf2_data);
+    free(buf1);
+    free(buf1_data);
+    free(buf2);
+    free(buf2_data);
 
-    HDprintf("*** One or more extend tests failed ***\n");
-    HDexit(EXIT_FAILURE);
+    printf("*** One or more extend tests failed ***\n");
+    exit(EXIT_FAILURE);
 } /* end main() */

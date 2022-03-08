@@ -27,18 +27,18 @@
 void
 usage(const char *prog)
 {
-    HDfprintf(stderr, "usage: %s [OPTIONS]\n", prog);
-    HDfprintf(stderr, "  OPTIONS\n");
-    HDfprintf(stderr, "     -h, --help            Print a usage message and exit\n");
-    HDfprintf(stderr, "     -f FN                 Test file name [default: %s.h5]\n", prog);
-    HDfprintf(stderr,
+    fprintf(stderr, "usage: %s [OPTIONS]\n", prog);
+    fprintf(stderr, "  OPTIONS\n");
+    fprintf(stderr, "     -h, --help            Print a usage message and exit\n");
+    fprintf(stderr, "     -f FN                 Test file name [default: %s.h5]\n", prog);
+    fprintf(stderr,
               "     -i N, --iteration=N   Number of iterations to repeat the whole thing. [default: 1]\n");
-    HDfprintf(stderr, "     -l w|r                launch writer or reader only. [default: launch both]\n");
-    HDfprintf(stderr, "     -n N, --nplanes=N     Number of planes to write/read. [default: 1000]\n");
-    HDfprintf(stderr, "     -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes\n");
-    HDfprintf(stderr, "     -z N, --chunksize=N   Chunk size [default: %d]\n", Chunksize_DFT);
-    HDfprintf(stderr, "     -y N, --chunkplanes=N Number of planes per chunk [default: 1]\n");
-    HDfprintf(stderr, "\n");
+    fprintf(stderr, "     -l w|r                launch writer or reader only. [default: launch both]\n");
+    fprintf(stderr, "     -n N, --nplanes=N     Number of planes to write/read. [default: 1000]\n");
+    fprintf(stderr, "     -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes\n");
+    fprintf(stderr, "     -z N, --chunksize=N   Chunk size [default: %d]\n", Chunksize_DFT);
+    fprintf(stderr, "     -y N, --chunkplanes=N Number of planes per chunk [default: 1]\n");
+    fprintf(stderr, "\n");
 } /* end usage() */
 
 /* ----------------------------------------------------------------------------
@@ -66,14 +66,14 @@ parse_option(int argc, char *const argv[], options_t *opts)
         switch (c) {
             case 'h':
                 usage(opts->progname);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
                 opts->filename = HDstrdup(optarg);
                 break;
             case 'i': /* iterations */
-                if ((opts->iterations = HDatoi(optarg)) <= 0) {
-                    HDfprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
+                if ((opts->iterations = atoi(optarg)) <= 0) {
+                    fprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
@@ -87,49 +87,49 @@ parse_option(int argc, char *const argv[], options_t *opts)
                         opts->launch = UC_WRITER;
                         break;
                     default:
-                        HDfprintf(stderr, "launch value(%c) should be w or r only.\n", *optarg);
+                        fprintf(stderr, "launch value(%c) should be w or r only.\n", *optarg);
                         usage(opts->progname);
                         Hgoto_error(-1);
                         break;
                 } /* end switch (reader/writer-only mode toggle) */
                 break;
             case 'n': /* number of planes to write/read */
-                if ((opts->nplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
-                    HDfprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
+                if ((opts->nplanes = strtoul(optarg, NULL, 0)) <= 0) {
+                    fprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
                 break;
             case 's': /* use swmr file open mode */
-                use_swmr = HDatoi(optarg);
+                use_swmr = atoi(optarg);
                 if (use_swmr != 0 && use_swmr != 1) {
-                    HDfprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
+                    fprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
                 opts->use_swmr = (hbool_t)use_swmr;
                 break;
             case 'y': /* Number of planes per chunk */
-                if ((opts->chunkplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
-                    HDfprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
+                if ((opts->chunkplanes = strtoul(optarg, NULL, 0)) <= 0) {
+                    fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
                               optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
                 break;
             case 'z': /* size of chunk=(z,z) */
-                if ((opts->chunksize = HDstrtoull(optarg, NULL, 0)) <= 0) {
-                    HDfprintf(stderr, "bad chunksize %s, must be a positive integer\n", optarg);
+                if ((opts->chunksize = strtoull(optarg, NULL, 0)) <= 0) {
+                    fprintf(stderr, "bad chunksize %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
                 break;
             case '?':
-                HDfprintf(stderr, "getopt returned '%c'.\n", c);
+                fprintf(stderr, "getopt returned '%c'.\n", c);
                 Hgoto_error(-1);
             default:
-                HDfprintf(stderr, "getopt returned unexpected value.\n");
-                HDfprintf(stderr, "Unexpected value is %d\n", c);
+                fprintf(stderr, "getopt returned unexpected value.\n");
+                fprintf(stderr, "Unexpected value is %d\n", c);
                 Hgoto_error(-1);
         } /* end switch (argument symbol) */
     }     /* end while (there are still arguments) */
@@ -137,12 +137,12 @@ parse_option(int argc, char *const argv[], options_t *opts)
     /* set test file name if not given */
     if (!opts->filename) {
         /* default data file name is <progname>.h5 */
-        if ((opts->filename = (char *)HDmalloc(HDstrlen(opts->progname) + 4)) == NULL) {
-            HDfprintf(stderr, "malloc: failed\n");
+        if ((opts->filename = (char *)malloc(strlen(opts->progname) + 4)) == NULL) {
+            fprintf(stderr, "malloc: failed\n");
             Hgoto_error(-1);
         }
-        HDstrcpy(opts->filename, opts->progname);
-        HDstrcat(opts->filename, ".h5");
+        strcpy(opts->filename, opts->progname);
+        strcat(opts->filename, ".h5");
     }
 
 done:
@@ -156,31 +156,31 @@ done:
 void
 show_parameters(options_t *opts)
 {
-    HDprintf("===Parameters used:===\n");
-    HDprintf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->chunkdims[0],
+    printf("===Parameters used:===\n");
+    printf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->chunkdims[0],
              (unsigned long long)opts->chunkdims[1], (unsigned long long)opts->chunkdims[2]);
-    HDprintf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->max_dims[0],
+    printf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->max_dims[0],
              (unsigned long long)opts->max_dims[1], (unsigned long long)opts->max_dims[2]);
-    HDprintf("number of planes to write=%llu\n", (unsigned long long)opts->nplanes);
-    HDprintf("using SWMR mode=%s\n", opts->use_swmr ? "yes(1)" : "no(0)");
-    HDprintf("data filename=%s\n", opts->filename);
-    HDprintf("launch part=");
+    printf("number of planes to write=%llu\n", (unsigned long long)opts->nplanes);
+    printf("using SWMR mode=%s\n", opts->use_swmr ? "yes(1)" : "no(0)");
+    printf("data filename=%s\n", opts->filename);
+    printf("launch part=");
     switch (opts->launch) {
         case UC_READWRITE:
-            HDprintf("Reader/Writer\n");
+            printf("Reader/Writer\n");
             break;
         case UC_WRITER:
-            HDprintf("Writer\n");
+            printf("Writer\n");
             break;
         case UC_READER:
-            HDprintf("Reader\n");
+            printf("Reader\n");
             break;
         default:
             /* should not happen */
-            HDprintf("Illegal part(%d)\n", opts->launch);
+            printf("Illegal part(%d)\n", opts->launch);
     }
-    HDprintf("number of iterations=%d (not used yet)\n", opts->iterations);
-    HDprintf("===Parameters shown===\n");
+    printf("number of iterations=%d (not used yet)\n", opts->iterations);
+    printf("===Parameters shown===\n");
 } /* end show_parameters() */
 
 /* ----------------------------------------------------------------------------
@@ -230,7 +230,7 @@ create_uc_file(options_t *opts)
     if (H5Dget_chunk_index_type(dsid, &idx_type) < 0)
         return -1;
     if (idx_type == H5D_CHUNK_IDX_BTREE) {
-        HDfprintf(stderr, "ERROR: Chunk index is version 1 B-tree: aborting.\n");
+        fprintf(stderr, "ERROR: Chunk index is version 1 B-tree: aborting.\n");
         return -1;
     }
 
@@ -280,27 +280,27 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
 
     /* Open the dataset of the program name */
     if ((dsid = H5Dopen2(file_id, opts->progname, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "H5Dopen2 failed\n");
+        fprintf(stderr, "H5Dopen2 failed\n");
         return -1;
     }
 
     /* Find chunksize used */
     if ((dcpl = H5Dget_create_plist(dsid)) < 0) {
-        HDfprintf(stderr, "H5Dget_create_plist failed\n");
+        fprintf(stderr, "H5Dget_create_plist failed\n");
         return -1;
     }
     if (H5D_CHUNKED != H5Pget_layout(dcpl)) {
-        HDfprintf(stderr, "storage layout is not chunked\n");
+        fprintf(stderr, "storage layout is not chunked\n");
         return -1;
     }
     if ((rank = H5Pget_chunk(dcpl, 3, chunk_dims)) != 3) {
-        HDfprintf(stderr, "storage rank is not 3\n");
+        fprintf(stderr, "storage rank is not 3\n");
         return -1;
     }
 
     /* verify chunk_dims against set parameters */
     if (chunk_dims[0] != opts->chunkdims[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
-        HDfprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
+        fprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
                   (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
                   (unsigned long long)chunk_dims[2]);
         return -1;
@@ -310,8 +310,8 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
     memdims[0] = 1;
     memdims[1] = opts->dims[1];
     memdims[2] = opts->dims[2];
-    if ((buffer = (UC_CTYPE *)HDmalloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
-        HDfprintf(stderr, "malloc: failed\n");
+    if ((buffer = (UC_CTYPE *)malloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
+        fprintf(stderr, "malloc: failed\n");
         return -1;
     }
 
@@ -321,29 +321,29 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
     f_sid = H5Dget_space(dsid); /* Get filespace handle first. */
     rank  = H5Sget_simple_extent_ndims(f_sid);
     if (rank != UC_RANK) {
-        HDfprintf(stderr, "rank(%d) of dataset does not match\n", rank);
-        HDfree(buffer);
+        fprintf(stderr, "rank(%d) of dataset does not match\n", rank);
+        free(buffer);
         return -1;
     }
     if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0) {
-        HDfprintf(stderr, "H5Sget_simple_extent_dims got error\n");
-        HDfree(buffer);
+        fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
+        free(buffer);
         return -1;
     }
-    HDprintf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
+    printf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
              (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]) {
-        HDfprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n", (unsigned long long)dims[0],
+        fprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n", (unsigned long long)dims[0],
                   (unsigned long long)dims[1], (unsigned long long)dims[2]);
-        HDfree(buffer);
+        free(buffer);
         return -1;
     }
 
     /* setup mem-space for buffer */
     if ((m_sid = H5Screate_simple(rank, memdims, NULL)) < 0) {
-        HDfprintf(stderr, "H5Screate_simple for memory failed\n");
-        HDfree(buffer);
+        fprintf(stderr, "H5Screate_simple for memory failed\n");
+        free(buffer);
         return -1;
     }
 
@@ -363,8 +363,8 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
         /* Cork the dataset's metadata in the cache, if SWMR is enabled */
         if (opts->use_swmr) {
             if (H5Odisable_mdc_flushes(dsid) < 0) {
-                HDfprintf(stderr, "H5Odisable_mdc_flushes failed\n");
-                HDfree(buffer);
+                fprintf(stderr, "H5Odisable_mdc_flushes failed\n");
+                free(buffer);
                 return -1;
             }
         }
@@ -372,62 +372,62 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
         /* extend the dataset by one for new plane */
         dims[0] = i + 1;
         if (H5Dset_extent(dsid, dims) < 0) {
-            HDfprintf(stderr, "H5Dset_extent failed\n");
-            HDfree(buffer);
+            fprintf(stderr, "H5Dset_extent failed\n");
+            free(buffer);
             return -1;
         }
 
         /* Get the dataset's dataspace */
         if ((f_sid = H5Dget_space(dsid)) < 0) {
-            HDfprintf(stderr, "H5Dset_extent failed\n");
-            HDfree(buffer);
+            fprintf(stderr, "H5Dset_extent failed\n");
+            free(buffer);
             return -1;
         }
 
         start[0] = i;
         /* Choose the next plane to write */
         if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0) {
-            HDfprintf(stderr, "Failed H5Sselect_hyperslab\n");
-            HDfree(buffer);
+            fprintf(stderr, "Failed H5Sselect_hyperslab\n");
+            free(buffer);
             return -1;
         }
 
         /* Write plane to the dataset */
         if (H5Dwrite(dsid, UC_DATATYPE, m_sid, f_sid, H5P_DEFAULT, buffer) < 0) {
-            HDfprintf(stderr, "Failed H5Dwrite\n");
-            HDfree(buffer);
+            fprintf(stderr, "Failed H5Dwrite\n");
+            free(buffer);
             return -1;
         }
 
         /* Uncork the dataset's metadata from the cache, if SWMR is enabled */
         if (opts->use_swmr) {
             if (H5Oenable_mdc_flushes(dsid) < 0) {
-                HDfprintf(stderr, "H5Oenable_mdc_flushes failed\n");
-                HDfree(buffer);
+                fprintf(stderr, "H5Oenable_mdc_flushes failed\n");
+                free(buffer);
                 return -1;
             }
         }
 
         /* flush file to make the just written plane available. */
         if (H5Dflush(dsid) < 0) {
-            HDfprintf(stderr, "Failed to H5Fflush file\n");
-            HDfree(buffer);
+            fprintf(stderr, "Failed to H5Fflush file\n");
+            free(buffer);
             return -1;
         }
     } /* end for each plane to write */
 
     /* Done writing. Free/Close all resources including data file */
-    HDfree(buffer);
+    free(buffer);
     if (H5Dclose(dsid) < 0) {
-        HDfprintf(stderr, "Failed to close datasete\n");
+        fprintf(stderr, "Failed to close datasete\n");
         return -1;
     }
     if (H5Sclose(m_sid) < 0) {
-        HDfprintf(stderr, "Failed to close memory space\n");
+        fprintf(stderr, "Failed to close memory space\n");
         return -1;
     }
     if (H5Sclose(f_sid) < 0) {
-        HDfprintf(stderr, "Failed to close file space\n");
+        fprintf(stderr, "Failed to close file space\n");
         return -1;
     }
 
@@ -466,19 +466,19 @@ read_uc_file(hbool_t towait, options_t *opts)
 
     /* Before reading, wait for the message that H5Fopen is complete--file lock is released */
     if (towait && h5_wait_message(WRITER_MESSAGE) < 0) {
-        HDfprintf(stderr, "Cannot find writer message file...failed\n");
+        fprintf(stderr, "Cannot find writer message file...failed\n");
         return -1;
     }
 
-    HDfprintf(stderr, "Opening to read %s\n", opts->filename);
+    fprintf(stderr, "Opening to read %s\n", opts->filename);
     if ((fid = H5Fopen(opts->filename, H5F_ACC_RDONLY | (opts->use_swmr ? H5F_ACC_SWMR_READ : 0),
                        opts->fapl_id)) < 0) {
-        HDfprintf(stderr, "H5Fopen failed\n");
+        fprintf(stderr, "H5Fopen failed\n");
         return -1;
     }
 
     if ((dsid = H5Dopen2(fid, opts->progname, H5P_DEFAULT)) < 0) {
-        HDfprintf(stderr, "H5Dopen2 failed\n");
+        fprintf(stderr, "H5Dopen2 failed\n");
         return -1;
     }
 
@@ -486,8 +486,8 @@ read_uc_file(hbool_t towait, options_t *opts)
     memdims[0] = 1;
     memdims[1] = opts->dims[1];
     memdims[2] = opts->dims[2];
-    if ((buffer = (UC_CTYPE *)HDmalloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
-        HDfprintf(stderr, "malloc: failed\n");
+    if ((buffer = (UC_CTYPE *)malloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
+        fprintf(stderr, "malloc: failed\n");
         return -1;
     }
 
@@ -498,31 +498,31 @@ read_uc_file(hbool_t towait, options_t *opts)
     f_sid = H5Dget_space(dsid); /* Get filespace handle first. */
     rank  = H5Sget_simple_extent_ndims(f_sid);
     if (rank != UC_RANK) {
-        HDfprintf(stderr, "rank(%d) of dataset does not match\n", rank);
-        HDfree(buffer);
+        fprintf(stderr, "rank(%d) of dataset does not match\n", rank);
+        free(buffer);
         return -1;
     }
     if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0) {
-        HDfprintf(stderr, "H5Sget_simple_extent_dims got error\n");
-        HDfree(buffer);
+        fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
+        free(buffer);
         return -1;
     }
-    HDprintf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
+    printf("dataset rank %d, dimensions %llu x %llu x %llu\n", rank, (unsigned long long)(dims[0]),
              (unsigned long long)(dims[1]), (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[1] != memdims[1] || dims[2] != memdims[2]) {
-        HDfprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
+        fprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
                   (unsigned long long)dims[0], (unsigned long long)dims[1], (unsigned long long)dims[2]);
-        HDfprintf(stderr, "But memdims=(%llu,%llu,%llu)\n", (unsigned long long)memdims[0],
+        fprintf(stderr, "But memdims=(%llu,%llu,%llu)\n", (unsigned long long)memdims[0],
                   (unsigned long long)memdims[1], (unsigned long long)memdims[2]);
-        HDfree(buffer);
+        free(buffer);
         return -1;
     }
 
     /* Setup mem-space for buffer */
     if ((m_sid = H5Screate_simple(rank, memdims, NULL)) < 0) {
-        HDfprintf(stderr, "H5Screate_simple for memory failed\n");
-        HDfree(buffer);
+        fprintf(stderr, "H5Screate_simple for memory failed\n");
+        free(buffer);
         return -1;
     }
 
@@ -537,51 +537,51 @@ read_uc_file(hbool_t towait, options_t *opts)
         if (nplanes_seen < dims[0]) {
             if (loops_waiting_for_plane) {
                 /* end the previous message */
-                HDprintf("\n");
+                printf("\n");
                 loops_waiting_for_plane = 0;
             }
-            HDprintf("reading planes %llu to %llu\n", (unsigned long long)nplanes_seen,
+            printf("reading planes %llu to %llu\n", (unsigned long long)nplanes_seen,
                      (unsigned long long)dims[0]);
         }
         else {
             if (loops_waiting_for_plane) {
-                HDprintf(".");
+                printf(".");
                 if (loops_waiting_for_plane >= 30) {
-                    HDfprintf(stderr, "waited too long for new plane, quit.\n");
-                    HDfree(buffer);
+                    fprintf(stderr, "waited too long for new plane, quit.\n");
+                    free(buffer);
                     return -1;
                 }
             }
             else {
                 /* print mesg only the first time; dots still no new plane */
-                HDprintf("waiting for new planes to read ");
+                printf("waiting for new planes to read ");
             }
             loops_waiting_for_plane++;
             /* pause for a second */
-            HDsleep(1);
+            sleep(1);
         }
 
         for (nplane = nplanes_seen; nplane < dims[0]; nplane++) {
             /* read planes between last old nplanes and current extent */
             /* Get the dataset's dataspace */
             if ((f_sid = H5Dget_space(dsid)) < 0) {
-                HDfprintf(stderr, "H5Dget_space failed\n");
-                HDfree(buffer);
+                fprintf(stderr, "H5Dget_space failed\n");
+                free(buffer);
                 return -1;
             }
 
             start[0] = nplane;
             /* Choose the next plane to read */
             if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0) {
-                HDfprintf(stderr, "H5Sselect_hyperslab failed\n");
-                HDfree(buffer);
+                fprintf(stderr, "H5Sselect_hyperslab failed\n");
+                free(buffer);
                 return -1;
             }
 
             /* Read the plane from the dataset */
             if (H5Dread(dsid, UC_DATATYPE, m_sid, f_sid, H5P_DEFAULT, buffer) < 0) {
-                HDfprintf(stderr, "H5Dread failed\n");
-                HDfree(buffer);
+                fprintf(stderr, "H5Dread failed\n");
+                free(buffer);
                 return -1;
             }
 
@@ -592,7 +592,7 @@ read_uc_file(hbool_t towait, options_t *opts)
                 for (k = 0; k < dims[2]; k++) {
                     if ((hsize_t)*bufptr++ != nplane) {
                         if (++nerrs < ErrorReportMax) {
-                            HDfprintf(stderr, "found error %llu plane(%llu,%llu), expected %llu, got %d\n",
+                            fprintf(stderr, "found error %llu plane(%llu,%llu), expected %llu, got %d\n",
                                       (unsigned long long)nplane, (unsigned long long)j,
                                       (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr - 1));
                         } /* end if should print error */
@@ -601,7 +601,7 @@ read_uc_file(hbool_t towait, options_t *opts)
             }             /* end for plane first dimension */
             if (nerrs) {
                 nreadererr++;
-                HDfprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs,
+                fprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs,
                           (unsigned long long)nplane);
             }
         } /* end for each plane added since last read */
@@ -612,19 +612,19 @@ read_uc_file(hbool_t towait, options_t *opts)
         H5Drefresh(dsid);
         f_sid = H5Dget_space(dsid); /* Get filespace handle first. */
         if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0) {
-            HDfprintf(stderr, "H5Sget_simple_extent_dims got error\n");
-            HDfree(buffer);
+            fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
+            free(buffer);
             return -1;
         }
     } /* end while (expecting more planes to read) */
 
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "H5Fclose failed\n");
-        HDfree(buffer);
+        fprintf(stderr, "H5Fclose failed\n");
+        free(buffer);
         return -1;
     }
 
-    HDfree(buffer);
+    free(buffer);
 
     if (nreadererr)
         return -1;

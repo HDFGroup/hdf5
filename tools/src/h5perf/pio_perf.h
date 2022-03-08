@@ -91,10 +91,10 @@ extern int        pio_debug_level;     /* The debug level:
                                         *   4 - Even More Debugging (timer stuff)
                                         */
 
-#define HDprint_rank(f)      /* print rank in MPI_COMM_WORLD */ HDfprintf(f, "%d: ", comm_world_rank_g);
-#define HDprint_size(f)      /* print size of MPI_COMM_WORLD */ HDfprintf(f, "%d", comm_world_nprocs_g);
+#define HDprint_rank(f)      /* print rank in MPI_COMM_WORLD */ fprintf(f, "%d: ", comm_world_rank_g);
+#define HDprint_size(f)      /* print size of MPI_COMM_WORLD */ fprintf(f, "%d", comm_world_nprocs_g);
 #define HDprint_rank_size(f) /* print rank/size of MPI_COMM_WORLD */                                         \
-    HDfprintf(f, "%d/%d: ", comm_world_rank_g, comm_world_nprocs_g);
+    fprintf(f, "%d/%d: ", comm_world_rank_g, comm_world_nprocs_g);
 
 #ifdef __cplusplus
 extern "C" {

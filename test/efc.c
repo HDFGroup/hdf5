@@ -2658,7 +2658,7 @@ main(void)
     int                   i;                      /* iterator */
 
     /* Test Setup */
-    HDputs("Testing the external file cache");
+    puts("Testing the external file cache");
 
     /* Create property lists */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -2666,7 +2666,7 @@ main(void)
 
     /* Allocate memory for filenames */
     for (i = 0; i < N_FILENAMES; i++) {
-        filename[i] = (char *)HDcalloc(PATH_MAX, sizeof(char));
+        filename[i] = (char *)calloc(PATH_MAX, sizeof(char));
     }
 
     /* Patch filenames */
@@ -2711,18 +2711,18 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All external file cache tests passed.");
+    puts("All external file cache tests passed.");
 
     h5_clean_files(FILENAME, fapl_id);
 
     for (i = 0; i < N_FILENAMES; i++) {
-        HDfree(filename[i]);
+        free(filename[i]);
     }
 
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {
@@ -2734,7 +2734,7 @@ error:
         H5CX_pop(FALSE);
 
     for (i = 0; i < N_FILENAMES; i++) {
-        HDfree(filename[i]);
+        free(filename[i]);
     }
 
     return EXIT_FAILURE;

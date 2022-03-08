@@ -64,16 +64,16 @@ H5FD_mpi_get_rank(H5FD_t *file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file);
+    assert(file);
     cls = (const H5FD_class_t *)(file->cls);
-    HDassert(cls);
-    HDassert(cls->ctl); /* All MPI drivers must implement this */
+    assert(cls);
+    assert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL__GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
 
-    HDassert(rank >= 0);
+    assert(rank >= 0);
 
     ret_value = rank;
 
@@ -116,10 +116,10 @@ H5FD_mpi_get_size(H5FD_t *file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file);
+    assert(file);
     cls = (const H5FD_class_t *)(file->cls);
-    HDassert(cls);
-    HDassert(cls->ctl); /* All MPI drivers must implement this */
+    assert(cls);
+    assert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL__GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
@@ -169,10 +169,10 @@ H5FD_mpi_get_comm(H5FD_t *file)
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    HDassert(file);
+    assert(file);
     cls = (const H5FD_class_t *)(file->cls);
-    HDassert(cls);
-    HDassert(cls->ctl); /* All MPI drivers must implement this */
+    assert(cls);
+    assert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((cls->ctl)(file, H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
@@ -239,7 +239,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(mpi_off);
+    assert(mpi_off);
 
     /* Convert the HDF5 address into an MPI offset */
     *mpi_off = (MPI_Offset)addr;
@@ -288,11 +288,11 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     /* Portably initialize MPI status variable */
-    HDmemset(&rcvstat, 0, sizeof(MPI_Status));
+    memset(&rcvstat, 0, sizeof(MPI_Status));
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {
@@ -338,8 +338,8 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     if (file->mpi_rank != (file->mpi_size - 1))
         if (MPI_SUCCESS !=

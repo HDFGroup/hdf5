@@ -92,10 +92,10 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     hsize_t start[2] = {0, 0}; /* Hyperslab selection values */
     hsize_t count[2] = {1, 1}; /* Hyperslab selection values */
 
-    HDassert(fid >= 0);
-    HDassert(symbol);
-    HDassert(record);
-    HDassert(rec_sid >= 0);
+    assert(fid >= 0);
+    assert(symbol);
+    assert(record);
+    assert(rec_sid >= 0);
 
     /* Open dataset for symbol */
     if ((dsid = H5Dopen2(fid, symbol->name, H5P_DEFAULT)) < 0)
@@ -113,7 +113,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX "\n", symbol->name,
+        fprintf(stderr, "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX "\n", symbol->name,
                   (uintmax_t)start[0], (uintmax_t)start[1]);
 
     /* Read record from dataset */
@@ -123,9 +123,9 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Verify record value */
     if (record->rec_id != start[1]) {
-        HDfprintf(stderr, "*** ERROR ***\n");
-        HDfprintf(stderr, "Incorrect record value!\n");
-        HDfprintf(stderr,
+        fprintf(stderr, "*** ERROR ***\n");
+        fprintf(stderr, "Incorrect record value!\n");
+        fprintf(stderr,
                   "Symbol = '%s', location = %" PRIuMAX ",%" PRIuMAX ", record->rec_id = %" PRIu64 "\n",
                   symbol->name, (uintmax_t)start[0], (uintmax_t)start[1], record->rec_id);
         return -1;
@@ -183,8 +183,8 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
     unsigned long u;                             /* Local index variable */
     hid_t         fapl;
 
-    HDassert(filename);
-    HDassert(poll_time != 0);
+    assert(filename);
+    assert(poll_time != 0);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -194,7 +194,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Opening file: %s\n", filename);
+        fprintf(stderr, "Opening file: %s\n", filename);
 
     /* Open the file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
@@ -211,7 +211,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to read */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -219,7 +219,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Reading records\n");
+        fprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
     start_time = HDtime(NULL);
@@ -260,16 +260,16 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
             /* Check for timeout */
             if (HDtime(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
-                HDfprintf(stderr, "Reader timed out\n");
+                fprintf(stderr, "Reader timed out\n");
                 return -1;
             } /* end if */
 
             /* Pause */
-            HDsleep(poll_time);
+            sleep(poll_time);
 
             /* Retrieve and print the collection of metadata read retries */
             if (print_metadata_retries_info(fid) < 0)
-                HDfprintf(stderr, "Warning: could not obtain metadata retries info\n");
+                fprintf(stderr, "Warning: could not obtain metadata retries info\n");
 
             /* Reopen the file */
             if (H5Fclose(fid) < 0)
@@ -281,23 +281,23 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
         /* Emit informational message */
         if (verbose)
-            HDfprintf(stderr, "Checking dataset %lu\n", u);
+            fprintf(stderr, "Checking dataset %lu\n", u);
 
         /* Check dataset */
         if (check_dataset(fid, verbose, symbol, &record, mem_sid) < 0)
             return -1;
-        HDmemset(&record, 0, sizeof(record));
+        memset(&record, 0, sizeof(record));
 
         /* Check for reopen */
         iter_to_reopen--;
         if (iter_to_reopen == 0) {
             /* Emit informational message */
             if (verbose)
-                HDfprintf(stderr, "Reopening file: %s\n", filename);
+                fprintf(stderr, "Reopening file: %s\n", filename);
 
             /* Retrieve and print the collection of metadata read retries */
             if (print_metadata_retries_info(fid) < 0)
-                HDfprintf(stderr, "Warning: could not obtain metadata retries info\n");
+                fprintf(stderr, "Warning: could not obtain metadata retries info\n");
 
             /* Reopen the file */
             if (H5Fclose(fid) < 0)
@@ -310,7 +310,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Retrieve and print the collection of metadata read retries */
     if (print_metadata_retries_info(fid) < 0)
-        HDfprintf(stderr, "Warning: could not obtain metadata retries info\n");
+        fprintf(stderr, "Warning: could not obtain metadata retries info\n");
 
     /* Close file */
     if (H5Fclose(fid) < 0)
@@ -326,19 +326,19 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 static void
 usage(void)
 {
-    HDprintf("\n");
-    HDprintf("Usage error!\n");
-    HDprintf("\n");
-    HDprintf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
-    HDprintf("    [-n <# of reads between reopens>] <# of records>\n");
-    HDprintf("\n");
-    HDprintf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
-    HDprintf("between reopens ('-r 1')\n");
-    HDprintf("\n");
-    HDprintf("Note that the # of records *must* be the same as that supplied to\n");
-    HDprintf("swmr_sparse_writer\n");
-    HDprintf("\n");
-    HDexit(EXIT_FAILURE);
+    printf("\n");
+    printf("Usage error!\n");
+    printf("\n");
+    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
+    printf("    [-n <# of reads between reopens>] <# of records>\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
+    printf("between reopens ('-r 1')\n");
+    printf("\n");
+    printf("Note that the # of records *must* be the same as that supplied to\n");
+    printf("swmr_sparse_writer\n");
+    printf("\n");
+    exit(EXIT_FAILURE);
 } /* end usage() */
 
 int
@@ -360,7 +360,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of reads between reopens */
                     case 'n':
-                        reopen_count = HDatoi(argv[u + 1]);
+                        reopen_count = atoi(argv[u + 1]);
                         if (reopen_count < 0)
                             usage();
                         u += 2;
@@ -374,7 +374,7 @@ main(int argc, char *argv[])
 
                     /* # of seconds between polling */
                     case 's':
-                        poll_time = HDatoi(argv[u + 1]);
+                        poll_time = atoi(argv[u + 1]);
                         if (poll_time < 0)
                             usage();
                         u += 2;
@@ -387,7 +387,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to read */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 
@@ -398,20 +398,20 @@ main(int argc, char *argv[])
 
     /* Emit informational message */
     if (verbose) {
-        HDfprintf(stderr, "Parameters:\n");
-        HDfprintf(stderr, "\t# of seconds between polling = %d\n", poll_time);
-        HDfprintf(stderr, "\t# of reads between reopens = %d\n", reopen_count);
-        HDfprintf(stderr, "\t# of records to read = %ld\n", nrecords);
+        fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "\t# of seconds between polling = %d\n", poll_time);
+        fprintf(stderr, "\t# of reads between reopens = %d\n", reopen_count);
+        fprintf(stderr, "\t# of records to read = %ld\n", nrecords);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Generating symbol names\n");
+        fprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if (generate_symbols() < 0) {
-        HDfprintf(stderr, "Error generating symbol names!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error generating symbol names!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -421,28 +421,28 @@ main(int argc, char *argv[])
     /* Reading records from datasets */
     if (read_records(FILENAME, verbose, (unsigned long)nrecords, (unsigned)poll_time,
                      (unsigned)reopen_count) < 0) {
-        HDfprintf(stderr, "Error reading records from datasets!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error reading records from datasets!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Releasing symbols\n");
+        fprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
-        HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error releasing symbols!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Closing objects\n");
+        fprintf(stderr, "Closing objects\n");
 
     /* Close objects created */
     if (H5Tclose(symbol_tid) < 0) {
-        HDfprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(EXIT_FAILURE);
+        fprintf(stderr, "Error closing symbol datatype!\n");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

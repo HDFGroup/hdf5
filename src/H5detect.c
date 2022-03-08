@@ -43,7 +43,7 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
-/* Do NOT use HDfprintf in this file as it is not linked with the library,
+/* Do NOT use fprintf in this file as it is not linked with the library,
  * which contains the H5system.c file in which the function is defined.
  */
 #include "H5Tpublic.h"
@@ -82,8 +82,8 @@ H5_GCC_CLANG_DIAG_OFF("cast-align")
 #define H5HAVE_SIGJMP       /* sigsetjmp/siglongjmp are supported. */
 #else
 #define H5JMP_BUF           jmp_buf
-#define H5SETJMP(buf)       HDsetjmp(buf)
-#define H5LONGJMP(buf, val) HDlongjmp(buf, val)
+#define H5SETJMP(buf)       setjmp(buf)
+#define H5LONGJMP(buf, val) longjmp(buf, val)
 #endif
 
 /* ALIGNMENT and signal-handling status codes */
@@ -224,7 +224,7 @@ precision(detected_t *d)
         int            _i, _j;                                                                               \
         unsigned char *_x;                                                                                   \
                                                                                                              \
-        HDmemset(&INFO, 0, sizeof(INFO));                                                                    \
+        memset(&INFO, 0, sizeof(INFO));                                                                    \
         INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
@@ -233,16 +233,16 @@ precision(detected_t *d)
                                                                                                              \
         for (_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(DETECT_TYPE); _i++) {                    \
             _j = (*_x++) - 1;                                                                                \
-            HDassert(_j < (signed)sizeof(DETECT_TYPE));                                                      \
+            assert(_j < (signed)sizeof(DETECT_TYPE));                                                      \
             INFO.perm[_i] = _j;                                                                              \
         } /* end for */                                                                                      \
                                                                                                              \
         INFO.sign = ('U' != *(#VAR));                                                                        \
         precision(&(INFO));                                                                                  \
         ALIGNMENT(TYPE, INFO);                                                                               \
-        if (!HDstrcmp(INFO.varname, "SCHAR") || !HDstrcmp(INFO.varname, "SHORT") ||                          \
-            !HDstrcmp(INFO.varname, "INT") || !HDstrcmp(INFO.varname, "LONG") ||                             \
-            !HDstrcmp(INFO.varname, "LLONG")) {                                                              \
+        if (!strcmp(INFO.varname, "SCHAR") || !strcmp(INFO.varname, "SHORT") ||                          \
+            !strcmp(INFO.varname, "INT") || !strcmp(INFO.varname, "LONG") ||                             \
+            !strcmp(INFO.varname, "LLONG")) {                                                              \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
         }                                                                                                    \
     }
@@ -280,12 +280,12 @@ precision(detected_t *d)
         int           _i, _j, _last = (-1);                                                                  \
         const char *  _mesg;                                                                                 \
                                                                                                              \
-        HDmemset(&INFO, 0, sizeof(INFO));                                                                    \
+        memset(&INFO, 0, sizeof(INFO));                                                                    \
         INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
         /* Initialize padding mask */                                                                        \
-        HDmemset(_pad_mask, 0, sizeof(_pad_mask));                                                           \
+        memset(_pad_mask, 0, sizeof(_pad_mask));                                                           \
                                                                                                              \
         /* Padding bits.  Set a variable to 4.0, then flip each bit and see if                               \
          * the modified variable is equal ("==") to the original.  Build a                                   \
@@ -295,11 +295,11 @@ precision(detected_t *d)
          * and interfere with detection of the various properties below unless we                            \
          * know to ignore them. */                                                                           \
         _v1 = (TYPE)4.0L;                                                                                    \
-        HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                   \
+        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                   \
         for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-                HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
+                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
                 H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
@@ -312,8 +312,8 @@ precision(detected_t *d)
             _v3 = _v1;                                                                                       \
             _v1 += _v2;                                                                                      \
             _v2 /= (TYPE)256.0L;                                                                             \
-            HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                               \
-            HDmemcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                               \
+            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                               \
+            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                               \
             _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                            \
             if (_j >= 0) {                                                                                   \
                 INFO.perm[_i] = _j;                                                                          \
@@ -322,7 +322,7 @@ precision(detected_t *d)
         }                                                                                                    \
         fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);                                    \
                                                                                                              \
-        if (!HDstrcmp(_mesg, "VAX"))                                                                         \
+        if (!strcmp(_mesg, "VAX"))                                                                         \
             INFO.is_vax = TRUE;                                                                              \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
@@ -352,8 +352,8 @@ precision(detected_t *d)
         INFO.bias = find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                       \
         precision(&(INFO));                                                                                  \
         ALIGNMENT(TYPE, INFO);                                                                               \
-        if (!HDstrcmp(INFO.varname, "FLOAT") || !HDstrcmp(INFO.varname, "DOUBLE") ||                         \
-            !HDstrcmp(INFO.varname, "LDOUBLE")) {                                                            \
+        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                         \
+            !strcmp(INFO.varname, "LDOUBLE")) {                                                            \
             COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
         }                                                                                                    \
     }
@@ -389,11 +389,11 @@ precision(detected_t *d)
         char *volatile _buf    = NULL;                                                                       \
         TYPE            _val   = 1, _val2;                                                                   \
         volatile size_t _ano   = 0;                                                                          \
-        void (*_handler)(int)  = HDsignal(SIGBUS, sigbus_handler);                                           \
-        void (*_handler2)(int) = HDsignal(SIGSEGV, sigsegv_handler);                                         \
-        void (*_handler3)(int) = HDsignal(SIGILL, sigill_handler);                                           \
+        void (*_handler)(int)  = signal(SIGBUS, sigbus_handler);                                           \
+        void (*_handler2)(int) = signal(SIGSEGV, sigsegv_handler);                                         \
+        void (*_handler3)(int) = signal(SIGILL, sigill_handler);                                           \
                                                                                                              \
-        _buf = (char *)HDmalloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                \
+        _buf = (char *)malloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                                \
         if (H5SETJMP(jbuf_g))                                                                                \
             _ano++;                                                                                          \
         if (_ano < NELMTS(align_g)) {                                                                        \
@@ -404,14 +404,14 @@ precision(detected_t *d)
             /*              pointer values when pointing to non-word aligned */                              \
             /*              locations with pointers that are supposed to be */                               \
             /*              word aligned. -QAK */                                                            \
-            HDmemset(_buf, 0xff, sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                               \
+            memset(_buf, 0xff, sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);                               \
             /*How to handle VAX types?*/                                                                     \
             if (INFO.perm[0]) /* Big-Endian */                                                               \
-                HDmemcpy(_buf + align_g[_ano] + (INFO.size - ((INFO.offset + INFO.precision) / 8)),          \
+                memcpy(_buf + align_g[_ano] + (INFO.size - ((INFO.offset + INFO.precision) / 8)),          \
                          ((char *)&_val) + (INFO.size - ((INFO.offset + INFO.precision) / 8)),               \
                          (size_t)(INFO.precision / 8));                                                      \
             else /* Little-Endian */                                                                         \
-                HDmemcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
+                memcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
                          (size_t)(INFO.precision / 8));                                                      \
             _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
             H5_GCC_CLANG_DIAG_OFF("float-equal")                                                             \
@@ -425,10 +425,10 @@ precision(detected_t *d)
             (INFO.align) = 0;                                                                                \
             fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);                                \
         }                                                                                                    \
-        HDfree(_buf);                                                                                        \
-        HDsignal(SIGBUS, _handler);   /*restore original handler*/                                           \
-        HDsignal(SIGSEGV, _handler2); /*restore original handler*/                                           \
-        HDsignal(SIGILL, _handler3);  /*restore original handler*/                                           \
+        free(_buf);                                                                                        \
+        signal(SIGBUS, _handler);   /*restore original handler*/                                           \
+        signal(SIGSEGV, _handler2); /*restore original handler*/                                           \
+        signal(SIGILL, _handler3);  /*restore original handler*/                                           \
     }
 
 /*-------------------------------------------------------------------------
@@ -456,7 +456,7 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
 #endif
 
     sigsegv_handler_called_g++;
-    HDsignal(SIGSEGV, sigsegv_handler);
+    signal(SIGSEGV, sigsegv_handler);
     H5LONGJMP(jbuf_g, SIGSEGV);
 }
 
@@ -485,7 +485,7 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
 #endif
 
     sigbus_handler_called_g++;
-    HDsignal(SIGBUS, sigbus_handler);
+    signal(SIGBUS, sigbus_handler);
     H5LONGJMP(jbuf_g, SIGBUS);
 }
 
@@ -514,7 +514,7 @@ sigill_handler(int H5_ATTR_UNUSED signo)
 #endif
 
     sigill_handler_called_g++;
-    HDsignal(SIGILL, sigill_handler);
+    signal(SIGILL, sigill_handler);
     H5LONGJMP(jbuf_g, SIGILL);
 }
 
@@ -667,7 +667,7 @@ H5T__init_native(void)\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
                 d[i].offset,                            /*offset        */
                 d[i].precision);                        /*precision        */
-        /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
+        /*assert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
 
         if (0 == d[i].msize) {
             /* The part unique to fixed point types */
@@ -704,10 +704,10 @@ H5T__init_native(void)\n\
                 (unsigned long)(d[i].align));
 
         /* Variables for alignment of compound datatype */
-        if (!HDstrcmp(d[i].varname, "SCHAR") || !HDstrcmp(d[i].varname, "SHORT") ||
-            !HDstrcmp(d[i].varname, "INT") || !HDstrcmp(d[i].varname, "LONG") ||
-            !HDstrcmp(d[i].varname, "LLONG") || !HDstrcmp(d[i].varname, "FLOAT") ||
-            !HDstrcmp(d[i].varname, "DOUBLE") || !HDstrcmp(d[i].varname, "LDOUBLE")) {
+        if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
+            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
+            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
+            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
             fprintf(rawoutstream, "    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }
@@ -806,7 +806,7 @@ iprint(detected_t *d)
         for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
             fprintf(rawoutstream, "%4d", d->perm[i]);
             if (i > pass * 4)
-                HDfputs("     ", stdout);
+                fputs("     ", stdout);
             if (!i)
                 break;
         }
@@ -821,31 +821,31 @@ iprint(detected_t *d)
 
             for (j = 8; j > 0; --j) {
                 if (k == d->sign && d->msize) {
-                    HDfputc('S', rawoutstream);
+                    fputc('S', rawoutstream);
                 }
                 else if (k >= d->epos && k < d->epos + d->esize) {
-                    HDfputc('E', rawoutstream);
+                    fputc('E', rawoutstream);
                 }
                 else if (k >= d->mpos && k < d->mpos + d->msize) {
-                    HDfputc('M', rawoutstream);
+                    fputc('M', rawoutstream);
                 }
                 else if (d->msize) {
-                    HDfputc('?', rawoutstream); /*unknown floating point bit */
+                    fputc('?', rawoutstream); /*unknown floating point bit */
                 }
                 else if (d->sign) {
-                    HDfputc('I', rawoutstream);
+                    fputc('I', rawoutstream);
                 }
                 else {
-                    HDfputc('U', rawoutstream);
+                    fputc('U', rawoutstream);
                 }
                 --k;
             }
             if (i > pass * 4)
-                HDfputc(' ', rawoutstream);
+                fputc(' ', rawoutstream);
             if (!i)
                 break;
         }
-        HDfputc('\n', rawoutstream);
+        fputc('\n', rawoutstream);
         if (!pass)
             break;
     }
@@ -919,7 +919,7 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char 
     unsigned char  aa, bb;
 
     for (i = 0; i < nbytes; i++) {
-        HDassert(perm[i] < (int)nbytes);
+        assert(perm[i] < (int)nbytes);
         if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
             (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
             unsigned int j;
@@ -929,11 +929,11 @@ bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char 
                     return i * 8 + j;
             }
             fprintf(stderr, "INTERNAL ERROR");
-            HDabort();
+            abort();
         }
     }
     fprintf(stderr, "INTERNAL ERROR");
-    HDabort();
+    abort();
     return 0;
 }
 
@@ -985,7 +985,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
              *          It could have some other endianness and fall into this
              *          case - JKM & QAK)
              */
-            HDassert(0 == n % 2);
+            assert(0 == n % 2);
             if (mesg)
                 *mesg = "VAX";
             for (i = 0; i < n; i += 2) {
@@ -996,7 +996,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
     else {
         fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n", n);
-        HDexit(1);
+        exit(1);
     }
 }
 
@@ -1096,7 +1096,7 @@ print_header(void)
 {
 
     time_t      now = HDtime(NULL);
-    struct tm * tm  = HDlocaltime(&now);
+    struct tm * tm  = localtime(&now);
     char        real_name[30];
     char        host_name[256];
     int         i;
@@ -1154,13 +1154,13 @@ bit.\n";
         size_t n;
         char * comma;
         if ((pwd = HDgetpwuid(HDgetuid()))) {
-            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
+            if ((comma = strchr(pwd->pw_gecos, ','))) {
                 n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
-                HDstrncpy(real_name, pwd->pw_gecos, n);
+                strncpy(real_name, pwd->pw_gecos, n);
                 real_name[n] = '\0';
             }
             else {
-                HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
                 real_name[sizeof(real_name) - 1] = '\0';
             }
         }
@@ -1186,7 +1186,7 @@ bit.\n";
      * The file header: warning, copyright notice, build information.
      */
     fprintf(rawoutstream, "/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
+    fputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
     fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
             1900 + tm->tm_year);
@@ -1196,17 +1196,17 @@ bit.\n";
             fprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if (pwd)
-            HDfputs(pwd->pw_name, rawoutstream);
+            fputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
             fprintf(rawoutstream, "@%s", host_name);
         if (real_name[0])
             fprintf(rawoutstream, ">");
-        HDfputc('\n', rawoutstream);
+        fputc('\n', rawoutstream);
     }
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
-        HDfputc(*s, rawoutstream);
+        fputc(*s, rawoutstream);
         if ('\n' == *s && s[1])
             fprintf(rawoutstream, " *\t\t\t");
     }
@@ -1217,7 +1217,7 @@ bit.\n";
 
     fprintf(rawoutstream, " *\n *");
     for (i = 0; i < 73; i++)
-        HDfputc('-', rawoutstream);
+        fputc('-', rawoutstream);
     fprintf(rawoutstream, "\n */\n\n");
 }
 
@@ -1458,7 +1458,7 @@ verify_signal_handlers(int signum, void (*handler)(int))
 #elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__) /* GCC */
     return 0;
 #endif
-    void (*save_handler)(int) = HDsignal(signum, handler);
+    void (*save_handler)(int) = signal(signum, handler);
     volatile int i, val;
     int          ntries     = 5;
     volatile int nfailures  = 0;
@@ -1469,7 +1469,7 @@ verify_signal_handlers(int signum, void (*handler)(int))
         if (val == 0) {
             /* send self the signal to trigger the handler */
             signal_handler_tested_g++;
-            HDraise(signum);
+            raise(signum);
             /* Should not reach here. Record error. */
             nfailures++;
         }
@@ -1485,7 +1485,7 @@ verify_signal_handlers(int signum, void (*handler)(int))
         }
     }
     /* restore save handler, check results and report failures */
-    HDsignal(signum, save_handler);
+    signal(signum, save_handler);
     if (nfailures > 0 || nsuccesses != ntries) {
         fprintf(stderr,
                 "verify_signal_handlers for signal %d did %d tries. "
@@ -1521,7 +1521,7 @@ main(int argc, char *argv[])
     /* First check if filename is string "NULL" */
     if (fname != NULL) {
         /* binary output */
-        if ((f = HDfopen(fname, "w")) != NULL)
+        if ((f = fopen(fname, "w")) != NULL)
             rawoutstream = f;
     }
     if (!rawoutstream)
@@ -1558,7 +1558,7 @@ main(int argc, char *argv[])
     print_results(nd_g, d_g, na_g, m_g);
 
     if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+        if (fclose(rawoutstream))
             fprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;

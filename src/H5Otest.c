@@ -118,7 +118,7 @@ H5O__is_attr_dense_test(hid_t oid)
     /* Check if dense storage is being used */
     if (H5F_addr_defined(ainfo.fheap_addr)) {
         /* Check for any messages in object header */
-        HDassert(H5O__msg_count_real(oh, H5O_MSG_ATTR) == 0);
+        assert(H5O__msg_count_real(oh, H5O_MSG_ATTR) == 0);
 
         ret_value = TRUE;
     } /* end if */
@@ -195,7 +195,7 @@ H5O__is_attr_empty_test(hid_t oid)
             /* Check for using dense storage */
             if (H5F_addr_defined(ainfo.fheap_addr)) {
                 /* Check for any messages in object header */
-                HDassert(nattrs == 0);
+                assert(nattrs == 0);
 
                 /* Set metadata tag in API context */
                 H5_BEGIN_TAG(loc->addr);
@@ -215,10 +215,10 @@ H5O__is_attr_empty_test(hid_t oid)
             } /* end if */
 
             /* Verify that attribute count in object header is correct */
-            HDassert(nattrs == ainfo.nattrs);
+            assert(nattrs == ainfo.nattrs);
         } /* end if */
         else
-            HDassert(nattrs == 0);
+            assert(nattrs == 0);
     } /* end if */
 
     /* Set the return value */
@@ -297,7 +297,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
         /* Check for using dense storage */
         if (H5F_addr_defined(ainfo.fheap_addr)) {
             /* Check for any messages in object header */
-            HDassert(obj_nattrs == 0);
+            assert(obj_nattrs == 0);
 
             /* Set metadata tag in API context */
             H5_BEGIN_TAG(loc->addr);
@@ -315,7 +315,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
         } /* end if */
 
         /* Verify that attribute count in object header is correct */
-        HDassert(obj_nattrs == ainfo.nattrs);
+        assert(obj_nattrs == ainfo.nattrs);
     } /* end if */
 
     /* Set the number of attributes */
@@ -536,7 +536,7 @@ H5O__expunge_chunks_test(const H5O_loc_t *loc)
 
     /* Safety check */
     nchunks = oh->nchunks;
-    HDassert(0 < nchunks && nchunks < NELMTS(chk_addr));
+    assert(0 < nchunks && nchunks < NELMTS(chk_addr));
 
     /* Iterate over all the chunks, saving the chunk addresses */
     for (u = 0; u < oh->nchunks; u++)
@@ -586,8 +586,8 @@ H5O__get_rc_test(const H5O_loc_t *loc, unsigned *rc)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(rc);
+    assert(loc);
+    assert(rc);
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))

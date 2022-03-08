@@ -77,8 +77,8 @@ H5FS__get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(frsp);
-    HDassert(cparam);
+    assert(frsp);
+    assert(cparam);
 
     cparam->client         = frsp->client;
     cparam->shrink_percent = frsp->shrink_percent;
@@ -110,8 +110,8 @@ H5FS__cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(cparam1);
-    HDassert(cparam2);
+    assert(cparam1);
+    assert(cparam2);
 
     if (cparam1->client < cparam2->client)
         HGOTO_DONE(-1)

@@ -151,8 +151,8 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(parent);
-    HDassert(pentry);
+    assert(parent);
+    assert(pentry);
 
     /* Add parent to the list of parents */
     if (NULL == pentry->parents)
@@ -167,7 +167,7 @@ H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     /* Add flush dependency on parent */
     if (pentry->nchildren > 0) {
         /* Sanity check */
-        HDassert(H5F_addr_defined(pentry->addr));
+        assert(H5F_addr_defined(pentry->addr));
 
         if (H5AC_create_flush_dependency(parent, pentry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "unable to set flush dependency on proxy entry")
@@ -199,9 +199,9 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(pentry);
-    HDassert(pentry->parents);
-    HDassert(parent);
+    assert(pentry);
+    assert(pentry->parents);
+    assert(parent);
 
     /* Remove parent from skip list */
     if (NULL == (rem_parent = (H5AC_info_t *)H5SL_remove(pentry->parents, &parent->addr)))
@@ -212,7 +212,7 @@ H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *_parent)
     /* Shut down the skip list, if this is the last parent */
     if (0 == H5SL_count(pentry->parents)) {
         /* Sanity check */
-        HDassert(0 == pentry->nchildren);
+        assert(0 == pentry->nchildren);
 
         if (H5SL_close(pentry->parents) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CLOSEERROR, FAIL, "can't close proxy parent skip list")
@@ -280,8 +280,8 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, void *child)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(pentry);
-    HDassert(child);
+    assert(pentry);
+    assert(child);
 
     /* Check for first child */
     if (0 == pentry->nchildren) {
@@ -373,8 +373,8 @@ H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(pentry);
-    HDassert(child);
+    assert(pentry);
+    assert(child);
 
     /* Remove flush dependency on proxy entry */
     if (H5AC_destroy_flush_dependency(pentry, child) < 0)
@@ -424,11 +424,11 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(pentry);
-    HDassert(NULL == pentry->parents);
-    HDassert(0 == pentry->nchildren);
-    HDassert(0 == pentry->ndirty_children);
-    HDassert(0 == pentry->nunser_children);
+    assert(pentry);
+    assert(NULL == pentry->parents);
+    assert(0 == pentry->nchildren);
+    assert(0 == pentry->ndirty_children);
+    assert(0 == pentry->nunser_children);
 
     /* Free the proxy entry object */
     pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
@@ -454,7 +454,7 @@ H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image_len);
+    assert(image_len);
 
     /* Set the image length size to 1 byte */
     *image_len = 1;
@@ -483,7 +483,7 @@ H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
 
         /* Should never be invoked */
-        HDassert(0 && "Invalid callback?!?");
+        assert(0 && "Invalid callback?!?");
 
     HERROR(H5E_CACHE, H5E_CANTSERIALIZE, "called unreachable fcn.");
 
@@ -511,7 +511,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(pentry);
+    assert(pentry);
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -521,7 +521,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
 #else  /* NDEBUG */
-            HDassert(0 && "Invalid action?!?");
+            assert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
             break;
 
@@ -529,28 +529,28 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid notify action from metadata cache")
 #else  /* NDEBUG */
-            HDassert(0 && "Invalid action?!?");
+            assert(0 && "Invalid action?!?");
 #endif /* NDEBUG */
             break;
 
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* Sanity checks */
-            HDassert(0 == pentry->ndirty_children);
-            HDassert(0 == pentry->nunser_children);
+            assert(0 == pentry->ndirty_children);
+            assert(0 == pentry->nunser_children);
 
             /* No action */
             break;
 
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             /* Sanity checks */
-            HDassert(pentry->ndirty_children > 0);
+            assert(pentry->ndirty_children > 0);
 
             /* No action */
             break;
 
         case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
             /* Sanity checks */
-            HDassert(0 == pentry->ndirty_children);
+            assert(0 == pentry->ndirty_children);
 
             /* No action */
             break;
@@ -567,7 +567,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
             /* Sanity check */
-            HDassert(pentry->ndirty_children > 0);
+            assert(pentry->ndirty_children > 0);
 
             /* Decrement # of dirty children */
             pentry->ndirty_children--;
@@ -590,7 +590,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
             /* Sanity check */
-            HDassert(pentry->nunser_children > 0);
+            assert(pentry->nunser_children > 0);
 
             /* Decrement # of unserialized children */
             pentry->nunser_children--;
@@ -605,7 +605,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "unknown notify action from metadata cache")
 #else  /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+            assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
     }  /* end switch */
 

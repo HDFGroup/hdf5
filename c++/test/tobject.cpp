@@ -317,7 +317,7 @@ test_get_objname_ontypes()
         // Name this datatype
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
-        verify_val(name_len, static_cast<ssize_t>(HDstrlen("/typetests/IntType NATIVE_INT")),
+        verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
                    "DataType::getObjName", __LINE__, __FILE__);
         verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
@@ -552,8 +552,8 @@ test_getobjectinfo_same_file()
         Group grp2(file1.createGroup(GROUP2NAME));
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -575,8 +575,8 @@ test_getobjectinfo_same_file()
         grp2 = file2.openGroup(GROUP2NAME);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         // Query the info of two groups and verify that they have the same
         // file number
@@ -585,8 +585,8 @@ test_getobjectinfo_same_file()
         verify_val(oinfo1.fileno, oinfo2.fileno, "file number from getObjinfo", __LINE__, __FILE__);
 
         // Reset object info
-        HDmemset(&oinfo1, 0, sizeof(oinfo1));
-        HDmemset(&oinfo2, 0, sizeof(oinfo2));
+        memset(&oinfo1, 0, sizeof(oinfo1));
+        memset(&oinfo2, 0, sizeof(oinfo2));
 
         file1.getObjinfo(GROUP1NAME, oinfo1);
         file1.getObjinfo(GROUP2NAME, oinfo2);
@@ -760,5 +760,5 @@ test_object()
 extern "C" void
 cleanup_object()
 {
-    HDremove(FILE_OBJECTS.c_str());
+    remove(FILE_OBJECTS.c_str());
 } // cleanup_objects

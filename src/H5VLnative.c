@@ -237,7 +237,7 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(conn_cls);
+    assert(conn_cls);
 
     /* Retrieve the native VOL connector class */
     *conn_cls = &H5VL_native_cls_g;
@@ -263,7 +263,7 @@ H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(cap_flags);
+    assert(cap_flags);
 
     /* Set the flags from the connector's field */
     *cap_flags = H5VL_native_cls_g.cap_flags;
@@ -292,7 +292,7 @@ H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(addr_len);
+    assert(addr_len);
 
     /* Get object type */
     if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
@@ -330,8 +330,8 @@ H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, size_t *addr_len)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(obj);
-    HDassert(addr_len);
+    assert(obj);
+    assert(addr_len);
 
     /* Retrieve file from the VOL object */
     if (H5VL_native_get_file_struct(obj, obj_type, &file) < 0)
@@ -389,7 +389,7 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
                         "can't determine if VOL object is native connector object")
 
-        HDassert(is_native_vol_obj && "not a native VOL connector object");
+        assert(is_native_vol_obj && "not a native VOL connector object");
     }
 #endif
 
@@ -420,15 +420,15 @@ H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_toke
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(obj);
-    HDassert(token);
+    assert(obj);
+    assert(token);
 
     /* Get the length of an haddr_t in the file */
     if (H5VL__native_get_file_addr_len(obj, obj_type, &addr_len) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "couldn't get length of haddr_t from VOL object")
 
     /* Ensure that token is initialized */
-    HDmemset(token, 0, sizeof(H5O_token_t));
+    memset(token, 0, sizeof(H5O_token_t));
 
     /* Encode token */
     p = (uint8_t *)token;
@@ -483,7 +483,7 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL,
                         "can't determine if VOL object is native connector object")
 
-        HDassert(is_native_vol_obj && "not a native VOL connector object");
+        assert(is_native_vol_obj && "not a native VOL connector object");
     }
 #endif
 
@@ -514,8 +514,8 @@ H5VL_native_token_to_addr(void *obj, H5I_type_t obj_type, H5O_token_t token, had
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(obj);
-    HDassert(addr);
+    assert(obj);
+    assert(addr);
 
     /* Get the length of an haddr_t in the file */
     if (H5VL__native_get_file_addr_len(obj, obj_type, &addr_len) < 0)

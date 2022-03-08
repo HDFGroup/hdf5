@@ -34,17 +34,17 @@
 /* Stream macros */
 #define FLUSHSTREAM(S)                                                                                       \
     if (S != NULL)                                                                                           \
-    HDfflush(S)
+    fflush(S)
 #define PRINTSTREAM(S, F, ...)                                                                               \
     if (S != NULL)                                                                                           \
-    HDfprintf(S, F, __VA_ARGS__)
+    fprintf(S, F, __VA_ARGS__)
 #define PRINTVALSTREAM(S, V)                                                                                 \
     if (S != NULL)                                                                                           \
-    HDfprintf(S, V)
+    fprintf(S, V)
 #define PUTSTREAM(X, S)                                                                                      \
     do {                                                                                                     \
         if (S != NULL)                                                                                       \
-            HDfputs(X, S);                                                                                   \
+            fputs(X, S);                                                                                   \
     } while (0)
 
 /*

@@ -92,17 +92,17 @@ H5G_rootof(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Walk to top of mounted files */
     while (f->parent)
         f = f->parent;
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->root_grp);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->root_grp);
 
     /* Check to see if the root group was opened through a different
      * "top" file, and switch it to point at the current "top" file.
@@ -143,9 +143,9 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->sblock);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->sblock);
 
     /* Check if the root group is already initialized */
     if (f->shared->root_grp)
@@ -194,7 +194,7 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
         sblock_dirty = TRUE;
 
         /* Create the root group symbol table entry */
-        HDassert(!f->shared->sblock->root_ent);
+        assert(!f->shared->sblock->root_ent);
         if (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2) {
             /* Allocate space for the root group symbol table entry */
             if (NULL == (f->shared->sblock->root_ent = (H5G_entry_t *)H5MM_calloc(sizeof(H5G_entry_t))))
@@ -288,7 +288,7 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
      * exists.  Don't count either the superblock extension or the root group
      * in the number of open objects in the file.
      */
-    HDassert((1 == f->nopen_objs) || (2 == f->nopen_objs && HADDR_UNDEF != f->shared->sblock->ext_addr));
+    assert((1 == f->nopen_objs) || (2 == f->nopen_objs && HADDR_UNDEF != f->shared->sblock->ext_addr));
     f->nopen_objs--;
 
 done:
@@ -335,8 +335,8 @@ H5G_root_free(H5G_t *grp)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(grp && grp->shared);
-    HDassert(grp->shared->fo_count > 0);
+    assert(grp && grp->shared);
+    assert(grp->shared->fo_count > 0);
 
     /* Free the path */
     H5G_name_free(&(grp->path));
@@ -368,12 +368,12 @@ H5G_root_loc(H5F_t *f, H5G_loc_t *loc)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(loc);
+    assert(f);
+    assert(loc);
 
     /* Retrieve the root group for the file */
     root_grp = H5G_rootof(f);
-    HDassert(root_grp);
+    assert(root_grp);
 
     /* Build the group location for the root group */
     if (NULL == (loc->oloc = H5G_oloc(root_grp)))

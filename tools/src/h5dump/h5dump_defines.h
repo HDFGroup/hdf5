@@ -33,12 +33,12 @@
 
 #define end_obj(obj, end)                                                                                    \
     do {                                                                                                     \
-        if (HDstrlen(end)) {                                                                                 \
+        if (strlen(end)) {                                                                                 \
             PRINTSTREAM(rawoutstream, "%s", end);                                                            \
-            if (HDstrlen(obj))                                                                               \
+            if (strlen(obj))                                                                               \
                 PRINTVALSTREAM(rawoutstream, " ");                                                           \
         }                                                                                                    \
-        if (HDstrlen(obj))                                                                                   \
+        if (strlen(obj))                                                                                   \
             PRINTSTREAM(rawoutstream, "%s", obj);                                                            \
     } while (0);
 

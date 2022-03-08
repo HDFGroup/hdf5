@@ -107,8 +107,8 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(_data);
-    HDassert(_len > 0);
+    assert(_data);
+    assert(_len > 0);
 
     /* Compute checksum for pairs of bytes */
     /* (the magic "360" value is is the largest number of sums that can be
@@ -232,8 +232,8 @@ H5_checksum_crc(const void *_data, size_t len)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(_data);
-    HDassert(len > 0);
+    assert(_data);
+    assert(len > 0);
 
     FUNC_LEAVE_NOAPI(H5__checksum_crc_update((uint32_t)0xffffffffL, (const uint8_t *)_data, len) ^
                      0xffffffffL)
@@ -385,8 +385,8 @@ H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(key);
-    HDassert(length > 0);
+    assert(key);
+    assert(length > 0);
 
     /* Set up the internal state */
     a = b = c = 0xdeadbeef + ((uint32_t)length) + initval;
@@ -463,7 +463,7 @@ H5_checksum_lookup3(const void *key, size_t length, uint32_t initval)
         case 0:
             goto done;
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     }
 
     H5_lookup3_final(a, b, c);
@@ -492,8 +492,8 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(data);
-    HDassert(len > 0);
+    assert(data);
+    assert(len > 0);
 
     /* Choose the appropriate checksum routine */
     /* (use Bob Jenkin's "lookup3" algorithm for all buffer sizes) */
@@ -524,7 +524,7 @@ H5_hash_string(const char *str)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(str);
+    assert(str);
 
     while ((c = *str++))
         hash = ((hash << 5) + hash) + (uint32_t)c; /* hash * 33 + c */

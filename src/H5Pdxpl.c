@@ -470,8 +470,8 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(bkgr_buf_type);
-    HDassert(size);
+    assert(bkgr_buf_type);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode background buffer type */
@@ -507,9 +507,9 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(bkgr_buf_type);
+    assert(pp);
+    assert(*pp);
+    assert(bkgr_buf_type);
 
     /* Decode background buffer type */
     *bkgr_buf_type = (H5T_bkg_t) * (*pp)++;
@@ -541,8 +541,8 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(btree_split_ratio);
-    HDassert(size);
+    assert(btree_split_ratio);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size of a double*/
@@ -592,9 +592,9 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(btree_split_ratio);
+    assert(pp);
+    assert(*pp);
+    assert(btree_split_ratio);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -632,7 +632,7 @@ H5P__dxfr_xform_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -664,7 +664,7 @@ H5P__dxfr_xform_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -703,7 +703,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Check for data transform set */
     if (NULL != data_xform_prop) {
@@ -712,7 +712,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
 
         /* Get the transform string expression size */
-        len = HDstrlen(pexp) + 1;
+        len = strlen(pexp) + 1;
     } /* end if */
 
     if (NULL != *pp) {
@@ -722,13 +722,13 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
         /* encode the length of the prefix */
         enc_value = (uint64_t)len;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         if (NULL != data_xform_prop) {
             /* Sanity check */
-            HDassert(pexp);
+            assert(pexp);
 
             /* Copy the expression into the buffer */
             H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
@@ -774,14 +774,14 @@ H5P__dxfr_xform_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(data_xform_prop);
+    assert(pp);
+    assert(*pp);
+    assert(data_xform_prop);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the length of xform expression */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     len = (size_t)enc_value;
 
@@ -818,7 +818,7 @@ H5P__dxfr_xform_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 
     FUNC_ENTER_STATIC
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
@@ -849,7 +849,7 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
@@ -885,9 +885,9 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(xform1);
-    HDassert(xform2);
-    HDassert(size == sizeof(H5Z_data_xform_t *));
+    assert(xform1);
+    assert(xform2);
+    assert(size == sizeof(H5Z_data_xform_t *));
 
     /* Check for a property being set */
     if (*xform1 == NULL && *xform2 != NULL)
@@ -896,7 +896,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
         HGOTO_DONE(1);
 
     if (*xform1) {
-        HDassert(*xform2);
+        assert(*xform2);
 
         /* Get the transform expressions */
         pexp1 = H5Z_xform_extract_xform_str(*xform1);
@@ -909,8 +909,8 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
             HGOTO_DONE(1);
 
         if (pexp1) {
-            HDassert(pexp2);
-            ret_value = HDstrcmp(pexp1, pexp2);
+            assert(pexp2);
+            ret_value = strcmp(pexp1, pexp2);
         } /* end if */
     }     /* end if */
 
@@ -938,7 +938,7 @@ H5P__dxfr_xform_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
 
     FUNC_ENTER_STATIC
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
@@ -1050,9 +1050,9 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
 
     /* Copy into application buffer */
-    len = HDstrlen(pexp);
+    len = strlen(pexp);
     if (expression) {
-        HDstrncpy(expression, pexp, size);
+        strncpy(expression, pexp, size);
         if (len >= size)
             expression[size - 1] = '\0';
     } /* end if */
@@ -1555,7 +1555,7 @@ H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(plist);
+    assert(plist);
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_VLEN_ALLOC_NAME, &alloc_func) < 0)
@@ -1759,8 +1759,8 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(xfer_mode);
-    HDassert(size);
+    assert(xfer_mode);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode I/O transfer mode */
@@ -1796,9 +1796,9 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(xfer_mode);
+    assert(pp);
+    assert(*pp);
+    assert(xfer_mode);
 
     /* Decode I/O transfer mode */
     *xfer_mode = (H5FD_mpio_xfer_t) * (*pp)++;
@@ -1831,8 +1831,8 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(coll_opt);
-    HDassert(size);
+    assert(coll_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O collective optimization property */
@@ -1869,9 +1869,9 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(coll_opt);
+    assert(pp);
+    assert(*pp);
+    assert(coll_opt);
 
     /* Decode MPI-I/O collective optimization mode */
     *coll_opt = (H5FD_mpio_collective_opt_t) * (*pp)++;
@@ -1904,8 +1904,8 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(chunk_opt);
-    HDassert(size);
+    assert(chunk_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O chunk optimization property */
@@ -1941,9 +1941,9 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(chunk_opt);
+    assert(pp);
+    assert(*pp);
+    assert(chunk_opt);
 
     /* Decode MPI-I/O chunk optimization mode */
     *chunk_opt = (H5FD_mpio_chunk_opt_t) * (*pp)++;
@@ -2085,8 +2085,8 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(check);
-    HDassert(size);
+    assert(check);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode EDC property */
@@ -2122,9 +2122,9 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(check);
+    assert(pp);
+    assert(*pp);
+    assert(check);
 
     /* Decode EDC property */
     *check = (H5Z_EDC_t) * (*pp)++;
@@ -2195,9 +2195,9 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(space1);
-    HDassert(space1);
-    HDassert(size == sizeof(H5S_t *));
+    assert(space1);
+    assert(space1);
+    assert(size == sizeof(H5S_t *));
 
     /* Check for a property being set */
     if (*space1 == NULL && *space2 != NULL)
@@ -2206,7 +2206,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
         HGOTO_DONE(1);
 
     if (*space1) {
-        HDassert(*space2);
+        assert(*space2);
 
         /* Compare the extents of the dataspaces */
         /* (Error & not-equal count the same) */

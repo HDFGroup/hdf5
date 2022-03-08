@@ -71,9 +71,9 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 
     const char *string = " ID reference count: ";
     for (i = 0; i < T_NUMCLASSES; i++) {
-        HDfprintf(stderr, "%s%s", IDNAME[i], string);
+        fprintf(stderr, "%s%s", IDNAME[i], string);
         n = (int)(strlen(IDNAME[i]) + strlen(string));
-        HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
+        fprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
 
@@ -96,15 +96,15 @@ main(void)
     TESTING("library shutdown with reference count > 1");
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
-        HDputs("\n -- SKIPPED for incompatible VFD --");
+    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split")) {
+        puts("\n -- SKIPPED for incompatible VFD --");
         return 0;
     }
 
@@ -176,7 +176,7 @@ main(void)
 
     RAND_INC(T_ESTACK)
 
-    HDsignal(SIGABRT, &Abrt_Handler);
+    signal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
         TEST_ERROR
@@ -195,7 +195,7 @@ main(void)
 
 error:
 
-    HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
+    puts("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
     return 1;
 }

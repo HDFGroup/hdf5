@@ -97,9 +97,9 @@ test_unregister_filters(hid_t fapl_id)
     TESTING("Unregistering filter");
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(DSET_DIM1, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(DSET_DIM1, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         buf[i] = buf_data + (i * DSET_DIM2);
@@ -136,7 +136,7 @@ test_unregister_filters(hid_t fapl_id)
 
     /* Create multiple groups under the main group */
     for (i = 0; i < GROUP_ITERATION; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group_%d", i);
+        snprintf(group_name, sizeof(group_name), "group_%d", i);
         if ((gid_loop = H5Gcreate2(gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid_loop) < 0)
@@ -155,7 +155,7 @@ test_unregister_filters(hid_t fapl_id)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -206,7 +206,7 @@ test_unregister_filters(hid_t fapl_id)
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -240,8 +240,8 @@ test_unregister_filters(hid_t fapl_id)
     if (H5Fclose(fid2) < 0)
         goto error;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return SUCCEED;
@@ -260,8 +260,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return FAIL;
 }
@@ -298,21 +298,21 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All filter unregistration tests passed.\n");
+    printf("All filter unregistration tests passed.\n");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

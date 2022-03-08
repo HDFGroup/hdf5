@@ -211,9 +211,9 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(entry_ptr->prefetched);
+    assert(entry_ptr);
+    assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(entry_ptr->prefetched);
 
     switch (action) {
         case H5C_NOTIFY_ACTION_AFTER_INSERT:
@@ -233,11 +233,11 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 H5C_cache_entry_t *parent_ptr;
 
                 /* Sanity checks */
-                HDassert(entry_ptr->flush_dep_parent);
+                assert(entry_ptr->flush_dep_parent);
                 parent_ptr = entry_ptr->flush_dep_parent[u];
-                HDassert(parent_ptr);
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                HDassert(parent_ptr->flush_dep_nchildren > 0);
+                assert(parent_ptr);
+                assert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                assert(parent_ptr->flush_dep_nchildren > 0);
 
                 /* Destroy flush dependency with flush dependency parent */
                 if (H5C_destroy_flush_dependency(parent_ptr, entry_ptr) < 0)
@@ -250,7 +250,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                      * field to reflect the destruction of the flush
                      * dependency relationship.
                      */
-                    HDassert(parent_ptr->fd_child_count > 0);
+                    assert(parent_ptr->fd_child_count > 0);
                     (parent_ptr->fd_child_count)--;
                 } /* end if */
             }     /* end for */
@@ -289,17 +289,17 @@ H5C__prefetched_entry_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(entry_ptr->prefetched);
+    assert(entry_ptr);
+    assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(entry_ptr->prefetched);
 
     /* Release array for flush dependency parent addresses */
     if (entry_ptr->fd_parent_addrs != NULL) {
-        HDassert(entry_ptr->fd_parent_count > 0);
+        assert(entry_ptr->fd_parent_count > 0);
         entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_xfree((void *)entry_ptr->fd_parent_addrs);
     } /* end if */
     else
-        HDassert(entry_ptr->fd_parent_count == 0);
+        assert(entry_ptr->fd_parent_count == 0);
 
     if (entry_ptr->image_ptr != NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "prefetched entry image buffer still attached?")

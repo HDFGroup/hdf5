@@ -1446,7 +1446,7 @@ h5pset_fapl_split_c(hid_t_f *prp_id, int_f *meta_len, _fcd meta_ext, hid_t_f *me
         return ret_value;
     c_raw_ext = (char *)HD5f2cstring(raw_ext, (size_t)*raw_len);
     if (c_raw_ext == NULL) {
-        HDfree(c_meta_ext);
+        free(c_meta_ext);
         return ret_value;
     }
 
@@ -1463,8 +1463,8 @@ h5pset_fapl_split_c(hid_t_f *prp_id, int_f *meta_len, _fcd meta_ext, hid_t_f *me
     ret_value = 0;
 
 DONE:
-    HDfree(c_meta_ext);
-    HDfree(c_raw_ext);
+    free(c_meta_ext);
+    free(c_raw_ext);
     return ret_value;
 }
 
@@ -1512,8 +1512,8 @@ h5pget_fapl_split_c(hid_t_f *prp_id, size_t_f *meta_ext_size, _fcd meta_ext, hid
 
     c_meta_ext_size = (size_t)*meta_ext_size;
     c_raw_ext_size  = (size_t)*raw_ext_size;
-    c_meta_ext      = (char *)HDmalloc(sizeof(char) * c_meta_ext_size);
-    c_raw_ext       = (char *)HDmalloc(sizeof(char) * c_raw_ext_size);
+    c_meta_ext      = (char *)malloc(sizeof(char) * c_meta_ext_size);
+    c_raw_ext       = (char *)malloc(sizeof(char) * c_raw_ext_size);
     if (c_meta_ext == NULL || c_raw_ext == NULL)
         return ret_value;
 
@@ -1727,7 +1727,7 @@ h5pset_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_nelmt
     unsigned int *c_cd_values;
     unsigned      i;
 
-    c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts);
+    c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts);
     if (!c_cd_values)
         return ret_value;
     for (i = 0; i < c_cd_nelmts; i++)
@@ -1743,7 +1743,7 @@ h5pset_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_nelmt
     ret_value = 0;
 
 DONE:
-    HDfree(c_cd_values);
+    free(c_cd_values);
     return ret_value;
 }
 
@@ -1823,10 +1823,10 @@ h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *flags, size_t_f *c
 
     c_cd_nelmts = (size_t)*cd_nelmts;
 
-    if (NULL == (c_name = (char *)HDmalloc((size_t)*namelen + 1)))
+    if (NULL == (c_name = (char *)malloc((size_t)*namelen + 1)))
         goto DONE;
 
-    if (NULL == (c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts)))
+    if (NULL == (c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts)))
         goto DONE;
 
     /*
@@ -1848,9 +1848,9 @@ h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *flags, size_t_f *c
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_cd_values)
-        HDfree(c_cd_values);
+        free(c_cd_values);
     return ret_value;
 }
 
@@ -1906,7 +1906,7 @@ h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, off_t_f *offset, h
     ret_value = 0;
 
 DONE:
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -1991,7 +1991,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
      * Allocate memory to store the name of the external file.
      */
     if (c_namelen)
-        c_name = (char *)HDmalloc(c_namelen + 1);
+        c_name = (char *)malloc(c_namelen + 1);
     if (c_name == NULL)
         return ret_value;
 
@@ -2015,7 +2015,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
     ret_value = 0;
 
 DONE:
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -2744,7 +2744,7 @@ h5pcreate_class_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls, H5P
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -2787,7 +2787,7 @@ h5pregister_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void H5_
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -2830,7 +2830,7 @@ h5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void H5_
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -2875,7 +2875,7 @@ h5pexist_c(hid_t_f *cls, _fcd name, int_f *name_len)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 /****if* H5Pf/h5pisa_class_c
@@ -2959,7 +2959,7 @@ h5pget_size_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 /****if* H5Pf/h5pget_nprops_c
@@ -3083,7 +3083,7 @@ h5pcopy_prop_c(hid_t_f *dst_id, hid_t_f *src_id, _fcd name, int_f *name_len)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 /****if* H5Pf/h5premove_c
@@ -3126,7 +3126,7 @@ h5premove_c(hid_t_f *plid, _fcd name, int_f *name_len)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 /****if* H5Pf/h5punregister_c
@@ -3169,7 +3169,7 @@ h5punregister_c(hid_t_f *cls, _fcd name, int_f *name_len)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 /****if* H5Pf/h5pclose_class_c
@@ -3240,7 +3240,7 @@ h5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
         goto DONE;
 
     HD5packFstring(c_name, _fcdtocp(name), (size_t)*name_len);
-    ret_value = (int_f)HDstrlen(c_name);
+    ret_value = (int_f)strlen(c_name);
     H5free_memory(c_name);
 
 DONE:
@@ -3286,7 +3286,7 @@ h5pset_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -3330,7 +3330,7 @@ h5pget_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 
 DONE:
     if (c_name != NULL)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -3563,8 +3563,8 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
         return ret_value;
     tmp_p = tmp;
     for (i = 0; i < H5FD_MEM_NTYPES; i++) {
-        c_memb_name[i] = (char *)HDmalloc((size_t)len[i] + 1);
-        HDmemcpy(c_memb_name[i], tmp_p, (size_t)len[i]);
+        c_memb_name[i] = (char *)malloc((size_t)len[i] + 1);
+        memcpy(c_memb_name[i], tmp_p, (size_t)len[i]);
         tmp_pp         = c_memb_name[i];
         tmp_pp[len[i]] = '\0';
         tmp_p          = tmp_p + c_lenmax;
@@ -3593,9 +3593,9 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     ret_value = 0;
 
 DONE:
-    HDfree(tmp);
+    free(tmp);
     for (i = 0; i < H5FD_MEM_NTYPES; i++)
-        HDfree(c_memb_name[i]);
+        free(c_memb_name[i]);
     return ret_value;
 }
 
@@ -3692,9 +3692,9 @@ h5pget_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     /*
      *  Take care of names array
      */
-    tmp   = (char *)HDmalloc(c_lenmax * H5FD_MEM_NTYPES + 1);
+    tmp   = (char *)malloc(c_lenmax * H5FD_MEM_NTYPES + 1);
     tmp_p = tmp;
-    HDmemset(tmp, ' ', c_lenmax * H5FD_MEM_NTYPES);
+    memset(tmp, ' ', c_lenmax * H5FD_MEM_NTYPES);
     tmp[c_lenmax * H5FD_MEM_NTYPES] = '\0';
     for (i = 0; i < H5FD_MEM_NTYPES; i++) {
         memcpy(tmp_p, c_memb_name[i], strlen(c_memb_name[i]));
@@ -3719,9 +3719,9 @@ h5pget_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     *flag       = (int_f)relax;
     *maxlen_out = (int_f)length;
     ret_value   = 0;
-    HDfree(tmp);
+    free(tmp);
     for (i = 0; i < H5FD_MEM_NTYPES; i++)
-        HDfree(c_memb_name[i]);
+        free(c_memb_name[i]);
     return ret_value;
 }
 
@@ -3847,10 +3847,10 @@ h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f 
     unsigned      i;
     int_f         ret_value = -1;
 
-    if (NULL == (c_name = (char *)HDmalloc((size_t)*namelen + 1)))
+    if (NULL == (c_name = (char *)malloc((size_t)*namelen + 1)))
         goto DONE;
 
-    if (NULL == (c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts_in)))
+    if (NULL == (c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts_in)))
         goto DONE;
 
     /*
@@ -3862,7 +3862,7 @@ h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f 
 
     *cd_nelmts = (size_t_f)c_cd_nelmts;
     *flags     = (int_f)c_flags;
-    HD5packFstring(c_name, _fcdtocp(name), HDstrlen(c_name));
+    HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
 
     for (i = 0; i < c_cd_nelmts_in; i++)
         cd_values[i] = (int_f)c_cd_values[i];
@@ -3871,9 +3871,9 @@ h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f 
 
 DONE:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_cd_values)
-        HDfree(c_cd_values);
+        free(c_cd_values);
 
     return ret_value;
 }
@@ -3912,7 +3912,7 @@ h5pmodify_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_ne
     unsigned int *c_cd_values;
     unsigned      i;
 
-    c_cd_values = (unsigned int *)HDmalloc(sizeof(unsigned int) * c_cd_nelmts);
+    c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts);
     if (!c_cd_values)
         return ret_value;
     for (i = 0; i < c_cd_nelmts; i++)
@@ -3928,7 +3928,7 @@ h5pmodify_filter_c(hid_t_f *prp_id, int_f *filter, int_f *flags, size_t_f *cd_ne
     ret_value = 0;
 
 DONE:
-    HDfree(c_cd_values);
+    free(c_cd_values);
     return ret_value;
 }
 
@@ -4637,7 +4637,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
      * Allocate memory to store the expression.
      */
     if (c_expression_len) {
-        c_expression = (char *)HDmalloc(c_expression_len);
+        c_expression = (char *)malloc(c_expression_len);
         if (NULL == c_expression)
             HGOTO_DONE(FAIL)
     } /* end if */
@@ -4656,7 +4656,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
 
 done:
     if (c_expression)
-        HDfree(c_expression);
+        free(c_expression);
 
     return ret_value;
 }
@@ -4707,7 +4707,7 @@ h5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
 
 done:
     if (c_expression)
-        HDfree(c_expression);
+        free(c_expression);
 
     return ret_value;
 }
@@ -5380,7 +5380,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
     if ((H5Pget_file_image((hid_t)*fapl_id, (void **)&c_buf_ptr, &c_buf_len_ptr)) < 0)
         return ret_value; /* error occurred */
 
-    HDmemcpy((void *)*buf_ptr, (void *)c_buf_ptr, c_buf_len_ptr);
+    memcpy((void *)*buf_ptr, (void *)c_buf_ptr, c_buf_len_ptr);
 
     *buf_len_ptr = (size_t_f)c_buf_len_ptr;
 

@@ -138,10 +138,10 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(src_name && *src_name);
-    HDassert(dst_loc);
-    HDassert(dst_name && *dst_name);
+    assert(loc);
+    assert(src_name && *src_name);
+    assert(dst_loc);
+    assert(dst_name && *dst_name);
 
     /* Check if destination name already exists */
     dst_exists = FALSE;
@@ -225,11 +225,11 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     FUNC_ENTER_STATIC_TAG(oloc_src->addr)
 
-    HDassert(oloc_src);
-    HDassert(oloc_src->file);
-    HDassert(H5F_addr_defined(oloc_src->addr));
-    HDassert(oloc_dst->file);
-    HDassert(cpy_info);
+    assert(oloc_src);
+    assert(oloc_src->file);
+    assert(H5F_addr_defined(oloc_src->addr));
+    assert(oloc_dst->file);
+    assert(cpy_info);
 
     /* Get pointer to object class for this object */
     if (NULL == (obj_class = H5O__obj_class(oloc_src)))
@@ -352,7 +352,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      */
     if (NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+    memset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
      * (for messages which depend on information from other messages)
@@ -364,7 +364,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         mesg_src = &(oh_src->mesg[mesgno]);
 
         /* Sanity check */
-        HDassert(!mesg_src->dirty); /* Should be cleared by earlier call to flush messages */
+        assert(!mesg_src->dirty); /* Should be cleared by earlier call to flush messages */
 
         /* Get message class to operate on */
         copy_type = mesg_src->type;
@@ -377,7 +377,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             ++null_msgs;
             copy_type = H5O_MSG_NULL;
         } /* end if */
-        HDassert(copy_type);
+        assert(copy_type);
 
         if (copy_type->pre_copy_file) {
             /* Decode the message if necessary. */
@@ -423,7 +423,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         if (FALSE == cpy_info->preserve_null) {
             while (deleted[mesgno + null_msgs]) {
                 ++null_msgs;
-                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+                assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
         }     /* end if */
 
@@ -451,7 +451,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
          *      converted to a nil message) in the destination -QAK)
          */
         copy_type = mesg_dst->type;
-        HDassert(copy_type);
+        assert(copy_type);
 
         /* copy this message into destination file */
         if (copy_type->copy_file) {
@@ -531,7 +531,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         size_t delta = (size_t)(H5O_MIN_SIZE - dst_oh_size); /* Delta in chunk size needed */
 
         /* Sanity check */
-        HDassert((oh_dst->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
+        assert((oh_dst->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
 
         /* Determine whether to create gap or NULL message */
         if (delta < H5O_SIZEOF_MSGHDR_OH(oh_dst))
@@ -543,7 +543,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         dst_oh_size += delta;
 
         /* Sanity check */
-        HDassert(dst_oh_size <= 255);
+        assert(dst_oh_size <= 255);
     } /* end if */
 
     /* Add in destination's object header size now */
@@ -578,7 +578,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      * treatment.  This has to happen after the destination header has been
      * allocated.
      */
-    HDassert(H5O_SIZEOF_MSGHDR_OH(oh_src) == H5O_SIZEOF_MSGHDR_OH(oh_dst));
+    assert(H5O_SIZEOF_MSGHDR_OH(oh_src) == H5O_SIZEOF_MSGHDR_OH(oh_dst));
     msghdr_size = H5O_SIZEOF_MSGHDR_OH(oh_dst);
 
     current_pos = oh_dst->chunk[0].image;
@@ -599,7 +599,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         if (FALSE == cpy_info->preserve_null) {
             while (deleted[mesgno + null_msgs]) {
                 ++null_msgs;
-                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+                assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
         }     /* end if */
 
@@ -643,11 +643,11 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     } /* end if */
 
     /* Make sure we filled the chunk, except for room at the end for a checksum */
-    HDassert(current_pos + dst_oh_gap + dst_oh_null + H5O_SIZEOF_CHKSUM_OH(oh_dst) ==
+    assert(current_pos + dst_oh_gap + dst_oh_null + H5O_SIZEOF_CHKSUM_OH(oh_dst) ==
              (size_t)dst_oh_size + oh_dst->chunk[0].image);
 
     /* Set the dest. object location to the first chunk address */
-    HDassert(H5F_addr_defined(addr_new));
+    assert(H5F_addr_defined(addr_new));
     oloc_dst->addr = addr_new;
 
     /* If we are merging committed datatypes and this is a committed datatype, insert
@@ -688,7 +688,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         if (FALSE == cpy_info->preserve_null) {
             while (deleted[mesgno + null_msgs]) {
                 ++null_msgs;
-                HDassert(mesgno + null_msgs < oh_src->nmesgs);
+                assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
         }     /* end if */
 
@@ -701,14 +701,14 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
          *      converted to a nil message) in the destination -QAK)
          */
         copy_type = mesg_dst->type;
-        HDassert(copy_type);
+        assert(copy_type);
 
         if (copy_type->post_copy_file && mesg_src->native) {
             unsigned mesg_flags; /* Message flags */
 
             /* Sanity check destination message */
-            HDassert(mesg_dst->type == mesg_src->type);
-            HDassert(mesg_dst->native);
+            assert(mesg_dst->type == mesg_src->type);
+            assert(mesg_dst->native);
 
             /* Get destination message flags.   mesg_dst->flags will contain the
              * original flags for now. */
@@ -724,7 +724,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                             "unable to perform 'post copy' operation on message")
 
             /* Verify that the flags did not change */
-            HDassert(mesg_flags == (unsigned)mesg_dst->flags);
+            assert(mesg_flags == (unsigned)mesg_dst->flags);
         } /* end if */
     }     /* end for */
 
@@ -755,7 +755,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     /* Set obj_type and udata, if requested */
     if (obj_type) {
-        HDassert(udata);
+        assert(udata);
         *obj_type = obj_class->type;
         *udata    = cpy_udata;
     } /* end if */
@@ -812,11 +812,11 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5O_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(oloc_src);
-    HDassert(oloc_src->file);
-    HDassert(oloc_dst);
-    HDassert(oloc_dst->file);
-    HDassert(cpy_info);
+    assert(oloc_src);
+    assert(oloc_src->file);
+    assert(oloc_dst);
+    assert(oloc_dst->file);
+    assert(cpy_info);
 
     /* Create object "position" struct */
     H5F_GET_FILENO(oloc_src->file, src_obj_pos.fileno);
@@ -854,7 +854,7 @@ H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5O_
 
         /* Return saved obj_type and udata, if requested */
         if (obj_type) {
-            HDassert(udata);
+            assert(udata);
             *obj_type = addr_map->obj_class->type;
             *udata    = addr_map->udata;
         } /* end if */
@@ -907,12 +907,12 @@ H5O__copy_free_addrmap_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UN
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(item);
+    assert(item);
 
     /* Release user data for particular type of object */
     if (item->udata) {
-        HDassert(item->obj_class);
-        HDassert(item->obj_class->free_copy_file_udata);
+        assert(item->obj_class);
+        assert(item->obj_class->free_copy_file_udata);
         (item->obj_class->free_copy_file_udata)(item->udata);
     } /* end if */
 
@@ -947,13 +947,13 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(oloc_src);
-    HDassert(oloc_src->file);
-    HDassert(H5F_addr_defined(oloc_src->addr));
-    HDassert(oloc_dst->file);
+    assert(oloc_src);
+    assert(oloc_src->file);
+    assert(H5F_addr_defined(oloc_src->addr));
+    assert(oloc_dst->file);
 
     /* Initialize copy info before errors can be thrown */
-    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
+    memset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */
     if (NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
@@ -1043,11 +1043,11 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_
 
     FUNC_ENTER_STATIC
 
-    HDassert(src_loc);
-    HDassert(src_loc->oloc->file);
-    HDassert(dst_loc);
-    HDassert(dst_loc->oloc->file);
-    HDassert(dst_name);
+    assert(src_loc);
+    assert(src_loc->oloc->file);
+    assert(dst_loc);
+    assert(dst_loc->oloc->file);
+    assert(dst_name);
 
     /* Set up copied object location to fill in */
     new_loc.oloc = &new_oloc;
@@ -1101,9 +1101,9 @@ H5O__copy_free_comm_dt_cb(void *item, void *_key, void H5_ATTR_UNUSED *_op_data)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(addr);
-    HDassert(key);
-    HDassert(key->dt);
+    assert(addr);
+    assert(key);
+    assert(key->dt);
 
     key->dt = (H5T_t *)H5O_msg_free(H5O_DTYPE_ID, key->dt);
     key     = H5FL_FREE(H5O_copy_search_comm_dt_key_t, key);
@@ -1180,10 +1180,10 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(attr);
-    HDassert(udata);
-    HDassert(udata->dst_dt_list);
-    HDassert(H5F_addr_defined(udata->obj_oloc.addr));
+    assert(attr);
+    assert(udata);
+    assert(udata->dst_dt_list);
+    assert(H5F_addr_defined(udata->obj_oloc.addr));
 
     /* Get attribute datatype */
     if (NULL == (dt = H5A_type(attr)))
@@ -1224,7 +1224,7 @@ done:
             key = H5FL_FREE(H5O_copy_search_comm_dt_key_t, key);
         } /* end if */
         if (addr) {
-            HDassert(ret_value < 0);
+            assert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
         } /* end if */
     }     /* end if */
@@ -1260,10 +1260,10 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(obj_oloc);
-    HDassert(udata);
-    HDassert(udata->dst_dt_list);
-    HDassert(udata->dst_root_loc);
+    assert(obj_oloc);
+    assert(udata);
+    assert(udata->dst_dt_list);
+    assert(udata->dst_root_loc);
 
     /* Get pointer to object class for this object */
     if ((obj_class = H5O__obj_class(obj_oloc)) == NULL)
@@ -1342,7 +1342,7 @@ done:
             key = H5FL_FREE(H5O_copy_search_comm_dt_key_t, key);
         } /* end if */
         if (addr) {
-            HDassert(ret_value < 0);
+            assert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
         } /* end if */
     }     /* end if */
@@ -1379,11 +1379,11 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(name);
-    HDassert(linfo);
-    HDassert(udata);
-    HDassert(udata->dst_dt_list);
-    HDassert(udata->dst_root_loc);
+    assert(name);
+    assert(linfo);
+    assert(udata);
+    assert(udata->dst_dt_list);
+    assert(udata->dst_root_loc);
 
     /* Check if this is a hard link */
     if (linfo->type == H5L_TYPE_HARD) {
@@ -1440,11 +1440,11 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(oh_src);
-    HDassert(oloc_dst);
-    HDassert(oloc_dst->file);
-    HDassert(H5F_ID_EXISTS(oloc_dst->file));
-    HDassert(cpy_info);
+    assert(oh_src);
+    assert(oloc_dst);
+    assert(oloc_dst->file);
+    assert(H5F_ID_EXISTS(oloc_dst->file));
+    assert(cpy_info);
 
     /* Allocate key */
     if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
@@ -1533,7 +1533,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                 /* Build the complete dst dt list */
                 /* Set up the root group in the destination file, if necessary */
                 if (!dst_root_loc.oloc) {
-                    HDassert(!dst_root_loc.path);
+                    assert(!dst_root_loc.path);
                     if (NULL == (dst_root_loc.oloc = H5G_oloc(H5G_rootof(oloc_dst->file))))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "unable to get object location for root group")
@@ -1541,7 +1541,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
                 } /* end if */
                 else
-                    HDassert(dst_root_loc.path);
+                    assert(dst_root_loc.path);
 
                 /* Build udata.  Note that this may be done twice in some cases, but
                  * it should be rare and should be cheaper on average than trying to
@@ -1605,12 +1605,12 @@ H5O__copy_insert_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst, H5
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(oh_src);
-    HDassert(oloc_dst);
-    HDassert(oloc_dst->file);
-    HDassert(oloc_dst->addr != HADDR_UNDEF);
-    HDassert(cpy_info);
-    HDassert(cpy_info->dst_dt_list);
+    assert(oh_src);
+    assert(oloc_dst);
+    assert(oloc_dst->file);
+    assert(oloc_dst->addr != HADDR_UNDEF);
+    assert(cpy_info);
+    assert(cpy_info->dst_dt_list);
 
     /* Allocate key */
     if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))

@@ -232,12 +232,12 @@ main(int argc, char *argv[])
     ret = MPI_Comm_size(MPI_COMM_WORLD, &comm_world_nprocs_g);
 
     if (ret != MPI_SUCCESS) {
-        HDfprintf(stderr, "%s: MPI_Comm_size call failed\n", progname);
+        fprintf(stderr, "%s: MPI_Comm_size call failed\n", progname);
 
         if (ret == MPI_ERR_COMM)
-            HDfprintf(stderr, "invalid MPI communicator\n");
+            fprintf(stderr, "invalid MPI communicator\n");
         else
-            HDfprintf(stderr, "invalid argument\n");
+            fprintf(stderr, "invalid argument\n");
 
         exit_value = EXIT_FAILURE;
         goto finish;
@@ -246,12 +246,12 @@ main(int argc, char *argv[])
     ret = MPI_Comm_rank(MPI_COMM_WORLD, &comm_world_rank_g);
 
     if (ret != MPI_SUCCESS) {
-        HDfprintf(stderr, "%s: MPI_Comm_rank call failed\n", progname);
+        fprintf(stderr, "%s: MPI_Comm_rank call failed\n", progname);
 
         if (ret == MPI_ERR_COMM)
-            HDfprintf(stderr, "invalid MPI communicator\n");
+            fprintf(stderr, "invalid MPI communicator\n");
         else
-            HDfprintf(stderr, "invalid argument\n");
+            fprintf(stderr, "invalid argument\n");
 
         exit_value = EXIT_FAILURE;
         goto finish;
@@ -268,8 +268,8 @@ main(int argc, char *argv[])
     }
 
     if (opts->output_file) {
-        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
-            HDfprintf(stderr, "%s: cannot open output file\n", progname);
+        if ((output = fopen(opts->output_file, "w")) == NULL) {
+            fprintf(stderr, "%s: cannot open output file\n", progname);
             perror(opts->output_file);
             goto finish;
         }
@@ -759,7 +759,7 @@ h5_set_info_object(void)
     int   ret_value = 0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL) {
         char *next, *valp;
 
         valp = envp = next = HDstrdup(envp);
@@ -781,13 +781,13 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len     = strcspn(valp, ";");
             next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            key_val = (char *)calloc(1, len + 1);
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
                 ++next;
 
-            namep = HDstrncpy(key_val, valp, len);
+            namep = strncpy(key_val, valp, len);
 
             /* pass up any beginning whitespaces */
             while (*namep && (*namep == ' ' || *namep == '\t'))
@@ -797,13 +797,13 @@ h5_set_info_object(void)
                 continue; /* was all white space, so move to next k/v pair */
 
             /* eat up any ending white spaces */
-            endp = &namep[HDstrlen(namep) - 1];
+            endp = &namep[strlen(namep) - 1];
 
             while (endp && (*endp == ' ' || *endp == '\t'))
                 *endp-- = '\0';
 
             /* find the '=' */
-            valp = HDstrchr(namep, '=');
+            valp = strchr(namep, '=');
 
             if (valp != NULL) { /* it's a valid key/value pairing */
                 char *tmp_val = valp + 1;
@@ -823,16 +823,16 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    HDprintf("MPI_Info_set failed\n");
+                    printf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
 
             valp = next;
-            HDfree(key_val);
+            free(key_val);
         } while (next && *next);
 
-        HDfree(envp);
+        free(envp);
     }
 
     return ret_value;
@@ -853,17 +853,17 @@ h5_dump_info_object(MPI_Info info)
     int  flag;
     int  i, nkeys;
 
-    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
+    printf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info == MPI_INFO_NULL) {
-        HDprintf("object is MPI_INFO_NULL\n");
+        printf("object is MPI_INFO_NULL\n");
     }
     else {
         MPI_Info_get_nkeys(info, &nkeys);
-        HDprintf("object has %d items\n", nkeys);
+        printf("object has %d items\n", nkeys);
         for (i = 0; i < nkeys; i++) {
             MPI_Info_get_nthkey(info, i, key);
             MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-            HDprintf("%s=%s\n", key, value);
+            printf("%s=%s\n", key, value);
         }
     }
 }
@@ -950,7 +950,7 @@ create_comm_world(int num_procs, int *doing_pio)
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
     if (num_procs > nprocs) {
-        HDfprintf(stderr, "number of process(%d) must be <= number of processes in MPI_COMM_WORLD(%d)\n",
+        fprintf(stderr, "number of process(%d) must be <= number of processes in MPI_COMM_WORLD(%d)\n",
                   num_procs, nprocs);
         goto error_done;
     }
@@ -960,7 +960,7 @@ create_comm_world(int num_procs, int *doing_pio)
     mrc   = MPI_Comm_split(MPI_COMM_WORLD, color, myrank, &pio_comm_g);
 
     if (mrc != MPI_SUCCESS) {
-        HDfprintf(stderr, "MPI_Comm_split failed\n");
+        fprintf(stderr, "MPI_Comm_split failed\n");
         goto error_done;
     }
 
@@ -1086,9 +1086,9 @@ output_report(const char *fmt, ...)
     if (myrank == 0) {
         va_list ap;
 
-        HDva_start(ap, fmt);
-        HDvfprintf(output, fmt, ap);
-        HDva_end(ap);
+        va_start(ap, fmt);
+        vfprintf(output, fmt, ap);
+        va_end(ap);
     }
 }
 
@@ -1111,7 +1111,7 @@ print_indent(register int indent)
         indent *= TAB_SPACE;
 
         for (; indent > 0; --indent)
-            HDfputc(' ', output);
+            fputc(' ', output);
     }
 }
 
@@ -1121,25 +1121,25 @@ recover_size_and_print(long long val, const char *end)
     if (val >= ONE_KB && (val % ONE_KB) == 0) {
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
-                HDfprintf(output,
+                fprintf(output,
                           "%" H5_PRINTF_LL_WIDTH "d"
                           "GB%s",
                           val / ONE_GB, end);
             else
-                HDfprintf(output,
+                fprintf(output,
                           "%" H5_PRINTF_LL_WIDTH "d"
                           "MB%s",
                           val / ONE_MB, end);
         }
         else {
-            HDfprintf(output,
+            fprintf(output,
                       "%" H5_PRINTF_LL_WIDTH "d"
                       "KB%s",
                       val / ONE_KB, end);
         }
     }
     else {
-        HDfprintf(output,
+        fprintf(output,
                   "%" H5_PRINTF_LL_WIDTH "d"
                   "%s",
                   val, end);
@@ -1150,12 +1150,12 @@ static void
 print_io_api(long io_types)
 {
     if (io_types & PIO_POSIX)
-        HDfprintf(output, "posix ");
+        fprintf(output, "posix ");
     if (io_types & PIO_MPI)
-        HDfprintf(output, "mpiio ");
+        fprintf(output, "mpiio ");
     if (io_types & PIO_HDF5)
-        HDfprintf(output, "phdf5 ");
-    HDfprintf(output, "\n");
+        fprintf(output, "phdf5 ");
+    fprintf(output, "\n");
 }
 
 static void
@@ -1164,34 +1164,34 @@ report_parameters(struct options *opts)
     int rank = comm_world_rank_g;
 
     print_version("HDF5 Library"); /* print library version */
-    HDfprintf(output, "rank %d: ==== Parameters ====\n", rank);
+    fprintf(output, "rank %d: ==== Parameters ====\n", rank);
 
-    HDfprintf(output, "rank %d: IO API=", rank);
+    fprintf(output, "rank %d: IO API=", rank);
     print_io_api(opts->io_types);
 
-    HDfprintf(output, "rank %d: Number of files=%ld\n", rank, opts->num_files);
-    HDfprintf(output, "rank %d: Number of datasets=%ld\n", rank, opts->num_dsets);
-    HDfprintf(output, "rank %d: Number of iterations=%d\n", rank, opts->num_iters);
-    HDfprintf(output, "rank %d: Number of processes=%d:%d\n", rank, opts->min_num_procs, opts->max_num_procs);
+    fprintf(output, "rank %d: Number of files=%ld\n", rank, opts->num_files);
+    fprintf(output, "rank %d: Number of datasets=%ld\n", rank, opts->num_dsets);
+    fprintf(output, "rank %d: Number of iterations=%d\n", rank, opts->num_iters);
+    fprintf(output, "rank %d: Number of processes=%d:%d\n", rank, opts->min_num_procs, opts->max_num_procs);
 
     if (opts->dim2d) {
-        HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
+        fprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
         recover_size_and_print((long long)(opts->num_bpp * opts->num_bpp * opts->min_num_procs), ":");
         recover_size_and_print((long long)(opts->num_bpp * opts->num_bpp * opts->max_num_procs), "\n");
 
-        HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
+        fprintf(output, "rank %d: Size of dataset(s)=", rank);
         recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), "x");
         recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), ":");
         recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "x");
         recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
-        HDfprintf(output, "rank %d: File size=", rank);
+        fprintf(output, "rank %d: File size=", rank);
         recover_size_and_print((long long)(squareo(opts->num_bpp * opts->min_num_procs) * opts->num_dsets),
                                ":");
         recover_size_and_print((long long)(squareo(opts->num_bpp * opts->max_num_procs) * opts->num_dsets),
                                "\n");
 
-        HDfprintf(output, "rank %d: Transfer buffer size=", rank);
+        fprintf(output, "rank %d: Transfer buffer size=", rank);
         if (opts->interleaved) {
             recover_size_and_print((long long)opts->min_xfer_size, "x");
             recover_size_and_print((long long)opts->blk_size, ":");
@@ -1204,66 +1204,66 @@ report_parameters(struct options *opts)
             recover_size_and_print((long long)opts->blk_size, "x");
             recover_size_and_print((long long)opts->max_xfer_size, "\n");
         }
-        HDfprintf(output, "rank %d: Block size=", rank);
+        fprintf(output, "rank %d: Block size=", rank);
         recover_size_and_print((long long)opts->blk_size, "x");
         recover_size_and_print((long long)opts->blk_size, "\n");
     }
     else {
-        HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
+        fprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
         recover_size_and_print((long long)opts->num_bpp, "\n");
 
-        HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
+        fprintf(output, "rank %d: Size of dataset(s)=", rank);
         recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), ":");
         recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
-        HDfprintf(output, "rank %d: File size=", rank);
+        fprintf(output, "rank %d: File size=", rank);
         recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs * opts->num_dsets), ":");
         recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs * opts->num_dsets), "\n");
 
-        HDfprintf(output, "rank %d: Transfer buffer size=", rank);
+        fprintf(output, "rank %d: Transfer buffer size=", rank);
         recover_size_and_print((long long)opts->min_xfer_size, ":");
         recover_size_and_print((long long)opts->max_xfer_size, "\n");
-        HDfprintf(output, "rank %d: Block size=", rank);
+        fprintf(output, "rank %d: Block size=", rank);
         recover_size_and_print((long long)opts->blk_size, "\n");
     }
 
-    HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);
+    fprintf(output, "rank %d: Block Pattern in Dataset=", rank);
     if (opts->interleaved)
-        HDfprintf(output, "Interleaved\n");
+        fprintf(output, "Interleaved\n");
     else
-        HDfprintf(output, "Contiguous\n");
+        fprintf(output, "Contiguous\n");
 
-    HDfprintf(output, "rank %d: I/O Method for MPI and HDF5=", rank);
+    fprintf(output, "rank %d: I/O Method for MPI and HDF5=", rank);
     if (opts->collective)
-        HDfprintf(output, "Collective\n");
+        fprintf(output, "Collective\n");
     else
-        HDfprintf(output, "Independent\n");
+        fprintf(output, "Independent\n");
 
-    HDfprintf(output, "rank %d: Geometry=", rank);
+    fprintf(output, "rank %d: Geometry=", rank);
     if (opts->dim2d)
-        HDfprintf(output, "2D\n");
+        fprintf(output, "2D\n");
     else
-        HDfprintf(output, "1D\n");
+        fprintf(output, "1D\n");
 
-    HDfprintf(output, "rank %d: VFL used for HDF5 I/O=%s\n", rank, "MPI-IO driver");
+    fprintf(output, "rank %d: VFL used for HDF5 I/O=%s\n", rank, "MPI-IO driver");
 
-    HDfprintf(output, "rank %d: Data storage method in HDF5=", rank);
+    fprintf(output, "rank %d: Data storage method in HDF5=", rank);
     if (opts->h5_use_chunks)
-        HDfprintf(output, "Chunked\n");
+        fprintf(output, "Chunked\n");
     else
-        HDfprintf(output, "Contiguous\n");
+        fprintf(output, "Contiguous\n");
 
     {
-        char *prefix = HDgetenv("HDF5_PARAPREFIX");
+        char *prefix = getenv("HDF5_PARAPREFIX");
 
-        HDfprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank, (prefix ? prefix : "not set"));
+        fprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank, (prefix ? prefix : "not set"));
     }
 
-    HDfprintf(output, "rank %d: ", rank);
+    fprintf(output, "rank %d: ", rank);
     h5_dump_info_object(h5_io_info_g);
 
-    HDfprintf(output, "rank %d: ==== End of Parameters ====\n", rank);
-    HDfprintf(output, "\n");
+    fprintf(output, "rank %d: ==== End of Parameters ====\n", rank);
+    fprintf(output, "\n");
 }
 
 /*
@@ -1317,10 +1317,10 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (isalnum(*end) && i < 10)
+                        if (isalnum((int)(unsigned char)*end) && i < 10)
                             buf[i++] = *end;
 
                     if (!HDstrcasecmp(buf, "phdf5")) {
@@ -1333,8 +1333,8 @@ parse_command_line(int argc, const char *const *argv)
                         cl_opts->io_types |= PIO_POSIX;
                     }
                     else {
-                        HDfprintf(stderr, "pio_perf: invalid --api option %s\n", buf);
-                        HDexit(EXIT_FAILURE);
+                        fprintf(stderr, "pio_perf: invalid --api option %s\n", buf);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -1370,19 +1370,19 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum((int)(unsigned char)*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || HDisdigit(buf[0])) {
+                    if (strlen(buf) > 1 || isdigit((int)(unsigned char)buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
-                            if (!isdigit(buf[j])) {
-                                HDfprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                            if (!isdigit((int)(unsigned char)buf[j])) {
+                                fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
+                                exit(EXIT_FAILURE);
                             }
 
                         pio_debug_level = atoi(buf);
@@ -1407,8 +1407,8 @@ parse_command_line(int argc, const char *const *argv)
                                 cl_opts->verify = TRUE;
                                 break;
                             default:
-                                HDfprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
+                                exit(EXIT_FAILURE);
                         }
                     }
 
@@ -1424,13 +1424,13 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->num_bpp = parse_size_directive(H5_optarg);
                 break;
             case 'F':
-                cl_opts->num_files = HDatoi(H5_optarg);
+                cl_opts->num_files = atoi(H5_optarg);
                 break;
             case 'g':
                 cl_opts->dim2d = 1;
                 break;
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = atoi(H5_optarg);
                 break;
             case 'I':
                 cl_opts->interleaved = 1;
@@ -1439,10 +1439,10 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->output_file = H5_optarg;
                 break;
             case 'p':
-                cl_opts->min_num_procs = HDatoi(H5_optarg);
+                cl_opts->min_num_procs = atoi(H5_optarg);
                 break;
             case 'P':
-                cl_opts->max_num_procs = HDatoi(H5_optarg);
+                cl_opts->max_num_procs = atoi(H5_optarg);
                 break;
             case 'T':
                 cl_opts->h5_threshold = parse_size_directive(H5_optarg);
@@ -1460,7 +1460,7 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(progname);
-                HDfree(cl_opts);
+                free(cl_opts);
                 return NULL;
         }
     }
@@ -1532,7 +1532,7 @@ parse_size_directive(const char *size)
     off_t s;
     char *endptr;
 
-    s = HDstrtol(size, &endptr, 10);
+    s = strtol(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1552,8 +1552,8 @@ parse_size_directive(const char *size)
                 s *= ONE_GB;
                 break;
             default:
-                HDfprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
+                exit(EXIT_FAILURE);
         }
     }
 
@@ -1577,124 +1577,124 @@ usage(const char *prog)
 
     if (myrank == 0) {
         print_version(prog);
-        HDprintf("usage: %s [OPTIONS]\n", prog);
-        HDprintf("  OPTIONS\n");
-        HDprintf("     -h, --help                  Print a usage message and exit\n");
-        HDprintf("     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
-        HDprintf("     -A AL, --api=AL             Which APIs to test [default: all of them]\n");
+        printf("usage: %s [OPTIONS]\n", prog);
+        printf("  OPTIONS\n");
+        printf("     -h, --help                  Print a usage message and exit\n");
+        printf("     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
+        printf("     -A AL, --api=AL             Which APIs to test [default: all of them]\n");
 #if 0
-        HDprintf("     -b, --binary                The elusive binary option\n");
+        printf("     -b, --binary                The elusive binary option\n");
 #endif /* 0 */
-        HDprintf("     -B S, --block-size=S        Block size within transfer buffer\n");
-        HDprintf("                                 (see below for description)\n");
-        HDprintf("                                 [default: half the number of bytes per process\n");
-        HDprintf("                                           per dataset]\n");
-        HDprintf("     -c, --chunk                 Create HDF5 datasets using chunked storage\n");
-        HDprintf("                                 [default: contiguous storage]\n");
-        HDprintf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
-        HDprintf("                                 [default: independent I/O)\n");
-        HDprintf("     -d N, --num-dsets=N         Number of datasets per file [default: 1]\n");
-        HDprintf("     -D DL, --debug=DL           Indicate the debugging level\n");
-        HDprintf("                                 [default: no debugging]\n");
-        HDprintf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
-        HDprintf("                                 (see below for description)\n");
-        HDprintf("                                 [default: 256K for 1D, 8K for 2D]\n");
-        HDprintf("     -F N, --num-files=N         Number of files [default: 1]\n");
-        HDprintf("     -g, --geometry              Use 2D geometry [default: 1D geometry]\n");
-        HDprintf("     -i N, --num-iterations=N    Number of iterations to perform [default: 1]\n");
-        HDprintf("     -I, --interleaved           Interleaved access pattern\n");
-        HDprintf("                                 (see below for example)\n");
-        HDprintf("                                 [default: Contiguous access pattern]\n");
-        HDprintf("     -o F, --output=F            Output raw data into file F [default: none]\n");
-        HDprintf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        HDprintf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
-        HDprintf("                                 [default: all MPI_COMM_WORLD processes ]\n");
-        HDprintf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
-        HDprintf("                                 [default: 1]\n");
-        HDprintf("     -w, --write-only            Perform write tests not the read tests\n");
-        HDprintf("     -x S, --min-xfer-size=S     Minimum transfer buffer size\n");
-        HDprintf("                                 (see below for description)\n");
-        HDprintf("                                 [default: half the number of bytes per process\n");
-        HDprintf("                                           per dataset]\n");
-        HDprintf("     -X S, --max-xfer-size=S     Maximum transfer buffer size\n");
-        HDprintf("                                 [default: the number of bytes per process per\n");
-        HDprintf("                                           dataset]\n");
-        HDprintf("\n");
-        HDprintf("  F  - is a filename.\n");
-        HDprintf("  N  - is an integer >=0.\n");
-        HDprintf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
-        HDprintf("          K - Kilobyte (%d)\n", ONE_KB);
-        HDprintf("          M - Megabyte (%d)\n", ONE_MB);
-        HDprintf("          G - Gigabyte (%d)\n", ONE_GB);
-        HDprintf("\n");
-        HDprintf("      Example: '37M' is 37 megabytes or %d bytes\n", 37 * ONE_MB);
-        HDprintf("\n");
-        HDprintf("  AL - is an API list. Valid values are:\n");
-        HDprintf("          phdf5 - Parallel HDF5\n");
-        HDprintf("          mpiio - MPI-I/O\n");
-        HDprintf("          posix - POSIX\n");
-        HDprintf("\n");
-        HDprintf("      Example: --api=mpiio,phdf5\n");
-        HDprintf("\n");
-        HDprintf("  Dataset size:\n");
-        HDprintf("      Depending on the selected geometry, each test dataset is either a linear\n");
-        HDprintf("      array of size bytes-per-process * num-processes, or a square array of size\n");
-        HDprintf("      (bytes-per-process * num-processes) x (bytes-per-process * num-processes).\n");
-        HDprintf("\n");
-        HDprintf("  Block size vs. Transfer buffer size:\n");
-        HDprintf("      buffer-size controls the size of the memory buffer, which is broken into\n");
-        HDprintf("      blocks and written to the file. Depending on the selected geometry, each\n");
-        HDprintf("      block can be a linear array of size block-size or a square array of size\n");
-        HDprintf("      block-size x block-size. The arrangement in which blocks are written is\n");
-        HDprintf("      determined by the access pattern.\n");
-        HDprintf("\n");
-        HDprintf("      In 1D geometry, the transfer buffer is a linear array of size buffer-size.\n");
-        HDprintf("      In 2D geometry, it is a rectangular array of size block-size x buffer-size\n");
-        HDprintf("      or buffer-size x block-size if interleaved pattern is selected.\n");
-        HDprintf("\n");
-        HDprintf("  Interleaved and Contiguous patterns in 1D geometry:\n");
-        HDprintf("      When contiguous access pattern is chosen, the dataset is evenly divided\n");
-        HDprintf("      into num-processes regions and each process writes data to its own region.\n");
-        HDprintf("      When interleaved blocks are written to a dataset, space for the first\n");
-        HDprintf("      block of the first process is allocated in the dataset, then space is\n");
-        HDprintf("      allocated for the first block of the second process, etc. until space is\n");
-        HDprintf("      allocated for the first block of each process, then space is allocated for\n");
-        HDprintf("      the second block of the first process, the second block of the second\n");
-        HDprintf("      process, etc.\n");
-        HDprintf("\n");
-        HDprintf("      For example, with a 3 process run, 512KB bytes-per-process, 256KB transfer\n");
-        HDprintf("        buffer size, and 64KB block size, each process must issue 2 transfer\n");
-        HDprintf("        requests to complete access to the dataset.\n");
-        HDprintf("          Contiguous blocks of the first transfer request are written like so:\n");
-        HDprintf("              1111----2222----3333----\n");
-        HDprintf("          Interleaved blocks of the first transfer request are written like so:\n");
-        HDprintf("              123123123123------------\n");
-        HDprintf("        The actual number of I/O operations involved in a transfer request\n");
-        HDprintf("        depends on the access pattern and communication mode.\n");
-        HDprintf("        When using independent I/O with interleaved pattern, each process\n");
-        HDprintf("        performs 4 small non-contiguous I/O operations per transfer request.\n");
-        HDprintf("        If collective I/O is turned on, the combined content of the buffers of\n");
-        HDprintf("        the 3 processes will be written using one collective I/O operation\n");
-        HDprintf("        per transfer request.\n");
-        HDprintf("\n");
-        HDprintf("      For information about access patterns in 2D geometry, please refer to the\n");
-        HDprintf("      HDF5 Reference Manual.\n");
-        HDprintf("\n");
-        HDprintf("  DL - is a list of debugging flags. Valid values are:\n");
-        HDprintf("          1 - Minimal\n");
-        HDprintf("          2 - Not quite everything\n");
-        HDprintf("          3 - Everything\n");
-        HDprintf("          4 - The kitchen sink\n");
-        HDprintf("          r - Raw data I/O throughput information\n");
-        HDprintf("          t - Times as well as throughputs\n");
-        HDprintf("          v - Verify data correctness\n");
-        HDprintf("\n");
-        HDprintf("      Example: --debug=2,r,t\n");
-        HDprintf("\n");
-        HDprintf("  Environment variables:\n");
-        HDprintf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
-        HDprintf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
-        HDprintf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
+        printf("     -B S, --block-size=S        Block size within transfer buffer\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default: half the number of bytes per process\n");
+        printf("                                           per dataset]\n");
+        printf("     -c, --chunk                 Create HDF5 datasets using chunked storage\n");
+        printf("                                 [default: contiguous storage]\n");
+        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
+        printf("                                 [default: independent I/O)\n");
+        printf("     -d N, --num-dsets=N         Number of datasets per file [default: 1]\n");
+        printf("     -D DL, --debug=DL           Indicate the debugging level\n");
+        printf("                                 [default: no debugging]\n");
+        printf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default: 256K for 1D, 8K for 2D]\n");
+        printf("     -F N, --num-files=N         Number of files [default: 1]\n");
+        printf("     -g, --geometry              Use 2D geometry [default: 1D geometry]\n");
+        printf("     -i N, --num-iterations=N    Number of iterations to perform [default: 1]\n");
+        printf("     -I, --interleaved           Interleaved access pattern\n");
+        printf("                                 (see below for example)\n");
+        printf("                                 [default: Contiguous access pattern]\n");
+        printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
+        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
+        printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
+        printf("                                 [default: all MPI_COMM_WORLD processes ]\n");
+        printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
+        printf("                                 [default: 1]\n");
+        printf("     -w, --write-only            Perform write tests not the read tests\n");
+        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default: half the number of bytes per process\n");
+        printf("                                           per dataset]\n");
+        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size\n");
+        printf("                                 [default: the number of bytes per process per\n");
+        printf("                                           dataset]\n");
+        printf("\n");
+        printf("  F  - is a filename.\n");
+        printf("  N  - is an integer >=0.\n");
+        printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
+        printf("          K - Kilobyte (%d)\n", ONE_KB);
+        printf("          M - Megabyte (%d)\n", ONE_MB);
+        printf("          G - Gigabyte (%d)\n", ONE_GB);
+        printf("\n");
+        printf("      Example: '37M' is 37 megabytes or %d bytes\n", 37 * ONE_MB);
+        printf("\n");
+        printf("  AL - is an API list. Valid values are:\n");
+        printf("          phdf5 - Parallel HDF5\n");
+        printf("          mpiio - MPI-I/O\n");
+        printf("          posix - POSIX\n");
+        printf("\n");
+        printf("      Example: --api=mpiio,phdf5\n");
+        printf("\n");
+        printf("  Dataset size:\n");
+        printf("      Depending on the selected geometry, each test dataset is either a linear\n");
+        printf("      array of size bytes-per-process * num-processes, or a square array of size\n");
+        printf("      (bytes-per-process * num-processes) x (bytes-per-process * num-processes).\n");
+        printf("\n");
+        printf("  Block size vs. Transfer buffer size:\n");
+        printf("      buffer-size controls the size of the memory buffer, which is broken into\n");
+        printf("      blocks and written to the file. Depending on the selected geometry, each\n");
+        printf("      block can be a linear array of size block-size or a square array of size\n");
+        printf("      block-size x block-size. The arrangement in which blocks are written is\n");
+        printf("      determined by the access pattern.\n");
+        printf("\n");
+        printf("      In 1D geometry, the transfer buffer is a linear array of size buffer-size.\n");
+        printf("      In 2D geometry, it is a rectangular array of size block-size x buffer-size\n");
+        printf("      or buffer-size x block-size if interleaved pattern is selected.\n");
+        printf("\n");
+        printf("  Interleaved and Contiguous patterns in 1D geometry:\n");
+        printf("      When contiguous access pattern is chosen, the dataset is evenly divided\n");
+        printf("      into num-processes regions and each process writes data to its own region.\n");
+        printf("      When interleaved blocks are written to a dataset, space for the first\n");
+        printf("      block of the first process is allocated in the dataset, then space is\n");
+        printf("      allocated for the first block of the second process, etc. until space is\n");
+        printf("      allocated for the first block of each process, then space is allocated for\n");
+        printf("      the second block of the first process, the second block of the second\n");
+        printf("      process, etc.\n");
+        printf("\n");
+        printf("      For example, with a 3 process run, 512KB bytes-per-process, 256KB transfer\n");
+        printf("        buffer size, and 64KB block size, each process must issue 2 transfer\n");
+        printf("        requests to complete access to the dataset.\n");
+        printf("          Contiguous blocks of the first transfer request are written like so:\n");
+        printf("              1111----2222----3333----\n");
+        printf("          Interleaved blocks of the first transfer request are written like so:\n");
+        printf("              123123123123------------\n");
+        printf("        The actual number of I/O operations involved in a transfer request\n");
+        printf("        depends on the access pattern and communication mode.\n");
+        printf("        When using independent I/O with interleaved pattern, each process\n");
+        printf("        performs 4 small non-contiguous I/O operations per transfer request.\n");
+        printf("        If collective I/O is turned on, the combined content of the buffers of\n");
+        printf("        the 3 processes will be written using one collective I/O operation\n");
+        printf("        per transfer request.\n");
+        printf("\n");
+        printf("      For information about access patterns in 2D geometry, please refer to the\n");
+        printf("      HDF5 Reference Manual.\n");
+        printf("\n");
+        printf("  DL - is a list of debugging flags. Valid values are:\n");
+        printf("          1 - Minimal\n");
+        printf("          2 - Not quite everything\n");
+        printf("          3 - Everything\n");
+        printf("          4 - The kitchen sink\n");
+        printf("          r - Raw data I/O throughput information\n");
+        printf("          t - Times as well as throughputs\n");
+        printf("          v - Verify data correctness\n");
+        printf("\n");
+        printf("      Example: --debug=2,r,t\n");
+        printf("\n");
+        printf("  Environment variables:\n");
+        printf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
+        printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
+        printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
         fflush(stdout);
     } /* end if */
 } /* end usage() */
@@ -1711,7 +1711,7 @@ usage(const char *prog)
 int
 main(void)
 {
-    HDprintf("No parallel IO performance because parallel is not configured\n");
+    printf("No parallel IO performance because parallel is not configured\n");
     return EXIT_SUCCESS;
 } /* end main */
 

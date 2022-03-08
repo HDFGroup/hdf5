@@ -84,9 +84,9 @@ free_2D_array(int ***arr)
 {
 
     if (arr && *arr && (*arr)[0])
-        HDfree((*arr)[0]);
+        free((*arr)[0]);
     if (arr && *arr)
-        HDfree(*arr);
+        free(*arr);
     *arr = NULL;
 
     return SUCCEED;
@@ -114,9 +114,9 @@ allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_value
     c = (size_t)sizes[1];
 
     /* Allocate and set up pseudo-2D array */
-    if (NULL == (*arr = (int **)HDcalloc(r, sizeof(int *))))
+    if (NULL == (*arr = (int **)calloc(r, sizeof(int *))))
         TEST_ERROR;
-    if (NULL == ((*arr)[0] = (int *)HDcalloc(r * c, sizeof(int))))
+    if (NULL == ((*arr)[0] = (int *)calloc(r * c, sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < r; i++)
         (*arr)[i] = (**arr + c * i);
@@ -124,7 +124,7 @@ allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_value
     /* Copy over the data elements */
     if (initial_values) {
         n_bytes = r * c * sizeof(int);
-        HDmemcpy((*arr)[0], initial_values[0], n_bytes);
+        memcpy((*arr)[0], initial_values[0], n_bytes);
     }
 
     return SUCCEED;
@@ -212,7 +212,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
      */
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
-    if (NULL == (tconv_buf = HDcalloc((size_t)1000, sizeof(char))))
+    if (NULL == (tconv_buf = calloc((size_t)1000, sizeof(char))))
         TEST_ERROR;
     if (H5Pset_buffer(dxpl_id, (size_t)1000, tconv_buf, NULL) < 0)
         TEST_ERROR;
@@ -374,13 +374,13 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     /* Save the data written to the file for later comparison when the file
      * is reopened for read test.
      */
-    if (!HDstrcmp(name, DSET_DEFLATE_NAME))
+    if (!strcmp(name, DSET_DEFLATE_NAME))
         save_array = &orig_deflate_g;
-    else if (!HDstrcmp(name, DSET_FILTER1_NAME))
+    else if (!strcmp(name, DSET_FILTER1_NAME))
         save_array = &orig_dynlib1_g;
-    else if (!HDstrcmp(name, DSET_FILTER2_NAME))
+    else if (!strcmp(name, DSET_FILTER2_NAME))
         save_array = &orig_dynlib2_g;
-    else if (!HDstrcmp(name, DSET_FILTER3_NAME))
+    else if (!strcmp(name, DSET_FILTER3_NAME))
         save_array = &orig_dynlib4_g;
     else
         TEST_ERROR;
@@ -400,7 +400,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     free_2D_array(&orig);
     free_2D_array(&read);
 
-    HDfree(tconv_buf);
+    free(tconv_buf);
 
     return SUCCEED;
 
@@ -420,7 +420,7 @@ error:
     free_2D_array(&read);
 
     if (tconv_buf)
-        HDfree(tconv_buf);
+        free(tconv_buf);
 
     return FAIL;
 } /* end ensure_filter_works() */
@@ -446,7 +446,7 @@ test_dataset_write_with_filters(hid_t fid)
      * STEP 1: Test deflation by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing dataset writes with deflate filter");
+    puts("Testing dataset writes with deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
@@ -465,14 +465,14 @@ test_dataset_write_with_filters(hid_t fid)
         TEST_ERROR;
 #else  /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*----------------------------------------------------------
      * STEP 2: Test filter plugin 1 by itself.
      *----------------------------------------------------------
      */
-    HDputs("    dataset writes with filter plugin 1");
+    puts("    dataset writes with filter plugin 1");
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 2, chunk_sizes_g) < 0)
@@ -504,7 +504,7 @@ test_dataset_write_with_filters(hid_t fid)
      * STEP 3: Test filter plugin 2 by itself.
      *----------------------------------------------------------
      */
-    HDputs("    dataset writes with filter plugin 2");
+    puts("    dataset writes with filter plugin 2");
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 2, chunk_sizes_g) < 0)
@@ -532,7 +532,7 @@ test_dataset_write_with_filters(hid_t fid)
      *         (This filter plugin makes HDF5 API calls)
      *----------------------------------------------------------
      */
-    HDputs("    dataset writes with filter plugin 3");
+    puts("    dataset writes with filter plugin 3");
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 2, chunk_sizes_g) < 0)
@@ -654,7 +654,7 @@ test_dataset_read_with_filters(hid_t fid)
 
 #else  /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*----------------------------------------------------------
@@ -847,8 +847,8 @@ test_creating_groups_using_plugins(hid_t fid)
     for (i = 0; i < N_SUBGROUPS; i++) {
         char *sp = subgroup_name;
 
-        sp += HDsprintf(subgroup_name, SUBGROUP_PREFIX);
-        HDsprintf(sp, "%d", i);
+        sp += sprintf(subgroup_name, SUBGROUP_PREFIX);
+        sprintf(sp, "%d", i);
 
         if ((sub_gid = H5Gcreate2(gid, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -906,8 +906,8 @@ test_opening_groups_using_plugins(hid_t fid)
     for (i = 0; i < N_SUBGROUPS; i++) {
         char *sp = subgroup_name;
 
-        sp += HDsprintf(subgroup_name, SUBGROUP_PREFIX);
-        HDsprintf(sp, "%d", i);
+        sp += sprintf(subgroup_name, SUBGROUP_PREFIX);
+        sprintf(sp, "%d", i);
 
         if ((sub_gid = H5Gopen2(gid, subgroup_name, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -956,7 +956,7 @@ test_path_api_calls(void)
     char         path[256];
     char         temp_name[256];
 
-    HDputs("Testing access to the filter path table");
+    puts("Testing access to the filter path table");
 
     if (H5Zfilter_avail(FILTER1_ID) != TRUE)
         TEST_ERROR;
@@ -992,7 +992,7 @@ test_path_api_calls(void)
     /* Remove all existing paths */
     for (u = n_paths; u > 0; u--)
         if (H5PLremove(u - 1) < 0) {
-            HDfprintf(stderr, "    at %u: %s\n", u, path);
+            fprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
 
@@ -1025,9 +1025,9 @@ test_path_api_calls(void)
 
     /* Add a bunch of paths to the path table */
     for (u = 0; u < n_starting_paths; u++) {
-        HDsprintf(path, "a_path_%u", u);
+        sprintf(path, "a_path_%u", u);
         if (H5PLappend(path) < 0) {
-            HDfprintf(stderr, "    at %u: %s\n", u, path);
+            fprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
     }
@@ -1060,7 +1060,7 @@ test_path_api_calls(void)
 
     /* Get the path length by passing in NULL */
     if ((path_len = H5PLget(0, NULL, 0)) <= 0) {
-        HDfprintf(stderr, "    get path 0 length failed\n");
+        fprintf(stderr, "    get path 0 length failed\n");
         TEST_ERROR;
     }
     if (path_len != 8)
@@ -1068,11 +1068,11 @@ test_path_api_calls(void)
 
     /* Get the path */
     if ((path_len = H5PLget(0, path, 256)) <= 0) {
-        HDfprintf(stderr, "    get 0 len: %zd : %s\n", path_len, path);
+        fprintf(stderr, "    get 0 len: %zd : %s\n", path_len, path);
         TEST_ERROR;
     }
-    if (HDstrcmp(path, "a_path_0") != 0) {
-        HDfprintf(stderr, "    get 0: %s\n", path);
+    if (strcmp(path, "a_path_0") != 0) {
+        fprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1083,17 +1083,17 @@ test_path_api_calls(void)
     /* Get path at index 1 */
     if ((path_len = H5PLget(1, path, 256)) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_1") != 0) {
-        HDfprintf(stderr, "    get 1: %s\n", path);
+    if (strcmp(path, "a_path_1") != 0) {
+        fprintf(stderr, "    get 1: %s\n", path);
         TEST_ERROR;
     }
 
     /* Get path at the last index */
     if ((path_len = H5PLget(n_starting_paths - 1, path, 256)) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%u", n_starting_paths - 1);
-    if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr, "    get %u: %s\n", n_starting_paths - 1, path);
+    sprintf(temp_name, "a_path_%u", n_starting_paths - 1);
+    if (strcmp(path, temp_name) != 0) {
+        fprintf(stderr, "    get %u: %s\n", n_starting_paths - 1, path);
         TEST_ERROR;
     }
 
@@ -1129,8 +1129,8 @@ test_path_api_calls(void)
     /* Verify that the entries were moved */
     if ((path_len = H5PLget(8, path, 256)) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_9") != 0) {
-        HDfprintf(stderr, "    get 8: %s\n", path);
+    if (strcmp(path, "a_path_9") != 0) {
+        fprintf(stderr, "    get 8: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1145,9 +1145,9 @@ test_path_api_calls(void)
     TESTING("    prepend");
 
     /* Prepend one path */
-    HDsprintf(path, "a_path_%d", n_starting_paths + 1);
+    sprintf(path, "a_path_%d", n_starting_paths + 1);
     if (H5PLprepend(path) < 0) {
-        HDfprintf(stderr, "    prepend %u: %s\n", n_starting_paths + 1, path);
+        fprintf(stderr, "    prepend %u: %s\n", n_starting_paths + 1, path);
         TEST_ERROR;
     }
 
@@ -1160,17 +1160,17 @@ test_path_api_calls(void)
     /* Verify that the entries were moved */
     if (H5PLget(8, path, 256) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_7") != 0) {
-        HDfprintf(stderr, "    get 8: %s\n", path);
+    if (strcmp(path, "a_path_7") != 0) {
+        fprintf(stderr, "    get 8: %s\n", path);
         TEST_ERROR;
     }
 
     /* Verify that the path was inserted at index zero */
     if (H5PLget(0, path, 256) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%d", n_starting_paths + 1);
-    if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr, "    get 0: %s\n", path);
+    sprintf(temp_name, "a_path_%d", n_starting_paths + 1);
+    if (strcmp(path, temp_name) != 0) {
+        fprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1183,9 +1183,9 @@ test_path_api_calls(void)
     TESTING("    replace");
 
     /* Replace one path at index 1 */
-    HDsprintf(path, "a_path_%u", n_starting_paths + 4);
+    sprintf(path, "a_path_%u", n_starting_paths + 4);
     if (H5PLreplace(path, 1) < 0) {
-        HDfprintf(stderr, "    replace 1: %s\n", path);
+        fprintf(stderr, "    replace 1: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1202,17 +1202,17 @@ test_path_api_calls(void)
     /* Check path at index 0 */
     if (H5PLget(0, path, 256) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%u", n_starting_paths + 1);
-    if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr, "    get 0: %s\n", path);
+    sprintf(temp_name, "a_path_%u", n_starting_paths + 1);
+    if (strcmp(path, temp_name) != 0) {
+        fprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
     /* Check path at index 2 */
     if (H5PLget(2, path, 256) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_1") != 0) {
-        HDfprintf(stderr, "    get 2: %s\n", path);
+    if (strcmp(path, "a_path_1") != 0) {
+        fprintf(stderr, "    get 2: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1235,8 +1235,8 @@ test_path_api_calls(void)
     /* Verify that the entries were moved */
     if (H5PLget(4, path, 256) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_4") != 0) {
-        HDfprintf(stderr, "    get 4: %s\n", path);
+    if (strcmp(path, "a_path_4") != 0) {
+        fprintf(stderr, "    get 4: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1250,17 +1250,17 @@ test_path_api_calls(void)
     TESTING("    insert");
 
     /* Insert one path at index 3*/
-    HDsprintf(path, "a_path_%d", n_starting_paths + 5);
+    sprintf(path, "a_path_%d", n_starting_paths + 5);
     if (H5PLinsert(path, 3) < 0) {
-        HDfprintf(stderr, "    insert 3: %s\n", path);
+        fprintf(stderr, "    insert 3: %s\n", path);
         TEST_ERROR;
     }
 
     /* Verify that the entries were moved */
     if (H5PLget(4, path, 256) <= 0)
         TEST_ERROR;
-    if (HDstrcmp(path, "a_path_2") != 0) {
-        HDfprintf(stderr, "    get 4: %s\n", path);
+    if (strcmp(path, "a_path_2") != 0) {
+        fprintf(stderr, "    get 4: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1286,7 +1286,7 @@ test_path_api_calls(void)
     /* Remove all existing paths */
     for (u = n_paths; u > 0; u--)
         if (H5PLremove(u - 1) < 0) {
-            HDfprintf(stderr, "    at %u: %s\n", u, path);
+            fprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
 
@@ -1323,7 +1323,7 @@ test_filter_numbers(void)
     unsigned int flags;
     unsigned int filter_config;
 
-    HDputs("Testing filter number handling");
+    puts("Testing filter number handling");
 
     /* Check that out-of-range filter numbers are handled correctly */
     TESTING("    Filter # out of range");
@@ -1470,7 +1470,7 @@ main(void)
 
         /* Set the FAPL for the type of format */
         if (new_format) {
-            HDputs("\nTesting with new file format:");
+            puts("\nTesting with new file format:");
             /* Copy the file access property list and set the latest file format on it */
             if ((new_ff_fapl_id = H5Pcopy(old_ff_fapl_id)) < 0)
                 TEST_ERROR;
@@ -1480,7 +1480,7 @@ main(void)
             my_fapl_id = new_ff_fapl_id;
         }
         else {
-            HDputs("Testing with old file format:");
+            puts("Testing with old file format:");
             my_fapl_id = old_ff_fapl_id;
         }
 
@@ -1512,7 +1512,7 @@ main(void)
         /* ENSURE THAT READING FROM DATASETS AND OPENING GROUPS WORKS      */
         /*******************************************************************/
 
-        HDputs("\nTesting reading data with with dynamic plugin filters:");
+        puts("\nTesting reading data with with dynamic plugin filters:");
 
         /* Close the library so that all loaded plugin libraries are unloaded */
         h5_reset();
@@ -1625,9 +1625,9 @@ main(void)
     if (nerrors)
         TEST_ERROR;
 
-    HDprintf("All plugin tests passed.\n");
+    printf("All plugin tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -1645,6 +1645,6 @@ error:
     free_2D_array(&orig_dynlib4_g);
 
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    printf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    exit(EXIT_FAILURE);
 } /* end main() */

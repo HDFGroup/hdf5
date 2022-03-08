@@ -103,7 +103,7 @@ test_properties(void)
      * not be the case.
      */
     size = (size_t)count * sizeof(char);
-    if (NULL == (buffer = (char *)HDmalloc(size)))
+    if (NULL == (buffer = (char *)malloc(size)))
         TEST_ERROR
     for (i = 0; i < count - 1; i++)
         buffer[i] = (char)(65 + i);
@@ -133,7 +133,7 @@ test_properties(void)
     VERIFY(temp != NULL, "temp is null!");
     VERIFY(temp_size == size, "Sizes of buffers don't match");
     VERIFY(temp != buffer, "Retrieved buffer is the same as original");
-    VERIFY(0 == HDmemcmp(temp, buffer, size), "Buffers contain different data");
+    VERIFY(0 == memcmp(temp, buffer, size), "Buffers contain different data");
 
     /* Copy the fapl */
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
@@ -148,7 +148,7 @@ test_properties(void)
     VERIFY(temp2 != NULL, "Received buffer not set");
     VERIFY(temp2 != buffer, "Retrieved buffer is the same as original");
     VERIFY(temp2 != temp, "Retrieved buffer is the same as previously retrieved buffer");
-    VERIFY(0 == HDmemcmp(temp2, buffer, size), "Buffers contain different data");
+    VERIFY(0 == memcmp(temp2, buffer, size), "Buffers contain different data");
 
     retval = 0;
 
@@ -159,7 +159,7 @@ error:
         retval = 1;
     if (H5Pclose(fapl_2) < 0)
         retval = 1;
-    HDfree(buffer);
+    free(buffer);
     H5free_memory(temp);
     H5free_memory(temp2);
 
@@ -188,7 +188,7 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
 
     u->used_callbacks |= MALLOC;
     u->malloc_src = op;
-    return HDmalloc(size);
+    return malloc(size);
 }
 
 /******************************************************************************
@@ -210,7 +210,7 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
 
     u->used_callbacks |= MEMCPY;
     u->memcpy_src = op;
-    return HDmemcpy(dest, src, size);
+    return memcpy(dest, src, size);
 }
 
 /******************************************************************************
@@ -232,7 +232,7 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
 
     u->used_callbacks |= REALLOC;
     u->realloc_src = op;
-    return HDrealloc(ptr, size);
+    return realloc(ptr, size);
 }
 
 /******************************************************************************
@@ -252,7 +252,7 @@ free_cb(void *ptr, H5FD_file_image_op_t op, void *udata)
 
     u->used_callbacks |= FREE;
     u->free_src = op;
-    HDfree(ptr);
+    free(ptr);
     return (SUCCEED);
 }
 
@@ -350,7 +350,7 @@ test_callbacks(void)
     TESTING("Callback use in property list operations");
 
     /* Allocate and initialize udata */
-    udata = (udata_t *)HDmalloc(sizeof(udata_t));
+    udata = (udata_t *)malloc(sizeof(udata_t));
     VERIFY(udata != NULL, "udata malloc failed");
     reset_udata(udata);
 
@@ -359,7 +359,7 @@ test_callbacks(void)
 
     /* Allocate and initialize file image buffer */
     size       = (size_t)count * sizeof(char);
-    file_image = (char *)HDmalloc(size);
+    file_image = (char *)malloc(size);
     VERIFY(file_image != NULL, "file_image malloc failed");
     for (i = 0; i < count - 1; i++)
         file_image[i] = (char)(65 + i);
@@ -524,16 +524,16 @@ test_callbacks(void)
     /* Close stuff */
     if (H5Pclose(fapl_1) < 0)
         FAIL_STACK_ERROR
-    HDfree(file_image);
-    HDfree(temp_file_image);
-    HDfree(udata);
+    free(file_image);
+    free(temp_file_image);
+    free(udata);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(file_image);
-    HDfree(udata);
+    free(file_image);
+    free(udata);
 
     return 1;
 } /* test_callbacks() */
@@ -583,17 +583,17 @@ test_core(void)
     VERIFY(tmp != NULL, "h5_fixname failed");
 
     /* Append ".copy" to the filename from the source directory */
-    VERIFY(HDstrlen(filename) < (1023 - 5), "file name too long.");
-    HDstrncpy(copied_filename, filename, (size_t)1023);
+    VERIFY(strlen(filename) < (1023 - 5), "file name too long.");
+    strncpy(copied_filename, filename, (size_t)1023);
     copied_filename[1023] = '\0';
-    HDstrcat(copied_filename, ".copy");
+    strcat(copied_filename, ".copy");
 
     /* Make a copy of the data file from svn. */
     ret = h5_make_local_copy(filename, copied_filename);
     VERIFY(ret >= 0, "h5_make_local_copy");
 
     /* Allocate and initialize udata */
-    udata = (udata_t *)HDmalloc(sizeof(udata_t));
+    udata = (udata_t *)malloc(sizeof(udata_t));
     VERIFY(udata != NULL, "udata malloc failed");
 
     /* copy the address of the udata into the callbacks structure */
@@ -662,7 +662,7 @@ test_core(void)
     ret = HDfstat(fd, &sb);
     VERIFY(ret == 0, "fstat failed");
     size       = (size_t)sb.st_size;
-    file_image = (unsigned char *)HDmalloc(size);
+    file_image = (unsigned char *)malloc(size);
     if (HDread(fd, file_image, size) < 0)
         FAIL_PUTS_ERROR("unable to read from file descriptor");
     ret = HDclose(fd);
@@ -680,9 +680,9 @@ test_core(void)
 
     /* Release resources */
     h5_clean_files(FILENAME, fapl);
-    HDfree(udata);
-    HDfree(file_image);
-    HDremove(copied_filename);
+    free(udata);
+    free(file_image);
+    remove(copied_filename);
 
     PASSED();
 
@@ -752,7 +752,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 
     /* setup the file name */
     h5_fixname(FILENAME2[file_name_num], fapl, file_name, sizeof(file_name));
-    VERIFY(HDstrlen(file_name) > 0, "h5_fixname failed");
+    VERIFY(strlen(file_name) > 0, "h5_fixname failed");
 
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     VERIFY(fcpl >= 0, "H5Pcreate");
@@ -790,8 +790,8 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     VERIFY(image_size > 0, "H5Fget_file_image(1) failed.");
 
     /* allocate a buffer of the appropriate size */
-    image_ptr = HDmalloc((size_t)image_size);
-    VERIFY(image_ptr != NULL, "HDmalloc(1) failed.");
+    image_ptr = malloc((size_t)image_size);
+    VERIFY(image_ptr != NULL, "malloc(1) failed.");
 
     /* load the image of the file into the buffer */
     bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)image_size);
@@ -821,7 +821,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
         file_size = 0;
 
         do {
-            HDsnprintf(member_file_name, (size_t)1024, file_name, i);
+            snprintf(member_file_name, (size_t)1024, file_name, i);
 
             /* get the size of the member file */
             result = HDstat(member_file_name, &stat_buf);
@@ -840,8 +840,8 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
         VERIFY(file_size >= image_size, "file size != image size.");
 
         /* allocate a buffer for the test file image */
-        file_image_ptr = HDmalloc((size_t)file_size);
-        VERIFY(file_image_ptr != NULL, "HDmalloc(2f) failed.");
+        file_image_ptr = malloc((size_t)file_size);
+        VERIFY(file_image_ptr != NULL, "malloc(2f) failed.");
 
         size_remaining = image_size;
         insertion_ptr  = file_image_ptr;
@@ -849,7 +849,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 
         while (size_remaining > 0) {
             /* construct the member file name */
-            HDsnprintf(member_file_name, 1024, file_name, i);
+            snprintf(member_file_name, 1024, file_name, i);
 
             /* open the test file using standard I/O calls */
             fd = HDopen(member_file_name, O_RDONLY);
@@ -898,8 +898,8 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
         VERIFY(file_size == image_size, "file size != image size.");
 
         /* allocate a buffer for the test file image */
-        file_image_ptr = HDmalloc((size_t)file_size);
-        VERIFY(file_image_ptr != NULL, "HDmalloc(2) failed.");
+        file_image_ptr = malloc((size_t)file_size);
+        VERIFY(file_image_ptr != NULL, "malloc(2) failed.");
 
         /* open the test file using standard I/O calls */
         fd = HDopen(file_name, O_RDONLY);
@@ -963,11 +963,11 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 
     /* discard the image buffer if it exists */
     if (image_ptr != NULL)
-        HDfree(image_ptr);
+        free(image_ptr);
 
     /* discard the image buffer if it exists */
     if (file_image_ptr != NULL)
-        HDfree(file_image_ptr);
+        free(file_image_ptr);
 
     PASSED();
 
@@ -1035,7 +1035,7 @@ test_get_file_image_error_rejection(void)
 
     /* setup the file name */
     h5_fixname(FILENAME2[6], fapl_id, file_name, sizeof(file_name));
-    VERIFY(HDstrlen(file_name) > 0, "h5_fixname failed");
+    VERIFY(strlen(file_name) > 0, "h5_fixname failed");
 
     /* create the file */
     file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -1066,8 +1066,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(image_size > 0, "H5Fget_file_image(1 -- test 1) failed.");
 
     /* allocate a buffer of the appropriate size */
-    image_ptr = HDmalloc((size_t)image_size);
-    VERIFY(image_ptr != NULL, "HDmalloc(1) failed.");
+    image_ptr = malloc((size_t)image_size);
+    VERIFY(image_ptr != NULL, "malloc(1) failed.");
 
     /* load the image of the file into the buffer */
     H5E_BEGIN_TRY
@@ -1112,7 +1112,7 @@ test_get_file_image_error_rejection(void)
 
     /* discard the image buffer if it exists */
     if (image_ptr != NULL)
-        HDfree(image_ptr);
+        free(image_ptr);
 
     /************************** Test #2 **********************************/
     /* set up a multi file driver test file, and try to get its image
@@ -1167,7 +1167,7 @@ test_get_file_image_error_rejection(void)
 
     /* setup the file name */
     h5_fixname(FILENAME2[4], fapl_id, file_name, sizeof(file_name));
-    VERIFY(HDstrlen(file_name) > 0, "h5_fixname failed");
+    VERIFY(strlen(file_name) > 0, "h5_fixname failed");
 
     /* create the file */
     file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -1229,7 +1229,7 @@ test_get_file_image_error_rejection(void)
 
     /* setup the file name */
     h5_fixname(FILENAME2[5], fapl_id, file_name, sizeof(file_name));
-    VERIFY(HDstrlen(file_name) > 0, "h5_fixname failed");
+    VERIFY(strlen(file_name) > 0, "h5_fixname failed");
 
     /* create the file */
     file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -1289,7 +1289,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Pset_fapl_family failed");
 
     h5_fixname(FILENAME2[3], fapl_id, file_name, sizeof(file_name));
-    VERIFY(HDstrlen(file_name) > 0, "h5_fixname failed");
+    VERIFY(strlen(file_name) > 0, "h5_fixname failed");
 
     /* create the file */
     file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -1357,7 +1357,7 @@ main(void)
 
     h5_reset();
 
-    HDprintf("Testing File Image Functionality.\n");
+    printf("Testing File Image Functionality.\n");
 
     errors += test_properties();
     errors += test_callbacks();
@@ -1418,10 +1418,10 @@ main(void)
     h5_restore_err();
 
     if (errors) {
-        HDprintf("***** %d File Image TEST%s FAILED! *****\n", errors, errors > 1 ? "S" : "");
+        printf("***** %d File Image TEST%s FAILED! *****\n", errors, errors > 1 ? "S" : "");
         return 1;
     }
 
-    HDprintf("All File Image tests passed.\n");
+    printf("All File Image tests passed.\n");
     return 0;
 }

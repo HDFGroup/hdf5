@@ -81,7 +81,7 @@ create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
     if ((top_gid = H5Gcreate2(fid, "top_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         STACK_ERROR
     for (i = 0; i < NGROUPS; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
+        snprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gcreate2(top_gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             STACK_ERROR
         if (H5Gclose(gid) < 0)
@@ -139,7 +139,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
         STACK_ERROR
 
     /* Write some data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         STACK_ERROR
     for (i = 0; i < NELEMENTS; i++)
         data[i] = i;
@@ -153,7 +153,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         STACK_ERROR
 
-    HDfree(data);
+    free(data);
 
     return SUCCEED;
 
@@ -166,7 +166,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(data);
+    free(data);
 
     return FAIL;
 } /* end add_dset_to_file() */
@@ -201,7 +201,7 @@ main(void)
         TEST_ERROR
 
     /* Check if the current VFD supports SWMR */
-    driver            = HDgetenv(HDF5_DRIVER);
+    driver            = getenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     /*************************************************/
@@ -313,11 +313,11 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     /* Flush console output streams */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
     if (H5Pclose(fapl_id) < 0)
@@ -333,5 +333,5 @@ error:
     }
     H5E_END_TRY;
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

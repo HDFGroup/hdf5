@@ -131,7 +131,7 @@ test_h5s_basic()
         hsize_t tdims[4]; // Dimension array to test with
         ndims = sid1.getSimpleExtentDims(tdims);
         verify_val(ndims, SPACE1_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
+        verify_val(memcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
                    "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
 
         // Create simple dataspace sid2
@@ -150,9 +150,9 @@ test_h5s_basic()
         // Retrieves dimension size and max size of dataspace sid2 and
         // verify them
         ndims = sid2.getSimpleExtentDims(tdims, tmax);
-        verify_val(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
+        verify_val(memcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
                    "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
-        verify_val(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
+        verify_val(memcmp(tmax, max2, SPACE2_RANK * sizeof(unsigned)), 0, "DataSpace::getSimpleExtentDims",
                    __LINE__, __FILE__);
 
         // Check to be sure we can't create a simple data space that has too
@@ -514,7 +514,7 @@ test_h5s_compound_scalar_read()
         dataset.read(&rdata, type);
 
         // Verify read data
-        if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
+        if (memcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
             cerr << "scalar data different: space4_data.c1=" << space4_data.c1
                  << ", read_data4.c1=" << rdata.c1 << endl;
             cerr << "scalar data different: space4_data.u=" << space4_data.u << ", read_data4.u=" << rdata.u
@@ -568,5 +568,5 @@ test_h5s()
 extern "C" void
 cleanup_h5s()
 {
-    HDremove(DATAFILE.c_str());
+    remove(DATAFILE.c_str());
 } // cleanup_h5s

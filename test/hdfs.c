@@ -102,7 +102,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -193,10 +193,10 @@
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
         if (reason != NULL) {                                                                                \
-            HDprintf("%s\n", (reason));                                                                      \
+            printf("%s\n", (reason));                                                                      \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
+            printf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
         }                                                                                                    \
     }
 
@@ -233,10 +233,10 @@
         const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
         if (_reason != NULL) {                                                                               \
-            HDprintf("%s\n", _reason);                                                                       \
+            printf("%s\n", _reason);                                                                       \
         }                                                                                                    \
         else {                                                                                               \
-            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
+            printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
         }                                                                                                    \
     }
 
@@ -303,7 +303,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -348,7 +348,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -414,8 +414,8 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -624,8 +624,8 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -710,8 +710,8 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -859,7 +859,7 @@ test_vfd_open(void)
         }
 
 #if HDFS_TEST_DEBUG
-        HDfprintf(stderr, "testing: %s\n", T.message);
+        fprintf(stderr, "testing: %s\n", T.message);
 #endif /* HDFS_TEST_DEBUG */
 
         H5E_BEGIN_TRY
@@ -869,7 +869,7 @@ test_vfd_open(void)
         H5E_END_TRY;
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
-                HDfprintf(stderr, "\n!!!!! WARNING !!!!!\n"
+                fprintf(stderr, "\n!!!!! WARNING !!!!!\n"
                                   "    Successful open of file on local system "
                                   "with non-HDFS VFD.\n");
                 JSVERIFY(SUCCEED, H5FDclose(fd), "unable to close errant open");
@@ -884,7 +884,7 @@ test_vfd_open(void)
     FAIL_IF(NULL != fd) /* sanity check */
 
 #if HDFS_TEST_DEBUG
-    HDfprintf(stderr, "nominal open\n");
+    fprintf(stderr, "nominal open\n");
 #endif /* HDFS_TEST_DEBUG */
 
     /* finally, show that a file can be opened
@@ -897,7 +897,7 @@ test_vfd_open(void)
      ************/
 
 #if HDFS_TEST_DEBUG
-    HDfprintf(stderr, "teardown...\n");
+    fprintf(stderr, "teardown...\n");
 #endif /* HDFS_TEST_DEBUG */
 
     FAIL_IF(FAIL == H5FDclose(fd))
@@ -966,8 +966,8 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1079,8 +1079,8 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1181,8 +1181,8 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1395,8 +1395,8 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1507,7 +1507,7 @@ test_cmp(void)
 {
     TESTING("HDFS cmp (comparison)");
     SKIPPED();
-    HDfprintf(stderr, "    TODO: Distinct valid fapls to open the same file.\n");
+    fprintf(stderr, "    TODO: Distinct valid fapls to open the same file.\n");
 
     return 0;
 
@@ -1541,8 +1541,8 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    puts("    HDFS VFD is not enabled");
+    fflush(stdout);
     return 0;
 
 #else
@@ -1609,8 +1609,8 @@ error:
      ***********/
 
 #if HDFS_TEST_DEBUG
-    HDprintf("\nerror!");
-    HDfflush(stdout);
+    printf("\nerror!");
+    fflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
@@ -1657,19 +1657,19 @@ main(void)
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
-    hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
+    hdfs_namenode_name_env = getenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
-        HDstrncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
     }
     else {
-        HDstrncpy(/* TODO: error-check? */
+        strncpy(/* TODO: error-check? */
                   default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
 #endif /* H5_HAVE_LIBHDFS */
 
     h5_reset();
 
-    HDprintf("Testing hdfs VFD functionality.\n");
+    printf("Testing hdfs VFD functionality.\n");
 
     nerrors += test_fapl_config_validation();
     nerrors += test_hdfs_fapl();
@@ -1682,11 +1682,11 @@ main(void)
     nerrors += test_H5F_integration();
 
     if (nerrors > 0) {
-        HDprintf("***** %d hdfs TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d hdfs TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         nerrors = 1;
     }
     else {
-        HDprintf("All hdfs tests passed.\n");
+        printf("All hdfs tests passed.\n");
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
 

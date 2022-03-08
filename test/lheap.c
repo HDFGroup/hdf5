@@ -97,13 +97,13 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsprintf(buf, "%03d-", i);
+        sprintf(buf, "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
             buf[j] = '\0';
 
-        if (H5HL_insert(f, heap, HDstrlen(buf) + 1, buf, &obj[i]) < 0) {
+        if (H5HL_insert(f, heap, strlen(buf) + 1, buf, &obj[i]) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -137,7 +137,7 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsprintf(buf, "%03d-", i);
+        sprintf(buf, "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
@@ -155,11 +155,11 @@ main(void)
             goto error;
         }
 
-        if (HDstrcmp(s, buf) != 0) {
+        if (strcmp(s, buf) != 0) {
             H5_FAILED();
-            HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
-            HDprintf("    got: \"%s\"\n", s);
-            HDprintf("    ans: \"%s\"\n", buf);
+            printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
+            printf("    got: \"%s\"\n", s);
+            printf("    ans: \"%s\"\n", buf);
             goto error;
         }
 
@@ -191,7 +191,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
+                printf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -207,13 +207,13 @@ main(void)
         FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
-    HDputs("All local heap tests passed.");
+    puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5Fclose(file);

@@ -191,7 +191,7 @@ diff_basename(const char *name)
         return NULL;
 
     /* Find the end of the base name */
-    i = HDstrlen(name);
+    i = strlen(name);
     while (i > 0 && '/' == name[i - 1])
         --i;
 
@@ -322,7 +322,7 @@ print_found(hsize_t nfound)
     if (g_Parallel)
         parallel_print("%" PRIuHSIZE " differences found\n", nfound);
     else
-        HDfprintf(stdout, "%" PRIuHSIZE " differences found\n", nfound);
+        fprintf(stdout, "%" PRIuHSIZE " differences found\n", nfound);
 }
 
 /*-----------------------------------------------------------------

@@ -99,10 +99,10 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(_io_info);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(_buf);
+    assert(_io_info);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
@@ -196,12 +196,12 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(_io_info);
-    HDassert(_io_info->dset);
-    HDassert(_io_info->store);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(_buf);
+    assert(_io_info);
+    assert(_io_info->dset);
+    assert(_io_info->store);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
@@ -288,10 +288,10 @@ H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, vo
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(tscat_buf);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(buf);
+    assert(tscat_buf);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -373,10 +373,10 @@ H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_tg
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(buf);
-    HDassert(iter);
-    HDassert(nelmts > 0);
-    HDassert(tgath_buf);
+    assert(buf);
+    assert(iter);
+    assert(nelmts > 0);
+    assert(tgath_buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -453,11 +453,11 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(buf);
+    assert(io_info);
+    assert(type_info);
+    assert(mem_space);
+    assert(file_space);
+    assert(buf);
 
     /* Check for NOOP read */
     if (nelmts == 0)
@@ -488,7 +488,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
         smine_nelmts = (size_t)MIN(type_info->request_nelmts, (nelmts - smine_start));
 
         /*
@@ -593,11 +593,11 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(buf);
+    assert(io_info);
+    assert(type_info);
+    assert(mem_space);
+    assert(file_space);
+    assert(buf);
 
     /* Check for NOOP write */
     if (nelmts == 0)
@@ -629,7 +629,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
         smine_nelmts = (size_t)MIN(type_info->request_nelmts, (nelmts - smine_start));
 
         /*
@@ -754,13 +754,13 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(nelmts > 0);
-    HDassert(iter);
-    HDassert(type_info);
-    HDassert(type_info->cmpd_subset);
-    HDassert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
+    assert(nelmts > 0);
+    assert(iter);
+    assert(type_info);
+    assert(type_info->cmpd_subset);
+    assert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
              H5T_SUBSET_DST == type_info->cmpd_subset->subset);
-    HDassert(user_buf);
+    assert(user_buf);
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -813,7 +813,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
 
             /* Copy the data into the right place. */
             for (i = 0; i < curr_nelmts; i++) {
-                HDmemmove(xubuf, xdbuf, copy_size);
+                memmove(xubuf, xdbuf, copy_size);
 
                 /* Update pointers */
                 xdbuf += src_stride;
@@ -878,8 +878,8 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(nelmts > 0);
-    HDassert(type_info);
+    assert(nelmts > 0);
+    assert(type_info);
 
     /* Initialize values for loop */
     src_stride = type_info->src_type_size;
@@ -889,7 +889,7 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     xsbuf = (uint8_t *)type_info->tconv_buf;
     xdbuf = (uint8_t *)type_info->tconv_buf;
     for (i = 0; i < nelmts; i++) {
-        HDmemmove(xdbuf, xsbuf, dst_stride);
+        memmove(xdbuf, xsbuf, dst_stride);
 
         /* Update pointers */
         xsbuf += src_stride;

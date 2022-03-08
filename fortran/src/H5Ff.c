@@ -88,7 +88,7 @@ h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hi
         *file_id  = c_file_id;
     }
 
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -189,7 +189,7 @@ h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid
     if (status >= 0)
         ret_value = 0;
 
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -237,7 +237,7 @@ h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
     if (status >= 0)
         ret_value = 0;
 
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -300,7 +300,7 @@ h5fopen_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_
         *file_id  = (hid_t_f)c_file_id;
     } /* end if */
 
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -511,7 +511,7 @@ h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f 
     c_file_id  = (hid_t)*file_id;
     c_obj_type = (unsigned)*obj_type;
     c_max_objs = (size_t)*max_objs;
-    c_obj_ids  = (hid_t *)HDmalloc(sizeof(hid_t) * c_max_objs);
+    c_obj_ids  = (hid_t *)malloc(sizeof(hid_t) * c_max_objs);
 
     c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
     if (c_num_objs < 0)
@@ -519,7 +519,7 @@ h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f 
     for (u = 0; u < c_max_objs; u++)
         obj_ids[u] = (hid_t_f)c_obj_ids[u];
 
-    HDfree(c_obj_ids);
+    free(c_obj_ids);
     *num_objs = (size_t_f)c_num_objs;
 
     return ret_value;
@@ -585,7 +585,7 @@ h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
     /*
      * Allocate buffer to hold name of file
      */
-    if (NULL == (c_buf = (char *)HDmalloc((size_t)*buflen + 1)))
+    if (NULL == (c_buf = (char *)malloc((size_t)*buflen + 1)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -602,7 +602,7 @@ h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 done:
     *size = (size_t_f)size_c;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 

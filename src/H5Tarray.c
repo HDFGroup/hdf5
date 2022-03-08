@@ -144,9 +144,9 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(base);
-    HDassert(ndims <= H5S_MAX_RANK);
-    HDassert(dim);
+    assert(base);
+    assert(ndims <= H5S_MAX_RANK);
+    assert(dim);
 
     /* Build new type */
     if (NULL == (ret_value = H5T__alloc()))
@@ -234,8 +234,8 @@ H5T__get_array_ndims(const H5T_t *dt)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(dt->shared->type == H5T_ARRAY);
+    assert(dt);
+    assert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the number of dimensions */
     FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
@@ -297,8 +297,8 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(dt->shared->type == H5T_ARRAY);
+    assert(dt);
+    assert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
     if (dims)

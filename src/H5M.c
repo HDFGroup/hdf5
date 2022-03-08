@@ -145,7 +145,7 @@ H5M_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(0 == H5I_nmembers(H5I_MAP));
+    assert(0 == H5I_nmembers(H5I_MAP));
 
     /* Destroy the dataset object id group */
     n += (H5I_dec_type_ref(H5I_MAP) > 0);
@@ -171,7 +171,7 @@ H5M__close_cb(H5VL_object_t *map_vol_obj, void **request)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(map_vol_obj);
+    assert(map_vol_obj);
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type = H5VL_MAP_CLOSE;

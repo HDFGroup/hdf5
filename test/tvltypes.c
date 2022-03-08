@@ -61,7 +61,7 @@ test_vltypes_alloc_custom(size_t size, void *mem_used)
                                                                *      DEC Alpha to keep the alignment correct - QAK)
                                                                */
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *(size_t *)mem_used += size;
     } /* end if */
@@ -91,7 +91,7 @@ test_vltypes_free_custom(void *_mem, void *mem_used)
         unsigned char *mem = ((unsigned char *)_mem) - extra;     /* Pointer to actual block allocated */
 
         *(size_t *)mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 }
 
@@ -255,7 +255,7 @@ test_vltypes_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(unsigned int));
+        wdata[i].p   = malloc((i + 1) * sizeof(unsigned int));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].p)[j] = i * 10 + j;
@@ -586,7 +586,7 @@ rewrite_vltypes_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + increment) * sizeof(unsigned int));
+        wdata[i].p   = malloc((i + increment) * sizeof(unsigned int));
         wdata[i].len = i + increment;
         for (j = 0; j < (i + increment); j++)
             ((unsigned int *)wdata[i].p)[j] = i * 20 + j;
@@ -748,7 +748,7 @@ test_vltypes_vlen_compound(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(s1));
+        wdata[i].p   = malloc((i + 1) * sizeof(s1));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             ((s1 *)wdata[i].p)[j].i = (int)(i * 10 + j);
@@ -900,7 +900,7 @@ rewrite_vltypes_vlen_compound(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + increment) * sizeof(s1));
+        wdata[i].p   = malloc((i + increment) * sizeof(s1));
         wdata[i].len = i + increment;
         for (j = 0; j < (i + increment); j++) {
             ((s1 *)wdata[i].p)[j].i = (int)(i * 40 + j);
@@ -1049,17 +1049,17 @@ test_vltypes_compound_vlen_vlen(void)
     MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
 
     /* Allocate and initialize VL data to write */
-    wdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK_PTR(wdata, "HDmalloc");
-    rdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK_PTR(rdata, "HDmalloc");
+    wdata = (s1 *)malloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK_PTR(wdata, "malloc");
+    rdata = (s1 *)malloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK_PTR(rdata, "malloc");
     for (i = 0; i < SPACE3_DIM1; i++) {
         wdata[i].i     = (int)(i * 10);
         wdata[i].f     = (float)(i * 20) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + L1_INCM) * sizeof(hvl_t));
+        wdata[i].v.p   = malloc((i + L1_INCM) * sizeof(hvl_t));
         wdata[i].v.len = i + L1_INCM;
         for (t1 = (hvl_t *)((wdata[i].v).p), j = 0; j < (i + L1_INCM); j++, t1++) {
-            t1->p   = HDmalloc((j + L2_INCM) * sizeof(unsigned int));
+            t1->p   = malloc((j + L2_INCM) * sizeof(unsigned int));
             t1->len = j + L2_INCM;
             for (k = 0; k < j + L2_INCM; k++)
                 ((unsigned int *)t1->p)[k] = i * 100 + j * 10 + k;
@@ -1191,8 +1191,8 @@ test_vltypes_compound_vlen_vlen(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Release buffers */
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 } /* end test_vltypes_compound_vlen_vlen() */
 
 /****************************************************************
@@ -1239,12 +1239,12 @@ test_vltypes_compound_vlstr(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].v.p   = (s2 *)HDmalloc((i + L3_INCM) * sizeof(s2));
+        wdata[i].v.p   = (s2 *)malloc((i + L3_INCM) * sizeof(s2));
         wdata[i].v.len = i + L3_INCM;
         for (t1 = (s2 *)((wdata[i].v).p), j = 0; j < (i + L3_INCM); j++, t1++) {
-            HDstrcat(str, "m");
-            t1->string = (char *)HDmalloc(HDstrlen(str) * sizeof(char) + 1);
-            HDstrcpy(t1->string, str);
+            strcat(str, "m");
+            t1->string = (char *)malloc(strlen(str) * sizeof(char) + 1);
+            strcpy(t1->string, str);
             /*t1->color = red;*/
             t1->color = blue;
         }
@@ -1385,7 +1385,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata[i].v.p), t2 = (s2 *)(rdata[i].v.p), j = 0; j < rdata[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string) != 0) {
+            if (strcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -1407,14 +1407,14 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Treclaim");
 
     /* Use this part for new data */
-    HDstrcpy(str, "bbbbbbbb\0");
+    strcpy(str, "bbbbbbbb\0");
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata2[i].v.p   = (s2 *)HDmalloc((i + 1) * sizeof(s2));
+        wdata2[i].v.p   = (s2 *)malloc((i + 1) * sizeof(s2));
         wdata2[i].v.len = i + 1;
         for (t1 = (s2 *)(wdata2[i].v).p, j = 0; j < i + 1; j++, t1++) {
-            HDstrcat(str, "pp");
-            t1->string = (char *)HDmalloc(HDstrlen(str) * sizeof(char) + 1);
-            HDstrcpy(t1->string, str);
+            strcat(str, "pp");
+            t1->string = (char *)malloc(strlen(str) * sizeof(char) + 1);
+            strcpy(t1->string, str);
             t1->color = green;
         }
     } /* end for */
@@ -1446,7 +1446,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata2[i].v.p), t2 = (s2 *)(rdata2[i].v.p), j = 0; j < rdata2[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string) != 0) {
+            if (strcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -1527,7 +1527,7 @@ test_vltypes_compound_vlen_atomic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i     = (int)(i * 10);
         wdata[i].f     = (float)(i * 20) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + 1) * sizeof(unsigned int));
+        wdata[i].v.p   = malloc((i + 1) * sizeof(unsigned int));
         wdata[i].v.len = i + 1;
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].v.p)[j] = i * 10 + j;
@@ -1631,7 +1631,7 @@ test_vltypes_compound_vlen_atomic(void)
     CHECK(dcpl_pid, FAIL, "H5Pcreate");
 
     /* Set the fill value for the second dataset */
-    HDmemset(&fill, 0, sizeof(s1));
+    memset(&fill, 0, sizeof(s1));
     ret = H5Pset_fill_value(dcpl_pid, tid2, &fill);
     CHECK(ret, FAIL, "H5Pset_fill_value");
 
@@ -1761,7 +1761,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i     = (int)(i * 40);
         wdata[i].f     = (float)(i * 50) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + increment) * sizeof(unsigned int));
+        wdata[i].v.p   = malloc((i + increment) * sizeof(unsigned int));
         wdata[i].v.len = i + increment;
         for (j = 0; j < (i + increment); j++)
             ((unsigned int *)wdata[i].v.p)[j] = i * 60 + j;
@@ -1935,14 +1935,14 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + 1;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + 1); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2136,14 +2136,14 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + increment) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + increment) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + increment;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + increment); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2316,14 +2316,14 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + increment) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + increment) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + increment;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + increment); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2592,8 +2592,8 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Allocate space for the buffer to read data */
-    rbuf = (dtype1_struct *)HDmalloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
-    CHECK_PTR(rbuf, "HDmalloc");
+    rbuf = (dtype1_struct *)malloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
+    CHECK_PTR(rbuf, "malloc");
 
     /* Create the small & large dataspaces to use */
     small_dspace_id = H5Screate_simple(SPACE4_RANK, small_dims, NULL);
@@ -2655,16 +2655,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id = small_dspace_id;
                     ret            = H5Pset_layout(tmp_dcpl_id, H5D_COMPACT);
                     CHECK(ret, FAIL, "H5Pset_layout");
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id = large_dspace_id;
                     break;
 
@@ -2676,28 +2676,28 @@ test_vltypes_fill_value(void)
                     CHECK(ret, FAIL, "H5Pset_chunk");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                         ret = H5Pset_deflate(tmp_dcpl_id, 3);
                         CHECK(ret, FAIL, "H5Pset_deflate");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
                 } break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2765,16 +2765,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id        = small_dspace_id;
                     dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_SMALL;
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id        = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_LARGE;
@@ -2783,13 +2783,13 @@ test_vltypes_fill_value(void)
                 case H5D_CHUNKED:
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
@@ -2799,13 +2799,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2819,10 +2819,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    strcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2833,7 +2833,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -2842,11 +2842,11 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -2877,10 +2877,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    strcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2891,7 +2891,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -2900,11 +2900,11 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -2952,16 +2952,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id        = small_dspace_id;
                     dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_SMALL;
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id        = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_LARGE;
@@ -2970,13 +2970,13 @@ test_vltypes_fill_value(void)
                 case H5D_CHUNKED:
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
@@ -2986,13 +2986,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -3019,22 +3019,22 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3046,7 +3046,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from dataset */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -3055,23 +3055,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                        if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            strcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */
@@ -3107,22 +3107,22 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                        strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3134,7 +3134,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from dataset */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -3143,23 +3143,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                        if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            strcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */
@@ -3213,7 +3213,7 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Release buffer */
-    HDfree(rbuf);
+    free(rbuf);
 } /* end test_vltypes_fill_value() */
 
 /****************************************************************
@@ -3262,5 +3262,5 @@ test_vltypes(void)
 void
 cleanup_vltypes(void)
 {
-    HDremove(FILENAME);
+    remove(FILENAME);
 }

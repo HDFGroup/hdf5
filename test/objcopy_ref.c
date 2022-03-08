@@ -106,7 +106,7 @@ token_insert(H5O_info2_t *oinfo)
     /* Extend the table */
     if (idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2 * idtab_g.nalloc);
-        idtab_g.obj    = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj    = (H5O_token_t *)realloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     }
 
     /* Insert the entry */
@@ -162,7 +162,7 @@ static void
 token_reset(void)
 {
     if (idtab_g.obj)
-        HDfree(idtab_g.obj);
+        free(idtab_g.obj);
     idtab_g.obj    = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
 } /* end token_reset() */
@@ -509,7 +509,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        sprintf(attr_name, "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -636,9 +636,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR
 
     /* Read data from the source attribute */
@@ -669,9 +669,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
             TEST_ERROR
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -694,9 +694,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
 error:
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (rbuf2)
-        HDfree(rbuf2);
+        free(rbuf2);
     H5E_BEGIN_TRY
     {
         H5Sclose(sid2);
@@ -883,11 +883,11 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             else {
                 /* vlens cannot currently be nested below the top layer of a
                  * compound */
-                HDassert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
+                assert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
-                    if (HDmemcmp(memb1, memb2, memb_size) != 0)
+                    if (memcmp(memb1, memb2, memb_size) != 0)
                         TEST_ERROR
 
                     /* Update member pointers */
@@ -1035,7 +1035,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
         else
             TEST_ERROR
     } /* end else */
-    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
+    else if (memcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
         TEST_ERROR
 
     /* Data should be the same. :-) */
@@ -1171,9 +1171,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR
 
     /* Read data from datasets */
@@ -1202,9 +1202,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
             TEST_ERROR
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -1234,9 +1234,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (rbuf)
-            HDfree(rbuf);
+            free(rbuf);
         if (rbuf2)
-            HDfree(rbuf2);
+            free(rbuf2);
         H5Pclose(dcpl2);
         H5Pclose(dcpl);
         H5Sclose(sid2);
@@ -1306,7 +1306,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if (H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR
-            if (HDstrcmp(objname, objname2) != 0)
+            if (strcmp(objname, objname2) != 0)
                 TEST_ERROR
 
             /* Get link info */
@@ -1386,12 +1386,12 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         break;
 
                     case H5O_TYPE_MAP:
-                        HDassert(0 && "maps not supported in native VOL connector");
+                        assert(0 && "maps not supported in native VOL connector");
 
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-                        HDassert(0 && "Unknown type of object");
+                        assert(0 && "Unknown type of object");
                         break;
                 } /* end switch */
 
@@ -1413,18 +1413,18 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     char linkval2[NAME_BUF_SIZE]; /* Link value */
 
                     /* Get link values */
-                    HDassert(linfo.u.val_size <= NAME_BUF_SIZE);
+                    assert(linfo.u.val_size <= NAME_BUF_SIZE);
                     if (H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR
                     if (H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR
 
                     /* Compare link data */
-                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size) != 0)
+                    if (memcmp(linkval, linkval2, linfo.u.val_size) != 0)
                         TEST_ERROR
                 } /* end else-if */
                 else {
-                    HDassert(0 && "Unknown type of link");
+                    assert(0 && "Unknown type of link");
                 } /* end else */
             }     /* end else */
         }         /* end for */
@@ -1860,7 +1860,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -1904,50 +1904,50 @@ main(void)
 
         /* Test with and without shared messages */
         if (configuration & CONFIG_SHARE_SRC) {
-            HDputs("\nTesting with shared src messages:");
+            puts("\nTesting with shared src messages:");
             fcpl_src = fcpl_shared;
         }
         else {
-            HDputs("\nTesting without shared src messages:");
+            puts("\nTesting without shared src messages:");
             fcpl_src = H5P_DEFAULT;
         }
         if (configuration & CONFIG_SHARE_DST) {
-            HDputs("Testing with shared dst messages:");
+            puts("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
         }
         else {
-            HDputs("Testing without shared dst messages:");
+            puts("Testing without shared dst messages:");
             fcpl_dst = H5P_DEFAULT;
         }
 
         /* Set the FAPL for the source file's type of format */
         if (configuration & CONFIG_SRC_NEW_FORMAT) {
-            HDputs("Testing with latest format for source file:");
+            puts("Testing with latest format for source file:");
             src_fapl = fapl2;
 
             /* Test with and without dense attributes */
             if (configuration & CONFIG_DENSE) {
-                HDputs("Testing with dense attributes:");
+                puts("Testing with dense attributes:");
                 num_attributes_g = max_compact + 1;
             }
             else {
-                HDputs("Testing without dense attributes:");
+                puts("Testing without dense attributes:");
                 num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for source file:");
+            puts("Testing with oldest file format for source file:");
             src_fapl         = fapl;
             num_attributes_g = 4;
         } /* end else */
 
         /* Set the FAPL for the destination file's type of format */
         if (configuration & CONFIG_DST_NEW_FORMAT) {
-            HDputs("Testing with latest format for destination file:");
+            puts("Testing with latest format for destination file:");
             dst_fapl = fapl2;
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for destination file:");
+            puts("Testing with oldest file format for destination file:");
             dst_fapl = fapl;
         } /* end else */
 
@@ -1964,11 +1964,11 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
-        HDexit(EXIT_FAILURE);
+        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
+        exit(EXIT_FAILURE);
     } /* end if */
 
-    HDputs("All object copying tests passed.");
+    puts("All object copying tests passed.");
 
     /* close property list.
      * NOTE: if this property list is not closed and the test is
@@ -1995,8 +1995,8 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* main */

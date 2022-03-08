@@ -71,7 +71,7 @@ rsrv_heap(void)
         }
         H5E_END_TRY
 
-        HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i);
+        snprintf(dset_name, sizeof(dset_name), "Dset %d", i);
 
         H5E_BEGIN_TRY
         {
@@ -115,7 +115,7 @@ rsrv_heap(void)
     if (H5open() < 0)
         TEST_ERROR;
 
-    HDsnprintf(dset_name, sizeof(dset_name), "Dset %d", i - 2);
+    snprintf(dset_name, sizeof(dset_name), "Dset %d", i - 2);
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
@@ -218,7 +218,7 @@ rsrv_ohdr(void)
     } /* end for */
 
     for (i = 0; i < 2000; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
+        snprintf(attrname, sizeof(attrname), "attr %d", i);
         H5E_BEGIN_TRY
         {
             aid     = H5Screate_simple(2, dims, NULL);
@@ -489,27 +489,27 @@ main(void)
     hid_t       fapl;
     const char *envval = NULL;
 
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
     /* QAK: should be able to use the core driver? */
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
-        HDstrcmp(envval, "family")) {
+    if (strcmp(envval, "core") && strcmp(envval, "split") && strcmp(envval, "multi") &&
+        strcmp(envval, "family")) {
         num_errs += rsrv_ohdr();
         num_errs += rsrv_heap();
         num_errs += rsrv_vlen();
 
         if (num_errs > 0)
-            HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
+            printf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
         else
-            HDputs("All address space reservation tests passed.");
+            puts("All address space reservation tests passed.");
 
         fapl = h5_fileaccess();
         h5_cleanup(FILENAME, fapl);
         return num_errs;
     }
     else {
-        HDputs(
+        puts(
             "All address space reservation tests skippped - Incompatible with current Virtual File Driver");
     }
 #endif /* BROKEN */

@@ -90,11 +90,11 @@ H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Check whether the file can use temporary addresses */
     if (f->shared->use_tmp_space) {
@@ -149,11 +149,11 @@ H5F__free(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the file driver 'free' routine */
     if (H5FD_free(f->shared->lf, type, f, addr, size) < 0)
@@ -193,11 +193,11 @@ H5F__try_extend(H5F_t *f, H5FD_mem_t type, haddr_t blk_end, hsize_t extra_reques
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(extra_requested > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(extra_requested > 0);
 
     /* Extend the object by extending the underlying file */
     if ((ret_value = H5FD_try_extend(f->shared->lf, type, f, blk_end, extra_requested)) < 0)

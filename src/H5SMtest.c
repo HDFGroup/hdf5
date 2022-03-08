@@ -73,8 +73,8 @@ H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count)
     FUNC_ENTER_PACKAGE_TAG(H5AC__SOHM_TAG)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg_count);
+    assert(f);
+    assert(mesg_count);
 
     /* Check for shared messages being enabled */
     if (H5F_addr_defined(H5F_SOHM_ADDR(f))) {

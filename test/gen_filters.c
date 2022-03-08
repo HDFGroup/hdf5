@@ -243,12 +243,12 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All tests passed.\n");
+    printf("All tests passed.\n");
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
+    printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
     return 1;
 }

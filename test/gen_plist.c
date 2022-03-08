@@ -451,29 +451,29 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
     char                          filename[1024];
 
     /* Generate filename */
-    if ((ret = HDsnprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length,
+    if ((ret = snprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length,
                           little_endian ? "le" : "be")) < 0)
-        HDassert(ret > 0);
+        assert(ret > 0);
 
     /* first call to encode returns only the size of the buffer needed */
     if ((ret = H5Pencode2(plist_id, NULL, &temp_size, H5P_DEFAULT)) < 0)
-        HDassert(ret > 0);
+        assert(ret > 0);
 
-    temp_buf = (void *)HDmalloc(temp_size);
-    HDassert(temp_buf);
+    temp_buf = (void *)malloc(temp_size);
+    assert(temp_buf);
 
     if ((ret = H5Pencode2(plist_id, temp_buf, &temp_size, H5P_DEFAULT)) < 0)
-        HDassert(ret > 0);
+        assert(ret > 0);
 
     fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-    HDassert(fd >= 0);
+    assert(fd >= 0);
 
     write_size = HDwrite(fd, temp_buf, temp_size);
-    HDassert(write_size == (ssize_t)temp_size);
+    assert(write_size == (ssize_t)temp_size);
 
     HDclose(fd);
 
-    HDfree(temp_buf);
+    free(temp_buf);
 
     return 1;
 }

@@ -36,9 +36,9 @@ static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s -c nb file] \n", prog);
-    HDfprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
+    fflush(stdout);
+    fprintf(stdout, "usage: %s -c nb file] \n", prog);
+    fprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -65,14 +65,14 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(h5tools_getprogname());
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         } /* end switch */
     }     /* end while */
 
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 } /* end parse_command_line() */
 
@@ -109,7 +109,7 @@ main(int argc, char *argv[])
     filename = HDstrdup(argv[H5_optind]);
 
     size = 0;
-    if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
+    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
         /* fail */
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
@@ -121,7 +121,7 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    if (NULL == (buf = (char *)HDmalloc((unsigned)(size + 1)))) {
+    if (NULL == (buf = (char *)malloc((unsigned)(size + 1)))) {
         error_msg("can't allocate buffer \n");
         goto error;
     } /* end if */
@@ -138,15 +138,15 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* close things and exit */
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     HDclose(fd);
 
     return EXIT_SUCCESS;
 
 error:
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     if (fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;

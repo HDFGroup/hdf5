@@ -99,7 +99,7 @@
 //! <!-- [H5O_native_info_fields_snip] -->
 
 /* Convenience macro to check if the token is the 'undefined' token value */
-#define H5O_IS_TOKEN_UNDEF(token) (!HDmemcmp(&(token), &(H5O_TOKEN_UNDEF), sizeof(H5O_token_t)))
+#define H5O_IS_TOKEN_UNDEF(token) (!memcmp(&(token), &(H5O_TOKEN_UNDEF), sizeof(H5O_token_t)))
 
 /*******************/
 /* Public Typedefs */

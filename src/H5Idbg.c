@@ -82,10 +82,10 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDfprintf(stderr, "         id = %" PRIdHID "\n", info->id);
-    HDfprintf(stderr, "         count = %u\n", info->count);
-    HDfprintf(stderr, "         obj   = 0x%8p\n", info->object);
-    HDfprintf(stderr, "         marked = %d\n", info->marked);
+    fprintf(stderr, "         id = %" PRIdHID "\n", info->id);
+    fprintf(stderr, "         count = %u\n", info->count);
+    fprintf(stderr, "         obj   = 0x%8p\n", info->object);
+    fprintf(stderr, "         marked = %d\n", info->marked);
 
     /* Get the group location, so we get get the name */
     switch (type) {
@@ -144,9 +144,9 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     if (path) {
         if (path->user_path_r)
-            HDfprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
+            fprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
         if (path->full_path_r)
-            HDfprintf(stderr, "                full_path = %s\n", H5RS_get_str(path->full_path_r));
+            fprintf(stderr, "                full_path = %s\n", H5RS_get_str(path->full_path_r));
     }
 
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
@@ -168,7 +168,7 @@ H5I_dump_ids_for_type(H5I_type_t type)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDfprintf(stderr, "Dumping ID type %d\n", (int)type);
+    fprintf(stderr, "Dumping ID type %d\n", (int)type);
     type_info = H5I_type_info_array_g[type];
 
     if (type_info) {
@@ -177,21 +177,21 @@ H5I_dump_ids_for_type(H5I_type_t type)
         H5I_id_info_t *tmp  = NULL;
 
         /* Header */
-        HDfprintf(stderr, "     init_count = %u\n", type_info->init_count);
-        HDfprintf(stderr, "     reserved   = %u\n", type_info->cls->reserved);
-        HDfprintf(stderr, "     id_count   = %llu\n", (unsigned long long)type_info->id_count);
-        HDfprintf(stderr, "     nextid        = %llu\n", (unsigned long long)type_info->nextid);
+        fprintf(stderr, "     init_count = %u\n", type_info->init_count);
+        fprintf(stderr, "     reserved   = %u\n", type_info->cls->reserved);
+        fprintf(stderr, "     id_count   = %llu\n", (unsigned long long)type_info->id_count);
+        fprintf(stderr, "     nextid        = %llu\n", (unsigned long long)type_info->nextid);
 
         /* List */
         if (type_info->id_count > 0) {
-            HDfprintf(stderr, "     List:\n");
+            fprintf(stderr, "     List:\n");
             /* Normally we care about the callback's return value
              * (H5I_ITER_CONT, etc.), but this is an iteration over all
              * the IDs so we don't care.
              *
              * XXX: Update this to emit an error message on errors?
              */
-            HDfprintf(stderr, "     (HASH TABLE)\n");
+            fprintf(stderr, "     (HASH TABLE)\n");
             HASH_ITER(hh, type_info->hash_table, item, tmp)
             {
                 H5I__id_dump_cb((void *)item, NULL, (void *)&type);
@@ -199,7 +199,7 @@ H5I_dump_ids_for_type(H5I_type_t type)
         }
     }
     else
-        HDfprintf(stderr, "Global type info/tracking pointer for that type is NULL\n");
+        fprintf(stderr, "Global type info/tracking pointer for that type is NULL\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5I_dump_ids_for_type() */

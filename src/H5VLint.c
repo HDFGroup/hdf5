@@ -205,8 +205,8 @@ H5VL_init_phase2(void)
     /* clang-format on */
 
     /* Sanity check default VOL connector */
-    HDassert(H5VL_def_conn_s.connector_id == (-1));
-    HDassert(H5VL_def_conn_s.connector_info == NULL);
+    assert(H5VL_def_conn_s.connector_id == (-1));
+    assert(H5VL_def_conn_s.connector_info == NULL);
 
     /* Set up the default VOL connector in the default FAPL */
     if (H5VL__set_def_conn() < 0)
@@ -283,7 +283,7 @@ H5VL__free_cls(H5VL_class_t *cls, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(cls);
+    assert(cls);
 
     /* Shut down the VOL connector */
     if (cls->terminate && cls->terminate() < 0)
@@ -321,13 +321,13 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
     FUNC_ENTER_STATIC_NOERR
 
     if (H5VL_GET_CONNECTOR_BY_NAME == op_data->key.kind) {
-        if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
+        if (0 == strcmp(cls->name, op_data->key.u.name)) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
     }     /* end if */
     else {
-        HDassert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->key.kind);
+        assert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->key.kind);
         if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
@@ -377,7 +377,7 @@ H5VL__set_def_conn(void)
     } /* end if */
 
     /* Check for environment variable set */
-    env_var = HDgetenv(HDF5_VOL_CONNECTOR);
+    env_var = getenv(HDF5_VOL_CONNECTOR);
 
     /* Only parse the string if it's set */
     if (env_var && *env_var) {
@@ -405,12 +405,12 @@ H5VL__set_def_conn(void)
         } /* end else-if */
         else {
             /* Check for VOL connectors that ship with the library */
-            if (!HDstrcmp(tok, "native")) {
+            if (!strcmp(tok, "native")) {
                 connector_id = H5VL_NATIVE;
                 if (H5I_inc_ref(connector_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "can't increment VOL connector refcount")
             } /* end if */
-            else if (!HDstrcmp(tok, "pass_through")) {
+            else if (!strcmp(tok, "pass_through")) {
                 connector_id = H5VL_PASSTHRU;
                 if (H5I_inc_ref(connector_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "can't increment VOL connector refcount")
@@ -501,7 +501,7 @@ H5VL__wrap_obj(void *obj, H5I_type_t obj_type)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(obj);
+    assert(obj);
 
     /* Retrieve the VOL object wrapping context */
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
@@ -544,8 +544,8 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(object);
-    HDassert(vol_connector);
+    assert(object);
+    assert(vol_connector);
 
     /* Make sure type number is valid */
     if (type != H5I_ATTR && type != H5I_DATASET && type != H5I_DATATYPE && type != H5I_FILE &&
@@ -693,8 +693,8 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Check arguments */
-    HDassert(object);
-    HDassert(vol_connector);
+    assert(object);
+    assert(vol_connector);
 
     /* Set up VOL object for the passed-in data */
     /* (Does not wrap object, since it's from a VOL callback) */
@@ -737,8 +737,8 @@ H5VL_register_using_existing_id(H5I_type_t type, void *object, H5VL_t *vol_conne
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(object);
-    HDassert(vol_connector);
+    assert(object);
+    assert(vol_connector);
 
     /* Set up VOL object for the passed-in data */
     /* (Wraps object, since it's a library object) */
@@ -865,8 +865,8 @@ H5VL_create_object(void *object, H5VL_t *vol_connector)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(object);
-    HDassert(vol_connector);
+    assert(object);
+    assert(vol_connector);
 
     /* Set up VOL object for the passed-in data */
     /* (Does not wrap object, since it's from a VOL callback) */
@@ -958,7 +958,7 @@ H5VL_conn_inc_rc(H5VL_t *connector)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(connector);
+    assert(connector);
 
     /* Increment refcount for connector */
     connector->nrefs++;
@@ -988,7 +988,7 @@ H5VL_conn_dec_rc(H5VL_t *connector)
     FUNC_ENTER_NOAPI(-1)
 
     /* Check arguments */
-    HDassert(connector);
+    assert(connector);
 
     /* Decrement refcount for connector */
     connector->nrefs--;
@@ -1025,7 +1025,7 @@ H5VL_object_inc_rc(H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Check arguments */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Increment refcount for object and return */
     FUNC_LEAVE_NOAPI(++vol_obj->rc)
@@ -1049,7 +1049,7 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     if (--vol_obj->rc == 0) {
         /* Decrement refcount on connector */
@@ -1087,8 +1087,8 @@ H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(obj);
-    HDassert(is_native);
+    assert(obj);
+    assert(is_native);
 
     /* Retrieve the terminal connector class for the object */
     cls = NULL;
@@ -1133,9 +1133,9 @@ H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2, 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(vol_obj1);
-    HDassert(vol_obj2);
-    HDassert(same_file);
+    assert(vol_obj1);
+    assert(vol_obj2);
+    assert(same_file);
 
     /* Retrieve the terminal connectors for each object */
     cls1 = NULL;
@@ -1200,7 +1200,7 @@ H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = H5FL_MALLOC(H5VL_class_t)))
@@ -1264,7 +1264,7 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_
     if (!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector class name cannot be the NULL pointer")
-    if (0 == HDstrlen(cls->name))
+    if (0 == strlen(cls->name))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector class name cannot be the empty string")
     if (cls->info_cls.copy && !cls->info_cls.free)
@@ -1735,9 +1735,9 @@ H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size)
 
     cls = vol_obj->connector->cls;
 
-    len = HDstrlen(cls->name);
+    len = strlen(cls->name);
     if (name) {
-        HDstrncpy(name, cls->name, size);
+        strncpy(name, cls->name, size);
         if (len >= size)
             name[size - 1] = '\0';
     } /* end if */
@@ -1989,8 +1989,8 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(cls1);
-    HDassert(cls2);
+    assert(cls1);
+    assert(cls2);
 
     /* If the pointers are the same the classes are the same */
     if (cls1 == cls2) {
@@ -2007,7 +2007,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    HDassert(cls1->value == cls2->value);
+    assert(cls1->value == cls2->value);
 
     /* Compare connector names */
     if (cls1->name == NULL && cls2->name != NULL) {
@@ -2018,7 +2018,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    if (0 != (*cmp_value = HDstrcmp(cls1->name, cls2->name)))
+    if (0 != (*cmp_value = strcmp(cls1->name, cls2->name)))
         HGOTO_DONE(SUCCEED)
 
     /* Compare connector VOL API versions */
@@ -2030,7 +2030,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    HDassert(cls1->version == cls2->version);
+    assert(cls1->version == cls2->version);
 
     /* Compare connector info */
     if (cls1->info_cls.size < cls2->info_cls.size) {
@@ -2041,7 +2041,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED)
     } /* end if */
-    HDassert(cls1->info_cls.size == cls2->info_cls.size);
+    assert(cls1->info_cls.size == cls2->info_cls.size);
 
     /* Set comparison value to 'equal' */
     *cmp_value = 0;
@@ -2071,7 +2071,7 @@ H5VL_retrieve_lib_state(void **state)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(state);
+    assert(state);
 
     /* Retrieve the API context state */
     if (H5CX_retrieve_state((H5CX_state_t **)state) < 0)
@@ -2134,7 +2134,7 @@ H5VL_restore_lib_state(const void *state)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(state);
+    assert(state);
 
     /* Restore the API context state */
     if (H5CX_restore_state((const H5CX_state_t *)state) < 0)
@@ -2202,7 +2202,7 @@ H5VL_free_lib_state(void *state)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(state);
+    assert(state);
 
     /* Free the API context state */
     if (H5CX_free_state((H5CX_state_t *)state) < 0)
@@ -2232,10 +2232,10 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(vol_wrap_ctx);
-    HDassert(0 == vol_wrap_ctx->rc);
-    HDassert(vol_wrap_ctx->connector);
-    HDassert(vol_wrap_ctx->connector->cls);
+    assert(vol_wrap_ctx);
+    assert(0 == vol_wrap_ctx->rc);
+    assert(vol_wrap_ctx->connector);
+    assert(vol_wrap_ctx->connector->cls);
 
     /* If there is a VOL connector object wrapping context, release it */
     if (vol_wrap_ctx->obj_wrap_ctx)
@@ -2273,7 +2273,7 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Retrieve the VOL object wrap context */
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
@@ -2284,13 +2284,13 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
         void *obj_wrap_ctx = NULL; /* VOL connector's wrapping context */
 
         /* Sanity checks */
-        HDassert(vol_obj->data);
-        HDassert(vol_obj->connector);
+        assert(vol_obj->data);
+        assert(vol_obj->connector);
 
         /* Check if the connector can create a wrap context */
         if (vol_obj->connector->cls->wrap_cls.get_wrap_ctx) {
             /* Sanity check */
-            HDassert(vol_obj->connector->cls->wrap_cls.free_wrap_ctx);
+            assert(vol_obj->connector->cls->wrap_cls.free_wrap_ctx);
 
             /* Get the wrap context from the connector */
             if ((vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx) < 0)
@@ -2463,7 +2463,7 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Sanity check */
-    HDassert(obj);
+    assert(obj);
 
     /* Retrieve the VOL object wrapping context */
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
@@ -2517,19 +2517,19 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(cls);
-    HDassert(key);
-    HDassert(success);
+    assert(cls);
+    assert(key);
+    assert(success);
 
     /* Which kind of key are we looking for? */
     if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
         /* Check if plugin name matches VOL connector class name */
-        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+        if (cls->name && !strcmp(cls->name, key->vol.u.name))
             *success = TRUE;
     } /* end if */
     else {
         /* Sanity check */
-        HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+        assert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
 
         /* Check if plugin value matches VOL connector class value */
         if (cls->value == key->vol.u.value)
@@ -2558,7 +2558,7 @@ H5VL__is_default_conn(hid_t fapl_id, hid_t connector_id, hbool_t *is_default)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(is_default);
+    assert(is_default);
 
     /* Determine if the default VOL connector will be used, based on non-default
      * values in the FAPL, connector ID, or the HDF5_VOL_CONNECTOR environment
@@ -2587,7 +2587,7 @@ H5VL_setup_args(hid_t loc_id, H5I_type_t id_type, H5VL_object_t **vol_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
+    assert(vol_obj);
 
     /* Get attribute pointer */
     if (NULL == (*vol_obj = (H5VL_object_t *)H5I_object_verify(loc_id, id_type)))
@@ -2618,8 +2618,8 @@ H5VL_setup_loc_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *lo
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Get the location object */
     if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
@@ -2655,10 +2655,10 @@ H5VL_setup_acc_args(hid_t loc_id, const H5P_libclass_t *libclass, hbool_t is_col
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(libclass);
-    HDassert(acspl_id);
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(libclass);
+    assert(acspl_id);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(acspl_id, libclass, loc_id, is_collective) < 0)
@@ -2693,8 +2693,8 @@ H5VL_setup_self_args(hid_t loc_id, H5VL_object_t **vol_obj, H5VL_loc_params_t *l
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Get the location object */
     if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
@@ -2726,8 +2726,8 @@ H5VL_setup_name_args(hid_t loc_id, const char *name, hbool_t is_collective, hid_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Check args */
     if (!name)
@@ -2772,8 +2772,8 @@ H5VL_setup_idx_args(hid_t loc_id, const char *name, H5_index_t idx_type, H5_iter
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Check args */
     if (!name)
@@ -2824,8 +2824,8 @@ H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Get the location object */
     if (NULL == (*vol_obj = (H5VL_object_t *)H5VL_vol_object(loc_id)))
@@ -2861,7 +2861,7 @@ H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_fl
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(connector_prop);
+    assert(connector_prop);
 
     /* Copy the connector ID & info, if there is one */
     if (connector_prop->connector_id > 0) {

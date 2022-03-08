@@ -115,8 +115,8 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (*p++ != H5O_LINFO_VERSION)
@@ -186,9 +186,9 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(linfo);
+    assert(f);
+    assert(p);
+    assert(linfo);
 
     /* Message version */
     *p++ = H5O_LINFO_VERSION;
@@ -212,7 +212,7 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     if (linfo->index_corder)
         H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
     else
-        HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
+        assert(!H5F_addr_defined(linfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__linfo_encode() */
@@ -241,7 +241,7 @@ H5O__linfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(linfo);
+    assert(linfo);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_linfo_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -308,7 +308,7 @@ H5O__linfo_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_linfo_t, mesg);
 
@@ -336,8 +336,8 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(linfo);
+    assert(f);
+    assert(linfo);
 
     /* If the group is using "dense" link storage, delete it */
     if (H5F_addr_defined(linfo->fheap_addr))
@@ -375,8 +375,8 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
     FUNC_ENTER_STATIC_TAG(H5AC__COPIED_TAG)
 
     /* check args */
-    HDassert(linfo_src);
-    HDassert(cpy_info);
+    assert(linfo_src);
+    assert(cpy_info);
 
     /* Copy the source message */
     if (NULL == (linfo_dst = (H5O_linfo_t *)H5O__linfo_copy(linfo_src, NULL)))
@@ -441,8 +441,8 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(src_lnk);
-    HDassert(udata);
+    assert(src_lnk);
+    assert(udata);
 
     /* Copy the link (and the object it points to) */
     if (H5L__link_copy_file(udata->dst_oloc->file, src_lnk, udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
@@ -491,12 +491,12 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(src_oloc && src_oloc->file);
-    HDassert(linfo_src);
-    HDassert(dst_oloc && dst_oloc->file);
-    HDassert(H5F_addr_defined(dst_oloc->addr));
-    HDassert(linfo_dst);
-    HDassert(cpy_info);
+    assert(src_oloc && src_oloc->file);
+    assert(linfo_src);
+    assert(dst_oloc && dst_oloc->file);
+    assert(H5F_addr_defined(dst_oloc->addr));
+    assert(linfo_dst);
+    assert(cpy_info);
 
     /* If we are performing a 'shallow hierarchy' copy, get out now */
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
@@ -542,24 +542,24 @@ H5O__linfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(linfo);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(linfo);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Track creation order of links:", linfo->track_corder ? "TRUE" : "FALSE");
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Index creation order of links:", linfo->index_corder ? "TRUE" : "FALSE");
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
-    HDfprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
+    fprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth,
               "Max. creation order value:", linfo->max_corder);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage fractal heap address:", linfo->fheap_addr);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage creation order index v2 B-tree address:", linfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

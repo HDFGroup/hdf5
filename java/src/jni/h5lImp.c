@@ -424,7 +424,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* add extra space for the null terminator */
-    if (NULL == (linkName = (char *)HDmalloc(sizeof(char) * (size_t)status_size + 1)))
+    if (NULL == (linkName = (char *)malloc(sizeof(char) * (size_t)status_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_name_by_idx: failed to allocate buffer for link name");
 
     if ((H5Lget_name_by_idx((hid_t)loc_id, groupName, (H5_index_t)index_field, (H5_iter_order_t)order,
@@ -438,7 +438,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
 
 done:
     if (linkName)
-        HDfree(linkName);
+        free(linkName);
     if (groupName)
         UNPIN_JAVA_STRING(ENVONLY, name, groupName);
 
@@ -478,7 +478,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstrin
     if (H5L_TYPE_HARD == infobuf.type)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val: hard links are unsupported");
 
-    if (NULL == (linkValue = (char *)HDmalloc(sizeof(char) * infobuf.u.val_size + 1)))
+    if (NULL == (linkValue = (char *)malloc(sizeof(char) * infobuf.u.val_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val((hid_t)loc_id, linkName, (void *)linkValue, infobuf.u.val_size + 1,
@@ -527,7 +527,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstrin
 
 done:
     if (linkValue)
-        HDfree(linkValue);
+        free(linkValue);
     if (linkName)
         UNPIN_JAVA_STRING(ENVONLY, name, linkName);
 
@@ -572,7 +572,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
     if (!infobuf.u.val_size)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (linkValue = (void *)HDmalloc(infobuf.u.val_size + 1)))
+    if (NULL == (linkValue = (void *)malloc(infobuf.u.val_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val_by_idx: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order,
@@ -622,7 +622,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
 
 done:
     if (linkValue)
-        HDfree(linkValue);
+        free(linkValue);
     if (grpName)
         UNPIN_JAVA_STRING(ENVONLY, name, grpName);
 

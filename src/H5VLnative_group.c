@@ -90,7 +90,7 @@ H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_params, const 
         /* Set up group creation info */
         gcrt_info.gcpl_id    = gcpl_id;
         gcrt_info.cache_type = H5G_NOTHING_CACHED;
-        HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+        memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
 
         /* Create the new group & get its ID */
         if (NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info)))

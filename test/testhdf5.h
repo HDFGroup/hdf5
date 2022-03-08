@@ -136,7 +136,7 @@
                        "%s \n",                                                                              \
                        (where), (int)__LINE__, __FILE__, x);                                                 \
         }                                                                                                    \
-        if (HDstrcmp(x, val) != 0) {                                                                         \
+        if (strcmp(x, val) != 0) {                                                                         \
             TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d "                \
                           "in %s\n",                                                                         \
                           where, val, x, (int)__LINE__, __FILE__);                                           \

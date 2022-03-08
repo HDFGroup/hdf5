@@ -94,8 +94,8 @@ H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (*p++ != H5O_REFCOUNT_VERSION)
@@ -139,9 +139,9 @@ H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(refcount);
+    assert(f);
+    assert(p);
+    assert(refcount);
 
     /* Message version */
     *p++ = H5O_REFCOUNT_VERSION;
@@ -176,7 +176,7 @@ H5O__refcount_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(refcount);
+    assert(refcount);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_refcount_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -237,7 +237,7 @@ H5O__refcount_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_refcount_t, mesg);
 
@@ -266,8 +266,8 @@ H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_U
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(deleted);
-    HDassert(cpy_info);
+    assert(deleted);
+    assert(cpy_info);
 
     /* Always delete this message when copying objects between files.  Let
      *  the copy routine set the correct ref. count.
@@ -297,13 +297,13 @@ H5O__refcount_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, in
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(refcount);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(refcount);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of links:", (unsigned)*refcount);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of links:", (unsigned)*refcount);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__refcount_debug() */

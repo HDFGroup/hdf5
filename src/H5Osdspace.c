@@ -117,8 +117,8 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* decode */
     if (NULL == (sdim = H5FL_CALLOC(H5S_extent_t)))
@@ -154,7 +154,7 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
         /* Increment past reserved byte */
         p++;
     } /* end else */
-    HDassert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
+    assert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
 
     /* Only Version 1 has these reserved bytes */
     if (version == H5O_SDSPACE_VERSION_1)
@@ -236,13 +236,13 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(sdim);
+    assert(f);
+    assert(p);
+    assert(sdim);
 
     /* Version */
-    HDassert(sdim->version > 0);
-    HDassert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
+    assert(sdim->version > 0);
+    assert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
     *p++ = (uint8_t)sdim->version;
 
     /* Rank */
@@ -304,7 +304,7 @@ H5O__sdspace_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
     if (!dest && NULL == (dest = H5FL_CALLOC(H5S_extent_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -406,7 +406,7 @@ H5O__sdspace_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5S_extent_t, mesg);
 
@@ -439,10 +439,10 @@ H5O__sdspace_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(file_src);
-    HDassert(src_space_extent);
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(file_src);
+    assert(src_space_extent);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
@@ -495,35 +495,35 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(sdim);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(sdim);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth, "Rank:", (unsigned long)(sdim->rank));
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth, "Rank:", (unsigned long)(sdim->rank));
 
     if (sdim->rank > 0) {
         unsigned u; /* local counting variable */
 
-        HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+        fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
-            HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
-        HDfprintf(stream, "}\n");
+            fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
+        fprintf(stream, "}\n");
 
-        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
         if (sdim->max) {
-            HDfprintf(stream, "{");
+            fprintf(stream, "{");
             for (u = 0; u < sdim->rank; u++) {
                 if (H5S_UNLIMITED == sdim->max[u])
-                    HDfprintf(stream, "%sUNLIM", u ? ", " : "");
+                    fprintf(stream, "%sUNLIM", u ? ", " : "");
                 else
-                    HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
+                    fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
             } /* end for */
-            HDfprintf(stream, "}\n");
+            fprintf(stream, "}\n");
         } /* end if */
         else
-            HDfprintf(stream, "CONSTANT\n");
+            fprintf(stream, "CONSTANT\n");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

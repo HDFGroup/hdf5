@@ -62,39 +62,39 @@ static struct h5_long_options l_opts[] = {
 static void
 usage(const char *prog)
 {
-    HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
-    HDfprintf(stdout, "  OPTIONS\n");
-    HDfprintf(stdout, "   -h, --help                Print a usage message and exit\n");
-    HDfprintf(stdout, "   -V, --version             Print version number and exit\n");
-    HDfprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
-    HDfprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
-    HDfprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
+    fprintf(stdout, "  OPTIONS\n");
+    fprintf(stdout, "   -h, --help                Print a usage message and exit\n");
+    fprintf(stdout, "   -V, --version             Print version number and exit\n");
+    fprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
+    fprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
+    fprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
+    fprintf(stdout,
               "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
-    HDfprintf(stdout, "                             the file <file_name>.\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "                             the file <file_name>.\n");
+    fprintf(stdout,
               "                             C is >= 0; C is optional and will default to 1M when not set.\n");
-    HDfprintf(
+    fprintf(
         stdout,
         "                             This option helps to repair a crashed file where the stored EOA\n");
-    HDfprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+    fprintf(stdout,
               "                             The file’s EOA and EOF will be the same after applying\n");
-    HDfprintf(stdout, "                             this option to the file.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Examples of use:\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5clear -s file_name\n");
-    HDfprintf(stdout, "  Clear the status_flags field in the superblock of the HDF5 file <file_name>.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5clear -m file_name\n");
-    HDfprintf(stdout, "  Remove the metadata cache image from the HDF5 file <file_name>.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5clear --increment file_name\n");
-    HDfprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5clear --increment=512 file_name\n");
-    HDfprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
+    fprintf(stdout, "                             this option to the file.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Examples of use:\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5clear -s file_name\n");
+    fprintf(stdout, "  Clear the status_flags field in the superblock of the HDF5 file <file_name>.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5clear -m file_name\n");
+    fprintf(stdout, "  Remove the metadata cache image from the HDF5 file <file_name>.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5clear --increment file_name\n");
+    fprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5clear --increment=512 file_name\n");
+    fprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
 } /* usage() */
 
 /*-------------------------------------------------------------------------
@@ -148,11 +148,11 @@ parse_command_line(int argc, const char *const *argv)
             case 'i':
                 increment_eoa_eof = TRUE;
                 if (H5_optarg != NULL) {
-                    if (HDatoi(H5_optarg) < 0) {
+                    if (atoi(H5_optarg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(H5_optarg);
+                    increment = (hsize_t)atoi(H5_optarg);
                 }
                 break;
 
@@ -193,7 +193,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 } /* leave() */
 
 /*-------------------------------------------------------------------------
@@ -329,7 +329,7 @@ main(int argc, char *argv[])
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        HDfprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
+        fprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
     }
 
     /* --increment option */
@@ -357,9 +357,9 @@ main(int argc, char *argv[])
 
 done:
     if (fname)
-        HDfree(fname);
+        free(fname);
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
 
     H5E_BEGIN_TRY
     {

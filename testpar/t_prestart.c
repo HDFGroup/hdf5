@@ -75,8 +75,8 @@ main(int argc, char **argv)
     VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
 
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* Each process takes a slabs of rows. */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -104,7 +104,7 @@ main(int argc, char **argv)
     for (i = 0; i < block[0]; i++) {
         for (j = 0; j < block[1]; j++) {
             if (*dataptr != mpi_rank + 1) {
-                HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+                printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
                          (unsigned long)i, (unsigned long)j, (unsigned long)((hsize_t)i + start[0]),
                          (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1, *(dataptr));
                 nerrors++;
@@ -113,11 +113,11 @@ main(int argc, char **argv)
         }
     }
     MPI_Finalize();
-    HDremove(filename);
+    remove(filename);
 
     /* release data buffers */
     if (data_array)
-        HDfree(data_array);
+        free(data_array);
 
     nerrors += GetTestNumErrs();
 

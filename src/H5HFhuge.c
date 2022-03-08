@@ -101,7 +101,7 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute the size of 'raw' records on disk */
     /* (Note: the size for huge IDs could be set to 'huge_id_size', instead
@@ -179,7 +179,7 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute information about 'huge' objects for the heap */
 
@@ -251,7 +251,7 @@ H5HF__huge_new_id(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check for wrapping around 'huge' object ID space */
     if (hdr->huge_ids_wrapped)
@@ -301,10 +301,10 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(obj_size > hdr->max_man_size);
-    HDassert(obj);
-    HDassert(id);
+    assert(hdr);
+    assert(obj_size > hdr->max_man_size);
+    assert(obj);
+    assert(id);
 
     /* Check if the v2 B-tree for tracking 'huge' heap objects has been created yet */
     if (!H5F_addr_defined(hdr->huge_bt2_addr)) {
@@ -322,7 +322,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
                             "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
     }     /* end else */
-    HDassert(hdr->huge_bt2);
+    assert(hdr->huge_bt2);
 
     /* Check for I/O pipeline filter on heap */
     if (hdr->filter_len > 0) {
@@ -363,7 +363,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
     /* Release buffer for writing, if we had one */
     if (write_buf != obj) {
-        HDassert(hdr->filter_len > 0);
+        assert(hdr->filter_len > 0);
         H5MM_xfree(write_buf);
     } /* end if */
 
@@ -482,10 +482,10 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(hdr);
+    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
+    assert(obj_len_p);
 
     /* Skip over the flag byte */
     id++;
@@ -580,10 +580,10 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
-    HDassert(obj_off_p);
+    assert(hdr);
+    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
+    assert(obj_off_p);
 
     /* Skip over the flag byte */
     id++;
@@ -597,7 +597,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5F_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -675,9 +675,9 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(is_read || op);
+    assert(hdr);
+    assert(id);
+    assert(is_read || op);
 
     /* Skip over the flag byte */
     id++;
@@ -696,7 +696,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
         hbool_t found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5F_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -830,9 +830,9 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Check for filters on the heap */
     if (hdr->filter_len > 0)
@@ -853,7 +853,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         hbool_t                   found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5F_addr_defined(hdr->huge_bt2_addr));
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -908,9 +908,9 @@ H5HF__huge_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Call the internal 'op' routine */
     if (H5HF__huge_op_real(hdr, id, TRUE, NULL, obj) < 0)
@@ -942,9 +942,9 @@ H5HF__huge_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_d
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Call the internal 'op' routine routine */
     if (H5HF__huge_op_real(hdr, id, FALSE, op, op_data) < 0)
@@ -977,9 +977,9 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(id);
+    assert(hdr);
+    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(id);
 
     /* Check if v2 B-tree is open yet */
     if (NULL == hdr->huge_bt2) {
@@ -1083,12 +1083,12 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Check if v2 B-tree index is open */
     if (hdr->huge_bt2) {
         /* Sanity check */
-        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+        assert(H5F_addr_defined(hdr->huge_bt2_addr));
 
         /* Close v2 B-tree index */
         if (H5B2_close(hdr->huge_bt2) < 0)
@@ -1101,7 +1101,7 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
      */
     if (H5F_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
         /* Sanity check */
-        HDassert(hdr->huge_size == 0);
+        assert(hdr->huge_size == 0);
 
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
@@ -1147,10 +1147,10 @@ H5HF__huge_delete(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
-    HDassert(hdr->huge_nobjs);
-    HDassert(hdr->huge_size);
+    assert(hdr);
+    assert(H5F_addr_defined(hdr->huge_bt2_addr));
+    assert(hdr->huge_nobjs);
+    assert(hdr->huge_size);
 
     /* Set up the callback info */
     udata.hdr = hdr;

@@ -87,8 +87,8 @@ H5EA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
@@ -118,8 +118,8 @@ H5EA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)

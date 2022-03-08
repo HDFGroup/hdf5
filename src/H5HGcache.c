@@ -117,12 +117,12 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, const H5F_t *f)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(heap);
-    HDassert(image);
-    HDassert(f);
+    assert(heap);
+    assert(image);
+    assert(f);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -135,7 +135,7 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, const H5F_t *f)
 
     /* Size */
     H5F_DECODE_LENGTH(f, image, heap->size);
-    HDassert(heap->size >= H5HG_MINSIZE);
+    assert(heap->size >= H5HG_MINSIZE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -164,7 +164,7 @@ H5HG__cache_heap_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *imag
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(image_len);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = (size_t)H5HG_MINSIZE;
@@ -196,11 +196,11 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UN
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(actual_len);
-    HDassert(*actual_len == image_len);
-    HDassert(image_len == H5HG_MINSIZE);
+    assert(image);
+    assert(udata);
+    assert(actual_len);
+    assert(*actual_len == image_len);
+    assert(image_len == H5HG_MINSIZE);
 
     /* Deserialize the heap's header */
     if (H5HG__hdr_deserialize(&heap, (const uint8_t *)image, (const H5F_t *)udata) < 0)
@@ -241,10 +241,10 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(_image);
-    HDassert(len >= (size_t)H5HG_MINSIZE);
-    HDassert(f);
-    HDassert(dirty);
+    assert(_image);
+    assert(len >= (size_t)H5HG_MINSIZE);
+    assert(f);
+    assert(dirty);
 
     /* Allocate a new global heap */
     if (NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
@@ -277,7 +277,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
              * The last bit of space is too tiny for an object header, so
              * we assume that it's free space.
              */
-            HDassert(NULL == heap->obj[0].begin);
+            assert(NULL == heap->obj[0].begin);
             heap->obj[0].size  = (size_t)(((const uint8_t *)heap->chunk + heap->size) - image);
             heap->obj[0].begin = image;
             image += heap->obj[0].size;
@@ -296,19 +296,19 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
 
                 /* Determine the new number of objects to index */
                 new_alloc = MAX(heap->nalloc * 2, (idx + 1));
-                HDassert(idx < new_alloc);
+                assert(idx < new_alloc);
 
                 /* Reallocate array of objects */
                 if (NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
                 /* Clear newly allocated space */
-                HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+                memset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
 
                 /* Update heap information */
                 heap->nalloc = new_alloc;
                 heap->obj    = new_obj;
-                HDassert(heap->nalloc > heap->nused);
+                assert(heap->nalloc > heap->nused);
             } /* end if */
 
             UINT16DECODE(image, heap->obj[idx].nrefs);
@@ -337,8 +337,8 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     }     /* end while */
 
     /* Sanity checks */
-    HDassert(image == heap->chunk + heap->size);
-    HDassert(H5HG_ISALIGNED(heap->obj[0].size));
+    assert(image == heap->chunk + heap->size);
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /* Set the next index value to use */
     if (max_idx > 0)
@@ -347,7 +347,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
         heap->nused = 1;
 
     /* Sanity check */
-    HDassert(max_idx < heap->nused);
+    assert(max_idx < heap->nused);
 
     /* Add the new heap to the CWFS list for the file */
     if (H5F_cwfs_add(f, heap) < 0)
@@ -385,11 +385,11 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
-    HDassert(heap->size >= H5HG_MINSIZE);
-    HDassert(image_len);
+    assert(heap);
+    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap->size >= H5HG_MINSIZE);
+    assert(image_len);
 
     *image_len = heap->size;
 
@@ -419,13 +419,13 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(f);
-    HDassert(image);
-    HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
-    HDassert(heap->size == len);
-    HDassert(heap->chunk);
+    assert(f);
+    assert(image);
+    assert(heap);
+    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap->size == len);
+    assert(heap->chunk);
 
     /* copy the image into the buffer */
     H5MM_memcpy(image, heap->chunk, len);
@@ -459,9 +459,9 @@ H5HG__cache_heap_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap);
+    assert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(heap->cache_info.type == H5AC_GHEAP);
 
     /* Destroy global heap collection */
     if (H5HG__free(heap) < 0)

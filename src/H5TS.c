@@ -160,9 +160,9 @@ H5TS__key_destructor(void *key_val)
 {
     FUNC_ENTER_STATIC_NAMECHECK_ONLY
 
-    /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5CS routines */
+    /* Use free here instead of H5MM_xfree(), to avoid calling the H5CS routines */
     if (key_val != NULL)
-        HDfree(key_val);
+        free(key_val);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS__key_destructor() */
@@ -271,7 +271,7 @@ H5TS_thread_id(void)
 
     /* If a prototype ID record was established, copy it to the heap. */
     if (tid == &proto_tid)
-        if ((tid = HDmalloc(sizeof(*tid))) != NULL)
+        if ((tid = malloc(sizeof(*tid))) != NULL)
             *tid = proto_tid;
 
     if (tid == NULL)
@@ -717,17 +717,17 @@ H5TS_cancel_count_inc(void)
          * First time thread calls library - create new counter and associate
          * with key.
          *
-         * Don't use H5MM calls here since the destructor has to use HDfree in
+         * Don't use H5MM calls here since the destructor has to use free in
          * order to avoid codestack calls.
          */
-        cancel_counter = (H5TS_cancel_t *)HDcalloc(1, sizeof(H5TS_cancel_t));
+        cancel_counter = (H5TS_cancel_t *)calloc(1, sizeof(H5TS_cancel_t));
         if (NULL == cancel_counter)
             HGOTO_DONE(FAIL);
 
         /* Set the thread's cancellation counter with the new object */
         ret_value = HDpthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter);
         if (ret_value) {
-            HDfree(cancel_counter);
+            free(cancel_counter);
             HGOTO_DONE(FAIL);
         } /* end if */
     }     /* end if */

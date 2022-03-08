@@ -100,9 +100,9 @@ H5F_cwfs_add(H5F_t *f, H5HG_heap_t *heap)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(heap);
+    assert(f);
+    assert(f->shared);
+    assert(heap);
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -120,13 +120,13 @@ H5F_cwfs_add(H5F_t *f, H5HG_heap_t *heap)
 
         for (i = H5F_NCWFS - 1; i >= 0; --i)
             if (H5HG_FREE_SIZE(f->shared->cwfs[i]) < H5HG_FREE_SIZE(heap)) {
-                HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, (size_t)i * sizeof(H5HG_heap_t *));
+                memmove(f->shared->cwfs + 1, f->shared->cwfs, (size_t)i * sizeof(H5HG_heap_t *));
                 f->shared->cwfs[0] = heap;
                 break;
             } /* end if */
     }
     else {
-        HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
+        memmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
         f->shared->cwfs[0] = heap;
         f->shared->ncwfs += 1;
     } /* end else */
@@ -159,9 +159,9 @@ H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(addr);
+    assert(f);
+    assert(f->shared);
+    assert(addr);
 
     /* Note that we don't have metadata cache locks on the entries in
      * f->shared->cwfs.
@@ -255,9 +255,9 @@ H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(heap);
+    assert(f);
+    assert(f->shared);
+    assert(heap);
 
     for (u = 0; u < f->shared->ncwfs; u++)
         if (f->shared->cwfs[u] == heap) {
@@ -297,14 +297,14 @@ H5F_cwfs_remove_heap(H5F_shared_t *shared, H5HG_heap_t *heap)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(shared);
-    HDassert(heap);
+    assert(shared);
+    assert(heap);
 
     /* Remove the heap from the CWFS list */
     for (u = 0; u < shared->ncwfs; u++) {
         if (shared->cwfs[u] == heap) {
             shared->ncwfs -= 1;
-            HDmemmove(shared->cwfs + u, shared->cwfs + u + 1, (shared->ncwfs - u) * sizeof(H5HG_heap_t *));
+            memmove(shared->cwfs + u, shared->cwfs + u + 1, (shared->ncwfs - u) * sizeof(H5HG_heap_t *));
             break;
         } /* end if */
     }     /* end for */

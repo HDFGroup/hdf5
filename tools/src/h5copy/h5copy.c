@@ -55,18 +55,18 @@ static void
 leave(int ret)
 {
     if (fname_src)
-        HDfree(fname_src);
+        free(fname_src);
     if (fname_dst)
-        HDfree(fname_dst);
+        free(fname_dst);
     if (oname_dst)
-        HDfree(oname_dst);
+        free(oname_dst);
     if (oname_src)
-        HDfree(oname_src);
+        free(oname_src);
     if (str_flag)
-        HDfree(str_flag);
+        free(str_flag);
 
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -168,25 +168,25 @@ parse_flag(const char *s_flag, unsigned *flag)
 {
     unsigned fla = 0;
 
-    if (HDstrcmp(s_flag, "shallow") == 0) {
+    if (strcmp(s_flag, "shallow") == 0) {
         fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
     }
-    else if (HDstrcmp(s_flag, "soft") == 0) {
+    else if (strcmp(s_flag, "soft") == 0) {
         fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
     }
-    else if (HDstrcmp(s_flag, "ext") == 0) {
+    else if (strcmp(s_flag, "ext") == 0) {
         fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
     }
-    else if (HDstrcmp(s_flag, "ref") == 0) {
+    else if (strcmp(s_flag, "ref") == 0) {
         fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
     }
-    else if (HDstrcmp(s_flag, "noattr") == 0) {
+    else if (strcmp(s_flag, "noattr") == 0) {
         fla = H5O_COPY_WITHOUT_ATTR_FLAG;
     }
-    else if (HDstrcmp(s_flag, "allflags") == 0) {
+    else if (strcmp(s_flag, "allflags") == 0) {
         fla = H5O_COPY_ALL;
     }
-    else if (HDstrcmp(s_flag, "nullmsg") == 0) {
+    else if (strcmp(s_flag, "nullmsg") == 0) {
         fla = H5O_COPY_PRESERVE_NULL_FLAG;
     }
     else {
@@ -233,7 +233,7 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /* Check for no command line parameters */
     if (argc == 1) {
@@ -373,10 +373,10 @@ main(int argc, char *argv[])
      *-------------------------------------------------------------------------*/
 
     if (verbose) {
-        HDprintf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n", fname_src, oname_src,
+        printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n", fname_src, oname_src,
                  fname_dst, oname_dst);
         if (flag) {
-            HDprintf("Using %s flag\n", str_flag);
+            printf("Using %s flag\n", str_flag);
         }
     }
 
@@ -410,28 +410,28 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (verbose)
-            HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
+            printf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
     else {
         /* error, if parent groups doesn't already exist in destination file */
         size_t i, len;
 
-        len = HDstrlen(oname_dst);
+        len = strlen(oname_dst);
 
         /* check if all the parents groups exist. skip root group */
         for (i = 1; i < len; i++) {
             if ('/' == oname_dst[i]) {
                 char *str_ptr;
 
-                str_ptr = (char *)HDcalloc(i + 1, sizeof(char));
-                HDstrncpy(str_ptr, oname_dst, i);
+                str_ptr = (char *)calloc(i + 1, sizeof(char));
+                strncpy(str_ptr, oname_dst, i);
                 str_ptr[i] = '\0';
                 if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0) {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
-                    HDfree(str_ptr);
+                    free(str_ptr);
                     H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Lexists failed");
                 }
-                HDfree(str_ptr);
+                free(str_ptr);
             }
         }
     }
@@ -462,7 +462,7 @@ main(int argc, char *argv[])
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     /* close propertis */
     if (H5Pclose(ocpl_id) < 0)
@@ -479,11 +479,11 @@ main(int argc, char *argv[])
     leave(EXIT_SUCCESS);
 
 done:
-    HDprintf("Error in copy...Exiting\n");
+    printf("Error in copy...Exiting\n");
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     H5E_BEGIN_TRY
     {

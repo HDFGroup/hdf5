@@ -192,7 +192,7 @@ H5T__vlen_create(const H5T_t *base)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(base);
+    assert(base);
 
     /* Build new type */
     if (NULL == (dt = H5T__alloc()))
@@ -252,14 +252,14 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(dt);
-    HDassert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
+    assert(dt);
+    assert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
 
     /* Only change the location if it's different */
     if (loc != dt->shared->u.vlen.loc || file != dt->shared->u.vlen.file) {
         switch (loc) {
             case H5T_LOC_MEMORY: /* Memory based VL datatype */
-                HDassert(NULL == file);
+                assert(NULL == file);
 
                 /* Mark this type as being stored in memory */
                 dt->shared->u.vlen.loc = H5T_LOC_MEMORY;
@@ -279,7 +279,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     dt->shared->u.vlen.cls = &H5T_vlen_mem_str_g;
                 } /* end else-if */
                 else
-                    HDassert(0 && "Invalid VL type");
+                    assert(0 && "Invalid VL type");
 
                 /* Release owned file */
                 if (dt->shared->owned_vol_obj) {
@@ -297,7 +297,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
                 H5VL_file_get_args_t  vol_cb_args; /* Arguments to VOL callback */
 
-                HDassert(file);
+                assert(file);
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc = H5T_LOC_DISK;
@@ -378,8 +378,8 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     FUNC_ENTER_STATIC_NOERR
 
     /* Check parameter */
-    HDassert(_vl);
-    HDassert(len);
+    assert(_vl);
+    assert(len);
 
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     *len = vl->len;
@@ -417,11 +417,11 @@ H5T__vlen_mem_seq_getptr(void *_vl)
 
     /* check parameters, return result */
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    HDassert(vl);
+    assert(vl);
 
     FUNC_LEAVE_NOAPI(vl->p)
 #else
-    HDassert(_vl);
+    assert(_vl);
     H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI(vl.p)
@@ -452,7 +452,7 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
     FUNC_ENTER_STATIC_NOERR
 
     /* Check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     *isnull = ((vl->len == 0 || vl->p == NULL) ? TRUE : FALSE);
@@ -485,7 +485,7 @@ H5T__vlen_mem_seq_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
     FUNC_ENTER_STATIC_NOERR
 
     /* check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
     /* Set the "nil" hvl_t */
     vl.len = 0;
@@ -521,15 +521,15 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
     FUNC_ENTER_STATIC_NOERR
 
     /* check parameters, copy data */
-    HDassert(buf);
+    assert(buf);
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    HDassert(vl && vl->p);
+    assert(vl && vl->p);
 
     H5MM_memcpy(buf, vl->p, len);
 #else
-    HDassert(_vl);
+    assert(_vl);
     H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
-    HDassert(vl.p);
+    assert(vl.p);
 
     H5MM_memcpy(buf, vl.p, len);
 #endif
@@ -559,8 +559,8 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     FUNC_ENTER_STATIC
 
     /* check parameters */
-    HDassert(_vl);
-    HDassert(buf);
+    assert(_vl);
+    assert(buf);
 
     if (seq_len) {
         size_t len = seq_len * base_size; /* Sequence size */
@@ -572,7 +572,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
                             "application memory allocation routine failed for VL data")
         }    /* end if */
         else /* Default to system malloc */
-            if (NULL == (vl.p = HDmalloc(len)))
+            if (NULL == (vl.p = malloc(len)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
         /* Copy the data into the newly allocated buffer */
@@ -615,13 +615,13 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     FUNC_ENTER_STATIC_NOERR
 
     /* check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
 #ifndef H5_NO_ALIGNMENT_RESTRICTIONS
     H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
-    *len = HDstrlen(s);
+    *len = strlen(s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_getlen() */
@@ -651,9 +651,9 @@ H5T__vlen_mem_str_getptr(void *_vl)
 
     /* check parameters */
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    HDassert(s);
+    assert(s);
 #else
-    HDassert(_vl);
+    assert(_vl);
     H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
@@ -742,11 +742,11 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
 
     if (len > 0) {
         /* check parameters */
-        HDassert(buf);
+        assert(buf);
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-        HDassert(s);
+        assert(s);
 #else
-        HDassert(_vl);
+        assert(_vl);
         H5MM_memcpy(&s, _vl, sizeof(char *));
 #endif
 
@@ -779,7 +779,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     FUNC_ENTER_STATIC
 
     /* check parameters */
-    HDassert(buf);
+    assert(buf);
 
     /* Use the user's memory allocation routine if one is defined */
     if (vl_alloc_info->alloc_func != NULL) {
@@ -789,7 +789,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
                         "application memory allocation routine failed for VL data")
     }    /* end if */
     else /* Default to system malloc */
-        if (NULL == (t = (char *)HDmalloc((seq_len + 1) * base_size)))
+        if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
     /* 'write' the string into the buffer, with memcpy() */
@@ -824,8 +824,8 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
     FUNC_ENTER_STATIC_NOERR
 
     /* Check parameters */
-    HDassert(vl);
-    HDassert(seq_len);
+    assert(vl);
+    assert(seq_len);
 
     /* Get length of sequence (different from blob size) */
     UINT32DECODE(vl, *seq_len);
@@ -855,9 +855,9 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
     FUNC_ENTER_STATIC
 
     /* Check parameters */
-    HDassert(file);
-    HDassert(vl);
-    HDassert(isnull);
+    assert(file);
+    assert(vl);
+    assert(isnull);
 
     /* Skip the sequence's length */
     vl += 4;
@@ -896,8 +896,8 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     FUNC_ENTER_STATIC
 
     /* check parameters */
-    HDassert(file);
-    HDassert(vl);
+    assert(file);
+    assert(vl);
 
     /* Free heap object for old data */
     if (bg != NULL)
@@ -940,9 +940,9 @@ H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *buf, size_t len)
     FUNC_ENTER_STATIC
 
     /* Check parameters */
-    HDassert(file);
-    HDassert(vl);
-    HDassert(buf);
+    assert(file);
+    assert(vl);
+    assert(buf);
 
     /* Skip the length of the sequence */
     vl += 4;
@@ -978,9 +978,9 @@ H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UN
     FUNC_ENTER_STATIC
 
     /* check parameters */
-    HDassert(vl);
-    HDassert(seq_len == 0 || buf);
-    HDassert(file);
+    assert(vl);
+    assert(seq_len == 0 || buf);
+    assert(file);
 
     /* Free heap object for old data, if non-NULL */
     if (bg != NULL)
@@ -1019,7 +1019,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl)
     FUNC_ENTER_STATIC
 
     /* Check parameters */
-    HDassert(file);
+    assert(file);
 
     /* Free heap object for old data */
     if (vl != NULL) {
@@ -1067,9 +1067,9 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(elem);
-    HDassert(dt);
-    HDassert(alloc_info);
+    assert(elem);
+    assert(dt);
+    assert(alloc_info);
 
     free_func = alloc_info->free_func;
     free_info = alloc_info->free_info;
@@ -1129,7 +1129,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     if (free_func != NULL)
                         (*free_func)(vl->p, free_info);
                     else
-                        HDfree(vl->p);
+                        free(vl->p);
                 } /* end if */
             }
             else if (dt->shared->u.vlen.type == H5T_VLEN_STRING) {
@@ -1137,10 +1137,10 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 if (free_func != NULL)
                     (*free_func)(*(char **)elem, free_info);
                 else
-                    HDfree(*(char **)elem);
+                    free(*(char **)elem);
             }
             else {
-                HDassert(0 && "Invalid VL type");
+                assert(0 && "Invalid VL type");
             } /* end else */
             break;
 
@@ -1190,8 +1190,8 @@ H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
     H5T_vlen_alloc_info_t vl_alloc_info;       /* VL allocation info */
     herr_t                ret_value = SUCCEED; /* return value */
 
-    HDassert(dt);
-    HDassert(elem);
+    assert(dt);
+    assert(elem);
 
     FUNC_ENTER_NOAPI(FAIL)
 

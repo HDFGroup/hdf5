@@ -146,7 +146,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -393,7 +393,7 @@ table_list_add(hid_t oid, unsigned long file_no)
         h5dump_table_items_t *tmp_ptr;
 
         table_list.nalloc = MAX(1, table_list.nalloc * 2);
-        if (NULL == (tmp_ptr = (h5dump_table_items_t *)HDrealloc(
+        if (NULL == (tmp_ptr = (h5dump_table_items_t *)realloc(
                          table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
             return -1;
         table_list.tables = tmp_ptr;
@@ -470,7 +470,7 @@ table_list_free(void)
     }
 
     /* Free the table list */
-    HDfree(table_list.tables);
+    free(table_list.tables);
     table_list.tables = NULL;
     table_list.nalloc = table_list.nused = 0;
 } /* end table_list_free() */
@@ -489,15 +489,15 @@ set_binary_form(const char *form)
 {
     int bform = -1;
 
-    if (HDstrcmp(form, "NATIVE") == 0 || HDstrcmp(form, "MEMORY") == 0) {
+    if (strcmp(form, "NATIVE") == 0 || strcmp(form, "MEMORY") == 0) {
         /* native form */
         bform = 0;
     }
-    else if (HDstrcmp(form, "FILE") == 0) /* file type form */
+    else if (strcmp(form, "FILE") == 0) /* file type form */
         bform = 1;
-    else if (HDstrcmp(form, "LE") == 0) /* convert to little endian */
+    else if (strcmp(form, "LE") == 0) /* convert to little endian */
         bform = 2;
-    else if (HDstrcmp(form, "BE") == 0) /* convert to big endian */
+    else if (strcmp(form, "BE") == 0) /* convert to big endian */
         bform = 3;
 
     return bform;
@@ -518,9 +518,9 @@ set_sort_by(const char *form)
 {
     H5_index_t idx_type = H5_INDEX_UNKNOWN;
 
-    if (HDstrcmp(form, "name") == 0) /* H5_INDEX_NAME */
+    if (strcmp(form, "name") == 0) /* H5_INDEX_NAME */
         idx_type = H5_INDEX_NAME;
-    else if (HDstrcmp(form, "creation_order") == 0) /* H5_INDEX_CRT_ORDER */
+    else if (strcmp(form, "creation_order") == 0) /* H5_INDEX_CRT_ORDER */
         idx_type = H5_INDEX_CRT_ORDER;
 
     return idx_type;
@@ -541,9 +541,9 @@ set_sort_order(const char *form)
 {
     H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
 
-    if (HDstrcmp(form, "ascending") == 0) /* H5_ITER_INC */
+    if (strcmp(form, "ascending") == 0) /* H5_ITER_INC */
         iter_order = H5_ITER_INC;
-    else if (HDstrcmp(form, "descending") == 0) /* H5_ITER_DEC */
+    else if (strcmp(form, "descending") == 0) /* H5_ITER_DEC */
         iter_order = H5_ITER_DEC;
 
     return iter_order;
@@ -578,7 +578,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit((int)(unsigned char)*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -593,14 +593,14 @@ parse_hsize_list(const char *h_list, subset_d *d)
         return;
 
     /* allocate an array for the integers in the list */
-    p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t));
+    p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit((int)(unsigned char)*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+            p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
-            while (HDisdigit(*ptr))
+            while (isdigit((int)(unsigned char)*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -623,10 +623,10 @@ parse_subset_params(const char *dset)
     struct subset_t *s = NULL;
     char *           brace;
 
-    if (!dump_opts.disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
+    if (!dump_opts.disable_compact_subset && ((brace = strrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
 
-        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
+        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
         parse_hsize_list(brace, &s->start);
 
         while (*brace && *brace != ';')
@@ -680,18 +680,18 @@ parse_mask_list(const char *h_list)
 
     /* sanity check */
     if (h_list) {
-        HDmemset(packed_mask, 0, sizeof(packed_mask));
+        memset(packed_mask, 0, sizeof(packed_mask));
 
         packed_bits_num = 0;
         /* scan in pair of offset,length separated by commas. */
         ptr = h_list;
         while (*ptr) {
             /* scan for an offset which is an unsigned int */
-            if (!HDisdigit(*ptr)) {
+            if (!isdigit((int)(unsigned char)*ptr)) {
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
-            soffset_value = HDatoi(ptr);
+            soffset_value = atoi(ptr);
             offset_value  = (unsigned)soffset_value;
             if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
                 error_msg("Packed Bit offset value(%d) must be between 0 and %u\n", soffset_value,
@@ -700,7 +700,7 @@ parse_mask_list(const char *h_list)
             }
 
             /* skip to end of integer */
-            while (HDisdigit(*++ptr))
+            while (isdigit((int)(unsigned char)*++ptr))
                 ;
             /* Look for the common separator */
             if (*ptr++ != ',') {
@@ -709,11 +709,11 @@ parse_mask_list(const char *h_list)
             }
 
             /* scan for a length which is a positive int */
-            if (!HDisdigit(*ptr)) {
+            if (!isdigit((int)(unsigned char)*ptr)) {
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
-            slength_value = HDatoi(ptr);
+            slength_value = atoi(ptr);
             if (slength_value <= 0) {
                 error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
                 return FAIL;
@@ -726,7 +726,7 @@ parse_mask_list(const char *h_list)
             }
 
             /* skip to end of int */
-            while (HDisdigit(*++ptr))
+            while (isdigit((int)(unsigned char)*++ptr))
                 ;
 
             /* store the offset,length pair */
@@ -793,26 +793,26 @@ free_handler(struct handler_t *hand, int len)
     if (hand) {
         for (i = 0; i < len; i++) {
             if (hand[i].obj) {
-                HDfree(hand[i].obj);
+                free(hand[i].obj);
                 hand[i].obj = NULL;
             }
 
             if (hand[i].subset_info) {
                 if (hand[i].subset_info->start.data)
-                    HDfree(hand[i].subset_info->start.data);
+                    free(hand[i].subset_info->start.data);
                 if (hand[i].subset_info->stride.data)
-                    HDfree(hand[i].subset_info->stride.data);
+                    free(hand[i].subset_info->stride.data);
                 if (hand[i].subset_info->count.data)
-                    HDfree(hand[i].subset_info->count.data);
+                    free(hand[i].subset_info->count.data);
                 if (hand[i].subset_info->block.data)
-                    HDfree(hand[i].subset_info->block.data);
+                    free(hand[i].subset_info->block.data);
 
-                HDfree(hand[i].subset_info);
+                free(hand[i].subset_info);
                 hand[i].subset_info = NULL;
             }
         }
 
-        HDfree(hand);
+        free(hand);
     }
 }
 
@@ -843,7 +843,7 @@ parse_command_line(int argc, const char *const *argv)
     }
 
     /* this will be plenty big enough to hold the info */
-    if ((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t))) == NULL) {
+    if ((hand = (struct handler_t *)calloc((size_t)argc, sizeof(struct handler_t))) == NULL) {
         goto error;
     }
 
@@ -863,7 +863,7 @@ parse_start:
                 dump_opts.display_fi = TRUE;
                 last_was_dset        = FALSE;
                 if (H5_optarg != NULL)
-                    h5trav_set_verbose(HDatoi(H5_optarg));
+                    h5trav_set_verbose(atoi(H5_optarg));
                 break;
             case 'p':
                 dump_opts.display_dcpl = TRUE;
@@ -881,7 +881,7 @@ parse_start:
                 break;
             case 'A':
                 if (H5_optarg != NULL) {
-                    if (0 == HDatoi(H5_optarg))
+                    if (0 == atoi(H5_optarg))
                         dump_opts.include_attrs = FALSE;
                 }
                 else {
@@ -905,7 +905,7 @@ parse_start:
                 goto done;
                 break;
             case 'w': {
-                int sh5tools_nCols = HDatoi(H5_optarg);
+                int sh5tools_nCols = atoi(H5_optarg);
 
                 if (sh5tools_nCols <= 0)
                     h5tools_nCols = 65535;
@@ -1079,7 +1079,7 @@ parse_start:
                 dump_opts.display_vds_first = TRUE;
                 break;
             case 'G':
-                dump_opts.vds_gap_size = HDatoi(H5_optarg);
+                dump_opts.vds_gap_size = atoi(H5_optarg);
                 if (dump_opts.vds_gap_size < 0) {
                     usage(h5tools_getprogname());
                     goto error;
@@ -1123,7 +1123,7 @@ parse_start:
                     usage(h5tools_getprogname());
                     goto error;
                 }
-                if (HDstrcmp(H5_optarg, ":") == 0)
+                if (strcmp(H5_optarg, ":") == 0)
                     xmlnsprefix = "";
                 else
                     xmlnsprefix = H5_optarg;
@@ -1151,7 +1151,7 @@ parse_start:
                     s = last_dset->subset_info;
                 }
                 else {
-                    last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
+                    last_dset->subset_info = s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
                 }
 
                 /*
@@ -1169,28 +1169,28 @@ parse_start:
                     switch ((char)opt) {
                         case 's':
                             if (s->start.data) {
-                                HDfree(s->start.data);
+                                free(s->start.data);
                                 s->start.data = NULL;
                             }
                             parse_hsize_list(H5_optarg, &s->start);
                             break;
                         case 'S':
                             if (s->stride.data) {
-                                HDfree(s->stride.data);
+                                free(s->stride.data);
                                 s->stride.data = NULL;
                             }
                             parse_hsize_list(H5_optarg, &s->stride);
                             break;
                         case 'c':
                             if (s->count.data) {
-                                HDfree(s->count.data);
+                                free(s->count.data);
                                 s->count.data = NULL;
                             }
                             parse_hsize_list(H5_optarg, &s->count);
                             break;
                         case 'k':
                             if (s->block.data) {
-                                HDfree(s->block.data);
+                                free(s->block.data);
                                 s->block.data = NULL;
                             }
                             parse_hsize_list(H5_optarg, &s->block);
@@ -1212,7 +1212,7 @@ end_collect:
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -1262,7 +1262,7 @@ end_collect:
 
             case '1':
                 vol_info_g.type    = VOL_BY_VALUE;
-                vol_info_g.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                vol_info_g.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 use_custom_vol_g   = TRUE;
                 break;
 
@@ -1278,7 +1278,7 @@ end_collect:
 
             case '4':
                 vfd_info_g.type    = VFD_BY_VALUE;
-                vfd_info_g.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                vfd_info_g.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 use_custom_vfd_g   = TRUE;
                 break;
 
@@ -1435,7 +1435,7 @@ main(int argc, char *argv[])
         if (doxml_g) {
             /* initialize XML */
             /* reset prefix! */
-            HDstrcpy(prefix, "");
+            strcpy(prefix, "");
 
             /* make sure the URI is initialized to something */
             if (xml_dtd_uri_g == NULL) {
@@ -1448,7 +1448,7 @@ main(int argc, char *argv[])
                 }
             }
             else {
-                if (useschema_g && HDstrcmp(xmlnsprefix, "") != 0) {
+                if (useschema_g && strcmp(xmlnsprefix, "") != 0) {
                     error_msg(
                         "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
                     h5tools_setstatus(EXIT_FAILURE);
@@ -1491,7 +1491,7 @@ main(int argc, char *argv[])
 
             /* alternative first element, depending on schema or DTD. */
             if (useschema_g) {
-                if (HDstrcmp(xmlnsprefix, "") == 0) {
+                if (strcmp(xmlnsprefix, "") == 0) {
                     PRINTSTREAM(rawoutstream,
                                 "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                                 "xsi:noNamespaceSchemaLocation=\"%s\">\n",
@@ -1503,7 +1503,7 @@ main(int argc, char *argv[])
                     char *indx;
 
                     ns   = HDstrdup(xmlnsprefix);
-                    indx = HDstrrchr(ns, (int)':');
+                    indx = strrchr(ns, (int)':');
                     if (indx)
                         *indx = '\0';
 
@@ -1513,7 +1513,7 @@ main(int argc, char *argv[])
                                 "xsi:schemaLocation=\"http://hdfgroup.org/HDF5/XML/schema/HDF5-File "
                                 "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",
                                 xmlnsprefix, ns);
-                    HDfree(ns);
+                    free(ns);
                 }
             }
             else {
@@ -1586,11 +1586,11 @@ main(int argc, char *argv[])
                 h5tools_setstatus(EXIT_FAILURE);
 
         if (prefix) {
-            HDfree(prefix);
+            free(prefix);
             prefix = NULL;
         }
         if (fname) {
-            HDfree(fname);
+            free(fname);
             fname = NULL;
         }
     } /* end while */
@@ -1616,11 +1616,11 @@ done:
             h5tools_setstatus(EXIT_FAILURE);
 
     if (prefix) {
-        HDfree(prefix);
+        free(prefix);
         prefix = NULL;
     }
     if (fname) {
-        HDfree(fname);
+        free(fname);
         fname = NULL;
     }
 
@@ -1647,7 +1647,7 @@ static void
 init_prefix(char **prfx, size_t prfx_len)
 {
     if (prfx_len > 0)
-        *prfx = (char *)HDcalloc(prfx_len, 1);
+        *prfx = (char *)calloc(prfx_len, 1);
     else
         error_msg("unable to allocate prefix buffer\n");
 }
@@ -1664,14 +1664,14 @@ init_prefix(char **prfx, size_t prfx_len)
 void
 add_prefix(char **prfx, size_t *prfx_len, const char *name)
 {
-    size_t new_len = HDstrlen(*prfx) + HDstrlen(name) + 2;
+    size_t new_len = strlen(*prfx) + strlen(name) + 2;
 
     /* Check if we need more space */
     if (*prfx_len <= new_len) {
         *prfx_len = new_len + 1;
-        *prfx     = (char *)HDrealloc(*prfx, *prfx_len);
+        *prfx     = (char *)realloc(*prfx, *prfx_len);
     }
 
     /* Append object name to prefix */
-    HDstrcat(HDstrcat(*prfx, "/"), name);
+    strcat(strcat(*prfx, "/"), name);
 } /* end add_prefix */

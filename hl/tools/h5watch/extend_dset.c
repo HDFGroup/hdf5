@@ -86,9 +86,9 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
     set_t *  cbuf = NULL; /* buffer for storing retrieved elements (compound) */
 
     /* Allocate memory */
-    if (NULL == (ibuf = (int *)HDcalloc(TEST_BUF_SIZE, sizeof(int))))
+    if (NULL == (ibuf = (int *)calloc(TEST_BUF_SIZE, sizeof(int))))
         goto error;
-    if (NULL == (cbuf = (set_t *)HDcalloc(TEST_BUF_SIZE, sizeof(set_t))))
+    if (NULL == (cbuf = (set_t *)calloc(TEST_BUF_SIZE, sizeof(set_t))))
         goto error;
 
     /* Create a copy of file access property list */
@@ -128,7 +128,7 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
         goto error;
 
     /* sleep to emulate about 2 seconds of application operation */
-    HDsleep(2);
+    sleep(2);
 
     /* Get current dimension sizes */
     if (H5LDget_dset_dims(did, cur_dims) < 0)
@@ -147,9 +147,9 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
         num_elmts *= (unsigned)ext_dims[i];
 
     /* Compound type */
-    if (!HDstrcmp(dname, DSET_CMPD_TWO)) {
+    if (!strcmp(dname, DSET_CMPD_TWO)) {
 
-        HDmemset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
+        memset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
         for (i = 0; i < num_elmts; i++) {
             cbuf[i].field1     = action1;
             cbuf[i].field2.a   = action1;
@@ -167,7 +167,7 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
             goto error;
     }
     else { /* Integer type */
-        HDmemset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
+        memset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
         for (i = 0; i < num_elmts; i++)
             ibuf[i] = action1;
 
@@ -190,9 +190,9 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
         goto error;
 
     if (ibuf)
-        HDfree(ibuf);
+        free(ibuf);
     if (cbuf)
-        HDfree(cbuf);
+        free(cbuf);
 
     return SUCCEED;
 
@@ -205,9 +205,9 @@ error:
     H5E_END_TRY
 
     if (ibuf)
-        HDfree(ibuf);
+        free(ibuf);
     if (cbuf)
-        HDfree(cbuf);
+        free(cbuf);
 
     return FAIL;
 
@@ -240,9 +240,9 @@ extend_dset_one(const char *file, char *dname, int action)
     set_t * cbuf = NULL; /* buffer for storing retrieved elements (compound) */
 
     /* Allocate memory */
-    if (NULL == (ibuf = (int *)HDcalloc(TEST_BUF_SIZE, sizeof(int))))
+    if (NULL == (ibuf = (int *)calloc(TEST_BUF_SIZE, sizeof(int))))
         goto error;
-    if (NULL == (cbuf = (set_t *)HDcalloc(TEST_BUF_SIZE, sizeof(set_t))))
+    if (NULL == (cbuf = (set_t *)calloc(TEST_BUF_SIZE, sizeof(set_t))))
         goto error;
 
     /* Create a copy of file access property list */
@@ -276,7 +276,7 @@ extend_dset_one(const char *file, char *dname, int action)
         goto error;
 
     /* sleep to emulate about 2 seconds of application operation */
-    HDsleep(2);
+    sleep(2);
 
     /* Get current dimension sizes */
     if (H5LDget_dset_dims(did, cur_dims) < 0)
@@ -306,9 +306,9 @@ extend_dset_one(const char *file, char *dname, int action)
 
         /* Initialize data for the extended region of the dataset */
         /* Compound type */
-        if (!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
+        if (!strcmp(dname, DSET_CMPD) || !strcmp(dname, DSET_CMPD_ESC)) {
 
-            HDmemset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
+            memset(cbuf, 0, TEST_BUF_SIZE * sizeof(set_t));
             for (i = 0; i < action; i++) {
                 cbuf[i].field1     = i + 1;
                 cbuf[i].field2.a   = i + 2;
@@ -329,7 +329,7 @@ extend_dset_one(const char *file, char *dname, int action)
         }
         else { /* Integer type */
 
-            HDmemset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
+            memset(ibuf, 0, TEST_BUF_SIZE * sizeof(int));
             for (i = 0; i < action; i++)
                 ibuf[i] = (int)i;
 
@@ -359,9 +359,9 @@ extend_dset_one(const char *file, char *dname, int action)
         goto error;
 
     if (ibuf)
-        HDfree(ibuf);
+        free(ibuf);
     if (cbuf)
-        HDfree(cbuf);
+        free(cbuf);
 
     return SUCCEED;
 
@@ -376,9 +376,9 @@ error:
     H5E_END_TRY
 
     if (ibuf)
-        HDfree(ibuf);
+        free(ibuf);
     if (cbuf)
-        HDfree(cbuf);
+        free(cbuf);
 
     return FAIL;
 } /* end extend_dset_one() */
@@ -399,40 +399,40 @@ main(int argc, char *argv[])
     int   action1, action2;
 
     if (argc != 5) {
-        HDfprintf(stderr, "Should have file name, dataset name, and the extended amount...\n");
+        fprintf(stderr, "Should have file name, dataset name, and the extended amount...\n");
         goto error;
     } /* end if */
 
     /* Get the dataset name to be extended */
     fname   = HDstrdup(argv[1]);
     dname   = HDstrdup(argv[2]);
-    action1 = HDatoi(argv[3]);
-    action2 = HDatoi(argv[4]);
+    action1 = atoi(argv[3]);
+    action2 = atoi(argv[4]);
 
-    if (!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
+    if (!strcmp(dname, DSET_CMPD) || !strcmp(dname, DSET_CMPD_ESC)) {
         if (extend_dset_one(fname, dname, action1) < 0)
             goto error;
     }
-    else if (!HDstrcmp(dname, DSET_ONE) || !HDstrcmp(dname, DSET_ALLOC_LATE) ||
-             !HDstrcmp(dname, DSET_ALLOC_EARLY)) {
+    else if (!strcmp(dname, DSET_ONE) || !strcmp(dname, DSET_ALLOC_LATE) ||
+             !strcmp(dname, DSET_ALLOC_EARLY)) {
         if (extend_dset_one(fname, dname, action1) < 0)
             goto error;
     }
-    else if (!HDstrcmp(dname, DSET_TWO) || !HDstrcmp(dname, DSET_CMPD_TWO)) {
+    else if (!strcmp(dname, DSET_TWO) || !strcmp(dname, DSET_CMPD_TWO)) {
         if (extend_dset_two(fname, dname, action1, action2) < 0)
             goto error;
     }
     else {
-        HDfprintf(stdout, "Dataset cannot be extended...\n");
+        fprintf(stdout, "Dataset cannot be extended...\n");
         goto error;
     } /* end if-else */
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (dname)
-        HDfree(dname);
+        free(dname);
     if (fname)
-        HDfree(fname);
-    HDexit(EXIT_FAILURE);
+        free(fname);
+    exit(EXIT_FAILURE);
 } /* end main() */

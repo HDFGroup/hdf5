@@ -141,9 +141,9 @@ verify_old_dset_cork(void)
         TEST_ERROR
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -255,8 +255,8 @@ verify_old_dset_cork(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -277,8 +277,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_old_dset_cork */
@@ -396,7 +396,7 @@ verify_obj_dset_cork(hbool_t swmr)
 
     /* Attach 8 attributes to the dataset */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        sprintf(attrname, "attr %d", i);
         if ((aid = H5Acreate2(did2, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if (H5Awrite(aid, H5T_NATIVE_INT, &i) < 0)
@@ -653,9 +653,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -719,8 +719,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -740,8 +740,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_dset_cork */
@@ -864,7 +864,7 @@ verify_group_cork(hbool_t swmr)
 
     /* Attach 8 attributes to the third group: GRP3 */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        sprintf(attrname, "attr %d", i);
         if ((aid = H5Acreate2(gid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -1081,7 +1081,7 @@ verify_named_cork(hbool_t swmr)
 
     /* Attach 8 attributes to datatype: DT3 */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        sprintf(attrname, "attr %d", i);
         if ((aid = H5Acreate2(tid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -2001,9 +2001,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Set up data array */
-    if (NULL == (wbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (wbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (wbuf = (int **)HDcalloc(DIMS0, sizeof(wbuf_data))))
+    if (NULL == (wbuf = (int **)calloc(DIMS0, sizeof(wbuf_data))))
         TEST_ERROR;
     for (i = 0; i < DIMS0; i++)
         wbuf[i] = wbuf_data + (i * DIMS1);
@@ -2048,7 +2048,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Set up data array */
-    if (NULL == (rbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (rbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
 
     /* Read from the dataset */
@@ -2195,9 +2195,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     PASSED();
     return 0;
@@ -2217,9 +2217,9 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     return 1;
 
@@ -2254,9 +2254,9 @@ main(void)
             /* Skip these tests if SWMR I/O is not supported for the VFD specified
              * by the environment variable.
              */
-            driver = HDgetenv(HDF5_DRIVER);
+            driver = getenv(HDF5_DRIVER);
             if (!H5FD__supports_swmr_test(driver)) {
-                HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
+                puts("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
                 continue;
             }
         }
@@ -2279,7 +2279,7 @@ main(void)
     } /* end for */
 
     /* Delete test files */
-    HDremove(FILENAME);
+    remove(FILENAME);
 
     /* Return Errors */
     return (nerrs > 0);

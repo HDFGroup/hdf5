@@ -135,7 +135,7 @@ create_dset1(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
-    HDfree(data);
+    free(data);
     return 0;
 
 error:
@@ -146,7 +146,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY;
-    HDfree(data);
+    free(data);
 
     return 1;
 }
@@ -199,7 +199,7 @@ create_dset2(hid_t file)
     H5Dclose(dataset);
     H5Pclose(dcpl);
     H5Sclose(dataspace);
-    HDfree(data);
+    free(data);
 
     return 0;
 
@@ -211,7 +211,7 @@ error:
         H5Sclose(dataspace);
     }
     H5E_END_TRY;
-    HDfree(data);
+    free(data);
 
     return 1;
 }
@@ -265,10 +265,10 @@ check_partial_chunks_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > 0.0)
-        HDprintf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %zu\n",
+        printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %zu\n",
                  (end_t - start_t), nbytes_global);
     else
-        HDprintf(
+        printf(
             "1. Partial chunks: no total read time because timer is not available; number of bytes being "
             "read from file is %zu\n",
             nbytes_global);
@@ -344,10 +344,10 @@ check_hash_value_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > 0.0)
-        HDprintf("2. Hash value: total read time is %lf; number of bytes being read from file is %zu\n",
+        printf("2. Hash value: total read time is %lf; number of bytes being read from file is %zu\n",
                  (end_t - start_t), nbytes_global);
     else
-        HDprintf(
+        printf(
             "2. Hash value: no total read time because timer is not available; number of bytes being read "
             "from file is %zu\n",
             nbytes_global);
@@ -408,6 +408,6 @@ main(void)
     return 0;
 
 error:
-    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }

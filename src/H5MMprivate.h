@@ -33,7 +33,7 @@
 /*#define H5MM_PRINT_MEMORY_STATS */
 #define H5MM_free(Z) H5MM_xfree(Z)
 #else /* H5_MEMORY_ALLOC_SANITY_CHECK */
-#define H5MM_free(Z) HDfree(Z)
+#define H5MM_free(Z) free(Z)
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*

@@ -96,7 +96,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -185,10 +185,10 @@ static inline void
 jserr_long(long expected, long actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+        printf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
     }
 }
 
@@ -230,10 +230,10 @@ static inline void
 jserr_str(const char *expected, const char *actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+        printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
     }
 }
 
@@ -311,7 +311,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -359,7 +359,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -535,7 +535,7 @@ test_aws_canonical_request(void)
         /* create HTTP request object with given verb, resource/path
          */
         hrb = H5FD_s3comms_hrb_init_request(C->verb, C->resource, "HTTP/1.1");
-        HDassert(hrb->body == NULL);
+        assert(hrb->body == NULL);
 
         /* Create headers list from test case input
          */
@@ -557,9 +557,9 @@ test_aws_canonical_request(void)
         while (node != NULL) {
             FAIL_IF(FAIL == H5FD_s3comms_hrb_node_set(&node, node->name, NULL));
         }
-        HDassert(NULL == node);
+        assert(NULL == node);
         FAIL_IF(FAIL == H5FD_s3comms_hrb_destroy(&hrb));
-        HDassert(NULL == hrb);
+        assert(NULL == hrb);
 
     } /* for each test case */
 
@@ -580,7 +580,7 @@ test_aws_canonical_request(void)
              "signed headers destination cannot be null")
 
     FAIL_IF(FAIL == H5FD_s3comms_hrb_destroy(&hrb))
-    HDassert(NULL == hrb);
+    assert(NULL == hrb);
 
     PASSED();
     return 0;
@@ -590,7 +590,7 @@ error:
     if (node != NULL) {
         while (node != NULL)
             (void)H5FD_s3comms_hrb_node_set(&node, node->name, NULL);
-        HDassert(node == NULL);
+        assert(node == NULL);
     }
     if (hrb != NULL) {
         (void)H5FD_s3comms_hrb_destroy(&hrb);
@@ -1241,7 +1241,7 @@ test_HMAC_SHA256(void)
             SHA256_DIGEST_LENGTH,
             "AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
             "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972",
-            HDstrlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
+            strlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
                      "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
             "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
             SHA256_DIGEST_LENGTH * 2 + 1, /* +1 for null terminator */
@@ -1271,8 +1271,8 @@ test_HMAC_SHA256(void)
             dest = NULL;
         }
         else {
-            dest = (char *)HDmalloc(sizeof(char) * cases[i].dest_size);
-            HDassert(dest != NULL);
+            dest = (char *)malloc(sizeof(char) * cases[i].dest_size);
+            assert(dest != NULL);
         }
 
         JSVERIFY(
@@ -1281,29 +1281,29 @@ test_HMAC_SHA256(void)
             cases[i].msg);
         if (cases[i].ret == SUCCEED) {
 #ifdef VERBOSE
-            if (0 != HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp))) {
+            if (0 != strncmp(cases[i].exp, dest, strlen(cases[i].exp))) {
                 /* print out how wrong things are, and then fail
                  */
-                dest = (char *)HDrealloc(dest, cases[i].dest_size + 1);
-                HDassert(dest != NULL);
+                dest = (char *)realloc(dest, cases[i].dest_size + 1);
+                assert(dest != NULL);
                 dest[cases[i].dest_size] = 0;
-                HDfprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
+                fprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
             }
 #else  /* VERBOSE not defined */
             /* simple pass/fail test
              */
-            JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);
+            JSVERIFY(0, strncmp(cases[i].exp, dest, strlen(cases[i].exp)), NULL);
 #endif /* VERBOSE */
         }
-        HDfree(dest);
+        free(dest);
     }
 
     PASSED();
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_HMAC_SHA256() */
@@ -1365,13 +1365,13 @@ test_nlowercase(void)
     TESTING("nlowercase");
 
     for (i = 0; i < n_cases; i++) {
-        dest = (char *)HDmalloc(sizeof(char) * 16);
+        dest = (char *)malloc(sizeof(char) * 16);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_nlowercase(dest, cases[i].in, cases[i].len), cases[i].in)
         if (cases[i].len > 0) {
-            JSVERIFY(0, HDstrncmp(dest, cases[i].exp, cases[i].len), NULL)
+            JSVERIFY(0, strncmp(dest, cases[i].exp, cases[i].len), NULL)
         }
-        HDfree(dest);
+        free(dest);
     } /* end for each testcase */
 
     JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null distination should fail")
@@ -1380,7 +1380,7 @@ test_nlowercase(void)
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_nlowercase() */
@@ -1606,7 +1606,7 @@ test_parse_url(void)
      *********/
 
     for (i = 0; i < ncases; i++) {
-        HDassert(purl == NULL);
+        assert(purl == NULL);
 
         JSVERIFY(cases[i].exp_ret, H5FD_s3comms_parse_url(cases[i].url, &purl), cases[i].msg)
 
@@ -1741,7 +1741,7 @@ test_percent_encode_char(void)
         JSVERIFY(SUCCEED, H5FD_s3comms_percent_encode_char(dest, (const unsigned char)cases[i].c, &dest_len),
                  NULL)
         JSVERIFY(cases[i].exp_len, dest_len, NULL)
-        JSVERIFY(0, HDstrncmp(dest, cases[i].exp, dest_len), NULL)
+        JSVERIFY(0, strncmp(dest, cases[i].exp, dest_len), NULL)
         JSVERIFY_STR(cases[i].exp, dest, NULL)
     }
 
@@ -1780,12 +1780,12 @@ test_s3r_get_filesize(void)
      */
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
         return 0;
     }
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     JSVERIFY(0, H5FD_s3comms_s3r_get_filesize(NULL), "filesize of the null handle should be 0")
@@ -1840,14 +1840,14 @@ test_s3r_open(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
-        HDfflush(stdout);
+        puts("    s3 credentials are not loaded");
+        fflush(stdout);
         return 0;
     }
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
         return 0;
     }
 
@@ -1855,13 +1855,13 @@ test_s3r_open(void)
      * PRE-TEST SETUP *
      ******************/
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s",
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s",
                                               s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_RESTRICTED));
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                               S3_TEST_RESOURCE_MISSING));
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     /* Set given bucket url with invalid/inactive port number for badport.
@@ -1871,15 +1871,15 @@ test_s3r_open(void)
     if (purl->port == NULL) {
         purl->port = (char *)H5MM_malloc(sizeof(char) * 5);
         FAIL_IF(purl->port == NULL);
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "9000"))
+        FAIL_IF(5 < snprintf(purl->port, 5, "9000"))
     }
-    else if (HDstrcmp(purl->port, "9000") != 0) {
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "9000"))
+    else if (strcmp(purl->port, "9000") != 0) {
+        FAIL_IF(5 < snprintf(purl->port, 5, "9000"))
     }
     else {
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "1234"))
+        FAIL_IF(5 < snprintf(purl->port, 5, "1234"))
     }
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven_badport, S3_TEST_MAX_URL_SIZE, "%s://%s:%s/%s",
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven_badport, S3_TEST_MAX_URL_SIZE, "%s://%s:%s/%s",
                                               purl->scheme, purl->host, purl->port,
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
@@ -1917,7 +1917,7 @@ test_s3r_open(void)
      *************************/
 
 #if S3_TEST_RUN_TIMEOUT
-    HDprintf("Opening on inactive port may hang for a minute; waiting for timeout\n");
+    printf("Opening on inactive port may hang for a minute; waiting for timeout\n");
     handle = H5FD_s3comms_s3r_open(url_raven_badport, NULL, NULL, NULL);
     FAIL_IF(handle != NULL);
 #endif
@@ -2044,14 +2044,14 @@ test_s3r_read(void)
      */
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        HDfflush(stdout);
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        fflush(stdout);
         return 0;
     }
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl_ready = TRUE;
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                               S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     for (i = 0; i < S3COMMS_TEST_BUFFER_SIZE; i++)
@@ -2105,7 +2105,7 @@ test_s3r_read(void)
     JSVERIFY(SUCCEED, H5FD_s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer), NULL)
     JSVERIFY(
         0,
-        HDstrncmp(
+        strncmp(
             buffer,
             "And my soul from out that shadow that lies floating on the floor\nShall be lifted—nevermore!\n",
             94),
@@ -2122,7 +2122,7 @@ test_s3r_read(void)
              H5FD_s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */
                                    buffer),
              NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /************************
      * read starts past eof *
@@ -2132,14 +2132,14 @@ test_s3r_read(void)
              H5FD_s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */
                                    (size_t)100, buffer),
              NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /**********************
      * read starts on eof *
      **********************/
 
     JSVERIFY(FAIL, H5FD_s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer), NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /*************
      * TEAR DOWN *
@@ -2223,16 +2223,16 @@ test_signing_key(void)
     TESTING("signing_key");
 
     for (i = 0; i < ncases; i++) {
-        key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
-        HDassert(key != NULL);
+        key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+        assert(key != NULL);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when),
                  NULL)
 
-        JSVERIFY(0, HDstrncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
+        JSVERIFY(0, strncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
                  (const char *)cases[i].exp)
 
-        HDfree(key);
+        free(key);
         key = NULL;
     }
 
@@ -2240,8 +2240,8 @@ test_signing_key(void)
      * ERROR CASES *
      ***************/
 
-    key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
-    HDassert(key != NULL);
+    key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+    assert(key != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when),
              "destination cannot be NULL")
@@ -2255,7 +2255,7 @@ test_signing_key(void)
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(key, cases[0].secret_key, cases[0].region, NULL),
              "time string cannot be NULL")
 
-    HDfree(key);
+    free(key);
     key = NULL;
 
     PASSED();
@@ -2263,7 +2263,7 @@ test_signing_key(void)
 
 error:
     if (key != NULL) {
-        HDfree(key);
+        free(key);
     }
 
     return -1;
@@ -2403,17 +2403,17 @@ test_trim(void)
     TESTING("s3comms trim");
 
     for (i = 0; i < n_cases; i++) {
-        HDassert(str == NULL);
-        str = (char *)HDmalloc(sizeof(char) * cases[i].in_len);
-        HDassert(str != NULL);
-        HDstrncpy(str, cases[i].in, cases[i].in_len);
+        assert(str == NULL);
+        str = (char *)malloc(sizeof(char) * cases[i].in_len);
+        assert(str != NULL);
+        strncpy(str, cases[i].in, cases[i].in_len);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_trim(dest, str, cases[i].in_len, &dest_len), NULL)
         JSVERIFY(cases[i].exp_len, dest_len, cases[i].in)
         if (dest_len > 0) {
-            JSVERIFY(0, HDstrncmp(cases[i].exp, dest, dest_len), cases[i].exp)
+            JSVERIFY(0, strncmp(cases[i].exp, dest, dest_len), cases[i].exp)
         }
-        HDfree(str);
+        free(str);
         str = NULL;
     } /* end for each testcase */
 
@@ -2421,12 +2421,12 @@ test_trim(void)
              "should not fail when trimming a null string");
     JSVERIFY(0, dest_len, "trimming NULL string writes 0 characters")
 
-    HDassert(str == NULL);
-    str = (char *)HDmalloc(sizeof(char *) * 11);
-    HDassert(str != NULL);
-    HDmemcpy(str, "some text ", 11); /* string with null terminator */
+    assert(str == NULL);
+    str = (char *)malloc(sizeof(char *) * 11);
+    assert(str != NULL);
+    memcpy(str, "some text ", 11); /* string with null terminator */
     JSVERIFY(FAIL, H5FD_s3comms_trim(NULL, str, 10, &dest_len), "destination for trim cannot be NULL");
-    HDfree(str);
+    free(str);
     str = NULL;
 
     PASSED();
@@ -2434,7 +2434,7 @@ test_trim(void)
 
 error:
     if (str != NULL) {
-        HDfree(str);
+        free(str);
     }
     return -1;
 
@@ -2518,16 +2518,16 @@ test_uriencode(void)
 
     for (i = 0; i < ncases; i++) {
         str_len = cases[i].s_len;
-        dest    = (char *)HDmalloc(sizeof(char) * str_len * 3 + 1);
+        dest    = (char *)malloc(sizeof(char) * str_len * 3 + 1);
         FAIL_IF(dest == NULL)
 
         JSVERIFY(SUCCEED,
                  H5FD_s3comms_uriencode(dest, cases[i].str, str_len, cases[i].encode_slash, &dest_written),
                  NULL);
-        JSVERIFY(HDstrlen(cases[i].expected), dest_written, NULL)
-        JSVERIFY(0, HDstrncmp(dest, cases[i].expected, dest_written), cases[i].expected);
+        JSVERIFY(strlen(cases[i].expected), dest_written, NULL)
+        JSVERIFY(0, strncmp(dest, cases[i].expected, dest_written), cases[i].expected);
 
-        HDfree(dest);
+        free(dest);
         dest = NULL;
     } /* end for each testcase */
 
@@ -2535,15 +2535,15 @@ test_uriencode(void)
      * ERROR CASES *
      ***************/
 
-    dest = (char *)HDmalloc(sizeof(char) * 15);
-    HDassert(dest != NULL);
+    dest = (char *)malloc(sizeof(char) * 15);
+    assert(dest != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
              "destination cannot be NULL");
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, FALSE, &dest_written),
              "source string cannot be NULL");
 
-    HDfree(dest);
+    free(dest);
     dest = NULL;
 
     PASSED();
@@ -2551,7 +2551,7 @@ test_uriencode(void)
 
 error:
     if (dest != NULL) {
-        HDfree(dest);
+        free(dest);
     }
     return -1;
 
@@ -2587,7 +2587,7 @@ main(void)
 
 #endif /* H5_HAVE_ROS3_VFD */
 
-    HDprintf("Testing S3Communications functionality.\n");
+    printf("Testing S3Communications functionality.\n");
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -2608,13 +2608,13 @@ main(void)
         s3_test_credentials_loaded = 1;
     }
 
-    bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
+    bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
-        HDprintf("WARNING: S3 bucket url is not defined in environment "
+        printf("WARNING: S3 bucket url is not defined in environment "
                  "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
-        HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
+        strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
         s3_test_bucket_defined = TRUE;
     }
 
@@ -2637,17 +2637,17 @@ main(void)
     nerrors += test_s3r_read() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d S3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d S3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return 1;
     }
 
-    HDprintf("All S3comms tests passed.\n");
+    printf("All S3comms tests passed.\n");
 
     return 0;
 
 #else
 
-    HDprintf("SKIPPED - read-only S3 VFD not built\n");
+    printf("SKIPPED - read-only S3 VFD not built\n");
     return EXIT_SUCCESS;
 
 #endif /* H5_HAVE_ROS3_VFD */

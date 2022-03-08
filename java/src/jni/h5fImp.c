@@ -127,7 +127,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
     if ((buf_size = H5Fget_name((hid_t)file_id, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_name: malloc failed");
 
     if ((H5Fget_name((hid_t)file_id, namePtr, (size_t)buf_size + 1)) < 0)
@@ -139,7 +139,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
 
 done:
     if (namePtr)
-        HDfree(namePtr);
+        free(namePtr);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Fget_1name */
@@ -431,7 +431,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Fget_obj_ids: obj_id_list length < 0");
     }
 
-    if (NULL == (id_list = (hid_t *)HDmalloc((size_t)rank * sizeof(hid_t))))
+    if (NULL == (id_list = (hid_t *)malloc((size_t)rank * sizeof(hid_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_obj_ids: malloc failed");
 
     if ((ret_val = H5Fget_obj_ids((hid_t)file_id, (unsigned int)types, (size_t)maxObjs, id_list)) < 0)
@@ -443,7 +443,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
 
 done:
     if (id_list)
-        HDfree(id_list);
+        free(id_list);
     if (obj_id_listP)
         UNPIN_LONG_ARRAY(ENVONLY, obj_id_list, obj_id_listP, (ret_val < 0) ? JNI_ABORT : 0);
 

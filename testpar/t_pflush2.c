@@ -69,7 +69,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
         goto error;
     if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
         goto error;
-    HDassert(100 == dims[0] && 100 == dims[1]);
+    assert(100 == dims[0] && 100 == dims[1]);
 
     /* Read some data */
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
@@ -79,8 +79,8 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
             val = (int)(i + (i * j) + j);
             if (data_g[i][j] != val) {
                 H5_FAILED();
-                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j, data_g[i][j]);
-                HDprintf("    should be %d\n", val);
+                printf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j, data_g[i][j]);
+                printf("    should be %d\n", val);
             }
         }
     }
@@ -89,7 +89,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
     if ((top_level_gid = H5Gopen2(fid, "some_groups", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
+        snprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gopen2(top_level_gid, name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -157,17 +157,17 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part2 with flush)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
-    if (!HDstrcmp(envval, "split")) {
+    if (!strcmp(envval, "split")) {
         if (mpi_rank == 0) {
             SKIPPED();
-            HDputs("    Test not compatible with current Virtual File Driver");
+            puts("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -215,8 +215,8 @@ main(int argc, char *argv[])
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

@@ -107,27 +107,27 @@ main(void)
     /* Compare object tokens & times from the two ways of calling H5Oget_info() */
     if (token_cmp || oi1.ctime != oi2.ctime) {
         H5_FAILED();
-        HDputs("    Calling H5Oget_info() with the dataset ID returned");
-        HDputs("    different values than calling it with a file and dataset");
-        HDputs("    name.");
+        puts("    Calling H5Oget_info() with the dataset ID returned");
+        puts("    different values than calling it with a file and dataset");
+        puts("    name.");
         goto error;
     }
 
     /* Compare times -- they must be within 60 seconds of one another */
     if (0 == oi1.ctime) {
         SKIPPED();
-        HDputs("    The modification time could not be decoded on this OS.");
-        HDputs("    Modification times will be maintained in the file but");
-        HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
+        puts("    The modification time could not be decoded on this OS.");
+        puts("    Modification times will be maintained in the file but");
+        puts("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }
-    else if (HDfabs(HDdifftime(now, oi1.ctime)) > 60.0) {
+    else if (fabs(difftime(now, oi1.ctime)) > 60.0) {
         H5_FAILED();
-        tm = HDlocaltime(&(oi1.ctime));
-        HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
-        tm = HDlocaltime(&now);
-        HDstrftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
+        tm = localtime(&(oi1.ctime));
+        strftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
+        tm = localtime(&now);
+        strftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
+        printf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();
@@ -149,7 +149,7 @@ main(void)
                     H5_FAILED();
                     /* If this fails, examine H5Omtime.c.  Modification time is very
                      * system dependent (e.g., on Windows DST must be hardcoded). */
-                    HDputs("    Old modification time incorrect");
+                    puts("    Old modification time incorrect");
                     goto error;
                 }
                 if (H5Fclose(file) < 0)
@@ -157,7 +157,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -179,7 +179,7 @@ main(void)
                     TEST_ERROR;
                 if (oi2.ctime != MTIME2) {
                     H5_FAILED();
-                    HDputs("    Modification time incorrect.");
+                    puts("    Modification time incorrect.");
                     goto error;
                 }
                 if (H5Fclose(file) < 0)
@@ -187,7 +187,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -199,7 +199,7 @@ main(void)
         TEST_ERROR
 
     /* All looks good */
-    HDputs("All modification time tests passed.");
+    puts("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
     return EXIT_SUCCESS;
 

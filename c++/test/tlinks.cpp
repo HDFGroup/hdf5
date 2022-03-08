@@ -770,6 +770,6 @@ test_links()
 extern "C" void
 cleanup_links()
 {
-    HDremove(FILENAME[0]);
-    HDremove(FILENAME[1]);
+    remove(FILENAME[0]);
+    remove(FILENAME[1]);
 }

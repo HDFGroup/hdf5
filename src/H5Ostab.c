@@ -98,8 +98,8 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* decode */
     if (NULL == (stab = H5FL_CALLOC(H5O_stab_t)))
@@ -138,9 +138,9 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(stab);
+    assert(f);
+    assert(p);
+    assert(stab);
 
     /* encode */
     H5F_addr_encode(f, &p, stab->btree_addr);
@@ -174,7 +174,7 @@ H5O__stab_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(stab);
+    assert(stab);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_stab_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -234,7 +234,7 @@ H5O__stab_free(void *mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_stab_t, mesg);
 
@@ -261,8 +261,8 @@ H5O__stab_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *mesg)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     /* Free the file space for the symbol table */
     if (H5G__stab_delete(f, (const H5O_stab_t *)mesg) < 0)
@@ -300,8 +300,8 @@ H5O__stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(stab_src);
-    HDassert(file_dst);
+    assert(stab_src);
+    assert(file_dst);
 
     /* Allocate space for the destination stab */
     if (NULL == (stab_dst = H5FL_MALLOC(H5O_stab_t)))
@@ -361,11 +361,11 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(stab_src);
-    HDassert(H5F_addr_defined(dst_oloc->addr));
-    HDassert(dst_oloc->file);
-    HDassert(stab_dst);
-    HDassert(cpy_info);
+    assert(stab_src);
+    assert(H5F_addr_defined(dst_oloc->addr));
+    assert(dst_oloc->file);
+    assert(stab_dst);
+    assert(cpy_info);
 
     /* If we are performing a 'shallow hierarchy' copy, get out now */
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
@@ -406,15 +406,15 @@ H5O__stab_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(stab);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(stab);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "B-tree address:", stab->btree_addr);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Name heap address:", stab->heap_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__stab_debug() */

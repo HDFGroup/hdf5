@@ -187,8 +187,8 @@ H5S_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(0 == H5I_nmembers(H5I_DATASPACE));
-    HDassert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
+    assert(0 == H5I_nmembers(H5I_DATASPACE));
+    assert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
 
     /* Destroy the dataspace object id group */
     n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
@@ -220,7 +220,7 @@ H5S__close_cb(void *_space, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(space);
+    assert(space);
 
     /* Close the dataspace object */
     if (H5S_close(space) < 0)
@@ -281,7 +281,7 @@ H5S_create(H5S_class_t type)
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown dataspace (extent) type" && 0);
+            assert("unknown dataspace (extent) type" && 0);
             break;
     } /* end switch */
 
@@ -370,7 +370,7 @@ H5S__extent_release(H5S_extent_t *extent)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(extent);
+    assert(extent);
 
     /* Release extent */
     if (extent->type == H5S_SIMPLE) {
@@ -405,7 +405,7 @@ H5S_close(H5S_t *ds)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(ds);
+    assert(ds);
 
     /* Release selection (this should come before the extent release) */
     if (H5S_SELECT_RELEASE(ds) < 0)
@@ -557,8 +557,8 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(dst);
-    HDassert(src);
+    assert(dst);
+    assert(src);
 
     /* Copy extent */
     if (H5S__extent_copy_real(&(dst->extent), &(src->extent), TRUE) < 0)
@@ -630,7 +630,7 @@ H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_m
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown dataspace type" && 0);
+            assert("unknown dataspace type" && 0);
             break;
     } /* end switch */
 
@@ -717,7 +717,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
     FUNC_ENTER_NOAPI_NOERR
 
     /* check args */
-    HDassert(ds);
+    assert(ds);
 
     /* Get the number of elements in extent */
     ret_value = (hssize_t)ds->extent.nelem;
@@ -784,7 +784,7 @@ H5S_get_npoints_max(const H5S_t *ds)
     FUNC_ENTER_NOAPI(0)
 
     /* check args */
-    HDassert(ds);
+    assert(ds);
 
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
@@ -813,7 +813,7 @@ H5S_get_npoints_max(const H5S_t *ds)
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown dataspace class" && 0);
+            assert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, 0, "internal error (unknown dataspace class)")
     }
 
@@ -880,7 +880,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(ds);
+    assert(ds);
 
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
@@ -891,7 +891,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown dataspace class" && 0);
+            assert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
     } /* end switch */
 
@@ -957,7 +957,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(ext);
+    assert(ext);
 
     switch (ext->type) {
         case H5S_NULL:
@@ -981,7 +981,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
 
         case H5S_NO_CLASS:
         default:
-            HDassert("unknown dataspace class" && 0);
+            assert("unknown dataspace class" && 0);
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
     } /* end switch */
 
@@ -1011,7 +1011,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(ds);
+    assert(ds);
 
     /* Get dims for extent */
     if ((ret_value = H5S_extent_get_dims(&ds->extent, dims, max_dims)) < 0)
@@ -1041,10 +1041,10 @@ H5S_write(H5F_t *f, H5O_t *oh, unsigned update_flags, H5S_t *ds)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(oh);
-    HDassert(ds);
-    HDassert(H5S_GET_EXTENT_TYPE(ds) >= 0);
+    assert(f);
+    assert(oh);
+    assert(ds);
+    assert(H5S_GET_EXTENT_TYPE(ds) >= 0);
 
     /* Write the current dataspace extent to the dataspace message */
     if (H5O_msg_write_oh(f, oh, H5O_SDSPACE_ID, 0, update_flags, &(ds->extent)) < 0)
@@ -1073,10 +1073,10 @@ H5S_append(H5F_t *f, H5O_t *oh, H5S_t *ds)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(oh);
-    HDassert(ds);
-    HDassert(H5S_GET_EXTENT_TYPE(ds) >= 0);
+    assert(f);
+    assert(oh);
+    assert(ds);
+    assert(H5S_GET_EXTENT_TYPE(ds) >= 0);
 
     /* Add the dataspace message to the object header */
     if (H5O_msg_append_oh(f, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent)) < 0)
@@ -1109,7 +1109,7 @@ H5S_read(const H5O_loc_t *loc)
     FUNC_ENTER_NOAPI(NULL)
 
     /* check args */
-    HDassert(loc);
+    assert(loc);
 
     if (NULL == (ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -1154,7 +1154,7 @@ H5S__is_simple(const H5S_t *sdim)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args and all the boring stuff. */
-    HDassert(sdim);
+    assert(sdim);
 
     /* H5S_NULL shouldn't be simple dataspace */
     ret_value =
@@ -1282,7 +1282,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(rank <= H5S_MAX_RANK);
+    assert(rank <= H5S_MAX_RANK);
 
     /* shift out of the previous state to a "simple" dataspace.  */
     if (H5S__extent_release(&space->extent) < 0)
@@ -1322,7 +1322,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     /* Selection related cleanup */
 
     /* Set offset to zeros */
-    HDmemset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
+    memset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
     space->select.offset_changed = FALSE;
 
     /* If the selection is 'all', update the number of elements selected */
@@ -1423,7 +1423,7 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/], const hsize_t max
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(rank <= H5S_MAX_RANK);
+    assert(rank <= H5S_MAX_RANK);
 
     /* Create the space and set the extent */
     if (NULL == (ret_value = H5S_create(H5S_SIMPLE)))
@@ -1696,7 +1696,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(space);
+    assert(space);
 
     ret_value = H5S_GET_EXTENT_TYPE(space);
 
@@ -1794,8 +1794,8 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
-    HDassert(size);
+    assert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    assert(size);
 
     /* Verify that the dimensions being changed are allowed to change */
     for (u = 0; u < space->extent.rank; u++)
@@ -1841,7 +1841,7 @@ H5S_has_extent(const H5S_t *ds)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(ds);
+    assert(ds);
 
     if (0 == ds->extent.rank && 0 == ds->extent.nelem && H5S_NULL != ds->extent.type)
         ret_value = FALSE;
@@ -1874,8 +1874,8 @@ H5S_set_extent_real(H5S_t *space, const hsize_t *size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
-    HDassert(size);
+    assert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    assert(size);
 
     /* Change the dataspace size & re-compute the number of elements in the extent */
     for (u = 0, nelem = 1; u < space->extent.rank; u++) {
@@ -1956,8 +1956,8 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(ds1);
-    HDassert(ds2);
+    assert(ds1);
+    assert(ds2);
 
     /* Make certain the dataspaces are the same type */
     if (ds1->extent.type != ds2->extent.type)
@@ -1969,8 +1969,8 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 
     /* Make certain the dataspaces' current dimensions are the same size */
     if (ds1->extent.rank > 0) {
-        HDassert(ds1->extent.size);
-        HDassert(ds2->extent.size);
+        assert(ds1->extent.size);
+        assert(ds2->extent.size);
         for (u = 0; u < ds1->extent.rank; u++)
             if (ds1->extent.size[u] != ds2->extent.size[u])
                 HGOTO_DONE(FALSE)
@@ -2012,7 +2012,7 @@ H5S_extent_nelem(const H5S_extent_t *ext)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    HDassert(ext);
+    assert(ext);
 
     /* Return the number of elements in extent */
     FUNC_LEAVE_NOAPI(ext->nelem)
@@ -2038,8 +2038,8 @@ H5S_set_version(H5F_t *f, H5S_t *ds)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(ds);
+    assert(f);
+    assert(ds);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(ds->extent.version, H5O_sdspace_ver_bounds[H5F_LOW_BOUND(f)]);

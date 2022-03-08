@@ -80,12 +80,12 @@ main(int argc, char **argv)
     char filename[65];
 
     if (argc < 2 || !argv[0] || !argv[1]) {
-        HDprintf("Usage: gen_test [le | be]\n");
+        printf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
     if (argv[1] && (strcmp("le", argv[1]) != 0) && (strcmp("be", argv[1]) != 0)) {
-        HDprintf("Usage: gen_test [le | be]\n");
+        printf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
@@ -105,11 +105,11 @@ main(int argc, char **argv)
 
     if (nerrors)
         goto error;
-    HDprintf("Dimension scales file generation passed.\n");
+    printf("Dimension scales file generation passed.\n");
     return 0;
 
 error:
-    HDprintf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n", nerrors);
+    printf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n", nerrors);
     return 1;
 }
 
@@ -193,11 +193,11 @@ test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx)
         if (H5DSis_attached(did, dsid, idx) == 0) {
             if (H5DSattach_scale(did, dsid, idx) >= 0) {
                 if (H5DSis_attached(did, dsid, idx) > 0) {
-                    /* HDprintf(" scale attached "); */
+                    /* printf(" scale attached "); */
                     ret_value = SUCCEED;
                 }
                 else if (H5DSis_attached(did, dsid, idx) == 0) {
-                    HDprintf(" scale not attached ");
+                    printf(" scale not attached ");
                 }
             }
         }
@@ -261,13 +261,13 @@ test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename
     if ((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if (H5DSis_attached(did, dsid, idx) == 1) {
             if ((name_len = H5DSget_scale_name(dsid, NULL, (size_t)0)) > 0) {
-                name_out = (char *)HDmalloc((size_t)name_len * sizeof(char));
+                name_out = (char *)malloc((size_t)name_len * sizeof(char));
                 if (name_out != NULL) {
                     if (H5DSget_scale_name(dsid, name_out, (size_t)name_len) >= 0) {
                         if (strcmp(scalename, name_out) == 0) {
                             ret_value = SUCCEED;
                         }
-                        HDfree(name_out);
+                        free(name_out);
                         name_out = NULL;
                     }
                 }

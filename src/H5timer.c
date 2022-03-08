@@ -101,41 +101,41 @@ H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds)
     double bw;
 
     if (nseconds <= 0.0)
-        HDstrcpy(buf, "       NaN");
+        strcpy(buf, "       NaN");
     else {
         bw = nbytes / nseconds;
         if (H5_DBL_ABS_EQUAL(bw, 0.0))
-            HDstrcpy(buf, "0.000  B/s");
+            strcpy(buf, "0.000  B/s");
         else if (bw < 1.0)
-            HDsprintf(buf, "%10.4e", bw);
+            sprintf(buf, "%10.4e", bw);
         else if (bw < (double)H5_KB) {
-            HDsprintf(buf, "%05.4f", bw);
-            HDstrcpy(buf + 5, "  B/s");
+            sprintf(buf, "%05.4f", bw);
+            strcpy(buf + 5, "  B/s");
         }
         else if (bw < (double)H5_MB) {
-            HDsprintf(buf, "%05.4f", bw / (double)H5_KB);
-            HDstrcpy(buf + 5, " kB/s");
+            sprintf(buf, "%05.4f", bw / (double)H5_KB);
+            strcpy(buf + 5, " kB/s");
         }
         else if (bw < (double)H5_GB) {
-            HDsprintf(buf, "%05.4f", bw / (double)H5_MB);
-            HDstrcpy(buf + 5, " MB/s");
+            sprintf(buf, "%05.4f", bw / (double)H5_MB);
+            strcpy(buf + 5, " MB/s");
         }
         else if (bw < (double)H5_TB) {
-            HDsprintf(buf, "%05.4f", bw / (double)H5_GB);
-            HDstrcpy(buf + 5, " GB/s");
+            sprintf(buf, "%05.4f", bw / (double)H5_GB);
+            strcpy(buf + 5, " GB/s");
         }
         else if (bw < (double)H5_PB) {
-            HDsprintf(buf, "%05.4f", bw / (double)H5_TB);
-            HDstrcpy(buf + 5, " TB/s");
+            sprintf(buf, "%05.4f", bw / (double)H5_TB);
+            strcpy(buf + 5, " TB/s");
         }
         else if (bw < (double)H5_EB) {
-            HDsprintf(buf, "%05.4f", bw / (double)H5_PB);
-            HDstrcpy(buf + 5, " PB/s");
+            sprintf(buf, "%05.4f", bw / (double)H5_PB);
+            strcpy(buf + 5, " PB/s");
         }
         else {
-            HDsprintf(buf, "%10.4e", bw);
-            if (HDstrlen(buf) > 10)
-                HDsprintf(buf, "%10.3e", bw);
+            sprintf(buf, "%10.4e", bw);
+            if (strlen(buf) > 10)
+                sprintf(buf, "%10.3e", bw);
         } /* end else-if */
     }     /* end else */
 } /* end H5_bandwidth() */
@@ -276,7 +276,7 @@ static herr_t
 H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     /* Windows call handles both system/user and elapsed times */
 #ifdef H5_HAVE_WIN32_API
@@ -376,10 +376,10 @@ herr_t
 H5_timer_init(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Initialize everything */
-    HDmemset(timer, 0, sizeof(H5_timer_t));
+    memset(timer, 0, sizeof(H5_timer_t));
 
     return 0;
 } /* end H5_timer_init() */
@@ -401,7 +401,7 @@ herr_t
 H5_timer_start(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Start the timer
      * This sets the "initial" times to the system-defined start times.
@@ -431,7 +431,7 @@ herr_t
 H5_timer_stop(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Stop the timer */
     if (H5__timer_get_timevals(&(timer->final_interval)) < 0)
@@ -482,7 +482,7 @@ herr_t
 H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;
@@ -537,7 +537,7 @@ herr_t
 H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;
@@ -603,22 +603,22 @@ H5_timer_get_time_string(double seconds)
         remainder_sec = seconds;
 
         /* Extract days */
-        days = HDfloor(remainder_sec / H5_SEC_PER_DAY);
+        days = floor(remainder_sec / H5_SEC_PER_DAY);
         remainder_sec -= (days * H5_SEC_PER_DAY);
 
         /* Extract hours */
-        hours = HDfloor(remainder_sec / H5_SEC_PER_HOUR);
+        hours = floor(remainder_sec / H5_SEC_PER_HOUR);
         remainder_sec -= (hours * H5_SEC_PER_HOUR);
 
         /* Extract minutes */
-        minutes = HDfloor(remainder_sec / H5_SEC_PER_MIN);
+        minutes = floor(remainder_sec / H5_SEC_PER_MIN);
         remainder_sec -= (minutes * H5_SEC_PER_MIN);
 
         /* The # of seconds left is in remainder_sec */
     } /* end if */
 
     /* Allocate */
-    if (NULL == (s = (char *)HDcalloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
+    if (NULL == (s = (char *)calloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
         return NULL;
 
     /* Do we need a format string? Some people might like a certain
@@ -627,30 +627,30 @@ H5_timer_get_time_string(double seconds)
      * (name? round_up_size? ?)
      */
     if (seconds < 0.0)
-        HDsprintf(s, "N/A");
+        sprintf(s, "N/A");
     else if (H5_DBL_ABS_EQUAL(0.0, seconds))
-        HDsprintf(s, "0.0 s");
+        sprintf(s, "0.0 s");
     else if (seconds < 1.0E-6)
         /* t < 1 us, Print time in ns */
-        HDsprintf(s, "%.f ns", seconds * 1.0E9);
+        sprintf(s, "%.f ns", seconds * 1.0E9);
     else if (seconds < 1.0E-3)
         /* t < 1 ms, Print time in us */
-        HDsprintf(s, "%.1f us", seconds * 1.0E6);
+        sprintf(s, "%.1f us", seconds * 1.0E6);
     else if (seconds < 1.0)
         /* t < 1 s, Print time in ms */
-        HDsprintf(s, "%.1f ms", seconds * 1.0E3);
+        sprintf(s, "%.1f ms", seconds * 1.0E3);
     else if (seconds < H5_SEC_PER_MIN)
         /* t < 1 m, Print time in s */
-        HDsprintf(s, "%.2f s", seconds);
+        sprintf(s, "%.2f s", seconds);
     else if (seconds < H5_SEC_PER_HOUR)
         /* t < 1 h, Print time in m and s */
-        HDsprintf(s, "%.f m %.f s", minutes, remainder_sec);
+        sprintf(s, "%.f m %.f s", minutes, remainder_sec);
     else if (seconds < H5_SEC_PER_DAY)
         /* t < 1 d, Print time in h, m and s */
-        HDsprintf(s, "%.f h %.f m %.f s", hours, minutes, remainder_sec);
+        sprintf(s, "%.f h %.f m %.f s", hours, minutes, remainder_sec);
     else
         /* Print time in d, h, m and s */
-        HDsprintf(s, "%.f d %.f h %.f m %.f s", days, hours, minutes, remainder_sec);
+        sprintf(s, "%.f d %.f h %.f m %.f s", days, hours, minutes, remainder_sec);
 
     return s;
 } /* end H5_timer_get_time_string() */

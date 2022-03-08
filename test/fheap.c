@@ -196,7 +196,7 @@ static int
 init_small_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = SMALL_ID_LEN;
@@ -232,7 +232,7 @@ static int
 init_large_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = LARGE_ID_LEN;
@@ -272,44 +272,44 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if (H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR
     if (heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
+        fprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
                   heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
+        fprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
                   heap_stats.man_size, state->man_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
                   heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
                   heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
+        fprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
                   heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
+        fprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
                   heap_stats.huge_size, state->huge_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
+        fprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
                   heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
+        fprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
                   heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR
     } /* end if */
@@ -339,7 +339,7 @@ static herr_t
 op_memcpy(const void *obj, size_t obj_len, void *op_data)
 {
     /* Make copy of the object */
-    HDmemcpy(op_data, obj, obj_len);
+    memcpy(op_data, obj, obj_len);
 
     return (SUCCEED);
 } /* op_memcpy() */
@@ -377,7 +377,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
     size_t         robj_size;                /* Object size read in */
 
     /* Sanity check */
-    HDassert(fh);
+    assert(fh);
 
     /* Initialize object buffer */
     obj = &shared_wobj_g[obj_off];
@@ -389,7 +389,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR
 
     /* Insert object */
-    HDmemset(heap_id, 0, id_len);
+    memset(heap_id, 0, id_len);
     if (H5HF_insert(fh, obj_size, obj, heap_id) < 0)
         FAIL_STACK_ERROR
 
@@ -424,7 +424,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(obj, shared_robj_g, obj_size) != 0)
+    if (memcmp(obj, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* If the heap IDs are to be retained, append them to the list */
@@ -451,7 +451,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         } /* end if */
 
         /* Append the object info onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
         keep_ids->lens[keep_ids->num_ids] = obj_size;
         keep_ids->offs[keep_ids->num_ids] = obj_off;
 
@@ -511,7 +511,7 @@ get_fill_size(const fheap_test_param_t *tparam)
 
         case FHEAP_TEST_FILL_N:
         default:
-            HDassert(0 && "Unknown bulk fill type?!?");
+            assert(0 && "Unknown bulk fill type?!?");
     } /* end switch */
 
     return (0);
@@ -542,13 +542,13 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
      */
     size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
     test_desc            = H5MM_malloc(test_desc_len);
-    (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
+    (void)snprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
 
     TESTING(test_desc);
     H5MM_xfree(test_desc);
 
     /* Initialize the heap ID structure */
-    HDmemset(keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Retrieve "bulk" filling object size */
     if (fill_size)
@@ -662,7 +662,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             FAIL_STACK_ERROR
         if (!H5F_addr_defined(*fh_addr))
             TEST_ERROR
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR
 
@@ -707,7 +707,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             FAIL_STACK_ERROR
         if (!H5F_addr_defined(*fh_addr))
             TEST_ERROR
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR
     } /* end if */
@@ -850,9 +850,9 @@ del_objs_half_refill(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_he
     size_t         u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(keep_ids);
 
     /* Check for closing & re-opening the heap */
     if (tparam->reopen_heap) {
@@ -941,10 +941,10 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     size_t  u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(state);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(state);
+    assert(keep_ids);
 
     /* Check for first deleting half of objects & then re-inserting them */
     if (tparam->drain_half == FHEAP_DEL_DRAIN_HALF)
@@ -985,7 +985,7 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     } /* end for */
 
     /* Heap should be completely empty now, reset our state */
-    HDmemset(state, 0, sizeof(fheap_heap_state_t));
+    memset(state, 0, sizeof(fheap_heap_state_t));
 
     /* Check up on heap... */
     if (check_stats(*fh, state))
@@ -1038,9 +1038,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
     unsigned       u;            /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
-    HDassert(obj_size + 256 < shared_obj_size_g);
+    assert(fh);
+    assert(state);
+    assert(obj_size + 256 < shared_obj_size_g);
 
     /* Initialize starting information */
     data_size    = (size_t)DBLOCK_FREE(fh, block_row);
@@ -1167,7 +1167,7 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
 
         /* Check that object is correct */
         wobj = &shared_wobj_g[*curr_off_ptr];
-        if (HDmemcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
+        if (memcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
             TEST_ERROR
 
         /* Adjust object & ID pointers */
@@ -1193,9 +1193,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
         } /* end if */
 
         /* Append the IDs onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
-        HDmemcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
-        HDmemcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
+        memcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
 
         /* Increment the number of IDs kept */
         keep_ids->num_ids += num_ids;
@@ -1237,8 +1237,8 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
     unsigned u;                /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1326,8 +1326,8 @@ fill_partial_row(H5HF_t *fh, unsigned row, unsigned width, size_t obj_size, fhea
     unsigned u;          /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1367,8 +1367,8 @@ static int
 fill_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Fill the entire row (with the partial row fill routine) */
     if (fill_partial_row(fh, row, DTABLE_WIDTH(fh), obj_size, state, keep_ids))
@@ -1406,7 +1406,7 @@ fill_root_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_h
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1445,7 +1445,7 @@ fill_2nd_indirect(H5HF_t *fh, unsigned pos, size_t obj_size, fheap_heap_state_t 
 
     /* Get some information for the heap */
     max_dblock_rows = IBLOCK_MAX_DROWS(fh, pos);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1482,7 +1482,7 @@ fill_all_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_he
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1860,14 +1860,14 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
     PASSED();
 
     /* Query the type of address mapping */
     TESTING("query heap creation parameters");
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -1985,7 +1985,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
 
@@ -2019,7 +2019,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Query the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2140,7 +2140,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
 
@@ -2149,7 +2149,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2181,7 +2181,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2310,7 +2310,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
 
@@ -2323,7 +2323,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2465,7 +2465,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("limits of heap ID lengths")
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set the 'default' heap ID length */
     tmp_cparam.id_len = 0;
@@ -2801,7 +2801,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("creating heaps with I/O filters")
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -2844,7 +2844,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR
 
     /* Query the heap creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR
     if (H5HF_cmp_cparam_test(&tmp_cparam, &test_cparam))
@@ -3205,7 +3205,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
 
@@ -3318,7 +3318,7 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
 
@@ -3419,7 +3419,7 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting first (small) object into absolute heap
@@ -3516,7 +3516,7 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) object into absolute heap
@@ -3615,7 +3615,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test forcing creation of indirect root block & second direct block
@@ -3721,7 +3721,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill second direct block
@@ -3828,7 +3828,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to create third direct block
@@ -3939,7 +3939,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill first row in root indirect block
@@ -4035,7 +4035,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4138,7 +4138,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4239,7 +4239,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start third row in root indirect block
@@ -4350,7 +4350,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill four rows in root indirect block
@@ -4447,7 +4447,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct  rows in root indirect block
@@ -4543,7 +4543,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of first recursive indirect block
@@ -4645,7 +4645,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of second direct
@@ -4755,7 +4755,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4858,7 +4858,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4969,7 +4969,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5073,7 +5073,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5175,7 +5175,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5284,7 +5284,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5387,7 +5387,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5497,7 +5497,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5608,7 +5608,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5716,7 +5716,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5825,7 +5825,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5940,7 +5940,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6061,7 +6061,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6173,7 +6173,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6287,7 +6287,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6419,7 +6419,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -6439,7 +6439,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155438845; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -6511,7 +6511,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         if (fh)
@@ -6578,7 +6578,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -6743,7 +6743,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -6937,7 +6937,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -7107,7 +7107,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -7348,7 +7348,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -7623,9 +7623,9 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Set up data array */
-    if (NULL == (heap_id_data = (unsigned char *)HDcalloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
+    if (NULL == (heap_id_data = (unsigned char *)calloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
         TEST_ERROR;
-    if (NULL == (heap_id = (unsigned char **)HDcalloc(100, sizeof(heap_id_data))))
+    if (NULL == (heap_id = (unsigned char **)calloc(100, sizeof(heap_id_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         heap_id[i] = heap_id_data + (i * MAX_HEAP_ID_LEN);
@@ -7653,7 +7653,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(fh_addr))
         FAIL_STACK_ERROR
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR
 
@@ -7662,14 +7662,14 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
      */
     TESTING("incremental object insertion and removal")
 
-    HDmemset(&obj1, 0, sizeof(obj1));
-    HDmemset(&obj2, 0, sizeof(obj2));
+    memset(&obj1, 0, sizeof(obj1));
+    memset(&obj2, 0, sizeof(obj2));
     for (i = 0; i < 100; i++) {
         for (j = 0; j < i; j++) {
             if (H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
 
-            HDsprintf(obj2.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+            sprintf(obj2.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if (H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
@@ -7679,8 +7679,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             TEST_ERROR
 
         /* Insert object */
-        HDmemset(heap_id[i], 0, id_len);
-        HDsprintf(obj1.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+        memset(heap_id[i], 0, id_len);
+        sprintf(obj1.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -7696,8 +7696,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     /* All tests passed */
     PASSED();
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 0;
 
@@ -7710,8 +7710,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 1;
 } /* test_man_incr_insert_remove() */
@@ -12693,10 +12693,10 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -12846,10 +12846,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -12876,10 +12876,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13079,10 +13079,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -13109,10 +13109,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -13139,10 +13139,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13390,10 +13390,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -13420,10 +13420,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -13450,10 +13450,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -13487,10 +13487,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -13525,10 +13525,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13663,7 +13663,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR
     } /* end if */
@@ -13765,7 +13765,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -13863,10 +13863,10 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14014,10 +14014,10 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14167,10 +14167,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object small enough to encode in heap ID */
@@ -14197,10 +14197,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14413,17 +14413,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on first huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert second object too large for managed heap blocks */
@@ -14450,17 +14450,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on second huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id2, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert third object too large for managed heap blocks */
@@ -14487,17 +14487,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on third huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id3, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -14531,17 +14531,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on fourth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id4, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -14576,17 +14576,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on fifth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id5, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert sixth object small enough to encode in heap ID */
@@ -14613,17 +14613,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id6, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on sixth ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id6, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Insert seventh object small enough to encode in heap ID */
@@ -14650,17 +14650,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id7, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Check 'op' functionality on seventh ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id7, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14857,7 +14857,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR
     } /* end if */
@@ -14961,7 +14961,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     const char *base_desc = "insert one 'managed' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15027,10 +15027,10 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15046,7 +15046,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
             TEST_ERROR
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR
     } /* end if */
@@ -15135,7 +15135,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     const char *base_desc = "insert two 'managed' objects into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15210,10 +15210,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id1, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Read in ('normal') object #2 */
@@ -15221,10 +15221,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR
     if (obj_size != robj_size)
         TEST_ERROR
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15268,7 +15268,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR
 
@@ -15298,7 +15298,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR
         } /* end if */
@@ -15341,7 +15341,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR
 
@@ -15371,7 +15371,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR
         } /* end else */
@@ -15461,10 +15461,10 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15509,7 +15509,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1156158635; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15546,9 +15546,9 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15609,7 +15609,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15665,10 +15665,10 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15715,7 +15715,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155181717; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15764,9 +15764,9 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15827,7 +15827,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15900,10 +15900,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TESTING("writing objects in heap")
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15957,7 +15957,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, huge_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY;
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (ret >= 0)
             TEST_ERROR
@@ -15973,7 +15973,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, tiny_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY;
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (ret >= 0)
         TEST_ERROR
 
@@ -16029,14 +16029,14 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Overwrite data just written */
         if (H5HF_write(fh, &keep_ids.ids[id_len * u], &id_changed, rewrite_obj) < 0)
             FAIL_STACK_ERROR
-        HDassert(!id_changed);
+        assert(!id_changed);
 
         /* Read data back in */
         if (H5HF_read(fh, &keep_ids.ids[id_len * u], shared_robj_g) < 0)
             FAIL_STACK_ERROR
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR
 
         /* Change size of data to write */
@@ -16085,7 +16085,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR
 
         /* Change size of data to write */
@@ -16170,7 +16170,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     TESTING("bug1: inserting several objects & removing one, then re-inserting")
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Perform common file & heap open operations */
     if (open_heap(filename, fapl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
@@ -16339,12 +16339,12 @@ main(void)
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (hbool_t)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16363,7 +16363,7 @@ main(void)
      *      in the future for parallel build.
      */
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
     else if (ExpressMode == 0) {
 #ifdef H5_HAVE_PARALLEL
         num_pb_fs = NUM_PB_FS - 2;
@@ -16478,7 +16478,7 @@ main(void)
         /* Iterate over the testing parameters */
         for (curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
             /* Clear the testing parameters */
-            HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
+            memset(&tparam, 0, sizeof(fheap_test_param_t));
             tparam.actual_id_len = HEAP_ID_LEN;
 
             /* Set to run with different file space setting */
@@ -16488,12 +16488,12 @@ main(void)
             switch (curr_test) {
                 /* "Normal" testing parameters */
                 case FHEAP_TEST_NORMAL:
-                    HDputs("Testing with normal parameters");
+                    puts("Testing with normal parameters");
                     break;
 
                 /* "Re-open heap" testing parameters */
                 case FHEAP_TEST_REOPEN:
-                    HDputs("Testing with reopen heap flag set");
+                    puts("Testing with reopen heap flag set");
                     tparam.reopen_heap = FHEAP_TEST_REOPEN;
                     break;
 
@@ -16525,12 +16525,12 @@ main(void)
                     switch (fill) {
                         /* "Bulk fill" heap blocks with 'large' objects */
                         case FHEAP_TEST_FILL_LARGE:
-                            HDputs("Bulk-filling blocks w/large objects");
+                            puts("Bulk-filling blocks w/large objects");
                             break;
 
                         /* "Bulk fill" heap blocks with 'single' objects */
                         case FHEAP_TEST_FILL_SINGLE:
-                            HDputs("Bulk-filling blocks w/single object");
+                            puts("Bulk-filling blocks w/single object");
                             break;
 
                         /* An unknown test? */
@@ -16581,7 +16581,7 @@ main(void)
                      * level of complexity gradually. -QAK
                      */
                     if (ExpressMode > 1)
-                        HDprintf(
+                        printf(
                             "***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                     else
                         nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
@@ -16629,7 +16629,7 @@ main(void)
                                 nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
                                     nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
@@ -16679,7 +16679,7 @@ main(void)
                                     test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
                                         fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors +=
                                         test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(
@@ -16730,12 +16730,12 @@ main(void)
                     switch (id_len) {
                         /* Use "normal" form for 'huge' object's heap IDs */
                         case 0:
-                            HDputs("Using 'normal' heap ID format for 'huge' objects");
+                            puts("Using 'normal' heap ID format for 'huge' objects");
                             break;
 
                         /* Use "direct" form for 'huge' object's heap IDs */
                         case 1:
-                            HDputs("Using 'direct' heap ID format for 'huge' objects");
+                            puts("Using 'direct' heap ID format for 'huge' objects");
 
                             /* Adjust actual length of heap IDs for directly storing 'huge' object's file
                              * offset & length in heap ID */
@@ -16745,7 +16745,7 @@ main(void)
                         /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
                         case 2:
                             small_cparam.id_len = 37;
-                            HDputs("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
+                            puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
                                    "'tiny' objects");
                             tparam.actual_id_len = 37;
                             break;
@@ -16809,10 +16809,10 @@ main(void)
 
             /* Random object insertion & deletion */
             if (ExpressMode > 1)
-                HDprintf("***Express test mode on.  Some tests skipped\n");
+                printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
-                HDputs("Using 'small' heap creation parameters");
+                puts("Using 'small' heap creation parameters");
 
                 /* (reduce size of tests when re-opening each time) */
                 /* XXX: Try to speed things up enough that these tests don't have to be reduced when
@@ -16834,7 +16834,7 @@ main(void)
                                             fapl, &small_cparam, &tparam);
 
                 /* Random tests using "large" heap creation parameters */
-                HDputs("Using 'large' heap creation parameters");
+                puts("Using 'large' heap creation parameters");
                 tparam.actual_id_len = LARGE_HEAP_ID_LEN;
 
                 /* (reduce size of tests when re-opening each time) */
@@ -16889,7 +16889,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All fractal heap tests passed.");
+    puts("All fractal heap tests passed.");
 
     /* Release space for the shared objects */
     H5MM_xfree(shared_wobj_g);
@@ -16914,7 +16914,7 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5MM_xfree(shared_wobj_g);

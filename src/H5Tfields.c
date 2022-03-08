@@ -86,7 +86,7 @@ H5T_get_nmembers(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(dt);
+    assert(dt);
 
     if (H5T_COMPOUND == dt->shared->type)
         ret_value = (int)dt->shared->u.compnd.nmembs;
@@ -162,7 +162,7 @@ H5T__get_member_name(H5T_t const *dt, unsigned membno)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(dt);
+    assert(dt);
 
     switch (dt->shared->type) {
         case H5T_COMPOUND:
@@ -223,7 +223,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     H5TRACE2("Is", "i*s", type_id, name);
 
     /* Check arguments */
-    HDassert(name);
+    assert(name);
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
@@ -231,12 +231,12 @@ H5Tget_member_index(hid_t type_id, const char *name)
     switch (dt->shared->type) {
         case H5T_COMPOUND:
             for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
-                if (!HDstrcmp(dt->shared->u.compnd.memb[i].name, name))
+                if (!strcmp(dt->shared->u.compnd.memb[i].name, name))
                     HGOTO_DONE((int)i)
             break;
         case H5T_ENUM:
             for (i = 0; i < dt->shared->u.enumer.nmembs; i++)
-                if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
+                if (!strcmp(dt->shared->u.enumer.name[i], name))
                     HGOTO_DONE((int)i)
             break;
 
@@ -288,8 +288,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(dt);
-    HDassert(H5T_COMPOUND == dt->shared->type || H5T_ENUM == dt->shared->type);
+    assert(dt);
+    assert(H5T_COMPOUND == dt->shared->type || H5T_ENUM == dt->shared->type);
 
     /* Use a bubble sort because we can short circuit */
     if (H5T_COMPOUND == dt->shared->type) {
@@ -315,7 +315,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
-                HDassert(dt->shared->u.compnd.memb[i].offset < dt->shared->u.compnd.memb[i + 1].offset);
+                assert(dt->shared->u.compnd.memb[i].offset < dt->shared->u.compnd.memb[i + 1].offset);
 #endif
         } /* end if */
     }
@@ -324,10 +324,10 @@ H5T__sort_value(const H5T_t *dt, int *map)
             dt->shared->u.enumer.sorted = H5T_SORT_VALUE;
             nmembs                      = dt->shared->u.enumer.nmembs;
             size                        = dt->shared->size;
-            HDassert(size <= sizeof(tbuf));
+            assert(size <= sizeof(tbuf));
             for (i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
+                    if (memcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
                                  (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
                         /* Swap names */
                         char *tmp                        = dt->shared->u.enumer.name[j];
@@ -355,7 +355,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
-                HDassert(HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
+                assert(memcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
                                   (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
 #endif
         } /* end if */
@@ -391,8 +391,8 @@ H5T__sort_name(const H5T_t *dt, int *map)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(dt);
-    HDassert(H5T_COMPOUND == dt->shared->type || H5T_ENUM == dt->shared->type);
+    assert(dt);
+    assert(H5T_COMPOUND == dt->shared->type || H5T_ENUM == dt->shared->type);
 
     /* Use a bubble sort because we can short circuit */
     if (H5T_COMPOUND == dt->shared->type) {
@@ -401,7 +401,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
             nmembs                      = dt->shared->u.compnd.nmembs;
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(dt->shared->u.compnd.memb[j].name, dt->shared->u.compnd.memb[j + 1].name) >
+                    if (strcmp(dt->shared->u.compnd.memb[j].name, dt->shared->u.compnd.memb[j + 1].name) >
                         0) {
                         H5T_cmemb_t tmp                  = dt->shared->u.compnd.memb[j];
                         dt->shared->u.compnd.memb[j]     = dt->shared->u.compnd.memb[j + 1];
@@ -418,7 +418,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++) {
-                HDassert(HDstrcmp(dt->shared->u.compnd.memb[i].name, dt->shared->u.compnd.memb[i + 1].name) <
+                assert(strcmp(dt->shared->u.compnd.memb[i].name, dt->shared->u.compnd.memb[i + 1].name) <
                          0);
             }
 #endif
@@ -429,10 +429,10 @@ H5T__sort_name(const H5T_t *dt, int *map)
             dt->shared->u.enumer.sorted = H5T_SORT_NAME;
             nmembs                      = dt->shared->u.enumer.nmembs;
             size                        = dt->shared->size;
-            HDassert(size <= sizeof(tbuf));
+            assert(size <= sizeof(tbuf));
             for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(dt->shared->u.enumer.name[j], dt->shared->u.enumer.name[j + 1]) > 0) {
+                    if (strcmp(dt->shared->u.enumer.name[j], dt->shared->u.enumer.name[j + 1]) > 0) {
                         /* Swap names */
                         char *tmp                        = dt->shared->u.enumer.name[j];
                         dt->shared->u.enumer.name[j]     = dt->shared->u.enumer.name[j + 1];
@@ -458,7 +458,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++)
-                HDassert(HDstrcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i + 1]) < 0);
+                assert(strcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i + 1]) < 0);
 #endif
         }
     }

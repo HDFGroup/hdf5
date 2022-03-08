@@ -97,7 +97,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     if (H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
         TEST_ERROR
 
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("vds prefix not set correctly");
 
     /* Create source dataspace */
@@ -186,7 +186,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data through virtual dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR
 
@@ -224,7 +224,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     }
 
     /* Read data directly from source dataset */
-    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    memset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
         TEST_ERROR
 
@@ -302,7 +302,7 @@ main(void)
     const char * env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
 
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -311,9 +311,9 @@ main(void)
      * doesn't support parallel reads and the splitter VFD has external
      * link-related bugs.
      */
-    if (h5_using_parallel_driver(env_h5_drvr) || !HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+    if (h5_using_parallel_driver(env_h5_drvr) || !strcmp(env_h5_drvr, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
+        exit(EXIT_SUCCESS);
     }
 
     /* Testing setup */
@@ -346,13 +346,13 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg),
+            snprintf(msg, sizeof(msg),
                        "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
                        high_string);
-            HDputs(msg);
+            puts(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
                          bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
                          bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
                 nerrors += test_vds_prefix_second(bit_config, fapl);
@@ -369,13 +369,13 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All virtual dataset tests passed.\n");
+    printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

@@ -1260,7 +1260,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "can't create VOL object for root group")
     } /* end if */
     else {
-        HDassert(H5I_GROUP == loc_type);
+        assert(H5I_GROUP == loc_type);
         if (NULL == (loc_vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
     } /* end else */
@@ -1293,7 +1293,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 done:
     /* Clean up if we temporarily opened the root group for a file */
     if (grp) {
-        HDassert(loc_vol_obj);
+        assert(loc_vol_obj);
         if (H5VL_group_close(loc_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group")
         if (H5VL_free_object(loc_vol_obj) < 0)
@@ -1370,7 +1370,7 @@ H5Funmount(hid_t loc_id, const char *name)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "can't create VOL object for root group")
     } /* end if */
     else {
-        HDassert(H5I_GROUP == loc_type);
+        assert(H5I_GROUP == loc_type);
         if (NULL == (loc_vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
     } /* end else */
@@ -1389,7 +1389,7 @@ H5Funmount(hid_t loc_id, const char *name)
 done:
     /* Clean up if we temporarily opened the root group for a file */
     if (grp) {
-        HDassert(loc_vol_obj);
+        assert(loc_vol_obj);
         if (H5VL_group_close(loc_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to release group")
         if (H5VL_free_object(loc_vol_obj) < 0)

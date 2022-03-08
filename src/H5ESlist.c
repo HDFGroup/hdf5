@@ -85,8 +85,8 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(ev);
+    assert(el);
+    assert(ev);
 
     ev->next = NULL;
 
@@ -123,7 +123,7 @@ H5ES__list_count(const H5ES_event_list_t *el)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
+    assert(el);
 
     FUNC_LEAVE_NOAPI(el->count)
 } /* end H5ES__list_count() */
@@ -156,8 +156,8 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(cb);
+    assert(el);
+    assert(cb);
 
     /* Iterate over events in list */
     ev = (order == H5_ITER_DEC) ? el->tail : el->head;
@@ -199,9 +199,9 @@ H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(el->head);
-    HDassert(ev);
+    assert(el);
+    assert(el->head);
+    assert(ev);
 
     /* Stitch event out of list */
     if (ev == el->head)

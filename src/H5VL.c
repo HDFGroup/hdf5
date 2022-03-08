@@ -129,7 +129,7 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     /* Check arguments */
     if (!name)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL connector name is disallowed")
-    if (0 == HDstrlen(name))
+    if (0 == strlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "zero-length VOL connector name is disallowed")
 

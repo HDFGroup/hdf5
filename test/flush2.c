@@ -78,7 +78,7 @@ dset_ok(hid_t fid, const char *dset_name)
         goto error;
 
     /* Read the data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         goto error;
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0)
         goto error;
@@ -91,7 +91,7 @@ dset_ok(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         goto error;
 
-    HDfree(data);
+    free(data);
 
     return TRUE;
 
@@ -103,7 +103,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(data);
+    free(data);
 
     return FALSE;
 } /* end dset_ok() */
@@ -144,7 +144,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     if ((top_gid = H5Gopen2(fid, "top_group", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < NGROUPS; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
+        snprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gopen2(top_gid, group_name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -251,7 +251,7 @@ main(void)
         PUTS_ERROR("bad vfd-dependent fapl")
 
     /* Check if the current VFD supports SWMR */
-    driver            = HDgetenv(HDF5_DRIVER);
+    driver            = getenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     /* TEST 1 */
@@ -293,7 +293,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR
 #endif
@@ -320,7 +320,7 @@ main(void)
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR
 #endif
@@ -379,7 +379,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED()
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR
 #endif
@@ -408,7 +408,7 @@ main(void)
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR
 #endif
@@ -423,12 +423,12 @@ main(void)
         SKIPPED()
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     h5_cleanup(FILENAME, fapl_id);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

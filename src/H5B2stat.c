@@ -77,7 +77,7 @@ H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(info);
+    assert(info);
 
     /* Get information about the B-tree */
     info->depth    = bt2->hdr->depth;
@@ -108,8 +108,8 @@ H5B2_size(H5B2_t *bt2, hsize_t *btree_size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(btree_size);
+    assert(bt2);
+    assert(btree_size);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;

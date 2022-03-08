@@ -63,21 +63,21 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(type);
+    assert(f);
+    assert(H5F_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(type);
 
     /* Currently does not support SWMR access */
-    HDassert(!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE));
+    assert(!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE));
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /*
      * Load the tree node.
@@ -91,38 +91,38 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Tree type ID:",
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Tree type ID:",
               ((shared->type->id) == H5B_SNODE_ID
                    ? "H5B_SNODE_ID"
                    : ((shared->type->id) == H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Dirty flag:", bt->cache_info.is_dirty ? "True" : "False");
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Level:", bt->level);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of left sibling:", bt->left);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of right sibling:", bt->right);
-    HDfprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth, "Number of children (max):", bt->nchildren,
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Level:", bt->level);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of left sibling:", bt->left);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of right sibling:", bt->right);
+    fprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth, "Number of children (max):", bt->nchildren,
               shared->two_k);
 
     /*
      * Print the child addresses
      */
     for (u = 0; u < bt->nchildren; u++) {
-        HDfprintf(stream, "%*sChild %d...\n", indent, "", u);
-        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
+        fprintf(stream, "%*sChild %d...\n", indent, "", u);
+        fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Address:", bt->child[u]);
 
         /* If there is a key debugging routine, use it to display the left & right keys */
         if (type->debug_key) {
             /* Decode the 'left' key & print it */
-            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "Left Key:");
-            HDassert(H5B_NKEY(bt, shared, u));
+            fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "Left Key:");
+            assert(H5B_NKEY(bt, shared, u));
             (void)(type->debug_key)(stream, indent + 6, MAX(0, fwidth - 6), H5B_NKEY(bt, shared, u), udata);
 
             /* Decode the 'right' key & print it */
-            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "Right Key:");
-            HDassert(H5B_NKEY(bt, shared, u + 1));
+            fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "Right Key:");
+            assert(H5B_NKEY(bt, shared, u + 1));
             (void)(type->debug_key)(stream, indent + 6, MAX(0, fwidth - 6), H5B_NKEY(bt, shared, u + 1),
                                     udata);
         } /* end if */
@@ -173,31 +173,31 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
     if (0 == ncalls++) {
         if (H5DEBUG(B))
-            HDfprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
+            fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
     } /* end if */
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
     shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
-    HDassert(shared);
+    assert(shared);
 
     /* Initialize the queue */
     cache_udata.f         = f;
     cache_udata.type      = type;
     cache_udata.rc_shared = rc_shared;
     bt                    = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG);
-    HDassert(bt);
+    assert(bt);
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
+    assert(shared);
     cur = (struct child_t *)H5MM_calloc(sizeof(struct child_t));
-    HDassert(cur);
+    assert(cur);
     cur->addr  = addr;
     cur->level = bt->level;
     head = tail = cur;
 
     status = H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
-    HDassert(status >= 0);
+    assert(status >= 0);
     bt = NULL; /* Make certain future references will be caught */
 
     /*
@@ -208,18 +208,18 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
      */
     for (ncell = 0; cur; ncell++) {
         bt = (H5B_t *)H5AC_protect(f, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG);
-        HDassert(bt);
+        assert(bt);
 
         /* Check node header */
-        HDassert(bt->level == cur->level);
+        assert(bt->level == cur->level);
         if (cur->next && cur->next->level == bt->level)
-            HDassert(H5F_addr_eq(bt->right, cur->next->addr));
+            assert(H5F_addr_eq(bt->right, cur->next->addr));
         else
-            HDassert(!H5F_addr_defined(bt->right));
+            assert(!H5F_addr_defined(bt->right));
         if (prev && prev->level == bt->level)
-            HDassert(H5F_addr_eq(bt->left, prev->addr));
+            assert(H5F_addr_eq(bt->left, prev->addr));
         else
-            HDassert(!H5F_addr_defined(bt->left));
+            assert(!H5F_addr_defined(bt->left));
 
         if (cur->level > 0) {
             unsigned u;
@@ -230,11 +230,11 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
                  * have then the tree has a cycle.
                  */
                 for (tmp = head; tmp; tmp = tmp->next)
-                    HDassert(H5F_addr_ne(tmp->addr, bt->child[u]));
+                    assert(H5F_addr_ne(tmp->addr, bt->child[u]));
 
                 /* Add the child node to the end of the queue */
                 tmp = (struct child_t *)H5MM_calloc(sizeof(struct child_t));
-                HDassert(tmp);
+                assert(tmp);
                 tmp->addr  = bt->child[u];
                 tmp->level = bt->level - 1;
                 tail->next = tmp;
@@ -242,13 +242,13 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
                 /* Check that the keys are monotonically increasing */
                 cmp = (type->cmp2)(H5B_NKEY(bt, shared, u), udata, H5B_NKEY(bt, shared, u + 1));
-                HDassert(cmp < 0);
+                assert(cmp < 0);
             } /* end for */
         }     /* end if */
 
         /* Release node */
         status = H5AC_unprotect(f, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
-        HDassert(status >= 0);
+        assert(status >= 0);
         bt = NULL; /* Make certain future references will be caught */
 
         /* Advance current location in queue */

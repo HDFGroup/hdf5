@@ -36,7 +36,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         ret = H5Pencode2(orig_pl, NULL, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        sbuf = (uint8_t *)HDmalloc(buf_size);
+        sbuf = (uint8_t *)malloc(buf_size);
 
         ret = H5Pencode2(orig_pl, sbuf, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
@@ -54,7 +54,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
 
         MPI_Recv(&recv_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
         buf_size = (size_t)recv_size;
-        rbuf     = (uint8_t *)HDmalloc(buf_size);
+        rbuf     = (uint8_t *)malloc(buf_size);
         MPI_Recv(rbuf, recv_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
         pl = H5Pdecode(rbuf);
@@ -66,14 +66,14 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         VRFY((ret >= 0), "H5Pclose succeeded");
 
         if (NULL != rbuf)
-            HDfree(rbuf);
+            free(rbuf);
     } /* end if */
 
     if (0 == mpi_rank)
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
 
     if (NULL != sbuf)
-        HDfree(sbuf);
+        free(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
     return (0);
@@ -140,7 +140,7 @@ test_plist_ed(void)
     herr_t ret; /* Generic return value */
 
     if (VERBOSE_MED)
-        HDprintf("Encode/Decode DCPLs\n");
+        printf("Encode/Decode DCPLs\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -467,7 +467,7 @@ external_links(void)
     char        link_path[50];
 
     if (VERBOSE_MED)
-        HDprintf("Check external links\n");
+        printf("Check external links\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -556,7 +556,7 @@ external_links(void)
 
             /* test opening a group that is to an external link, the external linked
                file should inherit the source file's access properties */
-            HDsnprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
+            snprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
             group = H5Gopen2(fid, link_path, H5P_DEFAULT);
             VRFY((group >= 0), "H5Gopen succeeded");
             ret = H5Gclose(group);

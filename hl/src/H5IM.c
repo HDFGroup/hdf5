@@ -104,13 +104,13 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
 
     /* Initialize the image dimensions */
 
-    if (HDstrncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
+    if (strncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
         /* Number of color planes is defined as the third dimension */
         dims[0] = height;
         dims[1] = width;
         dims[2] = IMAGE24_RANK;
     }
-    else if (HDstrncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
+    else if (strncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
         /* Number of color planes is defined as the first dimension */
         dims[0] = IMAGE24_RANK;
         dims[1] = height;
@@ -178,7 +178,7 @@ find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
      */
-    if (HDstrncmp(name, "PALETTE", 7) == 0)
+    if (strncmp(name, "PALETTE", 7) == 0)
         ret = H5_ITER_STOP;
 
     return ret;
@@ -293,13 +293,13 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
     /* This is a 24 bit image */
     {
 
-        if (HDstrncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
+        if (strncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
             /* Number of color planes is defined as the third dimension */
             *height = dims[0];
             *width  = dims[1];
             *planes = dims[2];
         }
-        else if (HDstrncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
+        else if (strncmp(interlace, "INTERLACE_PLANE", 15) == 0) {
             /* Number of color planes is defined as the first dimension */
             *planes = dims[0];
             *height = dims[1];
@@ -588,7 +588,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
 
         dim_ref = (hsize_t)n_refs + 1;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -629,7 +629,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         if (H5Aclose(aid) < 0)
             goto out;
 
-        HDfree(refbuf);
+        free(refbuf);
 
     } /* ok_pal ==  1 */
 
@@ -892,7 +892,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -921,7 +921,7 @@ H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -1001,7 +1001,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
 
         dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
+        refbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * (size_t)dim_ref);
 
         if (H5Aread(aid, atid, refbuf) < 0)
             goto out;
@@ -1023,7 +1023,7 @@ H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number, unsigned c
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(refbuf);
+        free(refbuf);
     }
 
     /* Close the image dataset. */
@@ -1108,19 +1108,19 @@ H5IMis_image(hid_t loc_id, const char *dset_name)
         if ((storage_size = H5Aget_storage_size(aid)) == 0)
             goto out;
 
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
         if (attr_data == NULL)
             goto out;
 
         if (H5Aread(aid, atid, attr_data) < 0)
             goto out;
 
-        if (HDstrncmp(attr_data, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS), HDstrlen(attr_data))) == 0)
+        if (strncmp(attr_data, IMAGE_CLASS, MIN(strlen(IMAGE_CLASS), strlen(attr_data))) == 0)
             ret = 1;
         else
             ret = 0;
 
-        HDfree(attr_data);
+        free(attr_data);
 
         if (H5Tclose(atid) < 0)
             goto out;
@@ -1208,19 +1208,19 @@ H5IMis_palette(hid_t loc_id, const char *dset_name)
         if ((storage_size = H5Aget_storage_size(aid)) == 0)
             goto out;
 
-        attr_data = (char *)HDmalloc((size_t)storage_size * sizeof(char) + 1);
+        attr_data = (char *)malloc((size_t)storage_size * sizeof(char) + 1);
         if (attr_data == NULL)
             goto out;
 
         if (H5Aread(aid, atid, attr_data) < 0)
             goto out;
 
-        if (HDstrncmp(attr_data, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS), HDstrlen(attr_data))) == 0)
+        if (strncmp(attr_data, PALETTE_CLASS, MIN(strlen(PALETTE_CLASS), strlen(attr_data))) == 0)
             ret = 1;
         else
             ret = 0;
 
-        HDfree(attr_data);
+        free(attr_data);
 
         if (H5Tclose(atid) < 0)
             goto out;

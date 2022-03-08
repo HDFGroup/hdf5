@@ -154,15 +154,15 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Slide records in parent node up one space, to make room for promoted record */
     if (idx < internal->nrec) {
-        HDmemmove(H5B2_INT_NREC(internal, hdr, idx + 1), H5B2_INT_NREC(internal, hdr, idx),
+        memmove(H5B2_INT_NREC(internal, hdr, idx + 1), H5B2_INT_NREC(internal, hdr, idx),
                   hdr->cls->nrec_size * (internal->nrec - idx));
-        HDmemmove(&(internal->node_ptrs[idx + 2]), &(internal->node_ptrs[idx + 1]),
+        memmove(&(internal->node_ptrs[idx + 2]), &(internal->node_ptrs[idx + 1]),
                   sizeof(H5B2_node_ptr_t) * (internal->nrec - idx));
     } /* end if */
 
@@ -351,7 +351,7 @@ H5B2__split_root(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Update depth of B-tree */
     hdr->depth++;
@@ -438,8 +438,8 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
+    assert(hdr);
+    assert(internal);
 
     /* Check for the kind of B-tree node to redistribute */
     if (depth > 1) {
@@ -536,7 +536,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                     hdr->cls->nrec_size);
 
         /* Slide records in right node down */
-        HDmemmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, move_nrec),
+        memmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, move_nrec),
                   hdr->cls->nrec_size * new_right_nrec);
 
         /* Handle node pointers, if we have an internal node */
@@ -555,7 +555,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                         sizeof(H5B2_node_ptr_t) * move_nrec);
 
             /* Slide node pointers in right node down */
-            HDmemmove(&(right_node_ptrs[0]), &(right_node_ptrs[move_nrec]),
+            memmove(&(right_node_ptrs[0]), &(right_node_ptrs[move_nrec]),
                       sizeof(H5B2_node_ptr_t) * (new_right_nrec + (unsigned)1));
         } /* end if */
 
@@ -583,10 +583,10 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             (uint16_t)(*left_nrec - new_left_nrec); /* Number of records to move from left node to right */
 
         /* Sanity check */
-        HDassert(*left_nrec > *right_nrec);
+        assert(*left_nrec > *right_nrec);
 
         /* Slide records in right node up */
-        HDmemmove(H5B2_NAT_NREC(right_native, hdr, move_nrec), H5B2_NAT_NREC(right_native, hdr, 0),
+        memmove(H5B2_NAT_NREC(right_native, hdr, move_nrec), H5B2_NAT_NREC(right_native, hdr, 0),
                   hdr->cls->nrec_size * (*right_nrec));
 
         /* Copy record from parent node down into right child */
@@ -609,7 +609,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             unsigned u;                      /* Local index variable */
 
             /* Slide node pointers in right node up */
-            HDmemmove(&(right_node_ptrs[move_nrec]), &(right_node_ptrs[0]),
+            memmove(&(right_node_ptrs[move_nrec]), &(right_node_ptrs[0]),
                       sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
             /* Copy node pointers from left node to right */
@@ -717,9 +717,9 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to redistribute */
     if (depth > 1) {
@@ -807,8 +807,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
         uint16_t curr_middle_nrec = *middle_nrec;
 
         /* Sanity check rounding */
-        HDassert(new_middle_nrec <= new_left_nrec);
-        HDassert(new_middle_nrec <= new_right_nrec);
+        assert(new_middle_nrec <= new_left_nrec);
+        assert(new_middle_nrec <= new_right_nrec);
 
         /* Move records into left node */
         if (new_left_nrec > *left_nrec) {
@@ -831,7 +831,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             moved_middle_nrec++;
 
             /* Slide records in middle node down */
-            HDmemmove(H5B2_NAT_NREC(middle_native, hdr, 0),
+            memmove(H5B2_NAT_NREC(middle_native, hdr, 0),
                       H5B2_NAT_NREC(middle_native, hdr, moved_middle_nrec),
                       hdr->cls->nrec_size * (size_t)(*middle_nrec - moved_middle_nrec));
 
@@ -853,7 +853,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 middle_moved_nrec -= (hssize_t)(moved_nrec + move_nptrs);
 
                 /* Slide the node pointers in middle node down */
-                HDmemmove(&(middle_node_ptrs[0]), &(middle_node_ptrs[move_nptrs]),
+                memmove(&(middle_node_ptrs[0]), &(middle_node_ptrs[move_nptrs]),
                           sizeof(H5B2_node_ptr_t) * ((*middle_nrec - move_nptrs) + 1));
             } /* end if */
 
@@ -878,7 +878,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 (unsigned)(new_right_nrec - *right_nrec); /* Number of records to move out of right node */
 
             /* Slide records in right node up */
-            HDmemmove(H5B2_NAT_NREC(right_native, hdr, right_nrec_move), H5B2_NAT_NREC(right_native, hdr, 0),
+            memmove(H5B2_NAT_NREC(right_native, hdr, right_nrec_move), H5B2_NAT_NREC(right_native, hdr, 0),
                       hdr->cls->nrec_size * (*right_nrec));
 
             /* Move right parent record down to right node */
@@ -902,7 +902,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 unsigned u;          /* Local index variable */
 
                 /* Slide the node pointers in right node up */
-                HDmemmove(&(right_node_ptrs[right_nrec_move]), &(right_node_ptrs[0]),
+                memmove(&(right_node_ptrs[right_nrec_move]), &(right_node_ptrs[0]),
                           sizeof(H5B2_node_ptr_t) * (size_t)(*right_nrec + 1));
 
                 /* Move middle node pointers into right node */
@@ -938,7 +938,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 (unsigned)(*left_nrec - new_left_nrec); /* Number of records to move out of left node */
 
             /* Slide middle records up */
-            HDmemmove(H5B2_NAT_NREC(middle_native, hdr, left_nrec_move), H5B2_NAT_NREC(middle_native, hdr, 0),
+            memmove(H5B2_NAT_NREC(middle_native, hdr, left_nrec_move), H5B2_NAT_NREC(middle_native, hdr, 0),
                       hdr->cls->nrec_size * curr_middle_nrec);
 
             /* Move left parent record down to middle node */
@@ -947,7 +947,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
 
             /* Move left records to middle node */
             if (left_nrec_move > 1)
-                HDmemmove(H5B2_NAT_NREC(middle_native, hdr, 0),
+                memmove(H5B2_NAT_NREC(middle_native, hdr, 0),
                           H5B2_NAT_NREC(left_native, hdr, new_left_nrec + 1),
                           hdr->cls->nrec_size * (left_nrec_move - 1));
 
@@ -961,7 +961,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 unsigned u;          /* Local index variable */
 
                 /* Slide the node pointers in middle node up */
-                HDmemmove(&(middle_node_ptrs[left_nrec_move]), &(middle_node_ptrs[0]),
+                memmove(&(middle_node_ptrs[left_nrec_move]), &(middle_node_ptrs[0]),
                           sizeof(H5B2_node_ptr_t) * (size_t)(curr_middle_nrec + 1));
 
                 /* Move left node pointers into middle node */
@@ -999,7 +999,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                         H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
 
             /* Move right records to middle node */
-            HDmemmove(H5B2_NAT_NREC(middle_native, hdr, (curr_middle_nrec + 1)),
+            memmove(H5B2_NAT_NREC(middle_native, hdr, (curr_middle_nrec + 1)),
                       H5B2_NAT_NREC(right_native, hdr, 0), hdr->cls->nrec_size * (right_nrec_move - 1));
 
             /* Move right parent record up from right node */
@@ -1007,7 +1007,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                         H5B2_NAT_NREC(right_native, hdr, right_nrec_move - 1), hdr->cls->nrec_size);
 
             /* Slide right records down */
-            HDmemmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, right_nrec_move),
+            memmove(H5B2_NAT_NREC(right_native, hdr, 0), H5B2_NAT_NREC(right_native, hdr, right_nrec_move),
                       hdr->cls->nrec_size * new_right_nrec);
 
             /* Move node pointers also if this is an internal node */
@@ -1026,7 +1026,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                 middle_moved_nrec += (hssize_t)(moved_nrec + right_nrec_move);
 
                 /* Slide the node pointers in right node down */
-                HDmemmove(&(right_node_ptrs[0]), &(right_node_ptrs[right_nrec_move]),
+                memmove(&(right_node_ptrs[0]), &(right_node_ptrs[right_nrec_move]),
                           sizeof(H5B2_node_ptr_t) * (size_t)(new_right_nrec + 1));
             } /* end if */
 
@@ -1136,10 +1136,10 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node_ptr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(curr_node_ptr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to split */
     if (depth > 1) {
@@ -1239,9 +1239,9 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
 
     /* Slide records in parent node down, to eliminate demoted record */
     if ((idx + 1) < internal->nrec) {
-        HDmemmove(H5B2_INT_NREC(internal, hdr, idx), H5B2_INT_NREC(internal, hdr, idx + 1),
+        memmove(H5B2_INT_NREC(internal, hdr, idx), H5B2_INT_NREC(internal, hdr, idx + 1),
                   hdr->cls->nrec_size * (internal->nrec - (idx + 1)));
-        HDmemmove(&(internal->node_ptrs[idx + 1]), &(internal->node_ptrs[idx + 2]),
+        memmove(&(internal->node_ptrs[idx + 1]), &(internal->node_ptrs[idx + 2]),
                   sizeof(H5B2_node_ptr_t) * (internal->nrec - (idx + 1)));
     } /* end if */
 
@@ -1318,10 +1318,10 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node_ptr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(curr_node_ptr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to split */
     if (depth > 1) {
@@ -1420,7 +1420,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
                     H5B2_NAT_NREC(middle_native, hdr, (middle_nrec_move - 1)), hdr->cls->nrec_size);
 
         /* Slide records in middle node down */
-        HDmemmove(H5B2_NAT_NREC(middle_native, hdr, 0), H5B2_NAT_NREC(middle_native, hdr, middle_nrec_move),
+        memmove(H5B2_NAT_NREC(middle_native, hdr, 0), H5B2_NAT_NREC(middle_native, hdr, middle_nrec_move),
                   hdr->cls->nrec_size * (*middle_nrec - middle_nrec_move));
 
         /* Move node pointers also if this is an internal node */
@@ -1436,7 +1436,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
                 middle_moved_nrec += middle_node_ptrs[u].all_nrec;
 
             /* Slide the node pointers in middle node down */
-            HDmemmove(&(middle_node_ptrs[0]), &(middle_node_ptrs[middle_nrec_move]),
+            memmove(&(middle_node_ptrs[0]), &(middle_node_ptrs[middle_nrec_move]),
                       sizeof(H5B2_node_ptr_t) * (size_t)((unsigned)(*middle_nrec + 1) - middle_nrec_move));
         } /* end if */
 
@@ -1499,9 +1499,9 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
 
     /* Slide records in parent node down, to eliminate demoted record */
     if ((idx + 1) < internal->nrec) {
-        HDmemmove(H5B2_INT_NREC(internal, hdr, idx), H5B2_INT_NREC(internal, hdr, idx + 1),
+        memmove(H5B2_INT_NREC(internal, hdr, idx), H5B2_INT_NREC(internal, hdr, idx + 1),
                   hdr->cls->nrec_size * (internal->nrec - (idx + 1)));
-        HDmemmove(&(internal->node_ptrs[idx + 1]), &(internal->node_ptrs[idx + 2]),
+        memmove(&(internal->node_ptrs[idx + 1]), &(internal->node_ptrs[idx + 2]),
                   sizeof(H5B2_node_ptr_t) * (internal->nrec - (idx + 1)));
     } /* end if */
 
@@ -1566,8 +1566,8 @@ H5B2__insert(H5B2_hdr_t *hdr, void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(udata);
+    assert(hdr);
+    assert(udata);
 
     /* Check if the root node is allocated yet */
     if (!H5F_addr_defined(hdr->root.addr)) {
@@ -1632,9 +1632,9 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
-    HDassert(op);
+    assert(hdr);
+    assert(curr_node);
+    assert(op);
 
     /* Protect current node & set up variables */
     if (depth > 0) {
@@ -1749,8 +1749,8 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, v
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
+    assert(hdr);
+    assert(curr_node);
 
     if (depth > 0) {
         H5B2_internal_t *internal; /* Pointer to internal node */
@@ -1831,10 +1831,10 @@ H5B2__node_size(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, voi
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
-    HDassert(btree_size);
-    HDassert(depth > 0);
+    assert(hdr);
+    assert(curr_node);
+    assert(btree_size);
+    assert(depth > 0);
 
     /* Lock the current B-tree node */
     if (NULL ==
@@ -1884,8 +1884,8 @@ H5B2__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
@@ -1919,11 +1919,11 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(node_ptr);
-    HDassert(old_parent);
-    HDassert(new_parent);
+    assert(hdr);
+    assert(depth > 0);
+    assert(node_ptr);
+    assert(old_parent);
+    assert(new_parent);
 
     /* Check the node's entry status in the metadata cache */
     if (H5AC_get_entry_status(hdr->f, node_ptr->addr, &node_status) < 0)
@@ -1950,7 +1950,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
                 update_deps = TRUE;
             } /* end if */
             else
-                HDassert(child_int->parent == new_parent);
+                assert(child_int->parent == new_parent);
         } /* end if */
         else {
             H5B2_leaf_t *child_leaf;
@@ -1968,13 +1968,13 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
                 update_deps = TRUE;
             } /* end if */
             else
-                HDassert(child_leaf->parent == new_parent);
+                assert(child_leaf->parent == new_parent);
         } /* end else */
 
         /* Update flush dependencies if necessary */
         if (update_deps) {
             /* Sanity check */
-            HDassert(parent_ptr);
+            assert(parent_ptr);
 
             /* Switch the flush dependency for the node */
             if (H5B2__destroy_flush_depend((H5AC_info_t *)old_parent, (H5AC_info_t *)child) < 0)
@@ -2016,12 +2016,12 @@ H5B2__update_child_flush_depends(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(hdr);
-    HDassert(depth > 1);
-    HDassert(node_ptrs);
-    HDassert(start_idx <= end_idx);
-    HDassert(old_parent);
-    HDassert(new_parent);
+    assert(hdr);
+    assert(depth > 1);
+    assert(node_ptrs);
+    assert(start_idx <= end_idx);
+    assert(old_parent);
+    assert(new_parent);
 
     /* Loop over children */
     for (u = start_idx; u < end_idx; u++)
@@ -2053,8 +2053,8 @@ H5B2__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)

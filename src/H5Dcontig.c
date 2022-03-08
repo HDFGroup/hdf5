@@ -157,8 +157,8 @@ H5D__contig_alloc(H5F_t *f, H5O_storage_contig_t *storage /*out */)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(storage);
+    assert(f);
+    assert(storage);
 
     /* Allocate space for the contiguous data */
     if (HADDR_UNDEF == (storage->addr = H5MF_alloc(f, H5FD_MEM_DRAW, storage->size)))
@@ -205,11 +205,11 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
-    HDassert(H5F_addr_defined(dset->shared->layout.storage.u.contig.addr));
-    HDassert(dset->shared->layout.storage.u.contig.size > 0);
-    HDassert(dset->shared->space);
-    HDassert(dset->shared->type);
+    assert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
+    assert(H5F_addr_defined(dset->shared->layout.storage.u.contig.addr));
+    assert(dset->shared->layout.storage.u.contig.size > 0);
+    assert(dset->shared->space);
+    assert(dset->shared->type);
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
@@ -346,8 +346,8 @@ H5D__contig_delete(H5F_t *f, const H5O_storage_t *storage)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(storage);
+    assert(f);
+    assert(storage);
 
     /* Free the file space for the chunk */
     if (H5MF_xfree(f, H5FD_MEM_DRAW, storage->u.contig.addr, storage->u.contig.size) < 0)
@@ -383,8 +383,8 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
@@ -454,8 +454,8 @@ H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSE
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /* Compute the size of the contiguous storage for versions of the
      * layout message less than version 3 because versions 1 & 2 would
@@ -522,7 +522,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(storage);
+    assert(storage);
 
     /* Set return value */
     ret_value = (hbool_t)H5F_addr_defined(storage->u.contig.addr);
@@ -548,7 +548,7 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(shared_dset);
+    assert(shared_dset);
 
     FUNC_LEAVE_NOAPI(shared_dset->cache.contig.sieve_size > 0)
 } /* end H5D__contig_is_data_cached() */
@@ -599,11 +599,11 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(io_info->u.rbuf);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
+    assert(io_info);
+    assert(io_info->u.rbuf);
+    assert(type_info);
+    assert(mem_space);
+    assert(file_space);
 
     /* Read data */
     if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
@@ -634,11 +634,11 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(io_info->u.wbuf);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
+    assert(io_info);
+    assert(io_info->u.wbuf);
+    assert(type_info);
+    assert(mem_space);
+    assert(file_space);
 
     /* Write data */
     if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
@@ -675,7 +675,7 @@ H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size)
 
     FUNC_ENTER_STATIC
 
-    HDassert(io_info);
+    assert(io_info);
 
     if (H5D__contig_writevv(io_info, (size_t)1, &dset_curr_seq, &dset_len, &dset_off, (size_t)1,
                             &mem_curr_seq, &mem_len, &mem_off) < 0)
@@ -909,13 +909,13 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1012,7 +1012,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
 
             /* Clear memory */
             if (dset_contig->sieve_size > len)
-                HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
+                memset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
 
             /* Determine the new sieve buffer size & location */
             dset_contig->sieve_loc = addr;
@@ -1097,7 +1097,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     /* Prepend to existing sieve buffer */
                     if ((addr + len) == sieve_start) {
                         /* Move existing sieve information to correct location */
-                        HDmemmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
+                        memmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
                                   dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
@@ -1227,13 +1227,13 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1290,7 +1290,7 @@ H5D__contig_flush(H5D_t *dset)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     /* Flush any data in sieve buffer */
     if (H5D__flush_sieve_buf(dset) < 0)
@@ -1352,11 +1352,11 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f_src);
-    HDassert(storage_src);
-    HDassert(f_dst);
-    HDassert(storage_dst);
-    HDassert(dt_src);
+    assert(f_src);
+    assert(storage_src);
+    assert(f_dst);
+    assert(storage_dst);
+    assert(dt_src);
 
     /* Allocate space for destination raw data */
     if (H5D__contig_alloc(f_dst, storage_dst) < 0)
@@ -1453,7 +1453,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     } /* end else */
 
     /* Allocate space for copy buffer */
-    HDassert(buf_size);
+    assert(buf_size);
     if (NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
 
@@ -1525,7 +1525,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             H5MM_memcpy(reclaim_buf, buf, mem_nbytes);
 
             /* Set background buffer to all zeros */
-            HDmemset(bkg, 0, buf_size);
+            memset(bkg, 0, buf_size);
 
             /* Convert from memory to destination file */
             if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -1547,7 +1547,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(buf, 0, src_nbytes);
+                memset(buf, 0, src_nbytes);
         } /* end if */
 
         /* Write raw data to destination file */

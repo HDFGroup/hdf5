@@ -85,8 +85,8 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (*p++ != H5O_DRVINFO_VERSION)
@@ -103,7 +103,7 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Decode buffer size */
     UINT16DECODE(p, mesg->len);
-    HDassert(mesg->len);
+    assert(mesg->len);
 
     /* Allocate space for buffer */
     if (NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
@@ -142,15 +142,15 @@ H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Store version, driver name, buffer length, & encoded buffer */
     *p++ = H5O_DRVINFO_VERSION;
     H5MM_memcpy(p, mesg->name, 8);
     p += 8;
-    HDassert(mesg->len <= 65535);
+    assert(mesg->len <= 65535);
     UINT16ENCODE(p, mesg->len);
     H5MM_memcpy(p, mesg->buf, mesg->len);
 
@@ -181,7 +181,7 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_drvinfo_t *)H5MM_malloc(sizeof(H5O_drvinfo_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -228,8 +228,8 @@ H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     ret_value = 1 +        /* Version number */
                 8 +        /* Driver name */
@@ -260,7 +260,7 @@ H5O__drvinfo_reset(void *_mesg)
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* reset */
     mesg->buf = (uint8_t *)H5MM_xfree(mesg->buf);
@@ -288,14 +288,14 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__drvinfo_debug() */

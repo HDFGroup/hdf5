@@ -162,7 +162,7 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image_len);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = H5O_SPEC_READ_SIZE;
@@ -193,17 +193,17 @@ H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED i
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(actual_len);
-    HDassert(*actual_len == image_len);
+    assert(image);
+    assert(udata);
+    assert(actual_len);
+    assert(*actual_len == image_len);
 
     /* Deserialize the object header prefix */
     if (H5O__prefix_deserialize((const uint8_t *)image, udata) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't deserialize object header prefix")
 
     /* Sanity check */
-    HDassert(udata->oh);
+    assert(udata->oh);
 
     /* Set the final size for the cache image */
     *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(udata->oh);
@@ -236,9 +236,9 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(udata);
-    HDassert(udata->oh);
+    assert(image);
+    assert(udata);
+    assert(udata->oh);
 
     /* There is no checksum for version 1 */
     if (udata->oh->version != H5O_VERSION_1) {
@@ -250,9 +250,9 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
 
         if (stored_chksum != computed_chksum) {
             /* These fields are not deserialized yet in H5O__prefix_deserialize() */
-            HDassert(udata->oh->chunk == NULL);
-            HDassert(udata->oh->mesg == NULL);
-            HDassert(udata->oh->proxy == NULL);
+            assert(udata->oh->chunk == NULL);
+            assert(udata->oh->mesg == NULL);
+            assert(udata->oh->proxy == NULL);
 
             /* Indicate that udata->oh is to be freed later
                in H5O__prefix_deserialize() */
@@ -261,7 +261,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
         } /* end if */
     }     /* end if */
     else
-        HDassert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
+        assert(!(udata->common.file_intent & H5F_ACC_SWMR_WRITE));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_verify_chksum() */
@@ -296,12 +296,12 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->common.f);
-    HDassert(udata->common.cont_msg_info);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->common.f);
+    assert(udata->common.cont_msg_info);
+    assert(dirty);
 
     /* Check for partially deserialized object header */
     /* (Object header prefix will be deserialized if the object header came
@@ -314,7 +314,7 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix")
 
         /* Sanity check */
-        HDassert(udata->oh);
+        assert(udata->oh);
     } /* end if */
 
     /* Retrieve partially deserialized object header from user data */
@@ -375,10 +375,10 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(oh->cache_info.type == H5AC_OHDR);
-    HDassert(image_len);
+    assert(oh);
+    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(oh->cache_info.type == H5AC_OHDR);
+    assert(image_len);
 
     /* Report the object header's prefix+first chunk length */
     *image_len = oh->chunk[0].size;
@@ -410,12 +410,12 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(oh->cache_info.type == H5AC_OHDR);
-    HDassert(oh->chunk[0].size == len);
+    assert(f);
+    assert(image);
+    assert(oh);
+    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(oh->cache_info.type == H5AC_OHDR);
+    assert(oh->chunk[0].size == len);
 #ifdef H5O_DEBUG
     H5O__assert(oh);
 #endif /* H5O_DEBUG */
@@ -433,11 +433,11 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     if (oh->version > H5O_VERSION_1) {
         uint64_t chunk0_size; /* Size of chunk 0's data */
 
-        HDassert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
+        assert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
         chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
         /* Verify magic number */
-        HDassert(!HDmemcmp(chunk_image, H5O_HDR_MAGIC, H5_SIZEOF_MAGIC));
+        assert(!memcmp(chunk_image, H5O_HDR_MAGIC, H5_SIZEOF_MAGIC));
         chunk_image += H5_SIZEOF_MAGIC;
 
         /* Version */
@@ -463,18 +463,18 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
         /* First chunk size */
         switch (oh->flags & H5O_HDR_CHUNK0_SIZE) {
             case 0: /* 1 byte size */
-                HDassert(chunk0_size < 256);
+                assert(chunk0_size < 256);
                 *chunk_image++ = (uint8_t)chunk0_size;
                 break;
 
             case 1: /* 2 byte size */
-                HDassert(chunk0_size < 65536);
+                assert(chunk0_size < 65536);
                 UINT16ENCODE(chunk_image, chunk0_size);
                 break;
 
             case 2: /* 4 byte size */
                 /* use <= 2**32 -1 to stay within 4 bytes integer range */
-                HDassert(chunk0_size <= 4294967295UL);
+                assert(chunk0_size <= 4294967295UL);
                 UINT32ENCODE(chunk_image, chunk0_size);
                 break;
 
@@ -508,11 +508,11 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
         UINT32ENCODE(chunk_image, (oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh)));
 
         /* Zero to alignment */
-        HDmemset(chunk_image, 0, (size_t)(H5O_SIZEOF_HDR(oh) - 12));
+        memset(chunk_image, 0, (size_t)(H5O_SIZEOF_HDR(oh) - 12));
         chunk_image += (size_t)(H5O_SIZEOF_HDR(oh) - 12);
     } /* end else */
 
-    HDassert((size_t)(chunk_image - oh->chunk[0].image) ==
+    assert((size_t)(chunk_image - oh->chunk[0].image) ==
              (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Serialize messages for this chunk */
@@ -552,14 +552,14 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
     /*
      * Check arguments.
      */
-    HDassert(oh);
+    assert(oh);
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             if (oh->swmr_write) {
                 /* Sanity check */
-                HDassert(oh->proxy);
+                assert(oh->proxy);
 
                 /* Register the object header as a parent of the virtual entry */
                 if (H5AC_proxy_entry_add_parent(oh->proxy, oh) < 0)
@@ -634,9 +634,9 @@ H5O__cache_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(oh->cache_info.type == H5AC_OHDR);
+    assert(oh);
+    assert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(oh->cache_info.type == H5AC_OHDR);
 
     /* Destroy object header */
     if (H5O__free(oh, FALSE) < 0)
@@ -669,9 +669,9 @@ H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(udata->oh);
-    HDassert(image_len);
+    assert(udata);
+    assert(udata->oh);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = udata->size;
@@ -703,7 +703,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image);
+    assert(image);
 
     /* There is no checksum for version 1 */
     if (udata->oh->version != H5O_VERSION_1) {
@@ -745,11 +745,11 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->oh);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->oh);
+    assert(dirty);
 
     /* Allocate space for the object header data structure */
     if (NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t)))
@@ -759,8 +759,8 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
     /* (as opposed to bringing a piece of it back from the file) */
     if (udata->decoding) {
         /* Sanity check */
-        HDassert(udata->common.f);
-        HDassert(udata->common.cont_msg_info);
+        assert(udata->common.f);
+        assert(udata->common.cont_msg_info);
 
         /* Parse the chunk */
         if (H5O__chunk_deserialize(udata->oh, udata->common.addr, udata->size, (const uint8_t *)image, len,
@@ -772,7 +772,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
     } /* end if */
     else {
         /* Sanity check */
-        HDassert(udata->chunkno < udata->oh->nchunks);
+        assert(udata->chunkno < udata->oh->nchunks);
 
         /* Set the chunk number for the chunk proxy */
         chk_proxy->chunkno = udata->chunkno;
@@ -780,7 +780,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
         /* Sanity check that the chunk representation we have in memory is
          * the same as the one being brought in from disk.
          */
-        HDassert(0 == HDmemcmp(image, udata->oh->chunk[chk_proxy->chunkno].image,
+        assert(0 == memcmp(image, udata->oh->chunk[chk_proxy->chunkno].image,
                                udata->oh->chunk[chk_proxy->chunkno].size));
     } /* end else */
 
@@ -822,11 +822,11 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
-    HDassert(chk_proxy->oh);
-    HDassert(image_len);
+    assert(chk_proxy);
+    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
+    assert(chk_proxy->oh);
+    assert(image_len);
 
     *image_len = chk_proxy->oh->chunk[chk_proxy->chunkno].size;
 
@@ -858,13 +858,13 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
-    HDassert(chk_proxy->oh);
-    HDassert(chk_proxy->oh->chunk[chk_proxy->chunkno].size == len);
+    assert(f);
+    assert(image);
+    assert(chk_proxy);
+    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
+    assert(chk_proxy->oh);
+    assert(chk_proxy->oh->chunk[chk_proxy->chunkno].size == len);
 
     /* Serialize messages for this chunk */
     if (H5O__chunk_serialize(f, chk_proxy->oh, chk_proxy->chunkno) < 0)
@@ -902,8 +902,8 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
     /*
      * Check arguments.
      */
-    HDassert(chk_proxy);
-    HDassert(chk_proxy->oh);
+    assert(chk_proxy);
+    assert(chk_proxy->oh);
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -912,10 +912,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Add flush dependency on chunk with continuation, if one exists */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
+                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
                              H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
-                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
+                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                              (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     /* Add flush dependency from chunk containing the continuation message
@@ -934,7 +934,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Add flush dependency on object header proxy, if proxy exists */
                 {
                     /* Sanity check */
-                    HDassert(chk_proxy->oh->proxy);
+                    assert(chk_proxy->oh->proxy);
 
                     /* Register the object header chunk as a parent of the virtual entry */
                     if (H5AC_proxy_entry_add_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
@@ -970,10 +970,10 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Remove flush dependency on parent object header chunk, if one is set */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
+                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
                              H5C__H5C_CACHE_ENTRY_T_MAGIC);
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
-                    HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
+                    assert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
+                    assert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                              (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
 
                     if (H5AC_destroy_flush_dependency(chk_proxy->fd_parent, chk_proxy) < 0)
@@ -996,7 +996,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
 #else  /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+            assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
     }  /* end switch */
 
@@ -1031,9 +1031,9 @@ H5O__cache_chk_free_icr(void *_thing)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
-    HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
+    assert(chk_proxy);
+    assert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
+    assert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
 
     /* Destroy object header chunk proxy */
     if (H5O__chunk_dest(chk_proxy) < 0)
@@ -1066,8 +1066,8 @@ H5O__add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(cont_msg_info);
-    HDassert(cont);
+    assert(cont_msg_info);
+    assert(cont);
 
     /* Increase chunk array size, if necessary */
     if (cont_msg_info->nmsgs >= cont_msg_info->alloc_nmsgs) {
@@ -1113,8 +1113,8 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(udata);
+    assert(image);
+    assert(udata);
 
     /* Allocate space for the new object header data structure */
     if (NULL == (oh = H5FL_CALLOC(H5O_t)))
@@ -1126,7 +1126,7 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 
     /* Check for presence of magic number */
     /* (indicates version 2 or later) */
-    if (!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    if (!memcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /* Magic number */
         image += H5_SIZEOF_MAGIC;
 
@@ -1231,14 +1231,14 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     } /* end else */
 
     /* Verify object header prefix length */
-    HDassert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    assert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* If udata->oh is to be freed (see H5O__cache_verify_chksum),
        save the pointer to udata->oh and free it later after setting
        udata->oh with the new object header */
     if (udata->free_oh) {
         H5O_t *saved_oh = udata->oh;
-        HDassert(udata->oh);
+        assert(udata->oh);
 
         /* Save the object header for later use in 'deserialize' callback */
         udata->oh = oh;
@@ -1292,12 +1292,12 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(oh);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(image);
-    HDassert(len);
-    HDassert(udata->f);
-    HDassert(udata->cont_msg_info);
+    assert(oh);
+    assert(H5F_addr_defined(addr));
+    assert(image);
+    assert(len);
+    assert(udata->f);
+    assert(udata->cont_msg_info);
 
     /* Increase chunk array size, if necessary */
     if (oh->nchunks >= oh->alloc_nchunks) {
@@ -1338,7 +1338,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
     /* Check for magic # on chunks > 0 in later versions of the format */
     else if (chunkno > 0 && oh->version > H5O_VERSION_1) {
         /* Magic number */
-        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        if (memcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "wrong object header chunk signature")
         chunk_image += H5_SIZEOF_MAGIC;
     } /* end if */
@@ -1565,10 +1565,10 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         /* Check for 'gap' at end of chunk */
         if ((eom_ptr - chunk_image) > 0 && (eom_ptr - chunk_image) < H5O_SIZEOF_MSGHDR_OH(oh)) {
             /* Gaps can only occur in later versions of the format */
-            HDassert(oh->version > H5O_VERSION_1);
+            assert(oh->version > H5O_VERSION_1);
 
             /* Gaps should only occur in chunks with no null messages */
-            HDassert(nullcnt == 0);
+            assert(nullcnt == 0);
 
             /* Set gap information for chunk */
             oh->chunk[chunkno].gap = (size_t)(eom_ptr - chunk_image);
@@ -1589,7 +1589,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
     } /* end if */
 
     /* Sanity check */
-    HDassert(chunk_image == oh->chunk[chunkno].image + oh->chunk[chunkno].size);
+    assert(chunk_image == oh->chunk[chunkno].image + oh->chunk[chunkno].size);
 
     /* Mark the chunk dirty if we've modified messages */
     if (mesgs_modified)
@@ -1632,8 +1632,8 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(oh);
+    assert(f);
+    assert(oh);
 
     /* Encode any dirty messages in this chunk */
     for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++)
@@ -1645,11 +1645,11 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
     /* Sanity checks */
     if (oh->version > H5O_VERSION_1)
         /* Make certain the magic # is present */
-        HDassert(!HDmemcmp(oh->chunk[chunkno].image, (chunkno == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC),
+        assert(!memcmp(oh->chunk[chunkno].image, (chunkno == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC),
                            H5_SIZEOF_MAGIC));
     else
         /* Gaps should never occur in version 1 of the format */
-        HDassert(oh->chunk[chunkno].gap == 0);
+        assert(oh->chunk[chunkno].gap == 0);
 
     /* Extra work, for later versions of the format */
     if (oh->version > H5O_VERSION_1) {
@@ -1658,7 +1658,7 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
 
         /* Check for gap in chunk & zero it out */
         if (oh->chunk[chunkno].gap)
-            HDmemset((oh->chunk[chunkno].image + oh->chunk[chunkno].size) -
+            memset((oh->chunk[chunkno].image + oh->chunk[chunkno].size) -
                          (H5O_SIZEOF_CHKSUM + oh->chunk[chunkno].gap),
                      0, oh->chunk[chunkno].gap);
 

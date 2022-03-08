@@ -137,7 +137,7 @@ tts_error(void)
         if (error_flag_g) {
             TestErrPrintf(
                 "At least one thread reported a value that was different from the expected value\n");
-            HDprintf(
+            printf(
                 "(Update the expected_g[] array in tts_error for this test if the error stack changed!)\n");
         }
 
@@ -159,7 +159,7 @@ tts_error(void)
         CHECK(status, FAIL, "H5Fclose");
     } /* end if */
     else
-        HDprintf("Non-native VOL connector used, skipping test\n");
+        printf("Non-native VOL connector used, skipping test\n");
 
     status = H5Idec_ref(vol_id);
     CHECK(status, FAIL, "H5Idec_ref");
@@ -246,14 +246,14 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
     }
 
     /* Unexpected error stack entry, print some info and set flag */
-    HDfprintf(stderr, "Unexpected error stack entry!\n");
-    HDfprintf(stderr, "Stack entry: %d\n", n);
-    HDfprintf(stderr,
+    fprintf(stderr, "Unexpected error stack entry!\n");
+    fprintf(stderr, "Stack entry: %d\n", n);
+    fprintf(stderr,
               "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
               ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
               err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
               err_desc->desc);
-    HDfprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
+    fprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
               expected_g[n].min_num);
     error_flag_g = -1;
 

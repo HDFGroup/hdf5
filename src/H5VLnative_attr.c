@@ -306,11 +306,11 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                 /* Get the length of the name */
-                *get_name_args->attr_name_len = HDstrlen(attr->shared->name);
+                *get_name_args->attr_name_len = strlen(attr->shared->name);
 
                 /* Copy the name into the user's buffer, if given */
                 if (get_name_args->buf) {
-                    HDstrncpy(get_name_args->buf, attr->shared->name,
+                    strncpy(get_name_args->buf, attr->shared->name,
                               MIN((*get_name_args->attr_name_len + 1), get_name_args->buf_size));
                     if (*get_name_args->attr_name_len >= get_name_args->buf_size)
                         get_name_args->buf[get_name_args->buf_size - 1] = '\0';

@@ -24,7 +24,7 @@
 int
 main(void)
 {
-    HDfprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
+    fprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
@@ -101,7 +101,7 @@ test_error(hid_t file)
     H5E_auto2_t old_func;
     void *      old_data = NULL;
 
-    HDfprintf(stderr, "\nTesting error API based on data I/O\n");
+    fprintf(stderr, "\nTesting error API based on data I/O\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -179,15 +179,15 @@ error:
 static herr_t
 init_error(void)
 {
-    ssize_t    cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
-    ssize_t    msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    ssize_t    cls_size = (ssize_t)strlen(ERR_CLS_NAME) + 1;
+    ssize_t    msg_size = (ssize_t)strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
     char *     cls_name = NULL;
     char *     msg      = NULL;
     H5E_type_t msg_type;
 
-    if (NULL == (cls_name = (char *)HDmalloc(HDstrlen(ERR_CLS_NAME) + 1)))
+    if (NULL == (cls_name = (char *)malloc(strlen(ERR_CLS_NAME) + 1)))
         TEST_ERROR
-    if (NULL == (msg = (char *)HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
+    if (NULL == (msg = (char *)malloc(strlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
         TEST_ERROR
 
     if ((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
@@ -195,7 +195,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
+    if (strcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -220,23 +220,23 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
+    if (strcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
     if ((ERR_CLS2 = H5Eregister_class(ERR_CLS2_NAME, PROG2_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
 
-    HDfree(cls_name);
-    HDfree(msg);
+    free(cls_name);
+    free(msg);
 
     return 0;
 
 error:
     if (cls_name)
-        HDfree(cls_name);
+        free(cls_name);
     if (msg)
-        HDfree(msg);
+        free(msg);
 
     return -1;
 } /* end init_error() */
@@ -297,7 +297,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
 {
     char *real_desc = (char *)client_data;
 
-    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, real_desc) == 0)
+    if (err_desc->desc != NULL && strcmp(err_desc->desc, real_desc) == 0)
         return 0;
     else
         return -1;
@@ -330,9 +330,9 @@ test_long_desc(void)
     const char *test_FUNC = "test_long_desc";
 
     /* Allocate space for the error description info */
-    if (NULL == (long_desc = (char *)HDmalloc(LONG_DESC_SIZE)))
+    if (NULL == (long_desc = (char *)malloc(LONG_DESC_SIZE)))
         TEST_ERROR;
-    if (NULL == (full_desc = (char *)HDmalloc(LONG_DESC_SIZE + 128)))
+    if (NULL == (full_desc = (char *)malloc(LONG_DESC_SIZE + 128)))
         TEST_ERROR;
 
     /* Create the long part of the error description */
@@ -349,10 +349,10 @@ test_long_desc(void)
                 long_desc) < 0)
         TEST_ERROR;
 
-    /* Create the string that should be in the description. Must use HDsnprintf here
+    /* Create the string that should be in the description. Must use snprintf here
      * because snprintf is _snprintf on Windows
      */
-    HDsnprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
+    snprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
 
     /* Make certain that the description is correct */
     if (H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc) < 0)
@@ -362,16 +362,16 @@ test_long_desc(void)
     if (H5Eclear2(H5E_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(long_desc);
-    HDfree(full_desc);
+    free(long_desc);
+    free(full_desc);
 
     return 0;
 
 error:
     if (long_desc)
-        HDfree(long_desc);
+        free(long_desc);
     if (full_desc)
-        HDfree(full_desc);
+        free(full_desc);
 
     return -1;
 } /* end test_long_desc() */
@@ -391,12 +391,12 @@ static herr_t
 dump_error(hid_t estack)
 {
     /* Print errors in library default way */
-    HDfprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if (H5Eprint2(estack, stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
-    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if (H5Ewalk2(estack, H5E_WALK_UPWARD, custom_print_cb, stderr) < 0)
         TEST_ERROR;
 
@@ -435,11 +435,11 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
         TEST_ERROR;
 
-    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
               err_desc->func_name, err_desc->line);
-    HDfprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
-    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     return 0;
 
@@ -745,7 +745,7 @@ test_filter_error(const char *fname, hid_t fapl)
     hid_t       dataset  = -1;
     int         buf[20];
 
-    HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
+    fprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
 
     /* Open the file */
     if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
@@ -790,11 +790,11 @@ main(void)
     int         i;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
-    HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
+    fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
     /* Initialize errors */
     if (init_error() < 0)
@@ -804,16 +804,16 @@ main(void)
         TEST_ERROR;
 
     /* Set up data arrays */
-    if (NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (ipoints2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+    if (NULL == (ipoints2 = (int **)calloc(DIM0, sizeof(ipoints2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         ipoints2[i] = ipoints2_data + (i * DIM1);
 
-    if (NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (icheck2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+    if (NULL == (icheck2 = (int **)calloc(DIM0, sizeof(icheck2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         icheck2[i] = icheck2_data + (i * DIM1);
@@ -883,7 +883,7 @@ main(void)
      * the test file was pre-generated.
      */
     h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
-    if (!h5_using_default_driver(env_h5_drvr) && HDstrcmp(env_h5_drvr, "stdio")) {
+    if (!h5_using_default_driver(env_h5_drvr) && strcmp(env_h5_drvr, "stdio")) {
         /* If not using the library's default VFD or the stdio VFD, force
          * the library's default VFD here. The test file was pre-generated
          * and can cause issues with many VFDs.
@@ -896,21 +896,21 @@ main(void)
 
     h5_clean_files(FILENAME, fapl);
 
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
-    HDfprintf(stderr, "\nAll error API tests passed.\n");
+    fprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
-    HDfprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
+    fprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;
 }
 #endif /* H5_USE_16_API */

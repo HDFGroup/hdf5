@@ -139,7 +139,7 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     if (!compat_w_default_vfd) {
         SKIPPED()
-        HDputs("    The current VFD is not compatible with the default VFD.");
+        puts("    The current VFD is not compatible with the default VFD.");
         return 0;
     }
 
@@ -2408,7 +2408,7 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
@@ -2498,7 +2498,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -2506,12 +2506,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail */
@@ -2522,13 +2522,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY;
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -2577,7 +2577,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) {                        /* Child process */
@@ -2588,84 +2588,84 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         /* close unused read end for in_pdf */
         if (HDclose(in_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should succeed in opening the test file 2 times */
         if ((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* open "dataset" 2 times */
         if ((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" via child_did1 */
         rdata = 0;
         if (H5Dread(child_did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 88)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Notify parent process */
         child_notify = 2;
         if (HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 3) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Refresh "dataset" via child_did2 */
         if (H5Drefresh(child_did2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" child_did2 */
         rdata = 0;
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" child_did1 */
         rdata = 0;
         if (H5Dread(child_did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the dataset */
         if (H5Dclose(child_did1))
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Dclose(child_did2))
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the file */
         if (H5Fclose(child_fid1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Fclose(child_fid2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (HDclose(in_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -2769,7 +2769,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -2777,12 +2777,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2792,9 +2792,9 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY;
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -2845,7 +2845,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -2853,12 +2853,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2868,13 +2868,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY;
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -2925,7 +2925,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -2933,12 +2933,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2948,13 +2948,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY;
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -3045,8 +3045,8 @@ test_start_swmr_write_stress_ohdr(hid_t in_fapl)
     TESTING("H5Fstart_swmr_write()--stress object header messages");
 
     /* Initialize buffers */
-    HDmemset(fill, 0, sizeof(fill));
-    HDmemset(attr_data, 0, sizeof(attr_data));
+    memset(fill, 0, sizeof(fill));
+    memset(attr_data, 0, sizeof(attr_data));
 
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -3621,7 +3621,7 @@ test_append_flush_generic(void)
         TEST_ERROR
 
     /* Verify expected values: with boundary rank < set boundary rank */
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     if (H5Pget_append_flush(dapl, 1, ret_boundary, NULL, NULL) < 0)
         TEST_ERROR
     if (ret_boundary[0] != 1 || ret_boundary[1] != 0 || boundary[2] != 0)
@@ -3752,7 +3752,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Set boundary dimension rank > the rank of dataset to be created */
-    HDmemset(boundary, 0, sizeof(boundary));
+    memset(boundary, 0, sizeof(boundary));
     if (H5Pset_append_flush(dapl, 3, boundary, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
@@ -3814,7 +3814,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     if ((ddapl = H5Dget_access_plist(did2)) < 0)
         FAIL_STACK_ERROR
 
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     ret_cb    = NULL;
     ret_count = NULL;
     /* Retrieve the append flush property values */
@@ -3827,7 +3827,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     if (ret_boundary[0] != 0 || ret_boundary[1] != 1 || ret_boundary[2] != 0)
         TEST_ERROR
 
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     /* Retrieve the append flush property values */
     if (H5Pget_append_flush(ddapl, 1, ret_boundary, NULL, NULL) < 0)
         TEST_ERROR
@@ -4025,7 +4025,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
      *      zero boundary, null callback function, null user data
      */
 
-    HDmemset(boundary, 0, sizeof(boundary));
+    memset(boundary, 0, sizeof(boundary));
     if (H5Pset_append_flush(dapl, 1, boundary, append_cb, &count) < 0)
         FAIL_STACK_ERROR
     if ((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
@@ -4817,7 +4817,7 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_concur() */
@@ -4865,7 +4865,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -4874,12 +4874,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -4891,13 +4891,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -4942,7 +4942,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -4951,12 +4951,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -4968,13 +4968,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5020,7 +5020,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5029,12 +5029,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -5046,13 +5046,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -5098,7 +5098,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5107,12 +5107,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -5126,16 +5126,16 @@ test_file_lock_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             /* Close the file */
             if (H5Fclose(child_fid) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
             /* Close the pipe */
             if (HDclose(out_pdf[0]) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         } /* end if */
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -5210,7 +5210,7 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
@@ -5262,7 +5262,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5271,12 +5271,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5288,13 +5288,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5340,7 +5340,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5349,12 +5349,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5366,13 +5366,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5418,7 +5418,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5427,12 +5427,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5444,13 +5444,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5495,7 +5495,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5504,12 +5504,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5521,13 +5521,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5572,7 +5572,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5581,12 +5581,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5600,14 +5600,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5652,7 +5652,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5661,12 +5661,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5678,13 +5678,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5730,7 +5730,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5739,12 +5739,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5756,13 +5756,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5808,7 +5808,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5817,12 +5817,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5834,13 +5834,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5886,7 +5886,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5895,12 +5895,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5914,14 +5914,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5967,7 +5967,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -5976,12 +5976,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5992,14 +5992,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6045,7 +6045,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -6054,12 +6054,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6071,13 +6071,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Close unused read end for out_pdf */
@@ -6123,7 +6123,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) { /* Child process */
@@ -6132,12 +6132,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6151,14 +6151,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6237,7 +6237,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
     else
         TESTING("File locking: OFF")
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 #else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
     hid_t  fid  = -1;               /* File ID */
@@ -6302,7 +6302,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         TEST_ERROR
 
     if (childpid == 0) {
@@ -6314,12 +6314,12 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open and close the test file */
@@ -6332,12 +6332,12 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if (H5I_INVALID_HID == child_fid || FAIL == ret)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         else
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
     } /* end child process work */
 
     /* close unused read end for out_pdf */
@@ -6712,7 +6712,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_refresh_concur() */
 
@@ -6801,7 +6801,7 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR
 
     if (childpid == 0) {         /* Child process */
@@ -6815,96 +6815,96 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* close unused read end for in_pdf */
         if (HDclose(in_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1)
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
         /* Open the file 2 times */
         if ((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if ((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Open the dataset 2 times */
         if ((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Get the dataset's dataspace via did1 */
         if ((child_sid = H5Dget_space(child_did1)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (tdims[0] != 1)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from the dataset via did2 */
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Verify the data is correct */
         if (rbuf[0] != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Notify parent process */
         child_notify = 2;
         if (HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 3)
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
         /* Refresh dataset via did1 */
         if (H5Drefresh(child_did1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Get the dataset's dataspace and verify */
         if ((child_sid = H5Dget_space(child_did1)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if (tdims[0] != 2)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from the dataset */
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Verify the data is correct */
         if (rbuf[0] != 100 || rbuf[1] != 100)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the 2 datasets */
         if (H5Dclose(child_did1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Dclose(child_did2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the 2 files */
         if (H5Fclose(child_fid1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Fclose(child_fid2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipes */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (HDclose(in_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* Close unused read end for out_pdf */
@@ -7367,9 +7367,9 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
-        HDprintf("This VFD does not support SWMR I/O\n");
+        printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     } /* end if */
 
@@ -7377,8 +7377,8 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !strcmp(lock_env_var, "FALSE"))
         use_file_locking = FALSE;
     else
         use_file_locking = TRUE;
@@ -7386,7 +7386,7 @@ main(void)
     /* Check if file locking is enabled on this file system */
     if (use_file_locking)
         if (h5_check_if_file_locking_enabled(&file_locking_enabled) < 0) {
-            HDprintf("Error when determining if file locks are enabled\n");
+            printf("Error when determining if file locks are enabled\n");
             return EXIT_FAILURE;
         }
 
@@ -7455,7 +7455,7 @@ main(void)
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
-    if (NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
+    if (NULL == driver || !strcmp(driver, "") || !strcmp(driver, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
     /* Test multiple opens via different locking flags */
@@ -7475,7 +7475,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All tests passed.\n");
+    printf("All tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -7483,7 +7483,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 
 } /* end main() */

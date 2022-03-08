@@ -165,7 +165,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         tmp_vol_obj.data      = vol_obj1->data;
     } /* end if */
     else {
-        HDassert(vol_obj2);
+        assert(vol_obj2);
 
         tmp_vol_obj.connector = vol_obj2->connector;
         tmp_vol_obj.data      = NULL;
@@ -269,7 +269,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         tmp_vol_obj.data      = vol_obj1->data;
     } /* end if */
     else {
-        HDassert(vol_obj2);
+        assert(vol_obj2);
 
         tmp_vol_obj.connector = vol_obj2->connector;
         tmp_vol_obj.data      = NULL;
@@ -505,7 +505,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
     if (curr_vol_obj)
         (*tmp_vol_obj_ptr_ptr)->connector = curr_vol_obj->connector;
     else {
-        HDassert(link_vol_obj);
+        assert(link_vol_obj);
 
         (*tmp_vol_obj_ptr_ptr)->connector = link_vol_obj->connector;
     } /* end else */
@@ -678,8 +678,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize object name")
 
     /* Combine the filename and link name into a single buffer to give to the UD link */
-    file_name_len     = HDstrlen(file_name) + 1;
-    norm_obj_name_len = HDstrlen(norm_obj_name) + 1;
+    file_name_len     = strlen(file_name) + 1;
+    norm_obj_name_len = strlen(norm_obj_name) + 1;
     buf_size          = 1 + file_name_len + norm_obj_name_len;
     if (NULL == (ext_link_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer")
@@ -687,9 +687,9 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     /* Encode the external link information */
     p    = (uint8_t *)ext_link_buf;
     *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL; /* External link version & flags */
-    HDstrncpy((char *)p, file_name, buf_size - 1);     /* Name of file containing external link's object */
+    strncpy((char *)p, file_name, buf_size - 1);     /* Name of file containing external link's object */
     p += file_name_len;
-    HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
+    strncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
 
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;
@@ -2043,10 +2043,10 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size, unsigned *flags,
     if (ext_linkval[link_size - 1] != '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer is not NULL-terminated")
 
-    /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
+    /* We're now guaranteed that strlen won't segfault, since the buffer has
      * at least one NULL in it.
      */
-    len = HDstrlen((const char *)ext_linkval + 1);
+    len = strlen((const char *)ext_linkval + 1);
 
     /* If the first NULL we found was at the very end of the buffer, then
      * this external link value has no object name and is invalid.

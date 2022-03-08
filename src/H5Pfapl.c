@@ -852,7 +852,7 @@ H5P__facc_set_def_driver(void)
     FUNC_ENTER_STATIC
 
     /* Check if VFL driver environment variable is set */
-    driver_env_var = HDgetenv(HDF5_DRIVER);
+    driver_env_var = getenv(HDF5_DRIVER);
 
     /* Only parse VFL driver string if it's set */
     if (driver_env_var && *driver_env_var) {
@@ -866,7 +866,7 @@ H5P__facc_set_def_driver(void)
         if ((driver_is_registered = H5FD_is_driver_registered_by_name(driver_env_var, &driver_id)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFL driver is already registered")
         if (driver_is_registered) {
-            HDassert(driver_id >= 0);
+            assert(driver_id >= 0);
 
             if (H5I_inc_ref(driver_id, TRUE) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "unable to increment ref count on VFD")
@@ -890,7 +890,7 @@ H5P__facc_set_def_driver(void)
         }     /* end else */
 
         /* Retrieve driver configuration string from environment variable, if set. */
-        driver_config_env_var = HDgetenv(HDF5_DRIVER_CONFIG);
+        driver_config_env_var = getenv(HDF5_DRIVER_CONFIG);
 
         driver_prop.driver_id         = driver_id;
         driver_prop.driver_info       = NULL;
@@ -946,38 +946,38 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
 
     FUNC_ENTER_STATIC
 
-    HDassert(driver_name);
-    HDassert(driver_id);
+    assert(driver_name);
+    assert(driver_id);
 
-    if (!HDstrcmp(driver_name, "sec2")) {
+    if (!strcmp(driver_name, "sec2")) {
         if ((*driver_id = H5FD_SEC2) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize sec2 VFD")
     }
-    else if (!HDstrcmp(driver_name, "core") || !HDstrcmp(driver_name, "core_paged")) {
+    else if (!strcmp(driver_name, "core") || !strcmp(driver_name, "core_paged")) {
         if ((*driver_id = H5FD_CORE) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize core VFD")
     }
-    else if (!HDstrcmp(driver_name, "log")) {
+    else if (!strcmp(driver_name, "log")) {
         if ((*driver_id = H5FD_LOG) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize log VFD")
     }
-    else if (!HDstrcmp(driver_name, "family")) {
+    else if (!strcmp(driver_name, "family")) {
         if ((*driver_id = H5FD_FAMILY) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize family VFD")
     }
-    else if (!HDstrcmp(driver_name, "multi") || !HDstrcmp(driver_name, "split")) {
+    else if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
         if ((*driver_id = H5FD_MULTI) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize multi VFD")
     }
-    else if (!HDstrcmp(driver_name, "stdio")) {
+    else if (!strcmp(driver_name, "stdio")) {
         if ((*driver_id = H5FD_STDIO) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize stdio VFD")
     }
-    else if (!HDstrcmp(driver_name, "splitter")) {
+    else if (!strcmp(driver_name, "splitter")) {
         if ((*driver_id = H5FD_SPLITTER) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize splitter VFD")
     }
-    else if (!HDstrcmp(driver_name, "mpio")) {
+    else if (!strcmp(driver_name, "mpio")) {
 #ifdef H5_HAVE_PARALLEL
         if ((*driver_id = H5FD_MPIO) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize MPI I/O VFD")
@@ -985,7 +985,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "MPI-I/O VFD is not enabled")
 #endif
     }
-    else if (!HDstrcmp(driver_name, "direct")) {
+    else if (!strcmp(driver_name, "direct")) {
 #ifdef H5_HAVE_DIRECT
         if ((*driver_id = H5FD_DIRECT) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Direct I/O VFD")
@@ -993,7 +993,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Direct I/O VFD is not enabled")
 #endif
     }
-    else if (!HDstrcmp(driver_name, "mirror")) {
+    else if (!strcmp(driver_name, "mirror")) {
 #ifdef H5_HAVE_MIRROR_VFD
         if ((*driver_id = H5FD_MIRROR) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize mirror VFD")
@@ -1001,7 +1001,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Mirror VFD is not enabled")
 #endif
     }
-    else if (!HDstrcmp(driver_name, "hdfs")) {
+    else if (!strcmp(driver_name, "hdfs")) {
 #ifdef H5_HAVE_LIBHDFS
         if ((*driver_id = H5FD_HDFS) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize HDFS VFD")
@@ -1009,7 +1009,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "HDFS VFD is not enabled")
 #endif
     }
-    else if (!HDstrcmp(driver_name, "ros3")) {
+    else if (!strcmp(driver_name, "ros3")) {
 #ifdef H5_HAVE_ROS3_VFD
         if ((*driver_id = H5FD_ROS3) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize ROS3 VFD")
@@ -1017,7 +1017,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "ROS3 VFD is not enabled")
 #endif
     }
-    else if (!HDstrcmp(driver_name, "windows")) {
+    else if (!strcmp(driver_name, "windows")) {
 #ifdef H5_HAVE_WINDOWS
         if ((*driver_id = H5FD_WINDOWS) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Windows VFD")
@@ -1156,7 +1156,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     /* If VFD configuration information is supplied, ensure that either binary
      * configuration data or a configuration string is supplied, but not both.
      */
-    HDassert(!new_driver_info || !new_driver_config_str);
+    assert(!new_driver_info || !new_driver_config_str);
 
     if (NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
@@ -1633,10 +1633,10 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
 
     /* Retrieve configuration string property */
     if ((config_str = H5P_peek_driver_config_str(plist))) {
-        size_t config_str_len = HDstrlen(config_str);
+        size_t config_str_len = strlen(config_str);
 
         if (config_buf) {
-            HDstrncpy(config_buf, config_str, MIN(config_str_len + 1, buf_size));
+            strncpy(config_buf, config_str, MIN(config_str_len + 1, buf_size));
             if (config_str_len >= buf_size)
                 config_buf[buf_size - 1] = '\0';
         }
@@ -1817,7 +1817,7 @@ H5P__facc_file_driver_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of file driver ID & info */
     if (H5P__file_driver_copy(value) < 0)
@@ -1849,7 +1849,7 @@ H5P__facc_file_driver_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of file driver */
     if (H5P__file_driver_copy(value) < 0)
@@ -1944,9 +1944,9 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(info1);
-    HDassert(info2);
-    HDassert(size == sizeof(H5FD_driver_prop_t));
+    assert(info1);
+    assert(info2);
+    assert(size == sizeof(H5FD_driver_prop_t));
 
     /* Compare drivers */
     if (NULL == (cls1 = H5FD_get_class(info1->driver_id)))
@@ -1957,7 +1957,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
         HGOTO_DONE(-1);
     if (cls1->name != NULL && cls2->name == NULL)
         HGOTO_DONE(1);
-    if (0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
+    if (0 != (cmp_value = strcmp(cls1->name, cls2->name)))
         HGOTO_DONE(cmp_value);
 
     /* Compare driver infos */
@@ -1965,14 +1965,14 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
         HGOTO_DONE(-1)
     if (cls1->fapl_size > cls2->fapl_size)
         HGOTO_DONE(1)
-    HDassert(cls1->fapl_size == cls2->fapl_size);
+    assert(cls1->fapl_size == cls2->fapl_size);
     if (info1->driver_info == NULL && info2->driver_info != NULL)
         HGOTO_DONE(-1);
     if (info1->driver_info != NULL && info2->driver_info == NULL)
         HGOTO_DONE(1);
     if (info1->driver_info) {
-        HDassert(cls1->fapl_size > 0);
-        if (0 != (cmp_value = HDmemcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
+        assert(cls1->fapl_size > 0);
+        if (0 != (cmp_value = memcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
             HGOTO_DONE(cmp_value);
     } /* end if */
 
@@ -1982,7 +1982,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
     if (info1->driver_config_str != NULL && info2->driver_config_str == NULL)
         HGOTO_DONE(1);
     if (info1->driver_config_str) {
-        if (0 != (cmp_value = HDstrcmp(info1->driver_config_str, info2->driver_config_str)))
+        if (0 != (cmp_value = strcmp(info1->driver_config_str, info2->driver_config_str)))
             HGOTO_DONE(cmp_value);
     }
 
@@ -3225,7 +3225,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistency */
-    HDassert(((image_info.buffer != NULL) && (image_info.size > 0)) ||
+    assert(((image_info.buffer != NULL) && (image_info.size > 0)) ||
              ((image_info.buffer == NULL) && (image_info.size == 0)));
 
     /* Set output size */
@@ -3300,7 +3300,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image info")
 
     /* verify file image field consistency */
-    HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
+    assert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* Make sure a file image hasn't already been set */
     if (info.buffer != NULL || info.size > 0)
@@ -3319,7 +3319,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
     /* Release old udata if it exists */
     if (info.callbacks.udata != NULL) {
-        HDassert(info.callbacks.udata_free);
+        assert(info.callbacks.udata_free);
         if (info.callbacks.udata_free(info.callbacks.udata) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed")
     } /* end if */
@@ -3328,8 +3328,8 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     info.callbacks = *callbacks_ptr;
 
     if (callbacks_ptr->udata) {
-        HDassert(callbacks_ptr->udata_copy);
-        HDassert(callbacks_ptr->udata_free);
+        assert(callbacks_ptr->udata_copy);
+        assert(callbacks_ptr->udata_free);
         if ((info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata)) == NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the supplied udata")
     } /* end if */
@@ -3376,7 +3376,7 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistency */
-    HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
+    assert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* verify that callbacks is not NULL */
     if (NULL == callbacks)
@@ -3387,7 +3387,7 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
     /* Copy udata if it exists */
     if (info.callbacks.udata != NULL) {
-        HDassert(info.callbacks.udata_copy);
+        assert(info.callbacks.udata_copy);
         if ((callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata")
     } /* end if */
@@ -3428,7 +3428,7 @@ H5P__file_image_info_copy(void *value)
         info = (H5FD_file_image_info_t *)value;
 
         /* verify file image field consistency */
-        HDassert(((info->buffer != NULL) && (info->size > 0)) ||
+        assert(((info->buffer != NULL) && (info->size > 0)) ||
                  ((info->buffer == NULL) && (info->size == 0)));
 
         if (info->buffer && info->size > 0) {
@@ -3502,7 +3502,7 @@ H5P__file_image_info_free(void *value)
         info = (H5FD_file_image_info_t *)value;
 
         /* Verify file image field consistency */
-        HDassert(((info->buffer != NULL) && (info->size > 0)) ||
+        assert(((info->buffer != NULL) && (info->size > 0)) ||
                  ((info->buffer == NULL) && (info->size == 0)));
 
         /* Free buffer */
@@ -3608,7 +3608,7 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     if (NULL != *pp) {
         /* Encode type sizes (as a safety check) */
@@ -3655,9 +3655,9 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(config);
+    assert(pp);
+    assert(*pp);
+    assert(config);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
@@ -3702,7 +3702,7 @@ H5P__facc_file_image_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of file image info */
     if (H5P__file_image_info_copy(value) < 0)
@@ -3734,7 +3734,7 @@ H5P__facc_file_image_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of file image info */
     if (H5P__file_image_info_copy(value) < 0)
@@ -3830,9 +3830,9 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(info1);
-    HDassert(info2);
-    HDassert(size == sizeof(H5FD_file_image_info_t));
+    assert(info1);
+    assert(info2);
+    assert(size == sizeof(H5FD_file_image_info_t));
 
     /* Check for different buffer sizes */
     if (info1->size < info2->size)
@@ -3868,7 +3868,7 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_
     if (info1->buffer == NULL && info2->buffer != NULL)
         HGOTO_DONE(1)
     if (info1->buffer != NULL && info2->buffer != NULL)
-        ret_value = HDmemcmp(info1->buffer, info2->buffer, size);
+        ret_value = memcmp(info1->buffer, info2->buffer, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4099,7 +4099,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     if (NULL != *pp) {
@@ -4126,7 +4126,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         enc_value = (uint64_t)config->initial_size;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -4134,13 +4134,13 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         enc_value = (uint64_t)config->max_size;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         enc_value = (uint64_t)config->min_size;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -4158,7 +4158,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         enc_value = (uint64_t)config->max_increment;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -4180,7 +4180,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         enc_value = (uint64_t)config->max_decrement;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
@@ -4244,9 +4244,9 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(config);
+    assert(pp);
+    assert(*pp);
+    assert(config);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
@@ -4269,7 +4269,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
 
     H5_DECODE_UNSIGNED(*pp, config->close_trace_file);
 
-    HDstrcpy(config->trace_file_name, (const char *)(*pp));
+    strcpy(config->trace_file_name, (const char *)(*pp));
     *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
     H5_DECODE_UNSIGNED(*pp, config->evictions_enabled);
@@ -4277,19 +4277,19 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     H5_DECODE_UNSIGNED(*pp, config->set_initial_size);
 
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     config->initial_size = (size_t)enc_value;
 
     H5_DECODE_DOUBLE(*pp, config->min_clean_fraction);
 
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     config->max_size = (size_t)enc_value;
 
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     config->min_size = (size_t)enc_value;
 
@@ -4309,7 +4309,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     H5_DECODE_UNSIGNED(*pp, config->apply_max_increment);
 
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     config->max_increment = (size_t)enc_value;
 
@@ -4330,7 +4330,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     H5_DECODE_UNSIGNED(*pp, config->apply_max_decrement);
 
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     config->max_decrement = (size_t)enc_value;
 
@@ -4376,8 +4376,8 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(fclose_degree);
-    HDassert(size);
+    assert(fclose_degree);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode file close degree */
@@ -4413,9 +4413,9 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(fclose_degree);
+    assert(pp);
+    assert(*pp);
+    assert(fclose_degree);
 
     /* Decode file close degree */
     *fclose_degree = (H5F_close_degree_t) * (*pp)++;
@@ -4447,8 +4447,8 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(type);
-    HDassert(size);
+    assert(type);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode file close degree */
@@ -4484,9 +4484,9 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(type);
+    assert(pp);
+    assert(*pp);
+    assert(type);
 
     /* Decode multi VFD memory type */
     *type = (H5FD_mem_t) * (*pp)++;
@@ -4517,8 +4517,8 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(type);
-    HDassert(size);
+    assert(type);
+    assert(size);
 
     /* Encode */
     if (NULL != *pp)
@@ -4553,9 +4553,9 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(type);
+    assert(pp);
+    assert(*pp);
+    assert(type);
 
     /* Decode */
     *type = (H5F_libver_t) * (*pp)++;
@@ -4818,7 +4818,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *locati
     /* Get location size, including terminating NULL */
     if (location_size) {
         if (location_ptr)
-            *location_size = HDstrlen(location_ptr) + 1;
+            *location_size = strlen(location_ptr) + 1;
         else
             *location_size = 0;
     } /* end if */
@@ -4854,11 +4854,11 @@ H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != log_location)
-        len = HDstrlen(log_location);
+        len = strlen(log_location);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     if (NULL != *pp) {
         /* encode the length of the prefix */
@@ -4903,14 +4903,14 @@ H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
 
     FUNC_ENTER_STATIC
 
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(log_location);
+    assert(pp);
+    assert(*pp);
+    assert(log_location);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -4920,7 +4920,7 @@ H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
         /* Make a copy of the user's prefix string */
         if (NULL == (*log_location = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
-        HDstrncpy(*log_location, *(const char **)pp, len);
+        strncpy(*log_location, *(const char **)pp, len);
         (*log_location)[len] = '\0';
 
         *pp += len;
@@ -4947,7 +4947,7 @@ H5P__facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -4968,7 +4968,7 @@ H5P__facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(value);
+    assert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
@@ -5000,7 +5000,7 @@ H5P__facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5021,7 +5021,7 @@ H5P__facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(value);
+    assert(value);
 
     H5MM_xfree(*(void **)value);
 
@@ -5232,8 +5232,8 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(coll_md_read_flag);
-    HDassert(size);
+    assert(coll_md_read_flag);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the value */
@@ -5269,9 +5269,9 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(coll_md_read_flag);
+    assert(pp);
+    assert(*pp);
+    assert(coll_md_read_flag);
 
     /* Decode file close degree */
     *coll_md_read_flag = (H5P_coll_md_read_flag_t) * (*pp);
@@ -6321,7 +6321,7 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of VOL connector ID & info */
     if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
@@ -6350,7 +6350,7 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of VOL connector */
     if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
@@ -6438,9 +6438,9 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(info1);
-    HDassert(info2);
-    HDassert(size == sizeof(H5VL_connector_prop_t));
+    assert(info1);
+    assert(info2);
+    assert(size == sizeof(H5VL_connector_prop_t));
 
     /* Compare connectors */
     if (NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
@@ -6448,7 +6448,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     if (NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
         HGOTO_DONE(1)
     status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
-    HDassert(status >= 0);
+    assert(status >= 0);
     if (cmp_value != 0)
         HGOTO_DONE(cmp_value);
 
@@ -6459,9 +6459,9 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     /* Use one of the classes (cls1) info comparison routines to compare the
      * info objects
      */
-    HDassert(cls1->info_cls.cmp == cls2->info_cls.cmp);
+    assert(cls1->info_cls.cmp == cls2->info_cls.cmp);
     status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Set return value */
     ret_value = cmp_value;

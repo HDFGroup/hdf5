@@ -56,31 +56,31 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"version", 
 static void
 usage(const char *prog)
 {
-    HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
-    HDfprintf(stdout, "  OPTIONS\n");
-    HDfprintf(stdout, "   -h, --help                Print a usage message and exit\n");
-    HDfprintf(stdout, "   -V, --version             Print version number and exit\n");
-    HDfprintf(stdout, "   -v, --verbose             Turn on verbose mode\n");
-    HDfprintf(stdout, "   -d dname, --dname=dataset_name    Pathname for the dataset\n");
-    HDfprintf(stdout, "   -n, --noop                Perform all the steps except the actual conversion\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Examples of use:\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5format_convert -d /group/dataset file_name\n");
-    HDfprintf(stdout, "  Convert the dataset </group/dataset> in the HDF5 file <file_name>:\n");
-    HDfprintf(stdout, "    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
-    HDfprintf(stdout, "    b. compact/contiguous dataset: downgrade the layout version to 3\n");
-    HDfprintf(stdout, "    c. virtual dataset: no action\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5format_convert file_name\n");
-    HDfprintf(stdout, "  Convert all datasets in the HDF5 file <file_name>:\n");
-    HDfprintf(stdout, "    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
-    HDfprintf(stdout, "    b. compact/contiguous dataset: downgrade the layout version to 3\n");
-    HDfprintf(stdout, "    c. virtual dataset: no action\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "h5format_convert -n -d /group/dataset file_name\n");
-    HDfprintf(stdout, "  Go through all the steps except the actual conversion when \n");
-    HDfprintf(stdout, "  converting the dataset </group/dataset> in the HDF5 file <file_name>.\n");
+    fprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
+    fprintf(stdout, "  OPTIONS\n");
+    fprintf(stdout, "   -h, --help                Print a usage message and exit\n");
+    fprintf(stdout, "   -V, --version             Print version number and exit\n");
+    fprintf(stdout, "   -v, --verbose             Turn on verbose mode\n");
+    fprintf(stdout, "   -d dname, --dname=dataset_name    Pathname for the dataset\n");
+    fprintf(stdout, "   -n, --noop                Perform all the steps except the actual conversion\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Examples of use:\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5format_convert -d /group/dataset file_name\n");
+    fprintf(stdout, "  Convert the dataset </group/dataset> in the HDF5 file <file_name>:\n");
+    fprintf(stdout, "    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
+    fprintf(stdout, "    b. compact/contiguous dataset: downgrade the layout version to 3\n");
+    fprintf(stdout, "    c. virtual dataset: no action\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5format_convert file_name\n");
+    fprintf(stdout, "  Convert all datasets in the HDF5 file <file_name>:\n");
+    fprintf(stdout, "    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
+    fprintf(stdout, "    b. compact/contiguous dataset: downgrade the layout version to 3\n");
+    fprintf(stdout, "    c. virtual dataset: no action\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "h5format_convert -n -d /group/dataset file_name\n");
+    fprintf(stdout, "  Go through all the steps except the actual conversion when \n");
+    fprintf(stdout, "  converting the dataset </group/dataset> in the HDF5 file <file_name>.\n");
 } /* usage() */
 
 /*-------------------------------------------------------------------------
@@ -180,7 +180,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 } /* leave() */
 
 /*-------------------------------------------------------------------------
@@ -216,7 +216,7 @@ convert(hid_t fid, const char *dname)
         goto error;
     }
     else if (verbose_g)
-        HDfprintf(stdout, "Open the dataset\n");
+        fprintf(stdout, "Open the dataset\n");
 
     /* Get the dataset's creation property list */
     if ((dcpl = H5Dget_create_plist(did)) < 0) {
@@ -232,12 +232,12 @@ convert(hid_t fid, const char *dname)
         goto error;
     }
     else if (verbose_g)
-        HDfprintf(stdout, "Retrieve the dataset's layout\n");
+        fprintf(stdout, "Retrieve the dataset's layout\n");
 
     switch (layout_type) {
         case H5D_CHUNKED:
             if (verbose_g)
-                HDfprintf(stdout, "Dataset is a chunked dataset\n");
+                fprintf(stdout, "Dataset is a chunked dataset\n");
 
             /* Get the dataset's chunk indexing type */
             if (H5Dget_chunk_index_type(did, &idx_type) < 0) {
@@ -246,34 +246,34 @@ convert(hid_t fid, const char *dname)
                 goto error;
             }
             else if (verbose_g)
-                HDfprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
+                fprintf(stdout, "Retrieve the dataset's chunk indexing type\n");
 
             if (idx_type == H5D_CHUNK_IDX_BTREE) {
                 if (verbose_g)
-                    HDfprintf(
+                    fprintf(
                         stdout,
                         "Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
                 h5tools_setstatus(EXIT_SUCCESS);
                 goto done;
             }
             else if (verbose_g)
-                HDfprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
+                fprintf(stdout, "Dataset's chunk indexing type is not version 1 B-tree\n");
 
             break;
 
         case H5D_CONTIGUOUS:
             if (verbose_g)
-                HDfprintf(stdout, "Dataset is a contiguous dataset: downgrade layout version as needed\n");
+                fprintf(stdout, "Dataset is a contiguous dataset: downgrade layout version as needed\n");
             break;
 
         case H5D_COMPACT:
             if (verbose_g)
-                HDfprintf(stdout, "Dataset is a compact dataset: downgrade layout version as needed\n");
+                fprintf(stdout, "Dataset is a compact dataset: downgrade layout version as needed\n");
             break;
 
         case H5D_VIRTUAL:
             if (verbose_g)
-                HDfprintf(stdout, "No further action for virtual dataset\n");
+                fprintf(stdout, "No further action for virtual dataset\n");
             goto done;
 
         case H5D_NLAYOUTS:
@@ -288,13 +288,13 @@ convert(hid_t fid, const char *dname)
     /* No further action if it is a noop */
     if (noop_g) {
         if (verbose_g)
-            HDfprintf(stdout, "Not converting the dataset\n");
+            fprintf(stdout, "Not converting the dataset\n");
         h5tools_setstatus(EXIT_SUCCESS);
         goto done;
     }
 
     if (verbose_g)
-        HDfprintf(stdout, "Converting the dataset...\n");
+        fprintf(stdout, "Converting the dataset...\n");
 
     /* Downgrade the dataset */
     if (H5Dformat_convert(did) < 0) {
@@ -303,7 +303,7 @@ convert(hid_t fid, const char *dname)
         goto error;
     }
     else if (verbose_g)
-        HDfprintf(stdout, "Done\n");
+        fprintf(stdout, "Done\n");
 
 done:
     /* Close the dataset */
@@ -313,7 +313,7 @@ done:
         goto error;
     }
     else if (verbose_g)
-        HDfprintf(stdout, "Close the dataset\n");
+        fprintf(stdout, "Close the dataset\n");
 
     /* Close the dataset creation property list */
     if (H5Pclose(dcpl) < 0) {
@@ -322,13 +322,13 @@ done:
         goto error;
     }
     else if (verbose_g)
-        HDprintf("Close the dataset creation property list\n");
+        printf("Close the dataset creation property list\n");
 
     return 0;
 
 error:
     if (verbose_g)
-        HDfprintf(stdout, "Error encountered\n");
+        fprintf(stdout, "Error encountered\n");
 
     H5E_BEGIN_TRY
     {
@@ -359,7 +359,7 @@ convert_dsets_cb(const char *path, const H5O_info2_t *oi, const char *already_vi
     if (NULL == already_visited) {
         if (oi->type == H5O_TYPE_DATASET) {
             if (verbose_g)
-                HDfprintf(stdout, "Going to process dataset:%s...\n", path);
+                fprintf(stdout, "Going to process dataset:%s...\n", path);
             if (convert(fid, path) < 0)
                 goto error;
         } /* end if */
@@ -397,10 +397,10 @@ main(int argc, char *argv[])
     if (parse_command_line(argc, (const char *const *)argv) < 0)
         goto done;
     else if (verbose_g)
-        HDfprintf(stdout, "Process command line options\n");
+        fprintf(stdout, "Process command line options\n");
 
     if (noop_g && verbose_g)
-        HDfprintf(stdout, "It is noop...\n");
+        fprintf(stdout, "It is noop...\n");
 
     /* enable error reporting if command line option */
     h5tools_error_report();
@@ -412,28 +412,28 @@ main(int argc, char *argv[])
         goto done;
     }
     else if (verbose_g)
-        HDfprintf(stdout, "Open the file %s\n", fname_g);
+        fprintf(stdout, "Open the file %s\n", fname_g);
 
     if (dset_g) { /* Convert a specified dataset in the file */
         if (verbose_g)
-            HDfprintf(stdout, "Going to process dataset: %s...\n", dname_g);
+            fprintf(stdout, "Going to process dataset: %s...\n", dname_g);
         if (convert(fid, dname_g) < 0)
             goto done;
     }
     else { /* Convert all datasets in the file */
         if (verbose_g)
-            HDfprintf(stdout, "Processing all datasets in the file...\n");
+            fprintf(stdout, "Processing all datasets in the file...\n");
         if (h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
             goto done;
     } /* end else */
 
     if (verbose_g) {
         if (noop_g) {
-            HDfprintf(stdout, "Not processing the file's superblock...\n");
+            fprintf(stdout, "Not processing the file's superblock...\n");
             h5tools_setstatus(EXIT_SUCCESS);
             goto done;
         } /* end if */
-        HDfprintf(stdout, "Processing the file's superblock...\n");
+        fprintf(stdout, "Processing the file's superblock...\n");
     } /* end if */
 
     /* Process superblock */
@@ -451,14 +451,14 @@ done:
             h5tools_setstatus(EXIT_FAILURE);
         }
         else if (verbose_g) {
-            HDfprintf(stdout, "Close the file\n");
+            fprintf(stdout, "Close the file\n");
         }
     } /* end if */
 
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
     if (dname_g)
-        HDfree(dname_g);
+        free(dname_g);
 
     leave(h5tools_getstatus());
 

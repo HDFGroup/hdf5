@@ -96,10 +96,10 @@ H5FD__supports_swmr_test(const char *vfd_name)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
+    if (!vfd_name || !strcmp(vfd_name, "") || !strcmp(vfd_name, "nomatch"))
         ret_value = TRUE;
     else
-        ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
+        ret_value = !strcmp(vfd_name, "log") || !strcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__supports_swmr_test() */

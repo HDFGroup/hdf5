@@ -76,18 +76,18 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
     char * buf;   /* buffer to receive formatted string */
     size_t bufsz; /* size of buffer to allocate */
 
-    for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL;) {
+    for (bufsz = 32; (buf = malloc(bufsz)) != NULL;) {
         int     ret;
         va_list ap;
 
-        HDva_copy(ap, _ap);
-        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        va_copy(ap, _ap);
+        ret = vsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
             *bufp = buf;
             return ret;
         }
-        HDfree(buf);
+        free(buf);
         if (ret < 0)
             return ret;
         bufsz = (size_t)ret + 1;
@@ -228,7 +228,7 @@ H5_make_time(struct tm *tm)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(tm);
+    assert(tm);
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
@@ -237,7 +237,7 @@ H5_make_time(struct tm *tm)
     } /* end if */
 
     /* Perform base conversion */
-    if ((time_t)-1 == (the_time = HDmktime(tm)))
+    if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
 
         /* Adjust for timezones */
@@ -399,7 +399,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     static hbool_t       is_initialized = FALSE;
     BOOL                 err;
 
-    HDassert(tvs);
+    assert(tvs);
 
     if (!is_initialized) {
         /* NOTE: This is just a pseudo handle and does not need to be closed. */
@@ -586,9 +586,9 @@ Wopen_utf8(const char *path, int oflag, ...)
     if (oflag & O_CREAT) {
         va_list vl;
 
-        HDva_start(vl, oflag);
-        pmode = HDva_arg(vl, int);
-        HDva_end(vl);
+        va_start(vl, oflag);
+        pmode = va_arg(vl, int);
+        va_end(vl);
     }
 
     /* Open the file */
@@ -667,8 +667,8 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(name);
-    HDassert(extpath);
+    assert(name);
+    assert(extpath);
 
     /* Clear external path pointer to begin with */
     *extpath = NULL;
@@ -688,7 +688,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
 
         if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
-        name_len = HDstrlen(name) + 1;
+        name_len = strlen(name) + 1;
         if (NULL == (new_name = (char *)H5MM_malloc(name_len)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -698,9 +698,9 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
          * Unix: does not apply
          */
         if (H5_CHECK_ABS_DRIVE(name)) {
-            drive  = HDtoupper(name[0]) - 'A' + 1;
+            drive  = toupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, &name[2], name_len);
+            strncpy(new_name, &name[2], name_len);
         } /* end if */
           /*
            * Windows: name[0] is a '/' or '\'
@@ -708,32 +708,32 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
            * Unix: does not apply
            */
         else if (H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
-            HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
+            snprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
-            HDstrncpy(new_name, &name[1], name_len);
+            strncpy(new_name, &name[1], name_len);
         }
         /* totally relative for Unix and Windows: get current working directory  */
         else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, name, name_len);
+            strncpy(new_name, name, name_len);
         } /* end if */
 
         if (retcwd != NULL) {
             size_t cwdlen;
             size_t path_len;
 
-            HDassert(cwdpath);
-            cwdlen = HDstrlen(cwdpath);
-            HDassert(cwdlen);
-            HDassert(new_name);
-            path_len = cwdlen + HDstrlen(new_name) + 2;
+            assert(cwdpath);
+            cwdlen = strlen(cwdpath);
+            assert(cwdlen);
+            assert(new_name);
+            path_len = cwdlen + strlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-            HDstrncpy(full_path, cwdpath, cwdlen + 1);
+            strncpy(full_path, cwdpath, cwdlen + 1);
             if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
-                HDstrncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
-            HDstrncat(full_path, new_name, path_len - (cwdlen + 1) - HDstrlen(H5_DIR_SEPS));
+                strncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
+            strncat(full_path, new_name, path_len - (cwdlen + 1) - strlen(H5_DIR_SEPS));
         } /* end if */
     }     /* end else */
 
@@ -742,7 +742,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         char *ptr = NULL;
 
         H5_GET_LAST_DELIMITER(full_path, ptr)
-        HDassert(ptr);
+        assert(ptr);
         *++ptr   = '\0';
         *extpath = full_path;
     } /* end if */
@@ -779,11 +779,11 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path2);
+    assert(path2);
 
     if (path1)
-        path1_len = HDstrlen(path1);
-    path2_len = HDstrlen(path2);
+        path1_len = strlen(path1);
+    path2_len = strlen(path2);
 
     if (path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
@@ -801,7 +801,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
              */
             if (NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer")
-            HDsnprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
+            snprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
         } /* end if */
         else {
             /* On windows path2 is path absolute name ("\foo\bar"),
@@ -825,7 +825,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
+        snprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
                    path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
                    (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
@@ -851,7 +851,7 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
+    DWORD dwMilliseconds = (DWORD)ceil(nanosec / 1.0e6);
     DWORD ignore;
 
     /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
@@ -966,7 +966,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         if (H5_optind >= argc || argv[H5_optind][0] != '-' || argv[H5_optind][1] == '\0') {
             return EOF;
         }
-        else if (HDstrcmp(argv[H5_optind], "--") == 0) {
+        else if (strcmp(argv[H5_optind], "--") == 0) {
             H5_optind++;
             return EOF;
         }
@@ -980,15 +980,15 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         size_t     arg_len = 0;
 
         H5_optarg = strchr(&argv[H5_optind][2], ch);
-        arg_len   = HDstrlen(&argv[H5_optind][2]);
+        arg_len   = strlen(&argv[H5_optind][2]);
         if (H5_optarg) {
-            arg_len -= HDstrlen(H5_optarg);
+            arg_len -= strlen(H5_optarg);
             H5_optarg++; /* skip the equal sign */
         }
         arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            if (HDstrcmp(arg, l_opts[i].name) == 0) {
+            if (strcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 optchar = l_opts[i].shortval;
 
@@ -1001,7 +1001,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
                         }
                         else if (l_opts[i].has_arg == require_arg) {
                             if (H5_opterr)
-                                HDfprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
+                                fprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
 
                             optchar = '?';
                         }
@@ -1010,7 +1010,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
                 else {
                     if (H5_optarg) {
                         if (H5_opterr)
-                            HDfprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
+                            fprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
 
                         optchar = '?';
                     }
@@ -1022,7 +1022,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         if (l_opts[i].name == NULL) {
             /* exhausted all of the l_opts we have and still didn't match */
             if (H5_opterr)
-                HDfprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
+                fprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
 
             optchar = '?';
         }
@@ -1030,7 +1030,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         H5_optind++;
         sp = 1;
 
-        HDfree(arg);
+        free(arg);
     }
     else {
         register char *cp; /* pointer into current token */
@@ -1038,9 +1038,9 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* short command line option */
         optchar = argv[H5_optind][sp];
 
-        if (optchar == ':' || (cp = HDstrchr(opts, optchar)) == 0) {
+        if (optchar == ':' || (cp = strchr(opts, optchar)) == 0) {
             if (H5_opterr)
-                HDfprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
+                fprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
 
             /* if no chars left in this token, move to next token */
             if (argv[H5_optind][++sp] == '\0') {
@@ -1058,7 +1058,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
             }
             else if (++H5_optind >= argc) {
                 if (H5_opterr)
-                    HDfprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], optchar);
+                    fprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], optchar);
 
                 optchar = '?';
             }

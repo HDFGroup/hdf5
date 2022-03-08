@@ -424,8 +424,8 @@ gen_err_level(const char *fname)
         goto error;
 
     /* Initialize data buffer */
-    buf = (unsigned char *)HDmalloc(NUM * sizeof(unsigned char *));
-    HDmemset(buf, 42, NUM * sizeof(unsigned char));
+    buf = (unsigned char *)malloc(NUM * sizeof(unsigned char *));
+    memset(buf, 42, NUM * sizeof(unsigned char));
 
     /* Create the test file */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -798,10 +798,10 @@ main(void)
         for (i = 0; i < 8; i++) {
             char filename[50];
 
-            HDmemset(filename, 0, sizeof(filename));
+            memset(filename, 0, sizeof(filename));
             if (!new_format)
-                HDstrcat(filename, "old_");
-            HDstrcat(filename, FILENAME[i]);
+                strcat(filename, "old_");
+            strcat(filename, FILENAME[i]);
 
             gen_ext(filename, new_format, i);
         } /* end for */

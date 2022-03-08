@@ -78,7 +78,7 @@ H5HG_get_addr(const H5HG_heap_t *heap)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(heap);
+    assert(heap);
 
     FUNC_LEAVE_NOAPI(heap->addr)
 } /* H5HG_get_addr() */
@@ -101,7 +101,7 @@ H5HG_get_size(const H5HG_heap_t *heap)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(heap);
+    assert(heap);
 
     FUNC_LEAVE_NOAPI(heap->size)
 } /* H5HG_get_size() */
@@ -124,7 +124,7 @@ H5HG_get_free_size(const H5HG_heap_t *heap)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(heap);
+    assert(heap);
 
     FUNC_LEAVE_NOAPI(heap->obj[0].size)
 } /* H5HG_get_free_size() */

@@ -91,7 +91,7 @@ H5FA__hdr_alloc(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5FA_hdr_t)))
@@ -136,7 +136,7 @@ H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Set size of header on disk (locally and in statistics) */
     hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE_HDR(hdr);
@@ -177,8 +177,8 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
 #ifndef NDEBUG
     {
@@ -272,7 +272,7 @@ H5FA__hdr_incr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as un-evictable when something is depending on it */
     if (hdr->rc == 0)
@@ -306,15 +306,15 @@ H5FA__hdr_decr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->rc);
+    assert(hdr);
+    assert(hdr->rc);
 
     /* Decrement reference count on shared header */
     hdr->rc--;
 
     /* Mark header as evictable again when nothing depend on it */
     if (hdr->rc == 0) {
-        HDassert(hdr->file_rc == 0);
+        assert(hdr->file_rc == 0);
         if (H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNPIN, FAIL, "unable to unpin fixed array header")
     }
@@ -341,7 +341,7 @@ H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Increment file reference count on shared header */
     hdr->file_rc++;
@@ -370,8 +370,8 @@ H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->file_rc);
+    assert(hdr);
+    assert(hdr->file_rc);
 
     /* Decrement file reference count on shared header */
     hdr->file_rc--;
@@ -402,7 +402,7 @@ H5FA__hdr_modified(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
@@ -434,11 +434,11 @@ H5FA__hdr_protect(H5F_t *f, haddr_t fa_addr, void *ctx_udata, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fa_addr));
+    assert(f);
+    assert(H5F_addr_defined(fa_addr));
 
     /* only the H5AC__READ_ONLY_FLAG is permitted */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data for cache callbacks */
     udata.f         = f;
@@ -490,7 +490,7 @@ H5FA__hdr_unprotect(H5FA_hdr_t *hdr, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_FARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
@@ -522,8 +522,8 @@ H5FA__hdr_delete(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(!hdr->file_rc);
+    assert(hdr);
+    assert(!hdr->file_rc);
 
 #ifndef NDEBUG
 
@@ -534,8 +534,8 @@ H5FA__hdr_delete(H5FA_hdr_t *hdr)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "unable to check metadata cache status for array header")
 
     /* Sanity checks on array header */
-    HDassert(hdr_status & H5AC_ES__IN_CACHE);
-    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+    assert(hdr_status & H5AC_ES__IN_CACHE);
+    assert(hdr_status & H5AC_ES__IS_PROTECTED);
 
 #endif /* NDEBUG */
 
@@ -577,8 +577,8 @@ H5FA__hdr_dest(H5FA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
-    HDassert(hdr->rc == 0);
+    assert(hdr);
+    assert(hdr->rc == 0);
 
     /* Destroy the callback context */
     if (hdr->cb_ctx) {

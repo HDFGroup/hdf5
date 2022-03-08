@@ -90,7 +90,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
@@ -121,7 +121,7 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
@@ -152,7 +152,7 @@ H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f_sh);
+    assert(f_sh);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
@@ -183,7 +183,7 @@ H5F_mpi_get_size(const H5F_t *f)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
@@ -210,7 +210,7 @@ H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
+    assert(file);
 
     /* Check VFD */
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
@@ -283,8 +283,8 @@ H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
-    HDassert(flag);
+    assert(file);
+    assert(flag);
 
     /* Check VFD */
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
@@ -364,7 +364,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(mpi_comm);
+    assert(mpi_comm);
 
     /* Set value to return to invalid MPI comm */
     *mpi_comm = MPI_COMM_NULL;
@@ -379,7 +379,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         if (H5G_loc(loc_id, &loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
         f = loc.oloc->file;
-        HDassert(f);
+        assert(f);
 
         /* Check if MPIO driver is used */
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
@@ -425,7 +425,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(file && file->shared);
+    assert(file && file->shared);
 
     /* Retrieve the file-global flag */
     file_flag = H5F_COLL_MD_READ(file);
@@ -503,9 +503,9 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(file && file->shared);
-    HDassert(file_flag);
-    HDassert(context_flag);
+    assert(file && file->shared);
+    assert(file_flag);
+    assert(context_flag);
 
     /* Save old state */
     prev_file_flag    = H5F_COLL_MD_READ(file);

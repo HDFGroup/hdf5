@@ -187,7 +187,7 @@ static int
 init_cparam(H5EA_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     /* General parameters */
     cparam->cls                       = H5EA_CLS_TEST;
@@ -224,14 +224,14 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     size_t  u;          /* Local index variable */
 
     /* Wipe out background */
-    HDmemset(tparam, 0, sizeof(*tparam));
+    memset(tparam, 0, sizeof(*tparam));
 
     /* Compute general information */
     tparam->nsblks = 1 + (cparam->max_nelmts_bits - H5VM_log2_of2(cparam->data_blk_min_elmts));
 
     /* Allocate information for each super block */
-    tparam->sblk_info = (H5EA_sblk_info_t *)HDmalloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
-    HDassert(tparam->sblk_info);
+    tparam->sblk_info = (H5EA_sblk_info_t *)malloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
+    assert(tparam->sblk_info);
 
     /* Compute information about each super block */
     start_idx  = 0;
@@ -267,7 +267,7 @@ static int
 finish_tparam(earray_test_param_t *tparam)
 {
     /* Release super block information */
-    HDfree(tparam->sblk_info);
+    free(tparam->sblk_info);
     tparam->sblk_info = NULL;
 
     return (0);
@@ -332,37 +332,37 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
 
     /* Compare information */
     if (earray_stats.stored.max_idx_set != state->max_idx_set) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n",
                   earray_stats.stored.max_idx_set, state->max_idx_set);
         TEST_ERROR
     } /* end if */
     if (earray_stats.stored.nelmts != state->nelmts) {
-        HDfprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+        fprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
                   earray_stats.stored.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.hdr_size != state->hdr_size) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
                   earray_stats.computed.hdr_size, state->hdr_size);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.nindex_blks != state->nindex_blks) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n",
                   earray_stats.computed.nindex_blks, state->nindex_blks);
         TEST_ERROR
     } /* end if */
     if (earray_stats.computed.index_blk_size != state->index_blk_size) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE
                   "\n",
                   earray_stats.computed.index_blk_size, state->index_blk_size);
         TEST_ERROR
     } /* end if */
     if (earray_stats.stored.ndata_blks != state->ndata_blks) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n",
                   earray_stats.stored.ndata_blks, state->ndata_blks);
         TEST_ERROR
@@ -370,7 +370,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.data_blk_size != state->data_blk_size) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE
                   "\n",
                   earray_stats.stored.data_blk_size, state->data_blk_size);
@@ -378,7 +378,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
     }  /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n",
                   earray_stats.stored.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
@@ -386,7 +386,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.super_blk_size != state->super_blk_size) {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE
                   "\n",
                   earray_stats.stored.super_blk_size, state->super_blk_size);
@@ -494,7 +494,7 @@ create_array(H5F_t *f, const H5EA_create_t *cparam, H5EA_t **ea, haddr_t *ea_add
         FAIL_STACK_ERROR
     if (!H5F_addr_defined(*ea_addr))
         TEST_ERROR
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(*ea, &state))
         TEST_ERROR
@@ -525,7 +525,7 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
     H5EA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5EA_create_t));
+    memset(&test_cparam, 0, sizeof(H5EA_create_t));
     if (H5EA__get_cparam_test(ea, &test_cparam) < 0)
         FAIL_STACK_ERROR
 
@@ -621,7 +621,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         H5EA_create_t test_cparam; /* Creation parameters for array */
 
         /* Set invalid element size */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
         H5E_BEGIN_TRY
         {
@@ -638,7 +638,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements bits */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 0;
         H5E_BEGIN_TRY
         {
@@ -654,7 +654,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             TEST_ERROR
         } /* end if */
 
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 65;
         H5E_BEGIN_TRY
         {
@@ -671,7 +671,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid min. # of data block pointers in super blocks */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 0;
         H5E_BEGIN_TRY
         {
@@ -686,7 +686,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 1;
         H5E_BEGIN_TRY
         {
@@ -701,7 +701,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 6;
         H5E_BEGIN_TRY
         {
@@ -718,7 +718,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid min. # of elements per data block */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.data_blk_min_elmts = 0;
         H5E_BEGIN_TRY
         {
@@ -736,7 +736,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         /* Set invalid max. # of elements per data block page bits */
         if (test_cparam.idx_blk_elmts > 0) {
-            HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+            memcpy(&test_cparam, cparam, sizeof(test_cparam));
             test_cparam.max_dblk_page_nelmts_bits =
                 (uint8_t)(H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
             H5E_BEGIN_TRY
@@ -753,7 +753,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
                 TEST_ERROR
             } /* end if */
         }     /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 4; /* corresponds to 16 elements in data block page, which is
                                                       less than the 64 elements for the default settings */
         H5E_BEGIN_TRY
@@ -769,7 +769,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(test_cparam.max_nelmts_bits + 1);
         H5E_BEGIN_TRY
         {
@@ -789,7 +789,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    HDputs("    Not tested when assertions are disabled");
+    puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -1301,8 +1301,8 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
     eiter_fw_t *eiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
-    HDassert(eiter);
+    eiter = (eiter_fw_t *)malloc(sizeof(eiter_fw_t));
+    assert(eiter);
 
     /* Initialize the element iteration object */
     eiter->idx           = 0;
@@ -1332,7 +1332,7 @@ eiter_fw_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx++;
@@ -1359,7 +1359,7 @@ eiter_fw_max(const void *in_eiter)
     const eiter_fw_t *eiter = (const eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)(eiter->idx - 1));
@@ -1385,10 +1385,10 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1442,10 +1442,10 @@ static int
 eiter_fw_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_fw_term() */
@@ -1488,8 +1488,8 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
     eiter_rv_t *eiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
-    HDassert(eiter);
+    eiter = (eiter_rv_t *)malloc(sizeof(eiter_rv_t));
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->idx = cnt - 1;
@@ -1532,7 +1532,7 @@ eiter_rv_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx--;
@@ -1559,7 +1559,7 @@ eiter_rv_max(const void *in_eiter)
     const eiter_rv_t *eiter = (const eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1585,10 +1585,10 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1667,10 +1667,10 @@ static int
 eiter_rv_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rv_term() */
@@ -1712,12 +1712,12 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1762,7 +1762,7 @@ eiter_rnd_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx[eiter->pos];
@@ -1794,7 +1794,7 @@ eiter_rnd_max(const void *in_eiter)
     const eiter_rnd_t *eiter = (const eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1819,14 +1819,14 @@ eiter_rnd_term(void *in_eiter)
     eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(eiter->idx);
+    assert(eiter);
+    assert(eiter->idx);
 
     /* Free shuffled index array */
-    HDfree(eiter->idx);
+    free(eiter->idx);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rnd_term() */
@@ -1861,12 +1861,12 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1878,8 +1878,8 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         hsize_t  sparse_cnt = (hsize_t)(cnt * EA_RND2_SCALE); /* Sparse range to choose from */
 
         /* Allocate temporary index array */
-        tmp_idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)sparse_cnt);
-        HDassert(tmp_idx);
+        tmp_idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)sparse_cnt);
+        assert(tmp_idx);
 
         /* Initialize temporary index array, for shuffling */
         for (u = 0; u < (size_t)sparse_cnt; u++)
@@ -1895,7 +1895,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         } /* end for */
 
         /* Release temporary array */
-        HDfree(tmp_idx);
+        free(tmp_idx);
     } /* end if */
     else {
         for (u = 0; u < (size_t)cnt; u++)
@@ -1943,8 +1943,8 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     eiter_cyc_t *eiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
-    HDassert(eiter);
+    eiter = (eiter_cyc_t *)malloc(sizeof(eiter_cyc_t));
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1976,7 +1976,7 @@ eiter_cyc_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->pos;
@@ -2010,7 +2010,7 @@ eiter_cyc_max(const void *in_eiter)
     const eiter_cyc_t *eiter = (const eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -2035,10 +2035,10 @@ eiter_cyc_term(void *in_eiter)
     eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_cyc_term() */
@@ -2113,7 +2113,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
         TEST_ERROR
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(ea, &state))
         TEST_ERROR
@@ -2287,7 +2287,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
         TEST_ERROR
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(ea, &state))
         TEST_ERROR
@@ -2317,7 +2317,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
         TEST_ERROR
 
     /* Set array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size       = EA_HDR_SIZE;
     state.nindex_blks    = 1;
     state.index_blk_size = EA_IBLOCK_SIZE;
@@ -2420,7 +2420,7 @@ main(void)
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -2463,12 +2463,12 @@ main(void)
         switch (curr_test) {
             /* "Normal" testing parameters */
             case EARRAY_TEST_NORMAL:
-                HDputs("Testing with normal parameters");
+                puts("Testing with normal parameters");
                 break;
 
             /* "Re-open array" testing parameters */
             case EARRAY_TEST_REOPEN:
-                HDputs("Testing with reopen array flag set");
+                puts("Testing with reopen array flag set");
                 tparam.reopen_array = EARRAY_TEST_REOPEN;
                 break;
 
@@ -2497,31 +2497,31 @@ main(void)
             switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case EARRAY_ITER_FW:
-                    HDputs("Testing with forward iteration");
+                    puts("Testing with forward iteration");
                     tparam.eiter = &ea_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case EARRAY_ITER_RV:
-                    HDputs("Testing with reverse iteration");
+                    puts("Testing with reverse iteration");
                     tparam.eiter = &ea_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case EARRAY_ITER_RND:
-                    HDputs("Testing with random iteration");
+                    puts("Testing with random iteration");
                     tparam.eiter = &ea_iter_rnd;
                     break;
 
                 /* "Random #2" testing parameters */
                 case EARRAY_ITER_RND2:
-                    HDputs("Testing with random #2 iteration");
+                    puts("Testing with random #2 iteration");
                     tparam.eiter = &ea_iter_rnd2;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case EARRAY_ITER_CYC:
-                    HDputs("Testing with cyclic iteration");
+                    puts("Testing with cyclic iteration");
                     tparam.eiter = &ea_iter_cyc;
                     break;
 
@@ -2543,7 +2543,7 @@ main(void)
                     /* Test first element in data block */
                     nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    HDsnprintf(test_str, sizeof(test_str),
+                    snprintf(test_str, sizeof(test_str),
                                "setting first element of array's data block #%llu",
                                (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
@@ -2551,7 +2551,7 @@ main(void)
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
-                    HDsnprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
+                    snprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
                                (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
@@ -2595,7 +2595,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All extensible array tests passed.");
+    puts("All extensible array tests passed.");
 
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
@@ -2603,7 +2603,7 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

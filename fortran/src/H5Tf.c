@@ -67,7 +67,7 @@ h5topen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f 
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -117,7 +117,7 @@ h5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -1358,7 +1358,7 @@ h5tget_member_index_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
         goto DONE;
     *idx = (int_f)c_index;
 DONE:
-    HDfree(c_name);
+    free(c_name);
     ret_value = 0;
     return ret_value;
 }
@@ -1625,7 +1625,7 @@ h5tinsert_c(hid_t_f *type_id, _fcd name, int_f *namelen, size_t_f *offset, hid_t
 
     error = H5Tinsert((hid_t)*type_id, c_name, (size_t)*offset, (hid_t)*field_id);
 
-    HDfree(c_name);
+    free(c_name);
     if (error < 0)
         return ret_value;
     ret_value = 0;
@@ -1785,7 +1785,7 @@ h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
     c_value = *value;
     error   = H5Tenum_insert((hid_t)*type_id, c_name, &c_value);
 
-    HDfree(c_name);
+    free(c_name);
     if (error < 0)
         return ret_value;
 
@@ -1826,11 +1826,11 @@ h5tenum_nameof_c(hid_t_f *type_id, int_f *value, _fcd name, size_t_f *namelen)
     int_f  c_value;
     c_value   = *value;
     c_namelen = ((size_t)*namelen) + 1;
-    c_name    = (char *)HDmalloc(sizeof(char) * c_namelen);
+    c_name    = (char *)malloc(sizeof(char) * c_namelen);
     c_type_id = (hid_t)*type_id;
     error     = H5Tenum_nameof(c_type_id, &c_value, c_name, c_namelen);
     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
-    HDfree(c_name);
+    free(c_name);
 
     if (error < 0)
         return ret_value;
@@ -1871,7 +1871,7 @@ h5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
         return ret_value;
 
     error = H5Tenum_valueof((hid_t)*type_id, c_name, value);
-    HDfree(c_name);
+    free(c_name);
 
     if (error < 0)
         return ret_value;
@@ -1948,7 +1948,7 @@ h5tset_tag_c(hid_t_f *type_id, _fcd tag, int_f *namelen)
     c_tag = (char *)HD5f2cstring(tag, (size_t)*namelen);
 
     status = H5Tset_tag((hid_t)*type_id, c_tag);
-    HDfree(c_tag);
+    free(c_tag);
     if (status < 0)
         return ret_value;
 
@@ -1990,7 +1990,7 @@ h5tget_tag_c(hid_t_f *type_id, _fcd tag, size_t_f *tag_size, int_f *taglen)
         return ret_value;
 
     HD5packFstring(c_tag, _fcdtocp(tag), (size_t)*tag_size);
-    *taglen = (int_f)HDstrlen(c_tag);
+    *taglen = (int_f)strlen(c_tag);
     H5free_memory(c_tag);
     ret_value = 0;
     return ret_value;
@@ -2264,7 +2264,7 @@ h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc)
      * Allocate buffer
      */
     c_size = (size_t)*nalloc;
-    if (NULL == (c_buf = (unsigned char *)HDmalloc(c_size)))
+    if (NULL == (c_buf = (unsigned char *)malloc(c_size)))
         return ret_value;
 
     /*
@@ -2279,11 +2279,11 @@ h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc)
      * with blanks.
      */
 
-    HDmemcpy(_fcdtocp(buf), (char *)c_buf, c_size);
+    memcpy(_fcdtocp(buf), (char *)c_buf, c_size);
 
     ret_value = 0;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -2467,7 +2467,7 @@ h5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f *namelen, void *value)
 
     status = H5Tenum_insert((hid_t)*type_id, c_name, value);
 
-    HDfree(c_name);
+    free(c_name);
     if (status < 0)
         return ret_value;
 

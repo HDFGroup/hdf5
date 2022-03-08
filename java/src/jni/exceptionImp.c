@@ -74,17 +74,17 @@ typedef struct H5E_num_t {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
                                                                                                              \
         if (NULL == (jm = ENVPTR->GetMethodID(ENVONLY, jc, "<init>", "(Ljava/lang/String;)V"))) {            \
-            HDprintf("THROWEXCEPTION FATAL ERROR: GetMethodID failed\n");                                    \
+            printf("THROWEXCEPTION FATAL ERROR: GetMethodID failed\n");                                    \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
                                                                                                              \
         if (NULL == (ex = ENVPTR->NewObjectA(ENVONLY, jc, jm, (jvalue *)(args)))) {                          \
-            HDprintf("THROWEXCEPTION FATAL ERROR: Class %s: Creation failed\n", (className));                \
+            printf("THROWEXCEPTION FATAL ERROR: Class %s: Creation failed\n", (className));                \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
                                                                                                              \
         if (ENVPTR->Throw(ENVONLY, (jthrowable)ex) < 0) {                                                    \
-            HDprintf("THROWEXCEPTION FATAL ERROR: Class %s: Throw failed\n", (className));                   \
+            printf("THROWEXCEPTION FATAL ERROR: Class %s: Throw failed\n", (className));                   \
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);                                                         \
         }                                                                                                    \
     }
@@ -169,9 +169,9 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env, j
     else {
         PIN_JAVA_STRING(ENVONLY, file_name, file, NULL, "printStackTrace0: file name not pinned");
 
-        if ((stream = HDfopen(file, "a+"))) {
+        if ((stream = fopen(file, "a+"))) {
             H5Eprint2(H5E_DEFAULT, stream);
-            HDfclose(stream);
+            fclose(stream);
         }
     }
 
@@ -404,7 +404,7 @@ h5libraryError(JNIEnv *env)
         goto done;
 
     if (msg_size > 0) {
-        if (NULL == (msg_str = (char *)HDcalloc((size_t)msg_size + 1, sizeof(char))))
+        if (NULL == (msg_str = (char *)calloc((size_t)msg_size + 1, sizeof(char))))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5libraryerror: failed to allocate buffer for error message");
 
         if ((msg_size = H5Eget_msg(min_num, &error_msg_type, msg_str, (size_t)msg_size + 1)) < 0)
@@ -429,7 +429,7 @@ h5libraryError(JNIEnv *env)
 
 done:
     if (msg_str)
-        HDfree(msg_str);
+        free(msg_str);
 
     return retVal;
 } /* end h5libraryError() */

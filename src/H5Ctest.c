@@ -94,8 +94,8 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
     FUNC_ENTER_STATIC
 
     /* Santify checks */
-    HDassert(entry);
-    HDassert(ctx);
+    assert(entry);
+    assert(ctx);
 
     /* Retrieve corked status for entry */
     is_corked = entry->tag_info ? entry->tag_info->corked : FALSE;

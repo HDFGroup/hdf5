@@ -101,7 +101,7 @@ tts_acreate(void)
      * with the dataset
      */
     for (i = 0; i < NUM_THREADS; i++) {
-        attrib_data                = (ttsafe_name_data_t *)HDmalloc(sizeof(ttsafe_name_data_t));
+        attrib_data                = (ttsafe_name_data_t *)malloc(sizeof(ttsafe_name_data_t));
         attrib_data->dataset       = dataset;
         attrib_data->datatype      = datatype;
         attrib_data->dataspace     = dataspace;
@@ -159,7 +159,7 @@ tts_acreate_thread(void *client_data)
     CHECK(attribute, H5I_INVALID_HID, "H5Acreate2");
 
     /* Write data to the attribute */
-    attribute_data  = (int *)HDmalloc(sizeof(int));
+    attribute_data  = (int *)malloc(sizeof(int));
     *attribute_data = attrib_data->current_index;
     status          = H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
     CHECK(status, FAIL, "H5Awrite");

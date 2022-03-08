@@ -90,7 +90,7 @@ H5HF__dtable_init(H5HF_dtable_t *dtable)
     /*
      * Check arguments.
      */
-    HDassert(dtable);
+    assert(dtable);
 
     /* Compute/cache some values */
     dtable->start_bits           = H5VM_log2_of2((uint32_t)dtable->cparam.start_block_size);
@@ -148,9 +148,9 @@ H5HF__dtable_lookup(const H5HF_dtable_t *dtable, hsize_t off, unsigned *row, uns
     /*
      * Check arguments.
      */
-    HDassert(dtable);
-    HDassert(row);
-    HDassert(col);
+    assert(dtable);
+    assert(row);
+    assert(col);
 
     /* Check for offset in first row */
     if (off < dtable->num_id_first_row) {
@@ -188,7 +188,7 @@ H5HF__dtable_dest(H5HF_dtable_t *dtable)
     /*
      * Check arguments.
      */
-    HDassert(dtable);
+    assert(dtable);
 
     /* Free the block size lookup table for the doubling table */
     H5MM_xfree(dtable->row_block_size);
@@ -227,7 +227,7 @@ H5HF__dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
     /*
      * Check arguments.
      */
-    HDassert(dtable);
+    assert(dtable);
 
     if (block_size == dtable->cparam.start_block_size)
         row = 0;
@@ -261,7 +261,7 @@ H5HF__dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
     /*
      * Check arguments.
      */
-    HDassert(dtable);
+    assert(dtable);
 
     rows = (H5VM_log2_gen(size) - dtable->first_row_bits) + 1;
 
@@ -295,8 +295,8 @@ H5HF__dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row, unsigned
     /*
      * Check arguments.
      */
-    HDassert(dtable);
-    HDassert(num_entries > 0);
+    assert(dtable);
+    assert(num_entries > 0);
 
     /* Compute starting entry */
     start_entry = (start_row * dtable->cparam.width) + start_col;

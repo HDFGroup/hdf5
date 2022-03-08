@@ -59,8 +59,8 @@ H5UC_create(void *o, H5UC_free_func_t free_func)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
-    HDassert(o);
-    HDassert(free_func);
+    assert(o);
+    assert(free_func);
 
     /* Allocate ref-counted string structure */
     if (NULL == (ret_value = H5FL_MALLOC(H5UC_t)))
@@ -102,10 +102,10 @@ H5UC_decr(H5UC_t *rc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(rc);
-    HDassert(rc->o);
-    HDassert(rc->n > 0);
-    HDassert(rc->free_func);
+    assert(rc);
+    assert(rc->o);
+    assert(rc->n > 0);
+    assert(rc->free_func);
 
     /* Decrement reference count */
     rc->n--;

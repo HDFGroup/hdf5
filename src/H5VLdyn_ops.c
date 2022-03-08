@@ -192,8 +192,8 @@ H5VL__register_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *o
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(op_val);
-    HDassert(op_name && *op_name);
+    assert(op_val);
+    assert(op_name && *op_name);
 
     /* Check for duplicate operation */
     if (H5VL_opt_ops_g[subcls]) {
@@ -267,8 +267,8 @@ H5VL__find_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_va
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(op_val);
-    HDassert(op_name && *op_name);
+    assert(op_val);
+    assert(op_name && *op_name);
 
     /* Check for dynamic operations in the VOL subclass */
     if (H5VL_opt_ops_g[subcls]) {
@@ -306,7 +306,7 @@ H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(op_name && *op_name);
+    assert(op_name && *op_name);
 
     /* Check for dynamic operations in the VOL subclass */
     if (H5VL_opt_ops_g[subcls]) {

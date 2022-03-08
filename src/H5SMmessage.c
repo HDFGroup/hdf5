@@ -91,7 +91,7 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
         udata->ret = -1;
     else
         /* Sizes are the same.  Return result of memcmp */
-        udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
+        udata->ret = memcmp(udata->key->encoding, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__compare_cb() */
@@ -124,16 +124,16 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     /*
      * Check arguments.
      */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(udata && udata->key);
+    assert(oh);
+    assert(mesg);
+    assert(udata && udata->key);
 
     /* Check the creation index for this message */
     if (sequence == udata->idx) {
         size_t aligned_encoded_size = H5O_ALIGN_OH(oh, udata->key->encoding_size);
 
         /* Sanity check the message's length */
-        HDassert(mesg->raw_size > 0);
+        assert(mesg->raw_size > 0);
 
         if (aligned_encoded_size > mesg->raw_size)
             udata->ret = 1;
@@ -146,8 +146,8 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, H5_ITER_ERROR,
                                 "unable to encode object header message")
 
-            HDassert(udata->key->encoding_size <= mesg->raw_size);
-            udata->ret = HDmemcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
+            assert(udata->key->encoding_size <= mesg->raw_size);
+            udata->ret = memcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
         } /* end else */
 
         /* Indicate that we found the message we were looking for */
@@ -216,8 +216,8 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
          */
         H5SM_compare_udata_t udata;
 
-        HDassert(key->message.hash == mesg->hash);
-        HDassert(key->encoding_size > 0 && key->encoding);
+        assert(key->message.hash == mesg->hash);
+        assert(key->encoding_size > 0 && key->encoding);
 
         /* Set up user data for callback */
         udata.key = key;
@@ -235,8 +235,8 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
             H5O_mesg_operator_t op;   /* Message operator */
 
             /* Sanity checks */
-            HDassert(key->file);
-            HDassert(mesg->location == H5SM_IN_OH);
+            assert(key->file);
+            assert(mesg->location == H5SM_IN_OH);
 
             /* Reset the object location */
             if (H5O_loc_reset(&oloc) < 0)
@@ -285,7 +285,7 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     *raw++ = (uint8_t)message->location;
     UINT32ENCODE(raw, message->hash);
@@ -295,7 +295,7 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
         H5MM_memcpy(raw, message->u.heap_loc.fheap_id.id, (size_t)H5O_FHEAP_ID_LEN);
     } /* end if */
     else {
-        HDassert(message->location == H5SM_IN_OH);
+        assert(message->location == H5SM_IN_OH);
 
         *raw++ = 0; /* reserved (possible flags byte) */
         *raw++ = (uint8_t)message->msg_type_id;
@@ -335,7 +335,7 @@ H5SM__message_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
         H5MM_memcpy(message->u.heap_loc.fheap_id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
     } /* end if */
     else {
-        HDassert(message->location == H5SM_IN_OH);
+        assert(message->location == H5SM_IN_OH);
 
         raw++; /* reserved */
         message->msg_type_id = *raw++;

@@ -111,7 +111,7 @@ H5EA__hdr_alloc(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
+    assert(f);
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5EA_hdr_t)))
@@ -184,10 +184,10 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->cparam.max_nelmts_bits);
-    HDassert(hdr->cparam.data_blk_min_elmts);
-    HDassert(hdr->cparam.sup_blk_min_data_ptrs);
+    assert(hdr);
+    assert(hdr->cparam.max_nelmts_bits);
+    assert(hdr->cparam.data_blk_min_elmts);
+    assert(hdr->cparam.sup_blk_min_data_ptrs);
 
     /* Compute general information */
     hdr->nsblks           = 1 + (hdr->cparam.max_nelmts_bits - H5VM_log2_of2(hdr->cparam.data_blk_min_elmts));
@@ -248,8 +248,8 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
-    HDassert(nelmts > 0);
+    assert(hdr);
+    assert(nelmts > 0);
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/ size_t, /*To:*/ uint32_t);
@@ -267,7 +267,7 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts)
                         "memory allocation failed for data block data element buffer factory array")
 
         /* Zero out new elements allocated */
-        HDmemset(new_fac + hdr->elmt_fac.nalloc, 0,
+        memset(new_fac + hdr->elmt_fac.nalloc, 0,
                  (new_nalloc - hdr->elmt_fac.nalloc) * sizeof(H5FL_fac_head_ptr_t));
 
         /* Update information about element factories in header */
@@ -317,17 +317,17 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(hdr);
-    HDassert(nelmts > 0);
-    HDassert(elmts);
+    assert(hdr);
+    assert(nelmts > 0);
+    assert(elmts);
 
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/ size_t, /*To:*/ uint32_t);
     idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
 
     /* Free buffer for elements in index block */
-    HDassert(idx < hdr->elmt_fac.nalloc);
-    HDassert(hdr->elmt_fac.fac[idx]);
+    assert(idx < hdr->elmt_fac.nalloc);
+    assert(hdr->elmt_fac.fac[idx]);
     elmts = H5FL_FAC_FREE(hdr->elmt_fac.fac[idx], elmts);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -356,8 +356,8 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
 #ifndef NDEBUG
     {
@@ -485,7 +485,7 @@ H5EA__hdr_incr(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as un-evictable when something is depending on it */
     if (hdr->rc == 0)
@@ -519,15 +519,15 @@ H5EA__hdr_decr(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->rc);
+    assert(hdr);
+    assert(hdr->rc);
 
     /* Decrement reference count on shared header */
     hdr->rc--;
 
     /* Mark header as evictable again when nothing depend on it */
     if (hdr->rc == 0) {
-        HDassert(hdr->file_rc == 0);
+        assert(hdr->file_rc == 0);
         if (H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPIN, FAIL, "unable to unpin extensible array header")
     }
@@ -554,7 +554,7 @@ H5EA__hdr_fuse_incr(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Increment file reference count on shared header */
     hdr->file_rc++;
@@ -583,8 +583,8 @@ H5EA__hdr_fuse_decr(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->file_rc);
+    assert(hdr);
+    assert(hdr->file_rc);
 
     /* Decrement file reference count on shared header */
     hdr->file_rc--;
@@ -615,8 +615,8 @@ H5EA__hdr_modified(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->f);
+    assert(hdr);
+    assert(hdr->f);
 
     /* Mark header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
@@ -648,11 +648,11 @@ H5EA__hdr_protect(H5F_t *f, haddr_t ea_addr, void *ctx_udata, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_addr_defined(ea_addr));
+    assert(f);
+    assert(H5F_addr_defined(ea_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data for cache callbacks */
     udata.f         = f;
@@ -704,7 +704,7 @@ H5EA__hdr_unprotect(H5EA_hdr_t *hdr, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
@@ -736,8 +736,8 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(!hdr->file_rc);
+    assert(hdr);
+    assert(!hdr->file_rc);
 
 #ifndef NDEBUG
     unsigned hdr_status = 0; /* Array header's status in the metadata cache */
@@ -747,8 +747,8 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "unable to check metadata cache status for array header")
 
     /* Sanity checks on array header */
-    HDassert(hdr_status & H5AC_ES__IN_CACHE);
-    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+    assert(hdr_status & H5AC_ES__IN_CACHE);
+    assert(hdr_status & H5AC_ES__IS_PROTECTED);
 #endif /* NDEBUG */
 
     /* Check for index block */
@@ -790,8 +790,8 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
-    HDassert(hdr->rc == 0);
+    assert(hdr);
+    assert(hdr->rc == 0);
 
     /* Destroy the callback context */
     if (hdr->cb_ctx) {
@@ -806,7 +806,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
         unsigned u; /* Local index variable */
 
         /* Sanity check */
-        HDassert(hdr->elmt_fac.nalloc > 0);
+        assert(hdr->elmt_fac.nalloc > 0);
 
         /* Iterate over factories, shutting them down */
         for (u = 0; u < hdr->elmt_fac.nalloc; u++) {

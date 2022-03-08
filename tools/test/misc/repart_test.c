@@ -143,10 +143,10 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    printf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    exit(EXIT_FAILURE);
 } /* end main() */

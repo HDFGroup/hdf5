@@ -63,8 +63,8 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 #define LOGPRINT(lvl, ...)                                                                                   \
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
-            HDfprintf(g_log_stream, __VA_ARGS__);                                                            \
-            HDfflush(g_log_stream);                                                                          \
+            fprintf(g_log_stream, __VA_ARGS__);                                                            \
+            fflush(g_log_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -117,7 +117,7 @@ mybzero(void *dest, size_t size)
 {
     size_t i = 0;
     char * s = NULL;
-    HDassert(dest != NULL);
+    assert(dest != NULL);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
         *(s + i) = 0;
@@ -149,8 +149,8 @@ _populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, ch
         TEST_ERROR;
     }
 
-    if (HDsnprintf(_path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
-                   (dirname[HDstrlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
+    if (snprintf(_path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
+                   (dirname[strlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
                    _basename) > H5FD_SPLITTER_PATH_MAX) {
         TEST_ERROR;
     }
@@ -200,7 +200,7 @@ build_paths(const char *_basename, H5FD_splitter_vfd_config_t *splitter_config,
 
     if (_basename == NULL || *_basename == 0)
         return FAIL;
-    if (HDsnprintf(baselogname, H5FD_SPLITTER_PATH_MAX, "%s_err.log", _basename) > H5FD_SPLITTER_PATH_MAX) {
+    if (snprintf(baselogname, H5FD_SPLITTER_PATH_MAX, "%s_err.log", _basename) > H5FD_SPLITTER_PATH_MAX) {
         TEST_ERROR;
     }
 
@@ -262,7 +262,7 @@ test_fapl_configuration(void)
     if (SERVER_HANDSHAKE_PORT != fa_out.handshake_port) {
         TEST_ERROR;
     }
-    if (HDstrncmp(SERVER_IP_ADDRESS, (const char *)fa_out.remote_ip, H5FD_MIRROR_MAX_IP_LEN)) {
+    if (strncmp(SERVER_IP_ADDRESS, (const char *)fa_out.remote_ip, H5FD_MIRROR_MAX_IP_LEN)) {
         TEST_ERROR;
     }
 
@@ -288,16 +288,16 @@ error:
         }                                                                                                    \
         if (_x != (len)) {                                                                                   \
             size_t _y = 0;                                                                                   \
-            HDprintf("First bytes differ at %zu\n", _x);                                                     \
-            HDprintf("exp  ");                                                                               \
+            printf("First bytes differ at %zu\n", _x);                                                     \
+            printf("exp  ");                                                                               \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                HDprintf("%02X", (unsigned char)(exp)[_y]);                                                  \
+                printf("%02X", (unsigned char)(exp)[_y]);                                                  \
             }                                                                                                \
-            HDprintf("\nact  ");                                                                             \
+            printf("\nact  ");                                                                             \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                HDprintf("%02X", (unsigned char)(act)[_y]);                                                  \
+                printf("%02X", (unsigned char)(act)[_y]);                                                  \
             }                                                                                                \
-            HDprintf("\n");                                                                                  \
+            printf("\n");                                                                                  \
         }                                                                                                    \
     } while (0); /* end PRINT_BUFFER_DIFF */
 
@@ -347,7 +347,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint8(buf, v) != 1) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -367,7 +367,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint8((buf + 3), v) != 1) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -387,7 +387,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint8((buf + 7), v) != 1) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -418,7 +418,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint16(buf, v) != 2) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -439,7 +439,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint16((buf + 3), v) != 2) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -467,7 +467,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint16((buf + 6), v) != 2) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -500,7 +500,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint32(buf, v) != 4) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -523,7 +523,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint32((buf + 3), v) != 4) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -553,7 +553,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint32((buf + 4), v) != 4) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 8) != 0) {
+        if (memcmp(buf, expected, 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 8);
             TEST_ERROR;
         }
@@ -590,7 +590,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint64(buf, v) != 8) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 16) != 0) {
+        if (memcmp(buf, expected, 16) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 16);
             TEST_ERROR;
         }
@@ -617,7 +617,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint64((buf + 3), v) != 8) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 16) != 0) {
+        if (memcmp(buf, expected, 16) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 16);
             TEST_ERROR;
         }
@@ -651,7 +651,7 @@ test_xmit_encode_decode(void)
         if (H5FD__mirror_xmit_encode_uint64((buf + 8), v) != 8) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, 16) != 0) {
+        if (memcmp(buf, expected, 16) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, 16);
             TEST_ERROR;
         }
@@ -682,7 +682,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_HEADER_SIZE; i++) {
             expected[i + 2] = (unsigned char)i;
         }
@@ -690,11 +690,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
         if (H5FD_mirror_xmit_encode_header((buf + 2), &xmit_mock) != H5FD_MIRROR_XMIT_HEADER_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_HEADER_SIZE + 8);
             TEST_ERROR;
         }
@@ -756,7 +756,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_EOA_SIZE; i++) {
             expected[i + 2] = (unsigned char)i;
         }
@@ -770,11 +770,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
         if (H5FD_mirror_xmit_encode_set_eoa((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_EOA_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_EOA_SIZE + 8);
             TEST_ERROR;
         }
@@ -844,7 +844,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_LOCK_SIZE; i++) {
             expected[i + 2] = (unsigned char)i;
         }
@@ -857,11 +857,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
         if (H5FD_mirror_xmit_encode_lock((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_LOCK_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_LOCK_SIZE + 8);
             TEST_ERROR;
         }
@@ -930,7 +930,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_OPEN_SIZE; i++) {
             /* 0x100 is "zero" in a byte, so encode will treat it as a NULL-
              * terminator in the filepath string. Expect all zeroes following.
@@ -953,11 +953,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
         if (H5FD_mirror_xmit_encode_open((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_OPEN_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_OPEN_SIZE + 8);
             TEST_ERROR;
         }
@@ -983,7 +983,7 @@ test_xmit_encode_decode(void)
             TEST_ERROR;
         if (xmit_out.size_t_blob != xmit_in.size_t_blob)
             TEST_ERROR;
-        if (HDstrncmp(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
+        if (strncmp(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
             PRINT_BUFFER_DIFF(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
             TEST_ERROR;
         }
@@ -1014,7 +1014,7 @@ test_xmit_encode_decode(void)
         for (i = 0x20; i < H5FD_MIRROR_XMIT_FILEPATH_MAX + 0x20; i++) {
             xmit_in.filename[i - 0x20] = (i > 0xFF) ? 0 : (char)i;
         }
-        if (HDstrncmp(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
+        if (strncmp(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
             PRINT_BUFFER_DIFF(xmit_out.filename, xmit_in.filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
             TEST_ERROR;
         }
@@ -1046,7 +1046,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_REPLY_SIZE; i++) {
             /* 0x100 is "zero" in a byte, so encode will treat it as a NULL-
              * terminator in the filepath string. Expect all zeroes following.
@@ -1067,11 +1067,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
         if (H5FD_mirror_xmit_encode_reply((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_REPLY_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_REPLY_SIZE + 8);
             TEST_ERROR;
         }
@@ -1093,7 +1093,7 @@ test_xmit_encode_decode(void)
             TEST_ERROR;
         if (xmit_out.status != xmit_in.status)
             TEST_ERROR;
-        if (HDstrncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
+        if (strncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
             PRINT_BUFFER_DIFF(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
             TEST_ERROR;
         }
@@ -1120,7 +1120,7 @@ test_xmit_encode_decode(void)
         for (i = 0x10; i < H5FD_MIRROR_STATUS_MESSAGE_MAX + 0x10; i++) {
             xmit_in.message[i - 0x10] = (i > 0xFF) ? 0 : (char)i;
         }
-        if (HDstrncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
+        if (strncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
             PRINT_BUFFER_DIFF(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
             TEST_ERROR;
         }
@@ -1149,7 +1149,7 @@ test_xmit_encode_decode(void)
 
         /* Populate the expected buffer; expect end padding of 0xFF
          */
-        HDmemset(expected, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
+        memset(expected, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
         for (i = 0; i < H5FD_MIRROR_XMIT_WRITE_SIZE; i++) {
             expected[i + 2] = (unsigned char)i;
         }
@@ -1164,11 +1164,11 @@ test_xmit_encode_decode(void)
         /* Encode, and compare buffer contents
          * Initial buffer is filled with 0xFF to match expected padding
          */
-        HDmemset(buf, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
+        memset(buf, 0xFF, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
         if (H5FD_mirror_xmit_encode_write((buf + 2), &xmit_in) != H5FD_MIRROR_XMIT_WRITE_SIZE) {
             TEST_ERROR;
         }
-        if (HDmemcmp(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8) != 0) {
+        if (memcmp(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8) != 0) {
             PRINT_BUFFER_DIFF(buf, expected, H5FD_MIRROR_XMIT_WRITE_SIZE + 8);
             TEST_ERROR;
         }
@@ -1275,7 +1275,7 @@ create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *
     mirror_conf.magic          = H5FD_MIRROR_FAPL_MAGIC;
     mirror_conf.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
     mirror_conf.handshake_port = SERVER_HANDSHAKE_PORT;
-    if (HDstrncpy(mirror_conf.remote_ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN) == NULL) {
+    if (strncpy(mirror_conf.remote_ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN) == NULL) {
         TEST_ERROR;
     }
     splitter_config.wo_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1294,10 +1294,10 @@ create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *
 
     /* Set file paths for w/o and logfile
      */
-    if (HDstrncpy(splitter_config.wo_path, (const char *)names->wo, H5FD_SPLITTER_PATH_MAX) == NULL) {
+    if (strncpy(splitter_config.wo_path, (const char *)names->wo, H5FD_SPLITTER_PATH_MAX) == NULL) {
         TEST_ERROR;
     }
-    if (HDstrncpy(splitter_config.log_file_path, (const char *)names->log, H5FD_SPLITTER_PATH_MAX) == NULL) {
+    if (strncpy(splitter_config.log_file_path, (const char *)names->log, H5FD_SPLITTER_PATH_MAX) == NULL) {
         TEST_ERROR;
     }
 
@@ -1431,9 +1431,9 @@ create_datasets(hid_t file_id, unsigned min_dset, unsigned max_dset)
     hsize_t      chunk_dims[2] = {CHUNK_DIM, CHUNK_DIM};
     hsize_t      dset_dims[2]  = {DSET_DIM, DSET_DIM};
 
-    HDassert(file_id >= 0);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset <= MAX_DSET_COUNT);
+    assert(file_id >= 0);
+    assert(min_dset <= max_dset);
+    assert(max_dset <= MAX_DSET_COUNT);
 
     LOGPRINT(2, "create_dataset()\n");
 
@@ -1558,7 +1558,7 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
     for (m = min_dset; m <= max_dset; m++) {
         dataspace_ids[m] = H5Screate_simple(2, dset_dims, NULL);
         if (dataspace_ids[m] < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create dataspace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create dataspace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1568,15 +1568,15 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
      */
 
     for (m = min_dset; m <= max_dset; m++) {
-        if (HDsnprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
+        if (snprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
 
         dataset_ids[m] =
             H5Dcreate(file_id, dset_name, H5T_STD_I32BE, dataspace_ids[m], H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dataset_ids[m] < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create dset ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create dset ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1588,7 +1588,7 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
     for (m = min_dset; m <= max_dset; m++) {
         filespace_ids[m] = H5Dget_space(dataset_ids[m]);
         if (filespace_ids[m] < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create filespace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create filespace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1647,14 +1647,14 @@ _open_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_t 
      */
 
     for (m = min_dset; m <= max_dset; m++) {
-        if (HDsnprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
+        if (snprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
 
         dataset_ids[m] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
         if (dataset_ids[m] < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to open dset ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to open dset ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1666,7 +1666,7 @@ _open_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_t 
     for (m = min_dset; m <= max_dset; m++) {
         filespace_ids[m] = H5Dget_space(dataset_ids[m]);
         if (filespace_ids[m] < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to get filespace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to get filespace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1712,16 +1712,16 @@ _close_chunking_ids(unsigned min_dset, unsigned max_dset, hid_t *dataspace_ids, 
         LOGPRINT(3, "closing ids[%d]\n", m);
         if (dataspace_ids) {
             if (H5Sclose(dataspace_ids[m]) < 0) {
-                HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close dataspace_id[%d]\n", m);
+                snprintf(mesg, MIRR_MESG_SIZE, "unable to close dataspace_id[%d]\n", m);
                 FAIL_PUTS_ERROR(mesg);
             }
         }
         if (H5Dclose(dataset_ids[m]) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close dataset_id[%d]\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to close dataset_id[%d]\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
         if (H5Sclose(filespace_ids[m]) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close filespace_id[%d]\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to close filespace_id[%d]\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1776,7 +1776,7 @@ _verify_datasets(unsigned min_dset, unsigned max_dset, hid_t *filespace_ids, hid
 
                 if (H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id, filespace_ids[m], H5P_DEFAULT,
                             data_chunk) < 0) {
-                    HDsnprintf(mesg, MIRR_MESG_SIZE, "      H5Dread() [%d][%d][%d]\n", i, j, m);
+                    snprintf(mesg, MIRR_MESG_SIZE, "      H5Dread() [%d][%d][%d]\n", i, j, m);
                     FAIL_PUTS_ERROR(mesg);
                 }
 
@@ -1784,7 +1784,7 @@ _verify_datasets(unsigned min_dset, unsigned max_dset, hid_t *filespace_ids, hid
                     for (l = 0; l < CHUNK_DIM; l++) {
                         if ((unsigned)data_chunk[k][l] !=
                             ((DSET_DIM * DSET_DIM * m) + (DSET_DIM * (i + k)) + j + l)) {
-                            HDsnprintf(mesg, MIRR_MESG_SIZE, "      MISMATCH [%d][%d][%d][%d][%d]\n", i, j, m,
+                            snprintf(mesg, MIRR_MESG_SIZE, "      MISMATCH [%d][%d][%d][%d][%d]\n", i, j, m,
                                        k, l);
                             FAIL_PUTS_ERROR(mesg);
                         }
@@ -1823,9 +1823,9 @@ verify_datasets(hid_t file_id, unsigned min_dset, unsigned max_dset)
     hid_t    memspace_id   = H5I_INVALID_HID;
     hsize_t  chunk_dims[2] = {CHUNK_DIM, CHUNK_DIM};
 
-    HDassert(file_id >= 0);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset <= MAX_DSET_COUNT);
+    assert(file_id >= 0);
+    assert(min_dset <= max_dset);
+    assert(max_dset <= MAX_DSET_COUNT);
 
     LOGPRINT(2, "verify_datasets()\n");
 
@@ -1913,7 +1913,7 @@ test_basic_dataset_write(void)
 
     /* Prepare data to be written
      */
-    buf = (int *)HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int));
+    buf = (int *)malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int));
     if (NULL == buf) {
         TEST_ERROR;
     }
@@ -1960,7 +1960,7 @@ test_basic_dataset_write(void)
     /* -------------------- */
     /* Standard cleanup */
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Dclose(dset_id) == FAIL) {
         TEST_ERROR;
@@ -1992,7 +1992,7 @@ error:
     {
         (void)H5Fclose(file_id);
         if (buf) {
-            HDfree(buf);
+            free(buf);
         }
         (void)H5Dclose(dset_id);
         (void)H5Sclose(dspace_id);
@@ -2184,7 +2184,7 @@ test_on_disk_zoo(void)
         validate_zoo(file_id, grp_name, 0); /* sanity-check */
     }
     if (!pass) {
-        HDprintf(failure_mssg);
+        printf(failure_mssg);
         TEST_ERROR;
     }
 
@@ -2290,7 +2290,7 @@ test_vanishing_datasets(void)
 
         /* deleting datasets */
         if (i >= max_at_one_time) {
-            if (HDsnprintf(namebuf, DSET_NAME_LEN, "/dset%02d", (i - max_at_one_time)) > DSET_NAME_LEN) {
+            if (snprintf(namebuf, DSET_NAME_LEN, "/dset%02d", (i - max_at_one_time)) > DSET_NAME_LEN) {
                 TEST_ERROR;
             }
             if (H5Ldelete(file_id, namebuf, H5P_DEFAULT) < 0) {
@@ -2300,7 +2300,7 @@ test_vanishing_datasets(void)
 
         /* writing datasets */
         if (i < (max_loops - max_at_one_time)) {
-            if (HDsnprintf(namebuf, DSET_NAME_LEN, "/dset%02d", i) > DSET_NAME_LEN) {
+            if (snprintf(namebuf, DSET_NAME_LEN, "/dset%02d", i) > DSET_NAME_LEN) {
                 TEST_ERROR;
             }
             dset_id =
@@ -2341,8 +2341,8 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in rw file: %" PRIuHSIZE "\n", group_info.nlinks);
-        HDfflush(stderr);
+        fprintf(stderr, "links in rw file: %" PRIuHSIZE "\n", group_info.nlinks);
+        fflush(stderr);
         TEST_ERROR;
     }
     if (H5Fclose(file_id) < 0) {
@@ -2356,8 +2356,8 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in wo file: %" PRIuHSIZE "\n", group_info.nlinks);
-        HDfflush(stderr);
+        fprintf(stderr, "links in wo file: %" PRIuHSIZE "\n", group_info.nlinks);
+        fflush(stderr);
         TEST_ERROR;
     }
     if (H5Fclose(file_id) < 0) {
@@ -2451,7 +2451,7 @@ test_concurrent_access(void)
     for (i = 0; i < CONCURRENT_COUNT; i++) {
         char  _name[16] = "";
         hid_t _fapl_id  = H5I_INVALID_HID;
-        HDsnprintf(_name, 15, "concurrent%d", i);
+        snprintf(_name, 15, "concurrent%d", i);
         _fapl_id = create_mirroring_split_fapl(_name, &bundle[i].names);
         if (H5I_INVALID_HID == _fapl_id) {
             TEST_ERROR;
@@ -2461,7 +2461,7 @@ test_concurrent_access(void)
 
     /* Prepare data to be written
      */
-    buf = (int *)HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int));
+    buf = (int *)malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int));
     if (NULL == buf) {
         TEST_ERROR;
     }
@@ -2528,7 +2528,7 @@ test_concurrent_access(void)
     /* -------------------- */
     /* Standard cleanup */
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Sclose(dspace_id) == FAIL) {
         TEST_ERROR;
@@ -2550,7 +2550,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (buf) {
-            HDfree(buf);
+            free(buf);
         }
         (void)H5Sclose(dspace_id);
         for (i = 0; i < CONCURRENT_COUNT; i++) {
@@ -2584,7 +2584,7 @@ main(void)
 
     g_log_stream = stdout; /* default debug/logging output stream */
 
-    HDprintf("Testing Mirror VFD functionality.\n");
+    printf("Testing Mirror VFD functionality.\n");
 
     /* -------------------- */
     /* SETUP */
@@ -2618,11 +2618,11 @@ main(void)
     }
 
     if (nerrors) {
-        HDprintf("***** %d Mirror VFD TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Mirror VFD TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
     }
 
-    HDprintf("All Mirror Virtual File Driver tests passed.\n");
+    printf("All Mirror Virtual File Driver tests passed.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 
@@ -2632,8 +2632,8 @@ int
 main(void)
 {
     h5_reset();
-    HDprintf("Testing Mirror VFD functionality.\n");
-    HDprintf("SKIPPED - Mirror VFD not built.\n");
+    printf("Testing Mirror VFD functionality.\n");
+    printf("SKIPPED - Mirror VFD not built.\n");
     return EXIT_SUCCESS;
 }
 

@@ -275,21 +275,21 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
     H5TOOLS_DEBUG("obj_names: %s - %s", obj1_name, obj2_name);
     opts->obj_name[0] = NULL;
     if (obj1_name) {
-        j = (int)HDstrlen(obj1_name);
+        j = (int)strlen(obj1_name);
         H5TOOLS_DEBUG("obj1_name: %s - %d", obj1_name, j);
         if (j > 0) {
-            opts->obj_name[0] = (char *)HDmalloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[0], obj1_name, (size_t)j + 1);
+            opts->obj_name[0] = (char *)malloc((size_t)j + 1);
+            strncpy(opts->obj_name[0], obj1_name, (size_t)j + 1);
         }
     }
 
     opts->obj_name[1] = NULL;
     if (obj2_name) {
-        j = (int)HDstrlen(obj2_name);
+        j = (int)strlen(obj2_name);
         H5TOOLS_DEBUG("obj2_name: %s - %d", obj2_name, j);
         if (j > 0) {
-            opts->obj_name[1] = (char *)HDmalloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[1], obj2_name, (size_t)j + 1);
+            opts->obj_name[1] = (char *)malloc((size_t)j + 1);
+            strncpy(opts->obj_name[1], obj2_name, (size_t)j + 1);
         }
     }
 
@@ -425,10 +425,10 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
         H5TOOLS_DEBUG("obj_names: %s - %s", obj1_name, obj2_name);
 
         if (opts->obj_name[0] != NULL)
-            HDfree(opts->obj_name[0]);
+            free(opts->obj_name[0]);
         opts->obj_name[0] = NULL;
         if (opts->obj_name[1] != NULL)
-            HDfree(opts->obj_name[1]);
+            free(opts->obj_name[1]);
         opts->obj_name[1] = NULL;
 
         if (obj1_name)
@@ -443,8 +443,8 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
          *-----------------------------------------------------------------
          */
         if (need < H5TOOLS_MALLOCSIZE) {
-            buf1 = HDmalloc(need);
-            buf2 = HDmalloc(need);
+            buf1 = malloc(need);
+            buf2 = malloc(need);
         } /* end if */
 
         /* Assume entire data space to be printed */
@@ -479,11 +479,11 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
             if (vl_data2)
                 H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
             if (buf1 != NULL) {
-                HDfree(buf1);
+                free(buf1);
                 buf1 = NULL;
             }
             if (buf2 != NULL) {
-                HDfree(buf2);
+                free(buf2);
                 buf2 = NULL;
             }
         }                   /* end if */
@@ -521,29 +521,29 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                 /* reclaim any VL memory, if necessary */
                 if (vl_data1)
                     H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
-                HDfree(buf1);
+                free(buf1);
                 buf1 = NULL;
             }
             if (buf2 != NULL) {
                 /* reclaim any VL memory, if necessary */
                 if (vl_data2)
                     H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
-                HDfree(buf2);
+                free(buf2);
                 buf2 = NULL;
             }
 
             /* the stripmine loop */
-            HDmemset(hs_offset1, 0, sizeof hs_offset1);
-            HDmemset(hs_stride1, 0, sizeof hs_stride1);
-            HDmemset(hs_count1, 0, sizeof hs_count1);
-            HDmemset(hs_block1, 0, sizeof hs_block1);
-            HDmemset(hs_size1, 0, sizeof hs_size1);
-            HDmemset(hs_offset2, 0, sizeof hs_offset2);
-            HDmemset(hs_stride2, 0, sizeof hs_stride2);
-            HDmemset(hs_count2, 0, sizeof hs_count2);
-            HDmemset(hs_block2, 0, sizeof hs_block2);
-            HDmemset(hs_size2, 0, sizeof hs_size2);
-            HDmemset(zero, 0, sizeof zero);
+            memset(hs_offset1, 0, sizeof hs_offset1);
+            memset(hs_stride1, 0, sizeof hs_stride1);
+            memset(hs_count1, 0, sizeof hs_count1);
+            memset(hs_block1, 0, sizeof hs_block1);
+            memset(hs_size1, 0, sizeof hs_size1);
+            memset(hs_offset2, 0, sizeof hs_offset2);
+            memset(hs_stride2, 0, sizeof hs_stride2);
+            memset(hs_count2, 0, sizeof hs_count2);
+            memset(hs_block2, 0, sizeof hs_block2);
+            memset(hs_size2, 0, sizeof hs_size2);
+            memset(zero, 0, sizeof zero);
 
             /* if subsetting was requested - initialize the subsetting variables */
             H5TOOLS_DEBUG("compare by hyperslabs: opts->nelmts=%ld - opts->m_size=%ld", opts->nelmts,
@@ -558,26 +558,26 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                      * dimensions */
                     if (!opts->sset[0]->start.data) {
                         /* default to (0, 0, ...) for the start coord */
-                        opts->sset[0]->start.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                        opts->sset[0]->start.data = (hsize_t *)calloc((size_t)rank1, sizeof(hsize_t));
                         opts->sset[0]->start.len  = (unsigned)rank1;
                     }
 
                     if (!opts->sset[0]->stride.data) {
-                        opts->sset[0]->stride.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                        opts->sset[0]->stride.data = (hsize_t *)calloc((size_t)rank1, sizeof(hsize_t));
                         opts->sset[0]->stride.len  = (unsigned)rank1;
                         for (i = 0; i < rank1; i++)
                             opts->sset[0]->stride.data[i] = 1;
                     }
 
                     if (!opts->sset[0]->count.data) {
-                        opts->sset[0]->count.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                        opts->sset[0]->count.data = (hsize_t *)calloc((size_t)rank1, sizeof(hsize_t));
                         opts->sset[0]->count.len  = (unsigned)rank1;
                         for (i = 0; i < rank1; i++)
                             opts->sset[0]->count.data[i] = 1;
                     }
 
                     if (!opts->sset[0]->block.data) {
-                        opts->sset[0]->block.data = (hsize_t *)HDcalloc((size_t)rank1, sizeof(hsize_t));
+                        opts->sset[0]->block.data = (hsize_t *)calloc((size_t)rank1, sizeof(hsize_t));
                         opts->sset[0]->block.len  = (unsigned)rank1;
                         for (i = 0; i < rank1; i++)
                             opts->sset[0]->block.data[i] = 1;
@@ -619,26 +619,26 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                      * dimensions */
                     if (!opts->sset[1]->start.data) {
                         /* default to (0, 0, ...) for the start coord */
-                        opts->sset[1]->start.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                        opts->sset[1]->start.data = (hsize_t *)calloc((size_t)rank2, sizeof(hsize_t));
                         opts->sset[1]->start.len  = (unsigned)rank2;
                     }
 
                     if (!opts->sset[1]->stride.data) {
-                        opts->sset[1]->stride.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                        opts->sset[1]->stride.data = (hsize_t *)calloc((size_t)rank2, sizeof(hsize_t));
                         opts->sset[1]->stride.len  = (unsigned)rank2;
                         for (i = 0; i < rank2; i++)
                             opts->sset[1]->stride.data[i] = 1;
                     }
 
                     if (!opts->sset[1]->count.data) {
-                        opts->sset[1]->count.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                        opts->sset[1]->count.data = (hsize_t *)calloc((size_t)rank2, sizeof(hsize_t));
                         opts->sset[1]->count.len  = (unsigned)rank2;
                         for (i = 0; i < rank2; i++)
                             opts->sset[1]->count.data[i] = 1;
                     }
 
                     if (!opts->sset[1]->block.data) {
-                        opts->sset[1]->block.data = (hsize_t *)HDcalloc((size_t)rank2, sizeof(hsize_t));
+                        opts->sset[1]->block.data = (hsize_t *)calloc((size_t)rank2, sizeof(hsize_t));
                         opts->sset[1]->block.len  = (unsigned)rank2;
                         for (i = 0; i < rank2; i++)
                             opts->sset[1]->block.data[i] = 1;
@@ -697,9 +697,9 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
             for (elmtno = 0; elmtno < opts->nelmts; elmtno += opts->hs_nelmts) {
                 H5TOOLS_DEBUG("elmtno: %ld - hs_nelmts1: %ld", elmtno, hs_nelmts1);
 
-                if (NULL == (sm_buf1 = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
+                if (NULL == (sm_buf1 = (unsigned char *)malloc((size_t)sm_nbytes)))
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not allocate buffer for strip-mine");
-                if (NULL == (sm_buf2 = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
+                if (NULL == (sm_buf2 = (unsigned char *)malloc((size_t)sm_nbytes)))
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Could not allocate buffer for strip-mine");
 
                 /* calculate the hyperslab size */
@@ -810,14 +810,14 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                     /* reclaim any VL memory, if necessary */
                     if (vl_data1)
                         H5Treclaim(m_tid1, sm_space1, H5P_DEFAULT, sm_buf1);
-                    HDfree(sm_buf1);
+                    free(sm_buf1);
                     sm_buf1 = NULL;
                 }
                 if (sm_buf2 != NULL) {
                     /* reclaim any VL memory, if necessary */
                     if (vl_data2)
                         H5Treclaim(m_tid2, sm_space2, H5P_DEFAULT, sm_buf2);
-                    HDfree(sm_buf2);
+                    free(sm_buf2);
                     sm_buf2 = NULL;
                 }
 
@@ -879,10 +879,10 @@ done:
     H5TOOLS_DEBUG("free names - errstat:%d", opts->err_stat);
     /* free */
     if (opts->obj_name[0] != NULL)
-        HDfree(opts->obj_name[0]);
+        free(opts->obj_name[0]);
     opts->obj_name[0] = NULL;
     if (opts->obj_name[1] != NULL)
-        HDfree(opts->obj_name[1]);
+        free(opts->obj_name[1]);
     opts->obj_name[1] = NULL;
 
     H5TOOLS_DEBUG("reclaim any VL memory");
@@ -890,14 +890,14 @@ done:
         /* reclaim any VL memory, if necessary */
         if (vl_data1)
             H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
-        HDfree(buf1);
+        free(buf1);
         buf1 = NULL;
     }
     if (buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
         if (vl_data2)
             H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
-        HDfree(buf2);
+        free(buf2);
         buf2 = NULL;
     }
     H5TOOLS_DEBUG("reclaim any stripmine VL memory");
@@ -905,14 +905,14 @@ done:
         /* reclaim any VL memory, if necessary */
         if (vl_data1)
             H5Treclaim(m_tid1, sm_space1, H5P_DEFAULT, sm_buf1);
-        HDfree(sm_buf1);
+        free(sm_buf1);
         sm_buf1 = NULL;
     }
     if (sm_buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
         if (vl_data2)
             H5Treclaim(m_tid2, sm_space2, H5P_DEFAULT, sm_buf2);
-        HDfree(sm_buf2);
+        free(sm_buf2);
         sm_buf2 = NULL;
     }
 

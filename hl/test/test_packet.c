@@ -59,7 +59,7 @@ static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10
 static int
 cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf)
 {
-    if ((HDstrcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
+    if ((strcmp(rbuf[i].name, wbuf[j].name) != 0) || rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi || !H5_FLT_ABS_EQUAL(rbuf[i].pressure, wbuf[j].pressure) ||
         !H5_DBL_ABS_EQUAL(rbuf[i].temperature, wbuf[j].temperature)) {
         return FAIL;
@@ -169,7 +169,7 @@ test_create_close(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create the table */
     table = H5PTcreate_fl(fid, PT_NAME, part_t, (hsize_t)100, -1);
@@ -446,7 +446,7 @@ test_big_table(hid_t fid)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create a new table */
     table = H5PTcreate_fl(fid, "Packet Test Dataset2", part_t, (hsize_t)33, -1);
@@ -520,7 +520,7 @@ test_opaque(hid_t fid)
     if ((part_t = H5Tcreate(H5T_OPAQUE, sizeof(particle_t))) < 0)
         return FAIL;
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Tag the opaque datatype */
     if (H5Tset_tag(part_t, "Opaque Particle") < 0)
@@ -596,7 +596,7 @@ test_compress(void)
     /* Create a datatype for the particle struct */
     part_t = make_particle_type();
 
-    HDassert(part_t != -1);
+    assert(part_t != -1);
 
     /* Create a new table with compression level 8 */
     table = H5PTcreate_fl(fid1, "Compressed Test Dataset", part_t, (hsize_t)80, 8);
@@ -621,7 +621,7 @@ test_compress(void)
         TEST_ERROR;
 
     /* Read particles to ensure that all of them were written correctly  */
-    HDmemset(readPart, 0, sizeof(readPart));
+    memset(readPart, 0, sizeof(readPart));
     for (c = 0; c < BIG_TABLE_SIZE; c++) {
         err = H5PTget_next(table, (size_t)1, readPart);
         if (err < 0)
@@ -983,7 +983,7 @@ main(void)
     /* create a file using default properties */
     fid = H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    HDputs("Testing packet table");
+    puts("Testing packet table");
 
     /* Test packet table with fixed length */
     if (test_packet_table(fid) < 0)

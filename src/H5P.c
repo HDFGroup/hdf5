@@ -435,7 +435,7 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_p
         /* Substitute the new property class in the ID */
         if (NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
-        HDassert(old_pclass == orig_pclass);
+        assert(old_pclass == orig_pclass);
 
         /* Close the previous class */
         if (H5P__close_class(old_pclass) < 0)
@@ -1125,8 +1125,8 @@ H5P__iterate_cb(H5P_genprop_t *prop, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(prop);
-    HDassert(udata);
+    assert(prop);
+    assert(udata);
 
     /* Call the user's callback routine */
     ret_value = (*udata->iter_func)(udata->id, prop->name, udata->iter_data);

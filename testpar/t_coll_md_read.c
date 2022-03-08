@@ -94,7 +94,7 @@ test_partial_no_selection_coll_md_read(void)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    dataset_dims = HDmalloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
+    dataset_dims = malloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
     VRFY((dataset_dims != NULL), "malloc succeeded");
 
     dataset_dims[0]     = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_size;
@@ -140,7 +140,7 @@ test_partial_no_selection_coll_md_read(void)
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    data = HDcalloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+    data = calloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
                            sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
@@ -164,7 +164,7 @@ test_partial_no_selection_coll_md_read(void)
     VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    read_buf = HDmalloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+    read_buf = malloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
                         sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
@@ -186,24 +186,24 @@ test_partial_no_selection_coll_md_read(void)
      * Check data integrity just to be sure.
      */
     if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
-        VRFY((!HDmemcmp(data, read_buf,
+        VRFY((!memcmp(data, read_buf,
                         count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
                             sizeof(int))),
              "memcmp succeeded");
     }
 
     if (dataset_dims) {
-        HDfree(dataset_dims);
+        free(dataset_dims);
         dataset_dims = NULL;
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -314,13 +314,13 @@ test_multi_chunk_io_addrmap_issue(void)
 
     VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
 
-    read_buf = HDmalloc(50 * sizeof(int));
+    read_buf = malloc(50 * sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     VRFY((H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "H5Dread succeeded");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -464,7 +464,7 @@ test_link_chunk_io_sort_chunk_issue(void)
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    data = HDcalloc(1, count[0] * sizeof(int));
+    data = calloc(1, count[0] * sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -487,7 +487,7 @@ test_link_chunk_io_sort_chunk_issue(void)
     VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    read_buf = HDmalloc(count[0] * sizeof(int));
+    read_buf = malloc(count[0] * sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -507,12 +507,12 @@ test_link_chunk_io_sort_chunk_issue(void)
          "H5Dread succeeded");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 

@@ -227,7 +227,7 @@ test_file_create(void)
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
     /* First ensure the file does not exist */
-    HDremove(FILE1);
+    remove(FILE1);
 
     /* Try opening a non-existent file */
     fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -663,7 +663,7 @@ test_file_reopen(void)
     CHECK(ret, FAIL, "H5Fclose");
     ret = H5Fclose(rfid);
     CHECK(ret, FAIL, "H5Fclose");
-    HDremove(REOPEN_FILE);
+    remove(REOPEN_FILE);
 
 } /* test_file_reopen() */
 
@@ -1111,14 +1111,14 @@ test_get_obj_ids(void)
 
     /* creates NGROUPS groups under the root group */
     for (m = 0; m < NGROUPS; m++) {
-        HDsprintf(gname, "group%d", m);
+        sprintf(gname, "group%d", m);
         gid[m] = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(gid[m], FAIL, "H5Gcreate2");
     }
 
     /* create NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        sprintf(dname, "dataset%d", n);
         dset[n] = H5Dcreate2(fid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1128,8 +1128,8 @@ test_get_obj_ids(void)
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, (NGROUPS + NDSETS + 1), "H5Fget_obj_count");
 
-    oid_list = (hid_t *)HDcalloc((size_t)oid_list_size, sizeof(hid_t));
-    CHECK_PTR(oid_list, "HDcalloc");
+    oid_list = (hid_t *)calloc((size_t)oid_list_size, sizeof(hid_t));
+    CHECK_PTR(oid_list, "calloc");
 
     /* Call the public function H5F_get_obj_ids to use H5F__get_objects.  User reported having problem here.
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in
@@ -1169,7 +1169,7 @@ test_get_obj_ids(void)
     H5Sclose(filespace);
     H5Fclose(fid);
 
-    HDfree(oid_list);
+    free(oid_list);
 
     /* Reopen the file to check whether H5Fget_obj_count and H5Fget_obj_ids still works
      * when the file is closed first */
@@ -1178,7 +1178,7 @@ test_get_obj_ids(void)
 
     /* Open NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        sprintf(dname, "dataset%d", n);
         dset[n] = H5Dopen2(fid, dname, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1191,8 +1191,8 @@ test_get_obj_ids(void)
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
 
-    oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
-    CHECK_PTR(oid_list, "HDcalloc");
+    oid_list = (hid_t *)calloc((size_t)oid_count, sizeof(hid_t));
+    CHECK_PTR(oid_list, "calloc");
 
     /* Get the list of all opened objects */
     ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
@@ -1203,7 +1203,7 @@ test_get_obj_ids(void)
     for (n = 0; n < oid_count; n++)
         H5Oclose(oid_list[n]);
 
-    HDfree(oid_list);
+    free(oid_list);
 }
 
 /****************************************************************
@@ -1420,7 +1420,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
     if (oid_count > 0) {
         hid_t *oid_list;
 
-        oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
+        oid_list = (hid_t *)calloc((size_t)oid_count, sizeof(hid_t));
         if (oid_list != NULL) {
             int i;
 
@@ -1470,7 +1470,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
                 } /* end switch */
             }     /* end for */
 
-            HDfree(oid_list);
+            free(oid_list);
         } /* end if */
     }     /* end if */
 
@@ -1708,7 +1708,7 @@ test_file_is_accessible(const char *env_h5_drvr)
     /* This test is not currently working for the family VFD.
      * There are failures when creating files with userblocks.
      */
-    if (0 != HDstrcmp(env_h5_drvr, "family")) {
+    if (0 != strcmp(env_h5_drvr, "family")) {
         /* Create a file creation property list with a non-default user block size */
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
         CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
@@ -2002,8 +2002,8 @@ test_file_delete(hid_t fapl_id)
     VERIFY(ret, FAIL, "H5Fdelete");
 
     /* Delete the file */
-    iret = HDremove(filename);
-    VERIFY(iret, 0, "HDremove");
+    iret = remove(filename);
+    VERIFY(iret, 0, "remove");
 
 } /* end test_file_delete() */
 
@@ -2709,7 +2709,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(tid1, FAIL, "H5Tcopy");
 
     /* Second file's dataset read */
-    HDmemset(buffer, 0, sizeof(char *) * 5);
+    memset(buffer, 0, sizeof(char *) * 5);
     ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
     ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
@@ -2724,7 +2724,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* First file's dataset read */
-    HDmemset(buffer, 0, sizeof(char *) * 5);
+    memset(buffer, 0, sizeof(char *) * 5);
     ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
     ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
@@ -2919,8 +2919,8 @@ test_userblock_file_size(const char *env_h5_drvr)
     herr_t        ret;              /* Generic return value */
 
     /* Don't run with multi/split, family or direct drivers */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split") ||
-        !HDstrcmp(env_h5_drvr, "family") || !HDstrcmp(env_h5_drvr, "direct"))
+    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split") ||
+        !strcmp(env_h5_drvr, "family") || !strcmp(env_h5_drvr, "direct"))
         return;
 
     /* Output message about test being performed */
@@ -3095,19 +3095,19 @@ cal_chksum(const char *file, uint32_t *chksum)
     CHECK(fdes, FAIL, "HDfstat");
 
     /* Allocate space for the file data */
-    file_data = HDmalloc((size_t)sb.st_size);
-    CHECK_PTR(file_data, "HDmalloc");
+    file_data = malloc((size_t)sb.st_size);
+    CHECK_PTR(file_data, "malloc");
 
     if (file_data) {
         /* Read file's data into memory */
         bytes_read = HDread(fdes, file_data, (size_t)sb.st_size);
-        CHECK(bytes_read == sb.st_size, FALSE, "HDmalloc");
+        CHECK(bytes_read == sb.st_size, FALSE, "malloc");
 
         /* Calculate checksum */
         *chksum = H5_checksum_lookup3(file_data, sizeof(file_data), 0);
 
         /* Free memory */
-        HDfree(file_data);
+        free(file_data);
     }
 
     /* Close the file */
@@ -3976,7 +3976,7 @@ test_filespace_info(const char *env_h5_drvr)
     MESSAGE(5, ("Testing file creation public routines: H5Pget/set_file_space_strategy & "
                 "H5Pget/set_file_space_page_size\n"));
 
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     fapl = h5_fileaccess();
     h5_fixname(FILESPACE_NAME[0], fapl, filename, sizeof filename);
@@ -4320,9 +4320,9 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
     hbool_t    relax;
     H5FD_mem_t mt;
 
-    HDassert(split);
+    assert(split);
 
-    HDmemset(memb_name, 0, sizeof memb_name);
+    memset(memb_name, 0, sizeof memb_name);
 
     /* Get current split settings */
     if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
@@ -4346,7 +4346,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        HDfree(memb_name[mt]);
+        free(memb_name[mt]);
 
     return 0;
 
@@ -4385,8 +4385,8 @@ test_file_freespace(const char *env_h5_drvr)
     hsize_t        expected_fs_del;        /* Freespace expected after delete */
     herr_t         ret;                    /* Return value */
 
-    split_vfd = !HDstrcmp(env_h5_drvr, "split");
-    multi_vfd = !HDstrcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(env_h5_drvr, "split");
+    multi_vfd = !strcmp(env_h5_drvr, "multi");
 
     if (!split_vfd && !multi_vfd) {
         fapl = h5_fileaccess();
@@ -4473,7 +4473,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Create datasets in file */
             for (u = 0; u < 10; u++) {
-                HDsprintf(name, "Dataset %u", u);
+                sprintf(name, "Dataset %u", u);
                 dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
                 CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4496,7 +4496,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Delete datasets in file */
             for (k = 9; k >= 0; k--) {
-                HDsprintf(name, "Dataset %u", (unsigned)k);
+                sprintf(name, "Dataset %u", (unsigned)k);
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
             } /* end for */
@@ -4561,8 +4561,8 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Fget_free_sections()--free-space section info in the file\n"));
 
-    split_vfd = !HDstrcmp(env_h5_drvr, "split");
-    multi_vfd = !HDstrcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(env_h5_drvr, "split");
+    multi_vfd = !strcmp(env_h5_drvr, "multi");
 
     if (!split_vfd && !multi_vfd) {
 
@@ -4624,7 +4624,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            sprintf(name, "Dataset %u", u);
             dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4642,7 +4642,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Delete odd-numbered datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            sprintf(name, "Dataset %u", u);
             if (u % 2) {
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
@@ -4670,7 +4670,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(nsects, FAIL, "H5Fget_free_sections");
 
         /* Retrieve and verify free space info for all the sections */
-        HDmemset(all_sect_info, 0, sizeof(all_sect_info));
+        memset(all_sect_info, 0, sizeof(all_sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)nall, all_sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4683,7 +4683,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         last_size = all_sect_info[nall - 1].size;
 
         /* Retrieve and verify free space info for -1 sections */
-        HDmemset(sect_info, 0, sizeof(sect_info));
+        memset(sect_info, 0, sizeof(sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)(nall - 1), sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4697,7 +4697,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(((hsize_t)free_space - last_size), total, "H5Fget_free_sections");
 
         /* Retrieve and verify free-space info for +1 sections */
-        HDmemset(sect_info, 0, sizeof(sect_info));
+        memset(sect_info, 0, sizeof(sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)(nall + 1), sect_info);
         VERIFY(nsects, nall, "H5Fget_free_sections");
 
@@ -4712,7 +4712,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         VERIFY(sect_info[nall].size, 0, "H5Fget_free_sections");
         VERIFY(free_space, total, "H5Fget_free_sections");
 
-        HDmemset(meta_sect_info, 0, sizeof(meta_sect_info));
+        memset(meta_sect_info, 0, sizeof(meta_sect_info));
         if (multi_vfd) {
             hssize_t ntmp;
 
@@ -4745,7 +4745,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         CHECK(nraw, FAIL, "H5Fget_free_sections");
 
         /* Retrieve and verify free-space sections for raw data */
-        HDmemset(raw_sect_info, 0, sizeof(raw_sect_info));
+        memset(raw_sect_info, 0, sizeof(raw_sect_info));
         nsects = H5Fget_free_sections(file, H5FD_MEM_DRAW, (size_t)nraw, raw_sect_info);
         VERIFY(nsects, nraw, "H5Fget_free_sections");
 
@@ -5576,7 +5576,7 @@ test_libver_bounds_copy(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Remove the destination file */
-    HDremove(DST_FILE);
+    remove(DST_FILE);
 
 } /* end test_libver_bounds_copy() */
 
@@ -7590,7 +7590,7 @@ test_incr_filesize(void)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            sprintf(name, "Dataset %u", u);
             dset = H5Dcreate2(fid, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -8026,7 +8026,7 @@ test_file(void)
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

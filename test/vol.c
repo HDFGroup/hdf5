@@ -508,7 +508,7 @@ reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optio
         return -1;
     if (loc_params->obj_type != H5I_GROUP)
         return -1;
-    if (HDstrcmp(loc_params->loc_data.loc_by_name.name, ".") != 0)
+    if (strcmp(loc_params->loc_data.loc_by_name.name, ".") != 0)
         return -1;
     if (loc_params->loc_data.loc_by_name.lapl_id != H5P_LINK_ACCESS_DEFAULT)
         return -1;
@@ -617,9 +617,9 @@ test_vol_registration(void)
         TEST_ERROR;
 
     /* Test registering a VOL connector with an incompatible version # */
-    if (NULL == (bad_fake_vol_class = HDmalloc(sizeof(H5VL_class_t))))
+    if (NULL == (bad_fake_vol_class = malloc(sizeof(H5VL_class_t))))
         TEST_ERROR;
-    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    memcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
     bad_fake_vol_class->version = H5VL_VERSION + 1;
     H5E_BEGIN_TRY
     {
@@ -628,7 +628,7 @@ test_vol_registration(void)
     H5E_END_TRY;
     if (H5I_INVALID_HID != vol_id)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
-    HDfree(bad_fake_vol_class);
+    free(bad_fake_vol_class);
     bad_fake_vol_class = NULL;
 
     /* Load a VOL interface
@@ -709,7 +709,7 @@ error:
     H5E_END_TRY;
 
     if (bad_fake_vol_class)
-        HDfree(bad_fake_vol_class);
+        free(bad_fake_vol_class);
 
     return FAIL;
 } /* end test_vol_registration() */
@@ -815,10 +815,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+                  strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
+                  strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
+                  strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -839,8 +839,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
+    if ((hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+                  strcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -879,10 +879,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+                  strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
+                  strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
+                  strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -896,10 +896,10 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+                  strcmp(env_h5_drvr, "family") != 0 && strcmp(env_h5_drvr, "direct") != 0 &&
+                  strcmp(env_h5_drvr, "core") != 0 && strcmp(env_h5_drvr, "core_paged") != 0 &&
+                  strcmp(env_h5_drvr, "mpio") != 0 && strcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
@@ -992,7 +992,7 @@ test_basic_group_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* H5Gflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    if (strcmp(env_h5_drvr, "mpio") != 0)
         if (H5Gflush(gid) < 0)
             TEST_ERROR;
 
@@ -1118,7 +1118,7 @@ test_basic_dataset_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* H5Dflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    if (strcmp(env_h5_drvr, "mpio") != 0)
         if (H5Dflush(did) < 0)
             TEST_ERROR;
 
@@ -1533,7 +1533,7 @@ test_basic_datatype_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* H5Tflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    if (strcmp(env_h5_drvr, "mpio") != 0)
         if (H5Tflush(tid) < 0)
             TEST_ERROR;
 
@@ -1625,7 +1625,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
     herr_t               ret = SUCCEED;
 
     /* Test registering optional operation */
-    HDsnprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
+    snprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
     if (H5VLregister_opt_operation(subcls, op_name, &op_val) < 0)
         TEST_ERROR;
 
@@ -1644,7 +1644,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         TEST_ERROR;
 
     /* Test registering second optional operation */
-    HDsnprintf(op_name, sizeof(op_name), "%s-op2", subcls_name);
+    snprintf(op_name, sizeof(op_name), "%s-op2", subcls_name);
     if (H5VLregister_opt_operation(subcls, op_name, &op_val2) < 0)
         TEST_ERROR;
 
@@ -1984,7 +1984,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
-    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
+    conn_env_str = getenv(HDF5_VOL_CONNECTOR);
     if (conn_env_str) {
         if (NULL == (conn_env_str = HDstrdup(conn_env_str)))
             TEST_ERROR
@@ -2083,7 +2083,7 @@ test_async_vol_props(void)
     if (conn_env_str) {
         if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
             TEST_ERROR
-        HDfree(conn_env_str);
+        free(conn_env_str);
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR
@@ -2100,7 +2100,7 @@ error:
         H5VLunregister_connector(vol_id);
     }
     H5E_END_TRY;
-    HDfree(conn_env_str);
+    free(conn_env_str);
 
     return FAIL;
 } /* end test_async_vol_props() */
@@ -2121,13 +2121,13 @@ main(void)
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     h5_reset();
 
-    HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
+    puts("Testing basic Virtual Object Layer (VOL) functionality.");
 
     nerrors += test_vol_registration() < 0 ? 1 : 0;
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
@@ -2142,12 +2142,12 @@ main(void)
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        exit(EXIT_FAILURE);
     }
 
-    HDputs("All Virtual Object Layer (VOL) tests passed.");
+    puts("All Virtual Object Layer (VOL) tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

@@ -72,13 +72,13 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         const void *Parameters)
 {
     /* Sanity checking */
-    if (HDstrlen(TheDescr) >= MAXTESTDESC) {
-        HDprintf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
-        HDexit(EXIT_FAILURE);
+    if (strlen(TheDescr) >= MAXTESTDESC) {
+        printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
+        exit(EXIT_FAILURE);
     } /* end if */
-    if (HDstrlen(TheName) >= MAXTESTNAME) {
-        HDprintf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
-        HDexit(EXIT_FAILURE);
+    if (strlen(TheName) >= MAXTESTNAME) {
+        printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Check for increasing the Test array size */
@@ -87,10 +87,10 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         unsigned    newAlloc = MAX(1, TestAlloc * 2); /* New array size */
 
         /* Reallocate array */
-        if (NULL == (newTest = (TestStruct *)HDrealloc(Test, newAlloc * sizeof(TestStruct)))) {
-            HDprintf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
+        if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
+            printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
                      newAlloc);
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         /* Update info */
@@ -99,13 +99,13 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
     } /* end if */
 
     /* Set up test function */
-    HDstrcpy(Test[Index].Description, TheDescr);
+    strcpy(Test[Index].Description, TheDescr);
     if (*TheName != '-') {
-        HDstrcpy(Test[Index].Name, TheName);
+        strcpy(Test[Index].Name, TheName);
         Test[Index].SkipFlag = 0;
     }
     else { /* skip test by default */
-        HDstrcpy(Test[Index].Name, TheName + 1);
+        strcpy(Test[Index].Name, TheName + 1);
         Test[Index].SkipFlag = 1;
     }
     Test[Index].Call       = TheCall;
@@ -226,7 +226,7 @@ TestParseCmdLine(int argc, char *argv[])
     int     ret_code;
 
     while (argv++, --argc > 0) {
-        if ((HDstrcmp(*argv, "-verbose") == 0) || (HDstrcmp(*argv, "-v") == 0)) {
+        if ((strcmp(*argv, "-verbose") == 0) || (strcmp(*argv, "-v") == 0)) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -234,10 +234,10 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-exclude") == 0) || (HDstrcmp(*argv, "-x") == 0))) {
+        else if (((strcmp(*argv, "-exclude") == 0) || (strcmp(*argv, "-x") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -245,10 +245,10 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-begin") == 0) || (HDstrcmp(*argv, "-b") == 0))) {
+        else if (((strcmp(*argv, "-begin") == 0) || (strcmp(*argv, "-b") == 0))) {
             if (argc > 0) {
                 --argc;
                 ++argv;
@@ -256,10 +256,10 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
-        else if (((HDstrcmp(*argv, "-only") == 0) || (HDstrcmp(*argv, "-o") == 0))) {
+        else if (((strcmp(*argv, "-only") == 0) || (strcmp(*argv, "-o") == 0))) {
             if (argc > 0) {
                 unsigned Loop;
 
@@ -276,18 +276,18 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
-        else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
+        else if ((strcmp(*argv, "-summary") == 0) || (strcmp(*argv, "-s") == 0))
             Summary = 1;
-        else if (HDstrcmp(*argv, "-enable-error-stack") == 0)
+        else if (strcmp(*argv, "-enable-error-stack") == 0)
             enable_error_stack = 1;
-        else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
+        else if ((strcmp(*argv, "-help") == 0) || (strcmp(*argv, "-h") == 0)) {
             TestUsage();
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
-        else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
+        else if ((strcmp(*argv, "-cleanoff") == 0) || (strcmp(*argv, "-c") == 0))
             SetTestNoCleanup();
         else {
             /* non-standard option.  Break out. */
@@ -299,7 +299,7 @@ TestParseCmdLine(int argc, char *argv[])
     if (NULL != TestPrivateParser) {
         ret_code = TestPrivateParser(argc + 1, argv - 1);
         if (ret_code != 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -382,7 +382,7 @@ void
 TestShutdown(void)
 {
     if (Test)
-        HDfree(Test);
+        free(Test);
 }
 
 /*
@@ -442,15 +442,15 @@ GetTestExpress(void)
 
     /* set it here for now.  Should be done in something like h5test_init(). */
     if (TestExpress == -1) {
-        env_val = HDgetenv("HDF5TestExpress");
+        env_val = getenv("HDF5TestExpress");
 
         if (env_val == NULL)
             SetTestExpress(1);
-        else if (HDstrcmp(env_val, "0") == 0)
+        else if (strcmp(env_val, "0") == 0)
             SetTestExpress(0);
-        else if (HDstrcmp(env_val, "1") == 0)
+        else if (strcmp(env_val, "1") == 0)
             SetTestExpress(1);
-        else if (HDstrcmp(env_val, "2") == 0)
+        else if (strcmp(env_val, "2") == 0)
             SetTestExpress(2);
         else
             SetTestExpress(3);
@@ -521,7 +521,7 @@ ParseTestVerbosity(char *argv)
     else if (*argv == 'h')
         SetTestVerbosity(VERBO_HI);
     else
-        SetTestVerbosity(HDatoi(argv));
+        SetTestVerbosity(atoi(argv));
 }
 
 /*
@@ -565,9 +565,9 @@ TestErrPrintf(const char *format, ...)
     num_errs++;
 
     /* Print the requested information */
-    HDva_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_start(arglist, format);
+    ret_value = vprintf(format, arglist);
+    va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
     return ret_value;
@@ -588,14 +588,14 @@ SetTest(const char *testname, int action)
     switch (action) {
         case SKIPTEST:
             for (Loop = 0; Loop < Index; Loop++)
-                if (HDstrcmp(testname, Test[Loop].Name) == 0) {
+                if (strcmp(testname, Test[Loop].Name) == 0) {
                     Test[Loop].SkipFlag = 1;
                     break;
                 }
             break;
         case BEGINTEST:
             for (Loop = 0; Loop < Index; Loop++) {
-                if (HDstrcmp(testname, Test[Loop].Name) != 0)
+                if (strcmp(testname, Test[Loop].Name) != 0)
                     Test[Loop].SkipFlag = 1;
                 else {
                     /* Found it. Set it to run.  Done. */
@@ -606,7 +606,7 @@ SetTest(const char *testname, int action)
             break;
         case ONLYTEST:
             for (Loop = 0; Loop < Index; Loop++) {
-                if (HDstrcmp(testname, Test[Loop].Name) == 0) {
+                if (strcmp(testname, Test[Loop].Name) == 0) {
                     /* Found it. Set it to run. Break to skip the rest. */
                     Test[Loop].SkipFlag = 0;
                     break;
@@ -615,7 +615,7 @@ SetTest(const char *testname, int action)
             break;
         default:
             /* error */
-            HDprintf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+            printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
             break;
     }
 }
@@ -629,15 +629,15 @@ void
 TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
-    char *        env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+    char *        env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
     unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
-        alarm_sec = (unsigned)HDstrtoul(env_val, (char **)NULL, 10);
+        alarm_sec = (unsigned)strtoul(env_val, (char **)NULL, 10);
 
     /* Set the number of seconds before alarm goes off */
-    HDalarm((unsigned)alarm_sec);
+    alarm((unsigned)alarm_sec);
 #endif
 }
 
@@ -647,6 +647,6 @@ TestAlarmOff(void)
 {
 #ifdef H5_HAVE_ALARM
     /* Set the number of seconds to zero */
-    HDalarm(0);
+    alarm(0);
 #endif
 }

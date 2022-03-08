@@ -200,7 +200,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
         goto done;
 
     /* Allocate the boundary array */
-    boundary = (hsize_t *)HDmalloc(ndims * sizeof(hsize_t));
+    boundary = (hsize_t *)malloc(ndims * sizeof(hsize_t));
 
     /* Retrieve the append flush property */
     if (H5Pget_append_flush(dapl, ndims, boundary, &append_cb, &udata) < 0)
@@ -248,7 +248,7 @@ done:
         ret_value = FAIL;
 
     if (boundary)
-        HDfree(boundary);
+        free(boundary);
 
     return ret_value;
 } /* H5DOappend() */

@@ -35,7 +35,7 @@
 static void
 catch_signal(int H5_ATTR_UNUSED signo)
 {
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* catch_signal() */
 
 /*-------------------------------------------------------------------------
@@ -68,7 +68,7 @@ main(void)
     hbool_t     contig_addr_vfd;                /* Contiguous address vfd */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -77,17 +77,17 @@ main(void)
      * Further investigation is needed to resolve the test failure with the
      * split/multi driver.  Please see HDFFV-10160.
      */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (hbool_t)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
     if (!contig_addr_vfd) {
         SKIPPED();
-        HDputs("    Temporary skipped for a spilt/multi driver");
-        HDexit(EXIT_SUCCESS);
+        puts("    Temporary skipped for a spilt/multi driver");
+        exit(EXIT_SUCCESS);
     }
 
     h5_reset();
 
     /* To exit from the file for SIGABRT signal */
-    if (HDsignal(SIGABRT, catch_signal) == SIG_ERR)
+    if (signal(SIGABRT, catch_signal) == SIG_ERR)
         TEST_ERROR
 
     fapl = h5_fileaccess();
@@ -137,9 +137,9 @@ main(void)
     /* The file is not closed. */
     /* The library will call H5_term_library to shut down the library. */
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TEST FAILED ***");
-    HDexit(EXIT_FAILURE);
+    puts("*** TEST FAILED ***");
+    exit(EXIT_FAILURE);
 }

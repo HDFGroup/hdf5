@@ -65,46 +65,46 @@ tts_cancel(void)
 
     /* make thread scheduling global */
     ret = pthread_attr_init(&attribute);
-    HDassert(ret == 0);
+    assert(ret == 0);
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    HDassert(ret == 0);
+    assert(ret == 0);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /* Initialize mutex & condition variables */
     ret = pthread_mutex_init(&mutex, NULL);
-    HDassert(ret == 0);
+    assert(ret == 0);
     ret = pthread_cond_init(&cond, NULL);
-    HDassert(ret == 0);
+    assert(ret == 0);
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
      * creation plist and default file access plist
      */
     cancel_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(cancel_file >= 0);
+    assert(cancel_file >= 0);
     ret = pthread_create(&childthread, &attribute, tts_cancel_thread, NULL);
-    HDassert(ret == 0);
+    assert(ret == 0);
     tts_cancel_barrier();
     ret = pthread_cancel(childthread);
-    HDassert(ret == 0);
+    assert(ret == 0);
 
     dataset = H5Dopen2(cancel_file, DATASETNAME, H5P_DEFAULT);
-    HDassert(dataset >= 0);
+    assert(dataset >= 0);
     ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
-    HDassert(ret >= 0);
+    assert(ret >= 0);
 
     if (buffer != 11)
         TestErrPrintf("operation unsuccessful with value at %d instead of 11\n", buffer);
 
     ret = H5Dclose(dataset);
-    HDassert(ret >= 0);
+    assert(ret >= 0);
     ret = H5Fclose(cancel_file);
-    HDassert(ret >= 0);
+    assert(ret >= 0);
 
     /* Destroy the thread attribute */
     ret = pthread_attr_destroy(&attribute);
-    HDassert(ret == 0);
+    assert(ret == 0);
 } /* end tts_cancel() */
 
 void *
@@ -136,7 +136,7 @@ tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* If thread is cancelled, make cleanup call */
-    cleanup_structure            = (cancel_cleanup_t *)HDmalloc(sizeof(cancel_cleanup_t));
+    cleanup_structure            = (cancel_cleanup_t *)malloc(sizeof(cancel_cleanup_t));
     cleanup_structure->dataset   = dataset;
     cleanup_structure->datatype  = datatype;
     cleanup_structure->dataspace = dataspace;
@@ -151,7 +151,7 @@ tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     status = H5Diterate(&buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     CHECK(status, FAIL, "H5Diterate");
 
-    HDsleep(3);
+    sleep(3);
 
     datavalue = 100;
     status    = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
@@ -182,7 +182,7 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
     herr_t status;
 
     tts_cancel_barrier();
-    HDsleep(3);
+    sleep(3);
 
     if (value != 1) {
         TestErrPrintf("Error! Element value should be 1 and not %d\n", value);

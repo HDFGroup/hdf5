@@ -113,7 +113,7 @@ error:
     }
     H5E_END_TRY;
 #else  /* H5O_ENABLE_BAD_MESG_COUNT */
-    HDputs("H5O_BAD_MESG_COUNT compiler macro not defined!");
+    puts("H5O_BAD_MESG_COUNT compiler macro not defined!");
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
     return 1;
 }

@@ -89,9 +89,9 @@ H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(sizeof_size > 0);
-    HDassert(sizeof_addr > 0);
-    HDassert(prfx_size > 0);
+    assert(sizeof_size > 0);
+    assert(sizeof_addr > 0);
+    assert(prfx_size > 0);
 
     /* Allocate new local heap structure */
     if (NULL == (heap = H5FL_CALLOC(H5HL_t)))
@@ -131,7 +131,7 @@ H5HL__inc_rc(H5HL_t *heap)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Increment heap's ref. count */
     heap->rc++;
@@ -159,7 +159,7 @@ H5HL__dec_rc(H5HL_t *heap)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Decrement heap's ref. count */
     heap->rc--;
@@ -192,13 +192,13 @@ H5HL__dest(H5HL_t *heap)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Verify that node is unused */
-    HDassert(heap->prots == 0);
-    HDassert(heap->rc == 0);
-    HDassert(heap->prfx == NULL);
-    HDassert(heap->dblk == NULL);
+    assert(heap->prots == 0);
+    assert(heap->rc == 0);
+    assert(heap->prfx == NULL);
+    assert(heap->dblk == NULL);
 
     /* Use DONE errors here to try to free as much as possible */
     if (heap->dblk_image)

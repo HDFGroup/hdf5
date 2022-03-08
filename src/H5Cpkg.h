@@ -492,7 +492,7 @@ if ( ( (hd_ptr) == NULL ) ||                                                  \
        )                                                                      \
      )                                                                        \
    ) {                                                                        \
-    HDassert(0 && "il DLL pre remove SC failed");                             \
+    assert(0 && "il DLL pre remove SC failed");                             \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "il DLL pre remove SC failed")   \
 }
 
@@ -514,7 +514,7 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
        )                                                                      \
      )                                                                        \
    ) {                                                                        \
-    HDassert(0 && "IL DLL pre insert SC failed");                             \
+    assert(0 && "IL DLL pre insert SC failed");                             \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "IL DLL pre insert SC failed")   \
 }
 
@@ -533,7 +533,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
        )                                                                   \
      )                                                                     \
    ) {                                                                     \
-    HDassert(0 && "IL DLL sanity check failed");                           \
+    assert(0 && "IL DLL sanity check failed");                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "IL DLL sanity check failed") \
 }
 
@@ -700,14 +700,14 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
 {                                                          \
     /* make sure image len is still good */                \
-    HDassert((cache_ptr)->image_len > 0);                  \
+    assert((cache_ptr)->image_len > 0);                  \
     (cache_ptr)->images_read++;                            \
 }
 
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
 {                                                          \
     /* make sure image len is still good */                \
-    HDassert((cache_ptr)->image_len > 0);                  \
+    assert((cache_ptr)->image_len > 0);                  \
     (cache_ptr)->images_loaded++;                          \
     (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
 }
@@ -1025,7 +1025,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||     \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||               \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {            \
-    HDassert(FALSE);                                                    \
+    assert(FALSE);                                                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "pre HT insert SC failed") \
 }
 
@@ -1047,7 +1047,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||     \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||               \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size) ) {             \
-    HDassert(FALSE);                                                    \
+    assert(FALSE);                                                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "post HT insert SC failed") \
 }
 
@@ -1088,7 +1088,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||     \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||               \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {            \
-    HDassert(FALSE);                                                    \
+    assert(FALSE);                                                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT remove SC failed") \
 }
 
@@ -1114,7 +1114,7 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||      \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||                \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {             \
-    HDassert(FALSE);                                                     \
+    assert(FALSE);                                                     \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT remove SC failed") \
 }
 
@@ -1191,7 +1191,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||     \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||               \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {            \
-    HDassert(FALSE);                                                    \
+    assert(FALSE);                                                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT entry size change SC failed") \
 }
 
@@ -1221,7 +1221,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||       \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||                 \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {              \
-    HDassert(FALSE);                                                      \
+    assert(FALSE);                                                      \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT entry size change SC failed") \
 }
 
@@ -1248,7 +1248,7 @@ if (                                                                          \
     ( (cache_ptr)->index_ring_size[(entry_ptr)->ring] !=                      \
       ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +                \
        (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ) {           \
-    HDassert(FALSE);                                                          \
+    assert(FALSE);                                                          \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT update for entry clean SC failed") \
 }
 
@@ -1275,7 +1275,7 @@ if (                                                                          \
     ( (cache_ptr)->index_ring_size[(entry_ptr)->ring] !=                      \
       ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +                \
        (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ) {           \
-    HDassert(FALSE);                                                          \
+    assert(FALSE);                                                          \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT update for entry dirty SC failed") \
 }
 
@@ -1291,7 +1291,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
      ( (cache_ptr)->index_ring_size[(entry_ptr)->ring] !=                   \
        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +             \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ) {        \
-    HDassert(FALSE);                                                        \
+    assert(FALSE);                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT update for entry clean SC failed") \
 }
 
@@ -1307,7 +1307,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
      ( (cache_ptr)->index_ring_size[(entry_ptr)->ring] !=                   \
        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring] +             \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ) {        \
-    HDassert(FALSE);                                                        \
+    assert(FALSE);                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT update for entry dirty SC failed") \
 }
 
@@ -1358,7 +1358,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
         (cache_ptr)->num_last_entries++;                                     \
-        HDassert((cache_ptr)->num_last_entries <= 2);                        \
+        assert((cache_ptr)->num_last_entries <= 2);                        \
     }                                                                        \
     H5C__IL_DLL_APPEND((entry_ptr), (cache_ptr)->il_head,                    \
                        (cache_ptr)->il_tail, (cache_ptr)->il_len,            \
@@ -1396,7 +1396,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
         (cache_ptr)->num_last_entries--;                                     \
-        HDassert((cache_ptr)->num_last_entries <= 1);                        \
+        assert((cache_ptr)->num_last_entries <= 1);                        \
     }                                                                        \
     H5C__IL_DLL_REMOVE((entry_ptr), (cache_ptr)->il_head,                    \
                        (cache_ptr)->il_tail, (cache_ptr)->il_len,            \
@@ -1418,7 +1418,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
             if(entry_ptr != ((cache_ptr)->index)[k]) {                      \
                 if((entry_ptr)->ht_next)                                    \
                     (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
-                HDassert((entry_ptr)->ht_prev != NULL);                     \
+                assert((entry_ptr)->ht_prev != NULL);                     \
                 (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
                 ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);             \
                 (entry_ptr)->ht_next = ((cache_ptr)->index)[k];             \
@@ -1446,7 +1446,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
             if(entry_ptr != ((cache_ptr)->index)[k]) {                      \
                 if((entry_ptr)->ht_next)                                    \
                     (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
-                HDassert((entry_ptr)->ht_prev != NULL);                     \
+                assert((entry_ptr)->ht_prev != NULL);                     \
                 (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
                 ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);             \
                 (entry_ptr)->ht_next = ((cache_ptr)->index)[k];             \
@@ -1617,21 +1617,21 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
-    HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+    assert( (cache_ptr) );                                                   \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
                                                                                \
     if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-        HDassert( (entry_ptr) );                                               \
-        HDassert( (entry_ptr)->size > 0 );                                     \
-        HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
-        HDassert( !((entry_ptr)->in_slist) );                                  \
-        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+        assert( (entry_ptr) );                                               \
+        assert( (entry_ptr)->size > 0 );                                     \
+        assert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        assert( !((entry_ptr)->in_slist) );                                  \
+        assert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
                   (cache_ptr)->slist_len );                                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_size );                                   \
                                                                                \
         if ( H5SL_insert((cache_ptr)->slist_ptr, entry_ptr,                    \
@@ -1648,13 +1648,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
         (cache_ptr)->slist_len_increase++;                                     \
         (cache_ptr)->slist_size_increase += (int64_t)((entry_ptr)->size);      \
                                                                                \
-        HDassert( (cache_ptr)->slist_len > 0 );                                \
-        HDassert( (cache_ptr)->slist_size > 0 );                               \
+        assert( (cache_ptr)->slist_len > 0 );                                \
+        assert( (cache_ptr)->slist_size > 0 );                               \
                                                                                \
     } else { /* slist disabled */                                              \
                                                                                \
-        HDassert( (cache_ptr)->slist_len == 0 );                               \
-        HDassert( (cache_ptr)->slist_size == 0 );                              \
+        assert( (cache_ptr)->slist_len == 0 );                               \
+        assert( (cache_ptr)->slist_size == 0 );                              \
     }                                                                          \
 } /* H5C__INSERT_ENTRY_IN_SLIST */
 
@@ -1662,23 +1662,23 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
-    HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+    assert( (cache_ptr) );                                                   \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
                                                                                \
     if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-        HDassert( (entry_ptr) );                                               \
-        HDassert( (entry_ptr)->size > 0 );                                     \
-        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
-        HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
-        HDassert( !((entry_ptr)->in_slist) );                                  \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+        assert( (entry_ptr) );                                               \
+        assert( (entry_ptr)->size > 0 );                                     \
+        assert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        assert( H5F_addr_defined((entry_ptr)->addr) );                       \
+        assert( !((entry_ptr)->in_slist) );                                  \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
                   (cache_ptr)->slist_len );                                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_size );                                   \
-        HDassert( (cache_ptr)->slist_ptr );                                    \
+        assert( (cache_ptr)->slist_ptr );                                    \
                                                                                \
         if ( H5SL_insert((cache_ptr)->slist_ptr, entry_ptr,                    \
                          &((entry_ptr)->addr)) < 0)                            \
@@ -1692,13 +1692,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])++;                    \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (entry_ptr)->size;\
                                                                                \
-        HDassert( (cache_ptr)->slist_len > 0 );                                \
-        HDassert( (cache_ptr)->slist_size > 0 );                               \
+        assert( (cache_ptr)->slist_len > 0 );                                \
+        assert( (cache_ptr)->slist_size > 0 );                               \
                                                                                \
     } else { /* slist disabled */                                              \
                                                                                \
-        HDassert( (cache_ptr)->slist_len == 0 );                               \
-        HDassert( (cache_ptr)->slist_size == 0 );                              \
+        assert( (cache_ptr)->slist_len == 0 );                               \
+        assert( (cache_ptr)->slist_size == 0 );                              \
     }                                                                          \
 } /* H5C__INSERT_ENTRY_IN_SLIST */
 
@@ -1750,38 +1750,38 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #if H5C_DO_SANITY_CHECKS
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
 {                                                                              \
-    HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+    assert( (cache_ptr) );                                                   \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
                                                                                \
     if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-        HDassert( (entry_ptr) );                                               \
-        HDassert( !((entry_ptr)->is_read_only) );                              \
-        HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-        HDassert( (entry_ptr)->size > 0 );                                     \
-        HDassert( (entry_ptr)->in_slist );                                     \
-        HDassert( (cache_ptr)->slist_ptr );                                    \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+        assert( (entry_ptr) );                                               \
+        assert( !((entry_ptr)->is_read_only) );                              \
+        assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+        assert( (entry_ptr)->size > 0 );                                     \
+        assert( (entry_ptr)->in_slist );                                     \
+        assert( (cache_ptr)->slist_ptr );                                    \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
                   (cache_ptr)->slist_len );                                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_size );                                   \
-        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+        assert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
                                                                                \
         if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)           \
                  != (entry_ptr) )                                              \
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                         \
                         "can't delete entry from skip list")                   \
                                                                                \
-        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        assert( (cache_ptr)->slist_len > 0 );                                \
         if(!(during_flush))                                                    \
             (cache_ptr)->slist_changed = TRUE;                                 \
         (cache_ptr)->slist_len--;                                              \
-        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+        assert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
                   (entry_ptr)->size );                                         \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         (cache_ptr)->slist_len_increase--;                                     \
@@ -1790,8 +1790,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
                                                                                \
     } else { /* slist disabled */                                              \
                                                                                \
-        HDassert( (cache_ptr)->slist_len == 0 );                               \
-        HDassert( (cache_ptr)->slist_size == 0 );                               \
+        assert( (cache_ptr)->slist_len == 0 );                               \
+        assert( (cache_ptr)->slist_size == 0 );                               \
     }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
@@ -1799,21 +1799,21 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
 {                                                                              \
-    HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
+    assert( (cache_ptr) );                                                   \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
                                                                                \
     if ( (cache_ptr)->slist_enabled ) {                                        \
                                                                                \
-        HDassert( (entry_ptr) );                                               \
-        HDassert( !((entry_ptr)->is_read_only) );                              \
-        HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-        HDassert( (entry_ptr)->in_slist );                                     \
-        HDassert( (cache_ptr)->slist_ptr );                                    \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
+        assert( (entry_ptr) );                                               \
+        assert( !((entry_ptr)->is_read_only) );                              \
+        assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+        assert( (entry_ptr)->in_slist );                                     \
+        assert( (cache_ptr)->slist_ptr );                                    \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
                   (cache_ptr)->slist_len );                                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_size );                                   \
                                                                                \
         if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)           \
@@ -1821,22 +1821,22 @@ if ( ( (cache_ptr)->index_size !=                                           \
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                         \
                         "can't delete entry from skip list")                   \
                                                                                \
-        HDassert( (cache_ptr)->slist_len > 0 );                                \
+        assert( (cache_ptr)->slist_len > 0 );                                \
         if(!(during_flush))                                                    \
             (cache_ptr)->slist_changed = TRUE;                                 \
         (cache_ptr)->slist_len--;                                              \
-        HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
+        assert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
                   (entry_ptr)->size );                                         \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         (entry_ptr)->in_slist = FALSE;                                         \
                                                                                \
     } else { /* slist disabled */                                              \
                                                                                \
-        HDassert( (cache_ptr)->slist_len == 0 );                               \
-        HDassert( (cache_ptr)->slist_size == 0 );                              \
+        assert( (cache_ptr)->slist_len == 0 );                               \
+        assert( (cache_ptr)->slist_size == 0 );                              \
     }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
@@ -1888,28 +1888,28 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
 {                                                                             \
-    HDassert( (cache_ptr) );                                                  \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
+    assert( (cache_ptr) );                                                  \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
                                                                               \
     if ( (cache_ptr)->slist_enabled ) {                                       \
                                                                               \
-        HDassert( (old_size) > 0 );                                           \
-        HDassert( (new_size) > 0 );                                           \
-        HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-        HDassert( (cache_ptr)->slist_len > 0 );                               \
-        HDassert( ((cache_ptr)->slist_len > 1) ||                             \
+        assert( (old_size) > 0 );                                           \
+        assert( (new_size) > 0 );                                           \
+        assert( (old_size) <= (cache_ptr)->slist_size );                    \
+        assert( (cache_ptr)->slist_len > 0 );                               \
+        assert( ((cache_ptr)->slist_len > 1) ||                             \
                   ( (cache_ptr)->slist_size == (old_size) ) );                \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_len );                                   \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
                   (cache_ptr)->slist_size );                                  \
                                                                               \
         (cache_ptr)->slist_size -= (old_size);                                \
         (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)]             \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)]             \
                   >= (old_size) );                                            \
                                                                               \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
@@ -1918,14 +1918,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
         (cache_ptr)->slist_size_increase -= (int64_t)(old_size);              \
         (cache_ptr)->slist_size_increase += (int64_t)(new_size);              \
                                                                               \
-        HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-        HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
+        assert( (new_size) <= (cache_ptr)->slist_size );                    \
+        assert( ( (cache_ptr)->slist_len > 1 ) ||                           \
                   ( (cache_ptr)->slist_size == (new_size) ) );                \
                                                                               \
     } else { /* slist disabled */                                             \
                                                                               \
-        HDassert( (cache_ptr)->slist_len == 0 );                              \
-        HDassert( (cache_ptr)->slist_size == 0 );                             \
+        assert( (cache_ptr)->slist_len == 0 );                              \
+        assert( (cache_ptr)->slist_size == 0 );                             \
     }                                                                         \
 } /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
@@ -1933,40 +1933,40 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
 {                                                                             \
-    HDassert( (cache_ptr) );                                                  \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
+    assert( (cache_ptr) );                                                  \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                       \
                                                                               \
     if ( (cache_ptr)->slist_enabled ) {                                       \
                                                                               \
-        HDassert( (old_size) > 0 );                                           \
-        HDassert( (new_size) > 0 );                                           \
-        HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-        HDassert( (cache_ptr)->slist_len > 0 );                               \
-        HDassert( ((cache_ptr)->slist_len > 1) ||                             \
+        assert( (old_size) > 0 );                                           \
+        assert( (new_size) > 0 );                                           \
+        assert( (old_size) <= (cache_ptr)->slist_size );                    \
+        assert( (cache_ptr)->slist_len > 0 );                               \
+        assert( ((cache_ptr)->slist_len > 1) ||                             \
                   ( (cache_ptr)->slist_size == (old_size) ) );                \
-        HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
-        HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
-        HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
+        assert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                   \
+        assert( (entry_ptr)->ring < H5C_RING_NTYPES );                      \
+        assert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=           \
                   (cache_ptr)->slist_len );                                   \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=          \
                   (cache_ptr)->slist_size );                                  \
                                                                               \
         (cache_ptr)->slist_size -= (old_size);                                \
         (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=          \
+        assert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=          \
                   (old_size) );                                               \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);      \
                                                                               \
-        HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-        HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
+        assert( (new_size) <= (cache_ptr)->slist_size );                    \
+        assert( ( (cache_ptr)->slist_len > 1 ) ||                           \
                   ( (cache_ptr)->slist_size == (new_size) ) );                \
                                                                               \
     } else { /* slist disabled */                                             \
                                                                               \
-        HDassert( (cache_ptr)->slist_len == 0 );                              \
-        HDassert( (cache_ptr)->slist_size == 0 );                             \
+        assert( (cache_ptr)->slist_len == 0 );                              \
+        assert( (cache_ptr)->slist_size == 0 );                             \
     }                                                                         \
 } /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
@@ -2020,13 +2020,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
 {                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->size > 0 );                                      \
+    assert( (cache_ptr) );                                                \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    assert( (entry_ptr) );                                                \
+    assert( !((entry_ptr)->is_protected) );                               \
+    assert( !((entry_ptr)->is_read_only) );                               \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    assert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
                                                                             \
@@ -2083,13 +2083,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
 {                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->size > 0 );                                      \
+    assert( (cache_ptr) );                                                \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    assert( (entry_ptr) );                                                \
+    assert( !((entry_ptr)->is_protected) );                               \
+    assert( !((entry_ptr)->is_read_only) );                               \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    assert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
                                                                             \
@@ -2162,14 +2162,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( !((entry_ptr)->is_pinned) );                                   \
-    HDassert( (entry_ptr)->size > 0 );                                       \
+    assert( (cache_ptr) );                                                 \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    assert( (entry_ptr) );                                                 \
+    assert( !((entry_ptr)->is_protected) );                                \
+    assert( !((entry_ptr)->is_read_only) );                                \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                            \
+    assert( !((entry_ptr)->is_pinned) );                                   \
+    assert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     /* modified LRU specific code */                                         \
                                                                              \
@@ -2204,14 +2204,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( !((entry_ptr)->is_pinned) );                                   \
-    HDassert( (entry_ptr)->size > 0 );                                       \
+    assert( (cache_ptr) );                                                 \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    assert( (entry_ptr) );                                                 \
+    assert( !((entry_ptr)->is_protected) );                                \
+    assert( !((entry_ptr)->is_read_only) );                                \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                            \
+    assert( !((entry_ptr)->is_pinned) );                                   \
+    assert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     /* modified LRU specific code */                                         \
                                                                              \
@@ -2275,13 +2275,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->size > 0 );                                      \
+    assert( (cache_ptr) );                                                \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    assert( (entry_ptr) );                                                \
+    assert( !((entry_ptr)->is_protected) );                               \
+    assert( !((entry_ptr)->is_read_only) );                               \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    assert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
                                                                             \
@@ -2337,13 +2337,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
-    HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
-    HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
-    HDassert( !((entry_ptr)->is_read_only) );                               \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
-    HDassert( (entry_ptr)->size > 0 );                                      \
+    assert( (cache_ptr) );                                                \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    assert( (entry_ptr) );                                                \
+    assert( !((entry_ptr)->is_protected) );                               \
+    assert( !((entry_ptr)->is_read_only) );                               \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    assert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
                                                                             \
@@ -2401,13 +2401,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, entry_ptr, fail_val)   \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_read_only) );                              \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( !((entry_ptr)->is_protected) );                              \
+    assert( !((entry_ptr)->is_read_only) );                              \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
@@ -2451,13 +2451,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, entry_ptr, fail_val)   \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_read_only) );                              \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( !((entry_ptr)->is_protected) );                              \
+    assert( !((entry_ptr)->is_read_only) );                              \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
@@ -2535,13 +2535,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_read_only) );                              \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( !((entry_ptr)->is_protected) );                              \
+    assert( !((entry_ptr)->is_read_only) );                              \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
@@ -2585,13 +2585,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( !((entry_ptr)->is_protected) );                              \
-    HDassert( !((entry_ptr)->is_read_only) );                              \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( !((entry_ptr)->is_protected) );                              \
+    assert( !((entry_ptr)->is_read_only) );                              \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                          \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
@@ -2670,13 +2670,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (entry_ptr) );                                              \
-    HDassert( !((entry_ptr)->is_protected) );                             \
-    HDassert( !((entry_ptr)->is_read_only) );                             \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    HDassert( (entry_ptr)->size > 0 );                                    \
+    assert( (cache_ptr) );                                              \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    assert( (entry_ptr) );                                              \
+    assert( !((entry_ptr)->is_protected) );                             \
+    assert( !((entry_ptr)->is_read_only) );                             \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    assert( (entry_ptr)->size > 0 );                                    \
                                     \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
@@ -2732,13 +2732,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (entry_ptr) );                                              \
-    HDassert( !((entry_ptr)->is_protected) );                             \
-    HDassert( !((entry_ptr)->is_read_only) );                             \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    HDassert( (entry_ptr)->size > 0 );                                    \
+    assert( (cache_ptr) );                                              \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    assert( (entry_ptr) );                                              \
+    assert( !((entry_ptr)->is_protected) );                             \
+    assert( !((entry_ptr)->is_read_only) );                             \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    assert( (entry_ptr)->size > 0 );                                    \
                                     \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
@@ -2797,12 +2797,12 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val) \
 {                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
+    assert( (cache_ptr) );                                                 \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    assert( (entry_ptr) );                                                 \
+    assert( !((entry_ptr)->is_read_only) );                                \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                            \
+    assert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) { \
                                                                         \
@@ -2874,12 +2874,12 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val) \
 {                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
+    assert( (cache_ptr) );                                                 \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    assert( (entry_ptr) );                                                 \
+    assert( !((entry_ptr)->is_read_only) );                                \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                            \
+    assert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) { \
                                                                         \
@@ -2941,14 +2941,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (entry_ptr) );                                              \
-    HDassert( !((entry_ptr)->is_protected) );                             \
-    HDassert( !((entry_ptr)->is_read_only) );                             \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    HDassert( (entry_ptr)->size > 0 );                                    \
-    HDassert( new_size > 0 );                                             \
+    assert( (cache_ptr) );                                              \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    assert( (entry_ptr) );                                              \
+    assert( !((entry_ptr)->is_protected) );                             \
+    assert( !((entry_ptr)->is_read_only) );                             \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    assert( (entry_ptr)->size > 0 );                                    \
+    assert( new_size > 0 );                                             \
                                                                           \
     if ( (entry_ptr)->coll_access ) {                                     \
                                                                           \
@@ -3006,14 +3006,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (entry_ptr) );                                              \
-    HDassert( !((entry_ptr)->is_protected) );                             \
-    HDassert( !((entry_ptr)->is_read_only) );                             \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    HDassert( (entry_ptr)->size > 0 );                                    \
-    HDassert( new_size > 0 );                                             \
+    assert( (cache_ptr) );                                              \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    assert( (entry_ptr) );                                              \
+    assert( !((entry_ptr)->is_protected) );                             \
+    assert( !((entry_ptr)->is_read_only) );                             \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    assert( (entry_ptr)->size > 0 );                                    \
+    assert( new_size > 0 );                                             \
                                         \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
@@ -3074,14 +3074,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
-    HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
-    HDassert( (entry_ptr) );                                           \
-    HDassert( !((entry_ptr)->is_protected) );                          \
-    HDassert( !((entry_ptr)->is_read_only) );                          \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
-    HDassert( (entry_ptr)->is_pinned);                                 \
-    HDassert( (entry_ptr)->size > 0 );                                 \
+    assert( (cache_ptr) );                                           \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    assert( (entry_ptr) );                                           \
+    assert( !((entry_ptr)->is_protected) );                          \
+    assert( !((entry_ptr)->is_read_only) );                          \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                      \
+    assert( (entry_ptr)->is_pinned);                                 \
+    assert( (entry_ptr)->size > 0 );                                 \
                                                                        \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
@@ -3130,14 +3130,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
-    HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
-    HDassert( (entry_ptr) );                                           \
-    HDassert( !((entry_ptr)->is_protected) );                          \
-    HDassert( !((entry_ptr)->is_read_only) );                          \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
-    HDassert( (entry_ptr)->is_pinned);                                 \
-    HDassert( (entry_ptr)->size > 0 );                                 \
+    assert( (cache_ptr) );                                           \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
+    assert( (entry_ptr) );                                           \
+    assert( !((entry_ptr)->is_protected) );                          \
+    assert( !((entry_ptr)->is_read_only) );                          \
+    assert( ((entry_ptr)->ro_ref_count) == 0 );                      \
+    assert( (entry_ptr)->is_pinned);                                 \
+    assert( (entry_ptr)->size > 0 );                                 \
                                                                        \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
@@ -3210,11 +3210,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( (entry_ptr)->is_protected);                                  \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( (entry_ptr)->is_protected);                                  \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
@@ -3269,11 +3269,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
-    HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                               \
-    HDassert( (entry_ptr)->is_protected);                                  \
-    HDassert( (entry_ptr)->size > 0 );                                     \
+    assert( (cache_ptr) );                                               \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    assert( (entry_ptr) );                                               \
+    assert( (entry_ptr)->is_protected);                                  \
+    assert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
@@ -3328,7 +3328,7 @@ if ( ( (hd_ptr) == NULL ) ||                                                   \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HDassert(0 && "coll DLL pre remove SC failed");                            \
+    assert(0 && "coll DLL pre remove SC failed");                            \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "coll DLL pre remove SC failed")  \
 }
 
@@ -3349,7 +3349,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        )                                                                    \
      )                                                                      \
    ) {                                                                      \
-    HDassert(0 && "COLL DLL sanity check failed");                          \
+    assert(0 && "COLL DLL sanity check failed");                          \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL sanity check failed") \
 }
 
@@ -3371,7 +3371,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        )                                                                       \
      )                                                                         \
    ) {                                                                         \
-    HDassert(0 && "COLL DLL pre insert SC failed");                            \
+    assert(0 && "COLL DLL pre insert SC failed");                            \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL pre insert SC failed")  \
 }
 
@@ -3466,9 +3466,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)        \
 {                                                                       \
-    HDassert( (cache_ptr) );                                            \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (entry_ptr) );                                            \
+    assert( (cache_ptr) );                                            \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    assert( (entry_ptr) );                                            \
                                                                         \
     /* insert the entry at the head of the list. */                     \
                                                                         \
@@ -3496,9 +3496,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, fail_val)      \
 {                                                                       \
-    HDassert( (cache_ptr) );                                            \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (entry_ptr) );                                            \
+    assert( (cache_ptr) );                                            \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    assert( (entry_ptr) );                                            \
                                                                         \
     /* remove the entry from the list. */                               \
                                                                         \
@@ -3526,9 +3526,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
 {                                                                       \
-    HDassert( (cache_ptr) );                                            \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (entry_ptr) );                                            \
+    assert( (cache_ptr) );                                            \
+    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    assert( (entry_ptr) );                                            \
                                                                         \
     /* Remove entry and insert at the head of the list. */              \
     H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \

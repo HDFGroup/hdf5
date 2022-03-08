@@ -38,7 +38,7 @@ const char *FILENAME[] = {"del_many_dense_attrs", NULL};
 static void
 catch_signal(int H5_ATTR_UNUSED signo)
 {
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* catch_signal() */
 
 /*-------------------------------------------------------------------------
@@ -74,7 +74,7 @@ main(void)
     h5_reset();
 
     /* To exit from the file for SIGABRT signal */
-    if (HDsignal(SIGABRT, catch_signal) == SIG_ERR)
+    if (signal(SIGABRT, catch_signal) == SIG_ERR)
         TEST_ERROR
 
     fapl = h5_fileaccess();
@@ -119,7 +119,7 @@ main(void)
     /* Create attributes in the group */
     for (i = ATTR_COUNT; i >= 0; i--) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Create the attribute */
         if ((aid = H5Acreate2(gid, aname, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -165,7 +165,7 @@ main(void)
     /* Delete the attributes */
     for (i = 0; i <= ATTR_COUNT; i++) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Delete the attribute */
         if (H5Adelete(gid, aname) < 0)

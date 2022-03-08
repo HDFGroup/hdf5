@@ -44,64 +44,64 @@ test_time_formatting(void)
 
     /*      < 0,            N/A             */
     s = H5_timer_get_time_string(-1.0);
-    if (NULL == s || HDstrcmp(s, "N/A") != 0)
+    if (NULL == s || strcmp(s, "N/A") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      0               0               */
     s = H5_timer_get_time_string(0.0);
-    if (NULL == s || HDstrcmp(s, "0.0 s") != 0)
+    if (NULL == s || strcmp(s, "0.0 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 us          nanoseconds     */
     s = H5_timer_get_time_string(123.0E-9);
-    if (NULL == s || HDstrcmp(s, "123 ns") != 0)
+    if (NULL == s || strcmp(s, "123 ns") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 ms          microseconds    */
     s = H5_timer_get_time_string(23.456E-6);
-    if (NULL == s || HDstrcmp(s, "23.5 us") != 0)
+    if (NULL == s || strcmp(s, "23.5 us") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 s           milliseconds    */
     s = H5_timer_get_time_string(4.56789E-3);
-    if (NULL == s || HDstrcmp(s, "4.6 ms") != 0)
+    if (NULL == s || strcmp(s, "4.6 ms") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 min         seconds         */
     s = H5_timer_get_time_string(3.14);
-    if (NULL == s || HDstrcmp(s, "3.14 s") != 0)
+    if (NULL == s || strcmp(s, "3.14 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 hr          mins, secs      */
     s = H5_timer_get_time_string(2521.0);
-    if (NULL == s || HDstrcmp(s, "42 m 1 s") != 0)
+    if (NULL == s || strcmp(s, "42 m 1 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      < 1 d           hrs, mins, secs */
     s = H5_timer_get_time_string(9756.0);
-    if (NULL == s || HDstrcmp(s, "2 h 42 m 36 s") != 0)
+    if (NULL == s || strcmp(s, "2 h 42 m 36 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     /*      > 1 d            days, hrs, mins, secs */
     s = H5_timer_get_time_string(280802.0);
-    if (NULL == s || HDstrcmp(s, "3 d 6 h 0 m 2 s") != 0)
+    if (NULL == s || strcmp(s, "3 d 6 h 0 m 2 s") != 0)
         TEST_ERROR;
-    HDfree(s);
+    free(s);
 
     PASSED();
     return 0;
 
 error:
     if (s)
-        HDfree(s);
+        free(s);
     return -1;
 }
 
@@ -146,14 +146,14 @@ test_timer_system_user(void)
      */
     if (timer.initial.system < 0.0 || timer.initial.user < 0.0) {
         SKIPPED();
-        HDprintf("NOTE: No suitable way to get system/user times on this platform.\n");
+        printf("NOTE: No suitable way to get system/user times on this platform.\n");
         return 0;
     }
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     err = H5_timer_stop(&timer);
@@ -211,8 +211,8 @@ test_timer_elapsed(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     err = H5_timer_stop(&timer);
@@ -278,8 +278,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* Running state should change after stop */
@@ -320,8 +320,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* Times should be non-negative */
@@ -337,8 +337,8 @@ test_timer_functionality(void)
 
     /* Do some fake work */
     for (i = 0; i < 1024; i++) {
-        buf = (char *)HDmalloc(1024 * (size_t)i);
-        HDfree(buf);
+        buf = (char *)malloc(1024 * (size_t)i);
+        free(buf);
     }
 
     /* State should flip on stop */
@@ -383,7 +383,7 @@ main(void)
 
     h5_reset();
 
-    HDprintf("Testing platform-independent timer functionality.\n");
+    printf("Testing platform-independent timer functionality.\n");
 
     nerrors += test_time_formatting() < 0 ? 1 : 0;
     nerrors += test_timer_system_user() < 0 ? 1 : 0;
@@ -391,12 +391,12 @@ main(void)
     nerrors += test_timer_functionality() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors,
+        printf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors,
                  nerrors > 1 ? "S" : "");
         return 1;
     }
     else {
-        HDprintf("All platform-independent timer tests passed.\n");
+        printf("All platform-independent timer tests passed.\n");
         return 0;
     }
 }

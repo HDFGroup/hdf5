@@ -168,7 +168,7 @@ H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out)
 
     FUNC_ENTER_STATIC
 
-    HDassert(fa_out);
+    assert(fa_out);
 
     fa_out->memb_size = H5FD_FAM_DEF_MEM_SIZE;
 
@@ -222,22 +222,22 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
 
     FUNC_ENTER_STATIC
 
-    HDassert(old_filename);
+    assert(old_filename);
 
-    old_filename_len = HDstrlen(old_filename);
+    old_filename_len = strlen(old_filename);
     if (0 == old_filename_len)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid filename")
 
-    new_filename_len = old_filename_len + HDstrlen(suffix) + 1;
+    new_filename_len = old_filename_len + strlen(suffix) + 1;
     if (NULL == (tmp_buffer = H5MM_malloc(new_filename_len)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer")
 
     /* Determine if filename contains a ".h5" extension. */
     if ((file_extension = strstr(old_filename, ".h5"))) {
         /* Insert the printf format between the filename and ".h5" extension. */
-        HDstrcpy(tmp_buffer, old_filename);
+        strcpy(tmp_buffer, old_filename);
         file_extension = strstr(tmp_buffer, ".h5");
-        HDsprintf(file_extension, "%s%s", suffix, ".h5");
+        sprintf(file_extension, "%s%s", suffix, ".h5");
     }
     else if ((file_extension = strrchr(old_filename, '.'))) {
         char *new_extension_loc = NULL;
@@ -245,15 +245,15 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
-        HDstrcpy(tmp_buffer, old_filename);
+        strcpy(tmp_buffer, old_filename);
         new_extension_loc = strrchr(tmp_buffer, '.');
-        HDsprintf(new_extension_loc, "%s%s", suffix, file_extension);
+        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
     }
     else {
         /* If the filename doesn't contain an extension at all, just insert
          * the printf format at the end of the filename.
          */
-        HDsnprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
     }
 
     ret_value = tmp_buffer;
@@ -590,7 +590,7 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*o
     FUNC_ENTER_STATIC_NOERR
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)9);
+    strncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -770,9 +770,9 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate temporary member name")
 
     /* Check that names are unique */
-    HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
-    if (!HDstrcmp(memb_name, temp)) {
+    snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
+    if (!strcmp(memb_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(name)))
@@ -785,14 +785,14 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     /* Open all the family members */
     while (1) {
-        HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
+        snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
 
         /* Enlarge member array */
         if (file->nmembs >= file->amembs) {
             unsigned n = MAX(64, 2 * file->amembs);
             H5FD_t **x;
 
-            HDassert(n > 0);
+            assert(n > 0);
             if (NULL == (x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to reallocate members")
             file->amembs = n;
@@ -938,8 +938,8 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(f1->nmembs >= 1 && f1->memb[0]);
-    HDassert(f2->nmembs >= 1 && f2->memb[0]);
+    assert(f1->nmembs >= 1 && f1->memb[0]);
+    assert(f2->nmembs >= 1 && f2->memb[0]);
 
     ret_value = H5FDcmp(f1->memb[0], f2->memb[0]);
 
@@ -1063,7 +1063,7 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if (u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u + 1);
-            HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
+            snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5E_BEGIN_TRY
             {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
@@ -1133,7 +1133,7 @@ H5FD__family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
      * with `i' equal to that member. If all members have zero EOF then exit
      * loop with i==0.
      */
-    HDassert(file->nmembs > 0);
+    assert(file->nmembs > 0);
     for (i = (int)file->nmembs - 1; i >= 0; --i) {
         if ((eof = H5FD_get_eof(file->memb[i], type)) != 0)
             break;
@@ -1248,7 +1248,7 @@ H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
             tempreq = SIZET_MAX;
         req = MIN(size, (size_t)tempreq);
 
-        HDassert(u < file->nmembs);
+        assert(u < file->nmembs);
 
         if (H5FDread(file->memb[u], type, dxpl_id, sub, req, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "member file read failed")
@@ -1313,7 +1313,7 @@ H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
             tempreq = SIZET_MAX;
         req = MIN(size, (size_t)tempreq);
 
-        HDassert(u < file->nmembs);
+        assert(u < file->nmembs);
 
         if (H5FDwrite(file->memb[u], type, dxpl_id, sub, req, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed")
@@ -1496,7 +1496,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_STATIC
 
-    HDassert(filename);
+    assert(filename);
 
     /* Get the driver info (for the member fapl)
      * The family_open call accepts H5P_DEFAULT, so we'll accept that here, too.
@@ -1526,9 +1526,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate temporary member name")
 
     /* Sanity check to make sure that generated names are unique */
-    HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
-    if (!HDstrcmp(member_name, temp)) {
+    snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
+    if (!strcmp(member_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(filename)))
@@ -1544,7 +1544,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     current_member = 0;
     while (1) {
         /* Fix up the filename with the current member's number */
-        HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
+        snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
 
         /* Attempt to delete the member files. If the first file throws an error
          * we always consider this an error. With subsequent member files, however,

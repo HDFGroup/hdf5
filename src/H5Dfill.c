@@ -129,10 +129,10 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(fill_type);
-    HDassert(buf);
-    HDassert(buf_type);
-    HDassert(space);
+    assert(fill_type);
+    assert(buf);
+    assert(buf_type);
+    assert(space);
 
     /* Make sure the dataspace has an extent set (or is NULL) */
     if (!(H5S_has_extent(space)))
@@ -314,13 +314,13 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(fb_info);
-    HDassert(fill);
-    HDassert(dset_type);
-    HDassert(dset_type_id > 0);
+    assert(fb_info);
+    assert(fill);
+    assert(dset_type);
+    assert(dset_type_id > 0);
 
     /* Reset fill buffer information */
-    HDmemset(fb_info, 0, sizeof(*fb_info));
+    memset(fb_info, 0, sizeof(*fb_info));
 
     /* Cache constant information from the dataset */
     fb_info->fill            = fill;
@@ -350,9 +350,9 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
 
             /* Retrieve sizes of memory & file datatypes */
             fb_info->mem_elmt_size = H5T_get_size(fb_info->mem_type);
-            HDassert(fb_info->mem_elmt_size > 0);
+            assert(fb_info->mem_elmt_size > 0);
             fb_info->file_elmt_size = H5T_get_size(dset_type);
-            HDassert(fb_info->file_elmt_size == (size_t)fill->size);
+            assert(fb_info->file_elmt_size == (size_t)fill->size);
 
             /* If fill value is not library default, use it to set the element size */
             fb_info->max_elmt_size = MAX(fb_info->mem_elmt_size, fb_info->file_elmt_size);
@@ -362,7 +362,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
             else
                 fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
-            HDassert(fb_info->elmts_per_buf > 0);
+            assert(fb_info->elmts_per_buf > 0);
 
             /* Compute the buffer size to use */
             fb_info->fill_buf_size = MIN(max_buf_size, (fb_info->elmts_per_buf * fb_info->max_elmt_size));
@@ -407,7 +407,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
         }     /* end if */
         else {
             /* If fill value is not library default, use it to set the element size */
-            HDassert(fill->size >= 0);
+            assert(fill->size >= 0);
             fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = (size_t)fill->size;
 
             /* Compute the number of elements that fit within a buffer to write */
@@ -415,7 +415,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
             else
                 fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
-            HDassert(fb_info->elmts_per_buf > 0);
+            assert(fb_info->elmts_per_buf > 0);
 
             /* Compute the buffer size to use */
             fb_info->fill_buf_size = MIN(max_buf_size, fb_info->elmts_per_buf * fb_info->max_elmt_size);
@@ -441,14 +441,14 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
     else { /* Fill the buffer with the default fill value */
         /* Retrieve size of elements */
         fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = H5T_get_size(dset_type);
-        HDassert(fb_info->max_elmt_size > 0);
+        assert(fb_info->max_elmt_size > 0);
 
         /* Compute the number of elements that fit within a buffer to write */
         if (total_nelmts > 0)
             fb_info->elmts_per_buf = MIN(total_nelmts, MAX(1, (max_buf_size / fb_info->max_elmt_size)));
         else
             fb_info->elmts_per_buf = max_buf_size / fb_info->max_elmt_size;
-        HDassert(fb_info->elmts_per_buf > 0);
+        assert(fb_info->elmts_per_buf > 0);
 
         /* Compute the buffer size to use */
         fb_info->fill_buf_size = MIN(max_buf_size, (fb_info->elmts_per_buf * fb_info->max_elmt_size));
@@ -458,19 +458,19 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             fb_info->fill_buf            = caller_fill_buf;
             fb_info->use_caller_fill_buf = TRUE;
 
-            HDmemset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
+            memset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
         } /* end if */
         else {
             if (alloc_func) {
                 fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
 
-                HDmemset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
+                memset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
             } /* end if */
             else {
                 htri_t buf_avail = H5FL_BLK_AVAIL(
                     zero_fill,
                     fb_info->fill_buf_size); /* Check if there is an already zeroed out buffer available */
-                HDassert(buf_avail != FAIL);
+                assert(buf_avail != FAIL);
 
                 /* Allocate temporary buffer (zeroing it if no buffer is available) */
                 if (!buf_avail)
@@ -513,16 +513,16 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(fb_info);
-    HDassert(fb_info->has_vlen_fill_type);
-    HDassert(fb_info->fill_buf);
+    assert(fb_info);
+    assert(fb_info->has_vlen_fill_type);
+    assert(fb_info->fill_buf);
 
     /* Make a copy of the (disk-based) fill value into the buffer */
     H5MM_memcpy(fb_info->fill_buf, fb_info->fill->buf, fb_info->file_elmt_size);
 
     /* Reset first element of background buffer, if necessary */
     if (H5T_path_bkg(fb_info->fill_to_mem_tpath))
-        HDmemset(fb_info->bkg_buf, 0, fb_info->max_elmt_size);
+        memset(fb_info->bkg_buf, 0, fb_info->max_elmt_size);
 
     /* Type convert the dataset buffer, to copy any VL components */
     if (H5T_convert(fb_info->fill_to_mem_tpath, fb_info->file_tid, fb_info->mem_tid, (size_t)1, (size_t)0,
@@ -536,7 +536,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
 
     /* Reset the entire background buffer, if necessary */
     if (H5T_path_bkg(fb_info->mem_to_dset_tpath))
-        HDmemset(fb_info->bkg_buf, 0, fb_info->bkg_buf_size);
+        memset(fb_info->bkg_buf, 0, fb_info->bkg_buf_size);
 
     /* Make a copy of the fill buffer so we can free dynamic elements after conversion */
     if (fb_info->fill_alloc_func)
@@ -593,8 +593,8 @@ H5D__fill_release(H5D_fill_buf_info_t *fb_info)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(fb_info);
-    HDassert(fb_info->fill);
+    assert(fb_info);
+    assert(fb_info->fill);
 
     /* Free the buffer for fill values */
     if (!fb_info->use_caller_fill_buf && fb_info->fill_buf) {
@@ -630,7 +630,7 @@ H5D__fill_term(H5D_fill_buf_info_t *fb_info)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(fb_info);
+    assert(fb_info);
 
     /* Free the buffer for fill values */
     H5D__fill_release(fb_info);

@@ -95,7 +95,7 @@ h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size
      * Allocate buffer to hold name of an object
      */
     c_buf_size = (size_t)*buf_size + 1;
-    c_buf      = (char *)HDmalloc(c_buf_size);
+    c_buf      = (char *)malloc(c_buf_size);
     if (c_buf == NULL)
         return ret_value;
 
@@ -115,7 +115,7 @@ h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size
     ret_value  = 0;
 
 DONE:
-    HDfree(c_buf);
+    free(c_buf);
     return ret_value;
 }
 

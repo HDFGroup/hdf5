@@ -730,8 +730,8 @@ test_nbit_compression(H5File &file)
 
     SUBTEST("N-bit compression (setup)");
 
-    HDmemset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
-    HDmemset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    memset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    memset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
 
     try {
         // Define datatypes of members of compound datatype
@@ -1097,7 +1097,7 @@ test_getnativeinfo(H5File &file)
 
         // Get dataset header info
         H5O_native_info_t ninfo;
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
         verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
@@ -1105,7 +1105,7 @@ test_getnativeinfo(H5File &file)
         // Open the dataset we created above and then close it.  This is one
         // way to open an existing dataset for accessing.
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
-        HDmemset(&ninfo, 0, sizeof(ninfo));
+        memset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
         verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
@@ -1445,5 +1445,5 @@ test_dset()
 extern "C" void
 cleanup_dsets()
 {
-    HDremove(FILE1.c_str());
+    remove(FILE1.c_str());
 } // cleanup_dsets

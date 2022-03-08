@@ -70,7 +70,7 @@ int
 setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
-    HDmemset(opts, 0, sizeof(options_t));
+    memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
     opts->use_swmr    = 1; /* use swmr open */
     opts->iterations  = 1;
@@ -135,25 +135,25 @@ main(int argc, char *argv[])
     /* Create file */
     /* =========== */
     if (UC_opts.launch != UC_READER) {
-        HDprintf("Creating skeleton data file for test...\n");
+        printf("Creating skeleton data file for test...\n");
         if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
-            HDfprintf(stderr, "can't create creation FAPL\n");
+            fprintf(stderr, "can't create creation FAPL\n");
             Hgoto_error(1);
         }
         if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            HDfprintf(stderr, "can't set creation FAPL libver bounds\n");
+            fprintf(stderr, "can't set creation FAPL libver bounds\n");
             Hgoto_error(1);
         }
         if (create_uc_file(&UC_opts) < 0) {
-            HDfprintf(stderr, "***encounter error\n");
+            fprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
         }
         else {
-            HDprintf("File created.\n");
+            printf("File created.\n");
         }
         /* Close FAPL to prevent issues with forking later */
         if (H5Pclose(UC_opts.fapl_id) < 0) {
-            HDfprintf(stderr, "can't close creation FAPL\n");
+            fprintf(stderr, "can't close creation FAPL\n");
             Hgoto_error(1);
         }
         UC_opts.fapl_id = H5I_INVALID_HID;
@@ -163,8 +163,8 @@ main(int argc, char *argv[])
     /* Fork process */
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((childpid = HDfork()) < 0) {
-            HDperror("fork");
+        if ((childpid = fork()) < 0) {
+            perror("fork");
             Hgoto_error(1);
         }
     }
@@ -176,20 +176,20 @@ main(int argc, char *argv[])
     if (UC_opts.launch != UC_WRITER) {
         /* child process launch the reader */
         if (0 == childpid) {
-            HDprintf("%d: launch reader process\n", mypid);
+            printf("%d: launch reader process\n", mypid);
             if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
-                HDfprintf(stderr, "can't create read FAPL\n");
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "can't create read FAPL\n");
+                exit(EXIT_FAILURE);
             }
             if (read_uc_file(send_wait, &UC_opts) < 0) {
-                HDfprintf(stderr, "read_uc_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "read_uc_file encountered error\n");
+                exit(EXIT_FAILURE);
             }
             if (H5Pclose(UC_opts.fapl_id) < 0) {
-                HDfprintf(stderr, "can't close read FAPL\n");
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "can't close read FAPL\n");
+                exit(EXIT_FAILURE);
             }
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
     }
 
@@ -197,39 +197,39 @@ main(int argc, char *argv[])
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-    HDprintf("%d: continue as the writer process\n", mypid);
+    printf("%d: continue as the writer process\n", mypid);
 
     /* Set the file access property list */
     if ((fapl = h5_fileaccess()) < 0) {
-        HDfprintf(stderr, "can't get write FAPL\n");
+        fprintf(stderr, "can't get write FAPL\n");
         Hgoto_error(1);
     }
 
     if (UC_opts.use_swmr) {
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            HDfprintf(stderr, "can't set write FAPL libver bounds\n");
+            fprintf(stderr, "can't set write FAPL libver bounds\n");
             Hgoto_error(1);
         }
     }
 
     if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) <
         0) {
-        HDfprintf(stderr, "H5Fopen failed\n");
+        fprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
 
     if (write_uc_file(send_wait, fid, &UC_opts) < 0) {
-        HDfprintf(stderr, "write_uc_file encountered error\n");
+        fprintf(stderr, "write_uc_file encountered error\n");
         Hgoto_error(1);
     }
 
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Failed to close file id\n");
+        fprintf(stderr, "Failed to close file id\n");
         Hgoto_error(1);
     }
 
     if (H5Pclose(fapl) < 0) {
-        HDfprintf(stderr, "can't close write FAPL\n");
+        fprintf(stderr, "can't close write FAPL\n");
         Hgoto_error(1);
     }
 
@@ -238,28 +238,28 @@ main(int argc, char *argv[])
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+            perror("waitpid");
             Hgoto_error(1);
         }
 
         if (WIFEXITED(child_status)) {
             if ((child_ret_value = WEXITSTATUS(child_status)) != 0) {
-                HDprintf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
+                printf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
                 Hgoto_error(1);
             }
         }
         else {
-            HDprintf("%d: child process terminated abnormally\n", mypid);
+            printf("%d: child process terminated abnormally\n", mypid);
             Hgoto_error(2);
         }
     }
 
 done:
     if (ret_value != 0) {
-        HDprintf("Error(s) encountered\n");
+        printf("Error(s) encountered\n");
     }
     else {
-        HDprintf("All passed\n");
+        printf("All passed\n");
     }
 
     return (ret_value);
@@ -270,7 +270,7 @@ done:
 int
 main(void)
 {
-    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    fprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 

@@ -110,10 +110,10 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(obj_size > 0);
-    HDassert(obj);
-    HDassert(id);
+    assert(hdr);
+    assert(obj_size > 0);
+    assert(obj);
+    assert(id);
 
     /* Check pipeline */
     H5HF_MAN_WRITE_CHECK_PLINE(hdr)
@@ -136,13 +136,13 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
         if (H5HF__man_iblock_alloc_row(hdr, &sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't break up row section")
     } /* end if */
-    HDassert(sec_node->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
+    assert(sec_node->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
 
     /* Check for 'single' section being serialized */
     if (sec_node->sect_info.state == H5FS_SECT_SERIALIZED)
         if (H5HF__sect_single_revive(hdr, sec_node) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
-    HDassert(sec_node->sect_info.state == H5FS_SECT_LIVE);
+    assert(sec_node->sect_info.state == H5FS_SECT_LIVE);
 
     /* Retrieve direct block address from section */
     if (H5HF__sect_single_dblock_info(hdr, sec_node, &dblock_addr, &dblock_size) < 0)
@@ -160,7 +160,7 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     blk_off = (size_t)(sec_node->sect_info.addr - dblock->block_off);
 
     /* Sanity checks */
-    HDassert(sec_node->sect_info.size >= obj_size);
+    assert(sec_node->sect_info.size >= obj_size);
 
     /* Reduce (& possibly re-add) single section */
     if (H5HF__sect_single_reduce(hdr, sec_node, obj_size) < 0)
@@ -179,7 +179,7 @@ H5HF__man_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
         p += obj_size;
 
         /* Sanity check */
-        HDassert((size_t)(p - (dblock->blk + blk_off)) == obj_size);
+        assert((size_t)(p - (dblock->blk + blk_off)) == obj_size);
     } /* end block */
 
     /* Set the heap ID for the new object (heap offset & obj length) */
@@ -226,9 +226,9 @@ H5HF__man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(hdr);
+    assert(id);
+    assert(obj_len_p);
 
     /* Skip over the flag byte */
     id++;
@@ -262,9 +262,9 @@ H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj_off_p);
+    assert(hdr);
+    assert(id);
+    assert(obj_off_p);
 
     /* Skip over the flag byte */
     id++;
@@ -311,9 +311,9 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Set the access mode for the direct block */
     if (op_flags & H5HF_OP_MODIFY) {
@@ -401,7 +401,7 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     } /* end else */
 
     /* Compute offset of object within block */
-    HDassert((obj_off - dblock->block_off) < (hsize_t)dblock_size);
+    assert((obj_off - dblock->block_off) < (hsize_t)dblock_size);
     blk_off = (size_t)(obj_off - dblock->block_off);
 
     /* Check for object's offset in the direct block prefix information */
@@ -449,9 +449,9 @@ H5HF__man_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Call the internal 'op' routine routine */
     if (H5HF__man_op_real(hdr, id, H5HF__op_read, obj, 0) < 0)
@@ -483,9 +483,9 @@ H5HF__man_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(obj);
+    assert(hdr);
+    assert(id);
+    assert(obj);
 
     /* Call the internal 'op' routine routine
      *
@@ -524,9 +524,9 @@ H5HF__man_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_da
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
-    HDassert(op);
+    assert(hdr);
+    assert(id);
+    assert(op);
 
     /* Call the internal 'op' routine routine */
     if (H5HF__man_op_real(hdr, id, op, op_data, 0) < 0)
@@ -567,8 +567,8 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(id);
+    assert(hdr);
+    assert(id);
 
     /* Check pipeline */
     H5HF_MAN_WRITE_CHECK_PLINE(hdr)
@@ -623,7 +623,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
     } /* end else */
 
     /* Compute offset of object within block */
-    HDassert((obj_off - dblock_block_off) < (hsize_t)dblock_size);
+    assert((obj_off - dblock_block_off) < (hsize_t)dblock_size);
     blk_off = (size_t)(obj_off - dblock_block_off);
 
     /* Check for object's offset in the direct block prefix information */

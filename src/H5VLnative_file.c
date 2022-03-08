@@ -231,11 +231,11 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Get length of file name */
-            *file_args->file_name_len = HDstrlen(H5F_OPEN_NAME(f));
+            *file_args->file_name_len = strlen(H5F_OPEN_NAME(f));
 
             /* Populate buffer with name, if given */
             if (file_args->buf) {
-                HDstrncpy(file_args->buf, H5F_OPEN_NAME(f),
+                strncpy(file_args->buf, H5F_OPEN_NAME(f),
                           MIN(*file_args->file_name_len + 1, file_args->buf_size));
                 if (*file_args->file_name_len >= file_args->buf_size)
                     file_args->buf[file_args->buf_size - 1] = '\0';
@@ -753,7 +753,7 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
     FUNC_ENTER_PACKAGE
 
     /* This routine should only be called when a file ID's ref count drops to zero */
-    HDassert(H5F_ID_EXISTS(f));
+    assert(H5F_ID_EXISTS(f));
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.

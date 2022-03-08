@@ -107,7 +107,7 @@ H5HF__hdr_alloc(H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(f);
+    assert(f);
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5HF_hdr_t)))
@@ -153,8 +153,8 @@ H5HF__hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(iblock_row >= hdr->man_dtable.max_direct_rows);
+    assert(hdr);
+    assert(iblock_row >= hdr->man_dtable.max_direct_rows);
 
     /* Set the free space in direct blocks */
     acc_heap_size   = 0;
@@ -199,7 +199,7 @@ H5HF__hdr_finish_init_phase1(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Compute/cache some values */
     hdr->heap_off_size = (uint8_t)H5HF_SIZEOF_OFFSET_BITS(hdr->man_dtable.cparam.max_index);
@@ -237,7 +237,7 @@ H5HF__hdr_finish_init_phase2(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Set the free space in direct blocks */
     for (u = 0; u < hdr->man_dtable.max_root_rows; u++) {
@@ -290,7 +290,7 @@ H5HF__hdr_finish_init(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* First phase of header final initialization */
     if (H5HF__hdr_finish_init_phase1(hdr) < 0)
@@ -328,8 +328,8 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
 #ifndef NDEBUG
     /* Check for valid parameters */
@@ -521,11 +521,11 @@ H5HF__hdr_protect(H5F_t *f, haddr_t addr, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(H5F_addr_defined(addr));
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up userdata for protect call */
     cache_udata.f = f;
@@ -567,7 +567,7 @@ H5HF__hdr_incr(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as un-evictable when a block is depending on it */
     if (hdr->rc == 0)
@@ -601,15 +601,15 @@ H5HF__hdr_decr(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->rc);
+    assert(hdr);
+    assert(hdr->rc);
 
     /* Decrement reference count on shared header */
     hdr->rc--;
 
     /* Mark header as evictable again when no child blocks depend on it */
     if (hdr->rc == 0) {
-        HDassert(hdr->file_rc == 0);
+        assert(hdr->file_rc == 0);
         if (H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
     } /* end if */
@@ -636,7 +636,7 @@ H5HF__hdr_fuse_incr(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Increment file reference count on shared header */
     hdr->file_rc++;
@@ -662,8 +662,8 @@ H5HF__hdr_fuse_decr(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->file_rc);
+    assert(hdr);
+    assert(hdr->file_rc);
 
     /* Decrement file reference count on shared header */
     hdr->file_rc--;
@@ -691,7 +691,7 @@ H5HF__hdr_dirty(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Resize pinned header in cache if I/O filter is present. */
     if (hdr->filter_len > 0)
@@ -728,10 +728,10 @@ H5HF__hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Update heap header */
-    HDassert(amt > 0 || hdr->total_man_free >= (hsize_t)-amt);
+    assert(amt > 0 || hdr->total_man_free >= (hsize_t)-amt);
     hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + amt);
 
     /* Mark heap header as modified */
@@ -764,13 +764,13 @@ H5HF__hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Set the total managed space in heap */
     hdr->man_size = new_size;
 
     /* Adjust the free space in direct blocks */
-    HDassert(extra_free > 0 || hdr->total_man_free >= (hsize_t)-extra_free);
+    assert(extra_free > 0 || hdr->total_man_free >= (hsize_t)-extra_free);
     hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + extra_free);
 
     /* Mark heap header as modified */
@@ -801,8 +801,8 @@ H5HF__hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(alloc_size);
+    assert(hdr);
+    assert(alloc_size);
 
     /* Update the "allocated" size within the heap */
     hdr->man_alloc_size += alloc_size;
@@ -832,8 +832,8 @@ H5HF__hdr_start_iter(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, hsize_t curr_off,
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(iblock);
+    assert(hdr);
+    assert(iblock);
 
     /* Set up "next block" iterator at correct location */
     if (H5HF__man_iter_start_entry(hdr, &hdr->next_block, iblock, curr_entry) < 0)
@@ -868,7 +868,7 @@ H5HF__hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Reset "next block" iterator */
     if (H5HF__man_iter_reset(&hdr->next_block) < 0)
@@ -905,15 +905,15 @@ H5HF__hdr_skip_blocks(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, unsigned start_e
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(iblock);
-    HDassert(nentries);
+    assert(hdr);
+    assert(iblock);
+    assert(nentries);
 
     /* Compute the span within the heap to skip */
     row       = start_entry / hdr->man_dtable.cparam.width;
     col       = start_entry % hdr->man_dtable.cparam.width;
     sect_size = H5HF__dtable_span_size(&hdr->man_dtable, row, col, nentries);
-    HDassert(sect_size > 0);
+    assert(sect_size > 0);
 
     /* Advance the new block iterator */
     if (H5HF__hdr_inc_iter(hdr, sect_size, nentries) < 0)
@@ -953,8 +953,8 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(min_dblock_size > 0);
+    assert(hdr);
+    assert(min_dblock_size > 0);
 
     /* Check for creating first indirect block */
     if (hdr->man_dtable.curr_root_rows == 0) {
@@ -1040,7 +1040,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
             if (next_row >= hdr->man_dtable.max_direct_rows) {
                 unsigned child_nrows; /* Number of rows in new indirect block */
 
-                HDassert(!H5F_addr_defined(iblock->ents[next_entry].addr));
+                assert(!H5F_addr_defined(iblock->ents[next_entry].addr));
 
                 /* Compute # of rows in next child indirect block to use */
                 child_nrows =
@@ -1056,7 +1056,7 @@ H5HF__hdr_update_iter(H5HF_hdr_t *hdr, size_t min_dblock_size)
                     child_rows_needed = (H5VM_log2_of2((uint32_t)min_dblock_size) -
                                          H5VM_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size)) +
                                         2;
-                    HDassert(child_rows_needed > child_nrows);
+                    assert(child_rows_needed > child_nrows);
                     child_entry =
                         (next_row + (child_rows_needed - child_nrows)) * hdr->man_dtable.cparam.width;
                     if (child_entry > (iblock->nrows * hdr->man_dtable.cparam.width))
@@ -1146,8 +1146,8 @@ H5HF__hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(nentries);
+    assert(hdr);
+    assert(nentries);
 
     /* Advance the iterator for the current location within the indirect block */
     if (hdr->next_block.curr)
@@ -1188,7 +1188,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Initialize block iterator, if necessary */
     if (!H5HF__man_iter_ready(&hdr->next_block))
@@ -1334,7 +1334,7 @@ H5HF__hdr_empty(H5HF_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Reset block iterator, if necessary */
     if (H5HF__man_iter_ready(&hdr->next_block))
@@ -1385,7 +1385,7 @@ H5HF__hdr_free(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Free the block size lookup table for the doubling table */
     if (H5HF__dtable_dest(&hdr->man_dtable) < 0)
@@ -1426,8 +1426,8 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(!hdr->file_rc);
+    assert(hdr);
+    assert(!hdr->file_rc);
 
 #ifndef NDEBUG
     {
@@ -1438,8 +1438,8 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for heap header")
 
         /* Sanity checks on heap header */
-        HDassert(hdr_status & H5AC_ES__IN_CACHE);
-        HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+        assert(hdr_status & H5AC_ES__IN_CACHE);
+        assert(hdr_status & H5AC_ES__IS_PROTECTED);
     }  /* end block */
 #endif /* NDEBUG */
 

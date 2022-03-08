@@ -130,7 +130,7 @@ H5O__group_free_copy_file_udata(void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(udata);
+    assert(udata);
 
     /* Free the ginfo struct (including nested data structs) */
     H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
@@ -167,7 +167,7 @@ H5O__group_isa(const H5O_t *oh)
 
     FUNC_ENTER_STATIC
 
-    HDassert(oh);
+    assert(oh);
 
     /* Check for any of the messages that indicate a group */
     if ((stab_exists = H5O_msg_exists_oh(oh, H5O_STAB_ID)) < 0)
@@ -202,7 +202,7 @@ H5O__group_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 
     FUNC_ENTER_STATIC
 
-    HDassert(obj_loc);
+    assert(obj_loc);
 
     *opened_type = H5I_GROUP;
 
@@ -243,9 +243,9 @@ H5O__group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(crt_info);
-    HDassert(obj_loc);
+    assert(f);
+    assert(crt_info);
+    assert(obj_loc);
 
     /* Create the the group */
     if (NULL == (grp = H5G__create(f, crt_info)))
@@ -326,11 +326,11 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
-    HDassert(oh);
-    HDassert(bh_info);
+    assert(loc);
+    assert(loc->file);
+    assert(H5F_addr_defined(loc->addr));
+    assert(oh);
+    assert(bh_info);
 
     /* Check for "new style" group info */
     if ((exists = H5O_msg_exists_oh(oh, H5O_LINFO_ID)) < 0)

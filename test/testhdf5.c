@@ -81,7 +81,7 @@ main(int argc, char *argv[])
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !HDgetenv(HDF5_NOCLEANUP))
+    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
         TestCleanup();
 
     /* Release test infrastructure */
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
     /* Exit failure if errors encountered; else exit success. */
     /* No need to print anything since PerformTests() already does. */
     if (GetTestNumErrs() > 0)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     else
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
 } /* end main() */

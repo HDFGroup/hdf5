@@ -166,10 +166,10 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(grp_loc);
-    HDassert(lnk);
-    HDassert(lnk->type >= H5L_TYPE_UD_MIN);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(lnk);
+    assert(lnk->type >= H5L_TYPE_UD_MIN);
+    assert(obj_loc);
 
     /* Get the link class for this type of link. */
     if (NULL == (link_class = H5L_find_class(lnk->type)))
@@ -287,9 +287,9 @@ H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(grp_loc);
-    HDassert(lnk);
-    HDassert(lnk->type == H5L_TYPE_SOFT);
+    assert(grp_loc);
+    assert(lnk);
+    assert(lnk->type == H5L_TYPE_SOFT);
 
     /* Set up temporary location */
     tmp_grp_loc.oloc = &tmp_grp_oloc;
@@ -359,9 +359,9 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(grp_loc);
-    HDassert(lnk);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(lnk);
+    assert(obj_loc);
 
     /* If we found a symbolic link then we should follow it.  But if this
      * is the last component of the name and the H5G_TARGET_SLINK bit of
@@ -478,9 +478,9 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     FUNC_ENTER_STATIC
 
     /* Check parameters */
-    HDassert(_loc);
-    HDassert(name);
-    HDassert(op);
+    assert(_loc);
+    assert(name);
+    assert(op);
 
     /*
      * Where does the searching start?  For absolute names it starts at the
@@ -492,7 +492,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 
         /* Look up root group for starting location */
         root_grp = H5G_rootof(_loc->oloc->file);
-        HDassert(root_grp);
+        assert(root_grp);
 
         /* Set the location entry to the root group's info */
         loc.oloc = &(root_grp->oloc);
@@ -529,7 +529,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
     /* Get a pointer to a buffer that's large enough  */
-    if (NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+    if (NULL == (comp = (char *)H5WB_actual(wb, (strlen(name) + 1))))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Traverse the path */
@@ -572,8 +572,8 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         /* If the lookup was OK, build object location and traverse special links, etc. */
         if (lookup_status) {
             /* Sanity check link and indicate it's valid */
-            HDassert(lnk.type >= H5L_TYPE_HARD);
-            HDassert(!HDstrcmp(comp, lnk.name));
+            assert(lnk.type >= H5L_TYPE_HARD);
+            assert(!strcmp(comp, lnk.name));
             link_valid = TRUE;
 
             /* Build object location from the link */
@@ -604,7 +604,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                     cb_loc = NULL;
             } /* end if */
             else {
-                HDassert(!obj_loc_valid);
+                assert(!obj_loc_valid);
                 cb_lnk = NULL;
                 cb_loc = NULL;
             } /* end else */
@@ -687,7 +687,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* XXX: Should we allow user to control the group creation params here? -QAK */
                 gcrt_info.gcpl_id    = H5P_GROUP_CREATE_DEFAULT;
                 gcrt_info.cache_type = H5G_NOTHING_CACHED;
-                HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+                memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
                 if (H5G__obj_create_real(grp_oloc.file, ginfo, linfo, pline, &gcrt_info,
                                          obj_loc.oloc /*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
@@ -750,14 +750,14 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
      * Since we don't have a group location or a link to the object we pass in
      * NULL.
      */
-    HDassert(group_copy);
+    assert(group_copy);
     if ((op)(NULL, ".", NULL, &grp_loc, op_data, &own_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "traversal operator failed")
 
     /* If the callback took ownership of the object location, it actually has
      * ownership of grp_loc.  It shouldn't have tried to take ownership of
      * the "group location", which was NULL. */
-    HDassert(!(own_loc & H5G_OWN_GRP_LOC));
+    assert(!(own_loc & H5G_OWN_GRP_LOC));
     if (own_loc & H5G_OWN_OBJ_LOC)
         own_loc |= H5G_OWN_GRP_LOC;
 

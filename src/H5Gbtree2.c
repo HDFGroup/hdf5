@@ -157,7 +157,7 @@ H5G__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Compare the string values */
-    udata->cmp = HDstrcmp(udata->name, lnk->name);
+    udata->cmp = strcmp(udata->name, lnk->name);
 
     /* Check for correct link & callback to make */
     if (udata->cmp == 0 && udata->found_op) {
@@ -224,8 +224,8 @@ H5G__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check hash value */
     if (bt2_udata->name_hash < bt2_rec->hash)
@@ -236,7 +236,7 @@ H5G__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
         H5G_fh_ud_cmp_t fh_udata; /* User data for fractal heap 'op' callback */
 
         /* Sanity check */
-        HDassert(bt2_udata->name_hash == bt2_rec->hash);
+        assert(bt2_udata->name_hash == bt2_rec->hash);
 
         /* Prepare user data for callback */
         /* down */
@@ -336,9 +336,9 @@ H5G__dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%x, ", indent, "", fwidth, "Record:", (unsigned)nrecord->hash);
+    fprintf(stream, "%*s%-*s {%x, ", indent, "", fwidth, "Record:", (unsigned)nrecord->hash);
     for (u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
-        HDfprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
+        fprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G__dense_btree2_name_debug() */
@@ -394,8 +394,8 @@ H5G__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, i
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check creation order value */
     if (bt2_udata->corder < bt2_rec->corder)
@@ -484,9 +484,9 @@ H5G__dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void 
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%llu, ", indent, "", fwidth, "Record:", (unsigned long long)nrecord->corder);
+    fprintf(stream, "%*s%-*s {%llu, ", indent, "", fwidth, "Record:", (unsigned long long)nrecord->corder);
     for (u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
-        HDfprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
+        fprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G__dense_btree2_corder_debug() */

@@ -302,7 +302,7 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
         return ret_value;
     c_startblock = (hsize_t)*startblock;
 
-    c_buf = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)(c_num_blocks * 2 * (hsize_t)rank));
+    c_buf = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)(c_num_blocks * 2 * (hsize_t)rank));
     if (!c_buf)
         return ret_value;
 
@@ -324,7 +324,7 @@ h5sget_select_hyper_blocklist_c(hid_t_f *space_id, hsize_t_f *startblock, hsize_
         }
     }
 
-    HDfree(c_buf);
+    free(c_buf);
     if (ret_value >= 0)
         ret_value = 0;
     return ret_value;
@@ -430,7 +430,7 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
         return ret_value;
 
     c_startpoint = (hsize_t)*startpoint;
-    c_buf        = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)(c_num_points * (hsize_t)rank));
+    c_buf        = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)(c_num_points * (hsize_t)rank));
     if (!c_buf)
         return ret_value;
     ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint, c_num_points, c_buf);
@@ -450,7 +450,7 @@ h5sget_select_elem_pointlist_c(hid_t_f *space_id, hsize_t_f *startpoint, hsize_t
     if (ret_value >= 0)
         ret_value = 0;
 
-    HDfree(c_buf);
+    free(c_buf);
 
     return ret_value;
 }
@@ -1055,19 +1055,19 @@ h5scombine_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f
     rank = H5Sget_simple_extent_ndims(*space_id);
     if (rank < 0)
         return ret_value;
-    c_start = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_start = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_start == NULL)
         goto DONE;
 
-    c_count = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_count = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_count == NULL)
         goto DONE;
 
-    c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_stride = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_stride == NULL)
         goto DONE;
 
-    c_block = (hsize_t *)HDmalloc(sizeof(hsize_t) * (unsigned)rank);
+    c_block = (hsize_t *)malloc(sizeof(hsize_t) * (unsigned)rank);
     if (c_block == NULL)
         goto DONE;
 
@@ -1093,13 +1093,13 @@ h5scombine_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f
     ret_value = 0;
 DONE:
     if (c_start != NULL)
-        HDfree(c_start);
+        free(c_start);
     if (c_count != NULL)
-        HDfree(c_count);
+        free(c_count);
     if (c_stride != NULL)
-        HDfree(c_stride);
+        free(c_stride);
     if (c_block != NULL)
-        HDfree(c_block);
+        free(c_block);
     return ret_value;
 }
 /****if* H5Sf/h5scombine_select_c
@@ -1258,7 +1258,7 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
     c_space_id = *space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
 
-    c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)rank * ((size_t)*nelements));
+    c_coord = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)rank * ((size_t)*nelements));
     if (!c_coord)
         return ret_value;
     for (i = 0; i < (size_t)*nelements; i++) {
@@ -1271,7 +1271,7 @@ h5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t_
     status      = H5Sselect_elements(c_space_id, c_op, c_nelements, c_coord);
     if (status >= 0)
         ret_value = 0;
-    HDfree(c_coord);
+    free(c_coord);
     return ret_value;
 }
 
@@ -1364,7 +1364,7 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
     /*
      * Allocate buffer
      */
-    if (NULL == (c_buf = (unsigned char *)HDmalloc(c_size)))
+    if (NULL == (c_buf = (unsigned char *)malloc(c_size)))
         return ret_value;
     /*
      * Call H5Sencode function.
@@ -1379,11 +1379,11 @@ h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc, hid_t_f *fapl_id)
      * with blanks.
      */
 
-    HDmemcpy(_fcdtocp(buf), (char *)c_buf, c_size);
+    memcpy(_fcdtocp(buf), (char *)c_buf, c_size);
 
     ret_value = 0;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 

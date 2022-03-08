@@ -71,21 +71,21 @@ FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
     {                                                                                                        \
-        errorfile = HDfopen(ERRFILE, "w+");                                                                  \
-        HDfprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
-        HDfflush(errorfile);                                                                                 \
-        HDfclose(errorfile);                                                                                 \
+        errorfile = fopen(ERRFILE, "w+");                                                                  \
+        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
+        fflush(errorfile);                                                                                 \
+        fclose(errorfile);                                                                                 \
         TEST_ERROR;                                                                                          \
     }
 
 #define CLEANUP_FILES                                                                                        \
     {                                                                                                        \
-        HDremove(ERRFILE);                                                                                   \
-        HDremove(FILENAME);                                                                                  \
-        HDremove(SIGNAL_TO_SCRIPT);                                                                          \
-        HDremove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
-        HDremove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
-        HDremove(SIGNAL_FROM_SCRIPT);                                                                        \
+        remove(ERRFILE);                                                                                   \
+        remove(FILENAME);                                                                                  \
+        remove(SIGNAL_TO_SCRIPT);                                                                          \
+        remove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
+        remove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
+        remove(SIGNAL_FROM_SCRIPT);                                                                        \
     }
 
 /* ===================== */
@@ -153,7 +153,7 @@ main(int argc, char *argv[])
          * anything. */
 
         /* Determine driver being used */
-        envval = HDgetenv(HDF5_DRIVER);
+        envval = getenv(HDF5_DRIVER);
 
         if (envval == NULL || H5FD__supports_swmr_test(envval)) {
             if (test_flush() != SUCCEED)
@@ -162,7 +162,7 @@ main(int argc, char *argv[])
                 TEST_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
 
             /* Test script is expecting some signals, so send them out to end it. */
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
     }
     else {
         /* Illegal number of arguments supplied. Error. */
-        HDfprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
+        fprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
         PROCESS_ERROR
     } /* end if */
 
@@ -268,7 +268,7 @@ test_flush(void)
     hsize_t dims[2] = {3, 5};
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object flush behavior:\n");
+    fprintf(stdout, "Testing individual object flush behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -652,7 +652,7 @@ test_flush(void)
         TEST_ERROR;
 
     /* Delete test file */
-    HDremove(FILENAME);
+    remove(FILENAME);
 
     if (end_verification() < 0)
         TEST_ERROR;
@@ -740,7 +740,7 @@ test_refresh(void)
     int     fillval  = 2;
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object refresh behavior:\n");
+    fprintf(stdout, "Testing individual object refresh behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -1004,7 +1004,7 @@ test_refresh(void)
         TEST_ERROR;
 
     /* Delete Test File */
-    HDremove(FILENAME);
+    remove(FILENAME);
 
     if (end_verification() < 0)
         TEST_ERROR;
@@ -1033,7 +1033,7 @@ error:
 herr_t
 run_flush_verification_process(const char *obj_pathname, const char *expected)
 {
-    HDremove(SIGNAL_FROM_SCRIPT);
+    remove(SIGNAL_FROM_SCRIPT);
 
     /* Send Signal to SCRIPT indicating that it should kick off a verification process. */
     h5_send_message(SIGNAL_TO_SCRIPT, obj_pathname, expected);
@@ -1088,21 +1088,21 @@ flush_verification(const char *obj_pathname, const char *expected)
     H5E_END_TRY;
 
     /* Compare to expected result */
-    if (HDstrcmp(expected, FLUSHED) == 0) {
+    if (strcmp(expected, FLUSHED) == 0) {
         if ((oid < 0) || (status < 0)) {
-            HDfprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
+            fprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
-    else if (HDstrcmp(expected, NOT_FLUSHED) == 0) {
+    else if (strcmp(expected, NOT_FLUSHED) == 0) {
         if ((oid > 0) || (status > 0)) {
-            HDfprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
+            fprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
                       obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else {
-        HDfprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n",
+        fprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n",
                   expected);
         PROCESS_ERROR;
     } /* end if */
@@ -1138,7 +1138,7 @@ error:
 herr_t
 start_refresh_verification_process(const char *obj_pathname)
 {
-    HDremove(SIGNAL_BETWEEN_PROCESSES_1);
+    remove(SIGNAL_BETWEEN_PROCESSES_1);
 
     /* Send Signal to SCRIPT indicating that it should kick off a refresh
        verification process */
@@ -1178,7 +1178,7 @@ error:
 herr_t
 end_refresh_verification_process(void)
 {
-    HDremove(SIGNAL_FROM_SCRIPT);
+    remove(SIGNAL_FROM_SCRIPT);
 
     /* Send Signal to REFRESH VERIFICATION PROCESS indicating that the object
         has been modified and it should now attempt to refresh its metadata,
@@ -1231,7 +1231,7 @@ refresh_verification(const char *obj_pathname)
     int               token_cmp;
     hbool_t           ok = FALSE;
 
-    HDremove(SIGNAL_BETWEEN_PROCESSES_2);
+    remove(SIGNAL_BETWEEN_PROCESSES_2);
 
     /* Open Object */
     if ((fid = H5Fopen(FILENAME, H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
@@ -1295,25 +1295,25 @@ refresh_verification(const char *obj_pathname)
      * test cases is easy). */
     do {
 
-        if ((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
+        if ((strcmp(obj_pathname, D1) == 0) || (strcmp(obj_pathname, D2) == 0)) {
             if (H5Drefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
+        else if ((strcmp(obj_pathname, G1) == 0) || (strcmp(obj_pathname, G2) == 0)) {
             if (H5Grefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
+        else if ((strcmp(obj_pathname, T1) == 0) || (strcmp(obj_pathname, T2) == 0)) {
             if (H5Trefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
-                 (HDstrcmp(obj_pathname, T3) == 0)) {
+        else if ((strcmp(obj_pathname, D3) == 0) || (strcmp(obj_pathname, G3) == 0) ||
+                 (strcmp(obj_pathname, T3) == 0)) {
             if (H5Orefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
+            fprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
             PROCESS_ERROR;
         } /* end else */
 
@@ -1339,15 +1339,15 @@ refresh_verification(const char *obj_pathname)
         }
 
         if (tries == sleep_tries)
-            HDsleep(1);
+            sleep(1);
 
     } while (--tries);
 
     if (!ok) {
-        HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
+        printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
                  (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
                  (int)flushed_ninfo.hdr.space.total);
-        HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
+        printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
                  (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
                  (int)refreshed_ninfo.hdr.space.total);
         PROCESS_ERROR;
@@ -1388,9 +1388,9 @@ check_for_errors(void)
 {
     FILE *file;
 
-    if ((file = HDfopen(ERRFILE, "r"))) {
-        HDfclose(file);
-        HDremove(ERRFILE);
+    if ((file = fopen(ERRFILE, "r"))) {
+        fclose(file);
+        remove(ERRFILE);
         return FAIL;
     } /* end if */
 
@@ -1413,7 +1413,7 @@ check_for_errors(void)
 herr_t
 end_verification(void)
 {
-    HDremove(SIGNAL_FROM_SCRIPT);
+    remove(SIGNAL_FROM_SCRIPT);
 
     /* Send Signal to SCRIPT to indicate that we're done with verification. */
     h5_send_message(SIGNAL_TO_SCRIPT, "VERIFICATION_DONE", "VERIFICATION_DONE");

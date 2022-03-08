@@ -86,9 +86,9 @@ H5G__compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void
     FUNC_ENTER_STATIC
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(udata);
-    HDassert(udata->curr_lnk < udata->ltable->nlinks);
+    assert(lnk);
+    assert(udata);
+    assert(udata->curr_lnk < udata->ltable->nlinks);
 
     /* Copy link message into table */
     if (NULL == H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])))
@@ -124,9 +124,9 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(oloc);
-    HDassert(linfo);
-    HDassert(ltable);
+    assert(oloc);
+    assert(linfo);
+    assert(ltable);
 
     /* Set size of table */
     H5_CHECK_OVERFLOW(linfo->nlinks, hsize_t, size_t);
@@ -184,8 +184,8 @@ H5G__compact_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(grp_oloc && grp_oloc->file);
-    HDassert(obj_lnk);
+    assert(grp_oloc && grp_oloc->file);
+    assert(obj_lnk);
 
     /* Insert link message into group */
     if (H5O_msg_create(grp_oloc, H5O_LINK_ID, 0, H5O_UPDATE_TIME, obj_lnk) < 0)
@@ -218,7 +218,7 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(oloc);
+    assert(oloc);
 
     /* Build table of all link messages */
     if (H5G__compact_build_table(oloc, linfo, idx_type, order, &ltable) < 0)
@@ -229,11 +229,11 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
     /* Get the length of the name */
-    *name_len = HDstrlen(ltable.lnks[idx].name);
+    *name_len = strlen(ltable.lnks[idx].name);
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
+        strncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
         if (*name_len >= name_size)
             name[name_size - 1] = '\0';
     } /* end if */
@@ -269,11 +269,11 @@ H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, vo
     FUNC_ENTER_STATIC
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     /* If we've found the right link, get the object type */
-    if (HDstrcmp(lnk->name, udata->name) == 0) {
+    if (strcmp(lnk->name, udata->name) == 0) {
         /* Replace path names for link being removed */
         if (H5G__link_name_replace(udata->file, udata->grp_full_path_r, lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object type")
@@ -306,8 +306,8 @@ H5G__compact_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const ch
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(oloc && oloc->file);
-    HDassert(name && *name);
+    assert(oloc && oloc->file);
+    assert(name && *name);
 
     /* Initialize data to pass through object header iteration */
     udata.file            = oloc->file;
@@ -344,8 +344,8 @@ H5G__compact_remove_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5RS
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(oloc && oloc->file);
-    HDassert(linfo);
+    assert(oloc && oloc->file);
+    assert(linfo);
 
     /* Build table of all link messages, sorted according to desired order */
     if (H5G__compact_build_table(oloc, linfo, idx_type, order, &ltable) < 0)
@@ -395,9 +395,9 @@ H5G__compact_iterate(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_index_t
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(oloc);
-    HDassert(linfo);
-    HDassert(op);
+    assert(oloc);
+    assert(linfo);
+    assert(op);
 
     /* Build table of all link messages */
     if (H5G__compact_build_table(oloc, linfo, idx_type, order, &ltable) < 0)
@@ -438,11 +438,11 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
     FUNC_ENTER_STATIC
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(udata);
+    assert(lnk);
+    assert(udata);
 
     /* Check for name to get information */
-    if (HDstrcmp(lnk->name, udata->name) == 0) {
+    if (strcmp(lnk->name, udata->name) == 0) {
         if (udata->lnk) {
             /* Copy link information */
             if (NULL == H5O_msg_copy(H5O_LINK_ID, lnk, udata->lnk))
@@ -482,9 +482,9 @@ H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, hbool_t *found, H5O
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(name && *name);
-    HDassert(found);
-    HDassert(lnk && oloc->file);
+    assert(name && *name);
+    assert(found);
+    assert(lnk && oloc->file);
 
     /* Set up user data for iteration */
     udata.name  = name;
@@ -524,9 +524,9 @@ H5G__compact_lookup_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_i
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(oloc && oloc->file);
-    HDassert(linfo);
-    HDassert(lnk);
+    assert(oloc && oloc->file);
+    assert(linfo);
+    assert(lnk);
 
     /* Build table of all link messages, sorted according to desired order */
     if (H5G__compact_build_table(oloc, linfo, idx_type, order, &ltable) < 0)

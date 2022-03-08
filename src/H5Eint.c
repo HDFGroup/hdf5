@@ -122,14 +122,14 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(msg);
+    assert(msg);
 
     /* Get the length of the message string */
-    len = (ssize_t)HDstrlen(msg->msg);
+    len = (ssize_t)strlen(msg->msg);
 
     /* Copy the message into the user's buffer, if given */
     if (msg_str) {
-        HDstrncpy(msg_str, msg->msg, size);
+        strncpy(msg_str, msg->msg, size);
         if ((size_t)len >= size)
             msg_str[size - 1] = '\0';
     } /* end if */
@@ -193,7 +193,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(err_desc);
+    assert(err_desc);
 
     /* If no client data was passed, output to stderr */
     if (!client_data)
@@ -218,7 +218,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     cls_ptr = maj_ptr->cls;
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -227,7 +227,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        HDfprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
                   (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                   (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                   (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -242,27 +242,27 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                HDfprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, "MPI-process %d", mpi_rank);
             } /* end if */
             else
-                HDfprintf(stream, "thread 0");
+                fprintf(stream, "thread 0");
         } /* end block */
 #else
-        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
-        HDfprintf(stream, ":\n");
+        fprintf(stream, ":\n");
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */
-    HDfprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
+    fprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
               err_desc->line, err_desc->func_name, (have_desc ? ": " : ""),
               (have_desc ? err_desc->desc : ""));
-    HDfprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
-    HDfprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
+    fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
+    fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -316,7 +316,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(err_desc);
+    assert(err_desc);
 
     /* If no client data was passed, output to stderr */
     if (!client_data)
@@ -346,7 +346,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         HGOTO_DONE(FAIL)
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -355,7 +355,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         if (cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        HDfprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
                   (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
                   (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
                   (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -370,27 +370,27 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
             if (mpi_initialized && !mpi_finalized) {
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                HDfprintf(stream, "MPI-process %d", mpi_rank);
+                fprintf(stream, "MPI-process %d", mpi_rank);
             } /* end if */
             else
-                HDfprintf(stream, "thread 0");
+                fprintf(stream, "thread 0");
         } /* end block */
 #else
-        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
+        fprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
-        HDfprintf(stream, ":\n");
+        fprintf(stream, ":\n");
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */
-    HDfprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
+    fprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n", H5E_INDENT, "", n, err_desc->file_name,
               err_desc->line, err_desc->func_name, (have_desc ? ": " : ""),
               (have_desc ? err_desc->desc : ""));
-    HDfprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
-    HDfprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
+    fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
+    fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -422,7 +422,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(estack);
+    assert(estack);
 
     /* If no stream was given, use stderr */
     if (!stream)
@@ -431,7 +431,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         eprint.stream = stream;
 
     /* Reset the original error class information */
-    HDmemset(&eprint.cls, 0, sizeof(H5E_cls_t));
+    memset(&eprint.cls, 0, sizeof(H5E_cls_t));
 
     /* Walk the error stack */
     if (bk_compatible) {
@@ -441,7 +441,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         if (H5E__walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void *)&eprint) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
-        HDassert(0 && "version 1 error stack print without deprecated symbols!");
+        assert(0 && "version 1 error stack print without deprecated symbols!");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }  /* end if */
     else {
@@ -494,8 +494,8 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(estack);
-    HDassert(op);
+    assert(estack);
+    assert(op);
 
     /* check args, but rather than failing use some default value */
     if (direction != H5E_WALK_UPWARD && direction != H5E_WALK_DOWNWARD)
@@ -540,11 +540,11 @@ H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *o
                 HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
         } /* end if */
 #else     /* H5_NO_DEPRECATED_SYMBOLS */
-        HDassert(0 && "version 1 error stack walk without deprecated symbols!");
+        assert(0 && "version 1 error stack walk without deprecated symbols!");
 #endif    /* H5_NO_DEPRECATED_SYMBOLS */
     }     /* end if */
     else {
-        HDassert(op->vers == 2);
+        assert(op->vers == 2);
         if (op->u.func2) {
             ret_value = SUCCEED;
             if (H5E_WALK_UPWARD == direction) {
@@ -586,7 +586,7 @@ H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(estack);
+    assert(estack);
 
     /* Retrieve the requested information */
     if (op)
@@ -625,7 +625,7 @@ H5E__set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(estack);
+    assert(estack);
 
     /* Set the automatic error reporting info */
     estack->auto_op   = *op;
@@ -665,10 +665,10 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(cls_id > 0);
-    HDassert(maj_id > 0);
-    HDassert(min_id > 0);
-    HDassert(fmt);
+    assert(cls_id > 0);
+    assert(maj_id > 0);
+    assert(min_id > 0);
+    assert(fmt);
 
     /* Note that the variable-argument parsing for the format is identical in
      *      the H5Epush2() routine - correct errors and make changes in both
@@ -676,7 +676,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
      */
 
     /* Start the variable-argument parsing */
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     va_started = TRUE;
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
@@ -689,12 +689,12 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
 done:
     if (va_started)
-        HDva_end(ap);
+        va_end(ap);
     /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with HDfree
+     * with free
      */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_printf_stack() */
@@ -735,9 +735,9 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(cls_id > 0);
-    HDassert(maj_id > 0);
-    HDassert(min_id > 0);
+    assert(cls_id > 0);
+    assert(maj_id > 0);
+    assert(min_id > 0);
 
     /* Check for 'default' error stack */
     if (estack == NULL)
@@ -759,7 +759,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
     /*
      * Push the error if there's room.  Otherwise just forget it.
      */
-    HDassert(estack);
+    assert(estack);
 
     if (estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
@@ -810,8 +810,8 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(estack);
-    HDassert(estack->nused >= nentries);
+    assert(estack);
+    assert(estack->nused >= nentries);
 
     /* Empty the error stack from the top down */
     for (u = 0; nentries > 0; nentries--, u++) {
@@ -870,7 +870,7 @@ H5E_clear_stack(H5E_t *estack)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
 
     /* Empty the error stack */
-    HDassert(estack);
+    assert(estack);
     if (estack->nused)
         if (H5E__clear_entries(estack, estack->nused) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack")
@@ -900,8 +900,8 @@ H5E__pop(H5E_t *estack, size_t count)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(estack);
-    HDassert(estack->nused >= count);
+    assert(estack);
+    assert(estack->nused >= count);
 
     /* Remove the entries from the error stack */
     if (H5E__clear_entries(estack, count) < 0)
@@ -936,7 +936,7 @@ H5E_dump_api_stack(hbool_t is_api)
     if (is_api) {
         H5E_t *estack = H5E__get_my_stack();
 
-        HDassert(estack);
+        assert(estack);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
         if (estack->auto_op.func2)

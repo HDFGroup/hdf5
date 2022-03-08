@@ -84,21 +84,21 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 
     switch (H5S_GET_EXTENT_TYPE(mesg)) {
         case H5S_NULL:
-            HDfprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth, "Space class:");
+            fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth, "Space class:");
             break;
 
         case H5S_SCALAR:
-            HDfprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth, "Space class:");
+            fprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth, "Space class:");
             break;
 
         case H5S_SIMPLE:
-            HDfprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth, "Space class:");
+            fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth, "Space class:");
             H5O_debug_id(H5O_SDSPACE_ID, f, &(mesg->extent), stream, indent + 3, MAX(0, fwidth - 3));
             break;
 
         case H5S_NO_CLASS:
         default:
-            HDfprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
+            fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
                       "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
             break;
     } /* end switch */

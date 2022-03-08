@@ -137,7 +137,7 @@ H5B2__test_crt_context(void *_f)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
@@ -174,7 +174,7 @@ H5B2__test_dst_context(void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Release callback context */
     ctx = H5FL_FREE(H5B2_test_ctx_t, ctx);
@@ -250,7 +250,7 @@ H5B2__test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     H5F_ENCODE_LENGTH_LEN(raw, *(const hsize_t *)nrecord, ctx->sizeof_size);
 
@@ -278,7 +278,7 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     H5F_DECODE_LENGTH_LEN(raw, *(hsize_t *)nrecord, ctx->sizeof_size);
 
@@ -303,9 +303,9 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(record);
+    assert(record);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_debug() */
@@ -378,7 +378,7 @@ H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
     H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
@@ -407,7 +407,7 @@ H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
     H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
@@ -433,9 +433,9 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(record);
+    assert(record);
 
-    HDfprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
+    fprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
               "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -459,8 +459,8 @@ H5B2__get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(bt2);
-    HDassert(root_addr);
+    assert(bt2);
+    assert(root_addr);
 
     /* Get B-tree root addr */
     *root_addr = bt2->hdr->root.addr;
@@ -494,7 +494,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(bt2);
+    assert(bt2);
 
     /* Set the shared v2 B-tree header's file context for this operation */
     bt2->hdr->f = bt2->f;
@@ -608,7 +608,7 @@ H5B2__get_node_info_test(H5B2_t *bt2, void *udata, H5B2_node_info_test_t *ninfo)
 
 done:
     if (parent) {
-        HDassert(ret_value < 0);
+        assert(ret_value < 0);
         if (parent != hdr && H5AC_unpin_entry(parent) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
     } /* end if */
@@ -642,7 +642,7 @@ H5B2__get_node_depth_test(H5B2_t *bt2, void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(bt2);
+    assert(bt2);
 
     /* Get information abou the node */
     if (H5B2__get_node_info_test(bt2, udata, &ninfo) < 0)

@@ -100,23 +100,23 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(sect);
-    HDassert(udata);
+    assert(sect);
+    assert(udata);
 
     /* Print generic section information */
-    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
+    fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
               (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE
                    ? "simple"
                    : (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL
                           ? "small"
                           : (sect->sect_info.type == H5MF_FSPACE_SECT_LARGE ? "large" : "unknown"))));
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
+    fprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
               "Section address:", sect->sect_info.addr);
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
+    fprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
+    fprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
               "End of section:", (haddr_t)((sect->sect_info.addr + sect->sect_info.size) - 1));
-    HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
+    fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
               "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
 
     /* Dump section-specific debugging information */
@@ -151,10 +151,10 @@ H5MF_sects_debug(H5F_t *f, haddr_t fs_addr, FILE *stream, int indent, int fwidth
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     for (type = H5F_MEM_PAGE_DEFAULT; type < H5F_MEM_PAGE_NTYPES; type++)
         if (H5F_addr_eq(f->shared->fs_addr[type], fs_addr)) {
@@ -210,20 +210,20 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Dumping file free space sections\n", __func__);
+    fprintf(stderr, "%s: Dumping file free space sections\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(stream);
+    assert(f);
+    assert(stream);
 
     /* Retrieve the 'eoa' for the file */
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", __func__, eoa);
+    fprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", __func__, eoa);
 #endif /* H5MF_ALLOC_DEBUG */
 
     if (H5F_PAGED_AGGR(f)) {  /* File space paging */
@@ -231,10 +231,10 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
 
         for (ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
             /* Print header for type */
-            HDfprintf(stream, "%*sFile Free Space Info for type = %u:\n", indent, "", (unsigned)ptype);
+            fprintf(stream, "%*sFile Free Space Info for type = %u:\n", indent, "", (unsigned)ptype);
 
             /* Print header for sections */
-            HDfprintf(stream, "%*sSections:\n", indent + 3, "");
+            fprintf(stream, "%*sSections:\n", indent + 3, "");
 
             /* If there is a free space manager for this type, iterate over them */
             if (f->shared->fs_man[ptype]) {
@@ -252,7 +252,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
             } /* end if */
             else
                 /* No sections of this type */
-                HDfprintf(stream, "%*s<none>\n", indent + 6, "");
+                fprintf(stream, "%*s<none>\n", indent + 6, "");
         }                                  /* end for */
     }                                      /* end if */
     else {                                 /* not file space paging */
@@ -265,7 +265,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
         /* Retrieve metadata aggregator info, if available */
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 #ifdef H5MF_ALLOC_DEBUG
-        HDfprintf(stderr,
+        fprintf(stderr,
                   "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
                   __func__, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
@@ -273,7 +273,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
         /* Retrieve 'small data' aggregator info, if available */
         H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size);
 #ifdef H5MF_ALLOC_DEBUG
-        HDfprintf(stderr,
+        fprintf(stderr,
                   "%s: sda_addr = %" PRIuHADDR ", sda_size = %" PRIuHSIZE ", end of sda = %" PRIuHADDR "\n",
                   __func__, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
@@ -281,18 +281,18 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
         /* Iterate over all the free space types that have managers and dump each free list's space */
         for (atype = H5FD_MEM_DEFAULT; atype < H5FD_MEM_NTYPES; atype++) {
             /* Print header for type */
-            HDfprintf(stream, "%*sFile Free Space Info for type = %u:\n", indent, "", (unsigned)atype);
+            fprintf(stream, "%*sFile Free Space Info for type = %u:\n", indent, "", (unsigned)atype);
 
             /* Check for this type being mapped to another type */
             if (H5FD_MEM_DEFAULT == f->shared->fs_type_map[atype] || atype == f->shared->fs_type_map[atype]) {
                 /* Retrieve the 'eoa' for this file memory type */
                 if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, atype)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
+                fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
                           "eoa:", eoa);
 
                 /* Print header for sections */
-                HDfprintf(stream, "%*sSections:\n", indent + 3, "");
+                fprintf(stream, "%*sSections:\n", indent + 3, "");
 
                 /* If there is a free space manager for this type, iterate over them */
                 if (f->shared->fs_man[atype]) {
@@ -309,16 +309,16 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
                         HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
                 }    /* end if */
                 else /* No sections of this type */
-                    HDfprintf(stream, "%*s<none>\n", indent + 6, "");
+                    fprintf(stream, "%*s<none>\n", indent + 6, "");
             } /* end if */
             else
-                HDfprintf(stream, "%*sMapped to type = %u\n", indent, "",
+                fprintf(stream, "%*sMapped to type = %u\n", indent, "",
                           (unsigned)f->shared->fs_type_map[atype]);
         } /* end for */
     }     /* end else */
 
 done:
-    HDfprintf(stderr, "%s: Done dumping file free space sections\n", __func__);
+    fprintf(stderr, "%s: Done dumping file free space sections\n", __func__);
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF__sects_dump() */
 #endif /* H5MF_ALLOC_DEBUG_DUMP */

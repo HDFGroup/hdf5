@@ -97,7 +97,7 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
 } /* end H5G__link_cmp_name_inc() */
 
 /*-------------------------------------------------------------------------
@@ -122,7 +122,7 @@ H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
 } /* end H5G__link_cmp_name_dec() */
 
 /*-------------------------------------------------------------------------
@@ -212,10 +212,10 @@ H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, co
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(lnk);
-    HDassert(heap);
-    HDassert(ent);
-    HDassert(name);
+    assert(lnk);
+    assert(heap);
+    assert(ent);
+    assert(name);
 
     /* Set (default) common info for link */
     lnk->cset         = H5F_DEFAULT_CSET;
@@ -278,8 +278,8 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(link_loc);
-    HDassert(lnk);
+    assert(link_loc);
+    assert(lnk);
 
     /* Get information from the link */
     if (info) {
@@ -297,7 +297,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 break;
 
             case H5L_TYPE_SOFT:
-                info->u.val_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
+                info->u.val_size = strlen(lnk->u.soft.name) + 1; /*count the null terminator*/
                 break;
 
             case H5L_TYPE_ERROR:
@@ -359,9 +359,9 @@ H5G__link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(grp_loc);
-    HDassert(lnk);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(lnk);
+    assert(obj_loc);
 
     /*
      * Build location from the link
@@ -405,32 +405,32 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_orde
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ltable);
+    assert(ltable);
 
     /* Can't sort when empty since the links table will be NULL */
     if (0 == ltable->nlinks)
         HGOTO_DONE(ret_value);
 
     /* This should never be NULL if the number of links is non-zero */
-    HDassert(ltable->lnks);
+    assert(ltable->lnks);
 
     /* Pick appropriate sorting routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+        assert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end else */
 
 done:
@@ -461,8 +461,8 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip, hsize_t *l
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ltable);
-    HDassert(op);
+    assert(ltable);
+    assert(op);
 
     /* Skip over links, if requested */
     if (last_lnk)
@@ -508,7 +508,7 @@ H5G__link_release_table(H5G_link_table_t *ltable)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ltable);
+    assert(ltable);
 
     /* Release link info, if any */
     if (ltable->nlinks > 0) {
@@ -521,7 +521,7 @@ H5G__link_release_table(H5G_link_table_t *ltable)
         H5MM_xfree(ltable->lnks);
     } /* end if */
     else
-        HDassert(ltable->lnks == NULL);
+        assert(ltable->lnks == NULL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -549,7 +549,7 @@ H5G__link_name_replace(H5F_t *file, H5RS_str_t *grp_full_path_r, const H5O_link_
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(file);
+    assert(file);
 
     /* Search the open IDs and replace names for unlinked object */
     if (grp_full_path_r) {

@@ -116,7 +116,7 @@ set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_fil
         return -1;
 
     for (i = 0; i < n_external_files; i++) {
-        if (HDsnprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
+        if (snprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
             return -1;
 
         if (H5Pset_external(dcpl, name, 0, n_elts_per_file * elt_size) < 0)
@@ -141,7 +141,7 @@ make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t
     hid_t space_id  = H5I_INVALID_HID;
     int   ret_value = 0;
 
-    if (HDsnprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
+    if (snprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
         H5REPACKGENTEST_OOPS;
 
     if (NULL != ext) {
@@ -330,19 +330,19 @@ main(void)
     for (i = 0; i < 2; i++) {
         hbool_t external = (i & 1) ? TRUE : FALSE;
         if (generate_int32le_1d(external) < 0)
-            HDprintf("A generate_int32le_1d failed!\n");
+            printf("A generate_int32le_1d failed!\n");
 
         if (generate_int32le_2d(external) < 0)
-            HDprintf("A generate_int32le_2d failed!\n");
+            printf("A generate_int32le_2d failed!\n");
 
         if (generate_int32le_3d(external) < 0)
-            HDprintf("A generate_int32le_3d failed!\n");
+            printf("A generate_int32le_3d failed!\n");
 
         if (generate_uint8be(external) < 0)
-            HDprintf("A generate_uint8be failed!\n");
+            printf("A generate_uint8be failed!\n");
 
         if (generate_f32le(external) < 0)
-            HDprintf("A generate_f32le failed!\n");
+            printf("A generate_f32le failed!\n");
 
     } /* end for external data storage or not */
 

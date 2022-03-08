@@ -694,7 +694,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stdout, "No compression IO performance because zlib was not configured\n");
+    fprintf(stdout, "No compression IO performance because zlib was not configured\n");
     return EXIT_SUCCESS;
 }
 

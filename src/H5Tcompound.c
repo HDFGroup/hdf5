@@ -131,8 +131,8 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].offset)
 } /* end H5T_get_member_offset() */
@@ -249,8 +249,8 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     /* Copy datatype */
     if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_TRANSIENT)))
@@ -285,8 +285,8 @@ H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     /* Copy datatype, possibly re-opening it */
     if (NULL == (ret_value = H5T_copy_reopen(dt->shared->u.compnd.memb[membno].type)))
@@ -314,8 +314,8 @@ H5T__get_member_size(const H5T_t *dt, unsigned membno)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(membno < dt->shared->u.compnd.nmembs);
+    assert(dt);
+    assert(membno < dt->shared->u.compnd.nmembs);
 
     FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].type->shared->size)
 } /* end H5T__get_member_size() */
@@ -434,14 +434,14 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(parent && H5T_COMPOUND == parent->shared->type);
-    HDassert(H5T_STATE_TRANSIENT == parent->shared->state);
-    HDassert(member);
-    HDassert(name && *name);
+    assert(parent && H5T_COMPOUND == parent->shared->type);
+    assert(H5T_STATE_TRANSIENT == parent->shared->state);
+    assert(member);
+    assert(name && *name);
 
     /* Does NAME already exist in PARENT? */
     for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+        if (!strcmp(parent->shared->u.compnd.memb[i].name, name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique")
 
     /* Does the new member overlap any existing member ? */
@@ -481,7 +481,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* It should not be possible to get this far if the type is already packed
      * - the new member would overlap something */
-    HDassert(!(parent->shared->u.compnd.packed));
+    assert(!(parent->shared->u.compnd.packed));
 
     /* Determine if the compound datatype becomes packed */
     H5T__update_packed(parent);
@@ -523,7 +523,7 @@ H5T__pack(const H5T_t *dt)
 
     FUNC_ENTER_STATIC
 
-    HDassert(dt);
+    assert(dt);
 
     if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
@@ -598,7 +598,7 @@ H5T__is_packed(const H5T_t *dt)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(dt);
+    assert(dt);
 
     /* Go up the chain as far as possible */
     while (dt->shared->parent)
@@ -633,8 +633,8 @@ H5T__update_packed(const H5T_t *dt)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(dt->shared->type == H5T_COMPOUND);
+    assert(dt);
+    assert(dt->shared->type == H5T_COMPOUND);
 
     /* First check if all space is used in the "top level" type */
     if (dt->shared->size == dt->shared->u.compnd.memb_size) {

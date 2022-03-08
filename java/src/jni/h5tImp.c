@@ -1190,7 +1190,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id
     if (size <= 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof_int: name size < 0");
 
-    if (NULL == (nameP = (char *)HDmalloc(sizeof(char) * (size_t)size)))
+    if (NULL == (nameP = (char *)malloc(sizeof(char) * (size_t)size)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tenum_nameof_int: failed to allocate name buffer");
 
     PIN_INT_ARRAY(ENVONLY, value, intP, &isCopy, "H5Tenum_nameof_int: value not pinned");
@@ -1209,7 +1209,7 @@ done:
     if (intP)
         UNPIN_INT_ARRAY(ENVONLY, value, intP, JNI_ABORT);
     if (nameP)
-        HDfree(nameP);
+        free(nameP);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int */
@@ -1235,7 +1235,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jby
     if (NULL == value)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Tenum_nameof: value is NULL");
 
-    if (NULL == (nameP = (char *)HDmalloc(sizeof(char) * (size_t)size)))
+    if (NULL == (nameP = (char *)malloc(sizeof(char) * (size_t)size)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tenum_nameof: failed to allocate name buffer");
 
     PIN_BYTE_ARRAY(ENVONLY, value, byteP, &isCopy, "H5Tenum_nameof: value not pinned");
@@ -1251,7 +1251,7 @@ done:
     if (byteP)
         UNPIN_BYTE_ARRAY(ENVONLY, value, byteP, JNI_ABORT);
     if (nameP)
-        HDfree(nameP);
+        free(nameP);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1nameof */
@@ -1433,7 +1433,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tget_array_dims: dims array length < 0");
     }
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tget_array_dims: failed to allocate dimension buffer");
 
     if ((ndims = H5Tget_array_dims2((hid_t)type_id, cdims)) < 0)
@@ -1445,7 +1445,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_INT_ARRAY(ENVONLY, dims, dimsP, (ndims < 0) ? JNI_ABORT : 0);
 
@@ -1573,7 +1573,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
     if (dlen != rank)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tarray_create: dimension array length != array rank");
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tarray_create: failed to allocate dimension buffer");
 
     for (i = 0; i < (size_t)dlen; i++) {
@@ -1585,7 +1585,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_LONG_ARRAY(ENVONLY, dims, dimsP, (retVal < 0) ? JNI_ABORT : 0);
 
@@ -1619,7 +1619,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Tarray_get_dims2: dims array length < 0");
     }
 
-    if (NULL == (cdims = (hsize_t *)HDmalloc((size_t)dlen * sizeof(hsize_t))))
+    if (NULL == (cdims = (hsize_t *)malloc((size_t)dlen * sizeof(hsize_t))))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Tarray_get_dims2: failed to allocate dimension buffer");
 
     if ((ndims = H5Tget_array_dims2((hid_t)type_id, (hsize_t *)cdims)) < 0)
@@ -1631,7 +1631,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
 
 done:
     if (cdims)
-        HDfree(cdims);
+        free(cdims);
     if (dimsP)
         UNPIN_LONG_ARRAY(ENVONLY, dims, dimsP, (ndims < 0) ? JNI_ABORT : 0);
 

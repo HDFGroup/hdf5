@@ -182,7 +182,7 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Set "local" parameter for this dataset's "pixels-per-scanline" */
     /* (Use the chunk's fastest changing dimension size) */
-    HDassert(ndims > 0);
+    assert(ndims > 0);
     scanline = dims[ndims - 1];
 
     /* Adjust scanline if it is smaller than number of pixels per block or
@@ -272,13 +272,13 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
 
     /* Sanity check to make certain that we haven't drifted out of date with
      * the mask options from the szlib.h header */
-    HDassert(H5_SZIP_ALLOW_K13_OPTION_MASK == SZ_ALLOW_K13_OPTION_MASK);
-    HDassert(H5_SZIP_CHIP_OPTION_MASK == SZ_CHIP_OPTION_MASK);
-    HDassert(H5_SZIP_EC_OPTION_MASK == SZ_EC_OPTION_MASK);
-    HDassert(H5_SZIP_LSB_OPTION_MASK == SZ_LSB_OPTION_MASK);
-    HDassert(H5_SZIP_MSB_OPTION_MASK == SZ_MSB_OPTION_MASK);
-    HDassert(H5_SZIP_NN_OPTION_MASK == SZ_NN_OPTION_MASK);
-    HDassert(H5_SZIP_RAW_OPTION_MASK == SZ_RAW_OPTION_MASK);
+    assert(H5_SZIP_ALLOW_K13_OPTION_MASK == SZ_ALLOW_K13_OPTION_MASK);
+    assert(H5_SZIP_CHIP_OPTION_MASK == SZ_CHIP_OPTION_MASK);
+    assert(H5_SZIP_EC_OPTION_MASK == SZ_EC_OPTION_MASK);
+    assert(H5_SZIP_LSB_OPTION_MASK == SZ_LSB_OPTION_MASK);
+    assert(H5_SZIP_MSB_OPTION_MASK == SZ_MSB_OPTION_MASK);
+    assert(H5_SZIP_NN_OPTION_MASK == SZ_NN_OPTION_MASK);
+    assert(H5_SZIP_RAW_OPTION_MASK == SZ_RAW_OPTION_MASK);
 
     /* Check arguments */
     if (cd_nelmts != 4)
@@ -308,7 +308,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         size_out = nalloc;
         if (SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes - 4, &sz_param) != SZ_OK)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed")
-        HDassert(size_out == nalloc);
+        assert(size_out == nalloc);
 
         /* Free the input buffer */
         H5MM_xfree(*buf);
@@ -335,7 +335,7 @@ H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
         size_out = nbytes;
         if (SZ_OK != SZ_BufftoBuffCompress(dst, &size_out, *buf, nbytes, &sz_param))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "overflow")
-        HDassert(size_out <= nbytes);
+        assert(size_out <= nbytes);
 
         /* Free the input buffer */
         H5MM_xfree(*buf);

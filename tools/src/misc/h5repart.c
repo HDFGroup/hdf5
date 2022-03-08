@@ -53,22 +53,22 @@
 static void
 usage(const char *progname)
 {
-    HDfprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2|-family_to_single] SRC DST\n",
+    fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2|-family_to_single] SRC DST\n",
               progname);
-    HDfprintf(stderr, "   -v     Produce verbose output\n");
-    HDfprintf(stderr, "   -V     Print a version number and exit\n");
-    HDfprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
-    HDfprintf(stderr, "   -m N   The destination member size or 1GB\n");
-    HDfprintf(stderr, "   -family_to_sec2   Deprecated version of -family_to_single (below)\n");
-    HDfprintf(stderr, "   -family_to_single   Change file driver from family to the default single-file VFD "
+    fprintf(stderr, "   -v     Produce verbose output\n");
+    fprintf(stderr, "   -V     Print a version number and exit\n");
+    fprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
+    fprintf(stderr, "   -m N   The destination member size or 1GB\n");
+    fprintf(stderr, "   -family_to_sec2   Deprecated version of -family_to_single (below)\n");
+    fprintf(stderr, "   -family_to_single   Change file driver from family to the default single-file VFD "
                       "(windows or sec2)\n");
-    HDfprintf(stderr, "   SRC    The name of the source file\n");
-    HDfprintf(stderr, "   DST    The name of the destination files\n");
-    HDfprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
+    fprintf(stderr, "   SRC    The name of the source file\n");
+    fprintf(stderr, "   DST    The name of the destination files\n");
+    fprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
                       "'k' for kB.\n");
-    HDfprintf(stderr, "File family names include an integer printf "
+    fprintf(stderr, "File family names include an integer printf "
                       "format such as '%%d'\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 /*-------------------------------------------------------------------------
@@ -99,15 +99,15 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
     off_t retval = -1;
     char *suffix = NULL;
 
-    if (isdigit((int)(argv[*argno][2]))) {
-        retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
+    if (isdigit((int)(unsigned char)(argv[*argno][2]))) {
+        retval = strtol(argv[*argno] + 2, &suffix, 10);
         (*argno)++;
     }
     else if (argv[*argno][2] || *argno + 1 >= argc) {
         usage(progname);
     }
     else {
-        retval = HDstrtol(argv[*argno + 1], &suffix, 0);
+        retval = strtol(argv[*argno + 1], &suffix, 0);
         if (suffix == argv[*argno + 1])
             usage(progname);
         *argno += 2;
@@ -192,7 +192,7 @@ main(int argc, char *argv[])
     /*
      * Get the program name from argv[0]. Use only the last component.
      */
-    if ((prog_name = HDstrrchr(argv[0], '/')))
+    if ((prog_name = strrchr(argv[0], '/')))
         prog_name++;
     else
         prog_name = argv[0];
@@ -201,20 +201,20 @@ main(int argc, char *argv[])
      * Parse switches.
      */
     while (argno < argc && '-' == argv[argno][0]) {
-        if (!HDstrcmp(argv[argno], "-v")) {
+        if (!strcmp(argv[argno], "-v")) {
             verbose = TRUE;
             argno++;
         }
-        else if (!HDstrcmp(argv[argno], "-V")) {
-            HDprintf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
+        else if (!strcmp(argv[argno], "-V")) {
+            printf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
                      H5_VERS_RELEASE);
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
-        else if (!HDstrcmp(argv[argno], "-family_to_sec2")) {
+        else if (!strcmp(argv[argno], "-family_to_sec2")) {
             family_to_single = TRUE;
             argno++;
         }
-        else if (!HDstrcmp(argv[argno], "-family_to_single")) {
+        else if (!strcmp(argv[argno], "-family_to_single")) {
             family_to_single = TRUE;
             argno++;
         }
@@ -230,10 +230,10 @@ main(int argc, char *argv[])
     }     /* end while */
 
     /* allocate names */
-    if (NULL == (src_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
-        HDexit(EXIT_FAILURE);
-    if (NULL == (dst_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
-        HDexit(EXIT_FAILURE);
+    if (NULL == (src_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
+    if (NULL == (dst_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
 
     /*
      * Get the name for the source file and open the first member.  The size
@@ -242,21 +242,21 @@ main(int argc, char *argv[])
     if (argno >= argc)
         usage(prog_name);
     src_gen_name = argv[argno++];
-    HDsprintf(src_name, src_gen_name, src_membno);
+    sprintf(src_name, src_gen_name, src_membno);
     src_is_family = strcmp(src_name, src_gen_name);
 
     if ((src = HDopen(src_name, O_RDONLY)) < 0) {
-        HDperror(src_name);
-        HDexit(EXIT_FAILURE);
+        perror(src_name);
+        exit(EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb) < 0) {
-        HDperror("fstat");
-        HDexit(EXIT_FAILURE);
+        perror("fstat");
+        exit(EXIT_FAILURE);
     }
     src_size = src_act_size = sb.st_size;
     if (verbose)
-        HDfprintf(stderr, "< %s\n", src_name);
+        fprintf(stderr, "< %s\n", src_name);
 
     /*
      * Get the name for the destination file and open the first member.
@@ -264,22 +264,22 @@ main(int argc, char *argv[])
     if (argno >= argc)
         usage(prog_name);
     dst_gen_name = argv[argno++];
-    HDsprintf(dst_name, dst_gen_name, dst_membno);
-    dst_is_family = HDstrcmp(dst_name, dst_gen_name);
+    sprintf(dst_name, dst_gen_name, dst_membno);
+    dst_is_family = strcmp(dst_name, dst_gen_name);
 
     if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
-        HDperror(dst_name);
-        HDexit(EXIT_FAILURE);
+        perror(dst_name);
+        exit(EXIT_FAILURE);
     }
     if (verbose)
-        HDfprintf(stderr, "> %s\n", dst_name);
+        fprintf(stderr, "> %s\n", dst_name);
 
     /* No more arguments */
     if (argno < argc)
         usage(prog_name);
 
     /* Now the real work, split the file */
-    buf = (char *)HDmalloc(blk_size);
+    buf = (char *)malloc(blk_size);
     while (src_offset < src_size) {
 
         /* Read a block.  The amount to read is the minimum of:
@@ -298,12 +298,12 @@ main(int argc, char *argv[])
         else if (src_offset < src_act_size) {
             n = (size_t)MIN((off_t)n, src_act_size - src_offset);
             if ((nio = HDread(src, buf, n)) < 0) {
-                HDperror("read");
-                HDexit(EXIT_FAILURE);
+                perror("read");
+                exit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
-                HDfprintf(stderr, "%s: short read\n", src_name);
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "%s: short read\n", src_name);
+                exit(EXIT_FAILURE);
             }
             for (i = 0; i < n; i++) {
                 if (buf[i])
@@ -324,16 +324,16 @@ main(int argc, char *argv[])
          */
         if (need_write) {
             if (need_seek && HDlseek(dst, dst_offset, SEEK_SET) < 0) {
-                HDperror("HDlseek");
-                HDexit(EXIT_FAILURE);
+                perror("HDlseek");
+                exit(EXIT_FAILURE);
             }
             if ((nio = HDwrite(dst, buf, n)) < 0) {
-                HDperror("write");
-                HDexit(EXIT_FAILURE);
+                perror("write");
+                exit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
-                HDfprintf(stderr, "%s: short write\n", dst_name);
-                HDexit(EXIT_FAILURE);
+                fprintf(stderr, "%s: short write\n", dst_name);
+                exit(EXIT_FAILURE);
             }
             need_seek = FALSE;
         }
@@ -356,26 +356,26 @@ main(int argc, char *argv[])
                 dst_offset = dst_offset + (off_t)n;
                 break;
             }
-            HDsprintf(src_name, src_gen_name, ++src_membno);
+            sprintf(src_name, src_gen_name, ++src_membno);
             if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
                 dst_offset = dst_offset + (off_t)n;
                 break;
             }
             else if (src < 0) {
-                HDperror(src_name);
-                HDexit(EXIT_FAILURE);
+                perror(src_name);
+                exit(EXIT_FAILURE);
             }
             if (HDfstat(src, &sb) < 0) {
-                HDperror("fstat");
-                HDexit(EXIT_FAILURE);
+                perror("fstat");
+                exit(EXIT_FAILURE);
             }
             src_act_size = sb.st_size;
             if (src_act_size > src_size) {
-                HDfprintf(stderr, "%s: member truncated to %lu bytes\n", src_name, (unsigned long)src_size);
+                fprintf(stderr, "%s: member truncated to %lu bytes\n", src_name, (unsigned long)src_size);
             }
             src_offset = 0;
             if (verbose)
-                HDfprintf(stderr, "< %s\n", src_name);
+                fprintf(stderr, "< %s\n", src_name);
         }
 
         /*
@@ -387,32 +387,32 @@ main(int argc, char *argv[])
         if (dst_is_family && dst_offset == dst_size) {
             if (0 == dst_membno) {
                 if (HDlseek(dst, dst_size - 1, SEEK_SET) < 0) {
-                    HDperror("HDHDlseek");
-                    HDexit(EXIT_FAILURE);
+                    perror("HDHDlseek");
+                    exit(EXIT_FAILURE);
                 }
                 if (HDread(dst, buf, 1) < 0) {
-                    HDperror("read");
-                    HDexit(EXIT_FAILURE);
+                    perror("read");
+                    exit(EXIT_FAILURE);
                 }
                 if (HDlseek(dst, dst_size - 1, SEEK_SET) < 0) {
-                    HDperror("HDlseek");
-                    HDexit(EXIT_FAILURE);
+                    perror("HDlseek");
+                    exit(EXIT_FAILURE);
                 }
                 if (HDwrite(dst, buf, 1) < 0) {
-                    HDperror("write");
-                    HDexit(EXIT_FAILURE);
+                    perror("write");
+                    exit(EXIT_FAILURE);
                 }
             }
             HDclose(dst);
-            HDsprintf(dst_name, dst_gen_name, ++dst_membno);
+            sprintf(dst_name, dst_gen_name, ++dst_membno);
             if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
-                HDperror(dst_name);
-                HDexit(EXIT_FAILURE);
+                perror(dst_name);
+                exit(EXIT_FAILURE);
             }
             dst_offset = 0;
             need_seek  = FALSE;
             if (verbose)
-                HDfprintf(stderr, "> %s\n", dst_name);
+                fprintf(stderr, "> %s\n", dst_name);
         }
     }
 
@@ -423,20 +423,20 @@ main(int argc, char *argv[])
      */
     if (need_seek) {
         if (HDlseek(dst, dst_offset - 1, SEEK_SET) < 0) {
-            HDperror("HDlseek");
-            HDexit(EXIT_FAILURE);
+            perror("HDlseek");
+            exit(EXIT_FAILURE);
         }
         if (HDread(dst, buf, 1) < 0) {
-            HDperror("read");
-            HDexit(EXIT_FAILURE);
+            perror("read");
+            exit(EXIT_FAILURE);
         }
         if (HDlseek(dst, dst_offset - 1, SEEK_SET) < 0) {
-            HDperror("HDlseek");
-            HDexit(EXIT_FAILURE);
+            perror("HDlseek");
+            exit(EXIT_FAILURE);
         }
         if (HDwrite(dst, buf, 1) < 0) {
-            HDperror("write");
-            HDexit(EXIT_FAILURE);
+            perror("write");
+            exit(EXIT_FAILURE);
         }
     }
     HDclose(dst);
@@ -444,8 +444,8 @@ main(int argc, char *argv[])
     /* Modify family driver information saved in superblock through private property.
      * These private properties are for this tool only. */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        HDperror("H5Pcreate");
-        HDexit(EXIT_FAILURE);
+        perror("H5Pcreate");
+        exit(EXIT_FAILURE);
     }
 
     if (family_to_single) {
@@ -454,8 +454,8 @@ main(int argc, char *argv[])
          * the library to ignore the family driver information saved in the superblock.
          */
         if (H5Pset(fapl, H5F_ACS_FAMILY_TO_SINGLE_NAME, &family_to_single) < 0) {
-            HDperror("H5Pset");
-            HDexit(EXIT_FAILURE);
+            perror("H5Pset");
+            exit(EXIT_FAILURE);
         }
     }
     else {
@@ -463,15 +463,15 @@ main(int argc, char *argv[])
          * library to save the new member size(specified in command line) in superblock.
          * This private property is for this tool only. */
         if (H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0) {
-            HDperror("H5Pset_fapl_family");
-            HDexit(EXIT_FAILURE);
+            perror("H5Pset_fapl_family");
+            exit(EXIT_FAILURE);
         }
 
         /* Set the property of the new member size as hsize_t */
         hdsize = (hsize_t)dst_size;
         if (H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) {
-            HDperror("H5Pset");
-            HDexit(EXIT_FAILURE);
+            perror("H5Pset");
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -491,19 +491,19 @@ main(int argc, char *argv[])
 
     if (file >= 0) {
         if (H5Fclose(file) < 0) {
-            HDperror("H5Fclose");
-            HDexit(EXIT_FAILURE);
+            perror("H5Fclose");
+            exit(EXIT_FAILURE);
         } /* end if */
     }     /* end if */
 
     if (H5Pclose(fapl) < 0) {
-        HDperror("H5Pclose");
-        HDexit(EXIT_FAILURE);
+        perror("H5Pclose");
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Free resources and return */
-    HDfree(src_name);
-    HDfree(dst_name);
-    HDfree(buf);
+    free(src_name);
+    free(dst_name);
+    free(buf);
     return EXIT_SUCCESS;
 } /* end main */

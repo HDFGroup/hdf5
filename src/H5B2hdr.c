@@ -109,16 +109,16 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(cparam);
-    HDassert(cparam->cls);
-    HDassert((cparam->cls->crt_context && cparam->cls->dst_context) ||
+    assert(hdr);
+    assert(cparam);
+    assert(cparam->cls);
+    assert((cparam->cls->crt_context && cparam->cls->dst_context) ||
              (NULL == cparam->cls->crt_context && NULL == cparam->cls->dst_context));
-    HDassert(cparam->node_size > 0);
-    HDassert(cparam->rrec_size > 0);
-    HDassert(cparam->merge_percent > 0 && cparam->merge_percent <= 100);
-    HDassert(cparam->split_percent > 0 && cparam->split_percent <= 100);
-    HDassert(cparam->merge_percent < (cparam->split_percent / 2));
+    assert(cparam->node_size > 0);
+    assert(cparam->rrec_size > 0);
+    assert(cparam->merge_percent > 0 && cparam->merge_percent <= 100);
+    assert(cparam->split_percent > 0 && cparam->split_percent <= 100);
+    assert(cparam->merge_percent < (cparam->split_percent / 2));
 
     /* Assign dynamic information */
     hdr->depth = depth;
@@ -135,7 +135,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Allocate "page" for node I/O */
     if (NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(hdr->page, 0, hdr->node_size);
+    memset(hdr->page, 0, hdr->node_size);
 
     /* Allocate array of node info structs */
     if (NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))
@@ -167,14 +167,14 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* (uses leaf # of records because its the largest) */
     u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
     H5_CHECKED_ASSIGN(hdr->max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
-    HDassert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
+    assert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
     /* Initialize internal node info */
     if (depth > 0) {
         for (u = 1; u < (unsigned)(depth + 1); u++) {
             sz_max_nrec = H5B2_NUM_INT_REC(hdr, u);
             H5_CHECKED_ASSIGN(hdr->node_info[u].max_nrec, unsigned, sz_max_nrec, size_t)
-            HDassert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
+            assert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
 
             hdr->node_info[u].split_nrec = (hdr->node_info[u].max_nrec * hdr->split_percent) / 100;
             hdr->node_info[u].merge_nrec = (hdr->node_info[u].max_nrec * hdr->merge_percent) / 100;
@@ -238,7 +238,7 @@ H5B2__hdr_alloc(H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(f);
+    assert(f);
 
     /* Allocate space for the shared information */
     if (NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
@@ -283,8 +283,8 @@ H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* Allocate v2 B-tree header */
     if (NULL == (hdr = H5B2__hdr_alloc(f)))
@@ -359,7 +359,7 @@ H5B2__hdr_incr(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark header as un-evictable when a B-tree node is depending on it */
     if (hdr->rc == 0)
@@ -393,8 +393,8 @@ H5B2__hdr_decr(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->rc > 0);
+    assert(hdr);
+    assert(hdr->rc > 0);
 
     /* Decrement reference count on B-tree header */
     hdr->rc--;
@@ -426,7 +426,7 @@ H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Increment file reference count on shared header */
     hdr->file_rc++;
@@ -452,8 +452,8 @@ H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(hdr->file_rc);
+    assert(hdr);
+    assert(hdr->file_rc);
 
     /* Decrement file reference count on shared header */
     hdr->file_rc--;
@@ -481,7 +481,7 @@ H5B2__hdr_dirty(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Mark B-tree header as dirty in cache */
     if (H5AC_mark_entry_dirty(hdr) < 0)
@@ -513,11 +513,11 @@ H5B2__hdr_protect(H5F_t *f, haddr_t hdr_addr, void *ctx_udata, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_addr_defined(hdr_addr));
+    assert(f);
+    assert(H5F_addr_defined(hdr_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data for cache callbacks */
     udata.f         = f;
@@ -576,7 +576,7 @@ H5B2__hdr_unprotect(H5B2_hdr_t *hdr, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Unprotect the header */
     if (H5AC_unprotect(hdr->f, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
@@ -607,7 +607,7 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Destroy the callback context */
     if (hdr->cb_ctx) {
@@ -685,7 +685,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
 #ifndef NDEBUG
     {
@@ -697,8 +697,8 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
                         "unable to check metadata cache status for v2 B-tree header")
 
         /* Sanity checks on v2 B-tree header */
-        HDassert(hdr_status & H5AC_ES__IN_CACHE);
-        HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+        assert(hdr_status & H5AC_ES__IN_CACHE);
+        assert(hdr_status & H5AC_ES__IS_PROTECTED);
     }  /* end block */
 #endif /* NDEBUG */
 

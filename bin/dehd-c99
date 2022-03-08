@@ -1,0 +1,222 @@
+#!/bin/sh
+#
+# This is a portable (POSIX) shell script, it's not a bash script.
+#
+
+set -e -u
+
+names=$(cat<<EOF
+abort
+abs
+acos
+alarm
+asctime
+asin
+assert
+atan
+atan2
+atexit
+atof
+atoi
+atol
+atoll
+bsearch
+calloc
+ceil
+clearerr
+clock
+cos
+cosh
+ctime
+difftime
+div
+exit
+exp
+exp2
+fabs
+fabsf
+fabsl
+fclose
+feof
+ferror
+fflush
+fgetc
+fgetpos
+fgets
+floor
+fmod
+fopen
+fork
+fprintf
+fputc
+fputs
+fread
+free
+freopen
+frexp
+frexpf
+frexpl
+fscanf
+fsetpos
+ftell
+fwrite
+getc
+getchar
+getenv
+gmtime
+isalnum
+isalpha
+isatty
+iscntrl
+isdigit
+isgraph
+islower
+isnan
+isprint
+ispunct
+isspace
+isupper
+isxdigit
+labs
+ldexp
+ldiv
+llround
+llroundf
+llroundl
+localeconv
+localtime
+log
+log10
+longjmp
+lround
+lroundf
+lroundl
+malloc
+mblen
+mbstowcs
+mbtowc
+memchr
+memcmp
+memcpy
+memmove
+memset
+mktime
+modf
+perror
+pow
+powf
+printf
+putc
+putchar
+puts
+qsort
+raise
+realloc
+remove
+rename
+rewind
+round
+roundf
+roundl
+scanf
+setbuf
+setjmp
+setlocale
+setvbuf
+signal
+sin
+sinh
+sleep
+snprintf
+sprintf
+sqrt
+sscanf
+strcat
+strchr
+strcmp
+strcoll
+strcpy
+strcspn
+strerror
+strftime
+strlen
+strncat
+strncmp
+strncpy
+strpbrk
+strrchr
+strspn
+strstr
+strtod
+strtok
+strtol
+strtoll
+strtoul
+strtoull
+strtoumax
+strxfrm
+system
+tan
+tanh
+tmpfile
+tmpnam
+tolower
+toupper
+ungetc
+va_arg
+va_copy
+va_end
+va_start
+vfprintf
+vprintf
+vsnprintf
+vsprintf
+wcstombs
+wctomb
+EOF
+)
+
+echo names=$names
+
+proto_regex=
+
+for name in $names; do
+	if [ x${proto_regex} = x ]; then
+		proto_regex="${name}"
+	else
+		proto_regex="${proto_regex}|${name}"
+	fi
+done
+
+{
+	cat<<EOF
+#ifndef H5poison_H
+#define H5poison_H
+EOF
+
+	for name in $names; do
+		cat<<EOF
+#ifdef HD${name}
+#error "HD${name} must not be defined"
+#endif /* HD${name} */
+#define HD${name} HD${name}_disallowed
+EOF
+	done
+
+	cat <<EOF
+#endif /* H5poison_H */
+EOF
+} > src/H5poison.h
+
+regex="\<HD(${proto_regex})\>"
+
+find . \( -name '*.[chyl]' -o -name '*.cpp' \) \
+       \! -name pio_standalone.h \! -name sio_standalone.h \
+       \! -name H5poison.h \! -name H5private.h | \
+xargs grep -E -l "${regex}" | \
+while read fn; do
+	sed -E "s,${regex},\\1,g" < $fn > $fn.dehd
+	mv $fn.dehd $fn
+done
+
+exit 0

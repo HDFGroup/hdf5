@@ -143,7 +143,7 @@ H5PLappend(const char *search_path)
     /* Check args */
     if (NULL == search_path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
-    if (0 == HDstrlen(search_path))
+    if (0 == strlen(search_path))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
 
     /* Append the search path to the path table */
@@ -175,7 +175,7 @@ H5PLprepend(const char *search_path)
     /* Check args */
     if (NULL == search_path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
-    if (0 == HDstrlen(search_path))
+    if (0 == strlen(search_path))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
 
     /* Prepend the search path to the path table */
@@ -208,7 +208,7 @@ H5PLreplace(const char *search_path, unsigned int idx)
     /* Check args */
     if (NULL == search_path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
-    if (0 == HDstrlen(search_path))
+    if (0 == strlen(search_path))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
 
     /* Check index */
@@ -250,7 +250,7 @@ H5PLinsert(const char *search_path, unsigned int idx)
     /* Check args */
     if (NULL == search_path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot be NULL")
-    if (0 == HDstrlen(search_path))
+    if (0 == strlen(search_path))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_path parameter cannot have length zero")
 
     /* Check index */
@@ -355,11 +355,11 @@ H5PLget(unsigned int idx, char *path_buf, size_t buf_size)
     /* Get the path at the specified index and its length */
     if (NULL == (path = H5PL__get_path(idx)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, (-1), "no path stored at that index")
-    path_len = HDstrlen(path);
+    path_len = strlen(path);
 
     /* If the path buffer is not NULL, copy the path to the buffer */
     if (path_buf) {
-        HDstrncpy(path_buf, path, buf_size);
+        strncpy(path_buf, path, buf_size);
         if ((size_t)path_len >= buf_size)
             path_buf[buf_size - 1] = '\0';
     } /* end if */

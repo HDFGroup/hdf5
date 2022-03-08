@@ -223,8 +223,8 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(encoding);
-    HDassert(size);
+    assert(encoding);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode character set encoding */
@@ -260,9 +260,9 @@ H5P__strcrt_char_encoding_dec(const void **_pp, void *_value)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(encoding);
+    assert(pp);
+    assert(*pp);
+    assert(encoding);
 
     /* Decode character set encoding */
     *encoding = (H5T_cset_t) * (*pp)++;

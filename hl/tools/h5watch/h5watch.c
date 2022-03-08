@@ -122,11 +122,11 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
         subset.block.data[i]  = block[i];
     } /* end for */
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.sset = &subset;
 
     /* Set to all default values and then override */
-    HDmemset(&info, 0, sizeof info);
+    memset(&info, 0, sizeof info);
 
     if (g_simple_output) {
         info.idx_fmt        = "";
@@ -200,7 +200,7 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     if ((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did)) < 0)
         error_msg("unable to print data\n");
 
-    HDfprintf(stdout, "\n");
+    fprintf(stdout, "\n");
 
     return ret_value;
 
@@ -293,7 +293,7 @@ monitor_dataset(hid_t fid, char *dsetname)
     hsize_t cur_dims[H5S_MAX_RANK];  /* previous dataspace dimensions */
     herr_t  ret_value = SUCCEED;     /* return value */
 
-    HDfprintf(stdout, "Monitoring dataset %s...\n", dsetname);
+    fprintf(stdout, "Monitoring dataset %s...\n", dsetname);
 
     /* Open the dataset for minitoring */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0) {
@@ -313,7 +313,7 @@ monitor_dataset(hid_t fid, char *dsetname)
         ret_value = FAIL;
         goto done;
     }
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Loop until an error occurs or the user interrupts execution */
     while (!g_user_interrupt) {
@@ -340,14 +340,14 @@ monitor_dataset(hid_t fid, char *dsetname)
         if (i != ndims) {
             /* Printing changes in dimension sizes */
             for (u = 0; u < ndims; u++) {
-                HDfprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u],
+                fprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u],
                           cur_dims[u]);
                 if (cur_dims[u] > prev_dims[u])
-                    HDfprintf(stdout, " (increases)\n");
+                    fprintf(stdout, " (increases)\n");
                 else if (cur_dims[u] < prev_dims[u])
-                    HDfprintf(stdout, " (decreases)\n");
+                    fprintf(stdout, " (decreases)\n");
                 else
-                    HDfprintf(stdout, " (unchanged)\n");
+                    fprintf(stdout, " (unchanged)\n");
             }
 
             /* Printing elements appended to the dataset if there is */
@@ -361,7 +361,7 @@ monitor_dataset(hid_t fid, char *dsetname)
 
                     /* Print the new appended data to the dataset */
                     if (cur_dims[u] > prev_dims[u]) {
-                        HDfprintf(stdout, "    Data:\n");
+                        fprintf(stdout, "    Data:\n");
 
                         for (j = 0; j < ndims; j++) {
                             start[j] = 0;
@@ -375,17 +375,17 @@ monitor_dataset(hid_t fid, char *dsetname)
                     }
                 } /* end for */
             }
-            HDfflush(stdout);
+            fflush(stdout);
         }
 
         /* Save the current dimension sizes */
-        HDmemcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
+        memcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
 
         /* Sleep before next monitor */
-        HDsleep(g_polling_interval);
+        sleep(g_polling_interval);
     } /* end while */
 
-    HDfflush(stdout);
+    fflush(stdout);
 
 done:
     /* Closing */
@@ -416,7 +416,7 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     size_t len;                 /* number of comma-separated fields in "g_list_of_fields" */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    HDassert(g_list_of_fields && *g_list_of_fields);
+    assert(g_list_of_fields && *g_list_of_fields);
 
     /* Open the dataset */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0) {
@@ -447,10 +447,10 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     }
 
     /* Estimate the number of comma-separated fields in "g_list of_fields" */
-    len = HDstrlen(g_list_of_fields) / 2 + 2;
+    len = strlen(g_list_of_fields) / 2 + 2;
 
     /* Allocate memory for a list vector of H5LD_memb_t structures to store "g_list_of_fields" info */
-    if ((g_listv = (H5LD_memb_t **)HDcalloc(len, sizeof(H5LD_memb_t *))) == NULL) {
+    if ((g_listv = (H5LD_memb_t **)calloc(len, sizeof(H5LD_memb_t *))) == NULL) {
         error_msg("error in allocating memory for H5LD_memb_t\n");
         ret_value = FAIL;
         goto done;
@@ -533,8 +533,8 @@ check_dataset(hid_t fid, char *dsetname)
         goto done;
     }
 
-    HDmemset(cur_dims, 0, sizeof cur_dims);
-    HDmemset(max_dims, 0, sizeof max_dims);
+    memset(cur_dims, 0, sizeof cur_dims);
+    memset(max_dims, 0, sizeof max_dims);
 
     /* Get dataset's dataspace */
     if ((sid = H5Dget_space(did)) < 0) {
@@ -609,45 +609,45 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
-    HDfprintf(stdout, "Usage: %s [OPTIONS] [OBJECT]\n", prog);
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "     OPTIONS\n");
-    HDfprintf(stdout, "        --help            Print a usage message and exit.\n");
-    HDfprintf(stdout, "        --version         Print version number and exit.\n");
-    HDfprintf(stdout, "        --label           Label members of compound typed dataset.\n");
-    HDfprintf(stdout, "        --simple          Use a machine-readable output format.\n");
-    HDfprintf(stdout, "        --dim             Monitor changes in size of dataset dimensions only.\n");
-    HDfprintf(stdout, "        --width=N         Set the number of columns to N for output.\n");
-    HDfprintf(stdout, "                              A value of 0 sets the number of columns to the\n");
-    HDfprintf(stdout, "                              maximum (65535). The default width is 80 columns.\n");
-    HDfprintf(stdout, "        --polling=N       Set the polling interval to N (in seconds) when the\n");
-    HDfprintf(stdout,
+    fflush(stdout);
+    fprintf(stdout, "Usage: %s [OPTIONS] [OBJECT]\n", prog);
+    fprintf(stdout, "\n");
+    fprintf(stdout, "     OPTIONS\n");
+    fprintf(stdout, "        --help            Print a usage message and exit.\n");
+    fprintf(stdout, "        --version         Print version number and exit.\n");
+    fprintf(stdout, "        --label           Label members of compound typed dataset.\n");
+    fprintf(stdout, "        --simple          Use a machine-readable output format.\n");
+    fprintf(stdout, "        --dim             Monitor changes in size of dataset dimensions only.\n");
+    fprintf(stdout, "        --width=N         Set the number of columns to N for output.\n");
+    fprintf(stdout, "                              A value of 0 sets the number of columns to the\n");
+    fprintf(stdout, "                              maximum (65535). The default width is 80 columns.\n");
+    fprintf(stdout, "        --polling=N       Set the polling interval to N (in seconds) when the\n");
+    fprintf(stdout,
               "                              dataset will be checked for appended data.  The default\n");
-    HDfprintf(stdout, "                              polling interval is 1.\n");
-    HDfprintf(stdout, "        --fields=<list_of_fields>\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "                              polling interval is 1.\n");
+    fprintf(stdout, "        --fields=<list_of_fields>\n");
+    fprintf(stdout,
               "                              Display data for the fields specified in <list_of_fields>\n");
-    HDfprintf(stdout, "                              for a compound data type.  <list_of_fields> can be\n");
-    HDfprintf(stdout, "                              specified as follows:\n");
-    HDfprintf(stdout, "                                   1) A comma-separated list of field names in a\n");
-    HDfprintf(stdout, "                                   compound data type.  \",\" is the separator\n");
-    HDfprintf(stdout, "                                   for field names while \".\" is the separator\n");
-    HDfprintf(stdout, "                                   for a nested field.\n");
-    HDfprintf(stdout, "                                   2) A single field name in a compound data type.\n");
-    HDfprintf(stdout, "                                   Can use this option multiple times.\n");
-    HDfprintf(stdout, "                              Note that backslash is the escape character to avoid\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "                              for a compound data type.  <list_of_fields> can be\n");
+    fprintf(stdout, "                              specified as follows:\n");
+    fprintf(stdout, "                                   1) A comma-separated list of field names in a\n");
+    fprintf(stdout, "                                   compound data type.  \",\" is the separator\n");
+    fprintf(stdout, "                                   for field names while \".\" is the separator\n");
+    fprintf(stdout, "                                   for a nested field.\n");
+    fprintf(stdout, "                                   2) A single field name in a compound data type.\n");
+    fprintf(stdout, "                                   Can use this option multiple times.\n");
+    fprintf(stdout, "                              Note that backslash is the escape character to avoid\n");
+    fprintf(stdout,
               "                              characters in field names that conflict with the tool's\n");
-    HDfprintf(stdout, "                              separators.\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "     OBJECT is specified as [<filename>/<path_to_dataset>/<dsetname>]\n");
-    HDfprintf(stdout, "        <filename>            Name of the HDF5 file.  It may be preceded by path\n");
-    HDfprintf(stdout, "                              separated by slashes to the specified HDF5 file.\n");
-    HDfprintf(stdout, "        <path_to_dataset>     Path separated by slashes to the specified dataset\n");
-    HDfprintf(stdout, "        <dsetname>            Name of the dataset\n");
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout,
+    fprintf(stdout, "                              separators.\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "     OBJECT is specified as [<filename>/<path_to_dataset>/<dsetname>]\n");
+    fprintf(stdout, "        <filename>            Name of the HDF5 file.  It may be preceded by path\n");
+    fprintf(stdout, "                              separated by slashes to the specified HDF5 file.\n");
+    fprintf(stdout, "        <path_to_dataset>     Path separated by slashes to the specified dataset\n");
+    fprintf(stdout, "        <dsetname>            Name of the dataset\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout,
               "     User can end the h5watch process by ctrl-C (SIGINT) or kill the process (SIGTERM).\n");
 
 } /* usage() */
@@ -691,7 +691,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'w': /* --width=N */
-                g_display_width = (int)HDstrtol(H5_optarg, NULL, 0);
+                g_display_width = (int)strtol(H5_optarg, NULL, 0);
                 if (g_display_width < 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
@@ -711,8 +711,8 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'p': /* --polling=N */
-                /* g_polling_interval = HDstrtod(H5_optarg, NULL); */
-                if ((tmp = (int)HDstrtol(H5_optarg, NULL, 10)) <= 0) {
+                /* g_polling_interval = strtod(H5_optarg, NULL); */
+                if ((tmp = (int)strtol(H5_optarg, NULL, 10)) <= 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
@@ -733,13 +733,13 @@ parse_command_line(int argc, const char *const *argv)
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    if ((g_list_of_fields = (char *)HDrealloc(
-                             g_list_of_fields, HDstrlen(g_list_of_fields) + HDstrlen(str) + 2)) == NULL) {
+                    if ((g_list_of_fields = (char *)realloc(
+                             g_list_of_fields, strlen(g_list_of_fields) + strlen(str) + 2)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
-                    HDstrcat(g_list_of_fields, FIELD_SEP);
-                    HDstrcat(g_list_of_fields, str);
+                    strcat(g_list_of_fields, FIELD_SEP);
+                    strcat(g_list_of_fields, str);
                 }
 
                 break;
@@ -807,13 +807,13 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* To exit from h5watch for SIGTERM signal */
-    if (HDsignal(SIGTERM, catch_signal) == SIG_ERR) {
+    if (signal(SIGTERM, catch_signal) == SIG_ERR) {
         error_msg("An error occurred while setting a signal handler.\n");
         leave(EXIT_FAILURE);
     }
 
     /* To exit from h5watch for SIGINT signal */
-    if (HDsignal(SIGINT, catch_signal) == SIG_ERR) {
+    if (signal(SIGINT, catch_signal) == SIG_ERR) {
         error_msg("An error occurred while setting a signal handler.\n");
         leave(EXIT_FAILURE);
     }
@@ -869,13 +869,13 @@ main(int argc, char *argv[])
                                 sizeof drivername);
 
             if (fid >= 0) {
-                HDfprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
+                fprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
             }          /* end if */
 
             /* Shorten the file name; lengthen the object name */
             x     = dname;
-            dname = HDstrrchr(fname, '/');
+            dname = strrchr(fname, '/');
             if (x)
                 *x = '/';
             if (!dname)
@@ -929,17 +929,17 @@ main(int argc, char *argv[])
 done:
     /* Free spaces */
     if (fname)
-        HDfree(fname);
+        free(fname);
     if (dname)
-        HDfree(dname);
+        free(dname);
     if (g_list_of_fields)
-        HDfree(g_list_of_fields);
+        free(g_list_of_fields);
     if (g_listv) {
         H5LD_clean_vector(g_listv);
-        HDfree(g_listv);
+        free(g_listv);
     }
     if (g_dup_fields)
-        HDfree(g_dup_fields);
+        free(g_dup_fields);
 
     /* Close the file access property list */
     if (fapl >= 0 && H5Pclose(fapl) < 0) {

@@ -135,8 +135,8 @@ H5MP__new_page(H5MP_pool_t *mp, size_t page_size)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(mp);
-    HDassert(page_size >= mp->page_size);
+    assert(mp);
+    assert(page_size >= mp->page_size);
 
     /* Allocate page */
     if (page_size > mp->page_size) {
@@ -201,8 +201,8 @@ H5MP_malloc(H5MP_pool_t *mp, size_t request)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
-    HDassert(mp);
-    HDassert(request > 0);
+    assert(mp);
+    assert(request > 0);
 
     /* Compute actual size needed */
     needed = H5MP_BLOCK_ALIGN(request) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t));
@@ -265,8 +265,8 @@ H5MP_malloc(H5MP_pool_t *mp, size_t request)
 found:
 
     /* Sanity check */
-    HDassert(alloc_page);
-    HDassert(alloc_free);
+    assert(alloc_page);
+    assert(alloc_free);
 
     /* Check if we can subdivide the free space */
     if (alloc_free->size > (needed + H5MP_MIN_BLOCK)) {
@@ -331,15 +331,15 @@ H5MP_free(H5MP_pool_t *mp, void *spc)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(mp);
-    HDassert(spc);
+    assert(mp);
+    assert(spc);
 
     /* Get block header for space to free */
     spc_blk =
         (H5MP_page_blk_t *)((void *)(((unsigned char *)spc) - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))));
 
     /* Mark block as free */
-    HDassert(spc_blk->is_free == FALSE);
+    assert(spc_blk->is_free == FALSE);
     spc_blk->is_free = TRUE;
 
     /* Add it's space to the amount of free space in the page & pool */
@@ -366,7 +366,7 @@ H5MP_free(H5MP_pool_t *mp, void *spc)
         H5MP_page_blk_t *next_blk; /* Block following space to free */
 
         next_blk = spc_blk->next;
-        HDassert(next_blk->prev == spc_blk);
+        assert(next_blk->prev == spc_blk);
         if (next_blk->is_free) {
             spc_blk->size += next_blk->size;
             spc_blk->next = next_blk->next;
@@ -378,7 +378,7 @@ H5MP_free(H5MP_pool_t *mp, void *spc)
         H5MP_page_blk_t *prev_blk; /* Block before space to free */
 
         prev_blk = spc_blk->prev;
-        HDassert(prev_blk->next == spc_blk);
+        assert(prev_blk->next == spc_blk);
         if (prev_blk->is_free) {
             prev_blk->size += spc_blk->size;
             prev_blk->next = spc_blk->next;

@@ -82,7 +82,7 @@
             H5_JNI_FATAL_ERROR(envptr, "JNI error: GetMethodID failed");                                     \
         }                                                                                                    \
         if (NULL == (ret_obj = (*envptr)->NewObjectA(envptr, cls, constructor, (args)))) {                   \
-            HDprintf("FATAL ERROR: %s: Creation failed\n", classname);                                       \
+            printf("FATAL ERROR: %s: Creation failed\n", classname);                                       \
             CHECK_JNI_EXCEPTION(envptr, JNI_FALSE);                                                          \
         }                                                                                                    \
     } while (0)

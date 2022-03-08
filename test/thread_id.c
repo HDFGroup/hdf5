@@ -34,12 +34,12 @@ my_errx(int code, const char *fmt, ...)
 {
     va_list ap;
 
-    (void)HDfprintf(stderr, "thread_id: ");
-    HDva_start(ap, fmt);
-    (void)HDvfprintf(stderr, fmt, ap);
-    HDva_end(ap);
-    (void)HDfputc('\n', stderr);
-    HDexit(code);
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
+    (void)vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    (void)fputc('\n', stderr);
+    exit(code);
 }
 
 #if defined(H5_HAVE_DARWIN)
@@ -73,7 +73,7 @@ pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *at
     if (attr != NULL)
         return EINVAL;
 
-    HDmemset(barrier, 0, sizeof(*barrier));
+    memset(barrier, 0, sizeof(*barrier));
 
     barrier->count = count;
 
@@ -96,7 +96,7 @@ barrier_lock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, HDstrerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, strerror(rc));
     }
 }
 
@@ -106,7 +106,7 @@ barrier_unlock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, HDstrerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, strerror(rc));
     }
 }
 
@@ -176,17 +176,17 @@ my_err(int code, const char *fmt, ...)
     va_list ap;
     int     errno_copy = errno;
 
-    (void)HDfprintf(stderr, "thread_id: ");
-    HDva_start(ap, fmt);
-    (void)HDvfprintf(stderr, fmt, ap);
-    HDva_end(ap);
-    (void)HDfprintf(stderr, ": %s\n", HDstrerror(errno_copy));
-    HDexit(code);
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
+    (void)vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    (void)fprintf(stderr, ": %s\n", strerror(errno_copy));
+    exit(code);
 }
 
 #define threads_failure(_call, _result)                                                                      \
     do {                                                                                                     \
-        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, HDstrerror(_result));             \
+        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, strerror(_result));             \
     } while (false)
 
 #define NTHREADS 5
@@ -203,9 +203,9 @@ atomic_printf(const char *fmt, ...)
     va_list ap;
     ssize_t nprinted, nwritten;
 
-    HDva_start(ap, fmt);
-    nprinted = HDvsnprintf(buf, sizeof(buf), fmt, ap);
-    HDva_end(ap);
+    va_start(ap, fmt);
+    nprinted = vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
 
     if (nprinted == -1)
         my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
@@ -318,7 +318,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stderr, "not implemented in this configuration.\n");
+    fprintf(stderr, "not implemented in this configuration.\n");
     return EXIT_SUCCESS;
 }
 #endif /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/

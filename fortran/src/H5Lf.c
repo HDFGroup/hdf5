@@ -76,9 +76,9 @@ h5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *de
 
 done:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dest_name)
-        HDfree(c_dest_name);
+        free(c_dest_name);
 
     return ret_value;
 }
@@ -136,11 +136,11 @@ h5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, size
 
 done:
     if (c_file_name)
-        HDfree(c_file_name);
+        free(c_file_name);
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -187,7 +187,7 @@ h5ldelete_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -239,9 +239,9 @@ h5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len, hid_t_f *link_loc_
 
 done:
     if (c_target_path)
-        HDfree(c_target_path);
+        free(c_target_path);
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -295,9 +295,9 @@ h5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen, hid_
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -365,7 +365,7 @@ h5ldelete_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, in
 
 done:
     if (c_group_name)
-        HDfree(c_group_name);
+        free(c_group_name);
     return ret_value;
 }
 
@@ -412,7 +412,7 @@ h5lexists_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -483,7 +483,7 @@ h5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, int_
 
 done:
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -661,9 +661,9 @@ h5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *de
 
 done:
     if (c_src_name)
-        HDfree(c_src_name);
+        free(c_src_name);
     if (c_dest_name)
-        HDfree(c_dest_name);
+        free(c_dest_name);
 
     return ret_value;
 }
@@ -715,7 +715,7 @@ h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if (NULL == (c_name = (char *)HDmalloc(c_size)))
+    if (NULL == (c_name = (char *)malloc(c_size)))
         HGOTO_DONE(FAIL)
 
     if ((c_size_link =
@@ -733,9 +733,9 @@ h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
 
 done:
     if (c_group_name)
-        HDfree(c_group_name);
+        free(c_group_name);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -897,9 +897,9 @@ done:
 
 /* done: */
 /*   if(c_src_name) */
-/*     HDfree(c_src_name); */
+/*     free(c_src_name); */
 /*   if(c_dest_name) */
-/*     HDfree(c_dest_name); */
+/*     free(c_dest_name); */
 
 /*   return ret_value; */
 /* } */
@@ -949,7 +949,7 @@ h5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_
 
 done:
     if (c_link_name)
-        HDfree(c_link_name);
+        free(c_link_name);
 
     return ret_value;
 }
@@ -1060,7 +1060,7 @@ h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index
     *idx      = (hsize_t_f)idx_c;
 
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }

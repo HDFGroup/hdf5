@@ -193,7 +193,7 @@ test_direct_chunk_read(hid_t did)
             TEST_ERROR
 
         /* Read the raw chunk back */
-        HDmemset(chunk_data, 0, CHUNK_NX * sizeof(int));
+        memset(chunk_data, 0, CHUNK_NX * sizeof(int));
         filter_mask = UINT_MAX;
         offset[0]   = (hsize_t)i * CHUNK_NX;
         if (H5DOread_chunk(did, H5P_DEFAULT, offset, &filter_mask, chunk_data) < 0)
@@ -248,8 +248,8 @@ main(void)
 {
 #ifdef H5_NO_DEPRECATED_SYMBOLS
 
-    HDputs("Direct chunk read/write wrapper tests SKIPPED.");
-    HDputs("(Backward compatibility not configured)");
+    puts("Direct chunk read/write wrapper tests SKIPPED.");
+    puts("(Backward compatibility not configured)");
     return EXIT_SUCCESS;
 
 #else
@@ -276,11 +276,11 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All direct chunk read/write wrapper tests passed.");
+    puts("All direct chunk read/write wrapper tests passed.");
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end main() */

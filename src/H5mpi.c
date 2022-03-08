@@ -396,9 +396,9 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
                 same = TRUE;
 
                 /* Memset the buffers to zero */
-                HDmemset(key, 0, MPI_MAX_INFO_KEY);
-                HDmemset(value1, 0, MPI_MAX_INFO_VAL);
-                HDmemset(value2, 0, MPI_MAX_INFO_VAL);
+                memset(key, 0, MPI_MAX_INFO_KEY);
+                memset(value1, 0, MPI_MAX_INFO_VAL);
+                memset(value2, 0, MPI_MAX_INFO_VAL);
 
                 /* Get the nth key */
                 if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nthkey(info1, i, key)))
@@ -411,7 +411,7 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
                     HMPI_GOTO_ERROR(FAIL, "MPI_Info_get failed", mpi_code)
 
                 /* Compare values and flags */
-                if (!flag1 || !flag2 || HDmemcmp(value1, value2, MPI_MAX_INFO_VAL)) {
+                if (!flag1 || !flag2 || memcmp(value1, value2, MPI_MAX_INFO_VAL)) {
                     same = FALSE;
                     break;
                 }

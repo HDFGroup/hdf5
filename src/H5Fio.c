@@ -89,9 +89,9 @@ H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    assert(f_sh);
+    assert(buf);
+    assert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
@@ -131,10 +131,10 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(buf);
+    assert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5F_addr_le(f->shared->tmp_addr, (addr + size)))
@@ -174,10 +174,10 @@ H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    assert(f_sh);
+    assert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
+    assert(buf);
+    assert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
@@ -217,11 +217,11 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    assert(buf);
+    assert(H5F_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5F_addr_le(f->shared->tmp_addr, (addr + size)))
@@ -320,8 +320,8 @@ H5F__evict_cache_entries(H5F_t *f)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Evict all except pinned entries in the cache */
     if (H5AC_evict(f) < 0)
@@ -375,8 +375,8 @@ H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(buf);
-    HDassert(buf_size);
+    assert(buf);
+    assert(buf_size);
 
     /* Return the stored checksum */
     if (s_chksum) {

@@ -46,7 +46,7 @@ typedef struct table_attrs_t {
 static void
 table_attrs_init(table_attrs_t **tbl)
 {
-    table_attrs_t *table_attrs = (table_attrs_t *)HDmalloc(sizeof(table_attrs_t));
+    table_attrs_t *table_attrs = (table_attrs_t *)malloc(sizeof(table_attrs_t));
 
     table_attrs->size         = 0;
     table_attrs->nattrs       = 0;
@@ -78,13 +78,13 @@ table_attrs_free(table_attrs_t *table)
         if (table->attrs) {
             for (i = 0; i < table->nattrs; i++) {
                 if (table->attrs[i].name) {
-                    HDfree(table->attrs[i].name);
+                    free(table->attrs[i].name);
                 }
             } /* end for */
-            HDfree(table->attrs);
+            free(table->attrs);
             table->attrs = NULL;
         } /* end if */
-        HDfree(table);
+        free(table);
         table = NULL;
     }
 }
@@ -110,7 +110,7 @@ table_attr_mark_exist(const unsigned *exist, char *name, table_attrs_t *table)
         match_attr_t *new_attrs;
 
         table->size = MAX(1, table->size * 2);
-        new_attrs   = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
+        new_attrs   = (match_attr_t *)realloc(table->attrs, table->size * sizeof(match_attr_t));
         if (new_attrs)
             table->attrs = new_attrs;
     } /* end if */
@@ -196,7 +196,7 @@ build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t **table_out, 
             H5TOOLS_GOTO_ERROR(FAIL, "H5Aget_name second attribute failed");
 
         /* criteria is string compare */
-        cmp = HDstrcmp(name1, name2);
+        cmp = strcmp(name1, name2);
 
         if (cmp == 0) {
             infile[0] = 1;
@@ -394,19 +394,19 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
     H5TOOLS_DEBUG("attr_names: %s - %s", name1, name2);
     if (name1) {
-        sz = HDstrlen(name1);
+        sz = strlen(name1);
         H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
         if (sz > 0) {
-            opts->obj_name[0] = (char *)HDmalloc(sz + 1);
-            HDstrncpy(opts->obj_name[0], name1, sz + 1);
+            opts->obj_name[0] = (char *)malloc(sz + 1);
+            strncpy(opts->obj_name[0], name1, sz + 1);
         }
     }
     if (name2) {
-        sz = HDstrlen(name2);
+        sz = strlen(name2);
         H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
         if (sz > 0) {
-            opts->obj_name[1] = (char *)HDmalloc(sz + 1);
-            HDstrncpy(opts->obj_name[1], name2, sz + 1);
+            opts->obj_name[1] = (char *)malloc(sz + 1);
+            strncpy(opts->obj_name[1], name2, sz + 1);
         }
     }
     H5TOOLS_DEBUG("attr_names: %s - %s", opts->obj_name[0], opts->obj_name[1]);
@@ -441,8 +441,8 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
          * read
          *----------------------------------------------------------------------
          */
-        buf1 = (void *)HDcalloc((size_t)(opts->nelmts), msize1);
-        buf2 = (void *)HDcalloc((size_t)(opts->nelmts), msize2);
+        buf1 = (void *)calloc((size_t)(opts->nelmts), msize1);
+        buf2 = (void *)calloc((size_t)(opts->nelmts), msize2);
         H5TOOLS_DEBUG("attr buffer size %ld * %ld", opts->nelmts, msize1);
         if (buf1 == NULL || buf2 == NULL) {
             parallel_print("cannot read into memory\n");
@@ -466,25 +466,25 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
         /* format output string */
         if (opts->obj_name[0] != NULL)
-            HDfree(opts->obj_name[0]);
+            free(opts->obj_name[0]);
         opts->obj_name[0] = NULL;
         if (opts->obj_name[1] != NULL)
-            HDfree(opts->obj_name[1]);
+            free(opts->obj_name[1]);
         opts->obj_name[1] = NULL;
 
         H5TOOLS_DEBUG("attr_names: %s - %s : %s - %s", name1, name2, path1, path2);
         if (name1) {
-            sz = HDstrlen(name1) + HDstrlen(path1) + 7;
+            sz = strlen(name1) + strlen(path1) + 7;
             H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
-            opts->obj_name[0] = (char *)HDcalloc(sz + 1, sizeof(char));
-            HDsnprintf(opts->obj_name[0], sz, "%s of <%s>", name1, path1);
+            opts->obj_name[0] = (char *)calloc(sz + 1, sizeof(char));
+            snprintf(opts->obj_name[0], sz, "%s of <%s>", name1, path1);
             opts->obj_name[0][sz] = '\0';
         }
         if (name2) {
-            sz = HDstrlen(name2) + HDstrlen(path2) + 7;
+            sz = strlen(name2) + strlen(path2) + 7;
             H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
-            opts->obj_name[1] = (char *)HDcalloc(sz + 1, sizeof(char));
-            HDsnprintf(opts->obj_name[1], sz, "%s of <%s>", name2, path2);
+            opts->obj_name[1] = (char *)calloc(sz + 1, sizeof(char));
+            snprintf(opts->obj_name[1], sz, "%s of <%s>", name2, path2);
             opts->obj_name[1][sz] = '\0';
         }
 
@@ -532,22 +532,22 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
      *----------------------------------------------------------------------
      */
     if (opts->obj_name[0] != NULL)
-        HDfree(opts->obj_name[0]);
+        free(opts->obj_name[0]);
     opts->obj_name[0] = NULL;
     if (opts->obj_name[1] != NULL)
-        HDfree(opts->obj_name[1]);
+        free(opts->obj_name[1]);
     opts->obj_name[1] = NULL;
 
     /* Free buf1 and buf2, check both VLEN-data VLEN-string to reclaim any
      * VLEN memory first */
     if (TRUE == h5tools_detect_vlen(mtype1_id))
         H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
-    HDfree(buf1);
+    free(buf1);
     buf1 = NULL;
 
     if (TRUE == h5tools_detect_vlen(mtype2_id))
         H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
-    HDfree(buf2);
+    free(buf2);
     buf2 = NULL;
 
     if (H5Tclose(ftype1_id) < 0)
@@ -571,12 +571,12 @@ done:
         if (buf1) {
             if (buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
                 H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
-            HDfree(buf1);
+            free(buf1);
         } /* end if */
         if (buf2) {
             if (buf2hasdata && TRUE == h5tools_detect_vlen(mtype2_id))
                 H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
-            HDfree(buf2);
+            free(buf2);
         } /* end if */
 
         H5Tclose(ftype1_id);

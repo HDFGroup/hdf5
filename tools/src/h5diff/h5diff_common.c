@@ -73,9 +73,9 @@ check_options(diff_opt_t *opts)
      * These options are mutually exclusive.
      */
     if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
-        HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
-        HDprintf("use no more than one.\n");
-        HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
+        printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+        printf("use no more than one.\n");
+        printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
                  "Reference Manual'.\n",
                  PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
@@ -112,7 +112,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit((int)(unsigned char)*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -130,15 +130,15 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_DEBUG("Number integers to read=%ld", size_count);
 
     /* allocate an array for the integers in the list */
-    if ((p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t))) == NULL)
+    if ((p_list = (hsize_t *)calloc(size_count, sizeof(hsize_t))) == NULL)
         H5TOOLS_INFO("Unable to allocate space for subset data");
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit((int)(unsigned char)*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+            p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
-            while (HDisdigit(*ptr))
+            while (isdigit((int)(unsigned char)*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
@@ -163,10 +163,10 @@ parse_subset_params(const char *dset)
     char *           brace;
 
     H5TOOLS_START_DEBUG(" - dset:%s", dset);
-    if ((brace = HDstrrchr(dset, '[')) != NULL) {
+    if ((brace = strrchr(dset, '[')) != NULL) {
         *brace++ = '\0';
 
-        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
+        s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
         parse_hsize_list(brace, &s->start);
 
         while (*brace && *brace != ';')
@@ -216,7 +216,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
     H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
-    HDmemset(opts, 0, sizeof(diff_opt_t));
+    memset(opts, 0, sizeof(diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;
@@ -275,7 +275,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     }
                     else {
                         if (H5_optarg != NULL)
-                            opts->mode_verbose_level = HDatoi(H5_optarg);
+                            opts->mode_verbose_level = atoi(H5_optarg);
                         else
                             opts->mode_verbose_level = 0;
                     }
@@ -307,9 +307,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->exclude_path = 1;
 
                 /* create linked list of excluding objects */
-                if ((exclude_node = (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) ==
+                if ((exclude_node = (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) ==
                     NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -336,8 +336,8 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
                 /* create linked list of excluding objects */
                 if ((exclude_attr_node =
-                         (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                         (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) == NULL) {
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -363,22 +363,22 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->delta_bool = 1;
 
                 if (check_d_input(H5_optarg) == -1) {
-                    HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+                    printf("<-d %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = HDatof(H5_optarg);
+                opts->delta = atof(H5_optarg);
                 /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
             case 'p':
                 opts->percent_bool = 1;
                 if (check_p_input(H5_optarg) == -1) {
-                    HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+                    printf("<-p %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = HDatof(H5_optarg);
+                opts->percent = atof(H5_optarg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
@@ -388,11 +388,11 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case 'n':
                 opts->count_bool = 1;
                 if (check_n_input(H5_optarg) == -1) {
-                    HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+                    printf("<-n %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->count = HDstrtoull(H5_optarg, NULL, 0);
+                opts->count = strtoull(H5_optarg, NULL, 0);
                 break;
 
             case 'N':
@@ -409,7 +409,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '1':
                 opts->vol_info[0].type    = VOL_BY_VALUE;
-                opts->vol_info[0].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                opts->vol_info[0].u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 opts->custom_vol[0]       = TRUE;
                 break;
 
@@ -425,7 +425,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '4':
                 opts->vol_info[1].type    = VOL_BY_VALUE;
-                opts->vol_info[1].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                opts->vol_info[1].u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 opts->custom_vol[1]       = TRUE;
                 break;
 
@@ -441,7 +441,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '7':
                 opts->vfd_info[0].type    = VFD_BY_VALUE;
-                opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->vfd_info[0].u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 opts->custom_vfd[0]       = TRUE;
                 break;
 
@@ -457,7 +457,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '0':
                 opts->vfd_info[1].type    = VFD_BY_VALUE;
-                opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->vfd_info[1].u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 opts->custom_vfd[1]       = TRUE;
                 break;
 
@@ -536,20 +536,20 @@ print_info(diff_opt_t *opts)
         return;
 
     if (opts->cmn_objs == 0) {
-        HDprintf("No common objects found. Files are not comparable.\n");
+        printf("No common objects found. Files are not comparable.\n");
         if (!opts->mode_verbose)
-            HDprintf("Use -v for a list of objects.\n");
+            printf("Use -v for a list of objects.\n");
     }
 
     if (opts->not_cmp == 1) {
         if (opts->mode_list_not_cmp == 0) {
-            HDprintf("--------------------------------\n");
-            HDprintf("Some objects are not comparable\n");
-            HDprintf("--------------------------------\n");
+            printf("--------------------------------\n");
+            printf("Some objects are not comparable\n");
+            printf("--------------------------------\n");
             if (opts->mode_verbose)
-                HDprintf("Use -c for a list of objects without details of differences.\n");
+                printf("Use -c for a list of objects without details of differences.\n");
             else
-                HDprintf("Use -c for a list of objects.\n");
+                printf("Use -c for a list of objects.\n");
         }
     }
 }
@@ -568,7 +568,7 @@ check_n_input(const char *str)
     unsigned i;
     char     c;
 
-    for (i = 0; i < HDstrlen(str); i++) {
+    for (i = 0; i < strlen(str); i++) {
         c = str[i];
         if (i == 0) {
             if (c < 49 || c > 57) /* ascii values between 1 and 9 */
@@ -597,10 +597,10 @@ check_p_input(const char *str)
      * the atof return value on a hexadecimal input is different
      * on some systems; we do a character check for this
      */
-    if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
+    if (strlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -624,10 +624,10 @@ check_d_input(const char *str)
      * the atof return value on a hexadecimal input is different
      * on some systems; we do a character check for this
      */
-    if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
+    if (strlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 

@@ -305,7 +305,7 @@ image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *
         if (udata->vfd_ref_count != 1)
             goto out;
 
-        if (NULL == (udata->vfd_image_ptr = HDrealloc(ptr, size)))
+        if (NULL == (udata->vfd_image_ptr = realloc(ptr, size)))
             goto out;
 
         udata->vfd_image_size = size;
@@ -357,7 +357,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
              * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
                 !(udata->flags & H5LT_FILE_IMAGE_DONT_RELEASE)) {
-                HDfree(udata->fapl_image_ptr);
+                free(udata->fapl_image_ptr);
                 udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
                 udata->vfd_image_ptr  = NULL;
@@ -376,7 +376,7 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
              * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
                 !(udata->flags & H5LT_FILE_IMAGE_DONT_RELEASE)) {
-                HDfree(udata->vfd_image_ptr);
+                free(udata->vfd_image_ptr);
                 udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
                 udata->vfd_image_ptr  = NULL;
@@ -464,7 +464,7 @@ udata_free(void *_udata)
 
     /* checks that there are no references outstanding before deallocating udata */
     if (udata->ref_count == 0 && udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0)
-        HDfree(udata);
+        free(udata);
 
     return (SUCCEED);
 
@@ -759,7 +759,7 @@ H5LTmake_dataset_string(hid_t loc_id, const char *dset_name, const char *buf)
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
         goto out;
 
-    size = HDstrlen(buf) + 1; /* extra null term */
+    size = strlen(buf) + 1; /* extra null term */
 
     if (H5Tset_size(tid, size) < 0)
         goto out;
@@ -857,7 +857,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         H5LT_file_image_ud_t *udata; /* Pointer to udata structure */
 
         /* Allocate buffer to communicate user data to callbacks */
-        if (NULL == (udata = (H5LT_file_image_ud_t *)HDmalloc(sizeof(H5LT_file_image_ud_t))))
+        if (NULL == (udata = (H5LT_file_image_ud_t *)malloc(sizeof(H5LT_file_image_ud_t))))
             goto out;
 
         /* Initialize udata with info about app buffer containing file image  and flags */
@@ -877,7 +877,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 
         /* Set file image callbacks */
         if (H5Pset_file_image_callbacks(fapl, &callbacks) < 0) {
-            HDfree(udata);
+            free(udata);
             goto out;
         } /* end if */
     }     /* end if */
@@ -893,7 +893,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         file_open_flags = H5F_ACC_RDONLY;
 
     /* define a unique file name */
-    HDsnprintf(file_name, (sizeof(file_name) - 1), "file_image_%ld", file_name_counter++);
+    snprintf(file_name, (sizeof(file_name) - 1), "file_image_%ld", file_name_counter++);
 
     /* Assign file image in FAPL to the core file driver */
     if ((file_id = H5Fopen(file_name, file_open_flags, fapl)) < 0)
@@ -1320,7 +1320,7 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
      */
-    if (HDstrncmp(name, (char *)op_data, HDstrlen((char *)op_data)) == 0)
+    if (strncmp(name, (char *)op_data, strlen((char *)op_data)) == 0)
         ret = 1;
 
     return ret;
@@ -1412,7 +1412,7 @@ H5LTset_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
     if ((attr_type = H5Tcopy(H5T_C_S1)) < 0)
         goto out;
 
-    attr_size = HDstrlen(attr_data) + 1; /* extra null term */
+    attr_size = strlen(attr_data) + 1; /* extra null term */
 
     if (H5Tset_size(attr_type, (size_t)attr_size) < 0)
         goto out;
@@ -2080,19 +2080,19 @@ H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
         goto out;
 
     if (lang_type != H5LT_DDL) {
-        HDfprintf(stderr, "only DDL is supported for now.\n");
+        fprintf(stderr, "only DDL is supported for now.\n");
         goto out;
     }
 
-    input_len = HDstrlen(text);
+    input_len = strlen(text);
     myinput   = HDstrdup(text);
 
     if ((type_id = H5LTyyparse()) < 0) {
-        HDfree(myinput);
+        free(myinput);
         goto out;
     }
 
-    HDfree(myinput);
+    free(myinput);
     input_len = 0;
 
     return type_id;
@@ -2128,16 +2128,16 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
             goto out;
 
         /* If the buffer isn't big enough, reallocate it.  Otherwise, go to do strcat. */
-        if (str_to_add && ((ssize_t)(*len - (HDstrlen(buf) + HDstrlen(str_to_add) + 1)) < LIMIT)) {
-            *len += ((HDstrlen(buf) + HDstrlen(str_to_add) + 1) / INCREMENT + 1) * INCREMENT;
+        if (str_to_add && ((ssize_t)(*len - (strlen(buf) + strlen(str_to_add) + 1)) < LIMIT)) {
+            *len += ((strlen(buf) + strlen(str_to_add) + 1) / INCREMENT + 1) * INCREMENT;
         }
-        else if (!str_to_add && ((ssize_t)(*len - HDstrlen(buf) - 1) < LIMIT)) {
+        else if (!str_to_add && ((ssize_t)(*len - strlen(buf) - 1) < LIMIT)) {
             *len += INCREMENT;
         }
 
-        tmp_realloc = (char *)HDrealloc(buf, *len);
+        tmp_realloc = (char *)realloc(buf, *len);
         if (tmp_realloc == NULL) {
-            HDfree(buf);
+            free(buf);
             buf = NULL;
             goto out;
         }
@@ -2147,19 +2147,19 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
 
     if (str_to_add) {
         /* find the size of the buffer to add */
-        size_str_to_add = HDstrlen(str_to_add);
+        size_str_to_add = strlen(str_to_add);
         /* find the size of the current buffer */
-        size_str = HDstrlen(buf);
+        size_str = strlen(buf);
 
         /* Check to make sure the appended string does not
          * extend past the allocated buffer; if it does then truncate the string
          */
         if (size_str < *len - 1) {
             if (size_str + size_str_to_add < *len - 1) {
-                HDstrcat(buf, str_to_add);
+                strcat(buf, str_to_add);
             }
             else {
-                HDstrncat(buf, str_to_add, (*len - 1) - size_str);
+                strncat(buf, str_to_add, (*len - 1) - size_str);
             }
         }
         else {
@@ -2194,11 +2194,11 @@ indentation(size_t x, char *str, hbool_t no_u_buf, size_t *s_len)
     char tmp_str[TMP_LEN];
 
     if (x < 80) {
-        HDmemset(tmp_str, ' ', x);
+        memset(tmp_str, ' ', x);
         tmp_str[x] = '\0';
     }
     else
-        HDsnprintf(tmp_str, TMP_LEN, "error: the indentation exceeds the number of cols.");
+        snprintf(tmp_str, TMP_LEN, "error: the indentation exceeds the number of cols.");
 
     if (!(str = realloc_and_append(no_u_buf, s_len, str, tmp_str)))
         goto out;
@@ -2256,8 +2256,8 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     dst_size   = H5Tget_size(native);
 
     /* Get the names and raw values of all members */
-    name  = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
-    value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(dst_size, super_size));
+    name  = (char **)calloc((size_t)nmembs, sizeof(char *));
+    value = (unsigned char *)calloc((size_t)nmembs, MAX(dst_size, super_size));
 
     for (i = 0; i < nmembs; i++) {
         if ((name[i] = H5Tget_member_name(type, (unsigned)i)) == NULL)
@@ -2281,22 +2281,22 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     for (i = 0; i < nmembs; i++) {
         if (!(str = indentation(indt + COL, str, no_ubuf, str_len)))
             goto out;
-        nchars = HDsnprintf(tmp_str, TMP_LEN, "\"%s\"", name[i]);
+        nchars = snprintf(tmp_str, TMP_LEN, "\"%s\"", name[i]);
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
-        HDmemset(tmp_str, ' ', (size_t)MAX(3, 19 - nchars) + 1);
+        memset(tmp_str, ' ', (size_t)MAX(3, 19 - nchars) + 1);
         tmp_str[MAX(3, 19 - nchars)] = '\0';
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
 
         if (H5T_SGN_NONE == H5Tget_sign(native))
-            HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int *)((void *)(value + (size_t)i * dst_size))));
+            snprintf(tmp_str, TMP_LEN, "%u", *((unsigned int *)((void *)(value + (size_t)i * dst_size))));
         else
-            HDsnprintf(tmp_str, TMP_LEN, "%d", *((int *)((void *)(value + (size_t)i * dst_size))));
+            snprintf(tmp_str, TMP_LEN, "%d", *((int *)((void *)(value + (size_t)i * dst_size))));
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
 
-        HDsnprintf(tmp_str, TMP_LEN, ";\n");
+        snprintf(tmp_str, TMP_LEN, ";\n");
         if (!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
     }
@@ -2305,8 +2305,8 @@ print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     for (i = 0; i < nmembs; i++)
         H5free_memory(name[i]);
 
-    HDfree(name);
-    HDfree(value);
+    free(name);
+    free(value);
     H5Tclose(super);
 
     return str;
@@ -2315,8 +2315,8 @@ out:
 
     if (0 == nmembs) {
         str = realloc_and_append(no_ubuf, str_len, str, "\n");
-        HDassert((indt + 4) < TMP_LEN);
-        HDmemset(tmp_str, ' ', (indt + 4) + 1);
+        assert((indt + 4) < TMP_LEN);
+        memset(tmp_str, ' ', (indt + 4) + 1);
         tmp_str[(indt + 4)] = '\0';
         str                 = realloc_and_append(no_ubuf, str_len, str, tmp_str);
         str                 = realloc_and_append(no_ubuf, str_len, str, " <empty>");
@@ -2326,12 +2326,12 @@ out:
     if (name) {
         for (i = 0; i < nmembs; i++)
             if (name[i])
-                HDfree(name[i]);
-        HDfree(name);
+                free(name[i]);
+        free(name);
     } /* end if */
 
     if (value)
-        HDfree(value);
+        free(value);
 
     if (super >= 0)
         H5Tclose(super);
@@ -2367,13 +2367,13 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
         goto out;
 
     if (len && !str) {
-        text_str    = (char *)HDcalloc(str_len, sizeof(char));
+        text_str    = (char *)calloc(str_len, sizeof(char));
         text_str[0] = '\0';
         if (!(text_str = H5LT_dtype_to_text(dtype, text_str, lang_type, &str_len, 1)))
             goto out;
-        *len = HDstrlen(text_str) + 1;
+        *len = strlen(text_str) + 1;
         if (text_str)
-            HDfree(text_str);
+            free(text_str);
         text_str = NULL;
     }
     else if (len && str) {
@@ -2385,7 +2385,7 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
     return ret;
 
 out:
-    HDfree(text_str);
+    free(text_str);
 
     return FAIL;
 }
@@ -2418,7 +2418,7 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
         goto out;
 
     if (lang != H5LT_DDL) {
-        HDsnprintf(dt_str, *slen, "only DDL is supported for now");
+        snprintf(dt_str, *slen, "only DDL is supported for now");
         goto out;
     }
 
@@ -2429,112 +2429,112 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
         case H5T_INTEGER:
         case H5T_BITFIELD:
             if (H5Tequal(dtype, H5T_STD_I8BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I8BE");
+                snprintf(dt_str, *slen, "H5T_STD_I8BE");
             }
             else if (H5Tequal(dtype, H5T_STD_I8LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I8LE");
+                snprintf(dt_str, *slen, "H5T_STD_I8LE");
             }
             else if (H5Tequal(dtype, H5T_STD_I16BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I16BE");
+                snprintf(dt_str, *slen, "H5T_STD_I16BE");
             }
             else if (H5Tequal(dtype, H5T_STD_I16LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I16LE");
+                snprintf(dt_str, *slen, "H5T_STD_I16LE");
             }
             else if (H5Tequal(dtype, H5T_STD_I32BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I32BE");
+                snprintf(dt_str, *slen, "H5T_STD_I32BE");
             }
             else if (H5Tequal(dtype, H5T_STD_I32LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I32LE");
+                snprintf(dt_str, *slen, "H5T_STD_I32LE");
             }
             else if (H5Tequal(dtype, H5T_STD_I64BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I64BE");
+                snprintf(dt_str, *slen, "H5T_STD_I64BE");
             }
             else if (H5Tequal(dtype, H5T_STD_I64LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_I64LE");
+                snprintf(dt_str, *slen, "H5T_STD_I64LE");
             }
             else if (H5Tequal(dtype, H5T_STD_U8BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U8BE");
+                snprintf(dt_str, *slen, "H5T_STD_U8BE");
             }
             else if (H5Tequal(dtype, H5T_STD_U8LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U8LE");
+                snprintf(dt_str, *slen, "H5T_STD_U8LE");
             }
             else if (H5Tequal(dtype, H5T_STD_U16BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U16BE");
+                snprintf(dt_str, *slen, "H5T_STD_U16BE");
             }
             else if (H5Tequal(dtype, H5T_STD_U16LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U16LE");
+                snprintf(dt_str, *slen, "H5T_STD_U16LE");
             }
             else if (H5Tequal(dtype, H5T_STD_U32BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U32BE");
+                snprintf(dt_str, *slen, "H5T_STD_U32BE");
             }
             else if (H5Tequal(dtype, H5T_STD_U32LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U32LE");
+                snprintf(dt_str, *slen, "H5T_STD_U32LE");
             }
             else if (H5Tequal(dtype, H5T_STD_U64BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U64BE");
+                snprintf(dt_str, *slen, "H5T_STD_U64BE");
             }
             else if (H5Tequal(dtype, H5T_STD_U64LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_STD_U64LE");
+                snprintf(dt_str, *slen, "H5T_STD_U64LE");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_SCHAR)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_SCHAR");
+                snprintf(dt_str, *slen, "H5T_NATIVE_SCHAR");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_UCHAR)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_UCHAR");
+                snprintf(dt_str, *slen, "H5T_NATIVE_UCHAR");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_SHORT)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_SHORT");
+                snprintf(dt_str, *slen, "H5T_NATIVE_SHORT");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_USHORT)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_USHORT");
+                snprintf(dt_str, *slen, "H5T_NATIVE_USHORT");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_INT)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_INT");
+                snprintf(dt_str, *slen, "H5T_NATIVE_INT");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_UINT)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_UINT");
+                snprintf(dt_str, *slen, "H5T_NATIVE_UINT");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_LONG)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_LONG");
+                snprintf(dt_str, *slen, "H5T_NATIVE_LONG");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_ULONG)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_ULONG");
+                snprintf(dt_str, *slen, "H5T_NATIVE_ULONG");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_LLONG)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_LLONG");
+                snprintf(dt_str, *slen, "H5T_NATIVE_LLONG");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_ULLONG)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_ULLONG");
+                snprintf(dt_str, *slen, "H5T_NATIVE_ULLONG");
             }
             else {
-                HDsnprintf(dt_str, *slen, "undefined integer");
+                snprintf(dt_str, *slen, "undefined integer");
             }
 
             break;
         case H5T_FLOAT:
             if (H5Tequal(dtype, H5T_IEEE_F32BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_IEEE_F32BE");
+                snprintf(dt_str, *slen, "H5T_IEEE_F32BE");
             }
             else if (H5Tequal(dtype, H5T_IEEE_F32LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_IEEE_F32LE");
+                snprintf(dt_str, *slen, "H5T_IEEE_F32LE");
             }
             else if (H5Tequal(dtype, H5T_IEEE_F64BE)) {
-                HDsnprintf(dt_str, *slen, "H5T_IEEE_F64BE");
+                snprintf(dt_str, *slen, "H5T_IEEE_F64BE");
             }
             else if (H5Tequal(dtype, H5T_IEEE_F64LE)) {
-                HDsnprintf(dt_str, *slen, "H5T_IEEE_F64LE");
+                snprintf(dt_str, *slen, "H5T_IEEE_F64LE");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_FLOAT)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_FLOAT");
+                snprintf(dt_str, *slen, "H5T_NATIVE_FLOAT");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_DOUBLE)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_DOUBLE");
+                snprintf(dt_str, *slen, "H5T_NATIVE_DOUBLE");
             }
             else if (H5Tequal(dtype, H5T_NATIVE_LDOUBLE)) {
-                HDsnprintf(dt_str, *slen, "H5T_NATIVE_LDOUBLE");
+                snprintf(dt_str, *slen, "H5T_NATIVE_LDOUBLE");
             }
             else {
-                HDsnprintf(dt_str, *slen, "undefined float");
+                snprintf(dt_str, *slen, "undefined float");
             }
 
             break;
@@ -2562,16 +2562,16 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
                 goto out;
 
             /* Print lead-in */
-            HDsnprintf(dt_str, *slen, "H5T_STRING {\n");
+            snprintf(dt_str, *slen, "H5T_STRING {\n");
             indent += COL;
 
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
 
             if (is_vlstr)
-                HDsnprintf(tmp_str, TMP_LEN, "STRSIZE H5T_VARIABLE;\n");
+                snprintf(tmp_str, TMP_LEN, "STRSIZE H5T_VARIABLE;\n");
             else
-                HDsnprintf(tmp_str, TMP_LEN, "STRSIZE %d;\n", (int)size);
+                snprintf(tmp_str, TMP_LEN, "STRSIZE %d;\n", (int)size);
 
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
@@ -2580,13 +2580,13 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
                 goto out;
 
             if (str_pad == H5T_STR_NULLTERM)
-                HDsnprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_NULLTERM;\n");
+                snprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_NULLTERM;\n");
             else if (str_pad == H5T_STR_NULLPAD)
-                HDsnprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_NULLPAD;\n");
+                snprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_NULLPAD;\n");
             else if (str_pad == H5T_STR_SPACEPAD)
-                HDsnprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_SPACEPAD;\n");
+                snprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_SPACEPAD;\n");
             else
-                HDsnprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_ERROR;\n");
+                snprintf(tmp_str, TMP_LEN, "STRPAD H5T_STR_ERROR;\n");
 
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
@@ -2595,11 +2595,11 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
                 goto out;
 
             if (cset == H5T_CSET_ASCII)
-                HDsnprintf(tmp_str, TMP_LEN, "CSET H5T_CSET_ASCII;\n");
+                snprintf(tmp_str, TMP_LEN, "CSET H5T_CSET_ASCII;\n");
             else if (cset == H5T_CSET_UTF8)
-                HDsnprintf(tmp_str, TMP_LEN, "CSET H5T_CSET_UTF8;\n");
+                snprintf(tmp_str, TMP_LEN, "CSET H5T_CSET_UTF8;\n");
             else
-                HDsnprintf(tmp_str, TMP_LEN, "CSET unknown;\n");
+                snprintf(tmp_str, TMP_LEN, "CSET unknown;\n");
 
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
@@ -2625,7 +2625,7 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
 
             /* Check C variable-length string first. Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
-                HDsnprintf(tmp_str, TMP_LEN, "CTYPE H5T_C_S1;\n");
+                snprintf(tmp_str, TMP_LEN, "CTYPE H5T_C_S1;\n");
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
                 goto next;
@@ -2644,7 +2644,7 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
             }
 
             if (H5Tequal(tmp_type, str_type)) {
-                HDsnprintf(tmp_str, TMP_LEN, "CTYPE H5T_C_S1;\n");
+                snprintf(tmp_str, TMP_LEN, "CTYPE H5T_C_S1;\n");
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
                 goto next;
@@ -2666,7 +2666,7 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
 
             /* Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
-                HDsnprintf(tmp_str, TMP_LEN, "CTYPE H5T_FORTRAN_S1;\n");
+                snprintf(tmp_str, TMP_LEN, "CTYPE H5T_FORTRAN_S1;\n");
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
                 goto next;
@@ -2686,14 +2686,14 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
 
             /* Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
-                HDsnprintf(tmp_str, TMP_LEN, "CTYPE H5T_FORTRAN_S1;\n");
+                snprintf(tmp_str, TMP_LEN, "CTYPE H5T_FORTRAN_S1;\n");
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
                 goto next;
             }
 
             /* Type doesn't match any of above. */
-            HDsnprintf(tmp_str, TMP_LEN, "CTYPE unknown_one_character_type;\n");
+            snprintf(tmp_str, TMP_LEN, "CTYPE unknown_one_character_type;\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2705,7 +2705,7 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2715,12 +2715,12 @@ next:
             char *tag = NULL;
 
             /* Print lead-in */
-            HDsnprintf(dt_str, *slen, "H5T_OPAQUE {\n");
+            snprintf(dt_str, *slen, "H5T_OPAQUE {\n");
             indent += COL;
 
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "OPQ_SIZE %lu;\n", (unsigned long)H5Tget_size(dtype));
+            snprintf(tmp_str, TMP_LEN, "OPQ_SIZE %lu;\n", (unsigned long)H5Tget_size(dtype));
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2728,13 +2728,13 @@ next:
                 goto out;
             tag = H5Tget_tag(dtype);
             if (tag) {
-                HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"%s\";\n", tag);
+                snprintf(tmp_str, TMP_LEN, "OPQ_TAG \"%s\";\n", tag);
                 if (tag)
                     H5free_memory(tag);
                 tag = NULL;
             }
             else
-                HDsnprintf(tmp_str, TMP_LEN, "OPQ_TAG \"\";\n");
+                snprintf(tmp_str, TMP_LEN, "OPQ_TAG \"\";\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2742,7 +2742,7 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2754,7 +2754,7 @@ next:
             char * stmp = NULL;
 
             /* Print lead-in */
-            HDsnprintf(dt_str, *slen, "H5T_ENUM {\n");
+            snprintf(dt_str, *slen, "H5T_ENUM {\n");
             indent += COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
@@ -2763,21 +2763,21 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
 
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
 
-            HDsnprintf(tmp_str, TMP_LEN, ";\n");
+            snprintf(tmp_str, TMP_LEN, ";\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
             H5Tclose(super);
@@ -2789,7 +2789,7 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2801,7 +2801,7 @@ next:
             char * stmp = NULL;
 
             /* Print lead-in */
-            HDsnprintf(dt_str, *slen, "H5T_VLEN {\n");
+            snprintf(dt_str, *slen, "H5T_VLEN {\n");
             indent += COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
@@ -2810,20 +2810,20 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
 
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
-            HDsnprintf(tmp_str, TMP_LEN, "\n");
+            snprintf(tmp_str, TMP_LEN, "\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
             H5Tclose(super);
@@ -2832,7 +2832,7 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2846,7 +2846,7 @@ next:
             int     ndims;
 
             /* Print lead-in */
-            HDsnprintf(dt_str, *slen, "H5T_ARRAY {\n");
+            snprintf(dt_str, *slen, "H5T_ARRAY {\n");
             indent += COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
@@ -2859,11 +2859,11 @@ next:
 
             /* Print array dimensions */
             for (i = 0; i < ndims; i++) {
-                HDsnprintf(tmp_str, TMP_LEN, "[%d]", (int)dims[i]);
+                snprintf(tmp_str, TMP_LEN, "[%d]", (int)dims[i]);
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
             }
-            HDsnprintf(tmp_str, TMP_LEN, " ");
+            snprintf(tmp_str, TMP_LEN, " ");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2871,19 +2871,19 @@ next:
                 goto out;
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
-            stmp = (char *)HDcalloc(super_len, sizeof(char));
+            stmp = (char *)calloc(super_len, sizeof(char));
             if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
-                HDfree(stmp);
+                free(stmp);
                 goto out;
             }
             if (stmp)
-                HDfree(stmp);
+                free(stmp);
             stmp = NULL;
-            HDsnprintf(tmp_str, TMP_LEN, "\n");
+            snprintf(tmp_str, TMP_LEN, "\n");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
             H5Tclose(super);
@@ -2892,7 +2892,7 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
@@ -2910,7 +2910,7 @@ next:
             if ((nmembs = H5Tget_nmembers(dtype)) < 0)
                 goto out;
 
-            HDsnprintf(dt_str, *slen, "H5T_COMPOUND {\n");
+            snprintf(dt_str, *slen, "H5T_COMPOUND {\n");
             indent += COL;
 
             for (i = 0; i < nmembs; i++) {
@@ -2929,30 +2929,30 @@ next:
 
                 if (H5LTdtype_to_text(mtype, NULL, lang, &mlen) < 0)
                     goto out;
-                mtmp = (char *)HDcalloc(mlen, sizeof(char));
+                mtmp = (char *)calloc(mlen, sizeof(char));
                 if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0) {
-                    HDfree(mtmp);
+                    free(mtmp);
                     goto out;
                 }
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp))) {
-                    HDfree(mtmp);
+                    free(mtmp);
                     goto out;
                 }
                 if (mtmp)
-                    HDfree(mtmp);
+                    free(mtmp);
                 mtmp = NULL;
 
                 if (H5T_COMPOUND == mclass)
                     indent -= COL;
 
-                HDsnprintf(tmp_str, TMP_LEN, " \"%s\"", mname);
+                snprintf(tmp_str, TMP_LEN, " \"%s\"", mname);
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
                 if (mname)
                     H5free_memory(mname);
                 mname = NULL;
 
-                HDsnprintf(tmp_str, TMP_LEN, " : %lu;\n", (unsigned long)moffset);
+                snprintf(tmp_str, TMP_LEN, " : %lu;\n", (unsigned long)moffset);
                 if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                     goto out;
             }
@@ -2961,30 +2961,30 @@ next:
             indent -= COL;
             if (!(dt_str = indentation(indent + COL, dt_str, no_user_buf, slen)))
                 goto out;
-            HDsnprintf(tmp_str, TMP_LEN, "}");
+            snprintf(tmp_str, TMP_LEN, "}");
             if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, tmp_str)))
                 goto out;
 
             break;
         }
         case H5T_TIME:
-            HDsnprintf(dt_str, *slen, "H5T_TIME: not yet implemented");
+            snprintf(dt_str, *slen, "H5T_TIME: not yet implemented");
             break;
         case H5T_NO_CLASS:
-            HDsnprintf(dt_str, *slen, "H5T_NO_CLASS");
+            snprintf(dt_str, *slen, "H5T_NO_CLASS");
             break;
         case H5T_REFERENCE:
             if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
-                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
+                snprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
             }
             else {
-                HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
+                snprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
             }
             break;
         case H5T_NCLASSES:
             break;
         default:
-            HDsnprintf(dt_str, *slen, "unknown data type");
+            snprintf(dt_str, *slen, "unknown data type");
     }
 
     return dt_str;
@@ -3557,7 +3557,7 @@ H5LT_set_attribute_string(hid_t dset_id, const char *name, const char *buf)
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
         return FAIL;
 
-    size = HDstrlen(buf) + 1; /* extra null term */
+    size = strlen(buf) + 1; /* extra null term */
 
     if (H5Tset_size(tid, (size_t)size) < 0)
         goto out;
@@ -3628,10 +3628,10 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
     }
 
     /* Find the length of the path */
-    path_length = HDstrlen(path);
+    path_length = strlen(path);
 
     /* Check if the identifier is the object itself, i.e. path is '.' */
-    if (HDstrncmp(path, ".", path_length) == 0) {
+    if (strncmp(path, ".", path_length) == 0) {
         if (check_object_valid) {
             obj_exists = H5Oexists_by_name(loc_id, path, H5P_DEFAULT);
             ret_value  = obj_exists;
@@ -3653,14 +3653,14 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
     curr_name = tmp_path;
 
     /* check if absolute pathname */
-    if (HDstrncmp(path, "/", 1) == 0)
+    if (strncmp(path, "/", 1) == 0)
         curr_name++;
 
     /* check if relative path name starts with "./" */
-    if (HDstrncmp(path, "./", 2) == 0)
+    if (strncmp(path, "./", 2) == 0)
         curr_name += 2;
 
-    while ((delimit = HDstrchr(curr_name, '/')) != NULL) {
+    while ((delimit = strchr(curr_name, '/')) != NULL) {
         /* Change the delimiter to terminate the string */
         *delimit = '\0';
 
@@ -3715,7 +3715,7 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
 
 done:
     if (tmp_path != NULL)
-        HDfree(tmp_path);
+        free(tmp_path);
 
     return ret_value;
 }

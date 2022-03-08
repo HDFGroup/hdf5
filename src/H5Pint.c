@@ -462,11 +462,11 @@ H5P_init_phase1(void)
             H5P_libclass_t const *lib_class = init_class[u]; /* Current class to operate on */
 
             /* Check if the current class hasn't been initialized and can be now */
-            HDassert(lib_class->class_id);
+            assert(lib_class->class_id);
             if (*lib_class->class_id == (-1) &&
                 (lib_class->par_pclass == NULL || *lib_class->par_pclass != NULL)) {
                 /* Sanity check - only the root class is not allowed to have a parent class */
-                HDassert(lib_class->par_pclass || lib_class == H5P_CLS_ROOT);
+                assert(lib_class->par_pclass || lib_class == H5P_CLS_ROOT);
 
                 /* Allocate the new class */
                 if (NULL == (*lib_class->pclass = H5P__create_class(
@@ -500,7 +500,7 @@ H5P_init_phase1(void)
     } while (pass_init > 0);
 
     /* Verify that all classes were initialized */
-    HDassert(tot_init == NELMTS(init_class));
+    assert(tot_init == NELMTS(init_class));
 
 done:
     if (ret_value < 0 && tot_init > 0) {
@@ -511,7 +511,7 @@ done:
         for (u = 0; u < NELMTS(init_class); u++) {
             H5P_libclass_t const *lib_class = init_class[u]; /* Current class to operate on */
 
-            HDassert(lib_class->class_id);
+            assert(lib_class->class_id);
             if (*lib_class->class_id >= 0) {
                 /* Close the class ID */
                 if (H5I_dec_ref(*lib_class->class_id) < 0)
@@ -707,7 +707,7 @@ H5P__close_class_cb(void *_pclass, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(pclass);
+    assert(pclass);
 
     /* Close the property list class object */
     if (H5P__close_class(pclass) < 0)
@@ -738,7 +738,7 @@ H5P__close_list_cb(void *_plist, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
+    assert(plist);
 
     /* Close the property list object */
     if (H5P_close(plist) < 0)
@@ -780,10 +780,10 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(slist);
-    HDassert(prop);
-    HDassert(prop->cmp);
-    HDassert(cb);
+    assert(slist);
+    assert(prop);
+    assert(prop->cmp);
+    assert(cb);
 
     /* Allocate space for a temporary copy of the property value */
     if (NULL == (tmp_value = H5MM_malloc(prop->size)))
@@ -847,7 +847,7 @@ H5P__copy_pclass(H5P_genclass_t *pclass)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pclass);
+    assert(pclass);
 
     /*
      * Create new property class object
@@ -929,7 +929,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    HDassert(old_plist);
+    assert(old_plist);
 
     /*
      * Create new property list object
@@ -1145,8 +1145,8 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 
     FUNC_ENTER_STATIC
 
-    HDassert(oprop);
-    HDassert(type != H5P_PROP_WITHIN_UNKNOWN);
+    assert(oprop);
+    assert(type != H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
     if (NULL == (prop = H5FL_MALLOC(H5P_genprop_t)))
@@ -1159,8 +1159,8 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 
     /* Duplicating property for a class */
     if (type == H5P_PROP_WITHIN_CLASS) {
-        HDassert(oprop->type == H5P_PROP_WITHIN_CLASS);
-        HDassert(oprop->shared_name == FALSE);
+        assert(oprop->type == H5P_PROP_WITHIN_CLASS);
+        assert(oprop->shared_name == FALSE);
 
         /* Duplicate name */
         prop->name = H5MM_xstrdup(oprop->name);
@@ -1177,8 +1177,8 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         } /* end if */
         /* Duplicating a property from a class */
         else {
-            HDassert(oprop->type == H5P_PROP_WITHIN_CLASS);
-            HDassert(oprop->shared_name == FALSE);
+            assert(oprop->type == H5P_PROP_WITHIN_CLASS);
+            assert(oprop->shared_name == FALSE);
 
             /* Share the name */
             prop->shared_name = TRUE;
@@ -1190,7 +1190,7 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 
     /* Duplicate current value, if it exists */
     if (oprop->value != NULL) {
-        HDassert(prop->size > 0);
+        assert(prop->size > 0);
         if (NULL == (prop->value = H5MM_malloc(prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         H5MM_memcpy(prop->value, oprop->value, prop->size);
@@ -1259,9 +1259,9 @@ H5P__create_prop(const char *name, size_t size, H5P_prop_within_t type, const vo
 
     FUNC_ENTER_STATIC
 
-    HDassert(name);
-    HDassert((size > 0 && value != NULL) || (size == 0));
-    HDassert(type != H5P_PROP_WITHIN_UNKNOWN);
+    assert(name);
+    assert((size > 0 && value != NULL) || (size == 0));
+    assert(type != H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
     if (NULL == (prop = H5FL_MALLOC(H5P_genprop_t)))
@@ -1340,9 +1340,9 @@ H5P__add_prop(H5SL_t *slist, H5P_genprop_t *prop)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(slist);
-    HDassert(prop);
-    HDassert(prop->type != H5P_PROP_WITHIN_UNKNOWN);
+    assert(slist);
+    assert(prop);
+    assert(prop->type != H5P_PROP_WITHIN_UNKNOWN);
 
     /* Insert property into skip list */
     if (H5SL_insert(slist, prop, prop->name) < 0)
@@ -1377,8 +1377,8 @@ H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(plist);
-    HDassert(name);
+    assert(plist);
+    assert(name);
 
     /* Check if the property has been deleted from list */
     if (H5SL_search(plist->del, name) != NULL) {
@@ -1436,8 +1436,8 @@ H5P__find_prop_pclass(H5P_genclass_t *pclass, const char *name)
 
     FUNC_ENTER_STATIC
 
-    HDassert(pclass);
-    HDassert(name);
+    assert(pclass);
+    assert(name);
 
     /* Get the property from the skip list */
     if (NULL == (ret_value = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
@@ -1470,7 +1470,7 @@ H5P__free_prop(H5P_genprop_t *prop)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(prop);
+    assert(prop);
 
     /* Release the property value if it exists */
     if (prop->value)
@@ -1513,7 +1513,7 @@ H5P__free_prop_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(tprop);
+    assert(tprop);
 
     /* Call the close callback and ignore the return value, there's nothing we can do about it */
     if (make_cb && tprop->close != NULL)
@@ -1551,7 +1551,7 @@ H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(del_name);
+    assert(del_name);
 
     /* Free the name */
     H5MM_xfree(del_name);
@@ -1586,8 +1586,8 @@ H5P__access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pclass);
-    HDassert(mod > H5P_MOD_ERR && mod < H5P_MOD_MAX);
+    assert(pclass);
+    assert(mod > H5P_MOD_ERR && mod < H5P_MOD_MAX);
 
     switch (mod) {
         case H5P_MOD_INC_CLS: /* Increment the dependent class count*/
@@ -1624,14 +1624,14 @@ H5P__access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         case H5P_MOD_ERR:
         case H5P_MOD_MAX:
         default:
-            HDassert(0 && "Invalid H5P class modification");
+            assert(0 && "Invalid H5P class modification");
     } /* end switch */
 
     /* Check if we can release the class information now */
     if (pclass->deleted && pclass->plists == 0 && pclass->classes == 0) {
         H5P_genclass_t *par_class = pclass->parent; /* Pointer to class's parent */
 
-        HDassert(pclass->name);
+        assert(pclass->name);
         H5MM_xfree(pclass->name);
 
         /* Free the class properties without making callbacks */
@@ -1681,14 +1681,14 @@ H5P__open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(obj);
-    HDassert(H5I_GENPROP_CLS == H5I_get_type(id));
-    HDassert(key);
+    assert(obj);
+    assert(H5I_GENPROP_CLS == H5I_get_type(id));
+    assert(key);
 
     /* Check if the class object has the same parent as the new class */
     if (obj->parent == key->parent) {
         /* Check if they have the same name */
-        if (HDstrcmp(obj->name, key->name) == 0) {
+        if (strcmp(obj->name, key->name) == 0) {
             key->new_class = obj;
             ret_value      = 1; /* Indicate a match */
         }                       /* end if */
@@ -1740,11 +1740,11 @@ H5P__create_class(H5P_genclass_t *par_class, const char *name, H5P_plist_type_t 
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(name);
+    assert(name);
     /* Allow internal classes to break some rules */
     /* (This allows the root of the tree to be created with this routine -QAK) */
     if (type == H5P_TYPE_USER)
-        HDassert(par_class);
+        assert(par_class);
 
     /* Allocate room for the class */
     if (NULL == (pclass = H5FL_CALLOC(H5P_genclass_t)))
@@ -1836,7 +1836,7 @@ H5P__create(H5P_genclass_t *pclass)
 
     FUNC_ENTER_STATIC
 
-    HDassert(pclass);
+    assert(pclass);
 
     /*
      * Create new property list object
@@ -1975,7 +1975,7 @@ H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    HDassert(pclass);
+    assert(pclass);
 
     /* Create the new property list */
     if ((plist = H5P__create(pclass)) == NULL)
@@ -2215,11 +2215,11 @@ H5P__register_real(H5P_genclass_t *pclass, const char *name, size_t size, const 
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pclass);
-    HDassert(0 == pclass->plists);
-    HDassert(0 == pclass->classes);
-    HDassert(name);
-    HDassert((size > 0 && def_value != NULL) || (size == 0));
+    assert(pclass);
+    assert(0 == pclass->plists);
+    assert(0 == pclass->classes);
+    assert(name);
+    assert((size > 0 && def_value != NULL) || (size == 0));
 
     /* Check for duplicate named properties */
     if (NULL != H5SL_search(pclass->props, name))
@@ -2446,8 +2446,8 @@ H5P__register(H5P_genclass_t **ppclass, const char *name, size_t size, const voi
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(ppclass);
-    HDassert(pclass);
+    assert(ppclass);
+    assert(pclass);
 
     /* Check if class needs to be split because property lists or classes have
      *  been created since the last modification was made to the class.
@@ -2685,9 +2685,9 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size, void *value, H5
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(plist);
-    HDassert(name);
-    HDassert((size > 0 && value != NULL) || (size == 0));
+    assert(plist);
+    assert(name);
+    assert((size > 0 && value != NULL) || (size == 0));
 
     /* Check for duplicate named properties */
     if (NULL != H5SL_search(plist->props, name))
@@ -2778,10 +2778,10 @@ H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(plist_op);
-    HDassert(pclass_op);
+    assert(plist);
+    assert(name);
+    assert(plist_op);
+    assert(pclass_op);
 
     /* Check if the property has been deleted */
     if (NULL != H5SL_search(plist->del, name))
@@ -2858,9 +2858,9 @@ H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_AT
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -2905,10 +2905,10 @@ H5P__poke_pclass_cb(H5P_genplist_t *plist, const char H5_ATTR_NDEBUG_UNUSED *nam
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
-    HDassert(prop->cmp);
+    assert(plist);
+    assert(name);
+    assert(prop);
+    assert(prop->cmp);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -2966,9 +2966,9 @@ H5P_poke(H5P_genplist_t *plist, const char *name, const void *value)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(value);
+    assert(plist);
+    assert(name);
+    assert(value);
 
     /* Find the property and set the value */
     udata.value = value;
@@ -3011,9 +3011,9 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -3088,10 +3088,10 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
-    HDassert(prop->cmp);
+    assert(plist);
+    assert(name);
+    assert(prop);
+    assert(prop->cmp);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -3178,9 +3178,9 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(value);
+    assert(plist);
+    assert(name);
+    assert(value);
 
     /* Find the property and set the value */
     udata.value = value;
@@ -3225,9 +3225,9 @@ H5P__class_get(const H5P_genclass_t *pclass, const char *name, void *value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pclass);
-    HDassert(name);
-    HDassert(value);
+    assert(pclass);
+    assert(name);
+    assert(value);
 
     /* Find property in list */
     if (NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
@@ -3280,9 +3280,9 @@ H5P__class_set(const H5P_genclass_t *pclass, const char *name, const void *value
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pclass);
-    HDassert(name);
-    HDassert(value);
+    assert(pclass);
+    assert(name);
+    assert(value);
 
     /* Find property in list */
     if (NULL == (prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
@@ -3327,8 +3327,8 @@ H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(plist);
-    HDassert(name);
+    assert(plist);
+    assert(name);
 
     /* Check for property in deleted property list */
     if (H5SL_search(plist->del, name) != NULL)
@@ -3386,8 +3386,8 @@ H5P__exist_pclass(H5P_genclass_t *pclass, const char *name)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pclass);
-    HDassert(name);
+    assert(pclass);
+    assert(name);
 
     /* Check for property in property list */
     if (H5SL_search(pclass->props, name) != NULL)
@@ -3442,9 +3442,9 @@ H5P__get_size_plist(const H5P_genplist_t *plist, const char *name, size_t *size)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(plist);
-    HDassert(name);
-    HDassert(size);
+    assert(plist);
+    assert(name);
+    assert(size);
 
     /* Find property */
     if (NULL == (prop = H5P__find_prop_plist(plist, name)))
@@ -3487,9 +3487,9 @@ H5P__get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pclass);
-    HDassert(name);
-    HDassert(size);
+    assert(pclass);
+    assert(name);
+    assert(size);
 
     /* Find property */
     if ((prop = H5P__find_prop_pclass(pclass, name)) == NULL)
@@ -3527,8 +3527,8 @@ H5P__get_nprops_plist(const H5P_genplist_t *plist, size_t *nprops)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(plist);
-    HDassert(nprops);
+    assert(plist);
+    assert(nprops);
 
     /* Get property size */
     *nprops = plist->nprops;
@@ -3564,8 +3564,8 @@ H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recu
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(pclass);
-    HDassert(nprops);
+    assert(pclass);
+    assert(nprops);
 
     /* Get number of properties */
     *nprops = pclass->nprops;
@@ -3610,11 +3610,11 @@ H5P__cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(prop1);
-    HDassert(prop2);
+    assert(prop1);
+    assert(prop2);
 
     /* Check the name */
-    if ((cmp_value = HDstrcmp(prop1->name, prop2->name)) != 0)
+    if ((cmp_value = strcmp(prop1->name, prop2->name)) != 0)
         HGOTO_DONE(cmp_value);
 
     /* Check the size of properties */
@@ -3741,15 +3741,15 @@ H5P__cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pclass1);
-    HDassert(pclass2);
+    assert(pclass1);
+    assert(pclass2);
 
     /* Use the revision number to quickly check for identical classes */
     if (pclass1->revision == pclass2->revision)
         HGOTO_DONE(0);
 
     /* Check the name */
-    if ((cmp_value = HDstrcmp(pclass1->name, pclass2->name)) != 0)
+    if ((cmp_value = strcmp(pclass1->name, pclass2->name)) != 0)
         HGOTO_DONE(cmp_value);
 
     /* Check the number of properties */
@@ -3872,8 +3872,8 @@ H5P__cmp_plist_cb(H5P_genprop_t *prop, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(prop);
-    HDassert(udata);
+    assert(prop);
+    assert(udata);
 
     /* Check if the property exists in the second property list */
     if ((prop2_exist = H5P_exist_plist(udata->plist2, prop->name)) < 0)
@@ -3932,9 +3932,9 @@ H5P__cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2, int *
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(plist1);
-    HDassert(plist2);
-    HDassert(cmp_ret);
+    assert(plist1);
+    assert(plist2);
+    assert(cmp_ret);
 
     /* Check the number of properties */
     if (plist1->nprops < plist2->nprops) {
@@ -4009,8 +4009,8 @@ H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(pclass1);
-    HDassert(pclass2);
+    assert(pclass1);
+    assert(pclass2);
 
     /* Compare property classes */
     if (H5P__cmp_class(pclass1, pclass2) == 0) {
@@ -4154,8 +4154,8 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(item);
-    HDassert(key);
+    assert(item);
+    assert(key);
 
     /* Check if we've found the correctly indexed property */
     if (*udata->curr_idx_ptr >= udata->prev_idx) {
@@ -4207,8 +4207,8 @@ H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(item);
-    HDassert(key);
+    assert(item);
+    assert(key);
 
     /* Only call iterator callback for properties we haven't seen
      * before and that haven't been deleted.
@@ -4286,9 +4286,9 @@ H5P__iterate_plist(const H5P_genplist_t *plist, hbool_t iter_all_prop, int *idx,
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(idx);
-    HDassert(cb_func);
+    assert(plist);
+    assert(idx);
+    assert(cb_func);
 
     /* Create the skip list to hold names of properties already seen */
     if (NULL == (seen = H5SL_create(H5SL_TYPE_STR, NULL)))
@@ -4365,8 +4365,8 @@ H5P__iterate_pclass_cb(void *_item, void H5_ATTR_NDEBUG_UNUSED *_key, void *_uda
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(item);
-    HDassert((char *)_key);
+    assert(item);
+    assert((char *)_key);
 
     /* Check if we've found the correctly indexed property */
     if (*udata->curr_idx_ptr >= udata->prev_idx) {
@@ -4444,9 +4444,9 @@ H5P__iterate_pclass(const H5P_genclass_t *pclass, int *idx, H5P_iterate_int_t cb
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(pclass);
-    HDassert(idx);
-    HDassert(cb_func);
+    assert(pclass);
+    assert(idx);
+    assert(cb_func);
 
     /* Set up iterator callback info */
     udata_int.cb_func      = cb_func;
@@ -4498,9 +4498,9 @@ H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDE
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -4546,9 +4546,9 @@ H5P_peek(H5P_genplist_t *plist, const char *name, void *value)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(value);
+    assert(plist);
+    assert(name);
+    assert(value);
 
     /* Find the property and peek at the value */
     udata.value = value;
@@ -4591,9 +4591,9 @@ H5P__get_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, void *
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Check for property size >0 */
     if (0 == prop->size)
@@ -4662,9 +4662,9 @@ H5P_get(H5P_genplist_t *plist, const char *name, void *value)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(value);
+    assert(plist);
+    assert(name);
+    assert(value);
 
     /* Find the property and get the value */
     udata.value = value;
@@ -4705,9 +4705,9 @@ H5P__del_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Pass value to 'close' callback, if it exists */
     if (NULL != prop->del) {
@@ -4774,9 +4774,9 @@ H5P__del_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
-    HDassert(prop);
+    assert(plist);
+    assert(name);
+    assert(prop);
 
     /* Pass value to 'del' callback, if it exists */
     if (NULL != prop->del) {
@@ -4849,8 +4849,8 @@ H5P_remove(H5P_genplist_t *plist, const char *name)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(plist);
-    HDassert(name);
+    assert(plist);
+    assert(name);
 
     /* Find the property and get the value */
     if (H5P__do_prop(plist, name, H5P__del_plist_cb, H5P__del_pclass_cb, NULL) < 0)
@@ -4902,7 +4902,7 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(name);
+    assert(name);
 
     /* Get the objects to operate on */
     if (NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_id)) ||
@@ -5013,7 +5013,7 @@ H5P__copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(name);
+    assert(name);
 
     /* Get property list classes */
     if (NULL == (src_pclass = (H5P_genclass_t *)H5I_object(src_id)))
@@ -5045,7 +5045,7 @@ H5P__copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name)
         /* Substitute the new destination property class in the ID */
         if (NULL == (old_dst_pclass = (H5P_genclass_t *)H5I_subst(dst_id, dst_pclass)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
-        HDassert(old_dst_pclass == orig_dst_pclass);
+        assert(old_dst_pclass == orig_dst_pclass);
 
         /* Close the previous class */
         if (H5P__close_class(old_dst_pclass) < 0)
@@ -5088,8 +5088,8 @@ H5P__unregister(H5P_genclass_t *pclass, const char *name)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pclass);
-    HDassert(name);
+    assert(pclass);
+    assert(name);
 
     /* Get the property node from the skip list */
     if ((prop = (H5P_genprop_t *)H5SL_search(pclass->props, name)) == NULL)
@@ -5151,7 +5151,7 @@ H5P_close(H5P_genplist_t *plist)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(plist);
+    assert(plist);
 
     /* Make call to property list class close callback, if needed
      * (up through chain of parent classes also)
@@ -5311,7 +5311,7 @@ H5P_get_class_name(H5P_genclass_t *pclass)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(pclass);
+    assert(pclass);
 
     /* Get class name */
     ret_value = H5MM_xstrdup(pclass->name);
@@ -5347,7 +5347,7 @@ H5P__get_class_path(H5P_genclass_t *pclass)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pclass);
+    assert(pclass);
 
     /* Recursively build the full path */
     if (pclass->parent != NULL) {
@@ -5361,13 +5361,13 @@ H5P__get_class_path(H5P_genclass_t *pclass)
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            ret_str_len = HDstrlen(par_path) + HDstrlen(pclass->name) + 1 +
+            ret_str_len = strlen(par_path) + strlen(pclass->name) + 1 +
                           3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
             if (NULL == (ret_value = (char *)H5MM_malloc(ret_str_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name")
 
             /* Build the full path for this class */
-            HDsnprintf(ret_value, ret_str_len, "%s/%s", par_path, pclass->name);
+            snprintf(ret_value, ret_str_len, "%s/%s", par_path, pclass->name);
 
             /* Free the parent class's path */
             H5MM_xfree(par_path);
@@ -5413,16 +5413,16 @@ H5P__open_class_path(const char *path)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(path);
+    assert(path);
 
     /* Duplicate the path to use */
     tmp_path = H5MM_xstrdup(path);
-    HDassert(tmp_path);
+    assert(tmp_path);
 
     /* Find the generic property class with this full path */
     curr_name  = tmp_path;
     curr_class = NULL;
-    while (NULL != (delimit = HDstrchr(curr_name, '/'))) {
+    while (NULL != (delimit = strchr(curr_name, '/'))) {
         /* Change the delimiter to terminate the string */
         *delimit = '\0';
 
@@ -5492,7 +5492,7 @@ H5P__get_class_parent(const H5P_genclass_t *pclass)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(pclass);
+    assert(pclass);
 
     /* Get property size */
     ret_value = pclass->parent;
@@ -5524,7 +5524,7 @@ H5P__close_class(H5P_genclass_t *pclass)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(pclass);
+    assert(pclass);
 
     /* Decrement the reference count & check if the object should go away */
     if (H5P__access_class(pclass, H5P_MOD_DEC_REF) < 0)
@@ -5558,7 +5558,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
     /* Sanity checks */
     HDcompile_assert(H5P_TYPE_REFERENCE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
-    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_REFERENCE_ACCESS);
+    assert(type >= H5P_TYPE_USER && type <= H5P_TYPE_REFERENCE_ACCESS);
 
     /* Check arguments */
     if (type == H5P_TYPE_USER)
@@ -5694,7 +5694,7 @@ H5P_get_plist_id(const H5P_genplist_t *plist)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(plist);
+    assert(plist);
 
     FUNC_LEAVE_NOAPI(plist->plist_id)
 } /* end H5P_get_plist_id() */
@@ -5721,7 +5721,7 @@ H5P_get_class(const H5P_genplist_t *plist)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(plist);
+    assert(plist);
 
     FUNC_LEAVE_NOAPI(plist->pclass)
 } /* end H5P_get_class() */

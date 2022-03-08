@@ -130,7 +130,7 @@ H5O__dset_free_copy_file_udata(void *_udata)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(udata);
+    assert(udata);
 
     /* Release copy of dataset's dataspace extent, if it was set */
     if (udata->src_space_extent)
@@ -175,7 +175,7 @@ H5O__dset_isa(const H5O_t *oh)
 
     FUNC_ENTER_STATIC
 
-    HDassert(oh);
+    assert(oh);
 
     /* Datatype */
     if ((exists = H5O_msg_exists_oh(oh, H5O_DTYPE_ID)) < 0)
@@ -215,7 +215,7 @@ H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 
     FUNC_ENTER_STATIC
 
-    HDassert(obj_loc);
+    assert(obj_loc);
 
     *opened_type = H5I_DATASET;
 
@@ -279,9 +279,9 @@ H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(crt_info);
-    HDassert(obj_loc);
+    assert(f);
+    assert(crt_info);
+    assert(obj_loc);
 
     /* Create the the dataset */
     if (NULL ==
@@ -365,11 +365,11 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
-    HDassert(oh);
-    HDassert(bh_info);
+    assert(loc);
+    assert(loc->file);
+    assert(H5F_addr_defined(loc->addr));
+    assert(oh);
+    assert(bh_info);
 
     /* Get the layout message from the object header */
     if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_LAYOUT_ID, &layout))
@@ -400,7 +400,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 
     if (exists && H5D__efl_is_space_alloc(&layout.storage)) {
         /* Start with clean EFL info */
-        HDmemset(&efl, 0, sizeof(efl));
+        memset(&efl, 0, sizeof(efl));
 
         /* Get External File List message from the object header */
         if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_EFL_ID, &efl))
@@ -444,8 +444,8 @@ H5O__dset_flush(void *_obj_ptr)
 
     FUNC_ENTER_STATIC
 
-    HDassert(dset);
-    HDassert(&dset->oloc);
+    assert(dset);
+    assert(&dset->oloc);
 
     /* Check that the object found is the correct type */
     if (H5O_obj_type(&dset->oloc, &obj_type) < 0)

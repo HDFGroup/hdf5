@@ -44,12 +44,12 @@ H5LD_clean_vector(H5LD_memb_t *listv[])
 {
     unsigned n; /* Local index variable */
 
-    HDassert(listv);
+    assert(listv);
 
     /* Go through info for each field stored in listv[] */
     for (n = 0; listv[n] != NULL; n++) {
         if (listv[n]->names) {
-            HDfree(listv[n]->names);
+            free(listv[n]->names);
             listv[n]->names = NULL;
         } /* end if */
 
@@ -60,7 +60,7 @@ H5LD_clean_vector(H5LD_memb_t *listv[])
         } /* end if */
 
         /* Free the H5LD_memb_t structure for the field */
-        HDfree(listv[n]);
+        free(listv[n]);
         listv[n] = NULL;
     } /* end for */
 } /* H5LD_clean_vector() */
@@ -160,8 +160,8 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
     char *  fields_ptr;            /* Pointer to "fields" */
     int     ret_value = FAIL;      /* Return value */
 
-    HDassert(listv);
-    HDassert(fields);
+    assert(listv);
+    assert(fields);
 
     fields_ptr = fields;
     nfields    = 0;
@@ -176,14 +176,14 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
         hbool_t      valid     = TRUE;  /* Whether a field being processed is valid or not */
         int          j         = 0;     /* The # of members in a field */
 
-        len = (HDstrlen(fields_ptr) / 2) + 2;
+        len = (strlen(fields_ptr) / 2) + 2;
 
         /* Allocate memory for an H5LD_memb_t for storing a field's info */
-        if (NULL == (memb = (H5LD_memb_t *)HDcalloc((size_t)1, sizeof(H5LD_memb_t))))
+        if (NULL == (memb = (H5LD_memb_t *)calloc((size_t)1, sizeof(H5LD_memb_t))))
             goto done;
 
         /* Allocate memory for an array of pointers to member names */
-        if (NULL == (memb->names = (char **)HDcalloc(len, sizeof(char *))))
+        if (NULL == (memb->names = (char **)calloc(len, sizeof(char *))))
             goto done;
 
         memb->names[j] = fields_ptr;
@@ -252,8 +252,8 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
         } /* end if */
         else {
             if (memb) {
-                HDfree(memb->names);
-                HDfree(memb);
+                free(memb->names);
+                free(memb);
             }
             goto done;
         } /* end else */
@@ -351,7 +351,7 @@ H5LD_get_dset_type_size(hid_t did, const char *fields)
         size_t tot = 0;        /* Data type size of all the fields in "fields" */
         int    n = 0, num = 0; /* Local index variables */
 
-        HDassert(fields && *fields);
+        assert(fields && *fields);
 
         /* Should be a compound datatype if "fields" exists */
         if (H5Tget_class(dset_tid) != H5T_COMPOUND)
@@ -362,8 +362,8 @@ H5LD_get_dset_type_size(hid_t did, const char *fields)
             goto done;
 
         /* Allocate memory for a list of H5LD_memb_t pointers to store "fields" info */
-        len = (HDstrlen(fields) / 2) + 2;
-        if (NULL == (listv = (H5LD_memb_t **)HDcalloc(len, sizeof(H5LD_memb_t *))))
+        len = (strlen(fields) / 2) + 2;
+        if (NULL == (listv = (H5LD_memb_t **)calloc(len, sizeof(H5LD_memb_t *))))
             goto done;
 
         /* Process and store info for "fields" */
@@ -389,11 +389,11 @@ done:
 
     /* Free the array of H5LD_memb_t pointers */
     if (listv)
-        HDfree(listv);
+        free(listv);
 
     /* Free memory */
     if (dup_fields)
-        HDfree(dup_fields);
+        free(dup_fields);
 
     return (ret_value);
 } /* H5LD_get_dset_type_size() */
@@ -441,8 +441,8 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
         goto done;
 
     /* Verify that cur_dims must have one dimension whose size is greater than prev_dims */
-    HDmemset(start, 0, sizeof start);
-    HDmemset(count, 0, sizeof count);
+    memset(start, 0, sizeof start);
+    memset(count, 0, sizeof count);
     ctr = 0;
     for (i = 0; i < ndims; i++)
         if (cur_dims[i] > prev_dims[i]) {
@@ -463,7 +463,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
             goto done;
     }      /* end if */
     else { /* changes for more than one dimensions */
-        HDmemset(start, 0, sizeof start);
+        memset(start, 0, sizeof start);
 
         /* Make the selection in the dataset based on "cur_dims" and "prev_dims" */
         if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, cur_dims, NULL) < 0)
@@ -507,7 +507,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
             goto done;
 
         /* Allocate memory for reading in the elements in the dataset selection */
-        if (NULL == (sav_buf = tmp_buf = (char *)HDcalloc((size_t)num_elmts, tot_tsize)))
+        if (NULL == (sav_buf = tmp_buf = (char *)calloc((size_t)num_elmts, tot_tsize)))
             goto done;
 
         /* Read the dataset elements in the selection */
@@ -519,8 +519,8 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
             goto done;
 
         /* Allocate memory for the vector of H5LD_memb_t pointers */
-        len = (HDstrlen(fields) / 2) + 2;
-        if (NULL == (listv = (H5LD_memb_t **)HDcalloc(len, sizeof(H5LD_memb_t *))))
+        len = (strlen(fields) / 2) + 2;
+        if (NULL == (listv = (H5LD_memb_t **)calloc(len, sizeof(H5LD_memb_t *))))
             goto done;
 
         /* Process and store information for "fields" */
@@ -533,7 +533,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
 
             /* Copy data for "fields" to the input buffer */
             for (j = 0; listv[j] != NULL; j++) {
-                HDmemcpy(buf_p, tmp_buf + listv[j]->tot_offset, listv[j]->last_tsize);
+                memcpy(buf_p, tmp_buf + listv[j]->tot_offset, listv[j]->last_tsize);
                 buf_p += listv[j]->last_tsize;
             } /* end for */
             tmp_buf += tot_tsize;
@@ -556,13 +556,13 @@ done:
 
     /* Free the array of H5LD_memb_t pointers */
     if (listv)
-        HDfree(listv);
+        free(listv);
 
     /* Free memory */
     if (dup_fields)
-        HDfree(dup_fields);
+        free(dup_fields);
     if (sav_buf)
-        HDfree(sav_buf);
+        free(sav_buf);
 
     return (ret_value);
 } /* H5LD_get_dset_elmts() */

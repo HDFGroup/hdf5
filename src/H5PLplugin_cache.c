@@ -186,7 +186,7 @@ H5PL__expand_cache(void)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "allocating additional memory for plugin cache failed")
 
     /* Initialize the new memory */
-    HDmemset(H5PL_cache_g + H5PL_num_plugins_g, 0, (size_t)H5PL_CACHE_CAPACITY_ADD * sizeof(H5PL_plugin_t));
+    memset(H5PL_cache_g + H5PL_num_plugins_g, 0, (size_t)H5PL_CACHE_CAPACITY_ADD * sizeof(H5PL_plugin_t));
 
 done:
     /* Set the cache capacity back if there were problems */
@@ -253,9 +253,9 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(search_params);
-    HDassert(found);
-    HDassert(plugin_info);
+    assert(search_params);
+    assert(found);
+    assert(plugin_info);
 
     /* Initialize output parameters */
     *found       = FALSE;
@@ -285,11 +285,11 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         continue;
 
                     /* Check if specified VOL connector name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
+                    if (!strcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
                         matched = TRUE;
                 }
                 else {
-                    HDassert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+                    assert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
 
                     /* Make sure the plugin cache entry key type matches our search key type */
                     if (H5PL_cache_g[u].key.vol.kind != H5VL_GET_CONNECTOR_BY_VALUE)
@@ -309,11 +309,11 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         continue;
 
                     /* Check if specified VFD name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
+                    if (!strcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
                         matched = TRUE;
                 }
                 else {
-                    HDassert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
+                    assert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
 
                     /* Make sure the plugin cache entry key type matches our search key type */
                     if (H5PL_cache_g[u].key.vfd.kind != H5FD_GET_DRIVER_BY_VALUE)

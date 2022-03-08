@@ -91,8 +91,8 @@ H5P__encode_size_t(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(enc_size < 256);
-    HDassert(size);
+    assert(enc_size < 256);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -132,8 +132,8 @@ H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
 
     /* Sanity checks */
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
-    HDassert(enc_size < 256);
-    HDassert(size);
+    assert(enc_size < 256);
+    assert(size);
 
     if (NULL != *pp) {
         *(*pp)++ = (uint8_t)enc_size;
@@ -169,8 +169,8 @@ H5P__encode_unsigned(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(value);
-    HDassert(size);
+    assert(value);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -207,8 +207,8 @@ H5P__encode_uint8_t(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(value);
-    HDassert(size);
+    assert(value);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the value */
@@ -242,8 +242,8 @@ H5P__encode_hbool_t(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(value);
-    HDassert(size);
+    assert(value);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode the value */
@@ -276,8 +276,8 @@ H5P__encode_double(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(value);
-    HDassert(size);
+    assert(value);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size */
@@ -322,8 +322,8 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    HDassert(prop);
-    HDassert(udata);
+    assert(prop);
+    assert(udata);
 
     /* Check if this property can be encoded */
     if (prop->encode) {
@@ -331,9 +331,9 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         size_t prop_value_len; /* Encoded size of property's value */
 
         /* Encode (or not, if the 'encode' flag is off) the property's name */
-        prop_name_len = HDstrlen(prop->name) + 1;
+        prop_name_len = strlen(prop->name) + 1;
         if (udata->encode) {
-            HDstrcpy((char *)*(udata->pp), prop->name);
+            strcpy((char *)*(udata->pp), prop->name);
             *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
@@ -451,13 +451,13 @@ H5P__decode_size_t(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -491,13 +491,13 @@ H5P__decode_hsize_t(const void **_pp, void *_value)
 
     /* Sanity check */
     HDcompile_assert(sizeof(hsize_t) <= sizeof(uint64_t));
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
@@ -530,9 +530,9 @@ H5P__decode_unsigned(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -568,9 +568,9 @@ H5P__decode_uint8_t(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the value */
     *value = *(*pp)++;
@@ -601,9 +601,9 @@ H5P__decode_hbool_t(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the value */
     *value = (hbool_t) * (*pp)++;
@@ -635,9 +635,9 @@ H5P__decode_double(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(value);
+    assert(pp);
+    assert(*pp);
+    assert(value);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -721,7 +721,7 @@ H5P__decode(const void *buf)
 
         /* Get property list name */
         name = (const char *)p;
-        p += HDstrlen(name) + 1;
+        p += strlen(name) + 1;
 
         /* Find property with name */
         if (NULL == (prop = H5P__find_prop_plist(plist, name)))

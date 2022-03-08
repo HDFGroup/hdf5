@@ -79,7 +79,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(dataset);
+    assert(dataset);
 
     /* Set the I/O functions for each layout type */
     switch (dataset->shared->layout.type) {
@@ -121,7 +121,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
-                    HDassert(0 && "Unknown chunk index method!");
+                    assert(0 && "Unknown chunk index method!");
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown chunk index method")
             } /* end switch */
             break;
@@ -167,8 +167,8 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(layout);
+    assert(f);
+    assert(layout);
 
     ret_value = 1 + /* Version number                       */
                 1;  /* layout class type                    */
@@ -191,7 +191,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
         case H5D_CHUNKED:
             if (layout->version < H5O_LAYOUT_VERSION_4) {
                 /* Number of dimensions (1 byte) */
-                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 ret_value++;
 
                 /* B-tree address */
@@ -205,11 +205,11 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 ret_value++;
 
                 /* Number of dimensions (1 byte) */
-                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 ret_value++;
 
                 /* Encoded # of bytes for each chunk dimension */
-                HDassert(layout->u.chunk.enc_bytes_per_dim > 0 && layout->u.chunk.enc_bytes_per_dim <= 8);
+                assert(layout->u.chunk.enc_bytes_per_dim > 0 && layout->u.chunk.enc_bytes_per_dim <= 8);
                 ret_value++;
 
                 /* Dimension sizes */
@@ -295,8 +295,8 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(layout);
-    HDassert(f);
+    assert(layout);
+    assert(f);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(layout->version, H5O_layout_ver_bounds[H5F_LOW_BOUND(f)]);
@@ -332,9 +332,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(layout);
-    HDassert(space);
-    HDassert(dcpl_cache);
+    assert(layout);
+    assert(space);
+    assert(dcpl_cache);
 
     /* The indexing methods only apply to chunked datasets (currently) */
     if (layout->type == H5D_CHUNKED) {
@@ -460,9 +460,9 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
     /* Sanity checking */
-    HDassert(file);
-    HDassert(oh);
-    HDassert(dset);
+    assert(file);
+    assert(oh);
+    assert(dset);
 
     /* Set some local variables, for convenience */
     layout    = &dset->shared->layout;
@@ -508,7 +508,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
 
         /* Determine size of heap needed to stored the file names */
         for (u = 0; u < efl->nused; ++u)
-            heap_size += H5HL_ALIGN(HDstrlen(efl->slot[u].name) + 1);
+            heap_size += H5HL_ALIGN(strlen(efl->slot[u].name) + 1);
 
         /* Create the heap for the EFL file names */
         if (H5HL_create(file, heap_size, &efl->heap_addr /*out*/) < 0)
@@ -526,7 +526,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
 
         for (u = 0; u < efl->nused; ++u) {
             /* Insert file name into heap */
-            if (H5HL_insert(file, heap, HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name, &name_offset) <
+            if (H5HL_insert(file, heap, strlen(efl->slot[u].name) + 1, efl->slot[u].name, &name_offset) <
                 0) {
                 H5HL_unprotect(heap);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
@@ -599,8 +599,8 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
-    HDassert(dataset);
-    HDassert(plist);
+    assert(dataset);
+    assert(plist);
 
     /* Get the optional filters message */
     if ((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_PLINE_ID)) < 0)
@@ -642,7 +642,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     } /* end if */
 
     /* Sanity check that the layout operations are set up */
-    HDassert(dataset->shared->layout.ops);
+    assert(dataset->shared->layout.ops);
 
     /* Initialize the layout information for the dataset */
     if (dataset->shared->layout.ops->init &&
@@ -692,8 +692,8 @@ H5D__layout_oh_write(const H5D_t *dataset, H5O_t *oh, unsigned update_flags)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
-    HDassert(dataset);
-    HDassert(oh);
+    assert(dataset);
+    assert(oh);
 
     /* Check if the layout message has been added to the dataset's header */
     if ((msg_exists = H5O_msg_exists_oh(oh, H5O_LAYOUT_ID)) < 0)

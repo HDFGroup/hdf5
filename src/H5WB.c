@@ -103,8 +103,8 @@ H5WB_wrap(void *buf, size_t buf_size)
     /*
      * Check arguments.
      */
-    HDassert(buf);
-    HDassert(buf_size);
+    assert(buf);
+    assert(buf_size);
 
     /* Create wrapped buffer info */
     if (NULL == (wb = H5FL_MALLOC(H5WB_t)))
@@ -154,13 +154,13 @@ H5WB_actual(H5WB_t *wb, size_t need)
     /*
      * Check arguments.
      */
-    HDassert(wb);
-    HDassert(wb->wrapped_buf);
+    assert(wb);
+    assert(wb->wrapped_buf);
 
     /* Check for previously allocated buffer */
     if (wb->actual_buf && wb->actual_buf != wb->wrapped_buf) {
         /* Sanity check */
-        HDassert(wb->actual_size > wb->wrapped_size);
+        assert(wb->actual_size > wb->wrapped_size);
 
         /* Check if we can re-use existing buffer */
         if (need <= wb->alloc_size)
@@ -220,15 +220,15 @@ H5WB_actual_clear(H5WB_t *wb, size_t need)
     /*
      * Check arguments.
      */
-    HDassert(wb);
-    HDassert(wb->wrapped_buf);
+    assert(wb);
+    assert(wb->wrapped_buf);
 
     /* Get a pointer to an actual buffer */
     if (NULL == (ret_value = H5WB_actual(wb, need)))
         HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear the buffer */
-    HDmemset(ret_value, 0, need);
+    memset(ret_value, 0, need);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -254,13 +254,13 @@ H5WB_unwrap(H5WB_t *wb)
     /*
      * Check arguments.
      */
-    HDassert(wb);
-    HDassert(wb->wrapped_buf);
+    assert(wb);
+    assert(wb->wrapped_buf);
 
     /* Release any extra buffers allocated */
     if (wb->actual_buf && wb->actual_buf != wb->wrapped_buf) {
         /* Sanity check */
-        HDassert(wb->actual_size > wb->wrapped_size);
+        assert(wb->actual_size > wb->wrapped_size);
 
         wb->actual_buf = H5FL_BLK_FREE(extra_buf, wb->actual_buf);
     } /* end if */

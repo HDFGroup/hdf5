@@ -112,8 +112,8 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fa_addr));
+    assert(f);
+    assert(H5F_addr_defined(fa_addr));
 
     /* Allocate fixed array wrapper */
     if (NULL == (fa = H5FL_CALLOC(H5FA_t)))
@@ -176,8 +176,8 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* H5FA interface sanity check */
     HDcompile_assert(H5FA_NUM_CLS_ID == NELMTS(H5FA_client_class_g));
@@ -224,8 +224,8 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fa_addr));
+    assert(f);
+    assert(H5F_addr_defined(fa_addr));
 
     /* Allocate and initialize new fixed array wrapper */
     if (NULL == (fa = H5FA__new(f, fa_addr, TRUE, ctx_udata)))
@@ -261,8 +261,8 @@ H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(nelmts);
+    assert(fa);
+    assert(nelmts);
 
     /* Retrieve the current number of elements in the fixed array */
     *nelmts = fa->hdr->stats.nelmts;
@@ -288,9 +288,9 @@ H5FA_get_addr(const H5FA_t *fa, haddr_t *addr)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(fa->hdr);
-    HDassert(addr);
+    assert(fa);
+    assert(fa->hdr);
+    assert(addr);
 
     /* Retrieve the address of the fixed array's header */
     *addr = fa->hdr->addr;
@@ -325,8 +325,8 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(fa->hdr);
+    assert(fa);
+    assert(fa->hdr);
 
     /* Set the shared array header's file context for this operation */
     hdr->f = fa->f;
@@ -339,7 +339,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create fixed array data block")
     }
 
-    HDassert(idx < hdr->cparam.nelmts);
+    assert(idx < hdr->cparam.nelmts);
 
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__NO_FLAGS_SET)))
@@ -436,8 +436,8 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(fa->hdr);
+    assert(fa);
+    assert(fa->hdr);
 
     /* Set the shared array header's file context for this operation */
     hdr->f = fa->f;
@@ -450,7 +450,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
     } /* end if */
     else {
         /* Get the data block */
-        HDassert(H5F_addr_defined(hdr->dblk_addr));
+        assert(H5F_addr_defined(hdr->dblk_addr));
         if (NULL == (dblock = H5FA__dblock_protect(hdr, hdr->dblk_addr, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTPROTECT, FAIL,
                         "unable to protect fixed array data block, address = %llu",
@@ -539,7 +539,7 @@ H5FA_close(H5FA_t *fa)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(fa);
+    assert(fa);
 
     /* Close the header if it was set */
     if (fa->hdr) {
@@ -575,9 +575,9 @@ H5FA_close(H5FA_t *fa)
                                 "unable to check metadata cache status for fixed array header")
 
                 /* Sanity checks on header */
-                HDassert(hdr_status & H5AC_ES__IN_CACHE);
-                HDassert(hdr_status & H5AC_ES__IS_PINNED);
-                HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+                assert(hdr_status & H5AC_ES__IN_CACHE);
+                assert(hdr_status & H5AC_ES__IS_PINNED);
+                assert(!(hdr_status & H5AC_ES__IS_PROTECTED));
             }
 #endif /* NDEBUG */
 
@@ -640,8 +640,8 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fa_addr));
+    assert(f);
+    assert(H5F_addr_defined(fa_addr));
 
     /* Lock the array header into memory */
     if (NULL == (hdr = H5FA__hdr_protect(f, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
@@ -694,9 +694,9 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata)
     FUNC_ENTER_NOAPI(H5_ITER_ERROR)
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(op);
-    HDassert(udata);
+    assert(fa);
+    assert(op);
+    assert(udata);
 
     /* Allocate space for a native array element */
     if (NULL == (elmt = H5FL_BLK_MALLOC(fa_native_elmt, fa->hdr->cparam.cls->nat_elmt_size)))
@@ -745,9 +745,9 @@ H5FA_depend(H5FA_t *fa, H5AC_proxy_entry_t *parent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(hdr);
-    HDassert(parent);
+    assert(fa);
+    assert(hdr);
+    assert(parent);
 
     /*
      * Check to see if a flush dependency between the fixed array
@@ -756,7 +756,7 @@ H5FA_depend(H5FA_t *fa, H5AC_proxy_entry_t *parent)
      */
     if (NULL == hdr->parent) {
         /* Sanity check */
-        HDassert(hdr->top_proxy);
+        assert(hdr->top_proxy);
 
         /* Set the shared array header's file context for this operation */
         hdr->f = fa->f;
@@ -789,8 +789,8 @@ H5FA_patch_file(H5FA_t *fa, H5F_t *f)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(f);
+    assert(fa);
+    assert(f);
 
     if (fa->f != f || fa->hdr->f != f)
         fa->f = fa->hdr->f = f;

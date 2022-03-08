@@ -662,7 +662,7 @@ test_allocate_random(void)
     curr_time = HDtime(NULL);
 #if 0
 curr_time=1115412944;
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -671,11 +671,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Allocate space for the block sizes */
-    if (NULL == (blk_size = (size_t *)HDmalloc(sizeof(size_t) * MPOOL_NUM_RANDOM)))
+    if (NULL == (blk_size = (size_t *)malloc(sizeof(size_t) * MPOOL_NUM_RANDOM)))
         TEST_ERROR
 
     /* Allocate space for the block pointers */
-    if (NULL == (spc = (void **)HDmalloc(sizeof(void *) * MPOOL_NUM_RANDOM)))
+    if (NULL == (spc = (void **)malloc(sizeof(void *) * MPOOL_NUM_RANDOM)))
         TEST_ERROR
 
     /* Initialize the block sizes with random values */
@@ -726,8 +726,8 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Free memory for block sizes & pointers */
-    HDfree(blk_size);
-    HDfree(spc);
+    free(blk_size);
+    free(spc);
 
     PASSED();
 
@@ -735,9 +735,9 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
 error:
     if (blk_size)
-        HDfree(blk_size);
+        free(blk_size);
     if (spc)
-        HDfree(spc);
+        free(spc);
     H5E_BEGIN_TRY
     {
         if (mp)
@@ -784,11 +784,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All memory pool tests passed.");
+    puts("All memory pool tests passed.");
 
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 }

@@ -165,7 +165,7 @@ H5EA__test_dst_context(void *_ctx)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Release context structure */
     ctx = H5FL_FREE(H5EA__test_ctx_t, ctx);
@@ -194,8 +194,8 @@ H5EA__test_fill(void *nat_blk, size_t nelmts)
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(nat_blk);
-    HDassert(nelmts);
+    assert(nat_blk);
+    assert(nelmts);
 
     H5VM_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
@@ -225,10 +225,10 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Check for callback action */
     if (ctx->cb) {
@@ -277,10 +277,10 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDE
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(raw);
-    HDassert(elmt);
-    HDassert(nelmts);
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+    assert(raw);
+    assert(elmt);
+    assert(nelmts);
+    assert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Decode raw elements into native elements */
     while (nelmts) {
@@ -318,12 +318,12 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
-    HDassert(stream);
-    HDassert(elmt);
+    assert(stream);
+    assert(elmt);
 
     /* Print element */
-    HDsnprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+    snprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
+    fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
               (unsigned long long)*(const uint64_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -380,7 +380,7 @@ H5EA__test_dst_dbg_context(void *_ctx)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(_ctx);
+    assert(_ctx);
 
     /* Release context structure */
     ctx = H5FL_FREE(H5EA__ctx_cb_t, ctx);
@@ -407,8 +407,8 @@ H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
-    HDassert(ea);
-    HDassert(cparam);
+    assert(ea);
+    assert(cparam);
 
     /* Get extensible array creation parameters */
     cparam->raw_elmt_size             = ea->hdr->cparam.raw_elmt_size;
@@ -442,8 +442,8 @@ H5EA__cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(cparam1);
-    HDassert(cparam2);
+    assert(cparam1);
+    assert(cparam2);
 
     /* Compare creation parameters for array */
     if (cparam1->raw_elmt_size < cparam2->raw_elmt_size)
