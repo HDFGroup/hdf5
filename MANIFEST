@@ -3775,8 +3775,8 @@
 ./tools/test/perform/CMakeTests.cmake
 
 ./utils/CMakeLists.txt
-./utils/test/CMakeLists.txt
 ./utils/mirror_vfd/CMakeLists.txt
+./utils/test/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake

@@ -1414,6 +1414,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     entry_ptr->serialization_count = 0;
 #endif /* NDEBUG */
 
+    /* initialize tag list fields */
     entry_ptr->tl_next  = NULL;
     entry_ptr->tl_prev  = NULL;
     entry_ptr->tag_info = NULL;
@@ -7416,6 +7417,7 @@ H5C__load_entry(H5F_t *f,
     entry->serialization_count = 0;
 #endif /* NDEBUG */
 
+    /* initialize tag list fields */
     entry->tl_next  = NULL;
     entry->tl_prev  = NULL;
     entry->tag_info = NULL;
