@@ -1170,6 +1170,9 @@ set_vfd(parameters *param)
 
         memset(memb_map, 0, sizeof memb_map);
         memset(memb_fapl, 0, sizeof memb_fapl);
+        /* MSVC reports `warning C4090: 'function': different 'const'
+         * qualifiers` because it is seriously confused by the `const`.
+         */
         memset(memb_name, 0, sizeof memb_name);
         memset(memb_addr, 0, sizeof memb_addr);
 

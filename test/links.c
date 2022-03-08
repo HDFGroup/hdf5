@@ -9046,6 +9046,9 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     /* settings for multi file */
     memset(memb_map, 0, sizeof memb_map);
     memset(memb_fapl, 0, sizeof memb_fapl);
+    /* MSVC reports `warning C4090: 'function': different 'const' qualifiers`
+     * because it is confused by the `const`.
+     */
     memset(memb_name, 0, sizeof memb_name);
     memset(memb_addr, 0, sizeof memb_addr);
     memset(sv, 0, sizeof sv);
