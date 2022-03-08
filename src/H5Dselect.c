@@ -100,10 +100,10 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     FUNC_ENTER_STATIC
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(io_info->dset);
-    HDassert(io_info->store);
-    HDassert(io_info->u.rbuf);
+    assert(io_info);
+    assert(io_info->dset);
+    assert(io_info->store);
+    assert(io_info->u.rbuf);
 
     if (elmt_size == 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
@@ -136,7 +136,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
         } /* end if */
         else {
-            HDassert(io_info->op_type == H5D_IO_OP_WRITE);
+            assert(io_info->op_type == H5D_IO_OP_WRITE);
             if ((tmp_file_len = (*io_info->layout_ops.writevv)(
                      io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
                      &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
@@ -144,7 +144,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
         } /* end else */
 
         /* Decrement number of elements left to process */
-        HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+        assert(((size_t)tmp_file_len % elmt_size) == 0);
     } /* end if */
     else {
         size_t mem_nelem;  /* Number of elements used in memory sequences */
@@ -220,7 +220,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
                     HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
             } /* end if */
             else {
-                HDassert(io_info->op_type == H5D_IO_OP_WRITE);
+                assert(io_info->op_type == H5D_IO_OP_WRITE);
                 if ((tmp_file_len = (*io_info->layout_ops.writevv)(io_info, file_nseq, &curr_file_seq,
                                                                    file_len, file_off, mem_nseq,
                                                                    &curr_mem_seq, mem_len, mem_off)) < 0)
@@ -228,7 +228,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
             } /* end else */
 
             /* Decrement number of elements left to process */
-            HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+            assert(((size_t)tmp_file_len % elmt_size) == 0);
             nelmts -= ((size_t)tmp_file_len / elmt_size);
         } /* end while */
     }     /* end else */
@@ -296,10 +296,10 @@ H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, co
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(dst_buf);
-    HDassert(dst_space);
-    HDassert(src_buf);
-    HDassert(src_space);
+    assert(dst_buf);
+    assert(dst_space);
+    assert(src_buf);
+    assert(src_space);
 
     if (elmt_size == 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
@@ -330,7 +330,7 @@ H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, co
                                src_nseq, &curr_src_seq, &single_src_len, &single_src_off)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
-        HDassert(((size_t)bytes_copied % elmt_size) == 0);
+        assert(((size_t)bytes_copied % elmt_size) == 0);
     }
     else {
         unsigned sel_iter_flags = H5S_SEL_ITER_GET_SEQ_LIST_SORTED | H5S_SEL_ITER_SHARE_WITH_DATASPACE;
@@ -406,7 +406,7 @@ H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, co
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
             /* Decrement number of elements left to process */
-            HDassert(((size_t)bytes_copied % elmt_size) == 0);
+            assert(((size_t)bytes_copied % elmt_size) == 0);
             nelmts -= ((size_t)bytes_copied / elmt_size);
         }
     }

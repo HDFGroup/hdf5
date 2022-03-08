@@ -640,9 +640,9 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(send_buf || send_count == 0);
+    assert(send_buf || send_count == 0);
     if (allgather || (mpi_rank == root))
-        HDassert(out_buf && out_buf_num_entries);
+        assert(out_buf && out_buf_num_entries);
 
         /* Retrieve the extent of the MPI Datatype being used */
 #if MPI_VERSION >= 3
@@ -726,9 +726,9 @@ H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_t
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(send_buf || send_count == 0);
+    assert(send_buf || send_count == 0);
     if (allgather || (mpi_rank == root))
-        HDassert(out_buf && out_buf_num_entries);
+        assert(out_buf && out_buf_num_entries);
 
     /*
      * Allocate array to store the receive counts of each rank, as well as

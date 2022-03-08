@@ -110,9 +110,9 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
-    HDassert(dataset && dataset->oloc.file);
-    HDassert(file_space);
-    HDassert(mem_space);
+    assert(dataset && dataset->oloc.file);
+    assert(file_space);
+    assert(mem_space);
 
     /* Set up datatype info for operation */
     if (H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -182,8 +182,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
                                             (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
                                             type_info.dst_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        HDassert(projected_mem_space);
-        HDassert(adj_buf);
+        assert(projected_mem_space);
+        assert(adj_buf);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
@@ -236,7 +236,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
 
     /* Sanity check that space is allocated, if there are elements */
     if (nelmts > 0)
-        HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
+        assert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
                  (dataset->shared->layout.ops->is_data_cached &&
                   (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
                  dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
@@ -323,9 +323,9 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
-    HDassert(dataset && dataset->oloc.file);
-    HDassert(file_space);
-    HDassert(mem_space);
+    assert(dataset && dataset->oloc.file);
+    assert(file_space);
+    assert(mem_space);
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
@@ -415,8 +415,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
                                             (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
                                             type_info.src_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-        HDassert(projected_mem_space);
-        HDassert(adj_buf);
+        assert(projected_mem_space);
+        assert(adj_buf);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
@@ -541,11 +541,11 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
     FUNC_ENTER_STATIC_NOERR
 
     /* check args */
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-    HDassert(type_info);
-    HDassert(type_info->tpath);
-    HDassert(io_info);
+    assert(dset);
+    assert(dset->oloc.file);
+    assert(type_info);
+    assert(type_info->tpath);
+    assert(io_info);
 
     /* Set up "normal" I/O fields */
     io_info->dset  = dset;
@@ -608,15 +608,15 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(type_info);
-    HDassert(dset);
+    assert(type_info);
+    assert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
-    HDmemset(type_info, 0, sizeof(*type_info));
+    memset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
@@ -778,13 +778,13 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(type_info);
-    HDassert(type_info->tpath);
-    HDassert(io_info);
+    assert(dset);
+    assert(dset->oloc.file);
+    assert(mem_space);
+    assert(file_space);
+    assert(type_info);
+    assert(type_info->tpath);
+    assert(io_info);
 
     /* Reset the actual io mode properties to the default values in case
      * the DXPL (if it's non-default) was previously used in a collective
@@ -886,11 +886,11 @@ H5D__typeinfo_term(const H5D_type_info_t *type_info)
 
     /* Check for releasing datatype conversion & background buffers */
     if (type_info->tconv_buf_allocated) {
-        HDassert(type_info->tconv_buf);
+        assert(type_info->tconv_buf);
         (void)H5FL_BLK_FREE(type_conv, type_info->tconv_buf);
     } /* end if */
     if (type_info->bkg_buf_allocated) {
-        HDassert(type_info->bkg_buf);
+        assert(type_info->bkg_buf);
         (void)H5FL_BLK_FREE(type_conv, type_info->bkg_buf);
     } /* end if */
 

@@ -554,13 +554,13 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(new_type);
-    HDassert(new_type_derived);
+    assert(new_type);
+    assert(new_type_derived);
 
     *new_type_derived = FALSE;
 
     field_count = 2;
-    HDassert(field_count == sizeof(types) / sizeof(MPI_Datatype));
+    assert(field_count == sizeof(types) / sizeof(MPI_Datatype));
 
     block_lengths[0] = 1;
     block_lengths[1] = 1;
