@@ -264,7 +264,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
             } /* end if */
 
             /* Pause */
-            sleep(poll_time);
+            HDsleep(poll_time);
 
             /* Retrieve and print the collection of metadata read retries */
             if (print_metadata_retries_info(fid) < 0)

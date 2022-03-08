@@ -334,7 +334,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
             return -1;
 
         /* Sleep for the appropriate # of seconds */
-        sleep(poll_time);
+        HDsleep(poll_time);
 
         /* Retrieve the current time */
         curr_time = HDtime(NULL);

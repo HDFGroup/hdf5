@@ -126,7 +126,6 @@ setvbuf
 signal
 sin
 sinh
-sleep
 snprintf
 sprintf
 sqrt

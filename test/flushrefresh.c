@@ -1337,7 +1337,7 @@ refresh_verification(const char *obj_pathname)
         }
 
         if (tries == sleep_tries)
-            sleep(1);
+            HDsleep(1);
 
     } while (--tries);
 

@@ -320,7 +320,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
             return -1;
 
         /* Sleep for the appropriate # of seconds */
-        sleep(poll_time);
+        HDsleep(poll_time);
 
         /* Retrieve the current time */
         curr_time = HDtime(NULL);

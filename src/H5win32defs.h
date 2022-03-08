@@ -74,7 +74,7 @@ struct timezone {
 #define remove(S)           Wremove_utf8(S)
 #define HDrmdir(S)          _rmdir(S)
 #define HDsetenv(N, V, O)   Wsetenv(N, V, O)
-#define sleep(S)            Sleep(S * 1000)
+#define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)        _stati64(S, B)
 #define HDstrdup(S)         _strdup(S)
 #define HDstrtok_r(X, Y, Z) strtok_s(X, Y, Z)

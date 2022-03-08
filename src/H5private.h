@@ -918,6 +918,9 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDsigsuspend
 #define HDsigsuspend(S) sigsuspend(S)
 #endif
+#ifndef HDsleep
+#define HDsleep(S) sleep(S)
+#endif
 #ifndef HDsocket
 #define HDsocket(A, B, C) socket((A), (B), (C))
 #endif

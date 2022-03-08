@@ -558,7 +558,7 @@ read_uc_file(hbool_t towait, options_t *opts)
             }
             loops_waiting_for_plane++;
             /* pause for a second */
-            sleep(1);
+            HDsleep(1);
         }
 
         for (nplane = nplanes_seen; nplane < dims[0]; nplane++) {

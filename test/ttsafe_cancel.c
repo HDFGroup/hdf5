@@ -151,7 +151,7 @@ tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     status = H5Diterate(&buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     CHECK(status, FAIL, "H5Diterate");
 
-    sleep(3);
+    HDsleep(3);
 
     datavalue = 100;
     status    = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
@@ -182,7 +182,7 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
     herr_t status;
 
     tts_cancel_barrier();
-    sleep(3);
+    HDsleep(3);
 
     if (value != 1) {
         TestErrPrintf("Error! Element value should be 1 and not %d\n", value);

@@ -381,7 +381,7 @@ monitor_dataset(hid_t fid, char *dsetname)
         memcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
 
         /* Sleep before next monitor */
-        sleep(g_polling_interval);
+        HDsleep(g_polling_interval);
     } /* end while */
 
     fflush(stdout);
