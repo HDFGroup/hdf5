@@ -973,7 +973,11 @@ test_path_api_calls(void)
 
     if (H5PLsize(&n_paths) < 0)
         TEST_ERROR;
-    if (n_paths != 2)
+    /* Just make sure a plugin path was set as both CMake and the Autotools
+     * set one, but don't check for a specific number as the two tests
+     * differ (and that's fragile anyway)
+     */
+    if (n_paths == 0)
         TEST_ERROR;
 
     PASSED();
