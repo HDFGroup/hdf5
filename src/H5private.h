@@ -43,11 +43,13 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#include <sys/types.h>
+#endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
 #endif
-#include <unistd.h>
-#include <sys/types.h>
+#ifdef H5_HAVE_WAITPID
 #include <sys/wait.h>
 #endif
 
