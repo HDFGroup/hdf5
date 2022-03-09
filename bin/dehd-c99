@@ -210,7 +210,8 @@ regex="\<HD(${proto_regex})\>"
 
 find . \( -name '*.[chyl]' -o -name '*.cpp' \) \
        \! -name pio_standalone.h \! -name sio_standalone.h \
-       \! -name H5poison.h \! -name H5private.h | \
+       \! -name H5poison.h \! -name H5private.h \
+       \! -name H5win32defs.h | \
 xargs grep -E -l "${regex}" | \
 while read fn; do
 	sed -E "s,${regex},\\1,g" < $fn > $fn.dehd
