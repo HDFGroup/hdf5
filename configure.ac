@@ -4213,21 +4213,20 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
-                 test/testabort_fail.sh
-                 test/testcheck_version.sh
-                 test/testerror.sh
-                 test/testexternal_env.sh
-                 test/testflushrefresh.sh
-                 test/testlibinfo.sh
-                 test/testlinks_env.sh
-                 test/testswmr.sh
-                 test/testvfdswmr.sh
-                 test/testvds_env.sh
-                 test/testvdsswmr.sh
-                 test/test_filter_plugin.sh
+                 test/test_abort_fail.sh
+                 test/test_check_version.sh
+                 test/test_error.sh
+                 test/test_external_env.sh
+                 test/test_flush_refresh.sh
+                 test/test_libinfo.sh
+                 test/test_links_env.sh
                  test/test_mirror.sh
-                 test/test_usecases.sh
-                 test/test_vol_plugin.sh
+                 test/test_plugin.sh
+                 test/test_swmr.sh
+                 test/test_use_cases.sh
+                 test/test_vds_env.sh
+                 test/test_vds_swmr.sh
+                 test/test_vfd_swmr.sh
                  testpar/Makefile
                  testpar/testpflush.sh
                  utils/Makefile

@@ -79,17 +79,17 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"       /* Generic Functions			*/
-#include "H5retry_private.h" /* Retry loops.				*/
-#include "H5Cpkg.h"          /* Cache				*/
-#include "H5CXprivate.h"     /* API Contexts                         */
-#include "H5Eprivate.h"      /* Error handling		  	*/
-#include "H5Fpkg.h"          /* Files				*/
-#include "H5FLprivate.h"     /* Free Lists                           */
-#include "H5Iprivate.h"      /* IDs			  		*/
-#include "H5MFprivate.h"     /* File memory management		*/
-#include "H5MMprivate.h"     /* Memory management			*/
-#include "H5Pprivate.h"      /* Property lists                       */
+#include "H5private.h"       /* Generic Functions            */
+#include "H5retry_private.h" /* Retry loops                  */
+#include "H5Cpkg.h"          /* Cache                        */
+#include "H5CXprivate.h"     /* API Contexts                 */
+#include "H5Eprivate.h"      /* Error handling               */
+#include "H5Fpkg.h"          /* Files                        */
+#include "H5FLprivate.h"     /* Free Lists                   */
+#include "H5Iprivate.h"      /* IDs                          */
+#include "H5MFprivate.h"     /* File memory management       */
+#include "H5MMprivate.h"     /* Memory management            */
+#include "H5Pprivate.h"      /* Property lists               */
 
 /****************/
 /* Local Macros */
@@ -6816,12 +6816,6 @@ done:
  *              If the H5C__FLUSH_INVALIDATE_FLAG flag is set, the entry will
  *              be cleared and not flushed, and the call can't be part of a
  *              sequence of flushes.
- *
- *              If the caller knows the address of the skip list node at
- *              which the target entry resides, it can avoid a lookup
- *              by supplying that address in the tgt_node_ptr parameter.
- *              If this parameter is NULL, the function will do a skip list
- *              search for the entry instead.
  *
  *              The function does nothing silently if there is no entry
  *              at the supplied address, or if the entry found has the

@@ -2370,7 +2370,6 @@ H5_DLL herr_t H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, 
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t *f, haddr_t tag);
-H5_DLL herr_t H5C_force_cache_image_load(H5F_t *f);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags,
                                             hbool_t type_match);
