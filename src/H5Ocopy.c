@@ -33,7 +33,6 @@
 #include "H5Aprivate.h"  /* Attributes                               */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5ESprivate.h" /* Event Sets                               */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5HGprivate.h" /* Global Heaps                             */
@@ -772,7 +771,7 @@ done:
     /* Free destination object header on failure */
     if (ret_value < 0) {
         if (oh_dst && !inserted) {
-            if (H5O__free(oh_dst) < 0)
+            if (H5O__free(oh_dst, TRUE) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
             if (H5O_loc_reset(oloc_dst) < 0)
                 HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")

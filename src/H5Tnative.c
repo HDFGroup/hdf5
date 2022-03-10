@@ -43,7 +43,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *
  * Purpose:     High-level API to return the native type of a datatype.
  *              The native type is chosen by matching the size and class of
- *              querried datatype from the following native premitive
+ *              queried datatype from the following native primitive
  *              datatypes:
  *                      H5T_NATIVE_CHAR         H5T_NATIVE_UCHAR
  *                      H5T_NATIVE_SHORT        H5T_NATIVE_USHORT
@@ -56,7 +56,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_LDOUBLE
  *
  *              Compound, array, enum, and VL types all choose among these
- *              types for their members.  Time, Bifield, Opaque, Reference
+ *              types for their members.  Time, Bitfield, Opaque, Reference
  *              types are only copy out.
  *
  * Return:      Success:        Returns the native data type if successful.
@@ -696,7 +696,7 @@ H5_GCC_DIAG_OFF("duplicated-branches")
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_float
  *
- * Purpose:     Returns the native floatt type of a datatype.
+ * Purpose:     Returns the native float type of a datatype.
  *
  * Return:      Success:        Returns the native data type if successful.
  *

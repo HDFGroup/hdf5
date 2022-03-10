@@ -591,6 +591,8 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     if (outlen < 22)
         return 1;
 
+    H5_CHECK_OVERFLOW(outlen, int, size_t);
+
     lookup_ret = ref_path_table_lookup(str, &obj_token);
     if (lookup_ret < 0) {
         if (HDstrlen(str) == 0) {
@@ -600,7 +602,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                     ref_path_table_gen_fake(str, &obj_token);
 
                     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                    HDsprintf(outstr, "xid_%s", obj_tok_str);
+                    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     return 0;
@@ -615,7 +617,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 ref_path_table_gen_fake(str, &obj_token);
 
                 H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                HDsprintf(outstr, "xid_%s", obj_tok_str);
+                HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 return 0;
@@ -627,7 +629,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     }
 
     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-    HDsprintf(outstr, "xid_%s", obj_tok_str);
+    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
     H5free_memory(obj_tok_str);
 
     return 0;
@@ -1777,8 +1779,7 @@ xml_dump_dataspace(hid_t space)
                     /* Render the element */
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"UNLIMITED\"/>",
+                                       "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"UNLIMITED\"/>",
                                        xmlnsprefix, size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1788,10 +1789,9 @@ xml_dump_dataspace(hid_t space)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
-                                       xmlnsprefix, size[i], size[i]);
+                    h5tools_str_append(
+                        &buffer, "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
+                        xmlnsprefix, size[i], size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -1800,10 +1800,9 @@ xml_dump_dataspace(hid_t space)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
-                                       xmlnsprefix, size[i], maxsize[i]);
+                    h5tools_str_append(
+                        &buffer, "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
+                        xmlnsprefix, size[i], maxsize[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -2802,7 +2801,7 @@ xml_dump_group(hid_t gid, const char *name)
                             type = H5Dget_type(dset);
 
                             H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                            HDsprintf(type_name, "#%s", obj_tok_str);
+                            HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                             H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
@@ -2895,7 +2894,7 @@ xml_dump_group(hid_t gid, const char *name)
                     type = H5Dget_type(dset);
 
                     H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                    HDsprintf(type_name, "#%s", obj_tok_str);
+                    HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);
@@ -3598,7 +3597,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "\"");
                 for (i = 0; i < sz; i++) {
-                    h5tools_str_append(&buffer, "%x ", *(unsigned int *)buf + (i * sizeof(unsigned int)));
+                    unsigned long val = *(unsigned int *)buf + (i * sizeof(unsigned int));
+
+                    H5_CHECK_OVERFLOW(val, unsigned long, unsigned);
+                    h5tools_str_append(&buffer, "%x ", (unsigned)val);
                 }
                 h5tools_str_append(&buffer, "\"");
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
@@ -3892,8 +3894,8 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" H5_PRINTF_LL_WIDTH "u\" />",
-                                   xmlnsprefix, chsize[i]);
+                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" PRIuHSIZE "\" />", xmlnsprefix,
+                                   chsize[i]);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
             }
@@ -4524,12 +4526,16 @@ xml_print_enum(hid_t type)
                 h5tools_str_append(&buffer, "%02x", value[i * dst_size + j]);
         }
         else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "u",
-                               *((unsigned long long *)((void *)(value + i * dst_size))));
+            unsigned long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%llu", copy);
         }
         else {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "d",
-                               *((long long *)((void *)(value + i * dst_size))));
+            long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%lld", copy);
         }
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);

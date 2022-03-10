@@ -392,7 +392,7 @@ error:
  ***********************************************************************
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     char *dname = NULL;
     char *fname = NULL;
