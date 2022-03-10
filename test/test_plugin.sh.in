@@ -124,18 +124,6 @@ $ENVCMD $VOL_TEST_BIN
 if [ $? != 0 ]; then
     nerrors=`expr $nerrors + 1`
 fi
-############################################
-# HDFFV-9655 test for relative path disabled
-# setup filter plugin path relative to test
-# actual executable is in the .libs folder
-#ENVCMD="env HDF5_PLUGIN_PATH=@/../${TEMP_FILTER_DIR1}:@/../${TEMP_FILTER_DIR2}"
-#
-# Run the test
-#$ENVCMD $FILTER_TEST_BIN
-#if [ $? != 0 ]; then
-#    nerrors=`expr $nerrors + 1`
-#fi
-#############################################
 
 # Print results
 if test $nerrors -ne 0 ; then

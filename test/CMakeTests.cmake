@@ -853,16 +853,6 @@ if (BUILD_SHARED_LIBS)
       ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
   )
-
-##############################################################################
-# HDFFV-9655 relative plugin test disabled
-#
-#  add_test (NAME H5PLUGIN-pluginRelative COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:plugin>)
-#  set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
-#      ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-#      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-#  )
-##############################################################################
 endif ()
 
 option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
