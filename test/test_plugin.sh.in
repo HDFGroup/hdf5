@@ -52,7 +52,7 @@ case $(uname) in
         ;;
 esac
 
-# Directores where we'll copy plugins
+# Directories where we'll copy plugins
 TEMP_PLUGIN_DIR=temp_plugins
 TEMP_FILTER_DIR1=temp_filter_plugin_dir1
 TEMP_FILTER_DIR2=temp_filter_plugin_dir2
