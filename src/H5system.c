@@ -862,7 +862,7 @@ H5_nanosleep(uint64_t nanosec)
 
 #else
 
-    const uint64_t  nanosec_per_sec = 1000 * 1000 * 1000;
+    const uint64_t  nanosec_per_sec = 1000 * 1000L * 1000;
     struct timespec sleeptime; /* Struct to hold time to sleep */
 
     /* Set up time to sleep
