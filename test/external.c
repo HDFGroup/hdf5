@@ -166,8 +166,7 @@ test_non_extendible(hid_t file)
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size,
-               max_size[0] * sizeof(int));
+        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
