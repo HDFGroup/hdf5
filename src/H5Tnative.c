@@ -975,6 +975,14 @@ get_host_byte_order(void)
 herr_t
 H5T__init_native_int(void)
 {
+    /* Here we construct a type that lets us find alignment constraints
+     * without using the alignof operator, which is not available in C99.
+     *
+     * Between each sub-struct's `char` member `c` and member `x`, the
+     * compiler must insert padding to ensure proper alignment of `x`.
+     * We can find the alignment constraint of each `x` by looking at
+     * its offset from the beginning of its sub-struct.
+     */
     typedef struct {
         struct {
             char        c;
