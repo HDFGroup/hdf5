@@ -396,6 +396,8 @@ H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS];
  * ADDR such that 0 == ADDR mod N. When N=1 no alignment is required;
  * N=0 implies that alignment constraints were not calculated.  These
  * values are used for structure alignment.
+ *
+ * This alignment info is only for H5Tget_native_type.
  */
 H5_DLLVAR size_t H5T_POINTER_ALIGN_g;
 H5_DLLVAR size_t H5T_HVL_ALIGN_g;
