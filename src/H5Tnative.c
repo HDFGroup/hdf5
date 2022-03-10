@@ -1130,14 +1130,14 @@ H5T__init_native_int(void)
         /* Pointer to the global variable that receives the
          * alignment of `type`:
          */
-        size_t *     alignmentp;
-        size_t       alignment; // natural alignment of `type`
+        size_t *alignmentp;
+        size_t  alignment; // natural alignment of `type`
         /* Pointer to the global variable that receives the
          * identifier for `type`'s H5T_t:
          */
         hid_t *      hidp;
-        size_t       size;      // sizeof(`type`)
-        H5T_atomic_t atomic;    // `type` facts such as signedness
+        size_t       size;   // sizeof(`type`)
+        H5T_atomic_t atomic; // `type` facts such as signedness
     } native_int_t;
 
     typedef struct {
