@@ -1033,7 +1033,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         HDfree(arg);
     }
     else {
-        register char *cp; /* pointer into current token */
+        char *cp; /* pointer into current token */
 
         /* short command line option */
         optchar = argv[H5_optind][sp];
