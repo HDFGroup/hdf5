@@ -1401,10 +1401,10 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
 static char *
 h5tools_escape(char *s /*in,out*/, size_t size)
 {
-    register size_t i;
-    const char *    escape;
-    char            octal[8];
-    size_t          n = HDstrlen(s);
+    size_t      i;
+    const char *escape;
+    char        octal[8];
+    size_t      n = HDstrlen(s);
 
     for (i = 0; i < n; i++) {
         switch (s[i]) {
