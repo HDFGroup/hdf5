@@ -394,7 +394,7 @@ static inline unsigned H5_ATTR_UNUSED
 H5VM_log2_gen(uint64_t n)
 {
     unsigned              r;          /* r will be log2(n) */
-    register unsigned int t, tt, ttt; /* temporaries */
+    unsigned int t, tt, ttt; /* temporaries */
 
     if ((ttt = (unsigned)(n >> 32)))
         if ((tt = (unsigned)(n >> 48)))
