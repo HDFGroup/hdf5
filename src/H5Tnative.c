@@ -1122,12 +1122,22 @@ H5T__init_native_int(void)
         } UINT_FAST64;
     } alignments_t;
 
+    /* Describe a C99 type, `type`, and tell where to write its
+     * H5T_t identifier and alignment.  Tables of these descriptions
+     * drive the initialization of `H5T_t`s.
+     */
     typedef struct {
+        /* Pointer to the global variable that receives the
+         * alignment of `type`:
+         */
         size_t *     alignmentp;
-        size_t       alignment;
+        size_t       alignment; // natural alignment of `type`
+        /* Pointer to the global variable that receives the
+         * identifier for `type`'s H5T_t:
+         */
         hid_t *      hidp;
-        size_t       size;
-        H5T_atomic_t atomic;
+        size_t       size;      // sizeof(`type`)
+        H5T_atomic_t atomic;    // `type` facts such as signedness
     } native_int_t;
 
     typedef struct {
@@ -1195,6 +1205,12 @@ H5T__init_native_int(void)
     for (i = 0; i < NELMTS(table_table); i++) {
         const native_int_t *table  = table_table[i].table;
         size_t              nelmts = table_table[i].nelmts;
+
+        /* For each C99 type in `table`, create its H5T_t,
+         * register a hid_t for the H5T_t, and record the type's
+         * alignment and hid_t in the variables named by the
+         * table.
+         */
         for (j = 0; j < nelmts; j++) {
             H5T_t *dt;
 
