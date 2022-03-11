@@ -1810,6 +1810,17 @@ New Features
 
     Configuration:
     -------------
+    - Reworked corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However setting the HDF5_ROOT variable failed to locate
+      the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
+      set to the <INSTALL_DIR>/cmake folder. The location of theconfiguration 
+      files can still be specified by the "HDF5_DIR" variable.
+
+      (ADB - 2022/02/02)
+
     - CPack will now generate RPM/DEB packages.
 
       Enabled the RPM and DEB CPack generators on linux. In addition to
