@@ -14,32 +14,13 @@
 
 # Make a release of hdf5.
 #
-# Programmer: Robb Matzke
-# Creation date: on or before 1998-01-29.
+#   NOTE:
+#   This script differs from bin/release in that this has an added
+#   --revision option to create private releases with the code revision
+#   hash in the version strings.
 #
-# Modifications
-#   Robb Matzke, 1999-07-16
-#   The SunOS 5.6 sed *must* have slashes as delimiters. I changed things like
-#   `sed s+/CVS++' to `sed 's/\/CVS//'
-#
-#   Albert Cheng, 1999-10-26
-#   Moved the MANIFEST checking to a separate command file so that
-#   it can be invoked individually.
-#
-#   Albert Cheng, 2004-08-14
-#   Added the --private option.
-#
-#   James Laird, 2005-09-07
-#   Added the md5 method.
-#
-#   Larry Knox, 2016-08-30
-#   Added the --revision option to create private releases with the 
-#   code revision hash in the version strings. Currently the version
-#   of this script with the --revision option is named bbrelease. It 
-#   can probably be merged into the original release script in the
-#   future.
-#   Commands to get the revision hash have now been converted to git
-#   to match the source repository change.
+#   This script can probably be merged into the original release script in
+#   the future.
 
 # Function definitions
 #
@@ -47,26 +28,25 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR	The name of the directory where the release(s) should be
+Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] [--revision] <methods> ...
+   -d DIR       The name of the directory where the release(s) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
-   --nocheck	Ignore errors in MANIFEST file.
-   --private	Make a private release with today's date in version information.
-   --revision	Make a private release with the code revision number in version information.
-         
+   --private    Make a private release with today's date in version information.
+   --revision   Make a private release with the code revision number in version information.
+
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
 "tar" is assumed):
 
-    tar		-- use tar and don't do any compressing.
-    gzip	-- use gzip with "-9" and append ".gz" to the output name.
+    tar         -- use tar and don't do any compressing.
+    gzip        -- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
-    zip		-- convert all text files to DOS style and form a zip file for Windows use.
+    zip         -- convert all text files to DOS style and form a zip file for Windows use.
     doc         -- produce the latest doc tree in addition to the archive.
 
 An md5 checksum is produced for each archive created and stored in the md5 file.
@@ -97,15 +77,10 @@ EOF
 # Function name: tar2zip
 # Convert the release tarball to a Windows zipball.
 #
-# Programmer: Albert Cheng
-# Creation date: 2014-04-23
-#
-# Modifications
-#
 # Steps:
 # 1. untar the tarball in a temporary directory;
 #    Note: do this in a temporary directory to avoid changing
-#    the original source directory which maybe around.
+#    the original source directory which may be around.
 # 2. convert all its text files to DOS (LF-CR) style;
 # 3. form a zip file which is usable by Windows users.
 #
@@ -119,8 +94,8 @@ EOF
 tar2zip()
 {
     if [ $# -ne 3 ]; then
-	echo "usage: tar2zip <tarfilename> <zipfilename>"
-	return 1
+        echo "usage: tar2zip <tarfilename> <zipfilename>"
+        return 1
     fi
     ztmpdir=/tmp/tmpdir$$
     mkdir -p $ztmpdir
@@ -132,23 +107,23 @@ tar2zip()
     (cd $ztmpdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $ztmpdir/$version ]; then
-	echo "untar did not create $ztmpdir/$version source dir"
-	# cleanup
-	rm -rf $ztmpdir
-	return 1
+        echo "untar did not create $ztmpdir/$version source dir"
+        # cleanup
+        rm -rf $ztmpdir
+        return 1
     fi
     # step 2: convert text files
     # There maybe a simpler way to do this.
     # options used in unix2dos:
-    # -k   Keep the date stamp 
+    # -k   Keep the date stamp
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
     find $ztmpdir/$version | \
-	while read inf; do \
-	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-		unix2dos -q -k $inf; \
-	    fi\
-	done
+        while read inf; do \
+            if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+                unix2dos -q -k $inf; \
+            fi\
+        done
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -163,14 +138,6 @@ tar2zip()
 
 # This command must be run at the top level of the hdf5 source directory.
 # Verify this requirement.
-# Since we are running bbrelease to create an HDF5 source tarfile for buildbot
-# testing with source that is not for release, there is not a file named
-# "configure" but there will be one named "configure.ac".  The "configure"
-# file will be created when autogen.sh runs. There probably will always
-# be a bin/release file, but just in case it is removed, we can check for 
-# this script, bbrelease, in the bin directory.  The bin/release script should
-# continue to check for "configure" because it should be present in release 
-# source.
 if [ ! \( -f configure.ac -a -f bin/bbrelease \) ]; then
     echo "$0 must be run at the top level of the hdf5 source directory"
     exit 1
@@ -182,12 +149,11 @@ VERS=`perl bin/h5vers`
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
-check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
 revmode='no'
-tmpdir="../#release_tmp.$$"	# tmp work directory
+tmpdir="../#release_tmp.$$"     # tmp work directory
 DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 
@@ -195,11 +161,11 @@ CPPLUS_RM_NAME=cpplus_RM
 RESTORE_VERSION()
 {
     if [ X-${VERS_OLD} != X- ]; then
-	echo restoring version information back to $VERS_OLD
-	rm -f config/lt_vers.am
-	cp $tmpdir/lt_vers.am config/lt_vers.am
-	bin/h5vers -s $VERS_OLD
-	VERS_OLD=
+        echo restoring version information back to $VERS_OLD
+        rm -f config/lt_vers.am
+        cp $tmpdir/lt_vers.am config/lt_vers.am
+        bin/h5vers -s $VERS_OLD
+        VERS_OLD=
     fi
 }
 
@@ -209,20 +175,17 @@ while [ -n "$1" ]; do
     arg=$1
     shift
     case "$arg" in
-	-d)
-	    DEST=$1
-	    shift
-	    ;;
-	--nocheck)
-	    check=no
-	    ;;
-	-h)
-	    USAGE
-	    exit 0
-	    ;;
-	--private)
-	    pmode=yes
-	    ;;
+        -d)
+            DEST=$1
+            shift
+            ;;
+        -h)
+            USAGE
+            exit 0
+            ;;
+        --private)
+            pmode=yes
+            ;;
         --revision)
             revmode=yes
             ;;
@@ -230,14 +193,14 @@ while [ -n "$1" ]; do
             DOCVERSION=$1
             shift
             ;;
-	-*)
-	    echo "Unknown switch: $arg" 1>&2
-	    USAGE
-	    exit 1
-	    ;;
-	*)
-	    methods="$methods $arg"
-	    ;;
+        -*)
+            echo "Unknown switch: $arg" 1>&2
+            USAGE
+            exit 1
+            ;;
+        *)
+            methods="$methods $arg"
+            ;;
     esac
 done
 
@@ -278,7 +241,7 @@ if [ X$revmode = Xyes ]; then
     cp config/lt_vers.am $tmpdir
     branch=`git branch | grep '*' | awk '{print $NF}'`
     revision=`git rev-parse --short HEAD`
-# Set version information to m.n.r-r$revision.
+    # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
@@ -299,22 +262,7 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
-# Check the validity of the MANIFEST file.
-bin/chkmanifest || fail=yes
-if [ "X$fail" = "Xyes" ]; then
-    if [ $check = yes ]; then
-        exit 1
-    else
-	echo "Continuing anyway..."
-    fi
-fi
-
-# Create a manifest that contains only files for distribution.
-MANIFEST=$tmpdir/H5_MANIFEST
-grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
-
 # Prepare the source tree for a release.
-#ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
 ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
 # Save a backup copy of Makefile if exists.
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
@@ -330,7 +278,7 @@ for f in README.md release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# trunk is different than branches.
+# develop is different than branches.
 if [ "${DOCVERSION}" ]; then
     DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git -b ${DOCVERSION}
 fi
@@ -338,9 +286,7 @@ fi
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
-    cd $tmpdir; \
-    tar cf $HDF5_VERS.tar $HDF5_IN_VERS/Makefile \
-	`sed 's/^\.\//'$HDF5_IN_VERS'\//' $MANIFEST` || exit 1 \
+    tar --transform "s,^\.,$HDF5_IN_VERS," -c --exclude=".git" -f "$tmpdir/$HDF5_VERS.tar" Makefile . || exit 1 \
 )
 
 # Compress
@@ -348,46 +294,46 @@ MD5file=$HDF5_VERS.md5
 cp /dev/null $DEST/$MD5file
 for comp in $methods; do
     case $comp in
-	tar)
-	    cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-	    (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file) 
-	    ;;
-	gzip)
-	    test "$verbose" && echo "   Running gzip..." 1>&2
-	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-	    (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
-	    ;;
-	bzip2)
-	    test "$verbose" && echo "   Running bzip2..." 1>&2
-	    bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-	    (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file) 
-	    ;;
-	zip)
-	    test "$verbose" && echo "   Creating zip ball..." 1>&2
-	    tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
-	    ;;
-	doc)
+        tar)
+            cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
+            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
+            ;;
+        gzip)
+            test "$verbose" && echo "   Running gzip..." 1>&2
+            gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
+            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
+            ;;
+        bzip2)
+            test "$verbose" && echo "   Running bzip2..." 1>&2
+            bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
+            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
+            ;;
+        zip)
+            test "$verbose" && echo "   Creating zip ball..." 1>&2
+            tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
+            ;;
+        doc)
             if [ "${DOCVERSION}" = "" ]; then
                 DOCVERSION=master
             fi
-	    test "$verbose" && echo "   Creating docs..." 1>&2
-	    # Check out docs from git repo
-	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
-	    # Create doxygen C++ RM
-	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
-	    # Replace version of C++ RM with just-created version
+            test "$verbose" && echo "   Creating docs..." 1>&2
+            # Check out docs from git repo
+            (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
+            # Create doxygen C++ RM
+            (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
+            # Replace version of C++ RM with just-created version
             rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
             mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
             # Compress the docs and move them to the release area
             mv $tmpdir/$DOCVERSION $tmpdir/${HDF5_VERS}_docs
-	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
-	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
-	    ;;
-	*)
-	    echo "***Error*** Unknown method $comp"
-	    exit 1
-	    ;;
+            (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
+            mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+            ;;
+        *)
+            echo "***Error*** Unknown method $comp"
+            exit 1
+            ;;
     esac
 done
 
@@ -407,5 +353,7 @@ fi
 
 # Remove temporary things
 rm -rf $tmpdir
+
+echo "DONE"
 
 exit 0
