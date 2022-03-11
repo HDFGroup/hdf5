@@ -3254,7 +3254,7 @@ fi
 ##
 AC_SUBST([SUBFILING_VFD])
 
-## Default is no direct VFD
+## Default is no subfiling VFD
 SUBFILING_VFD=no
 
 AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
@@ -3267,7 +3267,7 @@ AC_ARG_ENABLE([subfiling-vfd],
 
 if test "X$SUBFILING_VFD" = "Xyes"; then
         AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_SUBFILING], [1],
+        AC_DEFINE([HAVE_SUBFILING_VFD], [1],
                 [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
 else
     AC_MSG_RESULT([no])
