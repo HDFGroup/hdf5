@@ -326,6 +326,9 @@
 /* Define if struct videoconfig is defined */
 #cmakedefine H5_HAVE_STRUCT_VIDEOCONFIG @H5_HAVE_STRUCT_VIDEOCONFIG@
 
+/* Define if Subfiling VFD is built */
+#cmakedefine H5_HAVE_SUBFILING_VFD @H5_HAVE_SUBFILING_VFD@
+
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@
 

@@ -27,7 +27,7 @@
 #include "genall5.h"
 
 #include <mpi.h>
-#define H5_HAVE_SUBFILING_VFD
+
 #ifdef H5_HAVE_SUBFILING_VFD
 
 #include "H5FDsubfiling.h" /* Private header for the subfiling VFD */

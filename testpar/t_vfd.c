@@ -18,8 +18,11 @@
  */
 
 #include "testphdf5.h"
+
+#ifdef H5_HAVE_SUBFILING_VFD
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
+#endif
 
 /* Must be a power of 2.  Reducing it below 1024 may cause problems */
 #define INTS_PER_RANK 1024
@@ -320,6 +323,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set mpio fapl.";
             }
         }
+#ifdef H5_HAVE_SUBFILING_VFD
         else if (strcmp(vfd_name, "subfiling") == 0) {
 
             hid_t                   ioc_fapl;
@@ -423,6 +427,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
         }
+#endif
         else {
             pass         = FALSE;
             failure_mssg = "un-supported VFD";

@@ -738,15 +738,15 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-# see other find_package examples in /usr/share/cmake/Modules                                                                                                                                                                                 
-option (HDF5_BUILD_SUBFILING  "Build Parallel HDF5 Subfiling" OFF)
+# Determine whether to build the HDF5 Subfiling VFD
+option (HDF5_BUILD_SUBFILING "Build Parallel HDF5 Subfiling" OFF)
 if (HDF5_BUILD_SUBFILING)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
   endif()
 
   set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
-  set (WITH_SUBFILING 1)
+  set (H5_HAVE_SUBFILING_VFD 1)
 
   message (STATUS "Setting up to use Mercury components")
   include_directories(${H5FD_SUBFILING_DIR}/mercury/include)

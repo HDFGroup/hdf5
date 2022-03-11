@@ -21,6 +21,10 @@ include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test
 
+if SUBFILING_VFD_CONDITIONAL
+    AM_CPPFLAGS += -I$(top_srcdir)/src/H5FDsubfiling
+endif
+
 # Test scripts--
 #       testpflush.sh:
 TEST_SCRIPT_PARA = testpflush.sh
@@ -30,7 +34,11 @@ check_SCRIPTS = $(TEST_SCRIPT_PARA)
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel t_2Gio t_vfd t_subfiling_vfd
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel t_2Gio t_vfd
+
+if SUBFILING_VFD_CONDITIONAL
+    TEST_PROG_PARA += t_subfiling_vfd
+endif
 
 # t_pflush1 and t_pflush2 are used by testpflush.sh
 check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
