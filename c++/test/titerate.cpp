@@ -67,7 +67,8 @@ typedef struct {
     iter_enum  command;       /* The type of return value */
 } iter_info;
 
-int iter_strcmp(const void *s1, const void *s2);
+static int  iter_strcmp(const void *s1, const void *s2);
+static void printelems(const Group &group, const H5std_string &dsname, const H5std_string &atname);
 
 /*-------------------------------------------------------------------------
  * Function:    iter_strcmp
@@ -75,7 +76,7 @@ int iter_strcmp(const void *s1, const void *s2);
  * Purpose      String comparison routine for qsort
  *-------------------------------------------------------------------------
  */
-int
+static int
 iter_strcmp(const void *s1, const void *s2)
 {
     return (HDstrcmp(*(const char *const *)s1, *(const char *const *)s2));
@@ -168,8 +169,7 @@ test_iter_group(FileAccPropList &fapl)
             /* Keep a copy of the dataset names */
             lnames[i] = HDstrdup(name);
             check_values(lnames[i], "HDstrdup returns NULL", __LINE__, __FILE__);
-
-        } /* end for */
+        }
 
         /* Create a group and named datatype under root group for testing */
         Group grp(file.createGroup(GROUP1, 0));
@@ -206,7 +206,7 @@ test_iter_group(FileAccPropList &fapl)
             // oinfo = root_group.childObjType((hsize_t)i, H5_INDEX_NAME, H5_ITER_INC,  ".");
             // ret = H5Oget_info_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
             // H5P_DEFAULT);
-        } /* end for */
+        }
 
         // Attempted to iterate with invalid index, should fail
         try {
@@ -352,7 +352,7 @@ test_iter_group(FileAccPropList &fapl)
  * Purpose      Open an attribute and verify that it has a the correct name
  *-------------------------------------------------------------------------
  */
-const H5std_string FILE_NAME("titerate.h5");
+const H5std_string FILE_NAME("test_member_access.h5");
 const H5std_string GRP_NAME("/Group_A");
 const H5std_string FDATASET_NAME("file dset");
 const H5std_string GDATASET_NAME("group dset");
@@ -360,7 +360,7 @@ const H5std_string ATTR_NAME("Units");
 const H5std_string FATTR_NAME("F attr");
 const H5std_string GATTR_NAME("G attr");
 const int          DIM1 = 2;
-void
+static void
 printelems(const Group &group, const H5std_string &dsname, const H5std_string &atname)
 {
     try {
@@ -397,6 +397,9 @@ test_HDFFV_9920()
     int     attr_data[2] = {100, 200};
     hsize_t dims[1]      = {DIM1};
 
+    /* Output message about test being performed */
+    SUBTEST("Member access");
+
     try {
         // Create a new file and a group in it
         H5File file(FILE_NAME, H5F_ACC_TRUNC);
@@ -426,6 +429,7 @@ test_HDFFV_9920()
         printelems(file, FDATASET_NAME, FATTR_NAME);
         printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
+        PASSED();
     } // end of try block
 
     // Catch all failures for handling in the same way
@@ -474,4 +478,5 @@ extern "C" void
 cleanup_iterate()
 {
     HDremove(FILE_ITERATE.c_str());
+    HDremove(FILE_NAME.c_str());
 } // cleanup_iterate
