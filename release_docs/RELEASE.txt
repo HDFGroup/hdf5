@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts to cat the 
+      libhdf5-settings to the standard output.
+
+      (ADB - 2022/03/11)
+
     - Refactored the utils folder.
 
       Added subfolder test and moved the 'swmr_check_compat_vfd.c file'
