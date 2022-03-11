@@ -356,7 +356,7 @@ macro (HDF_DIR_PATHS package_prefix)
     endif ()
   endif ()
   if (NOT ${package_prefix}_INSTALL_CMAKE_DIR)
-    set (${package_prefix}_INSTALL_CMAKE_DIR share/cmake)
+    set (${package_prefix}_INSTALL_CMAKE_DIR cmake)
   endif ()
 
   # Always use full RPATH, i.e. don't skip the full RPATH for the build tree
@@ -427,7 +427,7 @@ macro (HDF_DIR_PATHS package_prefix)
     endif ()
   endif ()
 
-  if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     if (CMAKE_HOST_UNIX)
       set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
         CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
