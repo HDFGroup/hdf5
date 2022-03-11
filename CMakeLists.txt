@@ -744,12 +744,18 @@ endif ()
 
 # see other find_package examples in /usr/share/cmake/Modules                                                                                                                                                                                 
 option (HDF5_BUILD_SUBFILING  "Build Parallel HDF5 Subfiling" OFF)
-if (HDF5_BUILD_SUBFILING AND HDF5_ENABLE_PARALLEL)
-  message (STATUS "Setting up to use Mercury components")
-  include_directories(${HDF5_SRC_DIR}/mercury/include)
+if (HDF5_BUILD_SUBFILING)
+  if (NOT HDF5_ENABLE_PARALLEL)
+    message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
+  endif()
+
+  set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
   set (WITH_SUBFILING 1)
+
+  message (STATUS "Setting up to use Mercury components")
+  include_directories(${H5FD_SUBFILING_DIR}/mercury/include)
   set (H5_HAVE_MERCURY_H 1)
-  set (CMAKE_REQUIRED_INCLUDES "${HDF5_SRC_DIR}/mercury/include")
+  set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_DIR}/mercury/include")
 endif()
 
 #option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
