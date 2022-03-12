@@ -32,7 +32,7 @@ import org.junit.rules.TestName;
 
 public class TestH5OcopyOld {
     @Rule public TestName testname = new TestName();
-    private static final String FILENAME = "testRefsattribute.h5";
+    private static final String FILENAME = "testRefsattributeO.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     long H5fid = HDF5Constants.H5I_INVALID_HID;
@@ -139,7 +139,6 @@ public class TestH5OcopyOld {
         byte rbuf0[]=null , rbuf1[] = null;
         byte[] dset_data = new byte[16];
         long attribute_id = HDF5Constants.H5I_INVALID_HID;
-
 
         try {
             rbuf0 = H5.H5Rcreate(H5fid, "/G1", HDF5Constants.H5R_OBJECT, -1);
