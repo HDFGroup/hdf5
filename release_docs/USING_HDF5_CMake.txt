@@ -50,9 +50,9 @@ I. Preconditions
       or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
       to the installed location of HDF5.
          On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.10.x/cmake
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.10.x/
          On unix:
-            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.10.x/cmake
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.10.x/
 
       If you are using shared libraries, you may need to add to the path
       environment variable. Set the path environment variable to the
