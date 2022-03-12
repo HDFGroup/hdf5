@@ -821,6 +821,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static int          checked                  = 0; /* If we've already checked the version info */
     static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
     static const char * version_mismatch_warning = VERSION_MISMATCH_WARNING;
+    static const char * release_mismatch_warning = RELEASE_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
@@ -841,10 +842,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
-    /* Cast relnum to int to avoid warning for unsigned < 0 comparison
-     * in first release versions */
-    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > (int)relnum) {
-
+    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) {
         switch (disable_version_check) {
             case 0:
                 HDfprintf(stderr, "%s%s", version_mismatch_warning,
@@ -879,7 +877,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 break;
         } /* end switch */
 
-    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > relnum) */
+    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
 
     /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
     if (H5_VERS_RELEASE != relnum) {
@@ -889,7 +887,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 switch (disable_version_check) {
                     case 0:
                         HDfprintf(
-                            stderr, "%s%s", version_mismatch_warning,
+                            stderr, "%s%s", release_mismatch_warning,
                             "You can, at your own risk, disable this warning by setting the environment\n"
                             "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
                             "Setting it to 2 or higher will suppress the warning messages totally.\n");
@@ -908,7 +906,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                                   "%s'HDF5_DISABLE_VERSION_CHECK' "
                                   "environment variable is set to %d, application will\n"
                                   "continue at your own risk.\n",
-                                  version_mismatch_warning, disable_version_check);
+                                  release_mismatch_warning, disable_version_check);
                         /* Mention the versions we are referring to */
                         HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
                                   relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
@@ -986,7 +984,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5close
  *
- * Purpose:    Terminate the library and release all resources.
+ * Purpose:	Terminate the library and release all resources.
  *
  * Return:    Non-negative on success/Negative on failure
  *
