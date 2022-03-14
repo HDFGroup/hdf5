@@ -504,8 +504,10 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
-# Prepare the source tree for a release.
+# Create a symlink to the source so files in the tarball have the prefix
+# we want (gnu's --transform isn't portable)
 ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
+
 # Save a backup copy of Makefile if exists.
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
@@ -527,9 +529,7 @@ fi
 
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
-( \
-    tar --transform "s,^\.,$HDF5_VERS," -c --exclude=".git" -f "$tmpdir/$HDF5_VERS.tar" Makefile . || exit 1 \
-)
+(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_VERS" || exit 1 )
 
 # Compress
 MD5file=$HDF5_VERS.md5
