@@ -196,6 +196,7 @@
 #define H5FD_CTL__MEM_ALLOC                   5
 #define H5FD_CTL__MEM_FREE                    6
 #define H5FD_CTL__MEM_COPY                    7
+#define H5FD_CTL__MEM_QUERY_SUPPORTED_FLAGS   8
 
 /* ctl function flags: */
 
@@ -390,6 +391,35 @@ typedef struct H5FD_ctl_memcpy_args_t {
     size_t      len;     /**< Length of data to copy from source buffer */
 } H5FD_ctl_memcpy_args_t;
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
+
+/**
+ * Define structure to hold "ctl memory alloc" parameters
+ */
+//! <!-- [H5FD_ctl_alloc_args_t_snip] -->
+typedef struct H5FD_ctl_alloc_args_t {
+    hsize_t       size;      /**< Memory allocation size */
+    hsize_t       alignment; /**< Desired memory alignment */
+    unsigned long flags;     /**< Request flags (H5FD_ALLOC*) */
+    const void   *args;      /**< Optional arguments wanted by the VFD given the request flags */
+} H5FD_ctl_alloc_args_t;
+//! <!-- [H5FD_ctl_alloc_args_t_snip] -->
+
+/**
+ * Define structure to hold "ctl memory free" parameters
+ */
+//! <!-- [H5FD_ctl_free_args_t_snip] -->
+typedef struct H5FD_ctl_free_args_t {
+    void         *buf;   /**< Pointer to memory space to be freed */
+    unsigned long flags; /**< Request flags (H5FD_MEM*) */
+    const void   *args;  /**< Optional arguments wanted by the VFD given the request flags */
+} H5FD_ctl_free_args_t;
+//! <!-- [H5FD_ctl_free_args_t_snip] -->
+
+/**
+ * H5FD_MEM request flags
+ */
+/* Handle memory request asynchronously */
+#define H5FD_MEM_ASYNC       0x00000001
 
 /********************/
 /* Public Variables */

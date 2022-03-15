@@ -260,6 +260,8 @@ H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FDunlock(H5FD_t *file);
 H5_DLL herr_t  H5FDdelete(const char *name, hid_t fapl_id);
 H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
+H5_DLL herr_t  H5FDalloc_mem(H5FD_t *file, H5FD_ctl_alloc_args_t *args, void **out);
+H5_DLL herr_t  H5FDfree_mem(H5FD_t *file, H5FD_ctl_free_args_t *args);
 
 #ifdef __cplusplus
 }
