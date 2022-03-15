@@ -1208,7 +1208,7 @@ del_attrs_compact_dense_compact(hid_t obj_id, hid_t gcpl, unsigned int which)
     char        attrname[VS_ATTR_NAME_LEN];
     const char *aname_format  = "attr-%u-%u";
     const char *adname_format = "attr-d-%u-%u";
-    int sz;
+    int         sz;
 
     /* Obtain the maximal number of attributes to be stored in compact
      * storage and the minimal number of attributes to be stored in

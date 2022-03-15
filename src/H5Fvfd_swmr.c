@@ -881,7 +881,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
              and write them to the log file. */
     H5_timevals_t current_time;
     double        start_elapsed_time = 0.0;
-    double        end_elapsed_time = 0.0;
+    double        end_elapsed_time   = 0.0;
     unsigned int  temp_time;
     char *        log_msg;
 
@@ -2359,7 +2359,8 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     }
 
     /* Create the updater file with a temporary file name */
-    sz = HDsnprintf(namebuf, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.ud_tmp", shared->vfd_swmr_config.updater_file_path);
+    sz = HDsnprintf(namebuf, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.ud_tmp",
+                    shared->vfd_swmr_config.updater_file_path);
     if (sz < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
     if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
@@ -2492,7 +2493,8 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     /* Close the updater file and rename the file */
     if (H5FD_close(ud_file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close updater file")
-    sz = HDsnprintf(newname, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.%lu", shared->vfd_swmr_config.updater_file_path, shared->updater_seq_num);
+    sz = HDsnprintf(newname, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.%lu",
+                    shared->vfd_swmr_config.updater_file_path, shared->updater_seq_num);
     if (sz < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
     if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
