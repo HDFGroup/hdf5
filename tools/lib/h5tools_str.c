@@ -1051,7 +1051,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                 H5TOOLS_DEBUG("H5T_ENUM");
                 if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name) >= 0)
-                    h5tools_str_append(str, h5tools_escape(enum_name, sizeof(enum_name)));
+                    h5tools_str_append(str, "%s", h5tools_escape(enum_name, sizeof(enum_name)));
                 else {
                     size_t i;
                     if (1 == nsize)

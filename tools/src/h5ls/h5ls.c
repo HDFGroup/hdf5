@@ -2305,7 +2305,7 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 iter->symlink_list->dangle_link = TRUE;
 
             h5tools_str_append(&buffer, "Soft Link {");
-            h5tools_str_append(&buffer, buf);
+            h5tools_str_append(&buffer, "%s", buf);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);
@@ -2373,11 +2373,11 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 goto done;
 
             h5tools_str_append(&buffer, "External Link {");
-            h5tools_str_append(&buffer, filename);
+            h5tools_str_append(&buffer, "%s", filename);
             h5tools_str_append(&buffer, "/");
             if (*path != '/')
                 h5tools_str_append(&buffer, "/");
-            h5tools_str_append(&buffer, path);
+            h5tools_str_append(&buffer, "%s", path);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);
@@ -2654,7 +2654,8 @@ main(int argc, char *argv[])
     char *             fname = NULL, *oname = NULL, *x = NULL;
     const char *       s = NULL;
     char *             rest;
-    int                argno, times;
+    int                argno;
+    int                times;
     static char        root_name[] = "/";
     char               drivername[50];
     const char *       preferred_driver = NULL;

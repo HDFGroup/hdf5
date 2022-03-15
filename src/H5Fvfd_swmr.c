@@ -880,7 +880,8 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* Kent: define the local variables to calculate the EOT time
              and write them to the log file. */
     H5_timevals_t current_time;
-    double        start_elapsed_time, end_elapsed_time;
+    double        start_elapsed_time = 0.0;
+    double        end_elapsed_time = 0.0;
     unsigned int  temp_time;
     char *        log_msg;
 
@@ -2308,6 +2309,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     char                   newname[H5F__MAX_VFD_SWMR_FILE_NAME_LEN];
     unsigned               i, j;
     hsize_t                alloc_size;
+    int                    sz;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2357,7 +2359,12 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     }
 
     /* Create the updater file with a temporary file name */
-    HDsprintf(namebuf, "%s.ud_tmp", shared->vfd_swmr_config.updater_file_path);
+    sz = HDsnprintf(namebuf, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.ud_tmp", shared->vfd_swmr_config.updater_file_path);
+    if (sz < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
+    if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "string passed to snprintf would be truncated")
+    namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN] = '\0';
 
     if ((ud_file = H5FD_open(namebuf, H5F_ACC_TRUNC | H5F_ACC_RDWR | H5F_ACC_CREAT, H5P_FILE_ACCESS_DEFAULT,
                              HADDR_UNDEF)) == NULL)
@@ -2485,7 +2492,12 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     /* Close the updater file and rename the file */
     if (H5FD_close(ud_file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close updater file")
-    HDsprintf(newname, "%s.%lu", shared->vfd_swmr_config.updater_file_path, shared->updater_seq_num);
+    sz = HDsnprintf(newname, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.%lu", shared->vfd_swmr_config.updater_file_path, shared->updater_seq_num);
+    if (sz < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
+    if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "string passed to snprintf would be truncated")
+    newname[H5F__MAX_VFD_SWMR_FILE_NAME_LEN] = '\0';
     HDrename(namebuf, newname);
 
     ++shared->updater_seq_num;

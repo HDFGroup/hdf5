@@ -1208,6 +1208,7 @@ del_attrs_compact_dense_compact(hid_t obj_id, hid_t gcpl, unsigned int which)
     char        attrname[VS_ATTR_NAME_LEN];
     const char *aname_format  = "attr-%u-%u";
     const char *adname_format = "attr-d-%u-%u";
+    int sz;
 
     /* Obtain the maximal number of attributes to be stored in compact
      * storage and the minimal number of attributes to be stored in
@@ -1218,9 +1219,17 @@ del_attrs_compact_dense_compact(hid_t obj_id, hid_t gcpl, unsigned int which)
     }
     u = max_compact + 1;
 
-    /* delete a number of attributes so that the attribute storage just becomes dense.*/
+    /* Delete a number of attributes so that the attribute storage just becomes dense.*/
     for (u--; u >= (min_dense - 1); u--) {
-        HDsprintf(attrname, aname_format, which, max_compact - u);
+        sz = HDsnprintf(attrname, VS_ATTR_NAME_LEN - 1, aname_format, which, max_compact - u);
+        if (sz < 0) {
+            printf("snprintf format error\n");
+            TEST_ERROR;
+        }
+        if (sz > VS_ATTR_NAME_LEN - 1) {
+            printf("snprintf truncated string\n");
+            TEST_ERROR;
+        }
         if (H5Adelete(obj_id, attrname) < 0) {
             printf("H5Adelete failed\n");
             TEST_ERROR;
@@ -1235,7 +1244,15 @@ del_attrs_compact_dense_compact(hid_t obj_id, hid_t gcpl, unsigned int which)
      * The attribute name to be deleted is attr-max_compact+which-0
      */
 
-    HDsprintf(attrname, adname_format, max_compact + which, 0);
+    sz = HDsnprintf(attrname, VS_ATTR_NAME_LEN - 1, adname_format, max_compact + which, 0);
+    if (sz < 0) {
+        printf("snprintf format error\n");
+        TEST_ERROR;
+    }
+    if (sz > VS_ATTR_NAME_LEN - 1) {
+        printf("snprintf truncated string\n");
+        TEST_ERROR;
+    }
     if (H5Adelete(obj_id, attrname) < 0) {
         printf("H5Adelete failed\n");
         TEST_ERROR;
