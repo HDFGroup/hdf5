@@ -269,7 +269,6 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "unable to load/decode metadata file");
 
         vfd_swmr_reader_did_increase_tick_to(shared->tick_num);
-
     }
 
     /* Update end_of_tick */
@@ -406,7 +405,8 @@ H5F__shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t len
 int
 H5F_shadow_image_defer_free(H5F_shared_t *shared, const H5FD_vfd_swmr_idx_entry_t *entry)
 {
-    return H5F__shadow_range_defer_free(shared, entry->md_file_page_offset * shared->fs_page_size, entry->length);
+    return H5F__shadow_range_defer_free(shared, entry->md_file_page_offset * shared->fs_page_size,
+                                        entry->length);
 }
 
 /*-------------------------------------------------------------------------
@@ -1778,7 +1778,7 @@ done:
 H5FD_vfd_swmr_idx_entry_t *
 H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f)
 {
-    H5F_shared_t *             shared    = f->shared;
+    H5F_shared_t *             shared = f->shared;
     haddr_t                    idx_addr;
     haddr_t                    old_writer_index_offset;
     hsize_t                    idx_size;
@@ -1836,7 +1836,8 @@ H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f)
      * trade-off for simplicity.
      */
     /* Fix: use the saved old_writer_index_offset not the current one */
-    if (H5F__shadow_range_defer_free(shared, old_writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) == -1) {
+    if (H5F__shadow_range_defer_free(shared, old_writer_index_offset, H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) ==
+        -1) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "could not schedule index reclamation");
     }
 done:
@@ -2338,4 +2339,4 @@ done:
         HDfree(updater.change_list);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__generate_updater_file() */ 
+} /* end H5F__generate_updater_file() */

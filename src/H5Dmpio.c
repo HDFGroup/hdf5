@@ -446,7 +446,7 @@ static FILE *            debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                    \
-            fflush(debug_stream);                                                                            \
+            HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -455,7 +455,7 @@ static FILE *            debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);       \
-            fflush(debug_stream);                                                                            \
+            HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -465,7 +465,7 @@ static FILE *            debug_stream             = NULL;
                                                                                                              \
         if (trace_flag) {                                                                                    \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_in_pre, __func__);                                         \
-            debug_indent += (int)strlen(trace_in_pre);                                                       \
+            debug_indent += (int)HDstrlen(trace_in_pre);                                                     \
         }                                                                                                    \
     } while (0)
 
@@ -474,7 +474,7 @@ static FILE *            debug_stream             = NULL;
         hbool_t trace_flag = H5D_mpio_debug_flags_s[(int)'t'];                                               \
                                                                                                              \
         if (trace_flag) {                                                                                    \
-            debug_indent -= (int)strlen(trace_out_pre);                                                      \
+            debug_indent -= (int)HDstrlen(trace_out_pre);                                                    \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_out_pre, __func__);                                        \
         }                                                                                                    \
     } while (0)
@@ -1141,8 +1141,8 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             HGOTO_ERROR(H5E_IO, H5E_OPENERROR, FAIL, "couldn't open debugging log file")
 
         /* Print a short header for this I/O operation */
-        time_now = time(NULL);
-        HDfprintf(debug_log_file, "##### %s", asctime(localtime(&time_now)));
+        time_now = HDtime(NULL);
+        HDfprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
 
         debug_stream = debug_log_file;
     }

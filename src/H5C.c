@@ -7702,8 +7702,8 @@ init_len = len;
          *   --determine the actual size of the metadata
          *   --perform checksum verification
          */
-        for (do_try = h5_retry_init(&retry, H5F_GET_READ_ATTEMPTS(f), 1, H5_RETRY_ONE_HOUR / 3600 / 100);
-             do_try; do_try = h5_retry_next(&retry)) {
+        for (do_try = H5_retry_init(&retry, H5F_GET_READ_ATTEMPTS(f), 1, H5_RETRY_ONE_HOUR / 3600 / 100);
+             do_try; do_try = H5_retry_next(&retry)) {
             if (actual_len != len) {
                 if (NULL == (new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
@@ -7886,7 +7886,7 @@ init_len = len;
         }
 
     /* Calculate and track the # of retries */
-    if ((tries = h5_retry_tries(&retry)) > 1) { /* Does not track 0 retry */
+    if ((tries = H5_retry_tries(&retry)) > 1) { /* Does not track 0 retry */
 
         if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
 

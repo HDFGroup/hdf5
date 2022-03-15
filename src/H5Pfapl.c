@@ -1290,8 +1290,8 @@ H5P_set_driver_by_name(H5P_genplist_t *plist, const char *driver_name, const cha
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(plist);
-    assert(driver_name);
+    HDassert(plist);
+    HDassert(driver_name);
 
     /* Register the driver */
     if ((new_driver_id = H5FD_register_driver_by_name(driver_name, app_ref)) < 0)
@@ -1378,8 +1378,8 @@ H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value, 
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(plist);
-    assert(driver_value >= 0);
+    HDassert(plist);
+    HDassert(driver_value >= 0);
 
     /* Register the driver */
     if ((new_driver_id = H5FD_register_driver_by_value(driver_value, app_ref)) < 0)

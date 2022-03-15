@@ -50,14 +50,14 @@
 /* Round _x down to nearest _size. */
 /* not used at present */
 /*
-#ifndef rounddown
-#define rounddown(_x, _size) (((_x) / (_size)) * (_size))
+#ifndef H5PB_ROUNDDOWN
+#define H5PB_ROUNDDOWN(_x, _size) (((_x) / (_size)) * (_size))
 #endif
 */
 
 /* Round _x up to nearest _size. */
-#ifndef roundup
-#define roundup(_x, _size) ((((_x) + (_size)-1) / (_size)) * (_size))
+#ifndef H5PB_ROUNDUP
+#define H5PB_ROUNDUP(_x, _size) ((((_x) + (_size)-1) / (_size)) * (_size))
 #endif
 
 /******************/
@@ -4432,7 +4432,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
             H5PB_entry_t *overlap;
             void *        new_image = H5MM_malloc(size);
             uint64_t      iter_page;
-            uint64_t      last_page = page + roundup(size, page_buf->page_size) / page_buf->page_size;
+            uint64_t      last_page = page + H5PB_ROUNDUP(size, page_buf->page_size) / page_buf->page_size;
 
             for (iter_page = page + 1; iter_page < last_page; iter_page++) {
                 H5PB__SEARCH_INDEX(page_buf, iter_page, overlap, FAIL)
