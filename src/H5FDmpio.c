@@ -1390,7 +1390,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
         HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_read);
+                  (long)mpi_off, (long long)bytes_read);
 #endif
 
     /*
@@ -1611,7 +1611,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
         HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_written);
+                  (long)mpi_off, (long long)bytes_written);
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and
@@ -1811,8 +1811,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
              * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
              * In this case, this function must free the memory allocated for the sorted vectors.
              */
-            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (const void **)bufs,
-                                        &s_types, &s_addrs, &s_sizes, &s_bufs) < 0)
+            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
+                                        &s_types, &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
@@ -2385,10 +2385,10 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     H5FD_mem_t *               s_types           = NULL;
     haddr_t *                  s_addrs           = NULL;
     size_t *                   s_sizes           = NULL;
-    void **                    s_bufs            = NULL;
+    const void **              s_bufs            = NULL;
     int *                      mpi_block_lengths = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
-    void *                     mpi_bufs_base     = NULL;
+    const void *               mpi_bufs_base     = NULL;
     MPI_Aint                   mpi_bufs_base_Aint;
     MPI_Aint *                 mpi_bufs          = NULL;
     MPI_Aint *                 mpi_displacements = NULL;
@@ -2446,8 +2446,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
      * In this case, this function must free the memory allocated for the sorted vectors.
      */
-    if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
-                                &s_sizes, &s_bufs) < 0)
+    if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs, &s_types, &s_addrs,
+                                &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
     /* Get the transfer mode from the API context

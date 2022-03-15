@@ -2507,6 +2507,16 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
 
+/* Private typedefs */
+
+/* Union for const/non-const pointer for use by functions that manipulate
+ * pointers but do not write to their targets or return pointers to const
+ * specified locations.  This helps us avoid compiler warnings. */
+typedef union {
+    void       *vp;
+    const void *cvp;
+} H5_flexible_const_ptr_t;
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void   H5_term_library(void);
