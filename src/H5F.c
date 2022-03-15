@@ -463,6 +463,49 @@ done:
 } /* end H5Fget_vfd_handle() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Fget_file_driver_handle
+ *
+ * Purpose:     Returns a pointer to the handle of the low-level file
+ *              driver.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_file_driver_handle(hid_t file_id, void **file_handle /*out*/)
+{
+    H5F_t *                          obj;                 /* File driver handle */
+    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
+    herr_t                           ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", file_id, file_handle);
+
+    /* Check args */
+    if (!file_handle)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
+
+    /* Get the file object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if (NULL == (obj = vol_obj->data))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file driver handle")
+
+    if (NULL == (obj->shared))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file driver shared object data")
+
+    /* Set output file handle */
+    *file_handle = obj->shared->lf;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_vfd_handle() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fis_accessible
  *
  * Purpose:     Check if the file can be opened with the given fapl.

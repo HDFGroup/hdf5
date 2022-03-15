@@ -798,6 +798,9 @@ H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hi
  *
  */
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
+
+H5_DLL herr_t H5Fget_file_driver_handle(hid_t file_id, void **file_handle);
+
 /**
  * \ingroup H5F
  *
