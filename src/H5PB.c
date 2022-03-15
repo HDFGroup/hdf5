@@ -1369,7 +1369,7 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
         return 0;
 
     if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0) {
-        if (shadow_image_defer_free(shared, entry) != 0)
+        if (H5F_shadow_image_defer_free(shared, entry) != 0)
             return -1;
         entry->md_file_page_offset = 0;
     }
@@ -2106,7 +2106,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
             new_index_entry_index = shared->mdf_idx_entries_used + idx_ent_added++;
 
             if (new_index_entry_index >= shared->mdf_idx_len &&
-                (idx = vfd_swmr_enlarge_shadow_index(f)) == NULL) {
+                (idx = H5F_vfd_swmr_enlarge_shadow_index(f)) == NULL) {
                 HDfprintf(stderr, "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n", shared->mdf_idx_len);
                 HDfprintf(stderr, "tick = %" PRIu64 ".\n", tick_num);
                 HDexit(EXIT_FAILURE);
@@ -2136,7 +2136,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
             if (ie_ptr->length != (uint32_t)entry->size) {
                 int ret;
 
-                ret = shadow_image_defer_free(shared, ie_ptr);
+                ret = H5F_shadow_image_defer_free(shared, ie_ptr);
                 HDassert(ret == 0);
 
                 ie_ptr->md_file_page_offset = 0;
@@ -2714,7 +2714,7 @@ H5PB__allocate_page(H5PB_t *page_buf, size_t size, hbool_t clean_image)
     void *        image_ptr = NULL;
     H5PB_entry_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -2786,7 +2786,7 @@ done:
 
             image_ptr = H5MM_xfree(image_ptr);
         }
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -2922,7 +2922,7 @@ done:
 static void
 H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* sanity checks */
     HDassert(entry_ptr);
@@ -2989,7 +2989,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force, 
     H5PB_t *page_buf  = shared->page_buf;
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3108,7 +3108,7 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *const en
     haddr_t eoa;                 /* Current EOA for the file */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(shared);
@@ -3215,7 +3215,7 @@ H5PB__load_page(H5F_shared_t *shared, H5PB_t *page_buf, haddr_t addr, H5FD_mem_t
     void *        image_ptr = NULL;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(shared);
@@ -3384,7 +3384,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *page_buf, H5FD_mem_t inserted_typ
     H5PB_entry_t *evict_ptr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3498,7 +3498,7 @@ H5PB__mark_entry_clean(H5PB_t *page_buf, H5PB_entry_t *entry_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3558,7 +3558,7 @@ H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *ent
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3774,7 +3774,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        clipped_size;        /* possibley clipped size */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4082,7 +4082,7 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4375,7 +4375,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
     size_t        offset;              /* offset of write in page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4592,7 +4592,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        offset;              /* offset of write in a page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
