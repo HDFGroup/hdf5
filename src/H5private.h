@@ -1537,6 +1537,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDtimes
 #define HDtimes(T) times(T)
 #endif
+#ifndef HDtimespec_get
+#define HDtimespec_get(T,B) timespec_get(T,B)
+#endif
 
 #ifndef HDtimespeccmp
 #ifdef H5_HAVE_TIMESPECCMP

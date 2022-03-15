@@ -1609,7 +1609,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared, hbool_t incr
 
     /* Get current time in struct timespec */
 #ifdef H5_HAVE_WIN32_API
-    if (timespec_get(&curr, TIME_UTC) != TIME_UTC)
+    if (HDtimespec_get(&curr, TIME_UTC) != TIME_UTC)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
 #else
     if (HDclock_gettime(CLOCK_MONOTONIC, &curr) < 0) {
@@ -2041,7 +2041,7 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
         H5F_shared_t *shared = f->shared;
 
 #ifdef H5_HAVE_WIN32_API
-        if (timespec_get(&now, TIME_UTC) != TIME_UTC)
+        if (HDtimespec_get(&now, TIME_UTC) != TIME_UTC)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
 #else
         if (HDclock_gettime(CLOCK_MONOTONIC, &now) < 0) {
