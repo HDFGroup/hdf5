@@ -639,7 +639,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *
         ie_ptr = NULL;
     }
     else {
-        ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, page, FALSE);
+        ie_ptr = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, page, FALSE);
     }
 
     if (ie_ptr == NULL)
@@ -714,7 +714,7 @@ done:
 } /* H5F_vfd_swmr_writer__prep_for_flush_or_close() */
 
 static int
-clean_shadow_index(H5F_t *f, uint32_t nentries, H5FD_vfd_swmr_idx_entry_t *idx, uint32_t *ndeletedp)
+H5F__clean_shadow_index(H5F_t *f, uint32_t nentries, H5FD_vfd_swmr_idx_entry_t *idx, uint32_t *ndeletedp)
 {
     H5F_shared_t *             shared = f->shared;
     uint32_t                   i, j, ndeleted, max_lag = shared->vfd_swmr_config.max_lag;
@@ -899,7 +899,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
      *    to the HDF5 file more than max_lag ticks ago, and haven't
      *    been modified since.
      */
-    if (clean_shadow_index(f, shared->mdf_idx_entries_used + idx_entries_added, shared->mdf_idx,
+    if (H5F__clean_shadow_index(f, shared->mdf_idx_entries_used + idx_entries_added, shared->mdf_idx,
                            &idx_entries_removed) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't clean shadow file index")
 

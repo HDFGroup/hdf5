@@ -220,7 +220,7 @@ typedef struct H5FD_vfd_swmr_md_header {
  * is false.
  */
 static inline H5FD_vfd_swmr_idx_entry_t *
-vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentries, uint64_t target_page,
+H5FD_vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentries, uint64_t target_page,
                                  bool reuse_garbage)
 {
     uint32_t top;

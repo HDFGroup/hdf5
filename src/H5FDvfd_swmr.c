@@ -770,7 +770,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
     /* Try finding the addr from the index */
     target_page = addr / fs_page_size;
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
+    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
 
     if (entry == NULL) {
         /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -1170,7 +1170,8 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
     UINT32DECODE(p, md_header->fs_page_size);
     UINT64DECODE(p, md_header->tick_num);
     UINT64DECODE(p, md_header->index_offset);
-    if ((index_length = uint64_decode(&p)) > SIZE_MAX)
+    UINT64DECODE(p, index_length);
+    if (index_length > SIZE_MAX)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "index is too large to hold in core")
 
     md_header->index_length = (size_t)index_length;
@@ -1180,13 +1181,6 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
 
     /* Sanity check */
     HDassert((size_t)(p - image) <= H5FD_MD_HEADER_SIZE);
-
-#if 0  /* JRM */
-    HDfprintf(stderr,
-        "---read header ps/tick/idx_off/idx_len = %d / %lld / %lld / %lld\n",
-             md_header->fs_page_size, md_header->tick_num,
-             md_header->index_offset, md_header->index_length);
-#endif /* JRM */
 
     ret_value = TRUE;
 

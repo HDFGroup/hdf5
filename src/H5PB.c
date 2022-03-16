@@ -1358,12 +1358,12 @@ done:
  * this routine performs an O(n) copy of index entries.
  */
 static int
-shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
+H5PB__shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
 {
     ptrdiff_t                  i;
     H5FD_vfd_swmr_idx_entry_t *entry;
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE);
+    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE);
 
     if (entry == NULL)
         return 0;
@@ -1492,7 +1492,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
         HDassert(!shared->vfd_swmr_writer ||
-                 vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page,
+                 H5FD_vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page,
                                                   FALSE) == NULL);
     }
 
@@ -2098,7 +2098,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
 
         /* see if the shadow index already contains an entry for *entry. */
 
-        ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, target_page, FALSE);
+        ie_ptr = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, target_page, FALSE);
 
         if (ie_ptr == NULL) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -3063,7 +3063,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force, 
      * the image will be bigger.  So the shadow file will never see the
      * entire image written, just the first page of the image.
      */
-    if (shared->vfd_swmr_writer && shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
+    if (shared->vfd_swmr_writer && H5PB__shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "failed to remove shadow index entry")
     }
 

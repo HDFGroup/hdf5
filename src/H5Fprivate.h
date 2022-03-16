@@ -238,20 +238,6 @@ typedef struct H5F_t H5F_t;
         (p) += 8;                                                                                            \
     }
 
-static inline uint64_t
-uint64_decode(uint8_t **pp)
-{
-    int      i;
-    uint8_t *p = *pp;
-    uint64_t v = 0;
-
-    for (i = 0; i < 8; i++) {
-        v = (v << 8) | p[7 - i];
-    }
-    *pp += 8;
-    return v;
-}
-
 #define UINT64DECODE(p, n)                                                                                   \
     {                                                                                                        \
         /* WE DON'T CHECK FOR OVERFLOW! */                                                                   \
