@@ -227,40 +227,6 @@ set (H5FA_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5FA" "${H5FA_HDRS}" "${H5FA_SOURCES}" )
 
-set (MERCURY_UTIL_SOURCES
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_atomic_queue.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_dlog.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_event.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_hash_table.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_log.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem_pool.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_poll.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_request.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_condition.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_pool.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_mutex.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_rwlock.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_spin.c
-    ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_util.c
-)
-
-set (H5FD_SUBFILING_SOURCES
-    ${H5FD_SUBFILING_DIR}/H5FDioc.c
-    ${H5FD_SUBFILING_DIR}/H5FDioc_threads.c
-    ${H5FD_SUBFILING_DIR}/H5FDsubfiling.c
-    ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.c
-    ${H5FD_SUBFILING_DIR}/H5FDsubfile_mpi.c
-    ${MERCURY_UTIL_SOURCES}
-)
-
-set (H5FD_SUBFILING_HDRS
-    ${H5FD_SUBFILING_DIR}/H5FDioc.h
-    ${H5FD_SUBFILING_DIR}/H5FDsubfiling.h
-    ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.h
-)
-
 set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FD.c
     ${HDF5_SRC_DIR}/H5FDcore.c
@@ -303,6 +269,47 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
+
+# Append Subfiling VFD and Mercury sources to H5FD interface if Subfiling VFD is built
+if (HDF5_BUILD_SUBFILING)
+  set (MERCURY_UTIL_SOURCES
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_atomic_queue.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_dlog.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_event.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_hash_table.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_log.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem_pool.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_poll.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_request.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_condition.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_pool.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_mutex.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_rwlock.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_spin.c
+      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_util.c
+  )
+
+  set (H5FD_SUBFILING_SOURCES
+      ${H5FD_SUBFILING_DIR}/H5FDioc.c
+      ${H5FD_SUBFILING_DIR}/H5FDioc_threads.c
+      ${H5FD_SUBFILING_DIR}/H5FDsubfiling.c
+      ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.c
+      ${H5FD_SUBFILING_DIR}/H5FDsubfile_mpi.c
+      ${MERCURY_UTIL_SOURCES}
+  )
+
+  set (H5FD_SUBFILING_HDRS
+      ${H5FD_SUBFILING_DIR}/H5FDioc.h
+      ${H5FD_SUBFILING_DIR}/H5FDsubfiling.h
+      ${H5FD_SUBFILING_DIR}/H5FDsubfiling_priv.h
+  )
+
+  list (APPEND H5FD_SOURCES ${H5FD_SUBFILING_SOURCES})
+  list (APPEND H5FD_HDRS ${H5FD_SUBFILING_HDRS})
+endif()
+
 IDE_GENERATED_PROPERTIES ("H5FD" "${H5FD_HDRS}" "${H5FD_SOURCES}" )
 
 
@@ -797,12 +804,6 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5Zmodule.h
 )
 
-set (subfile_SOURCES )
-if (WITH_SUBFILING)
-  message (STATUS "Appending to common_SRCS ${H5FD_SUBFILING_SOURCES}")
-  list(APPEND subfile_SOURCES ${H5FD_SUBFILING_SOURCES})
-endif(WITH_SUBFILING)
-
 set (common_SRCS
     ${H5_SOURCES}
     ${H5A_SOURCES}
@@ -849,7 +850,6 @@ set (common_SRCS
     ${H5VM_SOURCES}
     ${H5WB_SOURCES}
     ${H5Z_SOURCES}
-    ${subfile_SOURCES}
 )
 
 
