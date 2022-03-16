@@ -358,8 +358,6 @@ done:
 static void
 H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
-    vfd_swmr_reader_did_increase_tick_to(0);
-
     if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
 

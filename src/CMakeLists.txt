@@ -250,7 +250,6 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDstdio.c
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDvfd_swmr.c
-    ${HDF5_SRC_DIR}/H5FDvfd_swmr_instr.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
 

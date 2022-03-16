@@ -267,8 +267,6 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         if (H5FD_vfd_swmr_get_tick_and_idx(shared->lf, FALSE, &shared->tick_num,
                                            &(shared->mdf_idx_entries_used), shared->mdf_idx) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "unable to load/decode metadata file");
-
-        vfd_swmr_reader_did_increase_tick_to(shared->tick_num);
     }
 
     /* Update end_of_tick */
@@ -823,17 +821,12 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr_writer);
 
-    /* Kent */
     /* Obtain the starting time for the logging info: the processing time of this function. */
     if (shared->vfd_swmr_log_on == true) {
         if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
         start_elapsed_time = current_time.elapsed;
     }
-    /* Kent */
-
-    if (!vfd_swmr_writer_may_increase_tick_to(shared->tick_num + 1, wait_for_reader))
-        goto update_eot;
 
     incr_tick = TRUE;
 
@@ -1293,8 +1286,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
          * Start the next tick.
          */
         shared->tick_num = tmp_tick_num;
-
-        vfd_swmr_reader_did_increase_tick_to(tmp_tick_num);
 
         /* Update end_of_tick */
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, FALSE) < 0) {

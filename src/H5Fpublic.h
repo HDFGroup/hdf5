@@ -1820,14 +1820,6 @@ H5_DLL herr_t H5Fvfd_swmr_disable_end_of_tick(hid_t file_id);
  * \todo Add missing documentation
  */
 H5_DLL herr_t H5Fvfd_swmr_enable_end_of_tick(hid_t file_id);
-/**
- * \todo Add missing documentation
- */
-H5_DLL bool vfd_swmr_writer_may_increase_tick_to(uint64_t, bool);
-/**
- * \todo Add missing documentation
- */
-H5_DLL void vfd_swmr_reader_did_increase_tick_to(uint64_t);
 
 #ifdef H5_HAVE_PARALLEL
 /**
