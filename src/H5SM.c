@@ -626,7 +626,7 @@ H5SM__create_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t      addr      = HADDR_UNDEF; /* Address of the list on disk */
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(header);
@@ -668,7 +668,7 @@ done:
             H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, addr, (hsize_t)header->list_size);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__create_list */
 
 /*-------------------------------------------------------------------------
@@ -848,7 +848,7 @@ H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t              btree_addr;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Remember the address of the old B-tree, but change the header over to be
      * a list..
@@ -882,7 +882,7 @@ done:
     if (list && H5AC_unprotect(f, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
         HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect SOHM index")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__convert_btree_to_list() */
 
 /*-------------------------------------------------------------------------
@@ -1271,7 +1271,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
     size_t               empty_pos    = SIZE_MAX; /* Empty entry in list */
     herr_t               ret_value    = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(header);
@@ -1535,7 +1535,7 @@ done:
     if (encoding_buf)
         encoding_buf = H5MM_xfree(encoding_buf);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__write_mesg() */
 
 /*-------------------------------------------------------------------------
@@ -1782,7 +1782,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
     unsigned        type_id;             /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -1948,7 +1948,7 @@ done:
         *mesg_size   = 0;
     }
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__delete_from_index() */
 
 /*-------------------------------------------------------------------------
@@ -2384,7 +2384,7 @@ H5SM__read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap, H5O_t *open_oh
     H5O_t *           oh        = NULL; /* Object header for message in object header */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(mesg);
@@ -2458,7 +2458,7 @@ done:
     if (ret_value < 0 && udata.encoding_buf)
         udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__read_mesg */
 
 /*-------------------------------------------------------------------------

@@ -1679,7 +1679,7 @@ H5O__attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -1712,7 +1712,7 @@ H5O__attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs)
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_count_real */
 
 /*-------------------------------------------------------------------------
