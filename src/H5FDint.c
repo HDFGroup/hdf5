@@ -741,38 +741,38 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                                H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                size_t element_sizes[], void *bufs[] /* out */)
 {
-    hbool_t        extend_sizes = FALSE;
-    hbool_t        extend_bufs  = FALSE;
-    uint32_t       i;
-    size_t         element_size;
-    void *         buf;
-    hbool_t        use_vector = FALSE;
-    haddr_t        addrs_static[8];
-    haddr_t *      addrs = addrs_static;
-    size_t         sizes_static[8];
-    size_t *       sizes = sizes_static;
-    void *         vec_bufs_static[8];
-    void **        vec_bufs = vec_bufs_static;
-    hsize_t        file_off[H5FD_SEQ_LIST_LEN];
-    size_t         file_len[H5FD_SEQ_LIST_LEN];
-    hsize_t        mem_off[H5FD_SEQ_LIST_LEN];
-    size_t         mem_len[H5FD_SEQ_LIST_LEN];
-    size_t         file_seq_i;
-    size_t         mem_seq_i;
-    size_t         file_nseq;
-    size_t         mem_nseq;
-    size_t         io_len;
-    size_t         nelmts;
-    hssize_t       hss_nelmts;
-    size_t         seq_nelem;
-    H5S_sel_iter_t *file_iter     = NULL;
-    H5S_sel_iter_t *mem_iter      = NULL;
-    hbool_t        file_iter_init = FALSE;
-    hbool_t        mem_iter_init  = FALSE;
-    H5FD_mem_t     types[2]       = {type, H5FD_MEM_NOLIST};
-    size_t         vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
-    size_t         vec_arr_nused  = 0;
-    herr_t         ret_value      = SUCCEED;
+    hbool_t         extend_sizes = FALSE;
+    hbool_t         extend_bufs  = FALSE;
+    uint32_t        i;
+    size_t          element_size;
+    void *          buf;
+    hbool_t         use_vector = FALSE;
+    haddr_t         addrs_static[8];
+    haddr_t *       addrs = addrs_static;
+    size_t          sizes_static[8];
+    size_t *        sizes = sizes_static;
+    void *          vec_bufs_static[8];
+    void **         vec_bufs = vec_bufs_static;
+    hsize_t         file_off[H5FD_SEQ_LIST_LEN];
+    size_t          file_len[H5FD_SEQ_LIST_LEN];
+    hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
+    size_t          mem_len[H5FD_SEQ_LIST_LEN];
+    size_t          file_seq_i;
+    size_t          mem_seq_i;
+    size_t          file_nseq;
+    size_t          mem_nseq;
+    size_t          io_len;
+    size_t          nelmts;
+    hssize_t        hss_nelmts;
+    size_t          seq_nelem;
+    H5S_sel_iter_t *file_iter      = NULL;
+    H5S_sel_iter_t *mem_iter       = NULL;
+    hbool_t         file_iter_init = FALSE;
+    hbool_t         mem_iter_init  = FALSE;
+    H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
+    size_t          vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
+    size_t          vec_arr_nused  = 0;
+    herr_t          ret_value      = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -878,8 +878,8 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 
             /* Fill/refill memory sequence list if necessary */
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                                                 &seq_nelem, mem_off, mem_len) < 0)
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
+                                                 mem_off, mem_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
                 HDassert(mem_nseq > 0);
 
@@ -1376,38 +1376,38 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                                 H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                 size_t element_sizes[], const void *bufs[])
 {
-    hbool_t        extend_sizes = FALSE;
-    hbool_t        extend_bufs  = FALSE;
-    uint32_t       i;
-    size_t         element_size;
-    const void *   buf;
-    hbool_t        use_vector = FALSE;
-    haddr_t        addrs_static[8];
-    haddr_t *      addrs = addrs_static;
-    size_t         sizes_static[8];
-    size_t *       sizes = sizes_static;
-    const void *   vec_bufs_static[8];
-    const void **  vec_bufs = vec_bufs_static;
-    hsize_t        file_off[H5FD_SEQ_LIST_LEN];
-    size_t         file_len[H5FD_SEQ_LIST_LEN];
-    hsize_t        mem_off[H5FD_SEQ_LIST_LEN];
-    size_t         mem_len[H5FD_SEQ_LIST_LEN];
-    size_t         file_seq_i;
-    size_t         mem_seq_i;
-    size_t         file_nseq;
-    size_t         mem_nseq;
-    size_t         io_len;
-    size_t         nelmts;
-    hssize_t       hss_nelmts;
-    size_t         seq_nelem;
-    H5S_sel_iter_t *file_iter     = NULL;
-    H5S_sel_iter_t *mem_iter      = NULL;
-    hbool_t        file_iter_init = FALSE;
-    hbool_t        mem_iter_init  = FALSE;
-    H5FD_mem_t     types[2]       = {type, H5FD_MEM_NOLIST};
-    size_t         vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
-    size_t         vec_arr_nused  = 0;
-    herr_t         ret_value      = SUCCEED;
+    hbool_t         extend_sizes = FALSE;
+    hbool_t         extend_bufs  = FALSE;
+    uint32_t        i;
+    size_t          element_size;
+    const void *    buf;
+    hbool_t         use_vector = FALSE;
+    haddr_t         addrs_static[8];
+    haddr_t *       addrs = addrs_static;
+    size_t          sizes_static[8];
+    size_t *        sizes = sizes_static;
+    const void *    vec_bufs_static[8];
+    const void **   vec_bufs = vec_bufs_static;
+    hsize_t         file_off[H5FD_SEQ_LIST_LEN];
+    size_t          file_len[H5FD_SEQ_LIST_LEN];
+    hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
+    size_t          mem_len[H5FD_SEQ_LIST_LEN];
+    size_t          file_seq_i;
+    size_t          mem_seq_i;
+    size_t          file_nseq;
+    size_t          mem_nseq;
+    size_t          io_len;
+    size_t          nelmts;
+    hssize_t        hss_nelmts;
+    size_t          seq_nelem;
+    H5S_sel_iter_t *file_iter      = NULL;
+    H5S_sel_iter_t *mem_iter       = NULL;
+    hbool_t         file_iter_init = FALSE;
+    hbool_t         mem_iter_init  = FALSE;
+    H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
+    size_t          vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
+    size_t          vec_arr_nused  = 0;
+    herr_t          ret_value      = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1463,9 +1463,9 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         }
 
         /* Allocate sequence lists for memory and file spaces */
-         if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-         if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
 
         /* Initialize sequence lists for memory and file spaces */
@@ -1513,8 +1513,8 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 
             /* Fill/refill memory sequence list if necessary */
             if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                                                 &seq_nelem, mem_off, mem_len) < 0)
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &seq_nelem,
+                                                 mem_off, mem_len) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
                 HDassert(mem_nseq > 0);
 
@@ -1605,7 +1605,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
-
     }
 
     /* Issue vector write call if appropriate */
@@ -2166,8 +2165,8 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
 
 herr_t
 H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t types[], haddr_t addrs[],
-                        size_t sizes[], H5_flexible_const_ptr_t bufs[], H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr,
-                        size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
+                        size_t sizes[], H5_flexible_const_ptr_t bufs[], H5FD_mem_t **s_types_ptr,
+                        haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
     herr_t                  ret_value = SUCCEED; /* Return value */
     size_t                  count     = (size_t)_count;
@@ -2268,7 +2267,8 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc(count * sizeof(H5FD_mem_t)))) ||
             (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc(count * sizeof(haddr_t)))) ||
             (NULL == (*s_sizes_ptr = (size_t *)HDmalloc(count * sizeof(size_t)))) ||
-            (NULL == (*s_bufs_ptr = (H5_flexible_const_ptr_t *)HDmalloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+            (NULL ==
+             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)HDmalloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
         }

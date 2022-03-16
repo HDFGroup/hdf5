@@ -2513,7 +2513,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * pointers but do not write to their targets or return pointers to const
  * specified locations.  This helps us avoid compiler warnings. */
 typedef union {
-    void       *vp;
+    void *      vp;
     const void *cvp;
 } H5_flexible_const_ptr_t;
 

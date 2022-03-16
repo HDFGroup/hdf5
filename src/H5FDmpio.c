@@ -99,12 +99,11 @@ static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
                               void **output);
 
 /* Other functions */
-static herr_t H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                              H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
-                              H5_flexible_const_ptr_t *s_bufs[], hbool_t *vector_was_sorted,
-                              MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base,
-                              int *size_i, MPI_Datatype *buf_type, hbool_t *buf_type_created,
-                              MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
+static herr_t H5FD__mpio_vector_build_types(
+    uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], H5_flexible_const_ptr_t bufs[],
+    haddr_t *s_addrs[], size_t *s_sizes[], H5_flexible_const_ptr_t *s_bufs[], hbool_t *vector_was_sorted,
+    MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
+    hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
@@ -1664,24 +1663,24 @@ static herr_t
 H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                               H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
                               H5_flexible_const_ptr_t *s_bufs[], hbool_t *vector_was_sorted,
-                              MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base,
-                              int *size_i, MPI_Datatype *buf_type, hbool_t *buf_type_created,
-                              MPI_Datatype *file_type, hbool_t *file_type_created, char *unused)
+                              MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i,
+                              MPI_Datatype *buf_type, hbool_t *buf_type_created, MPI_Datatype *file_type,
+                              hbool_t *file_type_created, char *unused)
 {
-    hsize_t bigio_count; /* Transition point to create derived type */
-    hbool_t                    fixed_size        = FALSE;
-    size_t                     size;
-    H5FD_mem_t *               s_types           = NULL;
-    int *                      mpi_block_lengths = NULL;
-    MPI_Aint                   mpi_bufs_base_Aint;
-    MPI_Aint *                 mpi_bufs          = NULL;
-    MPI_Aint *                 mpi_displacements = NULL;
-    MPI_Datatype *             sub_types         = NULL;
-    uint8_t *                  sub_types_created = NULL;
-    int                        i;
-    int                        j;
-    int                        mpi_code; /* MPI return code */
-    herr_t                     ret_value = SUCCEED;
+    hsize_t       bigio_count; /* Transition point to create derived type */
+    hbool_t       fixed_size = FALSE;
+    size_t        size;
+    H5FD_mem_t *  s_types           = NULL;
+    int *         mpi_block_lengths = NULL;
+    MPI_Aint      mpi_bufs_base_Aint;
+    MPI_Aint *    mpi_bufs          = NULL;
+    MPI_Aint *    mpi_displacements = NULL;
+    MPI_Datatype *sub_types         = NULL;
+    uint8_t *     sub_types_created = NULL;
+    int           i;
+    int           j;
+    int           mpi_code; /* MPI return code */
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1714,7 +1713,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* Setup s_sizes and s_bufs (needed for incomplete read filling code) */
         *s_sizes = sizes;
-        *s_bufs = bufs;
+        *s_bufs  = bufs;
 
         /* some numeric conversions */
         if (H5FD_mpi_haddr_to_MPIOff(addrs[0], mpi_off) < 0)
@@ -1749,8 +1748,8 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
          * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
          * In this case, this function must free the memory allocated for the sorted vectors.
          */
-        if (H5FD_sort_vector_io_req(vector_was_sorted, count, types, addrs, sizes, bufs,
-                                    &s_types, s_addrs, s_sizes, s_bufs) < 0)
+        if (H5FD_sort_vector_io_req(vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, s_addrs,
+                                    s_sizes, s_bufs) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
         if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
@@ -1809,7 +1808,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             if (MPI_SUCCESS != (mpi_code = MPI_Get_address((*s_bufs)[i].cvp, &(mpi_bufs[i]))))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
 
-            /*... and then subtract mpi_bufs_base_Aint from it. */
+                /*... and then subtract mpi_bufs_base_Aint from it. */
 #if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
             mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
 #else
@@ -1832,8 +1831,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                     if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
                         sub_types = H5MM_free(sub_types);
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                    "can't alloc sub types created array")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
                     }
 
                     /* Initialize sub_types to all MPI_BYTE */
@@ -1860,8 +1858,8 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                                                                   sub_types, buf_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for buf_type failed", mpi_code)
         }
-        else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
-                                                                     mpi_bufs, MPI_BYTE, buf_type)))
+        else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_bufs,
+                                                                     MPI_BYTE, buf_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
         *buf_type_created = TRUE;
@@ -1872,14 +1870,12 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* create the file MPI derived type */
         if (sub_types) {
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths, mpi_displacements,
-                                                   sub_types, file_type)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)count, mpi_block_lengths,
+                                                                  mpi_displacements, sub_types, file_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct for file_type failed", mpi_code)
         }
-        else if (MPI_SUCCESS !=
-                 (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths, mpi_displacements,
-                                                      MPI_BYTE, file_type)))
+        else if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)count, mpi_block_lengths,
+                                                                     mpi_displacements, MPI_BYTE, file_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
         *file_type_created = TRUE;
@@ -2094,11 +2090,11 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
-        if (H5FD__mpio_vector_build_types(count, types, addrs, sizes,
-                                          (H5_flexible_const_ptr_t *)bufs, &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **) &s_bufs, &vector_was_sorted, &mpi_off,
-                                          (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i,
-                                          &buf_type, &buf_type_created, &file_type,
-                                          &file_type_created, &unused) < 0)
+        if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
+                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
+                                          &vector_was_sorted, &mpi_off,
+                                          (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
+                                          &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O")
 
         /* free sorted addrs vector if it exists */
@@ -2491,11 +2487,11 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
-        if (H5FD__mpio_vector_build_types(count, types, addrs, sizes,
-                                          (H5_flexible_const_ptr_t *)bufs, &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **) &s_bufs, &vector_was_sorted, &mpi_off,
-                                          (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i,
-                                          &buf_type, &buf_type_created, &file_type,
-                                          &file_type_created, &unused) < 0)
+        if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
+                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
+                                          &vector_was_sorted, &mpi_off,
+                                          (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
+                                          &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O")
 
         /* Compute max addr writted to */
