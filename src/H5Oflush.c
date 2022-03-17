@@ -405,6 +405,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, const H5O_refresh_sta
             break;
 
         case H5I_DATASET:
+            /* Re-open the dataset */
             object = H5D_open(obj_loc, (state == NULL) ? H5P_DATASET_ACCESS_DEFAULT : state->dapl_id);
             if (NULL == object)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
