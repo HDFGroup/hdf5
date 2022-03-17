@@ -18,14 +18,15 @@
 /* Name of tool */
 #define PROGRAMNAME "h5dump"
 
-static const char *driver_name_g = NULL; /* The driver to open the file with. */
 const char *       outfname_g    = NULL;
 static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
 
 static hbool_t            use_custom_vol_g = FALSE;
+static hbool_t            use_custom_vfd_g = FALSE;
 static h5tools_vol_info_t vol_info_g;
+static h5tools_vfd_info_t vfd_info_g;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -127,6 +128,9 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"vol-value", require_arg, '1'},
                                           {"vol-name", require_arg, '2'},
                                           {"vol-info", require_arg, '3'},
+                                          {"vfd-value", require_arg, '4'},
+                                          {"vfd-name", require_arg, '5'},
+                                          {"vfd-info", require_arg, '6'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -948,7 +952,10 @@ parse_start:
                 last_was_dset = TRUE;
                 break;
             case 'f':
-                driver_name_g = H5_optarg;
+                vfd_info_g.type   = VFD_BY_NAME;
+                vfd_info_g.u.name = H5_optarg;
+                vfd_info_g.info   = NULL;
+                use_custom_vfd_g  = TRUE;
                 break;
             case 'g':
                 dump_opts.display_all = 0;
@@ -1269,6 +1276,22 @@ end_collect:
                 vol_info_g.info_string = H5_optarg;
                 break;
 
+            case '4':
+                vfd_info_g.type    = VFD_BY_VALUE;
+                vfd_info_g.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                use_custom_vfd_g   = TRUE;
+                break;
+
+            case '5':
+                vfd_info_g.type   = VFD_BY_NAME;
+                vfd_info_g.u.name = H5_optarg;
+                use_custom_vfd_g  = TRUE;
+                break;
+
+            case '6':
+                vfd_info_g.info = (const void *)H5_optarg;
+                break;
+
             case '?':
             default:
                 usage(h5tools_getprogname());
@@ -1383,40 +1406,9 @@ main(int argc, char *argv[])
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
 
-    if (driver_name_g != NULL) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.info = NULL;
-        vfd_info.name = driver_name_g;
-
-        if (!HDstrcmp(driver_name_g, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa_g;
-#else
-            error_msg("Read-Only S3 VFD not enabled.\n");
-            h5tools_setstatus(EXIT_FAILURE);
-            goto done;
-#endif
-        }
-        else if (!HDstrcmp(driver_name_g, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa_g;
-#else
-            error_msg("The HDFS VFD is not enabled.\n");
-            h5tools_setstatus(EXIT_FAILURE);
-            goto done;
-#endif
-        }
-
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            error_msg("unable to create FAPL for file access\n");
-            h5tools_setstatus(EXIT_FAILURE);
-            goto done;
-        }
-    } /* driver name defined */
-
-    if (use_custom_vol_g) {
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info_g, NULL)) < 0) {
+    if (use_custom_vol_g || use_custom_vfd_g) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, use_custom_vol_g ? &vol_info_g : NULL,
+                                        use_custom_vfd_g ? &vfd_info_g : NULL)) < 0) {
             error_msg("unable to create FAPL for file access\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -1426,7 +1418,7 @@ main(int argc, char *argv[])
     while (H5_optind < argc) {
         fname = HDstrdup(argv[H5_optind++]);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

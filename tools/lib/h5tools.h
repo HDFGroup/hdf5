@@ -550,6 +550,7 @@ typedef struct h5tools_context_t {
  */
 
 typedef enum { VOL_BY_NAME, VOL_BY_VALUE } h5tools_vol_info_type_t;
+typedef enum { VFD_BY_NAME, VFD_BY_VALUE } h5tools_vfd_info_type_t;
 
 typedef struct h5tools_vol_info_t {
     h5tools_vol_info_type_t type;
@@ -565,14 +566,18 @@ typedef struct h5tools_vol_info_t {
 } h5tools_vol_info_t;
 
 typedef struct h5tools_vfd_info_t {
+    h5tools_vfd_info_type_t type;
 
     /* Pointer to information to be passed to the driver for its setup */
     const void *info;
 
-    /* Name of the VFD */
-    const char *name;
+    /* Field specifying either the driver's name or value (ID) */
+    union {
+        const char *       name;
+        H5FD_class_value_t value;
+    } u;
 
-    /* Name of the file to open with the VFD */
+    /* Name of the file to open with the VFD (only needed by VFD SWMR) */
     const char *fname;
 } h5tools_vfd_info_t;
 
