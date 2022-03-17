@@ -234,7 +234,7 @@ H5AC_cache_image_pending(const H5F_t *f)
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
- * Changes:     Added code to configrue the metadata cache for VFD SWMR
+ * Changes:     Added code to configure the metadata cache for VFD SWMR
  *              reader operations when indicated.
  *
  *                                              JRM -- 1/15/19
