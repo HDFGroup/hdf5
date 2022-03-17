@@ -1154,57 +1154,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDprintf
 #define HDprintf printf /*varargs*/
 #endif
-#ifndef HDpthread_attr_destroy
-#define HDpthread_attr_destroy(A) pthread_attr_destroy(A)
-#endif
-#ifndef HDpthread_attr_init
-#define HDpthread_attr_init(A) pthread_attr_init(A)
-#endif
-#ifndef HDpthread_attr_setscope
-#define HDpthread_attr_setscope(A, S) pthread_attr_setscope(A, S)
-#endif
-#ifndef HDpthread_cond_init
-#define HDpthread_cond_init(C, A) pthread_cond_init(C, A)
-#endif
-#ifndef HDpthread_cond_signal
-#define HDpthread_cond_signal(C) pthread_cond_signal(C)
-#endif
-#ifndef HDpthread_cond_wait
-#define HDpthread_cond_wait(C, M) pthread_cond_wait(C, M)
-#endif
-#ifndef HDpthread_create
-#define HDpthread_create(R, A, F, U) pthread_create(R, A, F, U)
-#endif
-#ifndef HDpthread_equal
-#define HDpthread_equal(T1, T2) pthread_equal(T1, T2)
-#endif
-#ifndef HDpthread_getspecific
-#define HDpthread_getspecific(K) pthread_getspecific(K)
-#endif
-#ifndef HDpthread_join
-#define HDpthread_join(T, V) pthread_join(T, V)
-#endif
-#ifndef HDpthread_key_create
-#define HDpthread_key_create(K, D) pthread_key_create(K, D)
-#endif
-#ifndef HDpthread_mutex_init
-#define HDpthread_mutex_init(M, A) pthread_mutex_init(M, A)
-#endif
-#ifndef HDpthread_mutex_lock
-#define HDpthread_mutex_lock(M) pthread_mutex_lock(M)
-#endif
-#ifndef HDpthread_mutex_unlock
-#define HDpthread_mutex_unlock(M) pthread_mutex_unlock(M)
-#endif
-#ifndef HDpthread_self
-#define HDpthread_self() pthread_self()
-#endif
-#ifndef HDpthread_setcancelstate
-#define HDpthread_setcancelstate(N, O) pthread_setcancelstate(N, O)
-#endif
-#ifndef HDpthread_setspecific
-#define HDpthread_setspecific(K, V) pthread_setspecific(K, V)
-#endif
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
 #endif
