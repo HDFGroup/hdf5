@@ -1601,7 +1601,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
     } /* end if */
     else {
         /* Check if section is merged */
-        if (sect->size > saved_fs_size) {
+        if (sect->size != saved_fs_size) {
             if (H5FS__sect_link(fspace, sect, flags) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL,
                             "can't insert free space section into skip list")
