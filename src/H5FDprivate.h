@@ -221,7 +221,7 @@ typedef struct H5FD_vfd_swmr_md_header {
  */
 static inline H5FD_vfd_swmr_idx_entry_t *
 H5FD_vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentries, uint64_t target_page,
-                                 bool reuse_garbage)
+                                      bool reuse_garbage)
 {
     uint32_t top;
     uint32_t bottom;

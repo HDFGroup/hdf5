@@ -472,8 +472,8 @@ h5tools_set_error_file(const char *fname, int is_bin)
 static hid_t
 h5tools_set_up_vfd_swmr(hid_t fapl, const char *fname)
 {
-    H5F_vfd_swmr_config_t *config = NULL; /* Configuration for VFD SWMR */
-    char *                 dname  = NULL;
+    H5F_vfd_swmr_config_t *config    = NULL; /* Configuration for VFD SWMR */
+    char *                 dname     = NULL;
     hid_t                  ret_value = H5I_INVALID_HID;
 
     /* Enable page buffering */
@@ -622,7 +622,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                 /* VFD SWMR driver */
                 if (h5tools_set_up_vfd_swmr(fapl_id, vfd_info->fname) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
-            }   
+            }
             else {
                 /*
                  * Try to load VFD plugin.

@@ -2213,7 +2213,7 @@ done:
     if ((NULL == ret_value) && file) {
         if (file->shared->root_grp && file->shared->nrefs == 1) {
             if (H5AC_expunge_all_tagged_metadata(file, H5G_oloc(file->shared->root_grp)->addr, H5AC_OHDR_ID,
-                                               H5AC__NO_FLAGS_SET) < 0)
+                                                 H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, NULL, "unable to expunge root group tagged entries")
         }
 

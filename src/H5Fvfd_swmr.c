@@ -893,7 +893,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
      *    been modified since.
      */
     if (H5F__clean_shadow_index(f, shared->mdf_idx_entries_used + idx_entries_added, shared->mdf_idx,
-                           &idx_entries_removed) < 0)
+                                &idx_entries_removed) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't clean shadow file index")
 
     /* 6) Update the metadata file.  Must do this before we

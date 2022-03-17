@@ -1493,7 +1493,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 
         HDassert(!shared->vfd_swmr_writer ||
                  H5FD_vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page,
-                                                  FALSE) == NULL);
+                                                       FALSE) == NULL);
     }
 
 done:

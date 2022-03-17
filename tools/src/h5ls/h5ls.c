@@ -2664,7 +2664,7 @@ main(int argc, char *argv[])
     h5tools_vol_info_t vol_info;
     h5tools_vfd_info_t vfd_info;
     int                times;
-    uint64_t           poll_nanosecs    = 1000;
+    uint64_t           poll_nanosecs = 1000;
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */

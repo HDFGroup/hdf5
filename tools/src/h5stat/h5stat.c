@@ -1707,7 +1707,7 @@ main(int argc, char *argv[])
         vfd_info.type   = VFD_BY_NAME;
         vfd_info.info   = NULL;
         vfd_info.u.name = drivername;
-        vfd_info.fname = fname;
+        vfd_info.fname  = fname;
 
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
