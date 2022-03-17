@@ -2205,14 +2205,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Success */
     ret_value = file;
 
-#if 1 /*Kent: write to the log file when H5F_open ends. Tested, can be commented out if necessary.*/
+#if 1
+    /* Write to the log file when H5F_open ends. Tested, can be commented out if necessary.*/
     H5F_POST_VFD_SWMR_LOG_ENTRY(file, FILE_OPEN, "File open ends");
 #endif
 done:
     if ((NULL == ret_value) && file) {
         if (file->shared->root_grp && file->shared->nrefs == 1) {
-            if (H5AC_expunge_tag_type_metadata(file, H5G_oloc(file->shared->root_grp)->addr, H5AC_OHDR_ID,
-                                               H5AC__NO_FLAGS_SET, FALSE) < 0)
+            if (H5AC_expunge_all_tagged_metadata(file, H5G_oloc(file->shared->root_grp)->addr, H5AC_OHDR_ID,
+                                               H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, NULL, "unable to expunge root group tagged entries")
         }
 
