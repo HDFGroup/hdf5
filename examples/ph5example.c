@@ -888,6 +888,7 @@ test_split_comm_access(char filenames[][PATH_MAX])
         mrc = MPI_File_delete(filenames[color], info);
         assert(mrc == MPI_SUCCESS);
     }
+    MPI_Comm_free(&comm);
 }
 
 /*
