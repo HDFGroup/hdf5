@@ -7711,12 +7711,12 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 herr_t
 H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
-    const H5D_shared_t * const shared = dset->shared;
-    const H5O_layout_t * const layout = &shared->layout;
-    const H5D_rdcc_t *  const rdcc = &dset->shared->cache.chunk;
-    H5D_rdcc_ent_t *    ent;                 /* Cache entry index */
-    H5D_chk_idx_info_t  idx_info;            /* Chunked index info */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    const H5D_shared_t *const shared = dset->shared;
+    const H5O_layout_t *const layout = &shared->layout;
+    const H5D_rdcc_t *const   rdcc   = &dset->shared->cache.chunk;
+    H5D_rdcc_ent_t *          ent;                 /* Cache entry index */
+    H5D_chk_idx_info_t        idx_info;            /* Chunked index info */
+    herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -7746,8 +7746,7 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         ud.op_data = op_data;
 
         /* Iterate over the allocated chunks calling the iterator callback */
-        if ((ret_value =
-                 (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
+        if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
             HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
     } /* end if H5F_addr_defined */
 
