@@ -31,7 +31,7 @@ if test "X-" = "X-$CC"; then
 	    CC_BASENAME=clang
 
 	    # Production
-	    PROD_CFLAGS="-O3" 
+	    PROD_CFLAGS="-O3"
 	    PROD_CPPFLAGS=
 
 	    # Debug
@@ -65,7 +65,7 @@ case "$host_os" in
 	esac
 	;;
 esac
- 
+
 . $srcdir/config/intel-flags
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
