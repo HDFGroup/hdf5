@@ -1867,7 +1867,8 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                     if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                     if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
-                        sub_types = H5MM_free(sub_types);
+                        H5MM_free(sub_types);
+                        sub_types = NULL;
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
                     }
 
@@ -2355,9 +2356,9 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                     /* Compute the actual number of bytes requested */
 #if MPI_VERSION >= 3
-                io_size = (MPI_Count)sizes[i];
+                io_size = (MPI_Count)size;
 #else
-                io_size = (int)sizes[i];
+                io_size = (int)size;
 #endif
 
                 /* Check for read failure */
