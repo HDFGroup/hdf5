@@ -888,6 +888,7 @@ test_split_comm_access(char filenames[][PATH_MAX])
         mrc = MPI_File_delete(filenames[color], info);
         assert(mrc == MPI_SUCCESS);
     }
+    MPI_Comm_free(&comm);
 }
 
 /*
@@ -1073,11 +1074,11 @@ main(int argc, char **argv)
 finish:
     if (mpi_rank == 0) { /* only process 0 reports */
         if (nerrors)
-            printf("***PHDF5 tests detected %d errors***\n", nerrors);
+            printf("***PHDF5 example detected %d errors***\n", nerrors);
         else {
-            printf("===================================\n");
-            printf("PHDF5 tests finished with no errors\n");
-            printf("===================================\n");
+            printf("=====================================\n");
+            printf("PHDF5 example finished with no errors\n");
+            printf("=====================================\n");
         }
     }
     if (docleanup)
