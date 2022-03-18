@@ -1073,21 +1073,15 @@ static herr_t
 H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
                void H5_ATTR_UNUSED **output)
 {
-    H5FD_sec2_t *file      = (H5FD_sec2_t *)_file;
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(file);
+    HDassert(_file);
 
-    switch (op_code) {
-        /* Unknown op code */
-        default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
-            break;
-    }
+    if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
