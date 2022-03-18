@@ -23,7 +23,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.1-1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.2-1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -2710,9 +2710,11 @@ AC_ARG_ENABLE([memory-alloc-sanity-check],
                               [Enable this option to turn on internal memory
                               allocation sanity checking.  This could cause
                               more memory use and somewhat slower allocation.
-                              This option is orthogonal to the
-                              --enable-using-memchecker option.
-                               [default=yes if debug build, otherwise no]
+                              This option may also cause issues with HDF5
+                              filter plugins, so should not be enabled if
+                              filters are to be used.  This option is orthogonal
+                              to the --enable-using-memchecker option.
+                               [default=no]
                               ])],
               [MEMORYALLOCSANITYCHECK=$enableval])
 
@@ -2722,11 +2724,10 @@ AC_SUBST([MEMORYALLOCSANITYCHECK])
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+# Should consider enabling this option by default for
+# 'developer' builds if that build mode is added in
+# the future
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
@@ -2987,11 +2988,11 @@ if test -n "$PARALLEL"; then
   fi
 
   ## ----------------------------------------------------------------------
-  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## Check for the MPI functions necessary for the Parallel Compression
   ## feature. If these are not present, issue a warning that Parallel
   ## Compression will be disabled.
   ##
-  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+  AC_MSG_CHECKING([for MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions])
 
   AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
@@ -2999,16 +3000,19 @@ if test -n "$PARALLEL"; then
               #include <mpi.h>
           ]],
           [[
-              MPI_Message message;
+              int flag;
               MPI_Init(0, (void *) 0);
-              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
-              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+              MPI_Ibarrier(0, (void *) 0);
+              MPI_Issend((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
+              MPI_Iprobe(0, 0, 0, &flag, (void *) 0);
+              MPI_Irecv((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
           ]]
       )],
       [AC_MSG_RESULT([yes])
-       PARALLEL_FILTERED_WRITES=yes],
+       PARALLEL_FILTERED_WRITES=yes
+       AC_DEFINE([HAVE_PARALLEL_FILTERED_WRITES], [1], [Define if we have support for writing to filtered datasets in parallel])],
       [AC_MSG_RESULT([no])
-       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+       AC_MSG_WARN([A simple MPI program using the MPI_Ibarrier, MPI_Issend, MPI_Iprobe and MPI_Irecv functions could not be compiled and linked.
                     Parallel writes of filtered data will be disabled.])
        PARALLEL_FILTERED_WRITES=no]
   )
@@ -4161,20 +4165,19 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
-                 test/testabort_fail.sh
-                 test/testcheck_version.sh
-                 test/testerror.sh
-                 test/testexternal_env.sh
-                 test/testflushrefresh.sh
-                 test/testlibinfo.sh
-                 test/testlinks_env.sh
-                 test/testswmr.sh
-                 test/testvds_env.sh
-                 test/testvdsswmr.sh
-                 test/test_filter_plugin.sh
+                 test/test_abort_fail.sh
+                 test/test_check_version.sh
+                 test/test_error.sh
+                 test/test_external_env.sh
+                 test/test_flush_refresh.sh
+                 test/test_libinfo.sh
+                 test/test_links_env.sh
                  test/test_mirror.sh
-                 test/test_usecases.sh
-                 test/test_vol_plugin.sh
+                 test/test_plugin.sh
+                 test/test_swmr.sh
+                 test/test_use_cases.sh
+                 test/test_vds_env.sh
+                 test/test_vds_swmr.sh
                  testpar/Makefile
                  testpar/testpflush.sh
                  utils/Makefile

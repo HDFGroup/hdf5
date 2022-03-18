@@ -1779,8 +1779,7 @@ xml_dump_dataspace(hid_t space)
                     /* Render the element */
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"UNLIMITED\"/>",
+                                       "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"UNLIMITED\"/>",
                                        xmlnsprefix, size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -1790,10 +1789,9 @@ xml_dump_dataspace(hid_t space)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
-                                       xmlnsprefix, size[i], size[i]);
+                    h5tools_str_append(
+                        &buffer, "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
+                        xmlnsprefix, size[i], size[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -1802,10 +1800,9 @@ xml_dump_dataspace(hid_t space)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer,
-                                       "<%sDimension  DimSize=\"%" H5_PRINTF_LL_WIDTH
-                                       "u\" MaxDimSize=\"%" H5_PRINTF_LL_WIDTH "u\"/>",
-                                       xmlnsprefix, size[i], maxsize[i]);
+                    h5tools_str_append(
+                        &buffer, "<%sDimension  DimSize=\"%" PRIuHSIZE "\" MaxDimSize=\"%" PRIuHSIZE "\"/>",
+                        xmlnsprefix, size[i], maxsize[i]);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -3897,8 +3894,8 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" H5_PRINTF_LL_WIDTH "u\" />",
-                                   xmlnsprefix, chsize[i]);
+                h5tools_str_append(&buffer, "<%sChunkDimension DimSize=\"%" PRIuHSIZE "\" />", xmlnsprefix,
+                                   chsize[i]);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
             }
@@ -4529,12 +4526,16 @@ xml_print_enum(hid_t type)
                 h5tools_str_append(&buffer, "%02x", value[i * dst_size + j]);
         }
         else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "u",
-                               *((unsigned long long *)((void *)(value + i * dst_size))));
+            unsigned long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%llu", copy);
         }
         else {
-            h5tools_str_append(&buffer, "%" H5_PRINTF_LL_WIDTH "d",
-                               *((long long *)((void *)(value + i * dst_size))));
+            long long copy;
+
+            HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+            h5tools_str_append(&buffer, "%lld", copy);
         }
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);

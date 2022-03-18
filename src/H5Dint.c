@@ -378,40 +378,18 @@ H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation)
 
     /* Check for chunked layout */
     if (dset->shared->layout.type == H5D_CHUNKED) {
-        hsize_t  space_allocated; /* The number of bytes allocated for chunks */
-        hssize_t snelmts;         /* Temporary holder for number of elements in dataspace */
-        hsize_t  nelmts;          /* Number of elements in dataspace */
-        size_t   dt_size;         /* Size of datatype */
-        hsize_t  full_size;       /* The number of bytes in the dataset when fully populated */
+        hsize_t n_chunks_total = dset->shared->layout.u.chunk.nchunks;
+        hsize_t n_chunks_alloc = 0;
 
-        /* For chunked layout set the space status by the storage size */
-        /* Get the dataset's dataspace */
-        HDassert(dset->shared->space);
+        if (H5D__get_num_chunks(dset, dset->shared->space, &n_chunks_alloc) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "unable to retrieve number of allocated chunks in dataset")
 
-        /* Get the total number of elements in dataset's dataspace */
-        if ((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
-        nelmts = (hsize_t)snelmts;
+        HDassert(n_chunks_alloc <= n_chunks_total);
 
-        /* Get the size of the dataset's datatype */
-        if (0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
-
-        /* Compute the maximum size of the dataset in bytes */
-        full_size = nelmts * dt_size;
-
-        /* Check for overflow during multiplication */
-        if (nelmts != (full_size / dt_size))
-            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
-
-        /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
-        if (H5D__get_storage_size(dset, &space_allocated) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
-
-        /* Decide on how much of the space is allocated */
-        if (space_allocated == 0)
+        if (n_chunks_alloc == 0)
             *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
-        else if (space_allocated == full_size)
+        else if (n_chunks_alloc == n_chunks_total)
             *allocation = H5D_SPACE_STATUS_ALLOCATED;
         else
             *allocation = H5D_SPACE_STATUS_PART_ALLOCATED;
@@ -1301,8 +1279,17 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
     } /* end if */
 
-    /* Check if this dataset is going into a parallel file and set space allocation time */
+    /* Check if the file driver would like to force early space allocation */
     if (H5F_HAS_FEATURE(file, H5FD_FEAT_ALLOCATE_EARLY))
+        new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
+
+    /*
+     * Check if this dataset is going into a parallel file and set space allocation time.
+     * If the dataset has filters applied to it, writes to the dataset must be collective,
+     * so we don't need to force early space allocation. Otherwise, we force early space
+     * allocation to facilitate independent raw data operations.
+     */
+    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Set the dataset's I/O operations */
