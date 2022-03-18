@@ -1790,8 +1790,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
                                                                                \
     } else { /* slist disabled */                                              \
                                                                                \
-        assert( (cache_ptr)->slist_len == 0 );                               \
-        assert( (cache_ptr)->slist_size == 0 );                              \
+        HDassert( (cache_ptr)->slist_len == 0 );                               \
+        HDassert( (cache_ptr)->slist_size == 0 );                              \
     }                                                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
@@ -2670,13 +2670,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
-    assert( (cache_ptr) );                                              \
-    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    assert( (entry_ptr) );                                              \
-    assert( !((entry_ptr)->is_protected) );                             \
-    assert( !((entry_ptr)->is_read_only) );                             \
-    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    assert( (entry_ptr)->size > 0 );                                    \
+    HDassert( (cache_ptr) );                                              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (entry_ptr) );                                              \
+    HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    HDassert( (entry_ptr)->size > 0 );                                    \
                                                                           \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
@@ -2732,13 +2732,13 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
-    assert( (cache_ptr) );                                              \
-    assert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    assert( (entry_ptr) );                                              \
-    assert( !((entry_ptr)->is_protected) );                             \
-    assert( !((entry_ptr)->is_read_only) );                             \
-    assert( ((entry_ptr)->ro_ref_count) == 0 );                         \
-    assert( (entry_ptr)->size > 0 );                                    \
+    HDassert( (cache_ptr) );                                              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (entry_ptr) );                                              \
+    HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
+    HDassert( (entry_ptr)->size > 0 );                                    \
                                                                           \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
@@ -3349,7 +3349,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        )                                                                    \
      )                                                                      \
    ) {                                                                      \
-    assert(0 && "COLL DLL sanity check failed");                          \
+    HDassert(0 && "COLL DLL sanity check failed");                          \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL sanity check failed")\
 }
 

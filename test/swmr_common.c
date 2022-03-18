@@ -202,7 +202,7 @@ generate_symbols(void)
     unsigned u, v; /* Local index variables */
 
     for (u = 0; u < NLEVELS; u++) {
-        symbol_info[u] = malloc(symbol_count[u] * sizeof(symbol_info_t));
+        symbol_info[u] = HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
         for (v = 0; v < symbol_count[u]; v++) {
             char name_buf[64];
 

@@ -92,7 +92,7 @@ get_option(int argc, const char **argv, const char *opts, const struct h5_long_o
         sp = 1;
     }
     else {
-        register char *cp; /* pointer into current token */
+        char *cp; /* pointer into current token */
 
         /* short command line option */
         opt_opt = argv[H5_optind][sp];

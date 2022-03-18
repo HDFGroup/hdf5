@@ -165,9 +165,8 @@ test_non_extendible(hid_t file)
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
-        puts("    Wrong file size.");
-        printf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
-               (unsigned long)max_size[0] * sizeof(int));
+        HDputs("    Wrong file size.");
+        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -986,11 +985,11 @@ test_path_absolute(hid_t fapl)
     if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
         TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
-        snprintf(filename, sizeof(filename), "%s%sextern_%dr.raw", cwdpath, H5_DIR_SEPS, (int)i + 1);
+        HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
 #if defined(H5_HAVE_WINDOW_PATH)
         /* For windows, test path-absolute case (\dir\file.raw) for the second file */
         if (i == 1)
-            snprintf(filename, sizeof(filename), "%s%sextern_%dr.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
+            HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
 #endif
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR

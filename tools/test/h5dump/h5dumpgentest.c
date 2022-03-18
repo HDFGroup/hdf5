@@ -3914,9 +3914,9 @@ gent_multi(void)
 static void
 gent_large_objname(void)
 {
-    hid_t        fid, group, group2;
-    char         grp_name[128];
-    register int i;
+    hid_t fid, group, group2;
+    char  grp_name[128];
+    int   i;
 
     fid = H5Fcreate(FILE37, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

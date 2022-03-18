@@ -813,8 +813,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                     if (NULL == (this_str = (char *)malloc(this_len)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                    if (snprintf(this_str, "%g", this_len, tmp_double) < 0)
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
+                    if (HDsnprintf(this_str, this_len, "%g", tmp_double) < 0)
+                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
 
                     break;
                 }
@@ -1160,12 +1160,13 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                                         H5Otoken_to_str(tid, &oi.token, &token_str);
 
-                                        size_t this_len = 64 + strlen(token_str) + 1;
-                                        if (NULL == (this_str = (char *)malloc(this_len)))
+                                        size_t that_len = 64 + strlen(token_str) + 1;
+                                        if (NULL == (this_str = HDmalloc(that_len)))
                                             H5_OUT_OF_MEMORY_ERROR(
                                                 ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                        if (snprintf(this_str, this_len, "%lu:%s", oi.fileno, token_str) < 0)
-                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
+                                        if (HDsnprintf(this_str, that_len, "%lu:%s", oi.fileno, token_str) <
+                                            0)
+                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
 
                                         H5free_memory(token_str);
                                     }
