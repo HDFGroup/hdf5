@@ -1711,7 +1711,9 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
         *file_type     = MPI_BYTE;
         *mpi_bufs_base = bufs[0];
 
-        /* Setup s_sizes and s_bufs (needed for incomplete read filling code) */
+        /* Setup s_addrs, s_sizes and s_bufs (needed for incomplete read filling code and eof
+         * calculation code) */
+        *s_addrs = addrs;
         *s_sizes = sizes;
         *s_bufs  = bufs;
 
@@ -1792,8 +1794,9 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             /* Determine size of this vector element */
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
+                    HDassert(vector_was_sorted);
                     fixed_size = TRUE;
-                    size       = (*s_sizes)[i - 1];
+                    size       = sizes[i - 1];
                 }
                 else {
                     size = (*s_sizes)[i];
@@ -2369,11 +2372,6 @@ done:
         }
     }
 
-    /* Make sure we cleaned up */
-    HDassert(!s_addrs);
-    HDassert(!s_sizes);
-    HDassert(!s_bufs);
-
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
@@ -2428,7 +2426,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     hbool_t                    vector_was_sorted = TRUE;
     haddr_t *                  s_addrs           = NULL;
     size_t *                   s_sizes           = NULL;
-    void **                    s_bufs            = NULL;
+    const void **              s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     const void *               mpi_bufs_base     = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
@@ -2495,7 +2493,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O")
 
         /* Compute max addr writted to */
-        max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
+        if (count > 0)
+            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
 
         /* free sorted vectors if they exist */
         if (!vector_was_sorted) {
@@ -2516,10 +2515,6 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         /* Portably initialize MPI status variable */
         HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
 
-        /* some numeric conversions */
-        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
-
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stdout, "%s: mpi_off = %ld  size_i = %d\n", __func__, (long)mpi_off, size_i);
@@ -2529,6 +2524,10 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type,
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
+        /* Reset mpi_off to 0 since the view now starts at the data offset */
+        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
 
         /* Get the collective_opt property to check whether the application wants to do IO individually.
          */
@@ -2668,9 +2667,9 @@ done:
     }
 
     /* Make sure we cleaned up */
-    HDassert(!s_addrs);
-    HDassert(!s_sizes);
-    HDassert(!s_bufs);
+    HDassert(vector_was_sorted || !s_addrs);
+    HDassert(vector_was_sorted || !s_sizes);
+    HDassert(vector_was_sorted || !s_bufs);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)

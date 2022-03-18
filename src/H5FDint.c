@@ -795,6 +795,12 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     /* Check if we're using vector I/O */
     use_vector = file->cls->read_vector != NULL;
 
+    /* Allocate sequence lists for memory and file spaces */
+    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
 
@@ -826,12 +832,6 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 buf = bufs[i];
             }
         }
-
-        /* Allocate sequence lists for memory and file spaces */
-        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
 
         /* Initialize sequence lists for memory and file spaces */
         if (H5S_select_iter_init(file_iter, file_spaces[i], element_size, 0) < 0)
@@ -970,6 +970,14 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+
+        /* Terminate iterators */
+        if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+        file_iter_init = FALSE;
+        if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+        mem_iter_init = FALSE;
     }
 
     /* Issue vector read call if appropriate */
@@ -981,7 +989,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     }
 
 done:
-    /* Terminate iterators */
+    /* Terminate and free iterators */
     if (file_iter) {
         if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
@@ -1430,6 +1438,12 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     /* Check if we're using vector I/O */
     use_vector = file->cls->write_vector != NULL;
 
+    /* Allocate sequence lists for memory and file spaces */
+    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
 
@@ -1461,12 +1475,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 buf = bufs[i];
             }
         }
-
-        /* Allocate sequence lists for memory and file spaces */
-        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
 
         /* Initialize sequence lists for memory and file spaces */
         if (H5S_select_iter_init(file_iter, file_spaces[i], element_size, 0) < 0)
@@ -1605,6 +1613,14 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         /* Make sure both memory and file sequences terminated at the same time */
         if (mem_seq_i < mem_nseq)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "file selection terminated before memory selection")
+
+        /* Terminate iterators */
+        if (H5S_SELECT_ITER_RELEASE(file_iter) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
+        file_iter_init = FALSE;
+        if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release memory selection iterator")
+        mem_iter_init = FALSE;
     }
 
     /* Issue vector write call if appropriate */
@@ -1616,7 +1632,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     }
 
 done:
-    /* Terminate iterators */
+    /* Terminate and free iterators */
     if (file_iter) {
         if (file_iter_init && H5S_SELECT_ITER_RELEASE(file_iter) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't release file selection iterator")
