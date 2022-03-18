@@ -7713,7 +7713,7 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
     const H5D_shared_t *const shared = dset->shared;
     const H5O_layout_t *const layout = &shared->layout;
-    const H5D_rdcc_t *const   rdcc   = &dset->shared->cache.chunk;
+    const H5D_rdcc_t *const   rdcc   = &shared->cache.chunk;
     H5D_rdcc_ent_t *          ent;                 /* Cache entry index */
     H5D_chk_idx_info_t        idx_info;            /* Chunked index info */
     herr_t                    ret_value = SUCCEED; /* Return value */
