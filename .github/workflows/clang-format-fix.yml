@@ -1,7 +1,5 @@
 name: clang-format Check
-on: 
-  workflow_dispatch:
-  push:
+on:
 jobs:
   formatting-check:
     name: Formatting Check
