@@ -7595,10 +7595,7 @@ done:
  *
  * Programmer:  John Mainzer, 5/18/04
  *
- * Changes:     Please maintain the change list and do not delete entries
- *              unless the have been folded into the header comment.
- *
- *              Reverted optimization that avoided re-reading the prefix
+ * Changes:     Reverted optimization that avoided re-reading the prefix
  *              of a metadata entry when a speculative read proved too
  *              small.
  *                                           JRM -- 3/25/20
@@ -7657,10 +7654,6 @@ H5C__load_entry(H5F_t *f,
     if (type->get_initial_load_size(udata, &len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size")
     HDassert(len > 0);
-
-#if 0
-init_len = len;
-#endif
 
     /* Check for possible speculative read off the end of the file */
     if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
@@ -7770,17 +7763,6 @@ init_len = len;
 #ifdef H5_HAVE_PARALLEL
                         if (!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-#if 0  /* JRM */
-                        /* If the thing's image needs to be bigger for 
-                         * a speculatively loaded thing, go get the 
-                         * on-disk image again (the extra portion).
-                         */
-                        if ( H5F_block_read(f, type->mem_type, addr + len, 
-                                        actual_len - len, image + len) < 0)
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
-                                        "can't read image")
-#else  /* JRM */
 
                     /* the original version of this code re-read
                      * the entire buffer.  At some point, someone
@@ -7824,7 +7806,7 @@ init_len = len;
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
                     }
                     H5C__RESET_PB_READ_HINTS(f->shared->cache)
-#endif /* JRM */
+
 #ifdef H5_HAVE_PARALLEL
                         }
                         /* If the collective metadata read optimization is turned on,
@@ -7865,20 +7847,6 @@ init_len = len;
 
         /* Check for too many tries */
         if (!do_try) {
-#if 0  /* JRM */
-        haddr_t eoa;
-        int64_t page = (int64_t)(addr / f->shared->cache->page_size);
-
-        eoa = H5F_get_eoa(f, type->mem_type);
-
-        HDfprintf(stderr, "addr = 0x%llx, init_len = %lld, len = %lld\n",
-                  (int64_t)addr, (int64_t)init_len, (int64_t)len);
-        HDfprintf(stderr, "type = %s, eoa = 0x%llx, tick = %lld\n",
-                  type->name, (int64_t)eoa, f->shared->tick_num);
-        HDfprintf(stderr, "page = %lld, index_len = %d\n",
-                  page, f->shared->mdf_idx_entries_used);
-        H5FD_vfd_swmr_dump_status(f->shared->lf, page);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
                         "incorrect metadata checksum after all read attempts addr %" PRIuHADDR
                         " size %zu",

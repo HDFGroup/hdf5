@@ -336,7 +336,7 @@ H5_DLL htri_t H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value
 H5_DLL hid_t  H5FD_get_driver_id_by_name(const char *name, hbool_t is_api);
 H5_DLL hid_t  H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-H5FD_t *       H5FD_deduplicate(H5FD_t *, hid_t);
+H5FD_t *       H5FD_deduplicate(H5FD_t *file, hid_t fapl_id);
 H5_DLL herr_t  H5FD_close(H5FD_t *file);
 H5_DLL int     H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL herr_t  H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/);
@@ -372,18 +372,10 @@ H5_DLL herr_t H5FD_init(void);
 /* Function prototypes for VFD SWMR */
 H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index, uint64_t *tick_ptr,
                                              uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
-H5_DLL void   H5FD_vfd_swmr_dump_status(H5FD_t *, uint64_t);
+H5_DLL void   H5FD_vfd_swmr_dump_status(H5FD_t *file, uint64_t page);
 H5_DLL void   H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
-H5_DLL void   H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *, uint64_t);
+H5_DLL void   H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed);
 H5_DLL H5FD_t *H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id);
-
-/* TODO: VFD SWMR - move or rename/adjust types
- *       These are in H5Fvfd_swmr.c but use H5FDprivate.h. They need to either
- *       be renamed to H5FD<foo> and be moved to H5FDvfd_swmr.c or get moved
- *       to H5Fprivate.h (which might be a problem due to the return type).
- */
-H5_DLL H5FD_vfd_swmr_idx_entry_t *H5F_vfd_swmr_enlarge_shadow_index(struct H5F_t *f);
-H5_DLL int H5F_shadow_image_defer_free(struct H5F_shared_t *, const H5FD_vfd_swmr_idx_entry_t *);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL

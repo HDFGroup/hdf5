@@ -194,9 +194,9 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         md_size = (hsize_t)shared->vfd_swmr_config.md_pages_reserved * shared->fs_page_size;
 
-        if ((hdr_addr = H5MV_alloc(f, md_size)) == HADDR_UNDEF) {
-            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error allocating shadow-file header");
-        }
+        if ((hdr_addr = H5MV_alloc(f, md_size)) == HADDR_UNDEF)
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error allocating shadow-file header")
+
         HDassert(H5F_addr_eq(hdr_addr, H5FD_MD_HEADER_OFF));
 
         shared->writer_index_offset = H5FD_MD_HEADER_SIZE;
@@ -208,10 +208,10 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         if (!file_create) {
 
             if (H5F__vfd_swmr_construct_write_md_idx(shared, 0, NULL, md_idx_image) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md")
 
             if (H5F__vfd_swmr_construct_write_md_hdr(shared, 0, md_hdr_image) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md")
         }
 
         /* For VFD SWMR testing: invoke callback if set to generate metadata file checksum */
@@ -260,13 +260,13 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         /* allocate an index to save the initial index */
         if (H5F__vfd_swmr_create_index(shared) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate metadata file index");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate metadata file index")
 
         /* Set tick_num to the current tick read from the metadata file */
         shared->mdf_idx_entries_used = shared->mdf_idx_len;
         if (H5FD_vfd_swmr_get_tick_and_idx(shared->lf, FALSE, &shared->tick_num,
                                            &(shared->mdf_idx_entries_used), shared->mdf_idx) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "unable to load/decode metadata file");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, "unable to load/decode metadata file")
     }
 
     /* Update end_of_tick */
@@ -318,17 +318,17 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
     /* Write empty index to the md file */
     if (H5F__vfd_swmr_construct_write_md_idx(shared, 0, NULL, md_idx_image) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md")
 
     /* Write header to the md file */
     if (H5F__vfd_swmr_construct_write_md_hdr(shared, 0, md_hdr_image) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md")
 
     if (closing) { /* For file close */
 
         /* Close the md file */
         if (HDclose(shared->vfd_swmr_md_fd) < 0)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file");
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file")
         shared->vfd_swmr_md_fd = -1;
 
         /* For VFD SWMR testing: invoke callback if set to generate metadata file checksum */
@@ -339,12 +339,12 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
         /* Unlink the md file */
         if (HDunlink(shared->vfd_swmr_config.md_file_path) < 0)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "unable to unlink the metadata file");
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, "unable to unlink the metadata file")
 
         /* Close the free-space manager for the metadata file */
         if (H5MV_close(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
-                        "unable to close the free-space manager for the metadata file");
+                        "unable to close the free-space manager for the metadata file")
 
         /* Free the delayed list */
         while ((curr = TAILQ_FIRST(&shared->shadow_defrees)) != NULL) {
@@ -364,7 +364,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
     else { /* For file flush */
         /* Update end_of_tick */
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick");
+            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
     }
 #if 1 /* Save the end of close info. to the log file, subject to comment out. */
     if (closing)
@@ -384,23 +384,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-static int
+/*-------------------------------------------------------------------------
+ * Function: H5F__shadow_image_defer_free
+ *
+ * Purpose:
+ *
+ * Return:   SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
 H5F__shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t length)
 {
     shadow_defree_t *shadow_defree;
 
     if (NULL == (shadow_defree = H5FL_CALLOC(shadow_defree_t)))
-        return -1;
+        return FAIL;
 
     shadow_defree->offset   = offset;
     shadow_defree->length   = length;
     shadow_defree->tick_num = shared->tick_num;
 
     TAILQ_INSERT_HEAD(&shared->shadow_defrees, shadow_defree, link);
-    return 0;
+
+    return SUCCEED;
 }
 
-int
+/*-------------------------------------------------------------------------
+ * Function: H5F_shadow_image_defer_free
+ *
+ * Purpose:
+ *
+ * Return:   SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
 H5F_shadow_image_defer_free(H5F_shared_t *shared, const H5FD_vfd_swmr_idx_entry_t *entry)
 {
     return H5F__shadow_range_defer_free(shared, entry->md_file_page_offset * shared->fs_page_size,
@@ -408,7 +425,7 @@ H5F_shadow_image_defer_free(H5F_shared_t *shared, const H5FD_vfd_swmr_idx_entry_
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5F_update_vfd_swmr_metadata_file()
+ * Function: H5F_update_vfd_swmr_metadata_file
  *
  * Purpose:  Update the metadata file with the input index
  *
@@ -542,13 +559,11 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
         TAILQ_FOREACH_REVERSE_SAFE(shadow_defree, &shared->shadow_defrees, shadow_defree_queue, link, prev)
         {
 
-            if (shadow_defree->tick_num + shared->vfd_swmr_config.max_lag > shared->tick_num) {
+            if (shadow_defree->tick_num + shared->vfd_swmr_config.max_lag > shared->tick_num)
                 break; // No more entries are due for reclamation.
-            }
 
-            if (H5MV_free(f, shadow_defree->offset, shadow_defree->length) < 0) {
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush clean entry");
-            }
+            if (H5MV_free(f, shadow_defree->offset, shadow_defree->length) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush clean entry")
 
             TAILQ_REMOVE(&shared->shadow_defrees, shadow_defree, link);
 
@@ -570,15 +585,14 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
 
 done:
 
-    if (md_idx_image)
-        HDfree(md_idx_image);
+    HDfree(md_idx_image);
 
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5F_update_vfd_swmr_metadata_file() */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_vfd_swmr_writer__delay_write
+ * Function: H5F_vfd_swmr_writer_delay_write
  *
  * Purpose:  Given the base address of a page of metadata, or of a multi-
  *           page metadata entry, determine whether the write must be
@@ -612,7 +626,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *untilp)
+H5F_vfd_swmr_writer_delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *untilp)
 {
     uint64_t                   until;
     H5FD_vfd_swmr_idx_entry_t *ie_ptr;
@@ -629,16 +643,14 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *
 
     HDassert(idx != NULL || shared->tick_num <= 1);
 
-    /* do a binary search on the metadata file index to see if
-     * it already contains an entry for `page`.
+    /* Do a binary search on the metadata file index to see if
+     * it already contains an entry for `page`
      */
 
-    if (idx == NULL) {
+    if (idx == NULL)
         ie_ptr = NULL;
-    }
-    else {
+    else
         ie_ptr = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, page, FALSE);
-    }
 
     if (ie_ptr == NULL)
         until = shared->tick_num + shared->vfd_swmr_config.max_lag;
@@ -657,10 +669,10 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5F_vfd_swmr_writer__delay_write() */
+} /* H5F_vfd_swmr_writer_delay_write() */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_vfd_swmr_writer__prep_for_flush_or_close
+ * Function: H5F_vfd_swmr_writer_prep_for_flush_or_close
  *
  * Purpose:  In the context of the VFD SWMR writer, two issues must be
  *           addressed before the page buffer can be flushed -- as is
@@ -679,7 +691,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
+H5F_vfd_swmr_writer_prep_for_flush_or_close(H5F_t *f)
 {
     herr_t        ret_value = SUCCEED; /* Return value */
     H5F_shared_t *shared    = f->shared;
@@ -694,14 +706,11 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
      * tick so as to avoid attempts to flush entries on the page buffer
      * tick list that were modified during the current tick.
      */
-    if (H5F_vfd_swmr_writer_end_of_tick(f, TRUE) < 0)
-
+    if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed.")
 
     while (shared->page_buf->dwl_len > 0) {
-
         if (H5F__vfd_swmr_writer_wait_a_tick(f) < 0)
-
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "wait a tick failed.")
     }
 
@@ -709,7 +718,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5F_vfd_swmr_writer__prep_for_flush_or_close() */
+} /* H5F_vfd_swmr_writer_prep_for_flush_or_close() */
 
 static int
 H5F__clean_shadow_index(H5F_t *f, uint32_t nentries, H5FD_vfd_swmr_idx_entry_t *idx, uint32_t *ndeletedp)
@@ -796,7 +805,7 @@ H5F__clean_shadow_index(H5F_t *f, uint32_t nentries, H5FD_vfd_swmr_idx_entry_t *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
+H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 {
     H5F_shared_t *shared                    = f->shared;
     uint32_t      idx_entries_added         = 0;
@@ -807,8 +816,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     herr_t        ret_value                 = SUCCEED; /* Return value */
     hbool_t       incr_tick                 = FALSE;
 
-    /* Kent: define the local variables to calculate the EOT time
-             and write them to the log file. */
+    /* Local variables to calculate the EOT time and write to the log file */
     H5_timevals_t current_time;
     double        start_elapsed_time = 0.0;
     double        end_elapsed_time   = 0.0;
@@ -822,7 +830,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     HDassert(shared->vfd_swmr_writer);
 
     /* Obtain the starting time for the logging info: the processing time of this function. */
-    if (shared->vfd_swmr_log_on == true) {
+    if (shared->vfd_swmr_log_on == TRUE) {
         if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
         start_elapsed_time = current_time.elapsed;
@@ -917,21 +925,16 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 
     /* 7) Release the page buffer tick list. */
     if (H5PB_vfd_swmr__release_tick_list(shared) < 0)
-
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release tick list")
 
     /* 8) Release any delayed writes whose delay has expired */
     if (H5PB_vfd_swmr__release_delayed_writes(shared) < 0)
-
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release delayed writes")
-
-update_eot:
 
     /* 9) Increment the tick, and update the end of tick. */
 
     /* Update end_of_tick */
     if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, incr_tick) < 0)
-
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick")
 
     /* Remove the entry from the EOT queue */
@@ -943,8 +946,8 @@ update_eot:
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 done:
-    /* Kent: Calculate the processing time and write the time info to the log file */
-    if (shared->vfd_swmr_log_on == true) {
+    /* Calculate the processing time and write the time info to the log file */
+    if (shared->vfd_swmr_log_on == TRUE) {
         if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
         end_elapsed_time = current_time.elapsed;
@@ -955,12 +958,12 @@ done:
             HDfree(log_msg);
         }
     }
-    /* Kent */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5F_vfd_swmr_writer__dump_index
+ * Function: H5F_vfd_swmr_writer_dump_index
  *
  * Purpose:  Dump a summary of the metadata file index.
  *
@@ -968,7 +971,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer__dump_index(H5F_shared_t *shared)
+H5F_vfd_swmr_writer_dump_index(H5F_shared_t *shared)
 {
     unsigned int               i;
     uint32_t                   mdf_idx_len;
@@ -990,15 +993,13 @@ H5F_vfd_swmr_writer__dump_index(H5F_shared_t *shared)
     HDfprintf(stderr, "index len / entries used = %" PRIu32 " / %" PRIu32 "\n\n", mdf_idx_len,
               mdf_idx_entries_used);
 
-    for (i = 0; i < mdf_idx_entries_used; i++) {
-
+    for (i = 0; i < mdf_idx_entries_used; i++)
         HDfprintf(stderr, "%u: %" PRIu64 " %" PRIu64 " %" PRIu32 "\n", i, index[i].hdf5_page_offset,
                   index[i].md_file_page_offset, index[i].length);
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5F_vfd_swmr_writer__dump_index() */
+} /* end H5F_vfd_swmr_writer_dump_index() */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_vfd_swmr_reader_end_of_tick
@@ -1088,9 +1089,8 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
                     "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
     }
 
-    if (!entering_api) {
+    if (!entering_api)
         H5FD_vfd_swmr_record_elapsed_ticks(shared->lf, tmp_tick_num - shared->tick_num);
-    }
 
     if (tmp_tick_num != shared->tick_num) {
         const H5FD_vfd_swmr_idx_entry_t *new_mdf_idx;
@@ -1192,9 +1192,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
                      */
 
                     /* TODO:  review this */
-                    /*  Kent: need to comment out the line to make reader iterate
-                     *        a large number of groups
-                     */
                     /* This is a bug uncovered by issue #1 of the
                      * group test failures.  See Kent's documentation
                      * "Designed to Fail Tests and Issues".
@@ -1499,15 +1496,12 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared, hbool_t incr
     /* Convert tick_len to nanosecs */
     tlen_nsecs = shared->vfd_swmr_config.tick_len * NANOSECS_PER_TENTH_SEC;
 
-    /*
-     *  Update shared->tick_num
-     */
+    /* Update shared->tick_num */
     if (incr_tick_num) {
 
         shared->tick_num++;
 
         if (H5PB_vfd_swmr__set_tick(shared) < 0)
-
             HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "Can't update page buffer current tick")
     }
 
@@ -1584,14 +1578,13 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_shared_t *shared, uint32_t num_entries,
     if (shared->vfd_swmr_config.maintain_metadata_file) {
         /* Set to beginning of the file */
         if (HDlseek(shared->vfd_swmr_md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
-
             HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, "unable to seek in metadata file")
 
         nwritten = HDwrite(shared->vfd_swmr_md_fd, image, hdr_size);
+
         /* Write header to the metadata file */
-        if (nwritten != (ssize_t)hdr_size) {
+        if (nwritten != (ssize_t)hdr_size)
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing header to metadata file")
-        }
     }
 
 done:
@@ -1668,14 +1661,13 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_shared_t *shared, uint32_t num_entries,
             HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, "unable to seek in metadata file")
 
         nwritten = HDwrite(shared->vfd_swmr_md_fd, image, idx_size);
+
         /* Write index to the metadata file */
-        if (nwritten != (ssize_t)idx_size) {
+        if (nwritten != (ssize_t)idx_size)
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing index to metadata file")
-        }
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__vfd_swmr_construct_write_idx() */
 
@@ -1792,9 +1784,8 @@ H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f)
 
     idx_addr = H5MV_alloc(f, idx_size);
 
-    if (idx_addr == HADDR_UNDEF) {
+    if (idx_addr == HADDR_UNDEF)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "shadow-file allocation failed for index")
-    }
 
     new_mdf_idx = H5MM_calloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
 
@@ -1867,7 +1858,7 @@ H5F__vfd_swmr_writer_wait_a_tick(H5F_t *f)
 
     H5_nanosleep(tick_in_nsec);
 
-    if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
+    if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed")
 
 done:
@@ -1899,11 +1890,10 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
 
 #ifdef H5_HAVE_WIN32_API
         if (HDtimespec_get(&now, TIME_UTC) != TIME_UTC)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via timespec_get")
 #else
-        if (HDclock_gettime(CLOCK_MONOTONIC, &now) < 0) {
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
-        }
+        if (HDclock_gettime(CLOCK_MONOTONIC, &now) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime")
 #endif
         if (HDtimespeccmp(&now, &head->end_of_tick, <))
             break;
@@ -1917,11 +1907,11 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
             H5F_vfd_swmr_update_entry_eot(head);
         }
         else if (shared->vfd_swmr_writer) {
-            if (H5F_vfd_swmr_writer_end_of_tick(f, FALSE) < 0)
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR writer");
+            if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR writer")
         }
         else if (H5F_vfd_swmr_reader_end_of_tick(f, entering_api) < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR reader");
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR reader")
         }
     } while ((head = TAILQ_FIRST(&eot_queue_g)) != NULL && head != first_head);
 
@@ -2331,3 +2321,142 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__generate_updater_file() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_end_tick()
+ *
+ * Purpose:     To trigger end of tick processing
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_end_tick(H5F_t *f)
+{
+    eot_queue_entry_t *curr;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* The file should be opened with VFD SWMR configured.*/
+    if (!(H5F_USE_VFD_SWMR(f)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
+
+    /* Search EOT queue */
+    TAILQ_FOREACH(curr, &eot_queue_g, link)
+    {
+        if (curr->vfd_swmr_file == f)
+            break;
+    }
+
+    /* If the file does not exist on the EOT queue, flag an error */
+    if (curr == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has been disabled")
+
+    if (f->shared->vfd_swmr_writer) {
+        if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR writer")
+    }
+    else if (H5F_vfd_swmr_reader_end_of_tick(f, TRUE) < 0) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR reader")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_end_tick() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_disable_end_of_tick()
+ *
+ * Purpose:     To disable end of tick processing
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_disable_end_of_tick(H5F_t *f)
+{
+    eot_queue_entry_t *curr;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* The file should be opened with VFD SWMR configured.*/
+    if (!(H5F_USE_VFD_SWMR(f)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
+
+    /* Search EOT queue */
+    TAILQ_FOREACH(curr, &eot_queue_g, link)
+    {
+        if (curr->vfd_swmr_file == f)
+            break;
+    }
+
+    /* If the file does not exist on the EOT queue, flag an error */
+    if (curr == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has already been disabled")
+
+    /* Remove the entry that corresponds to "f" from the EOT queue */
+    if (H5F_vfd_swmr_remove_entry_eot(f) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_disable_end_of_tick() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__vfd_swmr_enable_end_of_tick()
+ *
+ * Purpose:     To enable end of tick processing
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__vfd_swmr_enable_end_of_tick(H5F_t *f)
+{
+    eot_queue_entry_t *curr;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* The file should be opened with VFD SWMR configured.*/
+    if (!(H5F_USE_VFD_SWMR(f)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
+
+    /* Search EOT queue */
+    TAILQ_FOREACH(curr, &eot_queue_g, link)
+    {
+        if (curr->vfd_swmr_file == f)
+            break;
+    }
+
+    /* If the file already exists on the EOT queue, flag an error */
+    if (curr != NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has already been enabled")
+
+    /* Insert the entry that corresponds to "f" onto the EOT queue */
+    if (H5F_vfd_swmr_insert_entry_eot(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
+
+    /* Check if the tick has expired, if so call end of tick processing */
+    if (H5F_vfd_swmr_process_eot_queue(TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "error processing EOT queue")
+
+    /* FUNC_LEAVE_API could do the check, but not so for reader_end_of_tick() */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F__vfd_swmr_enable_end_of_tick() */

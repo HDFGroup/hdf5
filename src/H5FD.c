@@ -970,7 +970,7 @@ H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
     H5FD_wrap_t *       item;
-    H5FD_wrap_t *       delete_me = NULL;
+    H5FD_wrap_t *       temp = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -989,11 +989,12 @@ H5FD_close(H5FD_t *file)
         if (item->file->exc_owner == file)
             item->file->exc_owner = NULL;
         if (item->file == file)
-            delete_me = item;
+            temp = item;
     }
-    HDassert(delete_me);
-    TAILQ_REMOVE(&all_vfds, delete_me, link);
-    H5MM_xfree(delete_me);
+
+    HDassert(temp);
+    TAILQ_REMOVE(&all_vfds, temp, link);
+    H5MM_xfree(temp);
 
     /* Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.
@@ -1056,9 +1057,10 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
+    FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-        if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HGOTO_DONE(0)
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+        HGOTO_DONE(0)
     if (!f1 || !f1->cls)
         HGOTO_DONE(-1)
     if (!f2 || !f2->cls)

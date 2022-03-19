@@ -768,22 +768,11 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
     (void)info;
     (void)operator_data;
 
-#if 0 /* Kent for debugging purpose. */
-    char *     subname;
-    int        grp_num;
-#endif
-
-    if (strncmp(name, "group", (size_t)5) != 0) {
-        printf("Iteration failed:  group name is %s\n", name);
+    if (HDstrncmp(name, "group", (size_t)5) != 0) {
+        HDprintf("Iteration failed:  group name is %s\n", name);
         return -1;
     }
     else {
-#if 0 /* Kent for debugging purpose. */
-        subname = name + 6;
-        grp_num = atoi((const char *)subname);
-        if (grp_num > 1450000 && grp_num % 5000 == 0)
-            dbgf(2, "Group name is %s\n", name);
-#endif
         return 0;
     }
 }

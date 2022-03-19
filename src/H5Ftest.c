@@ -569,6 +569,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__vfd_swmr_verify_md_hdr_and_idx() */
 
+/*-------------------------------------------------------------------------
+ * Function: H5F__count_shadow_defrees
+ *
+ * Purpose:
+ *
+ * Return:  SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
 static unsigned
 H5F__count_shadow_defrees(shadow_defree_queue_t *shadow_defrees)
 {

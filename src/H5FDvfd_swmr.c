@@ -1312,12 +1312,6 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
     /* Sanity check */
     HDassert((size_t)(p - image) <= md_header->index_length);
 
-#if 0  /* JRM */
-    HDfprintf(stderr,
-             " ---- read index tick/num_entries = %lld / %d \n",
-             md_index->tick_num, md_index->num_entries);
-#endif /* JRM */
-
 done:
     if (image != NULL)
         image = H5MM_xfree(image);

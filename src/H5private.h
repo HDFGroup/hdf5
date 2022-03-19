@@ -2069,6 +2069,16 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 #endif
 
+/* Typedef for the VFD SWMR end-of-tick queue */
+typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
+
+/* VFD SWMR globals used in FUNC macros */
+H5_DLLVAR unsigned int vfd_swmr_api_entries_g;
+H5_DLLVAR eot_queue_t  eot_queue_g;
+
+/* Forward declaration of H5F_vfd_swmr_process_eot_queue() */
+H5_DLL herr_t H5F_vfd_swmr_process_eot_queue(hbool_t entering_api);
+
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
@@ -2138,8 +2148,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
     BEGIN_MPE_LOG
 
-#include "H5FDvfd_swmr_private.h"
-
 #define VFD_SWMR_ENTER(err)                                                                                  \
     do {                                                                                                     \
         /* TBD assert that the API lock is held.  The API lock */                                            \
@@ -2164,7 +2172,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
             ; /* Do nothing: an error occurred. */                                                           \
         else if (TAILQ_EMPTY(&eot_queue_g))                                                                  \
             ; /* Nothing to do. */                                                                           \
-        else if (H5F_vfd_swmr_process_eot_queue(false) < 0) {                                                \
+        else if (H5F_vfd_swmr_process_eot_queue(FALSE) < 0) {                                                \
             /* Report error instead of "err" */                                                              \
             HDONE_ERROR(H5E_FUNC, H5E_CANTSET, FALSE, "error processing EOT queue")                          \
         }                                                                                                    \

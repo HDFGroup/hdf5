@@ -3224,18 +3224,6 @@ H5PB__load_page(H5F_shared_t *shared, H5PB_t *page_buf, haddr_t addr, H5FD_mem_t
     HDassert(page_buf->magic == H5PB__H5PB_T_MAGIC);
     HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
 
-#if 0  /* JRM */
-    haddr_t eoa;
-    /* Retrieve the 'eoa' for the file */
-    if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, type)))
-
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
-                    "driver get_eoa request failed")
-    if ( addr + ((haddr_t)(page_buf->page_size)) > eoa )
-
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                    "Attempt to load page that extends past EOA")
-#endif /* JRM */
     if (HADDR_UNDEF == (eof = H5FD_get_eof(shared->lf, H5FD_MEM_DEFAULT)))
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eof request failed")
@@ -3582,7 +3570,7 @@ H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *ent
         HDassert(entry_ptr->delay_write_until == 0);
 
         if ((page_buf->vfd_swmr_writer) && (entry_ptr->loaded) && (entry_ptr->mem_type != H5FD_MEM_DRAW) &&
-            (H5F_vfd_swmr_writer__delay_write(shared, entry_ptr->page, &(entry_ptr->delay_write_until)) < 0))
+            (H5F_vfd_swmr_writer_delay_write(shared, entry_ptr->page, &(entry_ptr->delay_write_until)) < 0))
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "get delayed write request failed")
 

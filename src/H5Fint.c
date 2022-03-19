@@ -32,7 +32,6 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MFprivate.h" /* File memory management                   */
-#include "H5MVprivate.h" /* File memory management for VFD SWMR      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SMprivate.h" /* Shared Object Header Messages            */
@@ -1541,7 +1540,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
 
         /* If this is a VFD SWMR writer, prep for flush or close */
         if ((f->shared->vfd_swmr) && (f->shared->vfd_swmr_writer) &&
-            (H5F_vfd_swmr_writer__prep_for_flush_or_close(f) < 0))
+            (H5F_vfd_swmr_writer_prep_for_flush_or_close(f) < 0))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
 
@@ -2070,7 +2069,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (H5F_VFD_SWMR_CONFIG(file)) {
 
         /* Set up the VFD SWMR LOG file */
-        /* Kent*/
         if (HDstrlen(vfd_swmr_config_ptr->log_file_path) > 0)
             shared->vfd_swmr_log_on = TRUE;
         if (TRUE == shared->vfd_swmr_log_on) {
@@ -2082,7 +2080,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't obtain the time from the HDF5 timer.")
         }
-        /* End of Kent */
 
         /* Initialization for VFD SWMR writer and reader */
         if (1 == shared->nrefs) {
@@ -2205,10 +2202,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Success */
     ret_value = file;
 
-#if 1
-    /* Write to the log file when H5F_open ends. Tested, can be commented out if necessary.*/
+    /* Write to the log file when H5F_open ends.
+     * TODO: Tested, can be commented out if necessary.
+     */
     H5F_POST_VFD_SWMR_LOG_ENTRY(file, FILE_OPEN, "File open ends");
-#endif
+
 done:
     if ((NULL == ret_value) && file) {
         if (file->shared->root_grp && file->shared->nrefs == 1) {
@@ -2359,7 +2357,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 
     /* If this is a VFD SWMR writer, prep for flush or close */
     if ((f->shared->vfd_swmr) && (f->shared->vfd_swmr_writer) &&
-        (H5F_vfd_swmr_writer__prep_for_flush_or_close(f) < 0))
+        (H5F_vfd_swmr_writer_prep_for_flush_or_close(f) < 0))
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
 
@@ -4115,142 +4113,3 @@ H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_min_dset_ohdr() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__vfd_swmr_end_tick()
- *
- * Purpose:     To trigger end of tick processing
- *
- * Return:      Non-negative on success/Negative on errors
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__vfd_swmr_end_tick(H5F_t *f)
-{
-    eot_queue_entry_t *curr;
-    herr_t             ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* The file should be opened with VFD SWMR configured.*/
-    if (!(H5F_USE_VFD_SWMR(f)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
-
-    /* Search EOT queue */
-    TAILQ_FOREACH(curr, &eot_queue_g, link)
-    {
-        if (curr->vfd_swmr_file == f)
-            break;
-    }
-
-    /* If the file does not exist on the EOT queue, flag an error */
-    if (curr == NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has been disabled")
-
-    if (f->shared->vfd_swmr_writer) {
-        if (H5F_vfd_swmr_writer_end_of_tick(f, true) < 0)
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR writer");
-    }
-    else if (H5F_vfd_swmr_reader_end_of_tick(f, true) < 0) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL, "end of tick error for VFD SWMR reader");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__vfd_swmr_end_tick() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__vfd_swmr_disable_end_of_tick()
- *
- * Purpose:     To disable end of tick processing
- *
- * Return:      Non-negative on success/Negative on errors
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__vfd_swmr_disable_end_of_tick(H5F_t *f)
-{
-    eot_queue_entry_t *curr;
-    herr_t             ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* The file should be opened with VFD SWMR configured.*/
-    if (!(H5F_USE_VFD_SWMR(f)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
-
-    /* Search EOT queue */
-    TAILQ_FOREACH(curr, &eot_queue_g, link)
-    {
-        if (curr->vfd_swmr_file == f)
-            break;
-    }
-
-    /* If the file does not exist on the EOT queue, flag an error */
-    if (curr == NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has already been disabled")
-
-    /* Remove the entry that corresponds to "f" from the EOT queue */
-    if (H5F_vfd_swmr_remove_entry_eot(f) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__vfd_swmr_disable_end_of_tick() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__vfd_swmr_enable_end_of_tick()
- *
- * Purpose:     To enable end of tick processing
- *
- * Return:      Non-negative on success/Negative on errors
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__vfd_swmr_enable_end_of_tick(H5F_t *f)
-{
-    eot_queue_entry_t *curr;
-    herr_t             ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* The file should be opened with VFD SWMR configured.*/
-    if (!(H5F_USE_VFD_SWMR(f)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "must have VFD SWMR configured for this public routine")
-
-    /* Search EOT queue */
-    TAILQ_FOREACH(curr, &eot_queue_g, link)
-    {
-        if (curr->vfd_swmr_file == f)
-            break;
-    }
-
-    /* If the file already exists on the EOT queue, flag an error */
-    if (curr != NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "EOT for the file has already been enabled")
-
-    /* Insert the entry that corresponds to "f" onto the EOT queue */
-    if (H5F_vfd_swmr_insert_entry_eot(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
-
-    /* Check if the tick has expired, if so call end of tick processing */
-    if (H5F_vfd_swmr_process_eot_queue(true) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "error processing EOT queue")
-
-    /* FUNC_LEAVE_API could do the check, but not so for reader_end_of_tick() */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__vfd_swmr_enable_end_of_tick() */

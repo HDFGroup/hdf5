@@ -374,10 +374,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)               ((F)->shared->threshold)
 #define H5F_PGEND_META_THRES(F)        ((F)->shared->fs.pgend_meta_thres)
 #define H5F_POINT_OF_NO_RETURN(F)      ((F)->shared->fs.point_of_no_return)
-#define H5F_FIRST_ALLOC_DEALLOC(F)     ((F)->shared->first_alloc_dealloc)
-#define H5F_EOA_PRE_FSM_FSALLOC(F)     ((F)->shared->eoa_pre_fsm_fsalloc)
 #define H5F_USE_VFD_SWMR(F)            ((F)->shared->vfd_swmr)
-#define H5F_VFD_SWMR_MD_EOA(F)         ((F)->shared->vfd_swmr_md_eoa)
 #define H5F_NULL_FSM_ADDR(F)           ((F)->shared->null_fsm_addr)
 #define H5F_GET_MIN_DSET_OHDR(F)       ((F)->shared->crt_dset_min_ohdr_flag)
 #define H5F_SET_MIN_DSET_OHDR(F, V)    ((F)->shared->crt_dset_min_ohdr_flag = (V))
@@ -441,9 +438,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)               (H5F_get_threshold(F))
 #define H5F_PGEND_META_THRES(F)        (H5F_get_pgend_meta_thres(F))
 #define H5F_POINT_OF_NO_RETURN(F)      (H5F_get_point_of_no_return(F))
-#define H5F_FIRST_ALLOC_DEALLOC(F)     (H5F_get_first_alloc_dealloc(F))
-#define H5F_EOA_PRE_FSM_FSALLOC(F)     (H5F_get_eoa_pre_fsm_fsalloc(F))
-#define H5F_USE_VFD_SWMR(F)            (H5F_use_vfd_swmr(F))
+#define H5F_USE_VFD_SWMR(F)            (H5F_get_use_vfd_swmr(F))
 #define H5F_NULL_FSM_ADDR(F)           (H5F_get_null_fsm_addr(F))
 #define H5F_GET_MIN_DSET_OHDR(F)       (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V)    (H5F_set_min_dset_ohdr((F), (V)))
@@ -627,16 +622,23 @@ typedef struct H5F_t H5F_t;
 
 /* Default configuration for VFD SWMR: not configured */
 #define H5F_ACS_VFD_SWMR_CONFIG_NAME "vfd_swmr_config"
+/* clang-format off */
 #define H5F__DEFAULT_VFD_SWMR_CONFIG                                                                         \
     {                                                                                                        \
-        /* int32_t    version                 = */ 0, /* int32_t    tick_len                = */ 0,          \
-            /* int32_t    max_lag                 = */ 0, /* hbool_t    vfd_swmr_writer         = */ FALSE,  \
-            /* hbool_t    maintain_metadata_file         = */ FALSE,                                         \
-            /* hbool_t    generate_updater_files         = */ FALSE,                                         \
-            /* hbool_t    flush_raw_data          = */ FALSE, /* int32_t    md_pages_reserved       = */ 0,  \
-            /* int32_t    pb_expansion_threshold  = */ 0, /* char       md_file_path[]          = */ "",     \
-            /* char       updater_file_path[]     = */ "", /* char       log_file_path[]         = */ ""     \
+        /* int32_t    version                 = */ 0,                                                        \
+        /* int32_t    tick_len                = */ 0,                                                        \
+        /* int32_t    max_lag                 = */ 0,                                                        \
+        /* hbool_t    vfd_swmr_writer         = */ FALSE,                                                    \
+        /* hbool_t    maintain_metadata_file  = */ FALSE,                                                    \
+        /* hbool_t    generate_updater_files  = */ FALSE,                                                    \
+        /* hbool_t    flush_raw_data          = */ FALSE,                                                    \
+        /* int32_t    md_pages_reserved       = */ 0,                                                        \
+        /* int32_t    pb_expansion_threshold  = */ 0,                                                        \
+        /* char       md_file_path[]          = */ "",                                                       \
+        /* char       updater_file_path[]     = */ "",                                                       \
+        /* char       log_file_path[]         = */ ""                                                        \
     }
+/* clang-format on */
 
 /*  For VFD SWMR testing only: private property to generate checksum for metadata file via callback */
 #define H5F_ACS_GENERATE_MD_CK_CB_NAME "generate md ck callback"
@@ -827,18 +829,6 @@ typedef struct H5F_t H5F_t;
      + H5F_SIZEOF_CHKSUM          /* Updater file change list checksum */                                    \
     )
 
-/*
- *  For VFD SWMR testing only:
- */
-
-/* Callback routine to generate checksum for metadata file specified by md_path */
-typedef herr_t (*H5F_generate_md_ck_t)(char *md_path, uint64_t updater_seq_num);
-
-/* Structure for "generate checksum callback" private property */
-typedef struct H5F_generate_md_ck_cb_t {
-    H5F_generate_md_ck_t func;
-} H5F_generate_md_ck_cb_t;
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -851,6 +841,7 @@ struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
 struct H5P_genplist_t;
+struct H5FD_vfd_swmr_idx_entry_t;
 
 /* Forward declarations for anonymous H5F objects */
 
@@ -912,6 +903,44 @@ typedef enum H5F_prefix_open_t {
 /*
  * VFD SWMR
  */
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct eot_queue_entry_t
+ *
+ *  This is the structure for an entry on the end-of-tick queue (EOT queue) of files
+ *  opened in either VFD SWMR write or VFD SWMR read mode.  This queue is maintained
+ *  in increasing end of tick time order.
+ *  The structure contains all information required to determine whether the end
+ *  of tick has arrived for the specified file, and to initiate end of tick processing
+ *  if it has.
+ *
+ *  The fields of eot_queue_entry_t are discussed below:
+ *
+ *  vfd_swmr_file: Pointer to the instance of H5F_shared_t containing the shared
+ *      fields of the associated file that has been opened in VFD SWMR mode
+ *  NOTE: for the time being use H5F_t instead of H5F_shared_t
+ *
+ *  vfd_swmr_writer:  Boolean flag that is set to TRUE if the associated file
+ *      has been opened in VFD SWMR writer mode, and FALSE if it has been
+ *      opened in VFD SWMR reader mode.
+ *
+ *  tick_num: Number of the current tick of the target file.
+ *
+ *  end_of_tick: Expiration time of the current tick of the target file.
+ *
+ *  link: Forward and backward linkage between the next element and the previous
+ *  element (or the queue head).  Note that if there is a following entry,
+ *  `next`, then `next->end_of_tick` must be greater than or equal to
+ *  `end_of_tick`.
+ */
+typedef struct eot_queue_entry {
+    hbool_t         vfd_swmr_writer;
+    uint64_t        tick_num;
+    struct timespec end_of_tick;
+    H5F_t *         vfd_swmr_file;
+    TAILQ_ENTRY(eot_queue_entry) link;
+} eot_queue_entry_t;
 
 /*----------------------------------------------------------------------------
  *
@@ -1083,6 +1112,14 @@ typedef struct H5F_vfd_swmr_updater_t {
     H5F_vfd_swmr_updater_cl_entry_t *change_list;
 } H5F_vfd_swmr_updater_t;
 
+/* Callback routine to generate checksum for metadata file specified by md_path */
+typedef herr_t (*H5F_generate_md_ck_t)(char *md_path, uint64_t updater_seq_num);
+
+/* Structure for "generate checksum callback" private property */
+typedef struct H5F_generate_md_ck_cb_t {
+    H5F_generate_md_ck_t func;
+} H5F_generate_md_ck_cb_t;
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -1175,7 +1212,22 @@ H5_DLL herr_t  H5F_shared_get_file_driver(const H5F_shared_t *f_sh, H5FD_t **fil
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
 /* VFD SWMR functions */
-H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
+H5_DLL hbool_t H5F_get_use_vfd_swmr(const H5F_t *f);
+H5_DLL herr_t  H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create);
+H5_DLL herr_t  H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing);
+H5_DLL herr_t  H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len,
+                                                 H5FD_vfd_swmr_idx_entry_t *index);
+H5_DLL herr_t  H5F_vfd_swmr_writer_delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *untilp);
+H5_DLL herr_t  H5F_vfd_swmr_writer_prep_for_flush_or_close(H5F_t *f);
+H5_DLL herr_t  H5F_vfd_swmr_writer_end_of_tick(H5F_t *f);
+H5_DLL herr_t  H5F_vfd_swmr_writer_dump_index(H5F_shared_t *shared);
+H5_DLL herr_t  H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api);
+H5_DLL herr_t  H5F_vfd_swmr_remove_entry_eot(H5F_t *f);
+H5_DLL herr_t  H5F_vfd_swmr_insert_entry_eot(H5F_t *f);
+H5_DLL void    H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *entry);
+H5_DLL herr_t  H5F_dump_eot_queue(void);
+H5_DLL herr_t  H5F_shadow_image_defer_free(H5F_shared_t *shared, const H5FD_vfd_swmr_idx_entry_t *entry);
+H5_DLL H5FD_vfd_swmr_idx_entry_t *H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f);
 
 /* File mounting routines */
 H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);

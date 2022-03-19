@@ -239,7 +239,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
             case H5I_DATASET:
                 ds            = (H5D_t *)vol_obj->data;
                 state.dapl_id = ds->shared->dapl_id;
-                if (H5I_inc_ref(state.dapl_id, false) < 0)
+                if (H5I_inc_ref(state.dapl_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not increase refcnt");
                 break;
             default:
