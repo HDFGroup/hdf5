@@ -970,7 +970,7 @@ H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
     H5FD_wrap_t *       item;
-    H5FD_wrap_t *       temp = NULL;
+    H5FD_wrap_t *       temp      = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
