@@ -106,3 +106,8 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/intel.cmake")
 
 #############################################################################################
+### OSX architectures
+
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_OSX_ARCHITECTURES:STRING=arm64;x86_64")
+
+#############################################################################################
