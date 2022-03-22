@@ -131,6 +131,11 @@ main(int argc, const char *argv[])
             HDfree(opts.sset[i]);
             opts.sset[i] = NULL;
         }
+
+        if (opts.vfd_info[i].name)
+            HDfree((void *)opts.vfd_info[i].name);
+        if (opts.vfd_info[i].info)
+            HDfree((void *)opts.vfd_info[i].info);
     }
 
     h5diff_exit(ret);

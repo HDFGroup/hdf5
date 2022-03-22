@@ -184,6 +184,12 @@ $SRC_H5DUMP_TESTFILES/tvms.h5
 $SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_old.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_new.h5
+$SRC_H5DUMP_TESTFILES/tst_onion_objs.h5
+$SRC_H5DUMP_TESTFILES/tst_onion_objs.h5.onion
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_ext.h5
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_ext.h5.onion
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.h5
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.h5.onion
 "
 
 LIST_OTHER_TEST_FILES="
@@ -372,6 +378,9 @@ $SRC_H5DUMP_TESTFILES/h5dump-help.txt
 $SRC_H5DUMP_TESTFILES/out3.h5import
 $SRC_H5DUMP_TESTFILES/tbinregR.exp
 $SRC_H5DUMP_TESTFILES/err_attr_dspace.ddl
+$SRC_H5DUMP_TESTFILES/tst_onion_objs.ddl
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_ext.ddl
+$SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.ddl
 "
 
 LIST_ERROR_TEST_FILES="
@@ -1485,6 +1494,11 @@ TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
 TOOLTEST_FAIL tCVE_2018_11206_fill_old.h5
 TOOLTEST_FAIL tCVE_2018_11206_fill_new.h5
+
+# test Onion VFD
+TOOLTEST tst_onion_objs.ddl --enable-error-stack -f onion -F 3 tst_onion_objs.h5 
+TOOLTEST tst_onion_dset_ext.ddl --enable-error-stack -f onion -F 1 tst_onion_dset_ext.h5
+TOOLTEST tst_onion_dset_1d.ddl --enable-error-stack -f onion -F 1 tst_onion_dset_1d.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
