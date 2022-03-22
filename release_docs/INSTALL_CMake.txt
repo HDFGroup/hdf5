@@ -13,6 +13,7 @@ Section V:    Options for building HDF5 Libraries with CMake command line
 Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
+Section IX:   Cross compile HDF5 Libraries with CMake
 
 ************************************************************************
 
@@ -208,10 +209,12 @@ Notes: This short set of instructions is written for users who want to
       5. Configure the C library, tools and tests with one of the following commands:
 
          On Windows 32 bit
-           cmake -G "Visual Studio 12 2013" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
+           cmake -G "Visual Studio 15 2017" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
+           cmake -G "Visual Studio 16 2019" -A "Win32" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
 
          On Windows 64 bit
-           cmake -G "Visual Studio 12 2013 Win64" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
+           cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
+           cmake -G "Visual Studio 16 2019" -A "x64" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.13."X"
 
          On Linux and Mac
            cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5-1.13."X"
@@ -348,7 +351,7 @@ IV. Further considerations
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
+           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -472,6 +475,7 @@ These five steps are described in detail below.
             * Visual Studio 15 2017
             * Visual Studio 15 2017 Win64
             * Visual Studio 16 2019
+              plus type of architecture -A "Win32/x64"
 
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
@@ -589,7 +593,7 @@ These five steps are described in detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 12).
+           generator you wish to use (for example on Windows, Visual Studio 16).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify the locations of other programs.
@@ -607,15 +611,9 @@ These five steps are described in detail below.
 
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 12 2013" \
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" -A "x64" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
-
-      2.3  On Windows, if you are using a Visual Studio Express version you must
-           be sure that the following two options are correctly set/unset:
-
-           HDF5_NO_PACKAGES:BOOL=ON
-           HDF5_USE_FOLDERS:BOOL=OFF
 
    3. Build HDF5
 
@@ -870,6 +868,20 @@ is run without a debugger attached.
 
 The HDF5_ENABLE_COVERAGE option will add "-g -O0 -fprofile-arcs -ftest-coverage"
 to CMAKE_C_FLAGS.
+
+
+========================================================================
+IX. Cross compile HDF5 Libraries with CMake
+========================================================================
+
+HDF5_USE_PREGEN
+HDF5_USE_PREGEN_DIR
+  These CMake variables would allow the use of an appropriate H5Tinit.c file
+  with type information generated on a target platform to be used when cross
+  compiling for those target platforms. Sample pre-generated files are in the
+  folder: config/crosscompile.
+
+See the INSTALL_cross_compile.txt file for more information.
 
 
 ========================================================================

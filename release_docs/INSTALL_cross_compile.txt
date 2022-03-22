@@ -1,0 +1,66 @@
+
+***********************************************************************
+*       HDF5 Build and Install Instructions for Cross Compiling       *
+***********************************************************************
+
+Cross-compiling has several consequences for CMake:
+    CMake cannot automatically detect the target platform.
+    CMake cannot find libraries and headers in the default system directories.
+    Executables built during cross compiling cannot be executed.
+
+Cross-compiling support means that CMake separates information about the
+  build platform and target platform and gives the user mechanisms to solve
+  cross-compiling issues without additional requirements such as running
+  virtual machines, etc.
+
+CMake uses a toolchain of utilities to compile, link libraries and create
+   archives, and other tasks to drive the build. The toolchain utilities
+   available are determined by the languages enabled.
+
+CMake stores info about the current toolchain in the following variables:
+    CMAKE_C_COMPILER,
+    CMAKE_CXX_COMPILER.
+  They contain paths to the C and C++ compilers respectively. This is usually
+  enough on desktop platforms. In the case of the embedded systems, also a
+  custom linker and assembler setting is needed. In more complex projects
+  you may need to additionally specify binaries to other parts of the toolchain
+  (size, ranlib, objcopy…). All these tools should be set in the corresponding
+  variables:
+    CMAKE_AR,
+    CMAKE_ASM_COMPILER,
+    CMAKE_LINKER,
+    CMAKE_OBJCOPY,
+    CMAKE_RANLIB
+
+As for the host and target operating systems, CMake stores their names in the
+  following variables:
+    CMAKE_HOST_SYSTEM_NAME
+      – name of the platform, on which CMake is running (host platform).
+        On major operating systems this is set to the Linux, Windows or
+        Darwin (MacOS) value.
+    CMAKE_SYSTEM_NAME
+      – name of the platform, for which we are building (target platform).
+        By default, this value is the same as CMAKE_HOST_SYSTEM_NAME, which
+        means that we are building for the local platform (no cross-compilation).
+
+Put the toolchain variables into a separate file (e.g. <toolchain_name>.cmake)
+  and set CMAKE_TOOLCHAIN_FILE variable to the path of that file. 
+  If cmake is invoked with the command line parameter:
+    --toolchain path/to/file
+  or
+    -DCMAKE_TOOLCHAIN_FILE=path/to/file
+  the file will be loaded early to set values for the compilers. The
+  CMAKE_CROSSCOMPILING variable is set to true when CMake is cross-compiling.
+
+Structure of the toolchain file
+-------------------------------
+In fact, the toolchain file doesn’t have any structure. You can put anything you
+  want there. But the best practice is to define at least these settings:
+    path to the toolchain binaries (C compiler, C++ compiler, linker, etc.)
+    name of the target platform (and optionally target processor architecture)
+    required compilation and linking flags on that particular platform
+    toolchain sysroot settings
+
+References:
+https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
+https://gitlab.com/embeddedlinux/libs/platform
