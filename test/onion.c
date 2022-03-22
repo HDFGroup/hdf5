@@ -3013,7 +3013,7 @@ error:
 static int
 test_integration_create(void)
 {
-    const char *basename = "integration_2d.h5";
+    const char *            basename   = "integration_2d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3659,10 +3659,10 @@ test_integration_create_delete_objects(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t group_id = H5I_INVALID_HID;
-    hid_t attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hsize_t attr_dim[1]                = {4};
-    
+    hid_t   group_id      = H5I_INVALID_HID;
+    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+    hsize_t attr_dim[1] = {4};
+
     TESTING("onion-created HDF5 file with revisions testing addition and deletion of objects");
 
     /* Set up */
@@ -3689,7 +3689,7 @@ test_integration_create_delete_objects(void)
     hid_t   file, space, dset, dcpl; /* Handles */
     hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     int     wdata[4][4], /* Write buffer */
-            fillval, i, j;
+        fillval, i, j;
 
     /*
      * Initialize data.
@@ -3708,7 +3708,7 @@ test_integration_create_delete_objects(void)
      */
     space = H5Screate_simple(2, dims, maxdims);
 
-    /* 
+    /*
      * Create the dataset creation property list, and set the chunk
      * size.
      */
@@ -3748,7 +3748,7 @@ test_integration_create_delete_objects(void)
         TEST_ERROR
 
     /*----------------------------------------------------------------------
-     * First revision: open the file with Onion VFD and add a dataset (DS2) to the file 
+     * First revision: open the file with Onion VFD and add a dataset (DS2) to the file
      *----------------------------------------------------------------------
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3766,7 +3766,6 @@ test_integration_create_delete_objects(void)
      */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR
-
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3787,7 +3786,7 @@ test_integration_create_delete_objects(void)
 
     if (H5Ldelete(file, "DS2", H5P_DEFAULT) < 0)
         TEST_ERROR;
-    
+
     if (H5Fclose(file) < 0)
         TEST_ERROR
     file = H5I_INVALID_HID;
@@ -3804,7 +3803,8 @@ test_integration_create_delete_objects(void)
     /* Create dataspace for attribute */
     attr_space_id = H5Screate_simple(1, attr_dim, NULL);
 
-    if ((attr_id = H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((attr_id =
+             H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Sclose(attr_space_id) < 0)
@@ -4054,15 +4054,15 @@ test_integration_dset_extension(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t file = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+    hid_t   file = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
     hid_t   space, dset_space, dset, dcpl; /* Handles */
     hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     hsize_t size[2], offset[2];
     int     wdata[4][4], /* Write buffer */
-            fillval, i, j;
-    int     rdata[4][4]; /* Read buffer */
-   
+        fillval, i, j;
+    int rdata[4][4]; /* Read buffer */
+
     TESTING("onion-created HDF5 file with revisions testing dataset extension");
 
     /* Setup */
@@ -4102,7 +4102,7 @@ test_integration_dset_extension(void)
      */
     space = H5Screate_simple(2, dims, maxdims);
 
-    /* 
+    /*
      * Create the dataset creation property list, and set the chunk
      * size.
      */
