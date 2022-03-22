@@ -472,16 +472,14 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
             case '0':
                 onion_fa_g_2.revision_id = (uint64_t)HDatol(H5_optarg);
-
-
         }
     }
 
     /* Copy the VFD driver info for both the files */
     if (driver_name_g_1) {
         if (!HDstrcmp(driver_name_g_1, "onion")) {
-            opts->vfd_info[0].name       = HDstrdup(driver_name_g_1);
-            opts->vfd_info[0].info       = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            opts->vfd_info[0].name = HDstrdup(driver_name_g_1);
+            opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
             HDmemcpy(opts->vfd_info[0].info, &onion_fa_g_1, sizeof(H5FD_onion_fapl_info_t));
         }
 
@@ -491,8 +489,8 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
     if (driver_name_g_2) {
         if (!HDstrcmp(driver_name_g_2, "onion")) {
-            opts->vfd_info[1].name       = HDstrdup(driver_name_g_2);
-            opts->vfd_info[1].info       = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            opts->vfd_info[1].name = HDstrdup(driver_name_g_2);
+            opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
             HDmemcpy(opts->vfd_info[1].info, &onion_fa_g_2, sizeof(H5FD_onion_fapl_info_t));
         }
 
