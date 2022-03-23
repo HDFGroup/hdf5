@@ -460,27 +460,29 @@ h5tools_set_error_file(const char *fname, int is_bin)
     return retvalue;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: h5tools_set_up_vfd_swmr
+ *
+ * Purpose:  Set up VFD SWMR on the fapl
+ *
+ * Return:   positive - succeeded
+ *           negative - failed
+ *-------------------------------------------------------------------------
+ */
 static hid_t
-swmr_fapl_augment(hid_t fapl, const char *fname)
+h5tools_set_up_vfd_swmr(hid_t fapl, const char *fname)
 {
-    H5F_vfd_swmr_config_t *config = NULL; /* Configuration for VFD SWMR */
-    char *                 dname  = NULL;
+    H5F_vfd_swmr_config_t *config    = NULL; /* Configuration for VFD SWMR */
+    char *                 dname     = NULL;
+    hid_t                  ret_value = H5I_INVALID_HID;
 
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
     /* Enable page buffering */
-    if (H5Pset_page_buffer_size(fapl, 4096, 100, 0) < 0) {
-        HDfprintf(rawerrorstream, "H5Pset_page_buffer_size failed\n");
-        return H5I_INVALID_HID;
-    }
+    if (H5Pset_page_buffer_size(fapl, 4096, 100, 0) < 0)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pset_page_buffer_size failed");
 
     /* Allocate memory for the configuration structure */
-    config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(*config));
-    if (config == NULL) {
-        HDfprintf(rawerrorstream, "VFD SWMR config allocation failed\n");
-        return H5I_INVALID_HID;
-    }
+    if (NULL == (config = HDcalloc(1, sizeof(*config))))
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "VFD SWMR config allocation failed");
 
     config->version           = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len          = 4;
@@ -488,26 +490,25 @@ swmr_fapl_augment(hid_t fapl, const char *fname)
     config->writer            = FALSE;
     config->md_pages_reserved = 128;
 
-    if (H5_dirname(fname, &dname) < 0) {
-        HDfprintf(rawerrorstream, "H5_dirname() failed\n");
-        return H5I_INVALID_HID;
-    }
+    if (H5_dirname(fname, &dname) < 0)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5_dirname() failed");
+
     HDsnprintf(config->md_file_path, sizeof(config->md_file_path), "%s/my_md_file", dname);
-    HDfree(dname);
 
     /* Enable VFD SWMR configuration */
-    if (H5Pset_vfd_swmr_config(fapl, config) < 0) {
-        HDfprintf(rawerrorstream, "H5Pset_vrd_swmr_config failed\n");
-        return H5I_INVALID_HID;
-    }
-    return fapl;
+    if (H5Pset_vfd_swmr_config(fapl, config) < 0)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pset_vrd_swmr_config failed");
+
+done:
+    HDfree(dname);
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
  * Function: h5tools_set_fapl_vfd
  *
- * Purpose:  Given a VFL driver name, sets the appropriate driver on the
- *           specified FAPL.
+ * Purpose:  Given a VFL driver name or ID, sets the appropriate driver on
+ *           the specified FAPL.
  *
  * Return:   positive - succeeded
  *           negative - failed
@@ -518,110 +519,136 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
 {
     herr_t ret_value = SUCCEED;
 
-    /* Determine which driver the user wants to open the file with */
-    if (!HDstrcmp(vfd_info->name, drivernames[SWMR_VFD_IDX])) {
-        /* SWMR driver */
-        if (swmr_fapl_augment(fapl_id, vfd_info->fname) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[SEC2_VFD_IDX])) {
-        /* SEC2 Driver */
-        if (H5Pset_fapl_sec2(fapl_id) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[DIRECT_VFD_IDX])) {
+    switch (vfd_info->type) {
+        case VFD_BY_NAME:
+            /* Determine which driver the user wants to open the file with */
+            if (!HDstrcmp(vfd_info->u.name, drivernames[SEC2_VFD_IDX])) {
+                /* SEC2 Driver */
+                if (H5Pset_fapl_sec2(fapl_id) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[DIRECT_VFD_IDX])) {
 #ifdef H5_HAVE_DIRECT
-        /* Direct Driver */
-        if (H5Pset_fapl_direct(fapl_id, 1024, 4096, 8 * 4096) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_direct failed");
+                /* Direct Driver */
+                if (H5Pset_fapl_direct(fapl_id, 1024, 4096, 8 * 4096) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_direct failed");
 #else
-        H5TOOLS_GOTO_ERROR(FAIL, "Direct VFD is not enabled");
+                H5TOOLS_GOTO_ERROR(FAIL, "Direct VFD is not enabled");
 #endif
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[LOG_VFD_IDX])) {
-        unsigned long long log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[LOG_VFD_IDX])) {
+                unsigned long long log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
 
-        /* Log Driver */
-        if (H5Pset_fapl_log(fapl_id, NULL, log_flags, (size_t)0) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_log failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[WINDOWS_VFD_IDX])) {
+                /* Log Driver */
+                if (H5Pset_fapl_log(fapl_id, NULL, log_flags, (size_t)0) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_log failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[WINDOWS_VFD_IDX])) {
 #ifdef H5_HAVE_WINDOWS
-        /* There is no Windows VFD - use SEC2 */
-        if (H5Pset_fapl_sec2(fapl_id) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
+                /* There is no Windows VFD - use SEC2 */
+                if (H5Pset_fapl_sec2(fapl_id) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
 #else
-        H5TOOLS_GOTO_ERROR(FAIL, "Windows VFD is not enabled");
+                H5TOOLS_GOTO_ERROR(FAIL, "Windows VFD is not enabled");
 #endif
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[STDIO_VFD_IDX])) {
-        /* Stdio Driver */
-        if (H5Pset_fapl_stdio(fapl_id) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_stdio failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[CORE_VFD_IDX])) {
-        /* Core Driver */
-        if (H5Pset_fapl_core(fapl_id, (size_t)H5_MB, TRUE) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_core failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[FAMILY_VFD_IDX])) {
-        /* FAMILY Driver */
-        /* Set member size to be 0 to indicate the current first member size
-         * is the member size.
-         */
-        if (H5Pset_fapl_family(fapl_id, (hsize_t)0, H5P_DEFAULT) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_family failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[SPLIT_VFD_IDX])) {
-        /* SPLIT Driver */
-        if (H5Pset_fapl_split(fapl_id, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_split failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[MULTI_VFD_IDX])) {
-        /* MULTI Driver */
-        if (H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_multi failed");
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[MPIO_VFD_IDX])) {
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[STDIO_VFD_IDX])) {
+                /* Stdio Driver */
+                if (H5Pset_fapl_stdio(fapl_id) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_stdio failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[CORE_VFD_IDX])) {
+                /* Core Driver */
+                if (H5Pset_fapl_core(fapl_id, (size_t)H5_MB, TRUE) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_core failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[FAMILY_VFD_IDX])) {
+                /* FAMILY Driver */
+                /* Set member size to be 0 to indicate the current first member size
+                 * is the member size.
+                 */
+                if (H5Pset_fapl_family(fapl_id, (hsize_t)0, H5P_DEFAULT) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_family failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[SPLIT_VFD_IDX])) {
+                /* SPLIT Driver */
+                if (H5Pset_fapl_split(fapl_id, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_split failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[MULTI_VFD_IDX])) {
+                /* MULTI Driver */
+                if (H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_multi failed");
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[MPIO_VFD_IDX])) {
 #ifdef H5_HAVE_PARALLEL
-        int mpi_initialized, mpi_finalized;
+                int mpi_initialized, mpi_finalized;
 
-        /* MPI-I/O Driver */
+                /* MPI-I/O Driver */
 
-        /* check if MPI is available. */
-        MPI_Initialized(&mpi_initialized);
-        MPI_Finalized(&mpi_finalized);
+                /* check if MPI is available. */
+                MPI_Initialized(&mpi_initialized);
+                MPI_Finalized(&mpi_finalized);
 
-        if (mpi_initialized && !mpi_finalized) {
-            if (H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_mpio failed");
-        }
+                if (mpi_initialized && !mpi_finalized) {
+                    if (H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_mpio failed");
+                }
 #else
-        H5TOOLS_GOTO_ERROR(FAIL, "MPI-I/O VFD is not enabled");
+                H5TOOLS_GOTO_ERROR(FAIL, "MPI-I/O VFD is not enabled");
 #endif /* H5_HAVE_PARALLEL */
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[ROS3_VFD_IDX])) {
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-        if (!vfd_info->info)
-            H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-        if (H5Pset_fapl_ros3(fapl_id, (H5FD_ros3_fapl_t *)vfd_info->info) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
+                if (!vfd_info->info)
+                    H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
+                if (H5Pset_fapl_ros3(fapl_id, (H5FD_ros3_fapl_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 #else
-        H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
+                H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
 #endif
-    }
-    else if (!HDstrcmp(vfd_info->name, drivernames[HDFS_VFD_IDX])) {
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-        if (!vfd_info->info)
-            H5TOOLS_GOTO_ERROR(FAIL, "HDFS VFD info is invalid");
-        if (H5Pset_fapl_hdfs(fapl_id, (H5FD_hdfs_fapl_t *)vfd_info->info) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_hdfs() failed");
+                if (!vfd_info->info)
+                    H5TOOLS_GOTO_ERROR(FAIL, "HDFS VFD info is invalid");
+                if (H5Pset_fapl_hdfs(fapl_id, (H5FD_hdfs_fapl_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_hdfs() failed");
 #else
-        H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
+                H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
 #endif
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[SWMR_VFD_IDX])) {
+                /* VFD SWMR driver */
+                if (h5tools_set_up_vfd_swmr(fapl_id, vfd_info->fname) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
+            }
+            else {
+                /*
+                 * Try to load VFD plugin.
+                 *
+                 * Currently, driver configuration strings are unsupported.
+                 */
+                if (H5Pset_driver_by_name(fapl_id, vfd_info->u.name, (const char *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't load VFD plugin by driver name '%s'", vfd_info->u.name);
+            }
+
+            break;
+
+        case VFD_BY_VALUE:
+            /*
+             * Try to load VFD plugin.
+             *
+             * Currently, driver configuration strings are unsupported.
+             */
+            if (H5Pset_driver_by_value(fapl_id, vfd_info->u.value, (const char *)vfd_info->info) < 0)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't load VFD plugin by driver value '%ld'",
+                                   (long int)vfd_info->u.value);
+            break;
+
+        default:
+            H5TOOLS_GOTO_ERROR(FAIL, "invalid VFD retrieval type");
     }
-    else
-        H5TOOLS_GOTO_ERROR(FAIL, "invalid VFD name");
 
 done:
     if (ret_value < 0) {
@@ -971,7 +998,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
      * as TRUE, we should return failure now since the file couldn't be opened with
      * the VFL driver/VOL connector that was set on the FAPL by the caller.
      */
-    if (fid < 0 && use_specific_driver)
+    if (use_specific_driver)
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
 
     /*
@@ -1012,9 +1039,10 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                 if (drivernum == SWMR_VFD_IDX)
                     continue;
 
-                vfd_info.info  = NULL;
-                vfd_info.fname = fname;
-                vfd_info.name  = drivernames[drivernum];
+                vfd_info.type   = VFD_BY_NAME;
+                vfd_info.info   = NULL;
+                vfd_info.fname  = fname;
+                vfd_info.u.name = drivernames[drivernum];
 
                 /* Get a fapl reflecting the selected VOL connector and VFD */
                 if ((tmp_fapl_id = h5tools_get_fapl(fapl_id, &vol_info, &vfd_info)) < 0)
@@ -1085,7 +1113,7 @@ done:
 H5_ATTR_PURE static size_t
 h5tools_count_ncols(const char *s)
 {
-    register size_t i;
+    size_t i;
 
     for (i = 0; *s; s++)
         if (*s >= ' ')

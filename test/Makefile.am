@@ -22,22 +22,23 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test scripts--
-#       testerror.sh: err_compat, error_test
-#       testlibinfo.sh:
-#       testcheck_version.sh: tcheck_version
-#       testlinks_env.sh: links_env
-#       testexternal_env.sh: external_env
-#       testflushrefresh.sh: flushrefresh
-#       testvds_env.sh: vds_env
-#       testswmr.sh: swmr*
-#       testvdsswmr.sh: vds_swmr*
-#       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
-#       test_filter_plugin.sh: filter_plugin.c
+#       test_abort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
+#       test_check_version.sh: tcheck_version
+#       test_error.sh: err_compat, error_test
+#       test_external_env.sh: external_env
+#       test_flush_refresh.sh: flushrefresh
+#       test_libinfo.sh:
+#       test_links_env.sh: links_env
 #       test_mirror.sh: mirror_vfd ../utils/mirror_vfd/*
-#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
-    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
-    testvfdswmr.sh
+#       test_plugin.sh: filter_plugin.c vfd_plugin.c vol_plugin.c
+#       test_swmr.sh: swmr*
+#       test_vds_env.sh: vds_env
+#       test_vds_swmr.sh: vds_swmr*
+#       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
+	test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
+	test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
+	test_use_cases.sh test_vfd_swmr.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -58,10 +59,9 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_indep_wr_p0$(EXEEXT) vfd_swmr_indep_wr_p1$(EXEEXT) \
     vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
+  TEST_SCRIPT += test_plugin.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vfd_plugin $(EXEEXT) vol_plugin$(EXEEXT)
 endif
-
 if MIRROR_VFD_CONDITIONAL
   TEST_SCRIPT += test_mirror.sh
 endif
@@ -84,22 +84,25 @@ TEST_PROG= testhdf5 \
            dangle dtransform reserved cross_read freespace mf vds file_image \
            unregister cache_logging cork swmr thread_id vol timer event_set
 
-# List programs to be built when testing here.
-# error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
-# tcheck_version is used by testcheck_version.sh.
-# accum_swmr_reader is used by accum.c.
-# atomic_writer and atomic_reader are standalone programs.
-# links_env is used by testlinks_env.sh
-# external_env is used by testexternal_env.sh
-# filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
-# flushrefresh is used by testflushrefresh.sh.
-# use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
-# swmr_* files (besides swmr.c) are used by testswmr.sh.
-# vds_swmr_* files are used by testvdsswmr.sh
-# vds_env is used by testvds_env.sh
+# List programs to be built when testing here
+#
+# error_test and err_compat are built at the same time as the other tests, but executed by test_error.sh
+# tcheck_version is used by test_check_version.sh
+# accum_swmr_reader is used by accum.c
+# atomic_writer and atomic_reader are stand-alone programs
+# links_env is used by test_links_env.sh
+# external_env is used by test_external_env.sh
+# filenotclosed and del_many_dense_attrs are used by test_abort_fail.sh
+# flushrefresh is used by test_flush_refresh.sh
+# use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_use_cases.sh
+# swmr_* files (besides swmr.c) are used by test_swmr.sh
+# vds_swmr_* files are used by test_vds_swmr.sh
+# vds_env is used by test_vds_env.sh
 # mirror_vfd is used by test_mirror.sh
+#
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
-# Also build testmeta, which is used for timings test.  It builds quickly,
+#
+# Also build testmeta, which is used for the timing test. It builds quickly
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
@@ -124,7 +127,6 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
 endif
-
 if MIRROR_VFD_CONDITIONAL
   check_PROGRAMS+= mirror_vfd
 endif

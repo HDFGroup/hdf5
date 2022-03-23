@@ -182,26 +182,6 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
         HGOTO_DONE(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
 
-#if 0  /* JRM */
-    /* If the file is open for SWMR read access, allow access to data past
-     * the end of the allocated space (the 'eoa').  This is done because the
-     * eoa stored in the file's superblock might be out of sync with the
-     * objects being written within the file by the application performing
-     * SWMR write operations.
-     */
-    if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
-        haddr_t eoa;
-
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
-
-        if ((addr + file->base_addr + size) > eoa)
-            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu",
-                        (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
-                        (unsigned long long)eoa)
-    }
-#endif /* JRM */
-
     /* Dispatch to driver */
     if ((file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")

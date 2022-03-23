@@ -862,53 +862,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 } /* H5C__free_image_entries_array() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_force_cache_image_load()
- *
- * Purpose:     On rare occasions, it is necessary to run
- *		H5MF_tidy_self_referential_fsm_hack() prior to the first
- *              metadata cache access.  This is a problem as if there is a
- *              cache image at the end of the file, that routine will
- *              discard it.
- *
- *              We solve this issue by calling this function, which will
- *		load the cache image and then call
- *              H5MF_tidy_self_referential_fsm_hack() to discard it.
- *
- * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              1/11/17
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_force_cache_image_load(H5F_t *f)
-{
-    H5C_t *cache_ptr;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr->load_image);
-
-    /* Load the cache image, if requested */
-    if (cache_ptr->load_image) {
-        cache_ptr->load_image = FALSE;
-        if (H5C__load_cache_image(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_force_cache_image_load() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_get_cache_image_config
  *
  * Purpose:     Copy the current configuration for cache image generation

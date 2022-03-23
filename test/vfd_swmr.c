@@ -18,7 +18,6 @@
  *
  *************************************************************/
 
-#include "H5queue.h"
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -3391,7 +3390,7 @@ test_shadow_index_lookup(void)
         for (j = 0; j < cursize; j++) {
             H5FD_vfd_swmr_idx_entry_t *found;
 
-            found = vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize, idx[j].hdf5_page_offset, FALSE);
+            found = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize, idx[j].hdf5_page_offset, FALSE);
             if ((have_failj && failj == j) || found != &idx[j])
                 break;
         }

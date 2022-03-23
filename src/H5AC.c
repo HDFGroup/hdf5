@@ -234,7 +234,7 @@ H5AC_cache_image_pending(const H5F_t *f)
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
- * Changes:     Added code to configrue the metadata cache for VFD SWMR
+ * Changes:     Added code to configure the metadata cache for VFD SWMR
  *              reader operations when indicated.
  *
  *                                              JRM -- 1/15/19
@@ -2452,7 +2452,7 @@ done:
 /*------------------------------------------------------------------------------
  * Function:    H5AC_expunge_tag_type_metadata()
  *
- * Purpose:     Wrapper for cache level function which expunge entries with
+ * Purpose:     Wrapper for cache level function which expunges entries with
  *              a specific tag and type id.
  *
  * Return:      SUCCEED on success, FAIL otherwise.
@@ -2462,7 +2462,7 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags, hbool_t type_match)
+H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
@@ -2475,12 +2475,46 @@ H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flag
     HDassert(f->shared);
 
     /* Call cache level function to expunge entries with specified tag and type id */
-    if (H5C_expunge_tag_type_metadata(f, tag, type_id, flags, type_match) < 0)
+    if (H5C_expunge_tag_type_metadata(f, tag, type_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge tagged type entries")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_expunge_tag_type_metadata*/
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_expunge_all_tagged_metadata()
+ *
+ * Purpose:     Wrapper for cache level function which expunges all tagged
+ *              entries
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2022
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Call cache level function to expunge all tagged entries */
+    if (H5C_expunge_all_tagged_metadata(f, tag, type_id, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge all entries")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_expunge_all_tagged_metadata*/
 
 /*------------------------------------------------------------------------------
  * Function:    H5AC_get_tag()

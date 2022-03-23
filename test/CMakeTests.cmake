@@ -674,18 +674,18 @@ set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
 #    flushrefresh
 ##############################################################################
 # autotools script tests
-# error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
-# NOT CONVERTED accum_swmr_reader is used by accum.c.
-# NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
-# links_env is used by testlinks_env.sh
-# filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
-# NOT CONVERTED flushrefresh is used by testflushrefresh.sh.
-# NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
-# NOT CONVERTED swmr_* files (besides swmr.c) are used by testswmr.sh.
-# NOT CONVERTED vds_swmr_* files are used by testvdsswmr.sh
-# NOT CONVERTED 'make check' doesn't run them directly, so they are not included in TEST_PROG.
-# NOT CONVERTED Also build testmeta, which is used for timings test.  It builds quickly,
-# NOT CONVERTED and this lets automake keep all its test programs in one place.
+# error_test and err_compat are built at the same time as the other tests, but executed by test_error.sh
+# NOT CONVERTED accum_swmr_reader is used by accum.c
+# NOT CONVERTED atomic_writer and atomic_reader are stand-alone programs
+# links_env is used by test_links_env.sh
+# filenotclosed and del_many_dense_attrs are used by test_abort_fail.sh
+# NOT CONVERTED flushrefresh is used by test_flush_refresh.sh
+# NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_use_cases.sh
+# NOT CONVERTED swmr_* files (besides swmr.c) are used by test_swmr.sh
+# NOT CONVERTED vds_swmr_* files are used by test_vds_swmr.sh
+# 'make check' doesn't run them directly, so they are not included in TEST_PROG.
+# Also build testmeta, which is used for timings test.  It builds quickly
+# and this lets automake keep all its test programs in one place.
 ##############################################################################
 
 #-- Adding test for filenotclosed
@@ -853,16 +853,6 @@ if (BUILD_SHARED_LIBS)
       ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/filter_plugin_dir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/filter_plugin_dir2;srcdir=${HDF5_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
   )
-
-##############################################################################
-# HDFFV-9655 relative plugin test disabled
-#
-#  add_test (NAME H5PLUGIN-pluginRelative COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:plugin>)
-#  set_tests_properties (H5PLUGIN-pluginRelative PROPERTIES
-#      ENVIRONMENT "HDF5_PLUGIN_PATH=@/${BIN_REL_PATH}testdir1${CMAKE_SEP}@/${BIN_REL_PATH}testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
-#      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
-#  )
-##############################################################################
 endif ()
 
 option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
@@ -875,10 +865,10 @@ if (ENABLE_EXTENDED_TESTS)
 ##############################################################################
 ###    S W M R  T E S T S
 ##############################################################################
-#       testflushrefresh.sh: flushrefresh
-#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-#       testswmr.sh: swmr*
-#       testvdsswmr.sh: vds_swmr*
+#       test_flush_refresh.sh: flushrefresh
+#       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       test_swmr.sh: swmr*
+#       test_vds_swmr.sh: vds_swmr*
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")

@@ -3374,7 +3374,7 @@ done:
 
                 /* Expunge from cache all v1 B-tree type entries associated with tag */
                 if (H5AC_expunge_tag_type_metadata(dataset->oloc.file, dataset->oloc.addr, H5AC_BT_ID,
-                                                   H5AC__NO_FLAGS_SET, TRUE))
+                                                   H5AC__NO_FLAGS_SET))
                     HDONE_ERROR(H5E_DATASET, H5E_CANTEXPUNGE, FAIL, "unable to expunge index metadata")
             } /* end if */
 

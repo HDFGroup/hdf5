@@ -272,7 +272,7 @@ const char *aux_optarg;     /* Flag argument (or value)               */
  *          Failure:    A question mark.
  *-------------------------------------------------------------------------
  */
-int
+static int
 aux_get_options(int argc, char **argv, const char *opts, const aux_long_options *l_opts)
 {
     static int sp      = 1;   /* character index in current token */
@@ -350,7 +350,7 @@ aux_get_options(int argc, char **argv, const char *opts, const aux_long_options 
         free(arg);
     }
     else {
-        register char *cp; /* pointer into current token */
+        char *cp; /* pointer into current token */
 
         /* short command line option */
         optchar = argv[aux_optind][sp];
@@ -798,15 +798,18 @@ verify_md_file_chksum(handler_t *hand, uint64_t ud_seq_num)
 
         if (hand->output) {
             fprintf(hand->output,
-                    "\nFor testing, verify the checksum after applying the updater file %llu:\n", ud_seq_num);
-            fprintf(hand->output, "received checksum=%u, calculated checksum=%u (at line %d)\n",
+                    "\nFor testing, verify the checksum after applying the updater file %" PRIu64 ":\n",
+                    ud_seq_num);
+            fprintf(hand->output,
+                    "received checksum=%" PRIu32 ", calculated checksum=%" PRIu32 " (at line %d)\n",
                     hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
         }
 
         /* Make sure the checksum is correct */
         if (verified_checksum != hand->md_file_checksums[ud_seq_num]) {
             fprintf(stderr,
-                    "received checksum for updater file %llu (%u) doesn't match calculated checksum (%u) at "
+                    "received checksum for updater file %" PRIu64 " (%" PRIu32
+                    ") doesn't match calculated checksum (%" PRIu32 ") at "
                     "line %d\n",
                     ud_seq_num, hand->md_file_checksums[ud_seq_num], verified_checksum, __LINE__);
             goto error;
@@ -903,15 +906,17 @@ decode_ud_header(updater_t *updater, handler_t *hand)
     /* Output the log info */
     if (hand->output) {
         fprintf(hand->output, "header signature=%s\n", updater->header_signature);
-        fprintf(hand->output, "version=%hu\n", updater->version);
-        fprintf(hand->output, "flags=%hu\n", updater->flags);
-        fprintf(hand->output, "page size (bytes)=%u\n", updater->page_size);
-        fprintf(hand->output, "sequence number=%llu\n", updater->sequence_num);
-        fprintf(hand->output, "tick number=%llu\n", updater->tick_num);
-        fprintf(hand->output, "change list offset (bytes)=%llu\n", updater->change_list_offset);
-        fprintf(hand->output, "change list length (bytes)=%llu\n", updater->change_list_len);
-        fprintf(hand->output, "received checksum for header=%u\n", updater->received_header_checksum);
-        fprintf(hand->output, "calculated checksum for header=%u\n\n", updater->verified_header_checksum);
+        fprintf(hand->output, "version=%h" PRIu16 "\n", updater->version);
+        fprintf(hand->output, "flags=%h" PRIu16 "\n", updater->flags);
+        fprintf(hand->output, "page size (bytes)=%" PRIu32 "\n", updater->page_size);
+        fprintf(hand->output, "sequence number=%" PRIu64 "\n", updater->sequence_num);
+        fprintf(hand->output, "tick number=%" PRIu64 "\n", updater->tick_num);
+        fprintf(hand->output, "change list offset (bytes)=%" PRIu64 "\n", updater->change_list_offset);
+        fprintf(hand->output, "change list length (bytes)=%" PRIu64 "\n", updater->change_list_len);
+        fprintf(hand->output, "received checksum for header=%" PRIu32 "\n",
+                updater->received_header_checksum);
+        fprintf(hand->output, "calculated checksum for header=%" PRIu32 "\n\n",
+                updater->verified_header_checksum);
     }
 
     /* If the flag is CREATE_METADATA_FILE_ONLY_FLAG (0x0001), create the metadata file and close the updater
@@ -1046,20 +1051,25 @@ decode_cl_top_fields(updater_t *updater, handler_t *hand)
     /* Output the log info */
     if (hand->output) {
         fprintf(hand->output, "change list signature=%s\n", updater->cl_signature);
-        fprintf(hand->output, "change list tick number=%llu\n", updater->cl_tick_num);
-        fprintf(hand->output, "page offset for metadata file header in updater=%u\n",
+        fprintf(hand->output, "change list tick number=%" PRIu64 "\n", updater->cl_tick_num);
+        fprintf(hand->output, "page offset for metadata file header in updater=%" PRIu32 "\n",
                 updater->md_file_header_ud_page_offset);
-        fprintf(hand->output, "length for metadata file header (bytes)=%u\n", updater->md_file_header_len);
-        fprintf(hand->output, "checksum for metadata file header=%u\n", updater->md_file_header_chksum);
-        fprintf(hand->output, "page offset for metadata file index in updater=%u\n",
+        fprintf(hand->output, "length for metadata file header (bytes)=%" PRIu32 "\n",
+                updater->md_file_header_len);
+        fprintf(hand->output, "checksum for metadata file header=%" PRIu32 "\n",
+                updater->md_file_header_chksum);
+        fprintf(hand->output, "page offset for metadata file index in updater=%" PRIu32 "\n",
                 updater->md_file_index_ud_page_offset);
-        fprintf(hand->output, "offset for metadata file index in metadata file (bytes)=%llu\n",
+        fprintf(hand->output, "offset for metadata file index in metadata file (bytes)=%" PRIu64 "\n",
                 updater->md_file_index_md_file_offset);
-        fprintf(hand->output, "length for metadata file index (bytes)=%u\n", updater->md_file_index_len);
-        fprintf(hand->output, "checksum for metadata file index=%u\n", updater->md_file_index_chksum);
-        fprintf(hand->output, "number of change list entries=%u\n", updater->num_cl_entries);
-        fprintf(hand->output, "received checksum for the change list=%u\n", updater->received_cl_checksum);
-        fprintf(hand->output, "calculated checksum for the change list=%u\n\n",
+        fprintf(hand->output, "length for metadata file index (bytes)=%" PRIu32 "\n",
+                updater->md_file_index_len);
+        fprintf(hand->output, "checksum for metadata file index=%" PRIu32 "\n",
+                updater->md_file_index_chksum);
+        fprintf(hand->output, "number of change list entries=%" PRIu32 "\n", updater->num_cl_entries);
+        fprintf(hand->output, "received checksum for the change list=%" PRIu32 "\n",
+                updater->received_cl_checksum);
+        fprintf(hand->output, "calculated checksum for the change list=%" PRIu32 "\n\n",
                 updater->verified_cl_checksum);
     }
 
@@ -1423,7 +1433,7 @@ get_md_file_chksums(handler_t *hand)
         UINT32DECODE(ptr, hand->md_file_checksums[i]);
 
         if (hand->output)
-            fprintf(hand->output, "\tupdater file %llu: checksum=%u\n", seq_nums[i],
+            fprintf(hand->output, "\tupdater file %" PRIu64 ": checksum=%" PRIu32 "\n", seq_nums[i],
                     hand->md_file_checksums[i]);
     }
 
@@ -1570,16 +1580,16 @@ main(int argc, char **argv)
     if (release_resources(&hand) < 0)
         goto error;
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
-    return 1;
+    return EXIT_FAILURE;
 }
 
 #else  /* H5_HAVE_AUX_PROCESS */
 int
 main()
 {
-    return 0;
+    return EXIT_FAILURE;
 }
 #endif /* H5_HAVE_AUX_PROCESS */

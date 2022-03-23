@@ -48,6 +48,12 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"vol-value-2", require_arg, '4'},
                                           {"vol-name-2", require_arg, '5'},
                                           {"vol-info-2", require_arg, '6'},
+                                          {"vfd-value-1", require_arg, '7'},
+                                          {"vfd-name-1", require_arg, '8'},
+                                          {"vfd-info-1", require_arg, '9'},
+                                          {"vfd-value-2", require_arg, '0'},
+                                          {"vfd-name-2", require_arg, 'Y'},
+                                          {"vfd-info-2", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -431,6 +437,38 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '6':
                 opts->vol_info[1].info_string = H5_optarg;
+                break;
+
+            case '7':
+                opts->vfd_info[0].type    = VFD_BY_VALUE;
+                opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->custom_vfd[0]       = TRUE;
+                break;
+
+            case '8':
+                opts->vfd_info[0].type   = VFD_BY_NAME;
+                opts->vfd_info[0].u.name = H5_optarg;
+                opts->custom_vol[0]      = TRUE;
+                break;
+
+            case '9':
+                opts->vfd_info[0].info = (const void *)H5_optarg;
+                break;
+
+            case '0':
+                opts->vfd_info[1].type    = VFD_BY_VALUE;
+                opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->custom_vfd[1]       = TRUE;
+                break;
+
+            case 'Y':
+                opts->vfd_info[1].type   = VFD_BY_NAME;
+                opts->vfd_info[1].u.name = H5_optarg;
+                opts->custom_vfd[1]      = TRUE;
+                break;
+
+            case 'Z':
+                opts->vfd_info[1].info = (const void *)H5_optarg;
                 break;
         }
     }

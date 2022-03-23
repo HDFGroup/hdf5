@@ -235,9 +235,9 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "could not allocate API elapsed ticks")
 
     /* Retry on opening the metadata file */
-    for (do_try         = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
+    for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
                                 H5_RETRY_DEFAULT_MAXIVAL);
-         do_try; do_try = h5_retry_next(&retry)) {
+         do_try; do_try = H5_retry_next(&retry)) {
         if ((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
             break;
     }
@@ -358,8 +358,6 @@ done:
 static void
 H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
-    vfd_swmr_reader_did_increase_tick_to(0);
-
     if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
 
@@ -770,7 +768,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
     /* Try finding the addr from the index */
     target_page = addr / fs_page_size;
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
+    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
 
     if (entry == NULL) {
         /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -1011,9 +1009,9 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 
     FUNC_ENTER_STATIC
 
-    for (do_try         = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX, H5_RETRY_ONE_SECOND / 10,
+    for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX, H5_RETRY_ONE_SECOND / 10,
                                 H5_RETRY_ONE_SECOND);
-         do_try; do_try = h5_retry_next(&retry)) {
+         do_try; do_try = H5_retry_next(&retry)) {
 
         /* Load and decode the header.  Go around again on a temporary
          * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
@@ -1170,7 +1168,8 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
     UINT32DECODE(p, md_header->fs_page_size);
     UINT64DECODE(p, md_header->tick_num);
     UINT64DECODE(p, md_header->index_offset);
-    if ((index_length = uint64_decode(&p)) > SIZE_MAX)
+    UINT64DECODE(p, index_length);
+    if (index_length > SIZE_MAX)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "index is too large to hold in core")
 
     md_header->index_length = (size_t)index_length;
@@ -1180,13 +1179,6 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
 
     /* Sanity check */
     HDassert((size_t)(p - image) <= H5FD_MD_HEADER_SIZE);
-
-#if 0  /* JRM */
-    HDfprintf(stderr,
-        "---read header ps/tick/idx_off/idx_len = %d / %lld / %lld / %lld\n",
-             md_header->fs_page_size, md_header->tick_num,
-             md_header->index_offset, md_header->index_length);
-#endif /* JRM */
 
     ret_value = TRUE;
 
@@ -1319,12 +1311,6 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
 
     /* Sanity check */
     HDassert((size_t)(p - image) <= md_header->index_length);
-
-#if 0  /* JRM */
-    HDfprintf(stderr,
-             " ---- read index tick/num_entries = %lld / %d \n",
-             md_index->tick_num, md_index->num_entries);
-#endif /* JRM */
 
 done:
     if (image != NULL)

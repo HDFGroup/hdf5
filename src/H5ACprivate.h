@@ -430,8 +430,8 @@ H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *rin
 H5_DLL void   H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
 H5_DLL herr_t H5AC_unsettle_ring(H5F_t *f, H5AC_ring_t ring);
-H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags,
-                                             hbool_t type_match);
+H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
+H5_DLL herr_t H5AC_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 H5_DLL herr_t H5AC_set_vfd_swmr_reader(H5AC_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_size);
 

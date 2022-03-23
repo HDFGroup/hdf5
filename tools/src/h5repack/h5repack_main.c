@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:EG:LM:P:S:T:VXW1:2:3:4:5:6:";
+static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:EG:LM:P:S:T:VXWY:Z:1:2:3:4:5:6:7:8:9:0:";
 static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"block", require_arg, 'b'},
                                           {"compact", require_arg, 'c'},
@@ -68,6 +68,12 @@ static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"dst-vol-value", require_arg, '4'},
                                           {"dst-vol-name", require_arg, '5'},
                                           {"dst-vol-info", require_arg, '6'},
+                                          {"src-vfd-value", require_arg, '7'},
+                                          {"src-vfd-name", require_arg, '8'},
+                                          {"src-vfd-info", require_arg, '9'},
+                                          {"dst-vfd-value", require_arg, '0'},
+                                          {"dst-vfd-name", require_arg, 'Y'},
+                                          {"dst-vfd-info", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -505,15 +511,21 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 {
     h5tools_vol_info_t in_vol_info;
     h5tools_vol_info_t out_vol_info;
-    hbool_t            custom_in_fapl  = FALSE;
-    hbool_t            custom_out_fapl = FALSE;
-    hid_t              tmp_fapl        = H5I_INVALID_HID;
+    h5tools_vfd_info_t in_vfd_info;
+    h5tools_vfd_info_t out_vfd_info;
+    hbool_t            custom_in_vol  = FALSE;
+    hbool_t            custom_in_vfd  = FALSE;
+    hbool_t            custom_out_vol = FALSE;
+    hbool_t            custom_out_vfd = FALSE;
+    hid_t              tmp_fapl       = H5I_INVALID_HID;
     int                bound, opt;
     int                ret_value = 0;
 
     /* Initialize fapl info structs */
     HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
     HDmemset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&in_vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    HDmemset(&out_vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* parse command line options */
     while (EOF != (opt = H5_get_option(argc, argv, s_opts, l_opts))) {
@@ -765,13 +777,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '1':
                 in_vol_info.type    = VOL_BY_VALUE;
                 in_vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
-                custom_in_fapl      = TRUE;
+                custom_in_vol       = TRUE;
                 break;
 
             case '2':
                 in_vol_info.type   = VOL_BY_NAME;
                 in_vol_info.u.name = H5_optarg;
-                custom_in_fapl     = TRUE;
+                custom_in_vol      = TRUE;
                 break;
 
             case '3':
@@ -781,17 +793,49 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             case '4':
                 out_vol_info.type    = VOL_BY_VALUE;
                 out_vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
-                custom_out_fapl      = TRUE;
+                custom_out_vol       = TRUE;
                 break;
 
             case '5':
                 out_vol_info.type   = VOL_BY_NAME;
                 out_vol_info.u.name = H5_optarg;
-                custom_out_fapl     = TRUE;
+                custom_out_vol      = TRUE;
                 break;
 
             case '6':
                 out_vol_info.info_string = H5_optarg;
+                break;
+
+            case '7':
+                in_vfd_info.type    = VFD_BY_VALUE;
+                in_vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                custom_in_vfd       = TRUE;
+                break;
+
+            case '8':
+                in_vfd_info.type   = VFD_BY_NAME;
+                in_vfd_info.u.name = H5_optarg;
+                custom_in_vfd      = TRUE;
+                break;
+
+            case '9':
+                in_vfd_info.info = (const void *)H5_optarg;
+                break;
+
+            case '0':
+                out_vfd_info.type    = VFD_BY_VALUE;
+                out_vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                custom_out_vfd       = TRUE;
+                break;
+
+            case 'Y':
+                out_vfd_info.type   = VFD_BY_NAME;
+                out_vfd_info.u.name = H5_optarg;
+                custom_out_vfd      = TRUE;
+                break;
+
+            case 'Z':
+                out_vfd_info.info = (const void *)H5_optarg;
                 break;
 
             default:
@@ -827,8 +871,9 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     }
 
     /* Setup FAPL for input and output file accesses */
-    if (custom_in_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &in_vol_info, NULL)) < 0) {
+    if (custom_in_vol || custom_in_vfd) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, custom_in_vol ? &in_vol_info : NULL,
+                                         custom_in_vfd ? &in_vfd_info : NULL)) < 0) {
             error_msg("failed to setup FAPL for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
@@ -847,8 +892,9 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         options->fin_fapl = tmp_fapl;
     }
 
-    if (custom_out_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &out_vol_info, NULL)) < 0) {
+    if (custom_out_vol || custom_out_vfd) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, custom_out_vol ? &out_vol_info : NULL,
+                                         custom_out_vfd ? &out_vfd_info : NULL)) < 0) {
             error_msg("failed to setup FAPL for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;

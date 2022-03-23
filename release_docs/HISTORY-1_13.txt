@@ -5,6 +5,7 @@ This file contains development history of the HDF5 1.13 releases from
 the develop branch
 
 01.      Release Information for hdf5-1.13.0
+02.      Release Information for hdf5-1.13.1
 
 [Search on the string '%%%%' for section breaks of each release.]
 
@@ -1609,6 +1610,407 @@ Platforms Tested
     (lassen)                             GCC 7.3.1
                                          XL 16.1.1.2
                                      (cmake)
+
+    Linux-4.12.14-150.75-default     cray-mpich/7.7.10
+    #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0
+    (cori)                               Intel (R) Version 19.0.3.199
+                                     (cmake)
+
+    Linux-4.12.14-197.86-default     cray-mpich/7.7.6
+    # 1SMP x86_64 GNU/Linux              GCC  7.3.0, 9.3.0, 10.2.0
+    (mutrino)                            Intel (R) Version 17.0.4, 18.0.5, 19.1.3
+                                     (cmake)
+
+    Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+
+    Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                         Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                     Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                     compilers:
+                                         Version 17.0.0.098 Build 20160721
+                                     GNU C (gcc) and C++ (g++) 4.8.5 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     MPICH 3.3 compiled with GCC 7.2.0
+                                     OpenMPI 2.1.6 compiled with icc 18.0.1
+                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+
+    Linux-3.10.0-1127.0.0.1chaos     openmpi-4.0.0
+    #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
+    (quartz)                             GCC 7.3.0, 8.1.0
+                                         Intel 16.0.4, 18.0.2, 19.0.4
+
+    macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
+    Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
+
+    macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
+    Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+    (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
+
+    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                           Intel icc/icpc/ifort version 17.0.2
+
+    Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                           gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
+
+
+    Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos6                              Version 4.4.7 20120313
+    (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+
+    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
+                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ clang 12.0.0
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+
+
+Known Problems
+==============
+    Setting a variable-length dataset fill value will leak the memory allocated
+    for the p field of the hvl_t struct. A fix is in progress for this.
+    HDFFV-10840
+
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and can be avoided by not building
+the gif tool. Disable building the High-Level tools with these options:
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF
+
+
+%%%%1.13.1%%%%
+
+HDF5 version 1.13.1 released on 2022-03-02
+================================================================================
+
+
+INTRODUCTION
+============
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from Release to Release and New Features in the HDF5-1.13.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.13.0
+- Platforms Tested
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Reworked corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However setting the HDF5_ROOT variable failed to locate
+      the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
+      set to the <INSTALL_DIR>/cmake folder. The location of the configuration 
+      files can still be specified by the "HDF5_DIR" variable.
+
+      (ADB - 2022/02/02)
+
+    - CPack will now generate RPM/DEB packages.
+
+      Enabled the RPM and DEB CPack generators on linux. In addition to
+      generating STGZ and TGZ packages, CPack will try to package the 
+      library for RPM and DEB packages. This is the initial attempt and
+      may change as issues are resolved.
+
+      (ADB - 2022/01/27)
+
+    - Added new option to the h5cc scripts produced by CMake.
+
+      Add -showconfig option to h5cc scripts to cat the 
+      libhdf5.settings file to the standard output.
+
+      (ADB - 2022/01/25)
+
+    - CMake will now run the PowerShell script tests in test/ by default
+      on Windows.
+
+      The test directory includes several shell script tests that previously
+      were not run by CMake on Windows. These are now run by default.
+      If TEST_SHELL_SCRIPTS is ON and PWSH is found, the PowerShell scripts
+      will execute. Similar to the bash scripts on unix platforms.
+
+      (ADB - 2021/11/23)
+
+
+    Library:
+    --------
+    - Add a new public function, H5ESget_requests()
+
+      This function allows the user to retrieve request pointers from an event
+      set. It is intended for use primarily by VOL plugin developers.
+
+      (NAF - 2022/01/11)
+
+
+    Parallel Library:
+    -----------------
+    - Several improvements to parallel compression feature, including:
+
+      * Improved support for collective I/O (for both writes and reads)
+
+      * Significant reduction of memory usage for the feature as a whole
+
+      * Reduction of copying of application data buffers passed to H5Dwrite
+
+      * Addition of support for incremental file space allocation for filtered
+        datasets created in parallel. Incremental file space allocation is the
+        default for these types of datasets (early file space allocation is
+        also still supported), while early file space allocation is still the
+        default (and only supported at allocation time) for unfiltered datasets
+        created in parallel. Incremental file space allocation should help with
+        parallel HDF5 applications that wish to use fill values on filtered
+        datasets, but would typically avoid doing so since dataset creation in
+        parallel would often take an excessive amount of time. Since these
+        datasets previously used early file space allocation, HDF5 would
+        allocate space for and write fill values to every chunk in the dataset
+        at creation time, leading to noticeable overhead. Instead, with
+        incremental file space allocation, allocation of file space for chunks
+        and writing of fill values to those chunks will be delayed until each
+        individual chunk is initially written to.
+
+      * Addition of support for HDF5's "don't filter partial edge chunks" flag
+        (https://portal.hdfgroup.org/display/HDF5/H5P_SET_CHUNK_OPTS)
+
+      * Addition of proper support for HDF5 fill values with the feature
+
+      * Addition of 'H5_HAVE_PARALLEL_FILTERED_WRITES' macro to H5pubconf.h
+        so HDF5 applications can determine at compile-time whether the feature
+        is available
+
+      * Addition of simple examples (ph5_filtered_writes.c and
+        ph5_filtered_writes_no_sel.c) under examples directory to demonstrate
+        usage of the feature
+
+      * Improved coverage of regression testing for the feature
+
+      (JTH - 2022/2/23)
+
+
+Support for new platforms, languages and compilers
+==================================================
+    - None
+
+
+Bug Fixes since HDF5-1.13.0 release
+===================================
+    Library
+    -------
+    - Fixed a metadata cache bug when resizing a pinned/protected cache entry
+
+      When resizing a pinned/protected cache entry, the metadata
+      cache code previously would wait until after resizing the
+      entry to attempt to log the newly-dirtied entry. This 
+      caused H5C_resize_entry to mark the entry as dirty and made
+      H5AC_resize_entry think that it didn't need to add the
+      newly-dirtied entry to the dirty entries skiplist.
+
+      Thus, a subsequent H5AC__log_moved_entry would think it
+      needed to allocate a new entry for insertion into the dirty
+      entry skip list, since the entry didGn't exist on that list.
+      This caused an assertion failure, as the code to allocate a
+      new entry assumes that the entry is not dirty.
+
+      (JRM - 2022/02/28)
+
+    - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
+      H5check_version function.
+
+      Investigating the original fix, #812, we discovered some inconsistencies
+      with a new block added to check H5_VERS_RELEASE for incompatibilities.
+      This new block was not using the new warning text dealing with the
+      H5_VERS_RELEASE check and would cause the warning to be duplicated.
+      
+      By removing the H5_VERS_RELEASE argument in the first check for 
+      H5_VERS_MAJOR and H5_VERS_MINOR, the second check would only check
+      the H5_VERS_RELEASE for incompatible release versions. This adheres
+      to the statement that except for the develop branch, all release versions
+      in a major.minor maintenance branch should be compatible. The prerequisite
+      is that an application will not use any APIs not present in all release versions.
+
+      (ADB - 2022/02/24, #1438)
+
+    - Unified handling of collective metadata reads to correctly fix old bugs
+
+      Due to MPI-related issues occurring in HDF5 from mismanagement of the
+      status of collective metadata reads, they were forced to be disabled
+      during chunked dataset raw data I/O in the HDF5 1.10.5 release. This
+      wouldn't generally have affected application performance because HDF5
+      already disables collective metadata reads during chunk lookup, since
+      it is generally unlikely that the same chunks will be read by all MPI
+      ranks in the I/O operation. However, this was only a partial solution
+      that wasn't granular enough.
+
+      This change now unifies the handling of the file-global flag and the
+      API context-level flag for collective metadata reads in order to
+      simplify querying of the true status of collective metadata reads. Thus,
+      collective metadata reads are once again enabled for chunked dataset
+      raw data I/O, but manually controlled at places where some processing
+      occurs on MPI rank 0 only and would cause issues when collective
+      metadata reads are enabled.
+
+      (JTH - 2021/11/16, HDFFV-10501/HDFFV-10562)
+
+    - Fixed several potential MPI deadlocks in library failure conditions
+
+      In the parallel library, there were several places where MPI rank 0
+      could end up skipping past collective MPI operations when some failure
+      occurs in rank 0-specific processing. This would lead to deadlocks
+      where rank 0 completes an operation while other ranks wait in the
+      collective operation. These places have been rewritten to have rank 0
+      push an error and try to cleanup after the failure, then continue to
+      participate in the collective operation to the best of its ability.
+
+      (JTH - 2021/11/09)
+
+
+Platforms Tested
+===================
+
+    Linux 5.13.14-200.fc34           GNU gcc (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
+    Fedora34                         clang version 12.0.1 (Fedora 12.0.1-1.fc34)
+                                     (cmake and autotools)
+
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+                                     (cmake and autotools)
+
+    Linux 5.8.0-63-generic           GNU gcc (GCC) 10.3.0-1ubuntu1
+    #71-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 10.3.0-1ubuntu1
+    Ubuntu20.10                      Ubuntu clang version 11.0.0-2
+                                     (cmake and autotools)
+
+    Linux 5.3.18-22-default          GNU gcc (SUSE Linux) 7.5.0
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (SUSE Linux) 7.5.0
+    SUSE15sp2                        clang version 7.0.1 (tags/RELEASE_701/final 349238)
+                                     (cmake and autotools)
+
+    Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 8.0.1, 11.0.1
+    (lassen)                             GCC 7.3.1
+                                         XL 16.1.1.2
+                                     (cmake)
+
+    Linux-3.10.0-1160.49.1           openmpi-intel/4.1
+    #1 SMP x86_64 GNU/Linux              Intel(R) Version 18.0.5, 19.1.2
+    (chama)                          (cmake)
 
     Linux-4.12.14-150.75-default     cray-mpich/7.7.10
     #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0

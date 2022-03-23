@@ -2809,7 +2809,7 @@ H5Fvfd_swmr_end_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
@@ -2848,7 +2848,7 @@ H5Fvfd_swmr_disable_end_of_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
@@ -2886,7 +2886,7 @@ H5Fvfd_swmr_enable_end_of_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")

@@ -72,7 +72,6 @@ typedef struct {
     H5F_t *  f;       /* File pointer for evicting entry */
     int      type_id; /* Cache entry type to expunge */
     unsigned flags;   /* Flags for expunging entry */
-    hbool_t  type_match;
 } H5C_tag_iter_ettm_ctx_t;
 
 /* Typedef for tagged entry iterator callback context - mark corked */
@@ -818,7 +817,7 @@ H5C__expunge_tag_type_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
     HDassert(ctx);
 
     /* Found one with the same tag and type id */
-    if (entry->type->id == ctx->type_id || !ctx->type_match)
+    if (entry->type->id == ctx->type_id)
         if (H5C_expunge_entry(ctx->f, entry->type, entry->addr, ctx->flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, H5_ITER_ERROR, "can't expunge entry")
 
@@ -841,7 +840,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags, hbool_t type_match)
+H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
 {
     H5C_t *                 cache;               /* Pointer to cache structure */
     H5C_tag_iter_ettm_ctx_t ctx;                 /* Context for iterator callback */
@@ -858,10 +857,9 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Construct context for iterator callbacks */
-    ctx.f          = f;
-    ctx.type_id    = type_id;
-    ctx.flags      = flags;
-    ctx.type_match = type_match;
+    ctx.f       = f;
+    ctx.type_id = type_id;
+    ctx.flags   = flags;
 
     /* Iterate through hash table entries, expunge those with specified tag and type id */
     if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__expunge_tag_type_metadata_cb, &ctx) < 0)
@@ -870,6 +868,82 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_expunge_tag_type_metadata() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__expunge_all_tagged_metadata_cb
+ *
+ * Purpose:     Callback for expunging all tagged cache entries
+ *
+ * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5C__expunge_all_tagged_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5C_tag_iter_ettm_ctx_t *ctx = (H5C_tag_iter_ettm_ctx_t *)_ctx; /* Get pointer to iterator context */
+    int                      ret_value = H5_ITER_CONT;              /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_STATIC
+
+    /* Santify checks */
+    HDassert(entry);
+    HDassert(ctx);
+
+    if (H5C_expunge_entry(ctx->f, entry->type, entry->addr, ctx->flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, H5_ITER_ERROR, "can't expunge entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__expunge_all_tagged_metadata_cb() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_expunge_all_tagged_metadata
+ *
+ * Purpose:     Expunge all cache entries
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
+{
+    H5C_t *                 cache;               /* Pointer to cache structure */
+    H5C_tag_iter_ettm_ctx_t ctx;                 /* Context for iterator callback */
+    herr_t                  ret_value = SUCCEED; /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    cache = f->shared->cache; /* Get cache pointer */
+    HDassert(cache != NULL);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+
+    /* Construct context for iterator callbacks */
+    ctx.f       = f;
+    ctx.type_id = type_id;
+    ctx.flags   = flags;
+
+    /* Iterate through all tagged entries, expunging them */
+    if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__expunge_all_tagged_metadata_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iterated expunging of tagged entries failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_expunge_all_tagged_metadata() */
 
 /*-------------------------------------------------------------------------
  *

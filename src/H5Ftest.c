@@ -416,9 +416,10 @@ H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr)
     UINT32DECODE(p, md_hdr->fs_page_size);
     UINT64DECODE(p, md_hdr->tick_num);
     UINT64DECODE(p, md_hdr->index_offset);
-    if ((index_length = uint64_decode(&p)) > SIZE_MAX) {
+    UINT64DECODE(p, index_length);
+    if (index_length > SIZE_MAX)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "index is too long")
-    }
+
     md_hdr->index_length = (size_t)index_length;
 
 done:
@@ -568,16 +569,27 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__vfd_swmr_verify_md_hdr_and_idx() */
 
+/*-------------------------------------------------------------------------
+ * Function: H5F__count_shadow_defrees
+ *
+ * Purpose:
+ *
+ * Return:  SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
 static unsigned
-count_shadow_defrees(shadow_defree_queue_t *shadow_defrees)
+H5F__count_shadow_defrees(shadow_defree_queue_t *shadow_defrees)
 {
     shadow_defree_t *shadow_defree;
     unsigned         count = 0;
 
+    FUNC_ENTER_STATIC_NOERR
+
     TAILQ_FOREACH(shadow_defree, shadow_defrees, link)
     count++;
 
-    return count;
+    FUNC_LEAVE_NOAPI(count)
 }
 
 /*-------------------------------------------------------------------------
@@ -618,7 +630,7 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
     /* Verify the number of entries in the delayed list is as expected */
-    if (count_shadow_defrees(&f->shared->shadow_defrees) == nshadow_defrees)
+    if (H5F__count_shadow_defrees(&f->shared->shadow_defrees) == nshadow_defrees)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */

@@ -2874,20 +2874,29 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_term() */
 
-/* Close the given dataset's chunk index, or destroy it if `destroy`
- * is true.  A closed index merely releases holds on metadata cache
- * entries; the index can be reopened.  Once a dataset's index is
- * destroyed, however, the dataset must not try to use the index, again.
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_index_close
  *
- * A useful side-effect of closing the chunk index is the release
- * pinned/tagged metadata cache entries connected with the index.
+ * Purpose:     Close the given dataset's chunk index, or destroy it if
+ *              `destroy` is true.  A closed index merely releases holds
+ *              on metadata cache entries; the index can be reopened.  Once
+ *              a dataset's index is
+ *              destroyed, however, the dataset must not try to use the
+ *              index, again.
+ *
+ *              A useful side-effect of closing the chunk index is the
+ *              release of pinned/tagged metadata cache entries connected
+ *              with the index.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__chunk_index_close(const H5D_t *dset, bool destroy)
 {
     H5D_chk_idx_info_t     idx_info;
     H5O_storage_chunk_t *  sc        = &(dset->shared->layout.storage.u.chunk);
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    herr_t                 ret_value = SUCCEED;
     H5D_chunk_close_func_t fn;
 
     FUNC_ENTER_STATIC
