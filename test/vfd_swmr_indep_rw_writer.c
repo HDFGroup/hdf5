@@ -220,26 +220,26 @@ verify_matrix(mat_t *mat, unsigned int which)
 static void
 usage(const char *progname)
 {
-    fprintf(stderr,
-            "usage: %s [-S] [-c cols] [-r rows] [-t tick_len] [-m max_lag] \n"
-            "    [-B page_buffer_size] [-s page_size] [-u reader wait interval] [-q silent output] \n"
-            "\n"
-            "-S:	               do not use VFD SWMR\n"
-            "-c cols:	       `cols` columns for the dataset\n"
-            "                      The default value is 512.\n"
-            "-r rows:	       `rows` rows for the dataset\n"
-            "                      The default value is 256.\n"
-            "-t tick_len:    length of a tick in tenths of a second.\n"
-            "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
-            "-B pbs:         page buffer size in bytes:\n"
-            "                The default value is 4K(4096).\n"
-            "-s ps:          page size used by page aggregation, page buffer and \n"
-            "                the metadata file. The default value is 4K(4096).\n"
-            "-u 0.1s:        interval in tenth of seconds to check if a dataset is ready for the reader.\n"
-            "-q:             silence printouts, few messages\n"
-            "\n",
-            progname);
-    exit(EXIT_FAILURE);
+    HDfprintf(stderr,
+              "usage: %s [-S] [-c cols] [-r rows] [-t tick_len] [-m max_lag] \n"
+              "    [-B page_buffer_size] [-s page_size] [-u reader wait interval] [-q silent output] \n"
+              "\n"
+              "-S:	               do not use VFD SWMR\n"
+              "-c cols:	       `cols` columns for the dataset\n"
+              "                      The default value is 512.\n"
+              "-r rows:	       `rows` rows for the dataset\n"
+              "                      The default value is 256.\n"
+              "-t tick_len:    length of a tick in tenths of a second.\n"
+              "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
+              "-B pbs:         page buffer size in bytes:\n"
+              "                The default value is 4K(4096).\n"
+              "-s ps:          page size used by page aggregation, page buffer and \n"
+              "                the metadata file. The default value is 4K(4096).\n"
+              "-u 0.1s:        interval in tenth of seconds to check if a dataset is ready for the reader.\n"
+              "-q:             silence printouts, few messages\n"
+              "\n",
+              progname);
+    HDexit(EXIT_FAILURE);
 }
 
 /* Initialize the state_t with different options specified by the user. */
@@ -368,7 +368,7 @@ indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
 
     /* Pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
     if ((s->fapl = vfd_swmr_create_fapl(true, s->use_vfd_swmr, true, s->pbs, &config)) < 0) {
-        printf("vfd_swmr_create_fapl failed\n");
+        HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
@@ -598,12 +598,12 @@ close_pl(const state_t *s)
 {
 
     if (H5Pclose(s->fapl) < 0) {
-        printf("H5Pclose failed\n");
+        HDprintf("H5Pclose failed\n");
         TEST_ERROR;
     }
 
     if (H5Pclose(s->fcpl) < 0) {
-        printf("H5Pclose failed\n");
+        HDprintf("H5Pclose failed\n");
         TEST_ERROR;
     }
 

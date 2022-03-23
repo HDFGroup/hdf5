@@ -631,7 +631,7 @@ main(int argc, char **argv)
 
         /* Delete 1000 groups if the del_grp option is true.  */
         if (s.del_grp && s.nsteps > 1000) {
-            printf("Deleting groups. \n");
+            HDprintf("Deleting groups. \n");
             for (step = s.nsteps - 1; step >= (s.nsteps - 1000); step--) {
                 dbgf(2, "writer: deleting step %d\n", step);
 
@@ -667,21 +667,21 @@ main(int argc, char **argv)
         }
 
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
-            fprintf(stderr, "HDclock_gettime failed");
+            HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
 
-        printf("Reader: call back function: check group names.\n");
+        HDprintf("Reader: call back function: check group names.\n");
         if (H5Literate(s.file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, NULL) < 0) {
-            printf("H5Literate failed \n");
+            HDprintf("H5Literate failed \n");
             TEST_ERROR;
         }
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-            fprintf(stderr, "HDclock_gettime failed");
+            HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
         temp_time = TIME_PASSED(start_time, end_time);
-        fprintf(stdout, "H5Literate: temp time                           = %lf\n", temp_time);
+        HDfprintf(stdout, "H5Literate: temp time                           = %lf\n", temp_time);
     }
 
     if (H5Pclose(fapl) < 0) {

@@ -289,7 +289,7 @@ usage(const char *progname)
         "-w deflate_level:     the level (0 - 9) of gzip compression\n"
         "\n",
         progname);
-    exit(EXIT_FAILURE);
+    HDexit(EXIT_FAILURE);
 }
 
 static bool
@@ -382,10 +382,10 @@ state_init(state_t *s, int argc, char **argv)
                 s->use_named_pipe = false;
                 break;
             case 'd':
-                if (strcmp(optarg, "1") == 0 || strcmp(optarg, "one") == 0)
+                if (HDstrcmp(optarg, "1") == 0 || HDstrcmp(optarg, "one") == 0)
                     s->expand_2d = false;
-                else if (strcmp(optarg, "2") == 0 || strcmp(optarg, "two") == 0 ||
-                         strcmp(optarg, "both") == 0)
+                else if (HDstrcmp(optarg, "2") == 0 || HDstrcmp(optarg, "two") == 0 ||
+                         HDstrcmp(optarg, "both") == 0)
                     s->expand_2d = true;
                 else {
                     HDfprintf(stderr, "bad -d argument %s\n", optarg);
@@ -496,7 +496,7 @@ state_init(state_t *s, int argc, char **argv)
 
 #ifdef H5_HAVE_AUX_PROCESS
     if (s->vds == vds_multi)
-        exit(EXIT_SUCCESS);
+        HDexit(EXIT_SUCCESS);
 #endif
 
     if (s->vds != vds_off && s->expand_2d) {
@@ -2703,7 +2703,7 @@ main(int argc, char **argv)
         /* Start to write chunks.  The writer writes as many chunks as possible within a tick, then
          * notify the reader.  But it doesn't receive back the reader's notice. */
         if (!write_dsets(s, &np, mat)) {
-            fprintf(stderr, "write_dsets failed");
+            HDfprintf(stderr, "write_dsets failed");
             TEST_ERROR;
         }
     }

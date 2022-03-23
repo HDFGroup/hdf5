@@ -254,7 +254,7 @@ usage(const char *progname)
         "     -x <xincrs> or -y <ydecrs>\n"
         "\n");
 
-    exit(EXIT_FAILURE);
+    HDexit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -340,7 +340,7 @@ state_init(state_t *s, int argc, char **argv)
             case 'u': /* Ticks for reader to wait before verification */
             case 'c': /* Communication interval */
                 errno = 0;
-                tmp   = strtoul(optarg, &end, 0);
+                tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
                     HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
                     TEST_ERROR;

@@ -2172,7 +2172,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
     if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "string passed to snprintf would be truncated")
-    namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN] = '\0';
+    namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN - 1] = '\0';
 
     if ((ud_file = H5FD_open(namebuf, H5F_ACC_TRUNC | H5F_ACC_RDWR | H5F_ACC_CREAT, H5P_FILE_ACCESS_DEFAULT,
                              HADDR_UNDEF)) == NULL)
@@ -2306,7 +2306,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")
     if (sz > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "string passed to snprintf would be truncated")
-    newname[H5F__MAX_VFD_SWMR_FILE_NAME_LEN] = '\0';
+    newname[H5F__MAX_VFD_SWMR_FILE_NAME_LEN - 1] = '\0';
     HDrename(namebuf, newname);
 
     ++shared->updater_seq_num;

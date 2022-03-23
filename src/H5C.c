@@ -11,9 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* TEMPORARY (during VFD SWMR sync with develop - reduces churn) */
-/* clang-format off */
-
 /*-------------------------------------------------------------------------
  *
  * Created:     H5C.c
@@ -36,7 +33,7 @@
  *
  *    Code Changes:
  *
- *	 - Remove extra functionality in H5C__flush_single_entry()?
+ *     - Remove extra functionality in H5C__flush_single_entry()?
  *
  *	 - Change protect/unprotect to lock/unlock.
  *
@@ -54,18 +51,18 @@
  *         the LRU list, eliminating skip list lookups when evicting objects
  *         from the cache.
  *
- *	 - Create MPI type for dirty objects when flushing in parallel.
+ *     - Create MPI type for dirty objects when flushing in parallel.
  *
- *	 - Now that TBBT routines aren't used, fix nodes in memory to
+ *     - Now that TBBT routines aren't used, fix nodes in memory to
  *         point directly to the skip list node from the LRU list, eliminating
  *         skip list lookups when evicting objects from the cache.
  *
- *	Tests:
+ *  Tests:
  *
- *	 - Trim execution time.  (This is no longer a major issue with the
- *	   shift from the TBBT to a hash table for indexing.)
+ *     - Trim execution time.  (This is no longer a major issue with the
+ *       shift from the TBBT to a hash table for indexing.)
  *
- *	 - Add random tests.
+ *     - Add random tests.
  *
  **************************************************************************/
 
@@ -79,17 +76,18 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"       /* Generic Functions            */
-#include "H5retry_private.h" /* Retry loops                  */
-#include "H5Cpkg.h"          /* Cache                        */
-#include "H5CXprivate.h"     /* API Contexts                 */
-#include "H5Eprivate.h"      /* Error handling               */
-#include "H5Fpkg.h"          /* Files                        */
-#include "H5FLprivate.h"     /* Free Lists                   */
-#include "H5Iprivate.h"      /* IDs                          */
-#include "H5MFprivate.h"     /* File memory management       */
-#include "H5MMprivate.h"     /* Memory management            */
-#include "H5Pprivate.h"      /* Property lists               */
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Cpkg.h"      /* Cache                        */
+#include "H5CXprivate.h" /* API Contexts                 */
+#include "H5Eprivate.h"  /* Error handling               */
+#include "H5Fpkg.h"      /* Files                        */
+#include "H5FLprivate.h" /* Free Lists                   */
+#include "H5Iprivate.h"  /* IDs                          */
+#include "H5MFprivate.h" /* File memory management       */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Pprivate.h"  /* Property lists               */
+
+#include "H5retry_private.h" /* Retry loops */
 
 /****************/
 /* Local Macros */
@@ -1064,12 +1062,6 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->vfd_swmr_reader);
 
-#if 0  /* JRM */
-    HDfprintf(stderr, 
-           "H5C_evict_or_refresh_all_entries_in_page() entering. page = %lld\n",
-            page);
-#endif /* JRM */
-
     /* since file must be opened R/O for a VFD SWMR reader, the skip
      * list must be empty.  Verify this.
      */
@@ -1117,11 +1109,6 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
                     tag = entry_ptr->tag_info->tag;
 
                     HDassert(!(entry_ptr->tag_info->corked));
-#if 0  /* JRM */
-                    HDfprintf(stderr, 
-                    "evicting tagged entries addr/page/tag == %lld/%lld/%lld\n",
-                              entry_ptr->addr, entry_ptr->page, tag);
-#endif /* JRM */
 
                     /* passing TRUE for the match_global parameter.  Look
                      * into this and verify that it is the right thing to
@@ -1137,10 +1124,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
                     follow_ptr = entry_ptr = NULL;
                 }
                 else if (entry_ptr->type->refresh) {
-#if 0  /* JRM */
-                    HDfprintf(stderr, "refreshing addr/page/tag == %lld/%lld\n",
-                              entry_ptr->addr, entry_ptr->page);
-#endif /* JRM */
+
                     /* If there is a refresh callback, use it to minimize
                      * overhead.
                      *
@@ -1281,19 +1265,6 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
                  * skip list -- thus no need for the
                  * H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG.
                  */
-#if 0  /* JRM */
-                if ( entry_ptr->tag_info ) {
-
-                    HDfprintf(stderr, 
-                          "evicting entry addr/page/tag == %lld/%lld/%lld\n",
-                          entry_ptr->addr, entry_ptr->page, 
-                          entry_ptr->tag_info->tag);
-                } else {
-                    HDfprintf(stderr, 
-                          "evicting entry addr/page == %lld/%lld no tag\n",
-                          entry_ptr->addr, entry_ptr->page);
-                }
-#endif /* JRM */
                 if (H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0)
 
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "can't evict unpinned entry")
@@ -1348,10 +1319,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t lengt
     entry_ptr = (cache_ptr->page_index)[i];
 
     while (entry_ptr) {
-
         HDassert((entry_ptr->page != page) || (entry_ptr->refreshed_in_tick == tick));
-        ;
-
         entry_ptr = entry_ptr->pi_next;
     }
 
@@ -1703,7 +1671,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* if this is a VFD SWMR reader, verify that the page size is defined */
+    /* If this is a VFD SWMR reader, verify that the page size is defined */
     HDassert((!cache_ptr->vfd_swmr_reader) || (cache_ptr->page_size > 0));
 
     HDassert(type);
@@ -1831,14 +1799,10 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     entry_ptr->tag_info = NULL;
 
     /* initialize fields supporting VFD SWMR */
-    if (cache_ptr->vfd_swmr_reader) {
-
+    if (cache_ptr->vfd_swmr_reader)
         entry_ptr->page = (addr / cache_ptr->page_size);
-    }
-    else {
-
+    else
         entry_ptr->page = 0;
-    }
     entry_ptr->refreshed_in_tick = 0;
     entry_ptr->pi_next           = NULL;
     entry_ptr->pi_prev           = NULL;
@@ -2281,7 +2245,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* if this is a VFD SWMR reader, verify that the page size is defined */
+    /* If this is a VFD SWMR reader, verify that the page size is defined */
     HDassert((!cache_ptr->vfd_swmr_reader) || (cache_ptr->page_size > 0));
 
     HDassert(type);
@@ -2346,13 +2310,11 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
     entry_ptr->addr = new_addr;
 
-    /* update the page in which the entry resides if the file is opened
-     * as a VFD SWMR reader.
+    /* Update the page in which the entry resides if the file is opened
+     * as a VFD SWMR reader
      */
-    if (cache_ptr->vfd_swmr_reader) {
-
+    if (cache_ptr->vfd_swmr_reader)
         entry_ptr->page = (new_addr / cache_ptr->page_size);
-    }
 
     if (!entry_ptr->destroy_in_progress) {
         hbool_t was_dirty; /* Whether the entry was previously dirty */
@@ -2806,15 +2768,16 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #endif /* H5_HAVE_PARALLEL */
                                              type, addr, udata))) {
             /* Print out meaningful message for VFD SWMR reader */
-            if(f->shared->vfd_swmr && !f->shared->vfd_swmr_writer) {
-                uint64_t                   tmp_tick_num = 0;
+            if (f->shared->vfd_swmr && !f->shared->vfd_swmr_writer) {
+                uint64_t tmp_tick_num = 0;
 
                 if (H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, TRUE, &tmp_tick_num, NULL, NULL) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, NULL, "error in retrieving tick_num from driver");
 
                 if (tmp_tick_num >= f->shared->tick_num + f->shared->vfd_swmr_config.max_lag)
-                    HDONE_ERROR(H5E_FILE, H5E_SYSTEM, NULL,
-                      "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
+                    HDONE_ERROR(
+                        H5E_FILE, H5E_SYSTEM, NULL,
+                        "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
             }
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
@@ -3520,7 +3483,7 @@ done:
  * Programmer:  John Mainzer
  *              1/15/19
  *
- * Changes:     None.
+ * Changes:     None
  *
  *-------------------------------------------------------------------------
  */
@@ -7128,7 +7091,8 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
                 H5C__SET_PB_WRITE_HINTS(cache_ptr, entry_ptr->type)
 
-                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0) {
+                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) <
+                    0) {
 
                     H5C__RESET_PB_WRITE_HINTS(cache_ptr)
 
@@ -7482,7 +7446,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
      */
 
     /* VFD SWMR TODO: Think on this, and decide if we need to extend
-     * this for multi page metadata entries.
+     * this for multi-page metadata entries.
      */
     if (update_page_buffer) {
 
@@ -7764,48 +7728,48 @@ H5C__load_entry(H5F_t *f,
                         if (!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
 
-                    /* the original version of this code re-read
-                     * the entire buffer.  At some point, someone
-                     * reworked this code to avoid re-reading the
-                     * initial portion of the buffer.
-                     *
-                     * In addition to being of questionable utility,
-                     * this optimization changed the invariant that
-                     * that metadata is read and written atomically.
-                     * While this didn't cause immediate problems,
-                     * the page buffer in VFD SWMR depends on this
-                     * invariant in its management of multi-page
-                     * metadata entries.
-                     *
-                     * To repair this issue, I have reverted to
-                     * the original algorithm for managing the
-                     * speculative load case.  Note that I have
-                     * done so crudely -- before merge, we should
-                     * remove the infrastructure that supports the
-                     * optimization.
-                     *
-                     * We should also verify my impression that the
-                     * that the optimization is of no measurable
-                     * value.  If it is, we will put it back, but
-                     * disable it in the VFD SWMR case.
-                     *
-                     * While this issue was detected in the global
-                     * heap case, note that the super block, the
-                     * local heap, and the fractal heap also use
-                     * speculative loads.
-                     *
-                     *                          JRM -- 3/24/20
-                     */
+                            /* the original version of this code re-read
+                             * the entire buffer.  At some point, someone
+                             * reworked this code to avoid re-reading the
+                             * initial portion of the buffer.
+                             *
+                             * In addition to being of questionable utility,
+                             * this optimization changed the invariant that
+                             * that metadata is read and written atomically.
+                             * While this didn't cause immediate problems,
+                             * the page buffer in VFD SWMR depends on this
+                             * invariant in its management of multi-page
+                             * metadata entries.
+                             *
+                             * To repair this issue, I have reverted to
+                             * the original algorithm for managing the
+                             * speculative load case.  Note that I have
+                             * done so crudely -- before merge, we should
+                             * remove the infrastructure that supports the
+                             * optimization.
+                             *
+                             * We should also verify my impression that the
+                             * that the optimization is of no measurable
+                             * value.  If it is, we will put it back, but
+                             * disable it in the VFD SWMR case.
+                             *
+                             * While this issue was detected in the global
+                             * heap case, note that the super block, the
+                             * local heap, and the fractal heap also use
+                             * speculative loads.
+                             *
+                             *                          JRM -- 3/24/20
+                             */
 
-                    H5C__SET_PB_READ_HINTS(f->shared->cache, type, FALSE);
+                            H5C__SET_PB_READ_HINTS(f->shared->cache, type, FALSE);
 
-                    if (H5F_block_read(f, type->mem_type, addr, actual_len, image) < 0) {
+                            if (H5F_block_read(f, type->mem_type, addr, actual_len, image) < 0) {
 
-                        H5C__RESET_PB_READ_HINTS(f->shared->cache)
+                                H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
-                    }
-                    H5C__RESET_PB_READ_HINTS(f->shared->cache)
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                            }
+                            H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
 #ifdef H5_HAVE_PARALLEL
                         }
@@ -7846,20 +7810,15 @@ H5C__load_entry(H5F_t *f,
         }
 
         /* Check for too many tries */
-        if (!do_try) {
+        if (!do_try)
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
-                        "incorrect metadata checksum after all read attempts addr %" PRIuHADDR
-                        " size %zu",
-                        addr, len);
-        }
+                        "incorrect metadata checksum after all read attempts addr %" PRIuHADDR " size %zu",
+                        addr, len)
 
-    /* Calculate and track the # of retries */
-    if ((tries = H5_retry_tries(&retry)) > 1) { /* Does not track 0 retry */
-
-        if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
-
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", tries)
-    }
+        /* Calculate and track the # of retries (does not track 0 retries) */
+        if ((tries = H5_retry_tries(&retry)) > 1)
+            if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", tries)
 
         /* Set the final length (in case it wasn't set earlier) */
         len = actual_len;
@@ -7966,14 +7925,10 @@ H5C__load_entry(H5F_t *f,
     entry->tag_info = NULL;
 
     /* initialize fields supporting VFD SWMR */
-    if (f->shared->cache->vfd_swmr_reader) {
-
+    if (f->shared->cache->vfd_swmr_reader)
         entry->page = (addr / f->shared->cache->page_size);
-    }
-    else {
-
+    else
         entry->page = 0;
-    }
     entry->refreshed_in_tick = 0;
     entry->pi_next           = NULL;
     entry->pi_prev           = NULL;
@@ -8314,10 +8269,8 @@ done:
  *
  * Programmer:  John Mainzer, 7/14/05
  *
- * Changes:
- *
- *		Added code to verify that the LRU contains no pinned
- *		entries.                        JRM -- 4/25/14
+ * Changes:     Added code to verify that the LRU contains no pinned
+ *              entries.                        JRM -- 4/25/14
  *
  *-------------------------------------------------------------------------
  */
@@ -8396,9 +8349,7 @@ done:
  *
  * Programmer:  John Mainzer, 4/25/14
  *
- * Changes:
- *
- *		None.
+ * Changes:     None
  *
  *-------------------------------------------------------------------------
  */
@@ -8480,9 +8431,7 @@ done:
  *
  * Programmer:  John Mainzer, 4/25/14
  *
- * Changes:
- *
- *		None.
+ * Changes:     None
  *
  *-------------------------------------------------------------------------
  */
@@ -8562,9 +8511,7 @@ done:
  *
  * Programmer:  John Mainzer, 11/1/14
  *
- * Changes:
- *
- *		None.
+ * Changes:     None
  *
  *-------------------------------------------------------------------------
  */
@@ -9678,10 +9625,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                 entry_ptr->addr = new_addr;
 
                 /* In the VFD SWMR reader case, update the entry page field */
-                if (cache_ptr->vfd_swmr_reader) {
-
+                if (cache_ptr->vfd_swmr_reader)
                     entry_ptr->page = (new_addr / cache_ptr->page_size);
-                }
 
                 /* And then reinsert in the index and slist */
                 H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL);
@@ -9860,6 +9805,3 @@ H5C_remove_entry(void *_entry)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__remove_entry() */
-
-/* TEMPORARY (during VFD SWMR sync with develop - reduces churn) */
-/* clang-format on */
