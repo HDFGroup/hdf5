@@ -32,7 +32,6 @@
 #include "vfd_swmr_common.h"
 #include "swmr_common.h"
 
-/* Uses getopt */
 #ifndef H5_HAVE_WIN32_API
 
 /********************/
@@ -285,15 +284,17 @@ main(int argc, char *const *argv)
     hbool_t  use_seed        = FALSE; /* Set to TRUE if a seed was set on the command line */
     hbool_t  wait_for_signal = TRUE;
     unsigned random_seed     = 0; /* Random # seed */
-    int      ch, temp;
+    int      opt, temp;
+    const char *           s_opts   = "Wf:qr:o";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     block_signals(&oldset);
 
-    while ((ch = getopt(argc, argv, "Wf:qr:o")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             /* # of records to write between flushing file */
             case 'f':
-                flush_count = HDatol(optarg);
+                flush_count = HDatol(H5_optarg);
                 if (flush_count < 0)
                     usage();
                 break;
@@ -306,7 +307,7 @@ main(int argc, char *const *argv)
             /* Random # seed */
             case 'r':
                 use_seed    = TRUE;
-                temp        = HDatoi(optarg);
+                temp        = HDatoi(H5_optarg);
                 random_seed = (unsigned)temp;
                 break;
 
@@ -324,8 +325,8 @@ main(int argc, char *const *argv)
                 break;
         }
     }
-    argv += optind;
-    argc -= optind;
+    argv += H5_optind;
+    argc -= H5_optind;
     /* Parse command line options */
     if (argc < 1)
         usage();

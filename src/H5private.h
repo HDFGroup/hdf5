@@ -1330,6 +1330,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsigsetjmp
 #define HDsigsetjmp(J, N) sigsetjmp(J, N)
 #endif
+#ifndef HDsigtimedwait
+#define HDsigtimedwait(S, I, T) sigtimedwait(S, I, T)
+#endif
 #ifndef HDsigsuspend
 #define HDsigsuspend(S) sigsuspend(S)
 #endif
@@ -1407,6 +1410,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrrchr
 #define HDstrrchr(S, C) strrchr(S, C)
+#endif
+#ifndef HDstrsignal
+#define HDstrsignal(S) strsignal(S)
 #endif
 #ifndef HDstrspn
 #define HDstrspn(X, Y) strspn(X, Y)

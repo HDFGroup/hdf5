@@ -148,10 +148,12 @@ static bool
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
-    int           ch;
+    int           opt;
     const hsize_t dims  = 1;
     char *        tfile = NULL;
     char *        end;
+    const char *           s_opts   = "SGa:bc:n:Nqu:t:m:B:s:A:O:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = ALL_HID_INITIALIZER;
 
@@ -167,8 +169,8 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:t:m:B:s:A:O:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             case 'S':
                 s->use_vfd_swmr = false;
                 break;
@@ -184,35 +186,35 @@ state_init(state_t *s, int argc, char **argv)
             case 'B':
             case 's':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDprintf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    HDprintf("`-%c` argument `%lu` too large\n", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'a')
+                if (opt == 'a')
                     s->asteps = (unsigned)tmp;
-                else if (ch == 'c')
+                else if (opt == 'c')
                     s->csteps = (unsigned)tmp;
-                else if (ch == 'n')
+                else if (opt == 'n')
                     s->nsteps = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->update_interval = (unsigned)tmp;
-                else if (ch == 't')
+                else if (opt == 't')
                     s->tick_len = (unsigned)tmp;
-                else if (ch == 'm')
+                else if (opt == 'm')
                     s->max_lag = (unsigned)tmp;
-                else if (ch == 'B')
+                else if (opt == 'B')
                     s->pbs = (unsigned)tmp;
-                else if (ch == 's')
+                else if (opt == 's')
                     s->ps = (unsigned)tmp;
                 break;
             case 'b':
@@ -222,52 +224,52 @@ state_init(state_t *s, int argc, char **argv)
                 s->use_named_pipes = false;
                 break;
             case 'O':
-                if (HDstrcmp(optarg, "grp-creation") == 0)
+                if (HDstrcmp(H5_optarg, "grp-creation") == 0)
                     s->grp_op_pattern = 'c';
-                else if (HDstrcmp(optarg, "grp-deletion") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-deletion") == 0)
                     s->grp_op_pattern = 'd';
-                else if (HDstrcmp(optarg, "grp-move") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-move") == 0)
                     s->grp_op_pattern = 'm';
-                else if (HDstrcmp(optarg, "grp-ins-links") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-ins-links") == 0)
                     s->grp_op_pattern = 'i';
-                else if (HDstrcmp(optarg, "grp-del-links") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-del-links") == 0)
                     s->grp_op_pattern = 'D';
-                else if (HDstrcmp(optarg, "grp-compact-t-dense") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-compact-t-dense") == 0)
                     s->grp_op_pattern = 't';
-                else if (HDstrcmp(optarg, "grp-dense-t-compact") == 0)
+                else if (HDstrcmp(H5_optarg, "grp-dense-t-compact") == 0)
                     s->grp_op_pattern = 'T';
                 else {
-                    HDprintf("Invalid -O argument \"%s\"", optarg);
+                    HDprintf("Invalid -O argument \"%s\"", H5_optarg);
                     TEST_ERROR;
                 }
                 break;
             case 'A':
-                if (HDstrcmp(optarg, "compact") == 0)
+                if (HDstrcmp(H5_optarg, "compact") == 0)
                     s->at_pattern = 'c';
-                else if (HDstrcmp(optarg, "dense") == 0)
+                else if (HDstrcmp(H5_optarg, "dense") == 0)
                     s->at_pattern = 'd';
-                else if (HDstrcmp(optarg, "compact-add-to-dense") == 0)
+                else if (HDstrcmp(H5_optarg, "compact-add-to-dense") == 0)
                     s->at_pattern = 't';
-                else if (HDstrcmp(optarg, "compact-del") == 0)
+                else if (HDstrcmp(H5_optarg, "compact-del") == 0)
                     s->at_pattern = 'C';
-                else if (HDstrcmp(optarg, "dense-del") == 0)
+                else if (HDstrcmp(H5_optarg, "dense-del") == 0)
                     s->at_pattern = 'D';
-                else if (HDstrcmp(optarg, "dense-del-to-compact") == 0)
+                else if (HDstrcmp(H5_optarg, "dense-del-to-compact") == 0)
                     s->at_pattern = 'T';
-                else if (HDstrcmp(optarg, "modify") == 0)
+                else if (HDstrcmp(H5_optarg, "modify") == 0)
                     s->at_pattern = 'M';
-                else if (HDstrcmp(optarg, "add-vstr") == 0)
+                else if (HDstrcmp(H5_optarg, "add-vstr") == 0)
                     s->at_pattern = 'v';
-                else if (HDstrcmp(optarg, "remove-vstr") == 0)
+                else if (HDstrcmp(H5_optarg, "remove-vstr") == 0)
                     s->at_pattern = 'r';
-                else if (HDstrcmp(optarg, "modify-vstr") == 0)
+                else if (HDstrcmp(H5_optarg, "modify-vstr") == 0)
                     s->at_pattern = 'm';
-                else if (HDstrcmp(optarg, "add-ohr-block") == 0)
+                else if (HDstrcmp(H5_optarg, "add-ohr-block") == 0)
                     s->at_pattern = 'a';
-                else if (HDstrcmp(optarg, "del-ohr-block") == 0)
+                else if (HDstrcmp(H5_optarg, "del-ohr-block") == 0)
                     s->at_pattern = 'R';
                 else {
-                    HDprintf("Invalid -A argument \"%s\"", optarg);
+                    HDprintf("Invalid -A argument \"%s\"", H5_optarg);
                     TEST_ERROR;
                 }
                 break;
@@ -280,8 +282,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     if (s->grp_op_pattern != ' ')
         s->grp_op_test = true;

@@ -28,8 +28,7 @@
 
 enum _step { CREATE = 0, LENGTHEN, SHORTEN, DELETE, NSTEPS } step_t;
 
-static const hid_t badhid               = H5I_INVALID_HID; // abbreviate
-static bool        caught_out_of_bounds = false;
+static bool caught_out_of_bounds = false;
 
 static void
 write_vl_dset(hid_t dset, hid_t type, hid_t space, char *data)
@@ -50,7 +49,7 @@ initialize_dset(hid_t file, hid_t type, hid_t space, const char *name,
     dset = H5Dcreate2(file, name, type, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT);
 
-    if (dset == badhid)
+    if (dset == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Dcreate2");
 
     if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
@@ -79,7 +78,7 @@ create_vl_dset(hid_t file, hid_t type, hid_t space, const char *name)
 
     dset = H5Dcreate2(file, name, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    if (dset == badhid)
+    if (dset == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Dcreate2");
 
     return dset;
@@ -127,21 +126,22 @@ main(int argc, char **argv)
     H5F_t *               f;
     H5C_t *               cache;
     sigset_t              oldsigs;
-    herr_t                ret;
     bool                  variable = true, wait_for_signal = true;
     const hsize_t         dims = 1;
-    int                   ch, i, ntimes = 100;
+    int                   opt, i, ntimes = 100;
     unsigned long         tmp;
     char *                end;
     bool                  use_vfd_swmr = true;
     const struct timespec delay        = {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
     testsel_t             sel          = TEST_NONE;
     H5F_vfd_swmr_config_t config;
+    const char *           s_opts   = "SWfn:qt:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    HDassert(H5T_C_S1 != badhid);
+    HDassert(H5T_C_S1 != H5I_INVALID_HID);
 
-    while ((ch = getopt(argc, argv, "SWfn:qt:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             case 'S':
                 use_vfd_swmr = false;
                 break;
@@ -153,11 +153,11 @@ main(int argc, char **argv)
                 break;
             case 'n':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0')
-                    errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0')
+                    errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
                 else if (errno != 0)
-                    err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
+                    err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
                 else if (tmp > INT_MAX)
                     errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
                 ntimes = (int)tmp;
@@ -166,9 +166,9 @@ main(int argc, char **argv)
                 verbosity = 1;
                 break;
             case 't':
-                if (HDstrcmp(optarg, "oob") == 0)
+                if (HDstrcmp(H5_optarg, "oob") == 0)
                     sel = TEST_OOB;
-                else if (HDstrcmp(optarg, "null") == 0)
+                else if (HDstrcmp(H5_optarg, "null") == 0)
                     sel = TEST_NULL;
                 else
                     usage(argv[0]);
@@ -178,14 +178,15 @@ main(int argc, char **argv)
                 break;
         }
     }
-    argv += optind;
-    argc -= optind;
+    argv += H5_optind;
+    argc -= H5_optind;
 
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path
+     */
     init_vfd_swmr_config(&config, 4, 7, true, TRUE, FALSE, TRUE, 128, "./vlstr-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
@@ -203,7 +204,7 @@ main(int argc, char **argv)
     /* Create the VL string datatype and a scalar dataspace, or a
      * fixed-length string datatype and a simple dataspace.
      */
-    if ((type = H5Tcopy(H5T_C_S1)) == badhid)
+    if ((type = H5Tcopy(H5T_C_S1)) == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Tcopy");
 
     if (!variable) {
@@ -217,7 +218,7 @@ main(int argc, char **argv)
         space = H5Screate(H5S_SCALAR);
     }
 
-    if (space == badhid)
+    if (space == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Screate");
 
     if ((f = H5VL_object_verify(fid, H5I_FILE)) == NULL)
@@ -225,7 +226,7 @@ main(int argc, char **argv)
 
     cache = f->shared->cache;
 
-    if (fid == badhid)
+    if (fid == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Fcreate");
 
     block_signals(&oldsigs);

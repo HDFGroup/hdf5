@@ -247,10 +247,12 @@ static bool
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
-    int           ch;
+    int           opt;
     char *        tfile = NULL;
     char *        end;
     const char *  personality;
+    const char *           s_opts   = "Sqc:r:t:m:B:s:u:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = state_initializer();
 
@@ -266,8 +268,8 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "Sqc:r:t:m:B:s:u:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             case 'S':
                 s->use_vfd_swmr = false;
                 break;
@@ -279,37 +281,37 @@ state_init(state_t *s, int argc, char **argv)
             case 's':
             case 'u':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDfprintf(stderr, "-%c argument %lu too large", ch, tmp);
+                    HDfprintf(stderr, "-%c argument %lu too large", opt, tmp);
                     TEST_ERROR;
                 }
-                if ((ch == 'c' || ch == 'r') && tmp == 0) {
-                    HDfprintf(stderr, "-%c argument %lu must be >= 1", ch, tmp);
+                if ((opt == 'c' || opt == 'r') && tmp == 0) {
+                    HDfprintf(stderr, "-%c argument %lu must be >= 1", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'c')
+                if (opt == 'c')
                     s->cols = (unsigned)tmp;
-                else if (ch == 'r')
+                else if (opt == 'r')
                     s->rows = (unsigned)tmp;
-                else if (ch == 't')
+                else if (opt == 't')
                     s->tick_len = (unsigned)tmp;
-                else if (ch == 'm')
+                else if (opt == 'm')
                     s->max_lag = (unsigned)tmp;
-                else if (ch == 'B')
+                else if (opt == 'B')
                     s->pbs = (unsigned)tmp;
-                else if (ch == 's')
+                else if (opt == 's')
                     s->ps = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->check_interval = (unsigned)tmp;
                 break;
             case 'q':
@@ -321,8 +323,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     if (argc > 0) {
         HDprintf("unexpected command-line arguments\n");

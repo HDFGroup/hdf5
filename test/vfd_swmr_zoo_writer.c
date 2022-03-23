@@ -97,12 +97,14 @@ usage(const char *progname)
 static int
 parse_command_line_options(int argc, char **argv)
 {
-    int           ch;
+    int           opt;
     unsigned long tmpl;
     char *        end;
+    const char *           s_opts   = "CSael:Nqv";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    while ((ch = getopt(argc, argv, "CSael:Nqv")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             case 'C':
                 config.skip_compact = true;
                 break;
@@ -119,14 +121,14 @@ parse_command_line_options(int argc, char **argv)
                 /* Expected maximal number of ticks from the writer's finishing zoo creation or deletion
                  * to the reader's finishing validation of zoo creation or deletion */
                 errno = 0;
-                tmpl  = HDstrtoul(optarg, &end, 0);
+                tmpl  = HDstrtoul(H5_optarg, &end, 0);
 
-                if (end == optarg || *end != '\0') {
-                    HDprintf("couldn't parse `-l` argument `%s`", optarg);
+                if (end == H5_optarg || *end != '\0') {
+                    HDprintf("couldn't parse `-l` argument `%s`", H5_optarg);
                     goto error;
                 }
                 else if (errno != 0) {
-                    HDprintf("couldn't parse `-l` argument `%s`", optarg);
+                    HDprintf("couldn't parse `-l` argument `%s`", H5_optarg);
                     goto error;
                 }
                 else if (tmpl > UINT_MAX) {
@@ -159,8 +161,8 @@ parse_command_line_options(int argc, char **argv)
                 break;
         }
     }
-    argv += optind;
-    argc -= optind;
+    argv += H5_optind;
+    argc -= H5_optind;
 
     if (argc > 0) {
         H5_FAILED();

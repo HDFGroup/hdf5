@@ -238,8 +238,6 @@ state_initializer(void)
 
 static bool state_init(state_t *, int, char **);
 
-static const hid_t badhid = H5I_INVALID_HID;
-
 static hsize_t two_dee_max_dims[RANK2], three_dee_max_dims[RANK3];
 
 static void
@@ -322,7 +320,7 @@ static bool
 state_init(state_t *s, int argc, char **argv)
 {
     unsigned long     tmp;
-    int               ch;
+    int               opt;
     unsigned          i;
     const hsize_t     dims  = 1;
     char *            tfile = NULL;
@@ -332,6 +330,8 @@ state_init(state_t *s, int argc, char **argv)
     quadrant_t *const ul = &s->quadrants.ul, *const ur = &s->quadrants.ur, *const bl = &s->quadrants.bl,
                       *const br = &s->quadrants.br, *const src = &s->quadrants.src;
     const char *personality;
+    const char *           s_opts   = "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = state_initializer();
 
@@ -345,8 +345,8 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+        switch (opt) {
             case 'A':
                 s->use_aux_proc = true;
                 break;
@@ -382,13 +382,13 @@ state_init(state_t *s, int argc, char **argv)
                 s->use_named_pipe = false;
                 break;
             case 'd':
-                if (HDstrcmp(optarg, "1") == 0 || HDstrcmp(optarg, "one") == 0)
+                if (HDstrcmp(H5_optarg, "1") == 0 || HDstrcmp(H5_optarg, "one") == 0)
                     s->expand_2d = false;
-                else if (HDstrcmp(optarg, "2") == 0 || HDstrcmp(optarg, "two") == 0 ||
-                         HDstrcmp(optarg, "both") == 0)
+                else if (HDstrcmp(H5_optarg, "2") == 0 || HDstrcmp(H5_optarg, "two") == 0 ||
+                         HDstrcmp(H5_optarg, "both") == 0)
                     s->expand_2d = true;
                 else {
-                    HDfprintf(stderr, "bad -d argument %s\n", optarg);
+                    HDfprintf(stderr, "bad -d argument %s\n", H5_optarg);
                     TEST_ERROR;
                 }
                 break;
@@ -410,40 +410,40 @@ state_init(state_t *s, int argc, char **argv)
             case 'v':
             case 'w':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDfprintf(stderr, "-%c argument %lu too large", ch, tmp);
+                    HDfprintf(stderr, "-%c argument %lu too large", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if ((ch == 'c' || ch == 'r') && tmp == 0) {
-                    HDfprintf(stderr, "-%c argument %lu must be >= 1", ch, tmp);
+                if ((opt == 'c' || opt == 'r') && tmp == 0) {
+                    HDfprintf(stderr, "-%c argument %lu must be >= 1", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'a')
+                if (opt == 'a')
                     s->asteps = (unsigned)tmp;
-                else if (ch == 'c')
+                else if (opt == 'c')
                     s->cols = (unsigned)tmp;
-                else if (ch == 'e')
+                else if (opt == 'e')
                     s->depth = (unsigned)tmp;
-                else if (ch == 'f')
+                else if (opt == 'f')
                     s->tick_len = (unsigned)tmp;
-                else if (ch == 'g')
+                else if (opt == 'g')
                     s->max_lag = (unsigned)tmp;
-                else if (ch == 'j')
+                else if (opt == 'j')
                     s->skip_chunk = (unsigned)tmp;
-                else if (ch == 'k')
+                else if (opt == 'k')
                     s->part_chunk = (unsigned)tmp;
-                else if (ch == 'l') {
+                else if (opt == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
                     float    time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
                     unsigned sec  = (unsigned)time;
@@ -452,21 +452,21 @@ state_init(state_t *s, int argc, char **argv)
                     s->ival.tv_sec  = sec;
                     s->ival.tv_nsec = nsec;
                 }
-                else if (ch == 'm')
+                else if (opt == 'm')
                     s->mdc_init_size = (unsigned)tmp;
-                else if (ch == 'n')
+                else if (opt == 'n')
                     s->nsteps = (unsigned)tmp;
-                else if (ch == 'o')
+                else if (opt == 'o')
                     s->page_buf_size = (unsigned)tmp;
-                else if (ch == 'p')
+                else if (opt == 'p')
                     s->fsp_size = (unsigned)tmp;
-                else if (ch == 'r')
+                else if (opt == 'r')
                     s->rows = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->over_extend = (unsigned)tmp;
-                else if (ch == 'v')
+                else if (opt == 'v')
                     s->chunk_cache_size = (unsigned)tmp;
-                else if (ch == 'w')
+                else if (opt == 'w')
                     s->deflate_level = (unsigned)tmp;
                 else
                     s->ndatasets = (unsigned)tmp;
@@ -486,8 +486,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     if (argc > 0) {
         HDfprintf(stderr, "unexpected command-line arguments\n");
@@ -664,8 +664,8 @@ state_init(state_t *s, int argc, char **argv)
     }
 
     for (i = 0; i < s->ndatasets; i++) {
-        s->dataset[i]    = badhid;
-        s->sources[i].ul = s->sources[i].ur = s->sources[i].bl = s->sources[i].br = badhid;
+        s->dataset[i]    = H5I_INVALID_HID;
+        s->sources[i].ul = s->sources[i].ur = s->sources[i].bl = s->sources[i].br = H5I_INVALID_HID;
     }
 
     if (s->test_3d) {
@@ -879,7 +879,7 @@ state_destroy(state_t *s)
     for (i = 0; i < NELMTS(s->file); i++) {
         hid_t fid = s->file[i];
 
-        s->file[i] = badhid;
+        s->file[i] = H5I_INVALID_HID;
 
         if (s->vds != vds_multi && i > 0)
             continue;
@@ -1173,6 +1173,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef TMP
 static herr_t
 md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
 {
@@ -1253,6 +1254,7 @@ error:
 
     return -1;
 } /* md_ck_cb() */
+#endif
 
 static bool
 create_extensible_dset(state_t *s, unsigned int which)
@@ -1422,7 +1424,7 @@ close_extensible_dset(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-    s->dataset[which] = badhid;
+    s->dataset[which] = H5I_INVALID_HID;
 
     if (s->vds != vds_off && s->writer) {
         sources_t *const srcs = &s->sources[which];
@@ -1452,7 +1454,9 @@ open_extensible_dset(state_t *s)
     hsize_t      dims2[RANK2], maxdims2[RANK2];
     hsize_t      dims3[RANK3], maxdims3[RANK3];
     char         dname[sizeof("/dataset-9999999999")];
-    hid_t        dset_id, filespace, dtype;
+    hid_t        dset_id = H5I_INVALID_HID;
+    hid_t        filespace = H5I_INVALID_HID;
+    hid_t        dtype = H5I_INVALID_HID;
     int          rank;
     unsigned int which, i;
 
@@ -2549,7 +2553,6 @@ main(int argc, char **argv)
     state_t                 s;
     np_state_t              np;
     size_t                  i;
-    H5F_generate_md_ck_cb_t cb_info; /* Callback */
 
     if (!state_init(&s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
@@ -2625,6 +2628,8 @@ main(int argc, char **argv)
         /* This part is for debugging only */
 #ifdef TMP
         {
+            H5F_generate_md_ck_cb_t cb_info;
+
             /* Set up callback to generate checksums for updater's metadata files */
             cb_info.func = md_ck_cb;
 
@@ -2636,7 +2641,7 @@ main(int argc, char **argv)
         s.file[i] = s.writer ? H5Fcreate(s.filename[i], H5F_ACC_TRUNC, fcpl, fapl)
                              : H5Fopen(s.filename[i], H5F_ACC_RDONLY, fapl);
 
-        if (s.file[i] == badhid) {
+        if (s.file[i] == H5I_INVALID_HID) {
             HDfprintf(stderr, s.writer ? "H5Fcreate failed" : "H5Fopen failed");
             TEST_ERROR;
         }
