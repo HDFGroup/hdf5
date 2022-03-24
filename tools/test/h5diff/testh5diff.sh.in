@@ -124,6 +124,12 @@ $SRC_H5DIFF_TESTFILES/h5diff_strings1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_strings2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_eps1.h5
 $SRC_H5DIFF_TESTFILES/h5diff_eps2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_onion_objs.h5
+$SRC_H5DIFF_TESTFILES/h5diff_onion_objs.h5.onion
+$SRC_H5DIFF_TESTFILES/h5diff_onion_dset_ext.h5
+$SRC_H5DIFF_TESTFILES/h5diff_onion_dset_ext.h5.onion
+$SRC_H5DIFF_TESTFILES/h5diff_onion_dset_1d.h5
+$SRC_H5DIFF_TESTFILES/h5diff_onion_dset_1d.h5.onion
 $SRC_TOOLS_TESTFILES/tvlstr.h5
 "
 
@@ -356,6 +362,9 @@ $SRC_H5DIFF_TESTFILES/h5diff_800.txt
 $SRC_H5DIFF_TESTFILES/h5diff_801.txt
 $SRC_H5DIFF_TESTFILES/h5diff_830.txt
 $SRC_H5DIFF_TESTFILES/h5diff_90.txt
+$SRC_H5DIFF_TESTFILES/h5diff_900.txt
+$SRC_H5DIFF_TESTFILES/h5diff_901.txt
+$SRC_H5DIFF_TESTFILES/h5diff_902.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8625.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8639.txt
 $SRC_H5DIFF_TESTFILES/h5diff_reg.txt
@@ -1214,6 +1223,12 @@ TOOLTEST h5diff_v1.txt -v 1_vds.h5 2_vds.h5
 TOOLTEST h5diff_v2.txt -r 1_vds.h5 2_vds.h5
 TOOLTEST h5diff_v3.txt -c 1_vds.h5 2_vds.h5
 
+# ##############################################################################
+# Onion VFD tests
+# ##############################################################################
+TOOLTEST h5diff_900.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5
+TOOLTEST h5diff_901.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5
+TOOLTEST h5diff_902.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5
 
 # ##############################################################################
 # # END

@@ -40,6 +40,7 @@
 #define ONION_TEST_FIXNAME_SIZE                   1024
 #define ONION_TEST_EXPECTED_HISTORY_REVISIONS_MAX 16
 #define ONION_TEST_REV_REV_WRITES_MAX             8
+#define ONE_DIM_SIZE                              1024
 
 #define WIP 1 /* development toggle */
 
@@ -3012,8 +3013,7 @@ error:
 static int
 test_integration_create(void)
 {
-    const char *basename = "integration.h5";
-    // const char *basename = "somesuch.h5";
+    const char *            basename   = "integration_2d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3030,9 +3030,7 @@ test_integration_create(void)
 
     TESTING("onion-created two dimensional HDF5 file with revisions");
 
-    /*********
-     * SETUP *
-     *********/
+    /* SETUP */
 
     onion_info.backing_fapl_id = h5_fileaccess();
     fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
@@ -3049,7 +3047,10 @@ test_integration_create(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    /* Create skeleton file without onion */
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
     hid_t   file, space, dset, dcpl; /* Handles */
     hsize_t dims[2] = {128, 256}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     int     wdata[128][256], /* Write buffer */
@@ -3065,7 +3066,6 @@ test_integration_create(void)
     /*
      * Create a new file using the default properties.
      */
-    // file = H5Fcreate ("example.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -3119,54 +3119,29 @@ test_integration_create(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR
 
-    /*
-     * Create first revision
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
      */
-    // HDputs(".");
-    fflush(stdout);
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
 
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-
-    // HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    // HDputs(".");
-    HDfflush(stdout);
 
-    ///
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    // HDputs(".");
-    HDfflush(stdout);
     int dset_data[128][256];
     for (i = 0; i < 128; i++)
         for (j = 0; j < 256; j++)
             dset_data[i][j] = i * 6 + j + 1;
 
-#if 0
-    printf("First revision\n");
-    for (i = 0; i < 4; i++) {
-        printf(" [");
-        for (j = 0; j < 7; j++)
-            printf(" %3d", dset_data[i][j]);
-        printf("]\n");
-    }
-#endif
-
-    // HDputs(".");
-    HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    // HDputs(".");
-    HDfflush(stdout);
-
-    // HDputs(".");
-    HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3175,57 +3150,29 @@ test_integration_create(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-    /*
-     * Create second revision
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
      */
-    // HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
 
-    // HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    // HDputs(".");
-    HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    // HDputs(".");
-    HDfflush(stdout);
     for (i = 0; i < 128; i++)
         for (j = 0; j < 256; j++)
             dset_data[i][j] = i * 3 + j + 5;
 
-#if 0
-    printf("Second revision\n");
-    for (i = 0; i < 128; i++) {
-        printf(" [");
-        for (j = 0; j < 256; j++)
-            printf(" %3d", dset_data[i][j]);
-        printf("]\n");
-    }
-#endif
-
-    // HDputs(".");
-    HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    // HDputs(".");
-    HDfflush(stdout);
 
-    // HDputs(".");
-    HDfflush(stdout);
-
-    /*
-     * CLEANUP
-     */
-
+    /* CLEANUP */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     dset = H5I_INVALID_HID;
@@ -3236,7 +3183,14 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    // Read back data to check for validtiy
+    /*----------------------------------------------------------------------
+     *  Start to verify the revision
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the original file
+     *----------------------------------------------------------------------
+     */
     onion_info.revision_id = 0;
     fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
@@ -3244,61 +3198,28 @@ test_integration_create(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
-    HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    HDputs(".");
-    HDfflush(stdout);
 
-    ///
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    HDputs(".");
-#if 0
-    HDputs("\n\nREADING\n\n");
-#endif
-    HDfflush(stdout);
     int rdata[128][256];
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
-#if 0
-    HDputs("\n\nDONE READING\n\n");
-#endif
-    HDfflush(stdout);
-
-#if 0
-    for (i = 0; i < 128; i++) {
-        printf(" [");
-        for (j = 0; j < 256; j++)
-            printf(" %3d", rdata[i][j]);
-        printf("]\n");
-    }
-#endif
 
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
-            // printf("i: %d, j: %d\n", i, j);
-            // int expected = i * 3 + j + 5;
-            // int expected = i * 6 + j + 1;
             int expected = i * j - j;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
-            }
-            else {
-                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
-                HDfflush(stdout);
             }
         }
     }
@@ -3312,8 +3233,11 @@ test_integration_create(void)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
-    /////
-    // onion_info.revision_id = 2;
+
+    /*----------------------------------------------------------------------
+     * Verify the first revision
+     *----------------------------------------------------------------------
+     */
     onion_info.revision_id = 1;
     fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
@@ -3321,59 +3245,27 @@ test_integration_create(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
-    HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    HDputs(".");
-    HDfflush(stdout);
 
-    ///
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    HDputs(".");
-#if 0
-    HDputs("\n\nREADING\n\n");
-#endif
-    HDfflush(stdout);
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
-#if 0
-    HDputs("\n\nDONE READING\n\n");
-#endif
-    HDfflush(stdout);
-
-#if 0
-    for (i = 0; i < 128; i++) {
-        printf(" [");
-        for (j = 0; j < 256; j++)
-            printf(" %3d", rdata[i][j]);
-        printf("]\n");
-    }
-#endif
 
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
-            // printf("i: %d, j: %d\n", i, j);
-            // int expected = i * 3 + j + 5;
             int expected = i * 6 + j + 1;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
-            }
-            else {
-                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
-                HDfflush(stdout);
             }
         }
     }
@@ -3388,54 +3280,31 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    /////
+    /*----------------------------------------------------------------------
+     * Verify the second revision
+     *----------------------------------------------------------------------
+     */
     onion_info.revision_id = 2;
-    // onion_info.revision_id = 1;
+
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    // HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
-    // HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-    // HDputs(".");
-    HDfflush(stdout);
 
-    ///
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    // HDputs(".");
-#if 0
-    HDputs("\n\nREADING\n\n");
-#endif
-    HDfflush(stdout);
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
-#if 0
-    HDputs("\n\nDONE READING\n\n");
-#endif
-    HDfflush(stdout);
-
-#if 0
-    for (i = 0; i < 128; i++) {
-        printf(" [");
-        for (j = 0; j < 256; j++)
-            printf(" %3d", rdata[i][j]);
-        printf("]\n");
-    }
-#endif
 
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
@@ -3460,6 +3329,10 @@ test_integration_create(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
+
+    /*
+     * Close and release resources.
+     */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
@@ -3494,7 +3367,7 @@ error:
 static int
 test_integration_create_simple(void)
 {
-    const char *            basename   = "integration.h5";
+    const char *            basename   = "integration_1d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3511,10 +3384,7 @@ test_integration_create_simple(void)
 
     TESTING("onion-created one-dimensional HDF5 file with revisions");
 
-    /*********
-     * SETUP *
-     *********/
-
+    /* Setup */
     onion_info.backing_fapl_id = h5_fileaccess();
     fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
@@ -3530,25 +3400,24 @@ test_integration_create_simple(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    /* Create skeleton file */
-
-    // CREATE FILE WITHOUT ONION
-
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
     hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {1, 1024}, maxdims[2] = {1, 1024};
-    int     wdata[1][1024], /* Write buffer */
+    hsize_t dims[2] = {1, ONE_DIM_SIZE}, maxdims[2] = {1, ONE_DIM_SIZE};
+    int     wdata[1][ONE_DIM_SIZE], /* Write buffer */
         fillval, i, j;
 
     /*
      * Initialize data.
      */
-    for (i = 0; i < 1024; i++)
+    for (i = 0; i < ONE_DIM_SIZE; i++)
         wdata[0][i] = i;
 
     /*
      * Create a new file using the default properties.
      */
-    // file = H5Fcreate ("example.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -3599,49 +3468,26 @@ test_integration_create_simple(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR
 
-    ////////////////////////////
-
-    // HDputs(".");
-    fflush(stdout);
-
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
+     */
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file_id) {
         TEST_ERROR;
     }
-
-    // HDputs(".");
-    HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
         TEST_ERROR
     }
 
-    // HDputs(".");
-    HDfflush(stdout);
-    int dset_data[1][1024];
-    for (i = 0; i < 1024; i++)
-        dset_data[0][i] = i + 1024;
+    int dset_data[1][ONE_DIM_SIZE];
+    for (i = 0; i < ONE_DIM_SIZE; i++)
+        dset_data[0][i] = i + ONE_DIM_SIZE;
 
-#if 0
-    printf("First revision\n");
-    for (i = 0; i < 1; i++) {
-        printf(" [");
-        for (j = 0; j < 1024; j++)
-            printf(" %3d", dset_data[i][j]);
-        printf("]\n");
-    }
-#endif
-
-    // HDputs(".");
-    HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    // HDputs(".");
-    HDfflush(stdout);
-
-    // HDputs(".");
-    HDfflush(stdout);
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3650,20 +3496,15 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-    /*
-     * Create second revision
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
      */
-    // HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file_id) {
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-
-    // HDputs(".");
-    HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
@@ -3671,35 +3512,13 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    // HDputs(".");
-    HDfflush(stdout);
-    for (i = 0; i < 1024; i++)
+    for (i = 0; i < ONE_DIM_SIZE; i++)
         dset_data[0][i] = i + 2048;
 
-#if 0
-    printf("Second revision\n");
-    for (i = 0; i < 1; i++) {
-        printf(" [");
-        for (j = 0; j < 1024; j++)
-            printf(" %3d", dset_data[i][j]);
-        printf("]\n");
-    }
-#endif
-
-    // HDputs(".");
-    HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    // HDputs(".");
-    HDfflush(stdout);
 
-    // HDputs(".");
-    HDfflush(stdout);
-
-    /*
-     * CLEANUP
-     */
-
+    /* CLEANUP */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     dset = H5I_INVALID_HID;
@@ -3707,21 +3526,15 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-    /*
-     * Create third revision
+    /*----------------------------------------------------------------------
+     * Third revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
      */
-
-    // HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file_id) {
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-
-    // HDputs(".");
-    HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
@@ -3729,35 +3542,13 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    // HDputs(".");
-    HDfflush(stdout);
-    for (i = 0; i < 1024; i += 20)
+    for (i = 0; i < ONE_DIM_SIZE; i += 20)
         dset_data[0][i] = i + 3072;
 
-#if 0
-    printf("Third revision\n");
-    for (i = 0; i < 1; i++) {
-        printf(" [");
-        for (j = 0; j < 1024; j++)
-            printf(" %3d", dset_data[i][j]);
-        printf("]\n");
-    }
-#endif
-
-    // HDputs(".");
-    HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
-    // HDputs(".");
-    HDfflush(stdout);
 
-    // HDputs(".");
-    HDfflush(stdout);
-
-    /*
-     * CLEANUP
-     */
-
+    /* CLEANUP */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     dset = H5I_INVALID_HID;
@@ -3768,32 +3559,28 @@ test_integration_create_simple(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    /////////////////////////
-
-    // Read back data to check for validtiy
-    // onion_info.revision_id = 3;
+    /*----------------------------------------------------------------------
+     *  Start to verify the revision
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the second revision
+     *----------------------------------------------------------------------
+     */
     onion_info.revision_id = 2;
-    // onion_info.revision_id = 1;
-    // onion_info.revision_id = 0;
+
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
 
-    // HDputs(".");
-    fflush(stdout);
-
     file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
-    // HDputs(".");
-    fflush(stdout);
     if (H5I_INVALID_HID == file_id) {
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-    // HDputs(".");
-    HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
     if (dset < 0) {
@@ -3801,44 +3588,16 @@ test_integration_create_simple(void)
         TEST_ERROR
     }
 
-    // HDputs(".");
-#if 0
-    HDputs("\n\nREADING\n\n");
-#endif
-    HDfflush(stdout);
-    int rdata[1][1024];
+    int rdata[1][ONE_DIM_SIZE];
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
-#if 0
-    HDputs("\n\nDONE READING\n\n");
-#endif
-    HDfflush(stdout);
-
-#if 0
-    for (i = 0; i < 1; i++) {
-        printf(" [");
-        for (j = 0; j < 1024; j++)
-            printf(" %3d", rdata[i][j]);
-        printf("]\n");
-    }
-#endif
 
     for (i = 0; i < 1; i++) {
-        // for (j = 0; j < 1024; j++) {
-        for (j = 0; j < 1024; j += 20) {
-            // printf("i: %d, j: %d\n", i, j);
-            // int expected = j;
-            // int expected = j + 1024;
+        for (j = 0; j < ONE_DIM_SIZE; j += 20) {
             int expected = j + 2048;
-            // int expected = j + 3072;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
-                HDfflush(stdout);
                 TEST_ERROR
-            }
-            else {
-                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
-                HDfflush(stdout);
             }
         }
     }
@@ -3849,14 +3608,18 @@ test_integration_create_simple(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
+
+    /*
+     * Close and release resources.
+     */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    // HDremove(paths->canon);
-    // HDremove(paths->onion);
-    // HDremove(paths->recovery);
-    // onion_filepaths_destroy(paths);
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3864,10 +3627,10 @@ test_integration_create_simple(void)
 error:
 
     if (paths != NULL) {
-        // HDremove(paths->canon);
-        // HDremove(paths->onion);
-        // HDremove(paths->recovery);
-        // onion_filepaths_destroy(paths);
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
@@ -3879,6 +3642,683 @@ error:
 
     return -1;
 } /* end test_integration_create_simple() */
+
+static int
+test_integration_create_delete_objects(void)
+{
+    const char *            basename   = "integration_objs.h5";
+    hid_t                   fapl_id    = H5I_INVALID_HID;
+    struct onion_filepaths *paths      = NULL;
+    H5FD_onion_fapl_info_t  onion_info = {
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5I_INVALID_HID,               /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
+    };
+    hid_t   group_id      = H5I_INVALID_HID;
+    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+    hsize_t attr_dim[1] = {4};
+
+    TESTING("onion-created HDF5 file with revisions testing addition and deletion of objects");
+
+    /* Set up */
+    onion_info.backing_fapl_id = h5_fileaccess();
+    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == fapl_id)
+        TEST_ERROR;
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    paths = onion_filepaths_init(basename, &onion_info);
+    if (NULL == paths)
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
+
+    hid_t   file, space, dset, dcpl; /* Handles */
+    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
+    int     wdata[4][4], /* Write buffer */
+        fillval, i, j;
+
+    /*
+     * Initialize data.
+     */
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            wdata[i][j] = i + j;
+
+    /*
+     * Create a new file using the default properties.
+     */
+    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Create dataspace with unlimited dimensions.
+     */
+    space = H5Screate_simple(2, dims, maxdims);
+
+    /*
+     * Create the dataset creation property list, and set the chunk
+     * size.
+     */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR
+
+    /*
+     * Set the fill value for the dataset.
+     */
+    fillval = 99;
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
+        TEST_ERROR
+
+    /*
+     * Set the allocation time to "early".  This way we can be sure
+     * that reading from the dataset immediately after creation will
+     * return the fill value.
+     */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        TEST_ERROR
+
+    /*
+     * Create the dataset using the dataset creation property list.
+     */
+    dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset.
+     */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and add a dataset (DS2) to the file
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /*
+     * Create the dataset using the dataset creation property list.
+     */
+    dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset.
+     */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and remove the dataset (DS2),
+     * which was added during the first revision.
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    if (H5Ldelete(file, "DS2", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Third revision: open the file with Onion VFD and add an attribute to the file
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* Create dataspace for attribute */
+    attr_space_id = H5Screate_simple(1, attr_dim, NULL);
+
+    if ((attr_id =
+             H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(attr_space_id) < 0)
+        TEST_ERROR
+    if (H5Aclose(attr_id) < 0)
+        TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Fourth revision: open the file with Onion VFD and delete the attribute
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    if (H5Adelete(file, "file_attribute") < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Fifth revision: open the file with Onion VFD and add a group to the file
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    if ((group_id = H5Gcreate2(file, "new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Sixth revision: open the file with Onion VFD and delete the newly added group
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    if (H5Ldelete(file, "new_group", H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     *  Start to verify the revision
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the first revision: it should have the second dataset (DS2)
+     *----------------------------------------------------------------------
+     */
+    onion_info.revision_id = 1;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The second dataset (DS2) should exist */
+    if (H5Lexists(file, "DS2", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*------------------------------------------------------------------------
+     * Verify the second revision: the second dataset (DS2) should be removed
+     *------------------------------------------------------------------------
+     */
+    onion_info.revision_id = 2;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The second dataset (DS2) shouldn't exist */
+    if (H5Lexists(file, "DS2", H5P_DEFAULT) > 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*-------------------------------------------------------------------------
+     * Verify the third revision: the file attribute (file_attribute) should exist
+     *-------------------------------------------------------------------------
+     */
+    onion_info.revision_id = 3;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The file attribute should exist */
+    if (H5Aexists(file, "file_attribute") <= 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*-------------------------------------------------------------------------
+     * Verify the fourth revision: the file attribute (file_attribute) should be removed
+     *-------------------------------------------------------------------------
+     */
+    onion_info.revision_id = 4;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The file attribute should be removed */
+    if (H5Aexists(file, "file_attribute") > 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*-------------------------------------------------------------------------
+     * Verify the fifth revision: the group (new_group) should exist
+     *-------------------------------------------------------------------------
+     */
+    onion_info.revision_id = 5;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The new group should exist */
+    if (H5Lexists(file, "new_group", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*-------------------------------------------------------------------------
+     * Verify the sixth revision: the group (new_group) should be removed
+     *-------------------------------------------------------------------------
+     */
+    onion_info.revision_id = 6;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* The new group should exist */
+    if (H5Lexists(file, "new_group", H5P_DEFAULT) > 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*
+     * Close and release resources.
+     */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    if (H5Sclose(space) < 0)
+        TEST_ERROR
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
+
+    PASSED();
+    return 0;
+
+error:
+
+    if (paths != NULL) {
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
+    }
+
+    if (dset != H5I_INVALID_HID)
+        (void)H5Dclose(dset);
+    if (file != H5I_INVALID_HID)
+        (void)H5Fclose(file);
+    if (fapl_id != H5I_INVALID_HID)
+        (void)H5Pclose(fapl_id);
+
+    return -1;
+} /* end test_integration_create_delete_objects */
+
+static int
+test_integration_dset_extension(void)
+{
+    const char *            basename   = "integration_dset_ext.h5";
+    hid_t                   fapl_id    = H5I_INVALID_HID;
+    struct onion_filepaths *paths      = NULL;
+    H5FD_onion_fapl_info_t  onion_info = {
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5I_INVALID_HID,               /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
+    };
+    hid_t   file = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+    hid_t   space, dset_space, dset, dcpl; /* Handles */
+    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
+    hsize_t size[2], offset[2];
+    int     wdata[4][4], /* Write buffer */
+        fillval, i, j;
+    int rdata[4][4]; /* Read buffer */
+
+    TESTING("onion-created HDF5 file with revisions testing dataset extension");
+
+    /* Setup */
+    onion_info.backing_fapl_id = h5_fileaccess();
+    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == fapl_id)
+        TEST_ERROR;
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    paths = onion_filepaths_init(basename, &onion_info);
+    if (NULL == paths)
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
+    /*
+     * Initialize data.
+     */
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            wdata[i][j] = i + j;
+
+    /*
+     * Create a new file using the default properties.
+     */
+    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Create dataspace with unlimited dimensions.
+     */
+    space = H5Screate_simple(2, dims, maxdims);
+
+    /*
+     * Create the dataset creation property list, and set the chunk
+     * size.
+     */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR
+
+    /*
+     * Set the fill value for the dataset.
+     */
+    fillval = 99;
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
+        TEST_ERROR
+
+    /*
+     * Set the allocation time to "early".  This way we can be sure
+     * that reading from the dataset immediately after creation will
+     * return the fill value.
+     */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        TEST_ERROR
+
+    /*
+     * Create the dataset using the dataset creation property list.
+     */
+    dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+    /*
+     * Write the data to the dataset.
+     */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and extend the dataset
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* Open the dataset */
+    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+
+    /* Extend the dataset and double the rows */
+    size[0] = 2 * dims[0];
+    size[1] = dims[1];
+    if (H5Dset_extent(dset, size) < 0)
+        TEST_ERROR
+
+    if ((dset_space = H5Dget_space(dset)) < 0)
+        TEST_ERROR
+
+    offset[0] = dims[0];
+    offset[1] = 0;
+    if (H5Sselect_hyperslab(dset_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0)
+        TEST_ERROR
+
+    /* Write the data to the dataset. */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, space, dset_space, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR
+
+    if (H5Sclose(dset_space) < 0)
+        TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and shrink the dataset
+     *----------------------------------------------------------------------
+     */
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* Open the dataset */
+    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+
+    /* Extend the dataset and shrink back the size */
+    if (H5Dset_extent(dset, dims) < 0)
+        TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     *  Start to verify the revision
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the first revision: it should have the extended data
+     *----------------------------------------------------------------------
+     */
+    onion_info.revision_id = 1;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* Open the dataset */
+    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+
+    if ((dset_space = H5Dget_space(dset)) < 0)
+        TEST_ERROR
+
+    offset[0] = dims[0];
+    offset[1] = 0;
+    if (H5Sselect_hyperslab(dset_space, H5S_SELECT_SET, offset, NULL, dims, NULL) < 0)
+        TEST_ERROR
+
+    if (H5Dread(dset, H5T_NATIVE_INT, space, dset_space, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR
+
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            if (rdata[i][j] != wdata[i][j])
+                TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Verify the second revision: it should have the original data
+     *----------------------------------------------------------------------
+     */
+    onion_info.revision_id = 2;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    /* Open the dataset */
+    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+
+    if ((dset_space = H5Dget_space(dset)) < 0)
+        TEST_ERROR
+
+    if (H5Dread(dset, H5T_NATIVE_INT, space, dset_space, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR
+
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            if (rdata[i][j] != wdata[i][j])
+                TEST_ERROR
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
+    file = H5I_INVALID_HID;
+
+    /* Close and release resources. */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    if (H5Sclose(space) < 0)
+        TEST_ERROR
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
+
+    PASSED();
+    return 0;
+
+error:
+
+    if (paths != NULL) {
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
+    }
+
+    if (dset != H5I_INVALID_HID)
+        (void)H5Dclose(dset);
+    if (file != H5I_INVALID_HID)
+        (void)H5Fclose(file);
+    if (fapl_id != H5I_INVALID_HID)
+        (void)H5Pclose(fapl_id);
+
+    return -1;
+} /* end test_integration_dset_extension */
 
 /*-----------------------------------------------------------------------------
  *
@@ -3919,6 +4359,8 @@ main(void)
     nerrors -= test_page_aligned_history_create();
     nerrors -= test_integration_create();
     nerrors -= test_integration_create_simple();
+    nerrors -= test_integration_create_delete_objects();
+    nerrors -= test_integration_dset_extension();
 
 #if H5FD_ONION_ENABLE_INDEX_STATS
     nerrors -= test_working_index_stats(); /* TODO */

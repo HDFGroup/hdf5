@@ -48,7 +48,36 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"vol-value-2", require_arg, '4'},
                                           {"vol-name-2", require_arg, '5'},
                                           {"vol-info-2", require_arg, '6'},
+                                          {"vfd-name-1", require_arg, '7'},
+                                          {"vfd-value-1", require_arg, '8'},
+                                          {"vfd-name-2", require_arg, '9'},
+                                          {"vfd-value-2", require_arg, '0'},
                                           {NULL, 0, '\0'}};
+
+static H5FD_onion_fapl_info_t onion_fa_g_1 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                        /* force_write_open               */
+    0,                        /* creation_flags                 */
+    "indoor speaking voices", /* comment                        */
+};
+
+static H5FD_onion_fapl_info_t onion_fa_g_2 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                        /* force_write_open               */
+    0,                        /* creation_flags                 */
+    "indoor speaking voices", /* comment                        */
+};
+
+static const char *driver_name_g_1 = NULL; /* The driver to open the first file with. */
+static const char *driver_name_g_2 = NULL; /* The driver to open the second file with. */
 
 /*-------------------------------------------------------------------------
  * Function: check_options
@@ -432,8 +461,42 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
             case '6':
                 opts->vol_info[1].info_string = H5_optarg;
                 break;
+            case '7':
+                driver_name_g_1 = HDstrdup(H5_optarg);
+                break;
+            case '8':
+                onion_fa_g_1.revision_id = (uint64_t)HDatol(H5_optarg);
+                break;
+            case '9':
+                driver_name_g_2 = HDstrdup(H5_optarg);
+                break;
+            case '0':
+                onion_fa_g_2.revision_id = (uint64_t)HDatol(H5_optarg);
         }
     }
+
+    /* Copy the VFD driver info for both the files */
+    if (driver_name_g_1) {
+        if (!HDstrcmp(driver_name_g_1, "onion")) {
+            opts->vfd_info[0].name = HDstrdup(driver_name_g_1);
+            opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            HDmemcpy(opts->vfd_info[0].info, &onion_fa_g_1, sizeof(H5FD_onion_fapl_info_t));
+        }
+
+        if (driver_name_g_1)
+            HDfree(driver_name_g_1);
+    } /* driver name defined */
+
+    if (driver_name_g_2) {
+        if (!HDstrcmp(driver_name_g_2, "onion")) {
+            opts->vfd_info[1].name = HDstrdup(driver_name_g_2);
+            opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            HDmemcpy(opts->vfd_info[1].info, &onion_fa_g_2, sizeof(H5FD_onion_fapl_info_t));
+        }
+
+        if (driver_name_g_2)
+            HDfree(driver_name_g_2);
+    } /* driver name defined */
 
     /* check options */
     check_options(opts);

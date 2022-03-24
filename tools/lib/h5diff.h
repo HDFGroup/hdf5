@@ -89,6 +89,7 @@ typedef struct {
     char *                    obj_name[2];             /* name for object */
     struct subset_t *         sset[2];                 /* subsetting parameters */
     h5tools_vol_info_t        vol_info[2];             /* VOL information for input file, output file */
+    h5tools_vfd_info_t        vfd_info[2];             /* VFD information for input file, output file */
     hbool_t                   custom_vol[2];           /* Using a custom input, output VOL? */
 } diff_opt_t;
 

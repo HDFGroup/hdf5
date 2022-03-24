@@ -952,7 +952,7 @@ parse_start:
                 last_was_dset = TRUE;
                 break;
             case 'f':
-                driver_name_g = H5_optarg;
+                driver_name_g = HDstrdup(H5_optarg);
                 break;
             case 'g':
                 dump_opts.display_all = 0;
@@ -1639,9 +1639,15 @@ done:
         HDfree(prefix);
         prefix = NULL;
     }
+
     if (fname) {
         HDfree(fname);
         fname = NULL;
+    }
+
+    if (driver_name_g) {
+        HDfree(driver_name_g);
+        driver_name_g = NULL;
     }
 
     if (hand)
