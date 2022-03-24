@@ -3600,6 +3600,7 @@ H5FD__ctl_test_vfd_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t 
 
 /* Minimal VFD for ctl feature tests */
 static const H5FD_class_t H5FD_ctl_test_vfd_g = {
+    H5FD_CLASS_VERSION,         /* struct version        */
     (H5FD_class_value_t)201,    /* value                 */
     "ctl_test_vfd",             /* name                  */
     HADDR_MAX,                  /* maxaddr               */

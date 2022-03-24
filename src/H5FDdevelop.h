@@ -25,6 +25,9 @@
 /* Public Macros */
 /*****************/
 
+/* H5FD_class_t struct version */
+#define H5FD_CLASS_VERSION 0x01 /* File driver struct version */
+
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
  * enough to object headers and probably too minor to deserve their own type.
@@ -160,6 +163,7 @@ typedef struct H5FD_t H5FD_t;
 
 /* Class information for each file driver */
 typedef struct H5FD_class_t {
+    unsigned           version;          /**< File driver class struct version #     */
     H5FD_class_value_t value;
     const char *       name;
     haddr_t            maxaddr;

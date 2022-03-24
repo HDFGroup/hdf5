@@ -537,7 +537,7 @@ done:
  *
  *              Note that it is not in general possible to convert a
  *              vector write into a selection write, because each element
- *              in the vector read may have a different memory type.
+ *              in the vector write may have a different memory type.
  *              In contrast, selection writes are of a single type.
  *
  * Return:      Success:    SUCCEED
@@ -1683,7 +1683,7 @@ done:
  *              element_sizes[n] = element_sizes[i-1] for all n >= i and
  *              < count.
  *
- *              If the underlying VFD supports selection reads, pass the
+ *              If the underlying VFD supports selection writes, pass the
  *              call through directly.
  *
  *              If it doesn't, convert the vector write into a sequence

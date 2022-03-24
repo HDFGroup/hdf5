@@ -152,6 +152,7 @@ static herr_t  H5FD__core_delete(const char *filename, hid_t fapl_id);
 static inline const H5FD_core_fapl_t *H5FD__core_get_default_config(void);
 
 static const H5FD_class_t H5FD_core_g = {
+    H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_CORE_VALUE,          /* value                */
     "core",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
