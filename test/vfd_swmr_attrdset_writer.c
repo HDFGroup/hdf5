@@ -240,7 +240,7 @@ state_init(state_t *s, int argc, const char *const *argv)
         tfile = NULL;
     }
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != -1) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch (opt) {
 
             case 'p':

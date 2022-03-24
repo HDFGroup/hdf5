@@ -36,16 +36,16 @@ typedef struct _shared_ticks {
 int                          fd_writer_to_reader = -1, fd_reader_to_writer = -1;
 const char *                 fifo_writer_to_reader = "./fifo_writer_to_reader";
 const char *                 fifo_reader_to_writer = "./fifo_reader_to_writer";
-bool                         use_vfd_swmr          = true;
-bool                         use_named_pipe        = true;
-bool                         print_estack          = false;
+hbool_t                      use_vfd_swmr          = TRUE;
+hbool_t                      use_named_pipe        = TRUE;
+hbool_t                      print_estack          = FALSE;
 static H5F_vfd_swmr_config_t swmr_config;
-static bool                  writer;
+static hbool_t               writer;
 struct timespec ival = {MAX_READ_LEN_IN_SECONDS, 0}; /* Expected maximal time for reader's validation */
 
 zoo_config_t config = {.proc_num        = 0,
-                       .skip_compact    = false,
-                       .skip_varlen     = true,
+                       .skip_compact    = FALSE,
+                       .skip_varlen     = TRUE,
                        .max_pause_msecs = 0,
                        .msgival         = {.tv_sec = 0, .tv_nsec = 0}};
 
@@ -97,25 +97,25 @@ usage(const char *progname)
 static int
 parse_command_line_options(int argc, char **argv)
 {
-    int           opt;
-    unsigned long tmpl;
-    char *        end;
+    int                    opt;
+    unsigned long          tmpl;
+    char *                 end;
     const char *           s_opts   = "CSael:Nqv";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch (opt) {
             case 'C':
-                config.skip_compact = true;
+                config.skip_compact = TRUE;
                 break;
             case 'S':
-                use_vfd_swmr = false;
+                use_vfd_swmr = FALSE;
                 break;
             case 'a':
-                config.skip_varlen = false;
+                config.skip_varlen = FALSE;
                 break;
             case 'e':
-                print_estack = true;
+                print_estack = TRUE;
                 break;
             case 'l':
                 /* Expected maximal number of ticks from the writer's finishing zoo creation or deletion
@@ -148,7 +148,7 @@ parse_command_line_options(int argc, char **argv)
                 break;
             case 'N':
                 /* Disable named pipes, mainly for running the writer and reader separately */
-                use_named_pipe = false;
+                use_named_pipe = FALSE;
                 break;
             case 'q':
                 verbosity = 1;
@@ -463,9 +463,9 @@ main(int argc, char **argv)
     personality = HDstrstr(progname, "vfd_swmr_zoo_");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_zoo_writer") == 0)
-        writer = true;
+        writer = TRUE;
     else if (personality != NULL && HDstrcmp(personality, "vfd_swmr_zoo_reader") == 0)
-        writer = false;
+        writer = FALSE;
     else {
         H5_FAILED();
         AT();
@@ -481,7 +481,7 @@ main(int argc, char **argv)
 
     /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    if ((fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, 4096, &vfd_swmr_config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, TRUE, 4096, &vfd_swmr_config)) < 0) {
         H5_FAILED();
         AT();
         HDprintf("vfd_swmr_create_fapl");

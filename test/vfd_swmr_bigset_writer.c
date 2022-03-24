@@ -329,7 +329,7 @@ state_init(state_t *s, int argc, char **argv)
     double            rdcc_w0;
     quadrant_t *const ul = &s->quadrants.ul, *const ur = &s->quadrants.ur, *const bl = &s->quadrants.bl,
                       *const br = &s->quadrants.br, *const src = &s->quadrants.src;
-    const char *personality;
+    const char *           personality;
     const char *           s_opts   = "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
@@ -345,7 +345,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch (opt) {
             case 'A':
                 s->use_aux_proc = true;
@@ -1454,9 +1454,9 @@ open_extensible_dset(state_t *s)
     hsize_t      dims2[RANK2], maxdims2[RANK2];
     hsize_t      dims3[RANK3], maxdims3[RANK3];
     char         dname[sizeof("/dataset-9999999999")];
-    hid_t        dset_id = H5I_INVALID_HID;
+    hid_t        dset_id   = H5I_INVALID_HID;
     hid_t        filespace = H5I_INVALID_HID;
-    hid_t        dtype = H5I_INVALID_HID;
+    hid_t        dtype     = H5I_INVALID_HID;
     int          rank;
     unsigned int which, i;
 
@@ -2547,12 +2547,12 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *                 mat  = NULL;
-    hid_t                   fcpl = H5I_INVALID_HID;
-    unsigned                which;
-    state_t                 s;
-    np_state_t              np;
-    size_t                  i;
+    mat_t *    mat  = NULL;
+    hid_t      fcpl = H5I_INVALID_HID;
+    unsigned   which;
+    state_t    s;
+    np_state_t np;
+    size_t     i;
 
     if (!state_init(&s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
@@ -2806,6 +2806,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */

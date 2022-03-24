@@ -261,10 +261,10 @@ usage(const char *progname)
 static bool
 state_init(state_t *s, int argc, char **argv)
 {
-    unsigned long tmp;
-    int           opt;
-    char *        tfile = NULL;
-    char *        end;
+    unsigned long          tmp;
+    int                    opt;
+    char *                 tfile = NULL;
+    char *                 end;
     const char *           s_opts   = "siferom:n:x:y:g:p:t:l:bqSNUu:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
@@ -282,7 +282,7 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((opt = H5_get_option(argc, (const char * const *)argv, s_opts, l_opts)) != -1) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch (opt) {
 
             case 's': /* A chunked dataset with single index */
@@ -2429,7 +2429,7 @@ error:
     }
 
     return EXIT_FAILURE;
-} /* main */
+}
 
 #else /* H5_HAVE_WIN32_API */
 
@@ -2438,6 +2438,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */
