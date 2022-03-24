@@ -6,7 +6,7 @@
 Cross-compiling has several consequences for CMake:
     CMake cannot automatically detect the target platform.
     CMake cannot find libraries and headers in the default system directories.
-    Executables built during cross compiling cannot be executed.
+    Executables built during cross compiling cannot be executed on the host platform.
 
 Cross-compiling support means that CMake separates information about the
   build platform and target platform and gives the user mechanisms to solve
