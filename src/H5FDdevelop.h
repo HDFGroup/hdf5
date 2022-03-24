@@ -163,7 +163,7 @@ typedef struct H5FD_t H5FD_t;
 
 /* Class information for each file driver */
 typedef struct H5FD_class_t {
-    unsigned           version;          /**< File driver class struct version #     */
+    unsigned           version; /**< File driver class struct version #     */
     H5FD_class_value_t value;
     const char *       name;
     haddr_t            maxaddr;
