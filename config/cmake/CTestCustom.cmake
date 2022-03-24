@@ -24,6 +24,8 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "note.*expected.*void.*but argument is of type.*volatile"
     "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
     "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
+    "plugin-build.*:[ \t]*warning"
+    "CMake Warning*stamp"
     "src.ZLIB.*:[ \t]*warning"
     "warning LNK4197:.*ZLIB-prefix"
     "src.SZIP.*:[ \t]*warning"
