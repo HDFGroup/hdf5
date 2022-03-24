@@ -878,8 +878,7 @@ HDF5_USE_PREGEN
 HDF5_USE_PREGEN_DIR
   These CMake variables would allow the use of an appropriate H5Tinit.c file
   with type information generated on a target platform to be used when cross
-  compiling for those target platforms. Sample pre-generated files are in the
-  folder: config/crosscompile.
+  compiling for those target platforms.
 
 See the INSTALL_cross_compile.txt file for more information.
 
