@@ -138,6 +138,7 @@ static herr_t  H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flag
                                   void **output);
 
 static const H5FD_class_t H5FD_splitter_g = {
+    H5FD_CLASS_VERSION,           /* struct version       */
     H5FD_SPLITTER_VALUE,          /* value                */
     "splitter",                   /* name                 */
     MAXADDR,                      /* maxaddr              */

@@ -107,6 +107,7 @@ static herr_t H5FD__mpio_vector_build_types(
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
+    H5FD_CLASS_VERSION,      /* struct version       */
     H5_VFD_MPIO,             /* value                 */
     "mpio",                  /* name                  */
     HADDR_MAX,               /* maxaddr               */
@@ -2289,12 +2290,16 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
-         * and thus there is no point in setting up an MPI derived type, as
-         * (to the best of my knowledge) MPI I/O doesn't have support for
-         * non-contiguous I/O in independent mode.
-         *
-         * Thus we have to read in each element of the vector in a separate
+         * and thus we can't use the above code to construct the MPI datatypes.
+         * In the future, we could write code to detect when a contiguous slab
+         * in the file selection spans multiple vector elements and construct a
+         * memory datatype to match this larger block in the file, but for now
+         * just read in each element of the vector in a separate
          * MPI_File_read_at() call.
+         *
+         * We could also just detect the case when the entire file selection is
+         * contiguous, which would allow us to use
+         * H5FD__mpio_vector_build_types() to construct the memory datatype.
          */
 
 #ifdef H5FDmpio_DEBUG
@@ -2605,14 +2610,18 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         hbool_t fixed_size = FALSE;
         size_t  size;
 
-        /* The write is part of an independent operation. As a result,
+        /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
-         * and thus there is no point in setting up an MPI derived type, as
-         * (to the best of my knowledge) MPI I/O doesn't have support for
-         * non-contiguous I/O in independent mode.
+         * and thus we can't use the above code to construct the MPI datatypes.
+         * In the future, we could write code to detect when a contiguous slab
+         * in the file selection spans multiple vector elements and construct a
+         * memory datatype to match this larger block in the file, but for now
+         * just read in each element of the vector in a separate
+         * MPI_File_read_at() call.
          *
-         * Thus we have to write out each element of the vector in a separate
-         * MPI_File_write_at() call.
+         * We could also just detect the case when the entire file selection is
+         * contiguous, which would allow us to use
+         * H5FD__mpio_vector_build_types() to construct the memory datatype.
          */
 
 #ifdef H5FDmpio_DEBUG
