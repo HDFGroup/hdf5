@@ -7994,7 +7994,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)(count[0] * block[0]);
     sel_dims[1] = (hsize_t)(count[1] * block[1]);
-    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8065,7 +8065,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
-    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8150,7 +8150,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)(count[0] * block[0]);
     sel_dims[1] = (hsize_t)(count[1] * block[1]);
-    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8215,7 +8215,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
-    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8390,7 +8390,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)(count[0] * block[0]);
     sel_dims[1] = (hsize_t)(count[1] * block[1]);
-    memspace = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8439,7 +8439,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1] = (hsize_t)FILL_VALUE_UNDEFINED_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
-    memspace = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8629,7 +8629,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)(count[0] * block[0]);
     sel_dims[1] = (hsize_t)(count[1] * block[1]);
-    memspace = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
@@ -8705,7 +8705,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     /* Set selected dims and create 2-D memory dataspace */
     sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1] = (hsize_t)FILL_TIME_NEVER_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
-    memspace = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
+    memspace    = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
     VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),

@@ -215,7 +215,7 @@ write_dataset_no_overlap(hid_t file_id, hid_t dxpl_id)
      * Create 1-D memory dataspace
      * ---------------------------------
      */
-    sel_dims[0] = count[0] * count[1];
+    sel_dims[0]   = count[0] * count[1];
     mem_dataspace = H5Screate_simple(1, sel_dims, NULL);
 
     /*
@@ -350,7 +350,7 @@ write_dataset_overlap(hid_t file_id, hid_t dxpl_id)
      * Create 1-D memory dataspace
      * ---------------------------------
      */
-    sel_dims[0] = count[0] * count[1];
+    sel_dims[0]   = count[0] * count[1];
     mem_dataspace = H5Screate_simple(1, sel_dims, NULL);
 
     /*
