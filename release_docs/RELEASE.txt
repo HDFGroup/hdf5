@@ -54,6 +54,25 @@ New Features
 
       (ADB - 2022/03/11)
 
+    - HDF5 memory allocation sanity checking is now off by default for
+      Autotools debug builds
+
+      HDF5 can be configured to perform sanity checking on internal memory
+      allocations by adding heap canaries to these allocations. However,
+      enabling this option can cause issues with external filter plugins
+      when working with (reallocating/freeing/allocating and passing back)
+      buffers.
+
+      Previously, this option was off by default for all CMake build types,
+      but only off by default for non-debug Autotools builds. Since debug
+      is the default build mode for HDF5 when built from source with
+      Autotools, this can result in surprising segfaults that don't occur
+      when an application is built against a release version of HDF5.
+      Therefore, this option is now off by default for all build types
+      across both CMake and Autotools.
+
+      (JTH - 2022/03/01)
+
     - Refactored the utils folder.
 
       Added subfolder test and moved the 'swmr_check_compat_vfd.c file'
@@ -224,6 +243,23 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
+    - Fixed a metadata cache bug when resizing a pinned/protected cache entry
+
+      When resizing a pinned/protected cache entry, the metadata
+      cache code previously would wait until after resizing the
+      entry to attempt to log the newly-dirtied entry. This would
+      cause H5C_resize_entry to mark the entry as dirty and make
+      H5AC_resize_entry think that it doesn't need to add the
+      newly-dirtied entry to the dirty entries skiplist.
+
+      Thus, a subsequent H5AC__log_moved_entry would think it
+      needs to allocate a new entry for insertion into the dirty
+      entry skip list, since the entry doesn't exist on that list.
+      This causes an assertion failure, as the code to allocate a
+      new entry assumes that the entry is not dirty.
+
+      (JRM - 2022/02/28)
+
     - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
       H5check_version function.
 
@@ -261,6 +297,18 @@ Bug Fixes since HDF5-1.12.1 release
       metadata reads are enabled.
 
       (JTH - 2021/11/16, HDFFV-10501/HDFFV-10562)
+
+    - Fixed several potential MPI deadlocks in library failure conditions
+
+      In the parallel library, there were several places where MPI rank 0
+      could end up skipping past collective MPI operations when some failure
+      occurs in rank 0-specific processing. This would lead to deadlocks
+      where rank 0 completes an operation while other ranks wait in the
+      collective operation. These places have been rewritten to have rank 0
+      push an error and try to cleanup after the failure, then continue to
+      participate in the collective operation to the best of its ability.
+
+      (JTH - 2021/11/09)
 
     - Fixed an issue with collective metadata reads being permanently disabled
       after a dataset chunk lookup operation. This would usually cause a

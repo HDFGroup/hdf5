@@ -857,8 +857,8 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
 
             HDstrncpy(full_path, cwdpath, cwdlen + 1);
             if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
-                HDstrncat(full_path, H5_DIR_SEPS, HDstrlen(H5_DIR_SEPS));
-            HDstrncat(full_path, new_name, HDstrlen(new_name));
+                HDstrncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
+            HDstrncat(full_path, new_name, path_len - (cwdlen + 1) - HDstrlen(H5_DIR_SEPS));
         } /* end if */
     }     /* end else */
 
