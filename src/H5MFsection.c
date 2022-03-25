@@ -473,8 +473,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  FUNC, sect->sect_info.addr, sect->sect_info.size, eoa);
+                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n", FUNC,
+                  sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
@@ -498,8 +498,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 udata->aggr = &(udata->f->shared->meta_aggr);
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 HDfprintf(stderr,
-                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n",
-                          FUNC, sect->sect_info.addr, sect->sect_info.size);
+                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n", FUNC,
+                          sect->sect_info.addr, sect->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
@@ -898,8 +898,8 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  FUNC, sect->sect_info.addr, sect->sect_info.size, eoa);
+                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n", FUNC,
+                  sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */

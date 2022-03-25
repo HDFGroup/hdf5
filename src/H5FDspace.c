@@ -287,8 +287,8 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     HDassert(size > 0);
 
 #ifdef H5FD_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", FUNC,
-              (unsigned)type, addr, size);
+    HDfprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", FUNC, (unsigned)type,
+              addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* Sanity checking */
@@ -332,7 +332,7 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         /* leak memory */
 #ifdef H5FD_ALLOC_DEBUG
         HDfprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
-                FUNC, (unsigned)type, addr, size);
+                  FUNC, (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
     }  /* end else */
 

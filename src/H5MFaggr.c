@@ -735,8 +735,8 @@ done:
             tmp_addr = aggr->addr;
             tmp_size = aggr->size;
 #ifdef H5MF_AGGR_DEBUG
-            HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", FUNC,
-                      tmp_addr, tmp_size);
+            HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", FUNC, tmp_addr,
+                      tmp_size);
 #endif /* H5MF_AGGR_DEBUG */
 
             /* Reset aggregator block information */

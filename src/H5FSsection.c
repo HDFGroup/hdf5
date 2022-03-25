@@ -205,7 +205,7 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
               "\n",
               FUNC, fspace->addr, (void *)fspace->sinfo, fspace->sect_addr);
     HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
-            FUNC, fspace->alloc_sect_size, fspace->sect_size);
+              FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -253,8 +253,8 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
             HDassert(H5F_addr_defined(fspace->addr));
 
 #ifdef H5FS_SINFO_DEBUG
-            HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %" PRIuHADDR "\n",
-                    FUNC, fspace->sect_addr);
+            HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %" PRIuHADDR "\n", FUNC,
+                      fspace->sect_addr);
 #endif /* H5FS_SINFO_DEBUG */
             /* Protect the free space sections */
             cache_udata.f      = f;
@@ -296,7 +296,7 @@ done:
               ", fspace->sinfo = %p, fspace->sect_addr = %" PRIuHADDR "\n",
               FUNC, fspace->addr, (void *)fspace->sinfo, fspace->sect_addr);
     HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
-            FUNC, fspace->alloc_sect_size, fspace->sect_size);
+              FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sinfo_lock() */
@@ -344,7 +344,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
         "%s: fspace->sinfo_lock_count = %u, fspace->sinfo_modified = %d, fspace->sinfo_protected = %d\n",
         FUNC, fspace->sinfo_lock_count, fspace->sinfo_modified, fspace->sinfo_protected);
     HDfprintf(stderr, "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
-            FUNC, fspace->alloc_sect_size, fspace->sect_size);
+              FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -1350,9 +1350,8 @@ H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flag
     FUNC_ENTER_NOAPI(FAIL)
 
 #ifdef H5FS_SINFO_DEBUG
-    HDfprintf(stderr, "%s: *sect = {%" PRIuHADDR ", %" PRIuHSIZE ", %u, %s}\n", FUNC, sect->addr,
-              sect->size, sect->type,
-              (sect->state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
+    HDfprintf(stderr, "%s: *sect = {%" PRIuHADDR ", %" PRIuHSIZE ", %u, %s}\n", FUNC, sect->addr, sect->size,
+              sect->type, (sect->state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -1438,7 +1437,7 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
 
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr, "%s: addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", extra_requested = %" PRIuHSIZE "\n",
-            FUNC, addr, size, extra_requested);
+              FUNC, addr, size, extra_requested);
 #endif /* H5FS_SINFO_DEBUG */
 
     /* Check arguments. */
@@ -1451,8 +1450,7 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
     /* Check for any sections on free space list */
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr, "%s: fspace->tot_sect_count = %" PRIuHSIZE "\n", FUNC, fspace->tot_sect_count);
-    HDfprintf(stderr, "%s: fspace->serial_sect_count = %" PRIuHSIZE "\n", FUNC,
-              fspace->serial_sect_count);
+    HDfprintf(stderr, "%s: fspace->serial_sect_count = %" PRIuHSIZE "\n", FUNC, fspace->serial_sect_count);
     HDfprintf(stderr, "%s: fspace->ghost_sect_count = %" PRIuHSIZE "\n", FUNC, fspace->ghost_sect_count);
 #endif /* H5FS_SINFO_DEBUG */
     if (fspace->tot_sect_count > 0) {
