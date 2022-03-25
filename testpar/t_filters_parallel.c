@@ -721,6 +721,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     size_t      i, data_size, correct_buf_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -817,7 +818,11 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
         }
     }
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Create 2-D memory dataspace */
+    memspace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -847,6 +852,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -1033,6 +1039,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -1053,6 +1060,10 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     chunk_dims[1]   = (hsize_t)WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NCOLS;
     sel_dims[0]     = (hsize_t)WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NROWS;
     sel_dims[1]     = (hsize_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NCOLS;
+
+    /* Create 2-D memory dataspace */
+    memspace = H5Screate_simple(WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     filespace = H5Screate_simple(WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS, dataset_dims, max_dims);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -1118,7 +1129,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
              "Hyperslab selection succeeded");
 
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
              "Dataset write succeeded");
 
         /* Verify space allocation status */
@@ -1131,7 +1142,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
 
         HDmemset(read_buf, 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify the correct data was written */
@@ -1155,6 +1166,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
         HDfree(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -1187,6 +1199,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -1207,6 +1220,10 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     chunk_dims[1]   = (hsize_t)WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS;
     sel_dims[0]     = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1]     = (hsize_t)WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
+
+    /* Create 2-D memory dataspace */
+    memspace = H5Screate_simple(WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     filespace = H5Screate_simple(WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS, dataset_dims, max_dims);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -1271,7 +1288,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
              "Hyperslab selection succeeded");
 
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
              "Dataset write succeeded");
 
         /* Verify space allocation status */
@@ -1284,7 +1301,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
 
         HDmemset(read_buf, 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify correct data was written */
@@ -1308,6 +1325,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
         HDfree(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -1342,6 +1360,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -1393,6 +1412,10 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
         sel_dims[0] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NROWS;
         sel_dims[1] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NCOLS;
 
+        /* Create 2-D memory dataspace */
+        memspace = H5Screate_simple(WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS, sel_dims, NULL);
+        VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
         /* Fill data buffer */
         data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
@@ -1435,7 +1458,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
              "Hyperslab selection succeeded");
 
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
              "Dataset write succeeded");
 
         /* Verify space allocation status */
@@ -1448,7 +1471,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
 
         HDmemset(read_buf, 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify the correct data was written */
@@ -1468,6 +1491,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
             verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
+        VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     }
 
@@ -1509,6 +1533,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -1560,6 +1585,10 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
         sel_dims[0] = (i + 1);
         sel_dims[1] = (i + 1) * (size_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS;
 
+        /* Create 2-D memory dataspace */
+        memspace = H5Screate_simple(WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS, sel_dims, NULL);
+        VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
         /* Fill data buffer */
         data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
@@ -1602,7 +1631,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
              "Hyperslab selection succeeded");
 
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
              "Dataset write succeeded");
 
         /* Verify space allocation status */
@@ -1615,7 +1644,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
 
         HDmemset(read_buf, 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify correct data was written */
@@ -1631,6 +1660,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
             verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
+        VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
         VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     }
 
@@ -7424,6 +7454,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -7442,6 +7473,10 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     chunk_dims[1]   = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     sel_dims[0]     = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS;
     sel_dims[1]     = (hsize_t)WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
+
+    /* Create 2-D memory dataspace */
+    memspace = H5Screate_simple(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -7505,7 +7540,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -7517,7 +7552,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
@@ -7567,7 +7602,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -7581,7 +7616,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     HDmemset(read_buf, 255, data_size);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
@@ -7592,6 +7627,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
         HDfree(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -7626,6 +7662,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     size_t      i, data_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       memspace  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -7644,6 +7681,10 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     chunk_dims[1]   = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
     sel_dims[0]     = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1]     = (hsize_t)WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS;
+
+    /* Create 2-D memory dataspace */
+    memspace = H5Screate_simple(WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     filespace = H5Screate_simple(WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
@@ -7708,7 +7749,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -7720,7 +7761,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
@@ -7771,7 +7812,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -7785,7 +7826,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
 
     HDmemset(read_buf, 255, data_size);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
@@ -7796,6 +7837,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
         HDfree(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -7844,6 +7886,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     size_t      i, data_size, read_buf_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       memspace   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
     int *       recvcounts = NULL;
     int *       displs     = NULL;
@@ -7948,12 +7991,19 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)(count[0] * block[0]);
+    sel_dims[1] = (hsize_t)(count[1] * block[1]);
+    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
 
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
@@ -8012,7 +8062,13 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
+    sel_dims[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
+    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -8030,6 +8086,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
         VRFY((read_buf[i] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
 
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /********************************************************************
@@ -8090,12 +8147,19 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)(count[0] * block[0]);
+    sel_dims[1] = (hsize_t)(count[1] * block[1]);
+    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
 
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
@@ -8148,7 +8212,13 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
+    sel_dims[1] = (hsize_t)FILL_VALUES_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
+    memspace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -8179,6 +8249,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -8208,6 +8279,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     size_t           i, data_size, read_buf_size;
     hid_t            file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t            group_id  = H5I_INVALID_HID;
+    hid_t            memspace  = H5I_INVALID_HID;
     hid_t            filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
@@ -8315,12 +8387,19 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)(count[0] * block[0]);
+    sel_dims[1] = (hsize_t)(count[1] * block[1]);
+    memspace = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
 
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     dset_id = H5Dopen2(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, H5P_DEFAULT);
@@ -8357,7 +8436,13 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
+    sel_dims[1] = (hsize_t)FILL_VALUE_UNDEFINED_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
+    memspace = H5Screate_simple(FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -8379,6 +8464,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -8409,6 +8495,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     size_t      i, data_size, read_buf_size;
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       memspace   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
     int *       recvcounts = NULL;
     int *       displs     = NULL;
@@ -8539,12 +8626,19 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)(count[0] * block[0]);
+    sel_dims[1] = (hsize_t)(count[1] * block[1]);
+    memspace = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
     verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
 
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
@@ -8608,7 +8702,13 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
+    /* Set selected dims and create 2-D memory dataspace */
+    sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
+    sel_dims[1] = (hsize_t)FILL_TIME_NEVER_TEST_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
+    memspace = H5Screate_simple(FILL_TIME_NEVER_TEST_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
 
     /* Verify space allocation status */
@@ -8639,6 +8739,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");

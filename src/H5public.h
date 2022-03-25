@@ -387,10 +387,6 @@ typedef unsigned long long haddr_t;
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UINT64_T
-#endif
-
 /* uint32_t type is used for creation order field for messages.  It may be
  * defined in Posix.1g, otherwise it is defined here.
  */
