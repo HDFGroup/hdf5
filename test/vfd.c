@@ -4428,8 +4428,9 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
                 if (verbose) {
 
                     HDfprintf(stdout, "\n\nread/write buf mismatch in vector/entry");
-                    HDfprintf(stdout, "\"%s\"/%u at offset %llu/%llu w/r = %c/%c type = %s\n\n", name, (unsigned)i, (long long unsigned)j,
-                              (long long unsigned)buf_size, w_buf[j], r_buf[j], mem_type_names[type]);
+                    HDfprintf(stdout, "\"%s\"/%u at offset %llu/%llu w/r = %c/%c type = %s\n\n", name,
+                              (unsigned)i, (long long unsigned)j, (long long unsigned)buf_size, w_buf[j],
+                              r_buf[j], mem_type_names[type]);
                 }
             }
             j++;
@@ -4496,8 +4497,8 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
             r_buf = NULL;
         }
 
-        HDfprintf(stdout, "%u: addr/len = %llu/%llu, type = %s, w_buf = \"%s\"\n", (unsigned)i, (long long unsigned)(addrs[i]),
-                  (long long unsigned)(size), mem_type_names[type], w_buf);
+        HDfprintf(stdout, "%u: addr/len = %llu/%llu, type = %s, w_buf = \"%s\"\n", (unsigned)i,
+                  (long long unsigned)(addrs[i]), (long long unsigned)(size), mem_type_names[type], w_buf);
 
         if (r_buf) {
 
@@ -4986,8 +4987,8 @@ static herr_t
 test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
                         haddr_t offsets[], size_t element_sizes[], int *wbufs[])
 {
-    int     i;
-    int     j;
+    int i;
+    int j;
 
     /* Update write buffer */
     for (i = 0; i < (int)count; i++)
@@ -5029,11 +5030,11 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
                               hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
                               uint32_t rbufcount, int *erbufs[], hbool_t shorten_rbufs)
 {
-    int     rbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];
-    int     rbuf2[SEL_IO_DIM0 * SEL_IO_DIM1];
-    int *   rbufs[2] = {rbuf1, rbuf2};
-    int     i;
-    int     j;
+    int  rbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];
+    int  rbuf2[SEL_IO_DIM0 * SEL_IO_DIM1];
+    int *rbufs[2] = {rbuf1, rbuf2};
+    int  i;
+    int  j;
 
     /* Initialize read buffer */
     for (i = 0; i < (int)rbufcount; i++)
@@ -5059,7 +5060,7 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
                 H5_FAILED()
                 AT()
                 HDprintf("data read from file does not match expected values at mapping array location %d\n",
-                       i);
+                         i);
                 HDprintf("expected data: \n");
                 for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++) {
                     printf("%6d", erbufs[i][j]);
@@ -5206,7 +5207,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                        element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
             TEST_ERROR
 
         /*
@@ -5262,7 +5263,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
             TEST_ERROR
 
         /* Reset selections */
@@ -5467,7 +5468,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
             TEST_ERROR
 
         /* Reset selections */
@@ -5576,7 +5577,7 @@ test_selection_io(const char *vfd_name)
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1], element_sizes,
-                                     (int **)&wbufs[0]) < 0)
+                                    (int **)&wbufs[0]) < 0)
             TEST_ERROR
 
         /* Update file buf */
@@ -5597,7 +5598,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
             TEST_ERROR
 
         /* Reset selections */
@@ -5608,7 +5609,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
             TEST_ERROR
 
         /*
@@ -5636,7 +5637,7 @@ test_selection_io(const char *vfd_name)
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0], element_sizes,
-                                     (int **)&wbufs[1]) < 0)
+                                    (int **)&wbufs[1]) < 0)
             TEST_ERROR
 
         /* Update file buf */
@@ -5656,7 +5657,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
             TEST_ERROR
 
         /* Reset selections */
@@ -5667,7 +5668,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
             TEST_ERROR
 
         /* Run tests with full and partial element sizes array */
@@ -5717,7 +5718,7 @@ test_selection_io(const char *vfd_name)
 
             /* Issue write call */
             if (test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
-                                         (int **)wbufs) < 0)
+                                        (int **)wbufs) < 0)
                 TEST_ERROR
 
             /* Update file bufs */
@@ -5747,7 +5748,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                               (int **)erbufs, FALSE) < 0)
+                                              (int **)erbufs, FALSE) < 0)
                 TEST_ERROR
 
             /* Reset selections */
@@ -5762,7 +5763,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                               (int **)fbufs, FALSE) < 0)
+                                              (int **)fbufs, FALSE) < 0)
                 TEST_ERROR
 
             /*
@@ -5826,7 +5827,7 @@ test_selection_io(const char *vfd_name)
 
             /* Issue write call */
             if (test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
-                                         (int **)wbufs) < 0)
+                                        (int **)wbufs) < 0)
                 TEST_ERROR
 
             /* Update file bufs - need to reuse 1D array so data stays consistent, so use math to
@@ -5863,7 +5864,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 1,
-                                               (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE) < 0)
+                                              (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE) < 0)
                 TEST_ERROR
 
             /* Reset selections */
@@ -5878,7 +5879,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                               (int **)fbufs, FALSE) < 0)
+                                              (int **)fbufs, FALSE) < 0)
                 TEST_ERROR
 
             /* Reset first spaces to 1D */
