@@ -1346,7 +1346,7 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
 #endif
 
     /* If page buffering is disabled, or if this is a parallel raw data access,
-     * bypass page buffering. Note that page buffering may stil be disabled for
+     * bypass page buffering. Note that page buffering may still be disabled for
      * large metadata access or large non-parallel raw data access, but this
      * function doesn't take I/O size into account so if it returns TRUE the
      * page buffer may still be disabled for some I/O. If it returns FALSE it is

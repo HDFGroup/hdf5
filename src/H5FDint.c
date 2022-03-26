@@ -50,7 +50,7 @@
  * If more space is needed dynamic allocation will be used instead. */
 #define H5FD_LOCAL_VECTOR_LEN 8
 
-/* Length of stack allocated arrays for dataspace IDs/structs for selction I/O
+/* Length of stack allocated arrays for dataspace IDs/structs for selection I/O
  * operations. Corresponds to the number of file selection/memory selection
  * pairs (along with addresses, etc.) in a selection I/O operation. If more
  * space is needed dynamic allocation will be used instead */
