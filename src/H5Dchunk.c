@@ -2483,13 +2483,15 @@ done:
 static htri_t
 H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info)
 {
-    const H5D_t *dataset   = io_info->dset; /* Local pointer to dataset info */
-    htri_t       ret_value = FAIL;          /* Return value */
+    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    htri_t       ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(io_info);
+
+    dataset = io_info->dset;
     HDassert(dataset);
 
     /* Don't use selection I/O if it's globally disabled, there is a type
@@ -2498,12 +2500,12 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info)
         dataset->shared->dcpl_cache.pline.nused > 0)
         ret_value = FALSE;
     else {
-        htri_t page_buf_enabled;
+        hbool_t page_buf_enabled;
 
         HDassert(io_info->io_ops.single_write == H5D__select_write);
 
         /* Check if the page buffer is enabled */
-        if ((page_buf_enabled = H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW)) < 0)
+        if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled)
             ret_value = FALSE;
