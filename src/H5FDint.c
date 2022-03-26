@@ -45,6 +45,17 @@
 /* Length of sequence lists requested from dataspace selections */
 #define H5FD_SEQ_LIST_LEN 128
 
+/* Length of stack allocated arrays for building vector I/O operations.
+ * Corresponds to the number of contiguous blocks in a selection I/O operation.
+ * If more space is needed dynamic allocation will be used instead. */
+#define H5FD_LOCAL_VECTOR_LEN 8
+
+/* Length of stack allocated arrays for dataspace IDs/structs for selction I/O
+ * operations. Corresponds to the number of file selection/memory selection
+ * pairs (along with addresses, etc.) in a selection I/O operation. If more
+ * space is needed dynamic allocation will be used instead */
+#define H5FD_LOCAL_SEL_ARR_LEN 8
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -747,12 +758,12 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     size_t          element_size;
     void *          buf;
     hbool_t         use_vector = FALSE;
-    haddr_t         addrs_static[8];
-    haddr_t *       addrs = addrs_static;
-    size_t          sizes_static[8];
-    size_t *        sizes = sizes_static;
-    void *          vec_bufs_static[8];
-    void **         vec_bufs = vec_bufs_static;
+    haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
+    haddr_t *       addrs = addrs_local;
+    size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
+    size_t *        sizes = sizes_local;
+    void *          vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
+    void **         vec_bufs = vec_bufs_local;
     hsize_t         file_off[H5FD_SEQ_LIST_LEN];
     size_t          file_len[H5FD_SEQ_LIST_LEN];
     hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
@@ -770,7 +781,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     hbool_t         file_iter_init = FALSE;
     hbool_t         mem_iter_init  = FALSE;
     H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
-    size_t          vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
+    size_t          vec_arr_nalloc = H5FD_LOCAL_VECTOR_LEN;
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
@@ -779,8 +790,6 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(vec_arr_nalloc == sizeof(sizes_static) / sizeof(sizes_static[0]));
-    HDassert(vec_arr_nalloc == sizeof(vec_bufs_static) / sizeof(vec_bufs_static[0]));
     HDassert(mem_spaces);
     HDassert(file_spaces);
     HDassert(offsets);
@@ -895,25 +904,25 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 /* Check if we need to extend the arrays */
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
-                    if (addrs == addrs_static) {
-                        HDassert(sizes == sizes_static);
-                        HDassert(vec_bufs == vec_bufs_static);
+                    if (addrs == addrs_local) {
+                        HDassert(sizes == sizes_local);
+                        HDassert(vec_bufs == vec_bufs_local);
 
                         /* Allocate dynamic arrays */
-                        if (NULL == (addrs = H5MM_malloc(sizeof(addrs_static) * 2)))
+                        if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for address list")
-                        if (NULL == (sizes = H5MM_malloc(sizeof(sizes_static) * 2)))
+                        if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for size list")
-                        if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_static) * 2)))
+                        if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for buffer list")
 
                         /* Copy the existing data */
-                        (void)H5MM_memcpy(addrs, addrs_static, sizeof(addrs_static));
-                        (void)H5MM_memcpy(sizes, sizes_static, sizeof(sizes_static));
-                        (void)H5MM_memcpy(vec_bufs, vec_bufs_static, sizeof(vec_bufs_static));
+                        (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
+                        (void)H5MM_memcpy(sizes, sizes_local, sizeof(sizes_local));
+                        (void)H5MM_memcpy(vec_bufs, vec_bufs_local, sizeof(vec_bufs_local));
                     }
                     else {
                         void *tmp_ptr;
@@ -1003,18 +1012,18 @@ done:
 
     /* Cleanup vector arrays */
     if (use_vector) {
-        if (addrs != addrs_static)
+        if (addrs != addrs_local)
             addrs = H5MM_xfree(addrs);
-        if (sizes != sizes_static)
+        if (sizes != sizes_local)
             sizes = H5MM_xfree(sizes);
-        if (vec_bufs != vec_bufs_static)
+        if (vec_bufs != vec_bufs_local)
             vec_bufs = H5MM_xfree(vec_bufs);
     }
 
     /* Make sure we cleaned up */
-    HDassert(!addrs || addrs == addrs_static);
-    HDassert(!sizes || sizes == sizes_static);
-    HDassert(!vec_bufs || vec_bufs == vec_bufs_static);
+    HDassert(!addrs || addrs == addrs_local);
+    HDassert(!sizes || sizes == sizes_local);
+    HDassert(!vec_bufs || vec_bufs == vec_bufs_local);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__read_selection_translate() */
@@ -1065,10 +1074,10 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
                     haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
-    hid_t    mem_space_ids_static[8];
-    hid_t *  mem_space_ids = mem_space_ids_static;
-    hid_t    file_space_ids_static[8];
-    hid_t *  file_space_ids = file_space_ids_static;
+    hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
+    hid_t *  mem_space_ids = mem_space_ids_local;
+    hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
+    hid_t *  file_space_ids = file_space_ids_local;
     uint32_t num_spaces     = 0;
     hid_t    dxpl_id        = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
@@ -1143,9 +1152,9 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
 
     /* if the underlying VFD supports selection read, make the call */
     if (file->cls->read_selection) {
-        /* Allocate array of space IDs if necessary, otherwise use static
+        /* Allocate array of space IDs if necessary, otherwise use local
          * buffers */
-        if (count > sizeof(mem_space_ids_static) / sizeof(mem_space_ids_static[0])) {
+        if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
             if (NULL == (mem_space_ids = H5MM_malloc(count * sizeof(hid_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
             if (NULL == (file_space_ids = H5MM_malloc(count * sizeof(hid_t))))
@@ -1196,9 +1205,9 @@ done:
         if (H5I_dec_app_ref(file_space_ids[i]) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
     }
-    if (mem_space_ids != mem_space_ids_static)
+    if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
-    if (file_space_ids != file_space_ids_static)
+    if (file_space_ids != file_space_ids_local)
         file_space_ids = H5MM_xfree(file_space_ids);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1230,10 +1239,10 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
                        void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
-    H5S_t *  mem_spaces_static[8];
-    H5S_t ** mem_spaces = mem_spaces_static;
-    H5S_t *  file_spaces_static[8];
-    H5S_t ** file_spaces = file_spaces_static;
+    H5S_t *  mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t ** mem_spaces = mem_spaces_local;
+    H5S_t *  file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t ** file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1316,9 +1325,9 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
          * or vector read calls.
          */
 
-        /* Allocate arrays of space objects if necessary, otherwise use static
+        /* Allocate arrays of space objects if necessary, otherwise use local
          * buffers */
-        if (count > sizeof(mem_spaces_static) / sizeof(mem_spaces_static[0])) {
+        if (count > sizeof(mem_spaces_local) / sizeof(mem_spaces_local[0])) {
             if (NULL == (mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
             if (NULL == (file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
@@ -1352,9 +1361,9 @@ done:
     }
 
     /* Cleanup dataspace arrays */
-    if (mem_spaces != mem_spaces_static)
+    if (mem_spaces != mem_spaces_local)
         mem_spaces = H5MM_xfree(mem_spaces);
-    if (file_spaces != file_spaces_static)
+    if (file_spaces != file_spaces_local)
         file_spaces = H5MM_xfree(file_spaces);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1390,12 +1399,12 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     size_t          element_size;
     const void *    buf;
     hbool_t         use_vector = FALSE;
-    haddr_t         addrs_static[8];
-    haddr_t *       addrs = addrs_static;
-    size_t          sizes_static[8];
-    size_t *        sizes = sizes_static;
-    const void *    vec_bufs_static[8];
-    const void **   vec_bufs = vec_bufs_static;
+    haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
+    haddr_t *       addrs = addrs_local;
+    size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
+    size_t *        sizes = sizes_local;
+    const void *    vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
+    const void **   vec_bufs = vec_bufs_local;
     hsize_t         file_off[H5FD_SEQ_LIST_LEN];
     size_t          file_len[H5FD_SEQ_LIST_LEN];
     hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
@@ -1413,7 +1422,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     hbool_t         file_iter_init = FALSE;
     hbool_t         mem_iter_init  = FALSE;
     H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
-    size_t          vec_arr_nalloc = sizeof(addrs_static) / sizeof(addrs_static[0]);
+    size_t          vec_arr_nalloc = H5FD_LOCAL_VECTOR_LEN;
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
@@ -1422,8 +1431,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(vec_arr_nalloc == sizeof(sizes_static) / sizeof(sizes_static[0]));
-    HDassert(vec_arr_nalloc == sizeof(vec_bufs_static) / sizeof(vec_bufs_static[0]));
     HDassert(mem_spaces);
     HDassert(file_spaces);
     HDassert(offsets);
@@ -1538,25 +1545,25 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 /* Check if we need to extend the arrays */
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
-                    if (addrs == addrs_static) {
-                        HDassert(sizes == sizes_static);
-                        HDassert(vec_bufs == vec_bufs_static);
+                    if (addrs == addrs_local) {
+                        HDassert(sizes == sizes_local);
+                        HDassert(vec_bufs == vec_bufs_local);
 
                         /* Allocate dynamic arrays */
-                        if (NULL == (addrs = H5MM_malloc(sizeof(addrs_static) * 2)))
+                        if (NULL == (addrs = H5MM_malloc(sizeof(addrs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for address list")
-                        if (NULL == (sizes = H5MM_malloc(sizeof(sizes_static) * 2)))
+                        if (NULL == (sizes = H5MM_malloc(sizeof(sizes_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for size list")
-                        if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_static) * 2)))
+                        if (NULL == (vec_bufs = H5MM_malloc(sizeof(vec_bufs_local) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory allocation failed for buffer list")
 
                         /* Copy the existing data */
-                        (void)H5MM_memcpy(addrs, addrs_static, sizeof(addrs_static));
-                        (void)H5MM_memcpy(sizes, sizes_static, sizeof(sizes_static));
-                        (void)H5MM_memcpy(vec_bufs, vec_bufs_static, sizeof(vec_bufs_static));
+                        (void)H5MM_memcpy(addrs, addrs_local, sizeof(addrs_local));
+                        (void)H5MM_memcpy(sizes, sizes_local, sizeof(sizes_local));
+                        (void)H5MM_memcpy(vec_bufs, vec_bufs_local, sizeof(vec_bufs_local));
                     }
                     else {
                         void *tmp_ptr;
@@ -1646,18 +1653,18 @@ done:
 
     /* Cleanup vector arrays */
     if (use_vector) {
-        if (addrs != addrs_static)
+        if (addrs != addrs_local)
             addrs = H5MM_xfree(addrs);
-        if (sizes != sizes_static)
+        if (sizes != sizes_local)
             sizes = H5MM_xfree(sizes);
-        if (vec_bufs != vec_bufs_static)
+        if (vec_bufs != vec_bufs_local)
             vec_bufs = H5MM_xfree(vec_bufs);
     }
 
     /* Make sure we cleaned up */
-    HDassert(!addrs || addrs == addrs_static);
-    HDassert(!sizes || sizes == sizes_static);
-    HDassert(!vec_bufs || vec_bufs == vec_bufs_static);
+    HDassert(!addrs || addrs == addrs_local);
+    HDassert(!sizes || sizes == sizes_local);
+    HDassert(!vec_bufs || vec_bufs == vec_bufs_local);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__write_selection_translate() */
@@ -1706,10 +1713,10 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
                      haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
-    hid_t    mem_space_ids_static[8];
-    hid_t *  mem_space_ids = mem_space_ids_static;
-    hid_t    file_space_ids_static[8];
-    hid_t *  file_space_ids = file_space_ids_static;
+    hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
+    hid_t *  mem_space_ids = mem_space_ids_local;
+    hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
+    hid_t *  file_space_ids = file_space_ids_local;
     uint32_t num_spaces     = 0;
     hid_t    dxpl_id        = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
@@ -1778,9 +1785,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
 
     /* if the underlying VFD supports selection write, make the call */
     if (file->cls->write_selection) {
-        /* Allocate array of space IDs if necessary, otherwise use static
+        /* Allocate array of space IDs if necessary, otherwise use local
          * buffers */
-        if (count > sizeof(mem_space_ids_static) / sizeof(mem_space_ids_static[0])) {
+        if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
             if (NULL == (mem_space_ids = H5MM_malloc(count * sizeof(hid_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
             if (NULL == (file_space_ids = H5MM_malloc(count * sizeof(hid_t))))
@@ -1831,9 +1838,9 @@ done:
         if (H5I_dec_app_ref(file_space_ids[i]) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
     }
-    if (mem_space_ids != mem_space_ids_static)
+    if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
-    if (file_space_ids != file_space_ids_static)
+    if (file_space_ids != file_space_ids_local)
         file_space_ids = H5MM_xfree(file_space_ids);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1862,10 +1869,10 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
-    H5S_t *  mem_spaces_static[8];
-    H5S_t ** mem_spaces = mem_spaces_static;
-    H5S_t *  file_spaces_static[8];
-    H5S_t ** file_spaces = file_spaces_static;
+    H5S_t *  mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t ** mem_spaces = mem_spaces_local;
+    H5S_t *  file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t ** file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1942,9 +1949,9 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
          * or vector write calls.
          */
 
-        /* Allocate arrays of space objects if necessary, otherwise use static
+        /* Allocate arrays of space objects if necessary, otherwise use local
          * buffers */
-        if (count > sizeof(mem_spaces_static) / sizeof(mem_spaces_static[0])) {
+        if (count > sizeof(mem_spaces_local) / sizeof(mem_spaces_local[0])) {
             if (NULL == (mem_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dataspace list")
             if (NULL == (file_spaces = H5MM_malloc(count * sizeof(H5S_t *))))
@@ -1978,9 +1985,9 @@ done:
     }
 
     /* Cleanup dataspace arrays */
-    if (mem_spaces != mem_spaces_static)
+    if (mem_spaces != mem_spaces_local)
         mem_spaces = H5MM_xfree(mem_spaces);
-    if (file_spaces != file_spaces_static)
+    if (file_spaces != file_spaces_local)
         file_spaces = H5MM_xfree(file_spaces);
 
     FUNC_LEAVE_NOAPI(ret_value)
