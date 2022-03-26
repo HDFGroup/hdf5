@@ -112,6 +112,7 @@ static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
+    H5FD_CLASS_VERSION,         /* struct version       */
     H5FD_FAMILY_VALUE,          /* value                */
     "family",                   /* name                 */
     HADDR_MAX,                  /* maxaddr              */
@@ -140,6 +141,10 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD__family_get_handle,    /* get_handle           */
     H5FD__family_read,          /* read                 */
     H5FD__family_write,         /* write                */
+    NULL,                       /* read_vector          */
+    NULL,                       /* write_vector         */
+    NULL,                       /* read_selection       */
+    NULL,                       /* write_selection      */
     H5FD__family_flush,         /* flush                */
     H5FD__family_truncate,      /* truncate             */
     H5FD__family_lock,          /* lock                 */

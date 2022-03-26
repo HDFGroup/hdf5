@@ -1979,6 +1979,11 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
+/* Extern global to determine if we should use selection I/O if available (this
+ * variable should be removed once selection I/O performs as well as the
+ * previous scalar I/O implementation */
+extern hbool_t H5_use_selection_io_g;
+
 #ifdef H5_HAVE_CODESTACK
 
 /* Include required function stack header */
@@ -2472,6 +2477,16 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
+
+/* Private typedefs */
+
+/* Union for const/non-const pointer for use by functions that manipulate
+ * pointers but do not write to their targets or return pointers to const
+ * specified locations.  This helps us avoid compiler warnings. */
+typedef union {
+    void *      vp;
+    const void *cvp;
+} H5_flexible_const_ptr_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

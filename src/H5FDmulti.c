@@ -176,6 +176,7 @@ static herr_t  H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
+    H5FD_CLASS_VERSION,        /* struct version       */
     H5_VFD_MULTI,              /* value             */
     "multi",                   /* name              */
     HADDR_MAX,                 /* maxaddr           */
@@ -204,6 +205,10 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_handle,     /* get_handle        */
     H5FD_multi_read,           /* read              */
     H5FD_multi_write,          /* write             */
+    NULL,                      /*read_vector        */
+    NULL,                      /*write_vector       */
+    NULL,                      /* read_selection    */
+    NULL,                      /* write_selection   */
     H5FD_multi_flush,          /* flush             */
     H5FD_multi_truncate,       /* truncate          */
     H5FD_multi_lock,           /* lock              */
