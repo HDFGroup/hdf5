@@ -44,7 +44,7 @@ MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
 
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
-# conversions.  If not, some hard conversions will still be prefered even
+# conversions.  If not, some hard conversions will still be preferred even
 # though the data may be wrong (for example, some compilers don't
 # support denormalized floating values) to maximize speed.
 #-----------------------------------------------------------------------------

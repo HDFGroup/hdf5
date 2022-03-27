@@ -316,7 +316,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, h5tools_cont
  *      This is a special case subfunction to print the data in a region reference of type blocks.
  *
  * Return:
- *      The function returns FAIL if there was an error, otherwise SUCEED
+ *      The function returns FAIL if there was an error, otherwise SUCCEED
  *
  * Parameters Description:
  *      h5tools_str_t *buffer is the string into which to render
@@ -338,7 +338,7 @@ h5tools_print_region_data_blocks(hid_t region_id, FILE *stream, const h5tool_for
     hsize_t *         count           = NULL;
     hsize_t           blkndx;
     hsize_t           total_size[H5S_MAX_RANK];
-    hsize_t           elmtno; /* elemnt index  */
+    hsize_t           elmtno; /* element index  */
     hsize_t           curr_pos = 0;
     unsigned int      region_flags; /* buffer extent flags */
     hsize_t           numelem;
@@ -734,7 +734,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id, FILE *stre
 {
     hbool_t           dimension_break = TRUE;
     hsize_t *         dims1           = NULL;
-    hsize_t           elmtno; /* elemnt index  */
+    hsize_t           elmtno; /* element index  */
     hsize_t           curr_pos = 0;
     hsize_t           total_size[H5S_MAX_RANK];
     hsize_t           jndx;
@@ -1124,7 +1124,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
 
     H5TOOLS_START_DEBUG(" ");
     if ((size_t)ctx->ndims > NELMTS(sm_size))
-        H5TOOLS_THROW(FAIL, "ndims and sm_size comparision failed");
+        H5TOOLS_THROW(FAIL, "ndims and sm_size comparison failed");
 
     size_row_block = ctx->sset->block.data[row_dim];
 
