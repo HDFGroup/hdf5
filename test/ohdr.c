@@ -541,7 +541,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
        done in the source directory. */
     HDstrncpy(testfile, FILE_BOGUS, TESTFILE_LEN);
     testfile[TESTFILE_LEN - 1] = '\0';
-    HDstrncat(testfile, ".copy", 5);
+    HDstrncat(testfile, ".copy", sizeof(testfile) - HDstrlen(testfile) - 1);
 
     /* Make a copy of the data file from svn. */
     if (h5_make_local_copy(FILE_BOGUS, testfile) < 0)

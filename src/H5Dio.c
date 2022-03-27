@@ -1097,11 +1097,19 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
+            int comm_size = 0;
+
+            /* Retrieve size of MPI communicator used for file */
+            if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
+
             /* Check if there are any filters in the pipeline. If there are,
-             * we cannot break to independent I/O if this is a write operation;
-             * otherwise there will be metadata inconsistencies in the file.
+             * we cannot break to independent I/O if this is a write operation
+             * with multiple ranks involved; otherwise, there will be metadata
+             * inconsistencies in the file.
              */
-            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+            if (comm_size > 1 && io_info->op_type == H5D_IO_OP_WRITE &&
+                io_info->dset->shared->dcpl_cache.pline.nused > 0) {
                 H5D_mpio_no_collective_cause_t cause;
                 uint32_t                       local_no_collective_cause;
                 uint32_t                       global_no_collective_cause;
@@ -1135,28 +1143,40 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
                 for (cause = 1, idx = 0;
                      (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len);
                      cause <<= 1, idx++) {
-                    size_t cause_strlen = HDstrlen(cause_strings[idx]);
-
                     if (cause & local_no_collective_cause) {
+                        size_t local_buffer_space = sizeof(local_no_collective_cause_string) -
+                                                    HDstrlen(local_no_collective_cause_string) - 1;
+
                         /* Check if there were any previous error messages included. If so, prepend a
                          * semicolon to separate the messages.
                          */
-                        if (local_error_message_previously_written)
-                            HDstrncat(local_no_collective_cause_string, "; ", 2);
+                        if (local_buffer_space && local_error_message_previously_written) {
+                            HDstrncat(local_no_collective_cause_string, "; ", local_buffer_space);
+                            local_buffer_space -= MIN(local_buffer_space, 2);
+                        }
 
-                        HDstrncat(local_no_collective_cause_string, cause_strings[idx], cause_strlen);
+                        if (local_buffer_space)
+                            HDstrncat(local_no_collective_cause_string, cause_strings[idx],
+                                      local_buffer_space);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
 
                     if (cause & global_no_collective_cause) {
+                        size_t global_buffer_space = sizeof(global_no_collective_cause_string) -
+                                                     HDstrlen(global_no_collective_cause_string) - 1;
+
                         /* Check if there were any previous error messages included. If so, prepend a
                          * semicolon to separate the messages.
                          */
-                        if (global_error_message_previously_written)
-                            HDstrncat(global_no_collective_cause_string, "; ", 2);
+                        if (global_buffer_space && global_error_message_previously_written) {
+                            HDstrncat(global_no_collective_cause_string, "; ", global_buffer_space);
+                            global_buffer_space -= MIN(global_buffer_space, 2);
+                        }
 
-                        HDstrncat(global_no_collective_cause_string, cause_strings[idx], cause_strlen);
+                        if (global_buffer_space)
+                            HDstrncat(global_no_collective_cause_string, cause_strings[idx],
+                                      global_buffer_space);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */

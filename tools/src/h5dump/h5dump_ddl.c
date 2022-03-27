@@ -1318,7 +1318,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
     j = (int)HDstrlen(op_name) - 1;
     /* find the last / */
     while (j >= 0) {
-        if (op_name[j] == '/' && (j == 0 || (j > 0 && op_name[j - 1] != '\\')))
+        if (op_name[j] == '/' && (j == 0 || (op_name[j - 1] != '\\')))
             break;
         j--;
     }
@@ -1343,13 +1343,21 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
                 ret = FAIL;
             }
             else {
+                size_t buffer_space = w - 1;
+
                 HDmemset(obj_name, '\0', w);
                 if (op_name[0] != '/') {
-                    HDstrncat(obj_name, buf, u + 1);
-                    if (buf[u - 1] != '/')
-                        HDstrncat(obj_name, "/", (size_t)2);
+                    HDstrncat(obj_name, buf, buffer_space);
+                    buffer_space -= MIN(buffer_space, u);
+
+                    if (buf[u - 1] != '/') {
+                        HDstrncat(obj_name, "/", buffer_space);
+                        buffer_space -= MIN(buffer_space, 2);
+                    }
                 }
-                HDstrncat(obj_name, op_name, v + 1);
+
+                HDstrncat(obj_name, op_name, buffer_space);
+                buffer_space -= MIN(buffer_space, v);
 
                 handle_attributes(oid, obj_name, NULL, 0, NULL);
                 HDfree(obj_name);
@@ -1421,10 +1429,10 @@ lnk_search(const char *path, const H5L_info2_t *li, void *_op_data)
     else {
         if (k == 2) {
             HDstrcpy(search_name, "/");
-            HDstrncat(search_name, op_name, search_len + 1);
+            HDstrcat(search_name, op_name);
         }
         else
-            HDstrncpy(search_name, op_name, search_len + 1);
+            HDstrcpy(search_name, op_name);
         search_name[search_len + k - 1] = '\0';
 
         if (HDstrcmp(path, search_name) == 0) {
@@ -1533,7 +1541,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
 
     /* find the last / */
     while (j >= 0) {
-        if (attr[j] == '/' && (j == 0 || (j > 0 && attr[j - 1] != '\\')))
+        if (attr[j] == '/' && (j == 0 || (attr[j - 1] != '\\')))
             break;
         j--;
     }
