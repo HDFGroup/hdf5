@@ -278,6 +278,7 @@ static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
+    H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_HDFS_VALUE,          /* value                */
     "hdfs",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
@@ -306,6 +307,10 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD__hdfs_get_handle,    /* get_handle           */
     H5FD__hdfs_read,          /* read                 */
     H5FD__hdfs_write,         /* write                */
+    NULL,                     /* read_vector          */
+    NULL,                     /* write_vector         */
+    NULL,                     /* read_selection       */
+    NULL,                     /* write_selection      */
     NULL,                     /* flush                */
     H5FD__hdfs_truncate,      /* truncate             */
     NULL,                     /* lock                 */
