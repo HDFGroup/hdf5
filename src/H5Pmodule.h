@@ -111,7 +111,8 @@
  *
  * \defgroup GAPL General Access Properties
  * \ingroup H5P
- * \todo Should this be as standalone page?
+ * The functions in this section can be applied to different kinds of property
+ * lists.
  *
  * \defgroup GCPL Group Creation Properties
  * \ingroup H5P

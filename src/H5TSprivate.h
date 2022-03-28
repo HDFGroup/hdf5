@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5TSprivate.h
- *			May 2 2000
- *			Chee Wai LEE
+ * Created:     H5TSprivate.h
  *
- * Purpose:		Private non-prototype header.
+ * Purpose:     Thread-safety abstractions used by the library
  *
  *-------------------------------------------------------------------------
  */
@@ -25,6 +23,7 @@
 #define H5TSprivate_H_
 
 #ifdef H5_HAVE_THREADSAFE
+
 /* Public headers needed by this file */
 #ifdef LATER
 #include "H5TSpublic.h" /* Public API prototypes */
@@ -134,6 +133,7 @@ H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr
 
 #else /* H5_HAVE_THREADSAFE */
 
+/* Non-threadsafe code needs this */
 #define H5TS_thread_id() ((uint64_t)0)
 
 #endif /* H5_HAVE_THREADSAFE */

@@ -148,7 +148,7 @@ typedef enum H5T_pad_t {
     H5T_PAD_ONE        = 1,  /**< always set to one               */
     H5T_PAD_BACKGROUND = 2,  /**< set to background value         */
 
-    H5T_NPAD = 3 /**< sentinal: THIS MUST BE LAST     */
+    H5T_NPAD = 3 /**< sentinel: THIS MUST BE LAST     */
 } H5T_pad_t;
 //! <!-- [H5T_pad_t_snip] -->
 
@@ -1198,7 +1198,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  *          the link(s) by which the new committed datatype is accessed and
  *          the creation of any intermediate groups that may be missing.
  *
- *          Once commited, this datatype may be used to define the datatype
+ *          Once committed, this datatype may be used to define the datatype
  *          of any other dataset or attribute in the file.
  *
  *          This function will not accept a datatype that cannot actually hold
@@ -1208,7 +1208,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  *          Committed datatypes are sometimes referred to as named datatypes.
  *
  * \version 1.8.7 Function modified in this release to reject datatypes that
- *          will not accomodate actual data, such as a compound datatype
+ *          will not accommodate actual data, such as a compound datatype
  *          with no fields or an enumerated datatype with no members.
  *
  * \since 1.8.0
@@ -1286,7 +1286,7 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  *          fields and enumerated datatypes with no members.
  *
  * \version 1.8.7 Function modified in this release to reject datatypes that
- *                will not accomodate actual data, such as a compound datatype
+ *                will not accommodate actual data, such as a compound datatype
  *                with no fields or an enumerated datatype with no members.
  *
  * \since 1.2.0
@@ -2679,7 +2679,6 @@ H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
  */
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
-/* Type conversion database */
 /**
  * \ingroup CONV
  *

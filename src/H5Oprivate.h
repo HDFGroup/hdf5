@@ -250,7 +250,7 @@ typedef struct H5O_copy_t {
 #define H5O_SHARE_TYPE_UNSHARED  0 /* Message is not shared */
 #define H5O_SHARE_TYPE_SOHM      1 /* Message is stored in SOHM heap */
 #define H5O_SHARE_TYPE_COMMITTED 2 /* Message is stored in another object header */
-#define H5O_SHARE_TYPE_HERE      3 /* Message is stored in this object header, but is sharable */
+#define H5O_SHARE_TYPE_HERE      3 /* Message is stored in this object header, but is shareable */
 
 /* Detect messages that aren't stored in message's object header */
 #define H5O_IS_STORED_SHARED(T)                                                                              \
