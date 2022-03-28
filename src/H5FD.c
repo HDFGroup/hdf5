@@ -932,7 +932,8 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
     FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-        if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HGOTO_DONE(0)
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+        HGOTO_DONE(0)
     if (!f1 || !f1->cls)
         HGOTO_DONE(-1)
     if (!f2 || !f2->cls)
@@ -1554,7 +1555,6 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     H5CX_set_dxpl(dxpl_id);
 
     /* Call private function */
-    /* JRM -- review this */
     /* (Note compensating for base addresses addition in internal routine) */
     if (H5FD_read_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed")
@@ -1632,7 +1632,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Call private function */ /* JRM -- review this */
+    /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")

@@ -2219,7 +2219,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
-
             /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
@@ -2290,8 +2289,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         haddr_t max_addr   = HADDR_MAX;
         hbool_t fixed_size = FALSE;
         size_t  size;
-
-        haddr_t max_addr = HADDR_MAX;
 
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
@@ -2478,8 +2475,6 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
-    MPI_Datatype *             sub_types         = NULL;
-    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2624,7 +2619,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
          * in the file selection spans multiple vector elements and construct a
          * memory datatype to match this larger block in the file, but for now
          * just read in each element of the vector in a separate
-         * MPI_File_read_at() call.
+         * MPI_File_write_at() call.
          *
          * We could also just detect the case when the entire file selection is
          * contiguous, which would allow us to use
@@ -2721,27 +2716,6 @@ done:
     HDassert(vector_was_sorted || !s_addrs);
     HDassert(vector_was_sorted || !s_sizes);
     HDassert(vector_was_sorted || !s_bufs);
-
-        if (sub_types) {
-            HDassert(sub_types_created);
-
-            for (i = 0; i < (int)count; i++)
-                if (sub_types_created[i])
-                    MPI_Type_free(&sub_types[i]);
-
-            HDfree(sub_types);
-            sub_types = NULL;
-            HDfree(sub_types_created);
-            sub_types_created = NULL;
-        }
-    }
-
-    /* Make sure we cleaned up */
-    HDassert(!mpi_block_lengths);
-    HDassert(!mpi_displacements);
-    HDassert(!mpi_bufs);
-    HDassert(!sub_types);
-    HDassert(!sub_types_created);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)

@@ -1145,7 +1145,6 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
      *     Close FAPL and DXPL.
      */
     takedown_vfd_test_file(mpi_rank, filename, &lf, &fapl_id, &dxpl_id);
-
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -2247,7 +2246,6 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         else {
 
             H5_FAILED();
-
             if ((disp_failure_mssgs) || (show_progress)) {
                 HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
             }
@@ -2310,7 +2308,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    const void *bufs[1];
+    void *      bufs[1];
 
     pass = TRUE;
 
@@ -2508,7 +2506,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    const void *bufs[1];
+    void *      bufs[1];
 
     pass = TRUE;
 
@@ -2772,7 +2770,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    const void *bufs[4];
+    void *      bufs[4];
 
     pass = TRUE;
 
@@ -3053,7 +3051,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    const void *bufs[4];
+    void *      bufs[4];
 
     pass = TRUE;
 
@@ -3370,7 +3368,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    const void *bufs[4];
+    void *      bufs[4];
 
     pass = TRUE;
 
@@ -3825,7 +3823,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[(INTS_PER_RANK / 16) + 1];
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
-    const void *bufs[(INTS_PER_RANK / 16) + 1];
+    void *      bufs[(INTS_PER_RANK / 16) + 1];
 
     pass = TRUE;
 
