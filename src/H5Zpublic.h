@@ -687,4 +687,5 @@ typedef struct H5Z_class1_t {
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* _H5Zpublic_H */
