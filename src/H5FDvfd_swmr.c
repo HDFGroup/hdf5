@@ -142,9 +142,6 @@ H5FL_SEQ_DEFINE(H5FD_vfd_swmr_idx_entry_t);
  * Return:      Success:    The driver ID for the VFD SWMR driver.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -169,9 +166,6 @@ H5FD_vfd_swmr_init(void)
  * Purpose:     Shut down the VFD
  *
  * Returns:     SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
  *
  *---------------------------------------------------------------------------
  */
@@ -214,9 +208,16 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_vfd_swmr() */
 
-/* Perform the reader-only aspects of opening in VFD SWMR mode:
- * initialize histogram of ticks spent in API calls, wait for the
- * shadow file to appear, load the header and index.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__swmr_reader_open
+ *
+ * Purpose:     Perform the reader-only aspects of opening in VFD SWMR mode:
+ *              initialize histogram of ticks spent in API calls, wait for
+ *              the shadow file to appear, load the header and index.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
@@ -351,24 +352,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__vfd_swmr_open() */
 
-/* Perform the reader-only aspects of closing in VFD SWMR mode: optionally
- * log and always release the histogram of ticks spent in API calls,
- * close the shadow file, release the shadow index.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__swmr_reader_close
+ *
+ * Purpose:     Perform the reader-only aspects of closing in VFD SWMR mode:
+ *              optionally log and always release the histogram of ticks spent
+ *              in API calls, close the shadow file, release the shadow index.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
     if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
 
     /* Close the metadata file */
     if (file->md_fd >= 0 && HDclose(file->md_fd) < 0)
         /* Push error, but keep going */
-        HERROR(H5E_VFL, H5E_CANTCLOSEFILE, "unable to close the metadata file");
+        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file");
 
     /* Free the index entries */
     if (file->md_index.num_entries && file->md_index.entries)
         file->md_index.entries = H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, file->md_index.entries);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5FD__swmr_reader_close() */
 
 /*-------------------------------------------------------------------------
@@ -1188,7 +1203,7 @@ done:
 
 } /* H5FD__vfd_swmr_header_deserialize() */
 
-/*
+/*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_index_deserialize()
  *
  * Purpose:     Load and decode the index in the metadata file
@@ -1199,10 +1214,8 @@ done:
  *              --Decode the index entries if the tick number in the header and
  *                the index match
  *
- * Return:      Success:    TRUE
- *              Failure:    FAIL
- *              Retry:     FALSE
- *
+ * Return:      TRUE/FALSE/FAIL
+ *-------------------------------------------------------------------------
  */
 static htri_t
 H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_index *md_index,
@@ -1342,8 +1355,7 @@ done:
  *              --Return tick_num, num_entries and index from the VFD's
  *                local copies.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi
  *
@@ -1392,8 +1404,7 @@ done:
  * Purpose:     Dump a variety of information about the vfd swmr reader
  *              vfd to stderr for debugging purposes.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1476,7 +1487,6 @@ H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
  * Programmer:  JRM -- 1/29/19
  *
  *-------------------------------------------------------------------------
- *
  */
 void
 H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
