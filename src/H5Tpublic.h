@@ -258,6 +258,14 @@ typedef struct {
 extern "C" {
 #endif
 
+/**
+ * All datatype conversion functions are...
+ */
+//! <!-- [H5T_conv_t_snip] -->
+typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
+                             size_t bkg_stride, void *buf, void *bkg, hid_t dset_xfer_plist);
+//! <!-- [H5T_conv_t_snip] -->
+
 //! <!-- [H5T_conv_except_func_t_snip] -->
 /**
  * \brief Exception handler.
