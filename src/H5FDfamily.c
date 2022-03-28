@@ -112,6 +112,7 @@ static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
+    H5FD_CLASS_VERSION,         /* struct version       */
     H5FD_FAMILY_VALUE,          /* value                */
     "family",                   /* name                 */
     HADDR_MAX,                  /* maxaddr              */
@@ -237,20 +238,20 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer")
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = strstr(old_filename, ".h5"))) {
+    if ((file_extension = HDstrstr(old_filename, ".h5"))) {
         /* Insert the printf format between the filename and ".h5" extension. */
         HDstrcpy(tmp_buffer, old_filename);
-        file_extension = strstr(tmp_buffer, ".h5");
+        file_extension = HDstrstr(tmp_buffer, ".h5");
         HDsprintf(file_extension, "%s%s", suffix, ".h5");
     }
-    else if ((file_extension = strrchr(old_filename, '.'))) {
+    else if ((file_extension = HDstrrchr(old_filename, '.'))) {
         char *new_extension_loc = NULL;
 
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
         HDstrcpy(tmp_buffer, old_filename);
-        new_extension_loc = strrchr(tmp_buffer, '.');
+        new_extension_loc = HDstrrchr(tmp_buffer, '.');
         HDsprintf(new_extension_loc, "%s%s", suffix, file_extension);
     }
     else {
