@@ -307,6 +307,9 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
+/* Define if we have support for writing to filtered datasets in parallel */
+#cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@
+
 /* Define if both pread and pwrite exist. */
 #cmakedefine H5_HAVE_PREADWRITE @H5_HAVE_PREADWRITE@
 
