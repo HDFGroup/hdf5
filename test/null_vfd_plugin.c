@@ -35,6 +35,7 @@ static herr_t  H5FD_null_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_null_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 
 static const H5FD_class_t H5FD_null_g = {
+    H5FD_CLASS_VERSION,  /* struct version  */
     NULL_VFD_VALUE,      /* value           */
     NULL_VFD_NAME,       /* name            */
     1,                   /* maxaddr         */

@@ -788,8 +788,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
      */
     sum_bytes_written = 0;
     do {
-        nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX);
-        if (-1 == nbytes_in_packet) {
+        if ((nbytes_in_packet = HDread(session->sockfd, buf, H5FD_MIRROR_DATA_BUFFER_MAX)) < 0) {
             mirror_log(session->loginfo, V_ERR, "can't read into databuffer");
             reply_error(session, "can't read data buffer");
             return -1;
@@ -798,7 +797,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
         mirror_log(session->loginfo, V_INFO, "received %zd bytes", nbytes_in_packet);
         if (HEXDUMP_WRITEDATA) {
             mirror_log(session->loginfo, V_ALL, "DATA:\n```");
-            mirror_log_bytes(session->loginfo, V_ALL, nbytes_in_packet, (const unsigned char *)buf);
+            mirror_log_bytes(session->loginfo, V_ALL, (size_t)nbytes_in_packet, (const unsigned char *)buf);
             mirror_log(session->loginfo, V_ALL, "```");
         }
 
@@ -859,8 +858,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */
 
-    read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX);
-    if (-1 == read_ret) {
+    if ((read_ret = HDread(session->sockfd, comm->raw, H5FD_MIRROR_XMIT_BUFFER_MAX)) < 0) {
         mirror_log(session->loginfo, V_ERR, "read:%zd", read_ret);
         goto error;
     }

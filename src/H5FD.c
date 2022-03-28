@@ -214,6 +214,8 @@ H5FDregister(const H5FD_class_t *cls)
     /* Check arguments */
     if (!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null class pointer is disallowed")
+    if (cls->version != H5FD_CLASS_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_VERSION, H5I_INVALID_HID, "wrong file driver version #")
     if (!cls->open || !cls->close)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "'open' and/or 'close' methods are not defined")
@@ -928,9 +930,10 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
+    FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-        if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HGOTO_DONE(0)
+    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+        HGOTO_DONE(0)
     if (!f1 || !f1->cls)
         HGOTO_DONE(-1)
     if (!f2 || !f2->cls)
@@ -1552,7 +1555,6 @@ H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
     H5CX_set_dxpl(dxpl_id);
 
     /* Call private function */
-    /* JRM -- review this */
     /* (Note compensating for base addresses addition in internal routine) */
     if (H5FD_read_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed")
@@ -1630,7 +1632,7 @@ H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[]
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Call private function */ /* JRM -- review this */
+    /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
     if (H5FD_write_vector(file, count, types, addrs, sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
@@ -1661,7 +1663,7 @@ done:
  *              If the underlying VFD supports selection reads, pass the
  *              call through directly.
  *
- *              If it doesn't, convert the vector write into a sequence
+ *              If it doesn't, convert the selection read into a sequence
  *              of individual reads.
  *
  *              All reads are done according to the data transfer property
@@ -1761,10 +1763,10 @@ done:
  *              element_sizes[n] = element_sizes[i-1] for all n >= i and
  *              < count.
  *
- *              If the underlying VFD supports selection reads, pass the
+ *              If the underlying VFD supports selection writes, pass the
  *              call through directly.
  *
- *              If it doesn't, convert the vector write into a sequence
+ *              If it doesn't, convert the selection write into a sequence
  *              of individual writes.
  *
  *              All writes are done according to the data transfer property

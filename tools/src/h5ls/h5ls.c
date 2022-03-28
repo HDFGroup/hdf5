@@ -78,9 +78,9 @@ static h5tool_format_t ls_dataformat = {
     ",",  /*elmt_suf1 */
     " ",  /*elmt_suf2 */
 
-    HSIZE_T_FORMAT, /*idx_n_fmt */
-    ",",            /*idx_sep */
-    "(%s)",         /*idx_fmt */
+    "%" PRIuHSIZE, /*idx_n_fmt */
+    ",",           /*idx_sep */
+    "(%s)",        /*idx_fmt */
 
     65535,
     /*line_ncols */ /*standard default columns */
@@ -942,8 +942,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print members */
         for (i = 0; i < (unsigned)nmembs; i++) {
-            unsigned char *copy;   /* a pointer to value array */
-            int            nchars; /* number of output characters */
+            int nchars; /* number of output characters */
 
             h5tools_str_append(buffer, "\n%*s", ind + 4, "");
             nchars = print_string(buffer, name[i], TRUE);
@@ -957,16 +956,16 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                     h5tools_str_append(buffer, "%02x", value[i * dst_size + j]);
             }
             else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long *)((void *)copy)));
+                unsigned long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%llu", copy);
             }
             else {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
+                long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%lld", copy);
             }
         }
 
@@ -1185,13 +1184,13 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print dimensions */
         for (i = 0; i < ndims; i++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, i ? "," : "[", dims[i]);
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, i ? "," : "[", dims[i]);
         h5tools_str_append(buffer, "]");
 
         HDfree(dims);
     }
     else
-        h5tools_str_append(buffer, " [SCALAR]\n", rawoutstream);
+        h5tools_str_append(buffer, " [SCALAR]\n");
 
     /* Print parent type */
     h5tools_str_append(buffer, " ");
@@ -1701,7 +1700,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", size[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", size[i]);
                     nelmts *= size[i];
                 }
                 h5tools_str_append(&buffer, "}\n");
@@ -1789,12 +1788,12 @@ dataset_list1(hid_t dset)
     ndims      = H5Sget_simple_extent_dims(space, cur_size, max_size);
     h5tools_str_append(&buffer, " {");
     for (i = 0; i < ndims; i++) {
-        h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", cur_size[i]);
+        h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", cur_size[i]);
         if (max_size[i] == H5S_UNLIMITED) {
             h5tools_str_append(&buffer, "/%s", "Inf");
         }
         else if (max_size[i] != cur_size[i] || verbose_g > 0) {
-            h5tools_str_append(&buffer, "/" HSIZE_T_FORMAT, max_size[i]);
+            h5tools_str_append(&buffer, "/%" PRIuHSIZE, max_size[i]);
         }
     }
     if (space_type == H5S_SCALAR)
@@ -1868,10 +1867,10 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
                 total = H5Tget_size(type);
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", chsize[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", chsize[i]);
                     total *= chsize[i];
                 }
-                h5tools_str_append(&buffer, "} " HSIZE_T_FORMAT " bytes\n", total);
+                h5tools_str_append(&buffer, "} %" PRIuHSIZE " bytes\n", total);
             } break;
             case H5D_COMPACT:
                 break;
@@ -1897,15 +1896,13 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                         if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size) <
                             0) {
                             h5tools_str_append(
-                                &buffer,
-                                "        #%03d %10" H5_PRINTF_LL_WIDTH "u %10s %10s ***ERROR*** %s\n", i,
+                                &buffer, "        #%03d %10" PRIuHSIZE " %10s %10s ***ERROR*** %s\n", i,
                                 total, "", "", i + 1 < nf ? "Following addresses are incorrect" : "");
                         }
                         else if (H5S_UNLIMITED == f_size) {
                             h5tools_str_append(&buffer,
-                                               "        #%03d %10" H5_PRINTF_LL_WIDTH
-                                               "u %10" H5_PRINTF_LL_WIDTH "u %10s ",
-                                               i, total, (hsize_t)f_offset, "INF");
+                                               "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10s ", i,
+                                               total, (hsize_t)f_offset, "INF");
                             print_string(&buffer, f_name, TRUE);
                         }
                         else {
@@ -1985,8 +1982,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             case H5T_ARRAY:
             case H5T_NCLASSES:
             default:
-                h5tools_str_append(&buffer,
-                                   HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
+                h5tools_str_append(&buffer, "%" PRIuHSIZE " logical byte%s, %" PRIuHSIZE " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
                     utilization = ((double)total * 100.0) / (double)used;
@@ -2303,7 +2299,7 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 iter->symlink_list->dangle_link = TRUE;
 
             h5tools_str_append(&buffer, "Soft Link {");
-            h5tools_str_append(&buffer, buf);
+            h5tools_str_append(&buffer, "%s", buf);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);
@@ -2371,11 +2367,11 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 goto done;
 
             h5tools_str_append(&buffer, "External Link {");
-            h5tools_str_append(&buffer, filename);
+            h5tools_str_append(&buffer, "%s", filename);
             h5tools_str_append(&buffer, "/");
             if (*path != '/')
                 h5tools_str_append(&buffer, "/");
-            h5tools_str_append(&buffer, path);
+            h5tools_str_append(&buffer, "%s", path);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);

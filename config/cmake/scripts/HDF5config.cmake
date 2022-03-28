@@ -37,7 +37,7 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.13.1")
+set (CTEST_SOURCE_VERSION "1.13.2")
 set (CTEST_SOURCE_VERSEXT "-1")
 
 ##############################################################################
@@ -68,7 +68,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
 endif ()
 
 ###################################################################

@@ -595,7 +595,7 @@ done:
  * Purpose:    A small internal function to if it may be possible to use
  *             selection I/O.
  *
- * Return:    TRUE or FALSE
+ * Return:    TRUE/FALSE/FAIL
  *
  * Programmer:    Neil Fortner
  *        3 August 2021
@@ -624,13 +624,13 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io_op_type_t op_
         (op_type == H5D_IO_OP_WRITE && io_info->dset->shared->cache.contig.sieve_buf))
         ret_value = FALSE;
     else {
-        htri_t page_buf_enabled;
+        hbool_t page_buf_enabled;
 
         HDassert(io_info->io_ops.single_write == H5D__select_write);
         HDassert(io_info->layout_ops.writevv == H5D__contig_writevv);
 
         /* Check if the page buffer is enabled */
-        if ((page_buf_enabled = H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW)) < 0)
+        if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled)
             ret_value = FALSE;

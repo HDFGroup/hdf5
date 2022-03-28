@@ -1440,20 +1440,81 @@ H5AC_resize_entry(void *thing, size_t new_size)
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
-    /* Resize the entry */
-    if (H5C_resize_entry(thing, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
-
 #ifdef H5_HAVE_PARALLEL
-    {
+    /* Log the generation of dirty bytes of metadata iff:
+     *
+     * 1) The entry is clean on entry, and this resize will dirty it
+     *    (i.e. the current and new sizes are different), and
+     *
+     * 2) This is a parallel computation -- which it is if the aux_ptr
+     *    is non-null.
+     *
+     * A few points to note about this section of the code:
+     *
+     * 1) This call must occur before the call to H5C_resize_entry() since
+     *    H5AC__log_dirtied_entry() expects the target entry to be clean
+     *    on entry.
+     *
+     * 2) This code has some basic issues in terms of the number of bytes
+     *    added to the dirty bytes count.
+     *
+     *    First, it adds the initial entry size to aux_ptr->dirty_bytes,
+     *    not the final size.  Note that this code used to use the final
+     *    size, but code to support this has been removed from
+     *    H5AC__log_dirtied_entry() for reasons unknown since I wrote this
+     *    code.
+     *
+     *    As long as all ranks do the same thing here, this probably doesn't
+     *    matter much, although it will delay initiation of sync points.
+     *
+     *    A more interesting point is that this code will not increment
+     *    aux_ptr->dirty_bytes if a dirty entry is resized.  At first glance
+     *    this seems major, as particularly with the older file formats,
+     *    resizes can be quite large.  However, this is probably not an
+     *    issue either, since such resizes will be accompanied by large
+     *    amounts of dirty metadata creation in other areas -- which will
+     *    cause aux_ptr->dirty_bytes to be incremented.
+     *
+     *    The bottom line is that this code is probably OK, but the above
+     *    points should be kept in mind.
+     *
+     * One final observation:  This comment is occasioned by a bug caused
+     * by moving the call to H5AC__log_dirtied_entry() after the call to
+     * H5C_resize_entry(), and then only calling H5AC__log_dirtied_entry()
+     * if entry_ptr->is_dirty was false.
+     *
+     * Since H5C_resize_entry() marks the target entry dirty unless there
+     * is not change in size, this had the effect of not calling
+     * H5AC__log_dirtied_entry() when it should be, and corrupting
+     * the cleaned and dirtied lists used by rank 0 in the parallel
+     * version of the metadata cache.
+     *
+     * The point here is that you should be very careful when working with
+     * this code, and not modify it unless you fully understand it.
+     *
+     *                                          JRM -- 2/28/22
+     */
+
+    if ((!entry_ptr->is_dirty) && (entry_ptr->size != new_size)) {
+
+        /* the entry is clean, and will be marked dirty in the resize
+         * operation.
+         */
         H5AC_aux_t *aux_ptr;
 
         aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((!entry_ptr->is_dirty) && (NULL != aux_ptr))
+
+        if (NULL != aux_ptr) {
+
             if (H5AC__log_dirtied_entry(entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
+        }
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Resize the entry */
+    if (H5C_resize_entry(thing, new_size) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
 
 done:
     /* If currently logging, generate a message */

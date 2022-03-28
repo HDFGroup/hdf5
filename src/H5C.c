@@ -138,16 +138,6 @@ static herr_t H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
 static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len,
                                   hbool_t actual);
 
-#if H5C_DO_SLIST_SANITY_CHECKS
-static hbool_t H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
-#endif /* H5C_DO_SLIST_SANITY_CHECKS */
-
-#if H5C_DO_EXTREME_SANITY_CHECKS
-static herr_t H5C__validate_lru_list(H5C_t *cache_ptr);
-static herr_t H5C__validate_pinned_entry_list(H5C_t *cache_ptr);
-static herr_t H5C__validate_protected_entry_list(H5C_t *cache_ptr);
-#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
-
 #ifndef NDEBUG
 static void H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry,
                                           const H5C_cache_entry_t *base_entry);
@@ -996,7 +986,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
     HDassert(H5F_addr_defined(addr));
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if (H5C__validate_lru_list(cache_ptr) < 0)
+    if (H5C_validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1031,7 +1021,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if (H5C__validate_lru_list(cache_ptr) < 0)
+    if (H5C_validate_lru_list(cache_ptr) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1138,8 +1128,8 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1314,8 +1304,8 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
 #if H5C_DO_EXTREME_SANITY_CHECKS
     /* no need to verify that entry is not already in the index as */
     /* we already make that check below.                           */
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1424,6 +1414,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     entry_ptr->serialization_count = 0;
 #endif /* NDEBUG */
 
+    /* initialize tag list fields */
     entry_ptr->tl_next  = NULL;
     entry_ptr->tl_prev  = NULL;
     entry_ptr->tag_info = NULL;
@@ -1503,8 +1494,8 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed just before done")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1542,8 +1533,8 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1867,8 +1858,8 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
     HDassert(H5F_addr_ne(old_addr, new_addr));
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1973,8 +1964,8 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2020,8 +2011,7 @@ H5C_resize_entry(void *thing, size_t new_size)
         HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "Entry isn't pinned or protected??")
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) || (H5C_validate_pinned_entry_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2117,8 +2107,7 @@ H5C_resize_entry(void *thing, size_t new_size)
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) || (H5C_validate_pinned_entry_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2158,8 +2147,8 @@ H5C_pin_protected_entry(void *thing)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2173,8 +2162,8 @@ H5C_pin_protected_entry(void *thing)
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2237,8 +2226,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
     HDassert(H5F_addr_defined(addr));
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -2625,8 +2614,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -3099,8 +3088,8 @@ H5C_unpin_entry(void *_entry_ptr)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -3110,8 +3099,8 @@ H5C_unpin_entry(void *_entry_ptr)
 
 done:
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -3278,8 +3267,8 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
     was_clean = !(entry_ptr->is_dirty);
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -3545,8 +3534,8 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 done:
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
 
         HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -6080,8 +6069,8 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     HDassert(ring < H5C_RING_NTYPES);
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -7428,6 +7417,7 @@ H5C__load_entry(H5F_t *f,
     entry->serialization_count = 0;
 #endif /* NDEBUG */
 
+    /* initialize tag list fields */
     entry->tl_next  = NULL;
     entry->tl_prev  = NULL;
     entry->tag_info = NULL;
@@ -7756,7 +7746,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C__validate_lru_list
+ * Function:    H5C_validate_lru_list
  *
  * Purpose:     Debugging function that scans the LRU list for errors.
  *
@@ -7771,15 +7761,15 @@ done:
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
-static herr_t
-H5C__validate_lru_list(H5C_t *cache_ptr)
+herr_t
+H5C_validate_lru_list(H5C_t *cache_ptr)
 {
     int32_t            len       = 0;
     size_t             size      = 0;
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -7788,51 +7778,48 @@ H5C__validate_lru_list(H5C_t *cache_ptr)
         (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
-    if (cache_ptr->LRU_list_len < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-
     if ((cache_ptr->LRU_list_len == 1) &&
         ((cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr) || (cache_ptr->LRU_head_ptr == NULL) ||
          (cache_ptr->LRU_head_ptr->size != cache_ptr->LRU_list_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
 
     if ((cache_ptr->LRU_list_len >= 1) &&
         ((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_head_ptr->prev != NULL) ||
          (cache_ptr->LRU_tail_ptr == NULL) || (cache_ptr->LRU_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->LRU_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
         if ((entry_ptr != cache_ptr->LRU_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if ((entry_ptr->is_pinned) || (entry_ptr->pinned_from_client) || (entry_ptr->pinned_from_cache))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
         len++;
         size += entry_ptr->size;
         entry_ptr = entry_ptr->next;
     }
 
-    if ((cache_ptr->LRU_list_len != len) || (cache_ptr->LRU_list_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+    if ((cache_ptr->LRU_list_len != (uint32_t)len) || (cache_ptr->LRU_list_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
 
 done:
     if (ret_value != SUCCEED)
         HDassert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__validate_lru_list() */
+} /* H5C_validate_lru_list() */
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C__validate_pinned_entry_list
+ * Function:    H5C_validate_pinned_entry_list
  *
  * Purpose:     Debugging function that scans the pinned entry list for
  *              errors.
@@ -7848,15 +7835,15 @@ done:
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
-static herr_t
-H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
+herr_t
+H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
 {
     int32_t            len       = 0;
     size_t             size      = 0;
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -7865,54 +7852,51 @@ H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
         (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
-    if (cache_ptr->pel_len < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-
     if ((cache_ptr->pel_len == 1) &&
         ((cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr) || (cache_ptr->pel_head_ptr == NULL) ||
          (cache_ptr->pel_head_ptr->size != cache_ptr->pel_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
 
     if ((cache_ptr->pel_len >= 1) &&
         ((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_head_ptr->prev != NULL) ||
          (cache_ptr->pel_tail_ptr == NULL) || (cache_ptr->pel_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     entry_ptr = cache_ptr->pel_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pel_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
         if ((entry_ptr != cache_ptr->pel_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if (!entry_ptr->is_pinned)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
         if (!(entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
 
         len++;
         size += entry_ptr->size;
         entry_ptr = entry_ptr->next;
     }
 
-    if ((cache_ptr->pel_len != len) || (cache_ptr->pel_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 9 failed")
+    if ((cache_ptr->pel_len != (uint32_t)len) || (cache_ptr->pel_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
 
 done:
     if (ret_value != SUCCEED)
         HDassert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__validate_pinned_entry_list() */
+} /* H5C_validate_pinned_entry_list() */
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C__validate_protected_entry_list
+ * Function:    H5C_validate_protected_entry_list
  *
  * Purpose:     Debugging function that scans the protected entry list for
  *              errors.
@@ -7928,15 +7912,15 @@ done:
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
-static herr_t
-H5C__validate_protected_entry_list(H5C_t *cache_ptr)
+herr_t
+H5C_validate_protected_entry_list(H5C_t *cache_ptr)
 {
     int32_t            len       = 0;
     size_t             size      = 0;
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -7945,54 +7929,51 @@ H5C__validate_protected_entry_list(H5C_t *cache_ptr)
         (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
-    if (cache_ptr->pl_len < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-
     if ((cache_ptr->pl_len == 1) &&
         ((cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr) || (cache_ptr->pl_head_ptr == NULL) ||
          (cache_ptr->pl_head_ptr->size != cache_ptr->pl_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
 
     if ((cache_ptr->pl_len >= 1) &&
         ((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_head_ptr->prev != NULL) ||
          (cache_ptr->pl_tail_ptr == NULL) || (cache_ptr->pl_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     entry_ptr = cache_ptr->pl_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pl_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
         if ((entry_ptr != cache_ptr->pl_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if (!entry_ptr->is_protected)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
         if (entry_ptr->is_read_only && (entry_ptr->ro_ref_count <= 0))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
 
         len++;
         size += entry_ptr->size;
         entry_ptr = entry_ptr->next;
     }
 
-    if ((cache_ptr->pl_len != len) || (cache_ptr->pl_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 9 failed")
+    if ((cache_ptr->pl_len != (uint32_t)len) || (cache_ptr->pl_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
 
 done:
     if (ret_value != SUCCEED)
         HDassert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__validate_protected_entry_list() */
+} /* H5C_validate_protected_entry_list() */
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C__entry_in_skip_list
+ * Function:    H5C_entry_in_skip_list
  *
  * Purpose:     Debugging function that scans skip list to see if it
  *        is in present.  We need this, as it is possible for
@@ -8006,8 +7987,8 @@ done:
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_SLIST_SANITY_CHECKS
-static hbool_t
-H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
+hbool_t
+H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 {
     H5SL_node_t *node_ptr;
     hbool_t      in_slist;
@@ -8035,7 +8016,7 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
     }
 
     return (in_slist);
-} /* H5C__entry_in_skip_list() */
+} /* H5C_entry_in_skip_list() */
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
 /*-------------------------------------------------------------------------
@@ -8525,8 +8506,8 @@ H5C__serialize_cache(H5F_t *f)
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
+    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 

@@ -2605,7 +2605,7 @@ compress_readAll(void)
                     nerrors++;
                 }
 
-#if MPI_VERSION >= 3
+#ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
             ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
             VRFY((ret >= 0), "H5Dwrite succeeded");
 #endif
@@ -3424,12 +3424,6 @@ actual_io_mode_tests(void)
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
  *         Test for Externl-File storage as the cause of breaking collective I/O.
  *
- *       TEST_FILTERS:
- *         Test for using filter (checksum) as the cause of breaking collective I/O.
- *         Note: TEST_FILTERS mode will not work until H5Dcreate and H5write is supported for mpio and filter
- * feature. Use test_no_collective_cause_mode_filter() function instead.
- *
- *
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
@@ -3471,9 +3465,6 @@ test_no_collective_cause_mode(int selection_mode)
     hid_t       file_space = -1;
     hsize_t     chunk_dims[RANK];
     herr_t      ret;
-#ifdef LATER /* fletcher32 */
-    H5Z_filter_t filter_info;
-#endif /* LATER */
     /* set to global value as default */
     int  l_facc_type = facc_type;
     char message[256];
@@ -3504,21 +3495,6 @@ test_no_collective_cause_mode(int selection_mode)
         VRFY((ret >= 0), "set EXTERNAL file layout succeeded");
         is_chunked = 0;
     }
-
-#ifdef LATER /* fletcher32 */
-    if (selection_mode & TEST_FILTERS) {
-        ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
-        VRFY((ret >= 0), "Fletcher32 filter is available.\n");
-
-        ret = H5Zget_filter_info(H5Z_FILTER_FLETCHER32, &filter_info);
-        VRFY(((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
-              (filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED)),
-             "Fletcher32 filter encoding and decoding available.\n");
-
-        ret = H5Pset_fletcher32(dcpl);
-        VRFY((ret >= 0), "set filter (flecher32) succeeded");
-    }
-#endif /* LATER */
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
         sid = H5Screate(H5S_NULL);
@@ -3594,14 +3570,6 @@ test_no_collective_cause_mode(int selection_mode)
         no_collective_cause_local_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
         no_collective_cause_global_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
-
-#ifdef LATER /* fletcher32 */
-    if (selection_mode & TEST_FILTERS) {
-        test_name = "Broken Collective I/O - Filter is required";
-        no_collective_cause_local_expected |= H5D_MPIO_FILTERS;
-        no_collective_cause_global_expected |= H5D_MPIO_FILTERS;
-    }
-#endif /* LATER */
 
     if (selection_mode & TEST_COLLECTIVE) {
         test_name                           = "Broken Collective I/O - Not Broken";
@@ -3741,242 +3709,6 @@ test_no_collective_cause_mode(int selection_mode)
     return;
 }
 
-/*
- * Function: test_no_collective_cause_mode_filter
- *
- * Purpose:
- *    Test specific for using filter as a caus of broken collective I/O and
- *    checks that the H5Pget_mpio_no_collective_cause properties in the DXPL
- *    have the correct values.
- *
- * NOTE:
- *    This is a temporary function.
- *    test_no_collective_cause_mode(TEST_FILTERS) will replace this when
- *    H5Dcreate and H5write support for mpio and filter feature.
- *
- * Input:
- *     TEST_FILTERS_READ:
- *       Test for using filter (checksum) as the cause of breaking collective I/O.
- *
- * Programmer: Jonathan Kim
- * Date: Aug, 2012
- */
-#ifdef LATER
-static void
-test_no_collective_cause_mode_filter(int selection_mode)
-{
-    uint32_t no_collective_cause_local_read      = 0;
-    uint32_t no_collective_cause_local_expected  = 0;
-    uint32_t no_collective_cause_global_read     = 0;
-    uint32_t no_collective_cause_global_expected = 0;
-
-    const char *filename;
-    const char *test_name  = "I/O";
-    hbool_t     is_chunked = 1;
-    int         mpi_size   = -1;
-    int         mpi_rank   = -1;
-    int         length;
-    int *       buffer;
-    int         i;
-    MPI_Comm    mpi_comm   = MPI_COMM_NULL;
-    MPI_Info    mpi_info   = MPI_INFO_NULL;
-    hid_t       fid        = -1;
-    hid_t       sid        = -1;
-    hid_t       dataset    = -1;
-    hid_t       data_type  = H5T_NATIVE_INT;
-    hid_t       fapl_write = -1;
-    hid_t       fapl_read  = -1;
-    hid_t       dcpl       = -1;
-    hid_t       dxpl       = -1;
-    hsize_t     dims[RANK];
-    hid_t       mem_space  = -1;
-    hid_t       file_space = -1;
-    hsize_t     chunk_dims[RANK];
-    herr_t      ret;
-#ifdef LATER /* fletcher32 */
-    H5Z_filter_t filter_info;
-#endif /* LATER */
-    char message[256];
-
-    /* Set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    HDassert(mpi_size >= 1);
-
-    mpi_comm = MPI_COMM_WORLD;
-    mpi_info = MPI_INFO_NULL;
-
-    /* Create the dataset creation plist */
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((dcpl >= 0), "dataset creation plist created successfully");
-
-    if (selection_mode == TEST_FILTERS_READ) {
-#ifdef LATER /* fletcher32 */
-        ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
-        VRFY((ret >= 0), "Fletcher32 filter is available.\n");
-
-        ret = H5Zget_filter_info(H5Z_FILTER_FLETCHER32, (unsigned int *)&filter_info);
-        VRFY(((filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
-              (filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED)),
-             "Fletcher32 filter encoding and decoding available.\n");
-
-        ret = H5Pset_fletcher32(dcpl);
-        VRFY((ret >= 0), "set filter (flecher32) succeeded");
-#endif /* LATER */
-    }
-    else {
-        VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
-    }
-
-    /* Create the basic Space */
-    dims[0] = (hsize_t)dim0;
-    dims[1] = (hsize_t)dim1;
-    sid     = H5Screate_simple(RANK, dims, NULL);
-    VRFY((sid >= 0), "H5Screate_simple succeeded");
-
-    filename = (const char *)GetTestParameters();
-    HDassert(filename != NULL);
-
-    /* Setup the file access template */
-    fapl_write = create_faccess_plist(mpi_comm, mpi_info, FACC_DEFAULT);
-    VRFY((fapl_write >= 0), "create_faccess_plist() succeeded");
-
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_write);
-    VRFY((fid >= 0), "H5Fcreate succeeded");
-
-    /* If we are not testing contiguous datasets */
-    if (is_chunked) {
-        /* Set up chunk information.  */
-        chunk_dims[0] = dims[0] / (hsize_t)mpi_size;
-        chunk_dims[1] = dims[1];
-        ret           = H5Pset_chunk(dcpl, 2, chunk_dims);
-        VRFY((ret >= 0), "chunk creation property list succeeded");
-    }
-
-    /* Create the dataset */
-    dataset = H5Dcreate2(fid, DSET_NOCOLCAUSE, data_type, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
-
-#ifdef LATER /* fletcher32 */
-    /* Set expected cause */
-    test_name                           = "Broken Collective I/O - Filter is required";
-    no_collective_cause_local_expected  = H5D_MPIO_FILTERS;
-    no_collective_cause_global_expected = H5D_MPIO_FILTERS;
-#endif /* LATER */
-
-    /* Get the file dataspace */
-    file_space = H5Dget_space(dataset);
-    VRFY((file_space >= 0), "H5Dget_space succeeded");
-
-    /* Create the memory dataspace */
-    mem_space = H5Screate_simple(RANK, dims, NULL);
-    VRFY((mem_space >= 0), "mem_space created");
-
-    /* Get the number of elements in the selection */
-    length = dim0 * dim1;
-
-    /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * length);
-    VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
-    for (i = 0; i < length; i++)
-        buffer[i] = i;
-
-    /* Set up the dxpl for the write */
-    dxpl = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
-
-    if (selection_mode == TEST_FILTERS_READ) {
-        /* To test read in collective I/O mode , write in independent mode
-         * because write fails with mpio + filter */
-        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
-        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-    }
-    else {
-        /* To test write in collective I/O mode. */
-        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
-        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-    }
-
-    /* Write */
-    ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl, buffer);
-
-    if (ret < 0)
-        H5Eprint2(H5E_DEFAULT, stdout);
-    VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
-
-    /* Make a copy of the dxpl to test the read operation */
-    dxpl = H5Pcopy(dxpl);
-    VRFY((dxpl >= 0), "H5Pcopy succeeded");
-
-    if (dataset)
-        H5Dclose(dataset);
-    if (fapl_write)
-        H5Pclose(fapl_write);
-    if (fid)
-        H5Fclose(fid);
-
-    /*---------------------
-     * Test Read access
-     *---------------------*/
-
-    /* Setup the file access template */
-    fapl_read = create_faccess_plist(mpi_comm, mpi_info, facc_type);
-    VRFY((fapl_read >= 0), "create_faccess_plist() succeeded");
-
-    fid     = H5Fopen(filename, H5F_ACC_RDONLY, fapl_read);
-    dataset = H5Dopen2(fid, DSET_NOCOLCAUSE, H5P_DEFAULT);
-
-    /* Set collective I/O properties in the dxpl. */
-    ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
-    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-
-    /* Read */
-    ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl, buffer);
-
-    if (ret < 0)
-        H5Eprint2(H5E_DEFAULT, stdout);
-    VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
-
-    /* Get the cause of broken collective I/O */
-    ret = H5Pget_mpio_no_collective_cause(dxpl, &no_collective_cause_local_read,
-                                          &no_collective_cause_global_read);
-    VRFY((ret >= 0), "retrieving no collective cause succeeded");
-
-    /* Test values */
-    HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
-    VRFY((no_collective_cause_local_read == (uint32_t)no_collective_cause_local_expected), message);
-    HDmemset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
-    VRFY((no_collective_cause_global_read == (uint32_t)no_collective_cause_global_expected), message);
-
-    /* Release some resources */
-    if (sid)
-        H5Sclose(sid);
-    if (fapl_read)
-        H5Pclose(fapl_read);
-    if (dcpl)
-        H5Pclose(dcpl);
-    if (dxpl)
-        H5Pclose(dxpl);
-    if (dataset)
-        H5Dclose(dataset);
-    if (mem_space)
-        H5Sclose(mem_space);
-    if (file_space)
-        H5Sclose(file_space);
-    if (fid)
-        H5Fclose(fid);
-    HDfree(buffer);
-    return;
-}
-#endif
-
 /* Function: no_collective_cause_tests
  *
  * Purpose: Tests cases for broken collective IO.
@@ -3997,13 +3729,6 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode(TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
-#ifdef LATER /* fletcher32 */
-    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
-     * H5Dwrite is ready for mpio + filter feature.
-     */
-    /* test_no_collective_cause_mode (TEST_FILTERS); */
-    test_no_collective_cause_mode_filter(TEST_FILTERS_READ);
-#endif /* LATER */
 
     /*
      * Test combined causes
