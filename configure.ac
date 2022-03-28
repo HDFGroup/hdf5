@@ -3098,11 +3098,11 @@ if test -n "$PARALLEL"; then
   fi
 
   ## ----------------------------------------------------------------------
-  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## Check for the MPI functions necessary for the Parallel Compression
   ## feature. If these are not present, issue a warning that Parallel
   ## Compression will be disabled.
   ##
-  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+  AC_MSG_CHECKING([for MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions])
 
   AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
@@ -3110,16 +3110,19 @@ if test -n "$PARALLEL"; then
               #include <mpi.h>
           ]],
           [[
-              MPI_Message message;
+              int flag;
               MPI_Init(0, (void *) 0);
-              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
-              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+              MPI_Ibarrier(0, (void *) 0);
+              MPI_Issend((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
+              MPI_Iprobe(0, 0, 0, &flag, (void *) 0);
+              MPI_Irecv((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
           ]]
       )],
       [AC_MSG_RESULT([yes])
-       PARALLEL_FILTERED_WRITES=yes],
+       PARALLEL_FILTERED_WRITES=yes
+       AC_DEFINE([HAVE_PARALLEL_FILTERED_WRITES], [1], [Define if we have support for writing to filtered datasets in parallel])],
       [AC_MSG_RESULT([no])
-       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+       AC_MSG_WARN([A simple MPI program using the MPI_Ibarrier, MPI_Issend, MPI_Iprobe and MPI_Irecv functions could not be compiled and linked.
                     Parallel writes of filtered data will be disabled.])
        PARALLEL_FILTERED_WRITES=no]
   )
