@@ -1043,8 +1043,12 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
 #endif
+/*
+ * The (char*) casts are required for the DEC when optimizations are turned
+ * on and the source and/or destination are not aligned.
+ */
 #ifndef HDmemcpy
-#define HDmemcpy(X, Y, Z) memcpy(X, Y, Z)
+#define HDmemcpy(X, Y, Z) memcpy((char *)(X), (const char *)(Y), Z)
 #endif
 #ifndef HDmemmove
 #define HDmemmove(X, Y, Z) memmove((char *)(X), (const char *)(Y), Z)
