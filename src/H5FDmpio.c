@@ -46,7 +46,7 @@ static hid_t H5FD_MPIO_g = 0;
 hbool_t H5FD_mpi_opt_types_g = TRUE;
 
 /* Whether the driver initialized MPI on its own */
-hbool_t H5FD_mpi_self_initialized = FALSE;
+static hbool_t H5FD_mpi_self_initialized = FALSE;
 
 /*
  * The view is set to this value
