@@ -336,6 +336,10 @@ H5_GCC_DIAG_ON("long-long")
 #error "nothing appropriate for hsize_t"
 #endif
 
+#ifdef H5_HAVE_PARALLEL
+#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
+#endif
+
 /**
  * The address of an object in the file.
  *

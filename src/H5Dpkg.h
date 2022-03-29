@@ -560,6 +560,7 @@ H5_DLL herr_t  H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t
                                   hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL herr_t  H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size);
 H5_DLL herr_t  H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage_size);
+H5_DLL herr_t  H5D__chunk_index_empty(const H5D_t *dset, hbool_t *empty);
 H5_DLL herr_t  H5D__get_num_chunks(const H5D_t *dset, const H5S_t *space, hsize_t *nchunks);
 H5_DLL herr_t  H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_t chk_idx, hsize_t *coord,
                                    unsigned *filter_mask, haddr_t *offset, hsize_t *size);
@@ -590,6 +591,10 @@ H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info
                                const H5S_t *file_space, const H5S_t *mem_space);
 H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
+
+/* Functions that perform direct copying between memory buffers */
+H5_DLL herr_t H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf,
+                                const H5S_t *src_space, size_t elmt_size, size_t nelmts);
 
 /* Functions that perform scatter-gather serial I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
@@ -635,7 +640,13 @@ H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_ov
                                    const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
+H5_DLL void *  H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
+H5_DLL void    H5D__chunk_mem_free(void *chk, const void *_pline);
+H5_DLL void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
+H5_DLL void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);
+H5_DLL hbool_t H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims, const uint32_t *chunk_dims,
+                                                const hsize_t *chunk_scaled, const hsize_t *dset_dims);
 H5_DLL herr_t  H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim);
 H5_DLL herr_t  H5D__chunk_set_sizes(H5D_t *dset);
 #ifdef H5_HAVE_PARALLEL
@@ -694,11 +705,11 @@ H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 
 #ifdef H5_HAVE_PARALLEL
 
-#ifdef H5S_DEBUG
+#ifdef H5D_DEBUG
 #ifndef H5Dmpio_DEBUG
 #define H5Dmpio_DEBUG
 #endif /*H5Dmpio_DEBUG*/
-#endif /*H5S_DEBUG*/
+#endif /*H5D_DEBUG*/
 /* MPI-IO function to read, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
@@ -727,6 +738,8 @@ H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
                                      const H5S_t *mem_space, const H5D_type_info_t *type_info);
+H5_DLL herr_t H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len,
+                                                  char *global_cause, size_t global_cause_len);
 
 #endif /* H5_HAVE_PARALLEL */
 
