@@ -16,11 +16,6 @@
 #ifndef H5CXprivate_H
 #define H5CXprivate_H
 
-/* Include package's public header */
-#ifdef NOT_YET
-#include "H5CXpublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5ACprivate.h" /* Metadata cache                       */
