@@ -768,13 +768,13 @@ typedef struct {
 #endif
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
-#endif /* HDfabs */
+#endif
 #ifndef HDfabsf
 #define HDfabsf(X) fabsf(X)
-#endif /* HDfabsf */
+#endif
 #ifndef HDfabsl
 #define HDfabsl(X) fabsl(X)
-#endif /* HDfabsl */
+#endif
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
 #endif
@@ -895,13 +895,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfstat
 #define HDfstat(F, B) fstat(F, B)
-#endif /* HDfstat */
+#endif
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
-#endif /* HDlstat */
+#endif
 #ifndef HDstat
 #define HDstat(S, B) stat(S, B)
-#endif /* HDstat */
+#endif
 
 #ifndef H5_HAVE_WIN32_API
 /* These definitions differ in Windows and are defined in
