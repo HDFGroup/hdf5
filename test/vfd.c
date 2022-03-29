@@ -4399,7 +4399,6 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
     hbool_t     verbose    = TRUE;
     uint32_t    i;
     size_t      j;
-    uint32_t    buf_size;
     char *      w_buf;
     char *      r_buf;
     const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
@@ -4429,7 +4428,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
 
                     HDfprintf(stdout, "\n\nread/write buf mismatch in vector/entry");
                     HDfprintf(stdout, "\"%s\"/%u at offset %llu/%llu w/r = %c/%c type = %s\n\n", name,
-                              (unsigned)i, (long long unsigned)j, (long long unsigned)buf_size, w_buf[j],
+                              (unsigned)i, (long long unsigned)j, (long long unsigned)size, w_buf[j],
                               r_buf[j], mem_type_names[type]);
                 }
             }
@@ -5521,6 +5520,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 1, j2 = 0; i < SEL_IO_DIM0; i++)
             for (j = 1; j < SEL_IO_DIM1; j += 2) {
+                HDassert(i2 < SEL_IO_DIM0);
                 fbuf2[i2][j2] = wbuf2[i][j];
                 if (++j2 == SEL_IO_DIM1) {
                     i2 += 2;
@@ -5582,9 +5582,10 @@ test_selection_io(const char *vfd_name)
 
         /* Update file buf */
         for (i = 1, i2 = 0, j2 = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2) {
+            HDassert(i2 < SEL_IO_DIM0);
             fbuf2[i2][j2] = wbuf1[i];
             j2 += 2;
-            if (j2 == SEL_IO_DIM1) {
+            if (j2 >= SEL_IO_DIM1) {
                 i2++;
                 j2 = 1;
             }
@@ -5643,6 +5644,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 0; i < SEL_IO_DIM0; i += 2)
             for (j = 0; j < SEL_IO_DIM1; j++) {
+                HDassert(i2 < (SEL_IO_DIM0 * SEL_IO_DIM1));
                 fbuf1[i2] = wbuf2[i][j];
                 i2 += 2;
             }
@@ -5726,6 +5728,7 @@ test_selection_io(const char *vfd_name)
                 fbuf1[(2 * i) + 1] = wbuf1[2 * i];
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
+                    HDassert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5834,6 +5837,7 @@ test_selection_io(const char *vfd_name)
              * find 1D index into 2D array */
             for (i = 0, i2 = 0, j2 = 0; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
+                    HDassert(i2 < SEL_IO_DIM0);
                     fbuf1[(i2 * SEL_IO_DIM1) + j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5843,6 +5847,7 @@ test_selection_io(const char *vfd_name)
                 }
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
+                    HDassert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
