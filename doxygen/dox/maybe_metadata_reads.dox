@@ -1,0 +1,50 @@
+/**
+ * \page maybe_metadata_reads Functions with No Access Property List Parameter that May Generate Metadata Reads
+ *
+ * \ingroup GACPL
+ *
+ * Currently there are several operations in HDF5 that can issue metadata reads
+ * from the metadata cache, but that take no property list. It is therefore not
+ * possible to set a collective requirement individually for those operations. The
+ * only solution with the HDF5 1.10.0 release is to set the collective requirement
+ * globally on H5Fopen() or H5Fcreate() for all metadata operations to be
+ * collective.
+ *
+ * The following is a list of those functions in the HDF5 library. This list is
+ * integral to the discussion in the H5Pset_all_coll_metadata_ops() entry:
+ *
+ * H5Awrite(), H5Aread(), H5Arename(), H5Aiterate2(), H5Adelete(), H5Aexists()
+ *
+ * H5Dget_space_status(), H5Dget_storage_size(), H5Dset_extent(), H5Ddebug(),
+ * H5Dclose(), H5Dget_create_plist(), H5Dget_space() (for virtual datasets)
+ *
+ * H5Gget_create_plist(), H5Gget_info(), H5Gclose()
+ *
+ * H5Literate(), H5Lvisit()
+ *
+ * H5Rcreate(), H5Rdereference2() (for object references),
+ * H5Rget_region(), H5Rget_obj_type2(), H5Rget_name()
+ *
+ * H5Ocopy(), H5Oopen_by_addr(), H5Oincr_refcount(), H5Odecr_refcount(),
+ * H5Oget_info(), H5Oset_comment(), H5Ovisit()
+ *
+ * H5Fis_hdf5(), H5Fflush(), H5Fclose(), H5Fget_file_image(), H5Freopen(),
+ * H5Fget_freespace(), H5Fget_info2(), H5Fget_free_sections(), H5Fmount(),
+ * H5Funmount()
+ *
+ * H5Iget_name()
+ *
+ * H5Tget_create_plist(), H5Tclose()
+ *
+ * H5Zunregister()
+ *
+ * In addition, \b most deprecated functions fall into this category.
+ *
+ * The HDF Group may address the above limitation in a future major release, but
+ * no decision has been made at this time. Such a change might, for example,
+ * include adding new versions of some or all the above functions with an extra
+ * property list parameter to allow an individual setting for the collective
+ * calling requirement.
+ *
+ * \sa_metadata_ops
+ */

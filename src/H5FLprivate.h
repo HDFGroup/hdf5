@@ -148,8 +148,8 @@ typedef struct H5FL_reg_head_t {
 typedef union H5FL_blk_list_t {
     size_t                 size;    /* Size of the page */
     union H5FL_blk_list_t *next;    /* Pointer to next block in free list */
-    double                 unused1; /* Unused normally, just here for aligment */
-    haddr_t                unused2; /* Unused normally, just here for aligment */
+    double                 unused1; /* Unused normally, just here for alignment */
+    haddr_t                unused2; /* Unused normally, just here for alignment */
 } H5FL_blk_list_t;
 
 /* Data structure for priority queue node of block free lists */
@@ -163,9 +163,9 @@ typedef struct H5FL_blk_node_t {
 /* Data structure for priority queue of native block free lists */
 typedef struct H5FL_blk_head_t {
     unsigned         init;      /* Whether the free list has been initialized */
-    unsigned         allocated; /* Number of blocks allocated */
-    unsigned         onlist;    /* Number of blocks on free list */
-    size_t           list_mem;  /* Amount of memory in block on free list */
+    unsigned         allocated; /* Total number of blocks allocated */
+    unsigned         onlist;    /* Total number of blocks on free list */
+    size_t           list_mem;  /* Total amount of memory in blocks on free list */
     const char *     name;      /* Name of the type */
     H5FL_blk_node_t *head;      /* Pointer to first free list in queue */
 } H5FL_blk_head_t;
@@ -221,8 +221,8 @@ typedef struct H5FL_blk_head_t {
 typedef union H5FL_arr_list_t {
     union H5FL_arr_list_t *next;    /* Pointer to next block in free list */
     size_t                 nelem;   /* Number of elements in this array */
-    double                 unused1; /* Unused normally, just here for aligment */
-    haddr_t                unused2; /* Unused normally, just here for aligment */
+    double                 unused1; /* Unused normally, just here for alignment */
+    haddr_t                unused2; /* Unused normally, just here for alignment */
 } H5FL_arr_list_t;
 
 /* Data structure for each size of array element */
@@ -235,7 +235,7 @@ typedef struct H5FL_arr_node_t {
 /* Data structure for free list of array blocks */
 typedef struct H5FL_arr_head_t {
     unsigned         init;      /* Whether the free list has been initialized */
-    unsigned         allocated; /* Number of blocks allocated */
+    unsigned         allocated; /* Total number of blocks allocated */
     size_t           list_mem;  /* Amount of memory in block on free list */
     const char *     name;      /* Name of the type */
     int              maxelem;   /* Maximum number of elements in an array */

@@ -25,11 +25,11 @@
 #define H5Oprivate_H
 
 /* Include the public header file for this API */
-#include "H5Opublic.h" /* Object header functions              */
+#include "H5Opublic.h" /* Object header functions             */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h" /* Dataset functions                    */
-#include "H5Lpublic.h" /* Link functions                       */
+#include "H5Dpublic.h" /* Dataset functions                   */
+#include "H5Lpublic.h" /* Link functions                      */
 #include "H5Spublic.h" /* Dataspace functions			*/
 
 /* Private headers needed by this file */
@@ -37,7 +37,7 @@
 #include "H5Fprivate.h"  /* File access				*/
 #include "H5SLprivate.h" /* Skip lists				*/
 #include "H5Tprivate.h"  /* Datatype functions			*/
-#include "H5Zprivate.h"  /* I/O pipeline filters			*/
+#include "H5Zprivate.h"  /* I/O pipeline filters		*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -229,7 +229,7 @@ typedef struct H5O_copy_t {
 #define H5O_SHARE_TYPE_UNSHARED  0 /* Message is not shared */
 #define H5O_SHARE_TYPE_SOHM      1 /* Message is stored in SOHM heap */
 #define H5O_SHARE_TYPE_COMMITTED 2 /* Message is stored in another object header */
-#define H5O_SHARE_TYPE_HERE      3 /* Message is stored in this object header, but is sharable */
+#define H5O_SHARE_TYPE_HERE      3 /* Message is stored in this object header, but is shareable */
 
 /* Detect messages that aren't stored in message's object header */
 #define H5O_IS_STORED_SHARED(T)                                                                              \
@@ -433,7 +433,7 @@ typedef struct H5O_layout_chunk_t {
     uint32_t dim[H5O_LAYOUT_NDIMS];         /* Size of chunk in elements         */
     uint32_t size;                          /* Size of chunk in bytes            */
     hsize_t  nchunks;                       /* Number of chunks in dataset	     */
-    hsize_t  chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in dataset dimensions */
+    hsize_t  chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in each dataset dimension  */
     hsize_t  down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of chunks in each dimension */
 } H5O_layout_chunk_t;
 

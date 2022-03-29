@@ -91,9 +91,9 @@ typedef enum {
 #define H5AC__DEFAULT_MIN_CLEAN_SIZE H5C__DEFAULT_MIN_CLEAN_SIZE
 
 /*
- * Class methods pertaining to caching.     Each type of cached object will
+ * Class methods pertaining to caching. Each type of cached object will
  * have a constant variable with permanent life-span that describes how
- * to cache the object.     That variable will be of type H5AC_class_t and
+ * to cache the object. That variable will be of type H5AC_class_t and
  * have the following required fields...
  *
  * LOAD:    Loads an object from disk to memory.  The function
@@ -181,7 +181,6 @@ extern H5P_genplist_t *H5AC_ind_dxpl_g;
 extern hid_t           H5AC_ind_dxpl_id;
 
 /* Default cache configuration. */
-
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 
 /* clang-format off */

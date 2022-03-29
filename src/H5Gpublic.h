@@ -15,6 +15,26 @@
  *
  * Use the functions in this module to manage HDF5 groups.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5G_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5G_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5G_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5G_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  * \details \Bold{Groups in HDF5:} A group associates names with objects and
  *          provides a mechanism for mapping a name to an object. Since all
  *          objects appear in at least one group (with the possible exception of
@@ -1131,7 +1151,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link
  *          actual object name length, the object name is truncated to
  *          \Code{max_size - 1} characters.
  *
- *          Note that if the size of the object's name is unkown, a preliminary
+ *          Note that if the size of the object's name is unknown, a preliminary
  *          call to H5Gget_objname_by_idx() with \p name set to \c NULL will
  *          return the length of the object's name. A second call to
  *          H5Gget_objname_by_idx() can then be used to retrieve the actual

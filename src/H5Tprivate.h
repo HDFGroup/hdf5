@@ -17,11 +17,11 @@
 #ifndef H5Tprivate_H
 #define H5Tprivate_H
 
-/* Get package's public header */
+/* Include package's public header */
 #include "H5Tpublic.h"
 
 /* Other public headers needed by this file */
-#include "H5MMpublic.h" /* Memory management                    */
+#include "H5MMpublic.h" /* Memory management                        */
 
 /* Private headers needed by this file */
 #include "H5private.h"  /* Generic Functions                        */

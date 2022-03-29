@@ -11,6 +11,13 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* Programmer:  Robb Matzke
+ *              Thursday, April 16, 1998
+ */
+
+#ifndef H5Zpublic_H
+#define H5Zpublic_H
+
 /**\defgroup H5Z H5Z
  *
  * Use the functions in this module to manage HDF5 filters.
@@ -24,6 +31,27 @@
  * updated at runtime.
  *
  * Filters are deleted by unregistering.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5Z_examples.c filter
+ *   \snippet{lineno} H5Z_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5Z_examples.c read
+ *   </td>
+ * </tr>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5Z_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5Z_examples.c delete
+ * </tr>
+ * </table>
  *
  * HDF5 supports a filter pipeline that provides the capability for standard and
  * customized raw data processing during I/O operations.  HDF5 is distributed
@@ -77,13 +105,6 @@
  * \ingroup H5ZPRE
  *
  */
-
-/* Programmer:  Robb Matzke
- *              Thursday, April 16, 1998
- */
-
-#ifndef H5Zpublic_H
-#define H5Zpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -754,4 +775,5 @@ typedef struct H5Z_class1_t {
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* _H5Zpublic_H */

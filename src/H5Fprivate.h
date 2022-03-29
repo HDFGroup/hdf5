@@ -217,30 +217,30 @@
 
 /* clang-format off */
 /* Address-related macros */
-#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                  \
-                HADDR_UNDEF==(X)+(haddr_t)(Z) ||          \
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
                 (X)+(haddr_t)(Z)<(X))
 #define H5F_addr_hash(X,M)    ((unsigned)((X)%(M)))
 #define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                  \
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
                 (X)==(Y))
 #define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<(Y))
-#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<=(Y))
-#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>(Y))
-#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :              \
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
                 (H5F_addr_lt((X), (Y)) ? -1 : 1))
 #define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
 #define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
@@ -498,11 +498,11 @@
 #define HDF5_BTREE_SNODE_IK_DEF 16
 #define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
     32                                  /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+                                           to be 32 for version 0                                            \
+                                           of the superblock and                                             \
+                                           if it is changed, the code                                        \
+                                           must compensate. -QAK                                             \
+                                        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
                                         /* See format specification on version 1 B-trees */
 

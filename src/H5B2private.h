@@ -29,7 +29,7 @@
 #include "H5B2public.h"
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h" /* File access				*/
+#include "H5Fprivate.h" /* File access */
 
 /**************************/
 /* Library Private Macros */

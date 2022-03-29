@@ -238,7 +238,7 @@ struct H5F_file_t {
                                                  /* (if aggregating "small data" allocations) */
 
     /* Metadata accumulator information */
-    H5F_meta_accum_t accum; /* Metadata accumulator info           	*/
+    H5F_meta_accum_t accum; /* Metadata accumulator info */
 };
 
 /*
@@ -247,13 +247,13 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    char *        open_name;   /* Name used to open file	*/
+    char *        open_name;   /* Name used to open file */
     char *        actual_name; /* Actual name of the file, after resolving symlinks, etc. */
     char *        extpath;     /* Path for searching target external link file */
-    H5F_file_t *  shared;      /* The shared file info		*/
+    H5F_file_t *  shared;      /* The shared file info */
     unsigned      nopen_objs;  /* Number of open object headers*/
     H5FO_t *      obj_count;   /* # of time each object is opened through top file structure */
-    hid_t         file_id;     /* ID of this file              */
+    hid_t         file_id;     /* ID of this file */
     hbool_t       closing;     /* File is in the process of being closed */
     struct H5F_t *parent;      /* Parent file that this file is mounted to */
     unsigned      nmounts;     /* Number of children mounted to this file */
