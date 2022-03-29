@@ -266,7 +266,6 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tgenprop.c
     ${HDF5_TEST_SOURCE_DIR}/th5o.c
     ${HDF5_TEST_SOURCE_DIR}/th5s.c
-    ${HDF5_TEST_SOURCE_DIR}/theap.c
     ${HDF5_TEST_SOURCE_DIR}/tid.c
     ${HDF5_TEST_SOURCE_DIR}/titerate.c
     ${HDF5_TEST_SOURCE_DIR}/tmeta.c
