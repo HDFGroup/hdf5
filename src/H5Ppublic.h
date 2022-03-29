@@ -476,7 +476,7 @@ typedef enum H5D_mpio_no_collective_cause_t {
     /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
     /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
-    H5D_MPIO_FILTERS                           = 0x40
+    H5D_MPIO_FILTERS = 0x40
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
 

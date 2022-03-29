@@ -89,7 +89,7 @@ typedef enum H5D_layout_t {
     H5D_COMPACT      = 0,  /**< raw data is small (< 64KB) */
     H5D_CONTIGUOUS   = 1,  /**< contiguous layout */
     H5D_CHUNKED      = 2,  /**< chunked or tiled layout */
-    H5D_NLAYOUTS   = 3  /**< this one must be last! */
+    H5D_NLAYOUTS     = 3   /**< this one must be last! */
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
