@@ -63,6 +63,9 @@
 #ifdef H5_HAVE_ROS3_VFD
 #include "H5FDros3.h"
 #endif
+#ifdef H5_HAVE_SUBFILING_VFD
+#include "H5FDsubfiling.h"
+#endif
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
@@ -1015,6 +1018,14 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize ROS3 VFD")
 #else
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "ROS3 VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "subfiling")) {
+#ifdef H5_HAVE_SUBFILING_VFD
+        if ((*driver_id = H5FD_SUBFILING) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Subfiling VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Subfiling VFD is not enabled")
 #endif
     }
     else if (!HDstrcmp(driver_name, "windows")) {
