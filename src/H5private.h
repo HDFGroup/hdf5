@@ -1790,6 +1790,15 @@ typedef struct H5_debug_t {
 } H5_debug_t;
 
 #ifdef H5_HAVE_PARALLEL
+
+/*
+ * Check that the MPI library version is at least version
+ * `mpi_version` and subversion `mpi_subversion`
+ */
+#define H5_CHECK_MPI_VERSION(mpi_version, mpi_subversion)                                                    \
+    ((MPI_VERSION > (mpi_version)) ||                                                                        \
+     ((MPI_VERSION == (mpi_version)) && (MPI_SUBVERSION >= (mpi_subversion))))
+
 extern hbool_t H5_coll_api_sanity_check_g;
 #endif /* H5_HAVE_PARALLEL */
 
