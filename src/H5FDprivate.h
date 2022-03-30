@@ -148,6 +148,7 @@ H5_DLL herr_t  H5FD_delete(const char *name, hid_t fapl_id);
 H5_DLL herr_t  H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
 H5_DLL herr_t  H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t  H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle);
+H5_DLL H5FD_t *H5FD_get_file_driver(hid_t file_id);
 H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
