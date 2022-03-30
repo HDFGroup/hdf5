@@ -378,7 +378,7 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t *  oh;      /* Object header for this chunk */
     unsigned chunkno; /* Chunk number for this chunk */
 
-    /* Flush depencency parent information (not stored)
+    /* Flush dependency parent information (not stored)
      *
      * The following field is used to store a pointer
      * to the in-core representation of a new chunk proxy's flush dependency

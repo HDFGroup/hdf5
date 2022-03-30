@@ -328,7 +328,7 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  * \obj_id
  * \param[in] subcls VOL subclass
  * \param[in] opt_type Option type
- * \param[out] supported Flag
+ * \param[out] flags Operation flags
  * \return \herr_t
  *
  * \since 1.12.0

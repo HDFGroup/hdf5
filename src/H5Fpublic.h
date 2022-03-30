@@ -1570,7 +1570,7 @@ H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], u
  * \brief Obtains information about a cache image if it exists
  *
  * \file_id
- * \param[out] image_addr Offset of the cache image if it exists, or \c HADDR_UNDEF if it does not
+ * \param[out] image_addr Offset of the cache image if it exists, or #HADDR_UNDEF if it does not
  * \param[out] image_size Length of the cache image if it exists, or 0 if it does not
  * \returns \herr_t
  *
@@ -1820,6 +1820,7 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
  *
  * \deprecated When?
  *
+ * \todo In which version was this function introduced?
  * \todo In which version was this function deprecated?
  *
  */

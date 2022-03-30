@@ -495,7 +495,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  *
  * \return \herr_t
  *
- * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
+ * \details H5Lget_val() returns the value of link \p name. For smbolic links,
  *          this is the path to which the link points, including the null
  *          terminator. For external and user-defined links, it is the link
  *          buffer.
@@ -525,7 +525,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  *
  *          This function should be used only after H5Lget_info() has been
  *          called to verify that \p name is a symbolic link. This can be
- *          deteremined from the \c link_type field of the \ref H5L_info_t
+ *          determined from the \c link_type field of the \ref H5L_info_t
  *          \c struct.
  *
  * \note This function will fail if called on a hard link.
@@ -613,7 +613,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          name includes either a relative path or an absolute path to the
  *          target link, intermediate steps along the path must be verified
  *          before the existence of the target link can be safely checked. If
- *          the path is not verified and an intermediate element of the path
+ *          the path is not verified, and an intermediate element of the path
  *          does not exist, H5Lexists() will fail. The example in the next
  *          paragraph illustrates one step-by-step method for verifying the
  *          existence of a link with a relative or absolute path.
@@ -653,13 +653,13 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          H5Lexists() with arguments \c file, \c "/", and \c lapl
  *          returns a positive value; in other words,
  *          \Code{H5Lexists(file, "/", lapl)} returns a positive value.
- *          In HDF5 version 1.8.16, this function returns 0.</li>
+ *          In the HDF5 1.8 release, this function returns 0.</li>
  *       <li>Let \c root denote a valid HDF5 group identifier that refers to the
  *          root group of an HDF5 file, and let \c lapl denote a valid link
  *          access property list identifier. A call to H5Lexists() with
  *          arguments c root, \c "/", and \c lapl returns a positive value;
- *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a postive
- *          value. In HDF5 version 1.8.16, this function returns 0.</li>
+ *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a positive
+ *          value. In the HDF5 1.8 release, this function returns 0.</li>
  *       </ol>
  *       Note that the function accepts link names and path names. This is
  *       potentially misleading to callers, and we plan to separate the
@@ -963,7 +963,7 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *          following:
  *          \orders
  *
- *          \p idx allows an interrupted iteration to be resumed; it is
+ *          \p idx_p allows an interrupted iteration to be resumed; it is
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *
@@ -1112,7 +1112,7 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          \p idx_type specifies the index to be used. If the links have not
  *          been indexed by the index type, they will first be sorted by that
  *          index then the iteration will begin; if the links have been so
- *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          indexed, the sorting step will be unnecessary, so the iteration may
  *          begin more quickly. Valid values include the following:
  *          \indexes
  *
@@ -2040,7 +2040,7 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          \p idx_type specifies the index to be used. If the links have not
  *          been indexed by the index type, they will first be sorted by that
  *          index then the iteration will begin; if the links have been so
- *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          indexed, the sorting step will be unnecessary, so the iteration may
  *          begin more quickly. Valid values include the following:
  *          \indexes
  *

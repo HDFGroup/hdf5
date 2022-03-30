@@ -78,7 +78,7 @@
 #define H5F_SUPERBLOCK_FIXED_SIZE (H5F_SIGNATURE_LEN + 1) /* superblock version */
 
 /* The H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE is the minimal amount of super block
- * variable length data guarnateed to load the sizeof offsets and the sizeof
+ * variable length data guaranteed to load the sizeof offsets and the sizeof
  * lengths fields in all versions of the superblock.
  *
  * This is necessary in the V3 cache, as on the initial load, we need to
@@ -351,7 +351,7 @@ struct H5F_shared_t {
     /* Metadata retry info */
     unsigned  read_attempts;        /* The # of reads to try when reading metadata with checksum */
     unsigned  retries_nbins;        /* # of bins for each retries[] */
-    uint32_t *retries[H5AC_NTYPES]; /* Track # of read retries for metdata items with checksum */
+    uint32_t *retries[H5AC_NTYPES]; /* Track # of read retries for metadata items with checksum */
 
     /* Object flush info */
     H5F_object_flush_t object_flush;           /* Information for object flush callback */
