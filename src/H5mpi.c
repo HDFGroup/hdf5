@@ -628,7 +628,7 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
 {
     size_t recv_buf_num_entries = 0;
     void * recv_buf             = NULL;
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     MPI_Count type_lb;
     MPI_Count type_extent;
 #else
@@ -645,7 +645,7 @@ H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, co
         HDassert(out_buf && out_buf_num_entries);
 
         /* Retrieve the extent of the MPI Datatype being used */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent_x(recv_type, &type_lb, &type_extent)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(recv_type, &type_lb, &type_extent)))
