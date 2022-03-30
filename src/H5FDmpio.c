@@ -1956,7 +1956,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
         default: /* unknown op code */
             if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
-                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
+                HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "unknown op_code and fail if unknown")
             }
             break;
     }

@@ -1322,15 +1322,21 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
         default:
             if (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG) {
                 /* Pass ctl call down to R/W channel VFD */
-                if (H5FDctl(file->rw_file, op_code, flags, input, output) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+                if (H5FDctl(file->rw_file, op_code, flags, input, output) < 0) {
+                    /* Propagate error condition set by the driver. H5E_FCNTL
+                     * is propagated in case the error stack is empty.
+                     */
+                    hid_t minor = H5E_VFL, major = H5E_FCNTL;
+                    H5E_get_last_error(&major, &minor);
+                    HGOTO_ERROR(major, minor, FAIL, "VFD ctl request failed")
+                }
             }
             else {
                 /* If no valid VFD routing flag is specified, fail for unknown op code
                  * if H5FD_CTL__FAIL_IF_UNKNOWN_FLAG flag is set.
                  */
                 if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                    HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL,
                                 "VFD ctl request failed (unknown op code and fail if unknown flag is set)")
             }
 

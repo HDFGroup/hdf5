@@ -2264,7 +2264,7 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
         /* Unknown op code */
         default:
             if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_UNSUPPORTED,
                             "VFD ctl request failed (unknown op code and fail if unknown flag is set)", -1);
 
             break;
