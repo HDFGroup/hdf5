@@ -148,8 +148,8 @@ typedef struct H5FL_reg_head_t {
 typedef union H5FL_blk_list_t {
     size_t                 size;    /* Size of the page */
     union H5FL_blk_list_t *next;    /* Pointer to next block in free list */
-    double                 unused1; /* Unused normally, just here for aligment */
-    haddr_t                unused2; /* Unused normally, just here for aligment */
+    double                 unused1; /* Unused normally, just here for alignment */
+    haddr_t                unused2; /* Unused normally, just here for alignment */
 } H5FL_blk_list_t;
 
 /* Data structure for priority queue node of block free lists */
@@ -223,8 +223,8 @@ typedef struct H5FL_blk_head_t {
 typedef union H5FL_arr_list_t {
     union H5FL_arr_list_t *next;    /* Pointer to next block in free list */
     size_t                 nelem;   /* Number of elements in this array */
-    double                 unused1; /* Unused normally, just here for aligment */
-    haddr_t                unused2; /* Unused normally, just here for aligment */
+    double                 unused1; /* Unused normally, just here for alignment */
+    haddr_t                unused2; /* Unused normally, just here for alignment */
 } H5FL_arr_list_t;
 
 /* Data structure for each size of array element */

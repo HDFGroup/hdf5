@@ -1038,7 +1038,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link
  *          actual object name length, the object name is truncated to
  *          \Code{max_size - 1} characters.
  *
- *          Note that if the size of the object's name is unkown, a preliminary
+ *          Note that if the size of the object's name is unknown, a preliminary
  *          call to H5Gget_objname_by_idx() with \p name set to \c NULL will
  *          return the length of the object's name. A second call to
  *          H5Gget_objname_by_idx() can then be used to retrieve the actual

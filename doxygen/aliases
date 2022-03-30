@@ -297,7 +297,7 @@ ALIASES += ref_rfc20071111="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/AURA-co
 ALIASES += ref_rfc20071018="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_NaNsHDF5.pdf\"><tt>NaN</tt> detection in HDF5</a>"
 ALIASES += ref_rfc20070801="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Metadata_Journaling_RFC.pdf\">Metadata Journaling to Improve Crash Survivability</a>"
 ALIASES += ref_rfc20070413="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/API_Compatibility_RFC.txt.pdf\">API Compatibility Strategies for HDF5</a>"
-ALIASES += ref_rfc20070115="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/PrivateHeap.pdf\">A 'Private' Heap for HDF5</a>"
+ALIASES += ref_rfc20070115="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/PrivateHeap.pdf\">A \"Private\" Heap for HDF5</a>"
 ALIASES += ref_rfc20060623="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/coll_ind_dd6.pdf\">Performance Comparison of Collective I/O and Independent I/O with Derived Datatypes</a>"
 ALIASES += ref_rfc20060604="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/h5stat_spec_v3_2006-06-04.pdf\"><tt>h5stat</tt> tool</a>"
 ALIASES += ref_rfc20060505="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Simple%20Performance%20Test%20on%20Fletcher32%20Filter.pdf\">Simple Performance Test on Fletcher32 Filter</a>"

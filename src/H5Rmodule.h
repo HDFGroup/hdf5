@@ -32,7 +32,6 @@
  * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
  * regions.
  *
- *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
