@@ -5018,7 +5018,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             if (MPI_SUCCESS != (mpi_code = MPI_Get_address(partial_chunk_fill_buf, &partial_fill_buf_addr)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+#if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
             partial_fill_buf_disp = MPI_Aint_diff(partial_fill_buf_addr, fill_buf_addr);
 #else
             partial_fill_buf_disp = partial_fill_buf_addr - fill_buf_addr;
