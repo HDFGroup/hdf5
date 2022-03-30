@@ -3915,109 +3915,6 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    test_mem_ctl
- *
- * Purpose:     Tests memory-related "ctl" callbacks of the VFD driver
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_mem_ctl(const char *driver_name)
-{
-    H5FD_t                *file_drv_ptr = NULL;
-    uint64_t               ctl_flag;
-    hid_t                  fid      = H5I_INVALID_HID;
-    hid_t                  fapl_id  = H5I_INVALID_HID;
-    char                   filename[1024];
-    void                  *alloc_buf = NULL;
-    unsigned long          supported_flags, *flag_ptr;
-    H5FD_ctl_alloc_args_t  alloc_args;
-    H5FD_ctl_free_args_t   free_args;
-    char                   test_msg[64];
-
-    snprintf(test_msg, sizeof(test_msg), "VFD mem ctl callbacks (%s driver)", driver_name);
-    TESTING(test_msg);
-    HDputs("");
-
-    /* Register VFD for test */
-    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        PUTS_ERROR("couldn't create FAPL");
-    if (H5Pset_driver_by_name(fapl_id, driver_name, NULL) < 0) {
-        snprintf(test_msg, sizeof(test_msg), "couldn't set %s VFD on FAPL", driver_name);
-        PUTS_ERROR(test_msg);
-    }
-
-    /* Reuse the filename delegated for test_ctl() */
-    h5_fixname(FILENAME[14], fapl_id, filename, sizeof(filename));
-
-    /* Make sure it's not present at the start of the test */
-    if (HDaccess(filename, F_OK) != -1)
-        if (HDremove(filename) < 0)
-            FAIL_PUTS_ERROR("unable to remove backing store file");
-
-    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
-
-    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF)))
-        PUTS_ERROR("couldn't get pointer to H5FD_t structure");
-
-    /* Query supported alloc flags */
-    TESTING_2("mem query supported flags")
-    flag_ptr = &supported_flags;
-    ctl_flag = 0 == strcmp(driver_name, "sec2") ? 0 : H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-    if (H5FDctl(file_drv_ptr, H5FD_CTL__MEM_QUERY_SUPPORTED_FLAGS, ctl_flag, NULL, (void **) &flag_ptr) < 0)
-        TEST_ERROR;
-    PASSED();
-
-    /* Alloc + Free */
-    TESTING_2("mem_alloc")
-    memset(&alloc_args, 0, sizeof(alloc_args));
-    alloc_args.size = 1024 * 1024;
-    if (H5FDalloc_mem(file_drv_ptr, &alloc_args, &alloc_buf) < 0)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING_2("mem_free");
-    memset(&free_args, 0, sizeof(free_args));
-    free_args.buf = alloc_buf;
-    if (H5FDfree_mem(file_drv_ptr, &free_args) < 0)
-        TEST_ERROR;
-    PASSED();
-
-    TESTING_2("test cleanup")
-
-    if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-
-    if (H5FDclose(file_drv_ptr) < 0)
-        PUTS_ERROR("couldn't close H5FD_t structure pointer");
-    file_drv_ptr = NULL;
-
-    if (HDaccess(filename, F_OK) != -1)
-        if (HDremove(filename) < 0)
-            FAIL_PUTS_ERROR("unable to remove backing store file");
-
-    PASSED();
-
-    return 0;
-
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl_id);
-        H5FDclose(file_drv_ptr);
-    }
-    H5E_END_TRY;
-
-    return -1;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the basic features of Virtual File Drivers
@@ -4060,7 +3957,6 @@ main(void)
     nerrors += test_ros3() < 0 ? 1 : 0;
     nerrors += test_splitter() < 0 ? 1 : 0;
     nerrors += test_ctl() < 0 ? 1 : 0;
-    nerrors += test_mem_ctl("sec2") < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
