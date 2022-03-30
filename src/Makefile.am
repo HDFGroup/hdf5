@@ -120,7 +120,7 @@ endif
 
 # Only compile the subfiling VFD if necessary
 if SUBFILING_VFD_CONDITIONAL
-    libhdf5_la_SOURCES += H5FDsubfiling/H5FDsubfiling.c H5FDsubfiling/H5FDsubfile_int.c H5FDsubfiling/H5FDsubfile_mpi.c H5FDsubfiling/H5FDioc.c H5FDsubfiling/H5FDioc_threads.c
+    libhdf5_la_SOURCES += H5FDsubfiling/H5FDsubfiling.c H5FDsubfiling/H5FDsubfile_int.c H5FDsubfiling/H5FDsubfile_mpi.c H5FDsubfiling/H5FDioc.c H5FDsubfiling/H5FDioc_int.c H5FDsubfiling/H5FDioc_threads.c
 endif
 
 # Only compile the direct VFD if necessary
@@ -165,7 +165,10 @@ include_HEADERS += H5ESdevelop.h H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
         H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
 
 if SUBFILING_VFD_CONDITIONAL
-    include_HEADERS += H5FDsubfiling/H5FDsubfiling.h H5FDsubfiling/H5FDsubfiling_priv.h H5FDsubfiling/H5FDioc.h 
+    include_HEADERS += H5FDsubfiling/H5FDsubfiling.h H5FDsubfiling/H5FDioc.h
+
+# TODO: eventually remove
+    include_HEADERS += H5FDsubfiling/H5FDsubfiling_priv.h H5FDsubfiling/H5FDioc_priv.h
 
 # Temporarily use internal Mercury until usage of Mercury is refactored
 if HAVE_MERCURY_CONDITIONAL

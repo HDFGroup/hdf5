@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,7 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "H5FDioc_priv.h"
+
 #include "H5FDsubfiling.h"
+
 #include "mercury_thread.h"
 #include "mercury_thread_mutex.h"
 #include "mercury_thread_pool.h"
@@ -36,21 +38,37 @@ static hg_thread_t       ioc_thread;
 #define HG_TEST_NUM_THREADS_DEFAULT 4
 #endif
 
-extern int ioc_main(int64_t context_id);
-
 static int                    pool_concurrent_max = 0;
 static struct hg_thread_work *pool_request        = NULL;
+
+H5FD_ioc_io_queue_t io_queue_g = {
+    /* magic               = */ H5FD_IOC__IO_Q_MAGIC,
+    /* q_head              = */ NULL,
+    /* q_tail              = */ NULL,
+    /* num_pending         = */ 0,
+    /* num_in_progress     = */ 0,
+    /* q_len               = */ 0,
+    /* req_counter         = */ 0,
+    /* q_mutex             = */
+    PTHREAD_MUTEX_INITIALIZER,
+#if H5FD_IOC__COLLECT_STATS
+    /* max_q_len           = */ 0,
+    /* max_num_pending     = */ 0,
+    /* max_num_in_progress = */ 0,
+    /* ind_read_requests   = */ 0,
+    /* ind_write_requests  = */ 0,
+    /* truncate_requests   = */ 0,
+    /* get_eof_requests    = */ 0,
+    /* requests_queued     = */ 0,
+    /* requests_dispatched = */ 0,
+    /* requests_completed  = */ 0
+#endif /* H5FD_IOC__COLLECT_STATS */
+};
 
 /* Prototypes */
 void __attribute__((destructor)) finalize_ioc_threads(void);
 int  wait_for_thread_main(void);
 bool tpool_is_empty(void);
-
-#if 1 /* JRM */
-
-extern H5FD_ioc_io_queue_t io_queue_g;
-
-#endif /* JRM */
 
 /*-------------------------------------------------------------------------
  * Function:    local ioc_thread_main

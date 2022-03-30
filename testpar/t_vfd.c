@@ -27,6 +27,9 @@
 
 /* global variable declarations: */
 
+static MPI_Comm comm = MPI_COMM_WORLD;
+static MPI_Info info = MPI_INFO_NULL;
+
 hbool_t     pass               = TRUE; /* set to FALSE on error */
 hbool_t     disp_failure_mssgs = TRUE; /* global force display of failure messages */
 const char *failure_mssg       = NULL;
@@ -315,43 +318,40 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
         if (strcmp(vfd_name, "mpio") == 0) {
 
-            if (H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0) {
+            if (H5Pset_fapl_mpio(fapl_id, comm, info) < 0) {
 
                 pass         = FALSE;
                 failure_mssg = "Can't set mpio fapl.";
             }
         }
 #ifdef H5_HAVE_SUBFILING_VFD
-        else if (strcmp(vfd_name, "subfiling") == 0) {
+        else if (strcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
             hid_t                   ioc_fapl;
-            H5FD_ioc_config_t       ioc_config     = {{
-                                                /* common */
-                                                /* magic         = */ H5FD_IOC_FAPL_T_MAGIC,
-                                                /* version       = */ H5FD_CURR_IOC_FAPL_T_VERSION,
-                                                /* stripe_count  = */ 0, /* will over write */
-                                                /* stripe_depth  = */ (INTS_PER_RANK / 2),
-                                                /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
-                                                /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                                                /* context_id    = */ 0,  /* will overwrite */
-                                                /* file_dir      = */ "", /* will overwrite */
-                                                /* file_path     = */ ""  /* will overwrite */
-                                            },
-                                            /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE};
+            H5FD_ioc_config_t       ioc_config = {
+                /* magic         = */ H5FD_IOC_FAPL_MAGIC,
+                /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
+                /* stripe_count  = */ 0, /* will over write */
+                /* stripe_depth  = */ (INTS_PER_RANK / 2),
+                /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
+                /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
+                /* context_id    = */ 0,  /* will overwrite */
+                /* file_dir      = */ "", /* will overwrite */
+                /* file_path     = */ "",  /* will overwrite */
+                /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE
+            };
             H5FD_subfiling_config_t subfiling_conf = {
-                {
-                    /* common */
-                    /* magic         = */ H5FD_IOC_FAPL_T_MAGIC,
-                    /* version       = */ H5FD_CURR_IOC_FAPL_T_VERSION,
-                    /* stripe_count  = */ 0, /* will over write */
-                    /* stripe_depth  = */ (INTS_PER_RANK / 2),
-                    /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
-                    /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                    /* context_id    = */ 0,           /* will overwrite */
-                    /* file_dir      = */ "",          /* will overwrite */
-                    /* file_path     = */ "",          /* will overwrite */
-                },
-                /* require_ioc       = */ TRUE};
+                /* magic         = */ H5FD_IOC_FAPL_MAGIC,
+                /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
+                /* stripe_count  = */ 0, /* will over write */
+                /* stripe_depth  = */ (INTS_PER_RANK / 2),
+                /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
+                /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
+                /* context_id    = */ 0,           /* will overwrite */
+                /* file_dir      = */ "",          /* will overwrite */
+                /* file_path     = */ "",          /* will overwrite */
+                /* require_ioc   = */ TRUE
+            };
 
             if ((pass) && ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)) {
 
@@ -396,16 +396,16 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             }
 
             /* Assign the IOC fapl as the underlying VPD */
-            subfiling_conf.common.ioc_fapl_id = ioc_fapl;
+            subfiling_conf.ioc_fapl_id = ioc_fapl;
 
             if (pass) { /* setup the paths in the subfiling fapl. */
 
-                HDassert(strlen(filename) < sizeof(subfiling_conf.common.file_dir));
-                strcpy(subfiling_conf.common.file_dir, dirname(filename));
-                strcpy(subfiling_conf.common.file_path, basename(filename));
+                HDassert(strlen(filename) < sizeof(subfiling_conf.file_dir));
+                strcpy(subfiling_conf.file_dir, dirname(filename));
+                strcpy(subfiling_conf.file_path, basename(filename));
 #if 0  /* JRM */
                 HDfprintf(stdout, "\nfilename = \"%s\"\nfile_dir = \"%s\"\nfile_path = \"%s\"\n",
-                          filename, subfiling_conf.common.file_dir, subfiling_conf.common.file_path);
+                          filename, subfiling_conf.file_dir, subfiling_conf.file_path);
 #endif /* JRM */
             }
 
@@ -419,7 +419,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #endif /* JRM */
 
             /* set the MPI communicator and info in the FAPL */
-            if (H5Pset_mpi_params(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL) < 0) {
+            if (H5Pset_mpi_params(fapl_id, comm, info) < 0) {
 
                 pass         = FALSE;
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
@@ -592,7 +592,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
     if (pass) {
 
         /* wait for everyone to close the file */
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
 
         if ((mpi_rank == 0) && (HDremove(filename) < 0)) {
 
@@ -601,7 +601,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
         }
 
         /* wait for the file delete to complete */
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -760,7 +760,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -828,7 +828,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1002,7 +1002,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1057,7 +1057,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1135,7 +1135,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1319,7 +1319,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1475,7 +1475,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1684,7 +1684,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -1946,7 +1946,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -2123,7 +2123,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -2222,7 +2222,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -2377,10 +2377,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -2622,10 +2619,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -2872,10 +2866,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3153,10 +3144,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3436,7 +3424,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3556,10 +3544,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3885,7 +3870,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3939,10 +3924,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -3988,7 +3970,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -4167,10 +4149,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -4190,10 +4169,6 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             addrs[i] = base_addr + ((haddr_t)(i)*addr_increment);
             sizes[i] = (size_t)(INTS_PER_RANK / 16) * sizeof(int32_t);
             bufs[i]  = (void *)(&(increasing_fi_buf[base_index + (i * (INTS_PER_RANK / 8))]));
-
-#if 0 /* JRM */ /* delete eventually */
-            HDfprintf(stderr, "\naddrs[%d] = %lld\n", i, (long long)(addrs[i]));
-#endif          /* JRM */
         }
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
@@ -4210,10 +4185,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (pass) {
 
-        MPI_Barrier(MPI_COMM_WORLD);
-#if 0 /* JRM */ /* test code -- remove before commit */
-        sleep(1);
-#endif          /* JRM */
+        MPI_Barrier(comm);
     }
 
     if (show_progress)
@@ -4323,26 +4295,30 @@ int
 main(int argc, char **argv)
 {
     unsigned nerrs    = 0;
-    MPI_Comm comm     = MPI_COMM_WORLD;
-    MPI_Info info     = MPI_INFO_NULL;
     int      required = MPI_THREAD_MULTIPLE;
     int      provided = 0;
     int      mpi_size;
     int      mpi_rank;
 
-#if 0  /* JRM */
-    MPI_Init(&argc, &argv);
-#else  /* JRM */
-    MPI_Init_thread(&argc, &argv, required, &provided);
-
-    if (provided != required) {
-
-        HDprintf("       MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Exiting\n");
+#ifdef H5_HAVE_SUBFILING_VFD
+    if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
+        HDprintf("    MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Exiting\n");
         goto finish;
     }
-#endif /* JRM */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (provided != required) {
+        HDprintf("    MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE. Exiting\n");
+        goto finish;
+    }
+#else
+    if (MPI_SUCCESS != MPI_Init(&argc, &argv)) {
+        HDprintf("    MPI_Init failed. Exiting\n");
+        goto finish;
+    }
+#endif
+
+    MPI_Comm_size(comm, &mpi_size);
+    MPI_Comm_rank(comm, &mpi_rank);
 
     /* Attempt to turn off atexit post processing so that in case errors
      * occur during the test and the process is aborted, it will not hang
@@ -4374,14 +4350,8 @@ main(int argc, char **argv)
         HDprintf("\nAllocation and initialize of file image buffers failed.  Test aborted.\n");
     }
 
-#if 1 /* JRM */
-    /* sleep for a bit to allow GDB to attach to the process */
-    // sleep(60);
-#endif /* JRM */
+    MPI_Barrier(comm);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
-#if 1 /* JRM */ /* skip MPIO VFD tests if desired. */
     if (mpi_rank == 0) {
 
         HDprintf("\n\n --- TESTING MPIO VFD --- \n\n");
@@ -4460,148 +4430,76 @@ main(int argc, char **argv)
         vector_write_test_7(6, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "mpio");
     nerrs +=
         vector_write_test_7(6, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "mpio");
-#endif /* JRM */
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(comm);
 
+#ifdef H5_HAVE_SUBFILING_VFD
     if (mpi_rank == 0) {
 
         HDprintf("\n\n --- TESTING SUBFILING VFD --- \n\n");
     }
 
-    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "subfiling");
-    // sleep(1);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "subfiling");
-    // sleep(1);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, "subfiling");
-    // sleep(1);
-    nerrs +=
-        vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, "subfiling");
-    // sleep(1);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                "subfiling");
-    // sleep(1);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                "subfiling");
-    // sleep(1);
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                "subfiling");
-    // sleep(1);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
-                                 "subfiling");
-    // sleep(1);
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
-                                 "subfiling");
-    // sleep(1);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+#endif
 
 finish:
-
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(comm);
 
     if (mpi_rank == 0) { /* only process 0 reports */
         HDprintf("===================================\n");
         if (nerrs > 0)
-            HDprintf("***parallel vfd tests detected %d failures***\n", nerrs);
+            HDprintf("***vfd tests detected %d failures***\n", nerrs);
         else
-            HDprintf("parallel vfd tests finished with no failures\n");
+            HDprintf("vfd tests finished with no failures\n");
         HDprintf("===================================\n");
     }
 

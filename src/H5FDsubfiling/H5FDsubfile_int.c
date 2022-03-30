@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -19,19 +18,11 @@
  *
  */
 
-#include "H5FDsubfiling.h"
+#include "H5FDsubfiling_priv.h"
 
 /***********/
 /* Headers */
 /***********/
-#include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Dprivate.h"  /* Datasets                                 */
-#include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Iprivate.h"  /* IDs                                      */
-#include "H5Ipublic.h"   /* IDs                                      */
-#include "H5MMprivate.h" /* Memory management                        */
-#include "H5Pprivate.h"  /* Property lists                           */
-#include "H5private.h"   /* Generic Functions                        */
 
 /*
 =========================================
@@ -365,7 +356,7 @@ record_fid_to_subfile(uint64_t fid, hid_t subfile_context_id, int *next_index)
  * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
-int
+static int
 open_subfile_with_context(subfiling_context_t *sf_context, uint64_t fid, int flags)
 {
     int    ret;
@@ -648,130 +639,6 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
 #endif
     return global_errors;
 } /* end close__subfiles() */
-
-#define MIN_RETRIES 10
-/*
-======================================================
-File functions
-
-The pread and pwrite posix functions are described as
-being thread safe.
-======================================================
-*/
-
-int
-sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
-{
-    int        ret     = 0;
-    int        retries = MIN_RETRIES;
-    useconds_t delay   = 100;
-    ssize_t    bytes_read;
-    ssize_t    bytes_remaining = (ssize_t)data_size;
-    char *     this_buffer     = data_buffer;
-
-    while (bytes_remaining) {
-        if ((bytes_read = (ssize_t)pread(fd, this_buffer, (size_t)bytes_remaining, file_offset)) < 0) {
-
-            perror("pread failed!");
-            HDprintf("[ioc(%d) %s] pread(fd, buf, bytes_remaining=%ld, "
-                     "file_offset =%ld)\n",
-                     subfile_rank, __func__, bytes_remaining, file_offset);
-            HDfflush(stdout);
-            return -1;
-        }
-        else if (bytes_read > 0) {
-            /* reset retry params */
-            retries = MIN_RETRIES;
-            delay   = 100;
-            bytes_remaining -= bytes_read;
-#ifdef VERBOSE
-            printf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%ld\n", subfile_rank, __func__,
-                   bytes_read, bytes_remaining, file_offset);
-            fflush(stdout);
-#endif
-            this_buffer += bytes_read;
-            file_offset += bytes_read;
-        }
-        else {
-            if (retries == 0) {
-#ifdef VERBOSE
-                printf("[ioc(%d) %s] TIMEOUT: file_offset=%ld, data_size=%ld\n", subfile_rank, __func__,
-                       file_offset, data_size);
-                printf("[ioc(%d) %s] ERROR! read of 0 bytes == eof!\n", subfile_rank, __func__);
-
-                fflush(stdout);
-#endif
-                return -2;
-            }
-            retries--;
-            usleep(delay);
-            delay *= 2;
-        }
-    }
-    return ret;
-} /* end sf_read_data() */
-
-int
-sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
-{
-    int     ret             = 0;
-    char *  this_data       = (char *)data_buffer;
-    ssize_t bytes_remaining = (ssize_t)data_size;
-    ssize_t written         = 0;
-    while (bytes_remaining) {
-        if ((written = pwrite(fd, this_data, (size_t)bytes_remaining, file_offset)) < 0) {
-            int         saved_errno = errno;
-            struct stat statbuf;
-            perror("pwrite failed!");
-            HDprintf("\nerrno = %d (%s)\n\n", saved_errno, strerror(saved_errno));
-            fstat(fd, &statbuf);
-            HDprintf("[ioc(%d) %s] pwrite(fd, data, bytes_remaining=%ld, "
-                     "file_offset=%ld), fd=%d, st_size=%ld\n",
-                     subfile_rank, __func__, bytes_remaining, file_offset, fd, statbuf.st_size);
-            HDfflush(stdout);
-            return -1;
-        }
-        else {
-            bytes_remaining -= written;
-#ifdef VERBOSE
-            printf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%ld\n", subfile_rank, __func__,
-                   written, bytes_remaining, file_offset);
-            fflush(stdout);
-#endif
-            this_data += written;
-            file_offset += written;
-        }
-    }
-    /* We don't usually use this for each file write.  We usually do the file
-     * flush as part of file close operation.
-     */
-#ifdef SUBFILE_REQUIRE_FLUSH
-    fdatasync(fd);
-#endif
-    return ret;
-} /* end sf_write_data() */
-
-int
-sf_truncate(int fd, int64_t length, int subfile_rank)
-{
-    int ret = 0;
-
-    if (HDftruncate(fd, (off_t)length) != 0) {
-
-        HDfprintf(stdout, "ftruncate failed on subfile rank %d.  errno = %d (%s)\n", subfile_rank, errno,
-                  strerror(errno));
-        fflush(stdout);
-        ret = -1;
-    }
-
-#ifdef VERBOSE
-    HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", subfile_rank, __func__,
-             (long long)length, ret);
-    HDfflush(stdout);
-#endif
-
-    return ret;
-} /* end sf_truncate() */
 
 /*
  * ---------------------------------------------------
@@ -1086,7 +953,7 @@ clear_fid_map_entry(uint64_t sf_fid)
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 active_map_entries(void)
 {
     int i, map_entries = 0;
@@ -1097,6 +964,23 @@ active_map_entries(void)
     }
     return map_entries;
 } /* end active_map_entries() */
+
+static void
+manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_value)
+{
+#ifndef NDEBUG
+    if (flag_value) {
+        char logname[64];
+        sprintf(logname, "sf_client_%d.log", client_rank);
+        client_log = fopen(logname, "a+");
+    }
+    else if (client_log) {
+        fclose(client_log);
+        client_log = 0;
+    }
+#endif
+    return;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__determine_ioc_count
@@ -1133,7 +1017,7 @@ active_map_entries(void)
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_select_method,
                           char *ioc_select_option, sf_topology_t **thisapp)
 {
@@ -1170,6 +1054,8 @@ H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_se
             HDassert(app_layout != NULL);
             HDmemset(app_layout, 0, alloc_size);
             app_layout->node_ranks = (int *)&app_layout[1];
+
+            /* TODO: this is broken */
             app_layout->layout     = (layout_t *)&app_layout->node_ranks[world_size + 2];
         }
 
@@ -1294,7 +1180,7 @@ next:
   Revision History -- Initial implementation
 -------------------------------------------------------------------------
 */
-char *
+static char *
 get_ioc_selection_criteria(ioc_selection_t *selection)
 {
     char *optValue = NULL;
@@ -1339,7 +1225,7 @@ get_ioc_selection_criteria(ioc_selection_t *selection)
  * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
-int
+static int
 H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
                            subfiling_context_t *newContext)
 {
@@ -1440,7 +1326,7 @@ err_exit:
   Revision History -- Initial implementation
 -------------------------------------------------------------------------
 */
-herr_t
+static herr_t
 H5FDsubfiling_init(ioc_selection_t ioc_select_method, char *ioc_select_option, int64_t *sf_context)
 {
     herr_t               ret_value = SUCCEED;
@@ -1556,15 +1442,15 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     ioc_selection_t      ioc_selection;
     // char filepath[PATH_MAX];
     // char *slash;
-    config_common_t *config_info = _config_info;
-    char *           option_arg  = get_ioc_selection_criteria(&ioc_selection);
+    H5FD_subfiling_config_t *config_info = _config_info;
+    char *                   option_arg  = get_ioc_selection_criteria(&ioc_selection);
 
     HDassert(config_info);
     /* Check to see who is calling the function::
      * We only allow the ioc or subfiling VFDs
      */
-    if ((config_info->magic != H5FD_IOC_FAPL_T_MAGIC) &&
-        (config_info->magic != H5FD_SUBFILING_FAPL_T_MAGIC)) {
+    if ((config_info->magic != H5FD_IOC_FAPL_MAGIC) &&
+        (config_info->magic != H5FD_SUBFILING_FAPL_MAGIC)) {
         HDputs("Unrecgonized driver!");
         return -1;
     }
@@ -1950,7 +1836,7 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
     *logical_eof_ptr = logical_eof;
 
 done:
+    HDfree(sf_eofs);
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5FD__subfiling__get_real_eof() */

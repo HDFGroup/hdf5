@@ -30,21 +30,57 @@
 #include "H5Pprivate.h"  /* Property lists           */
 #include "H5private.h"   /* Generic Functions        */
 
-#if 1 /* JRM */ /* For now, H5FDsubfiling_priv.h needs mercury.  Since the code that needs it will           \
-                 * move to its own header, just hack it for now.                                             \
-                 */
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
-#include "mercury_thread_pool.h"
-#endif /* JRM */
-
-#include "H5FDsubfiling_priv.h"
+#include "H5FDioc_priv.h"
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_IOC_g = 0;
+static hid_t H5FD_IOC_g = H5I_INVALID_HID;
+
 #if 0 /* JRM */ /* delete if all goes well */
 extern volatile int sf_shutdown_flag;
 #endif          /* JRM */
+
+/* The information of this ioc */
+typedef struct H5FD_ioc_t {
+    H5FD_t pub; /* public stuff, must be first    */
+    int    fd;  /* the filesystem file descriptor */
+
+    H5FD_ioc_config_t fa; /* driver-specific file access properties */
+    int               mpi_rank;
+    int               mpi_size;
+    H5FD_t *          ioc_file; /* native HDF5 file pointer (sec2) */
+
+#ifndef H5_HAVE_WIN32_API
+    /* On most systems the combination of device and i-node number uniquely
+     * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
+     * environments have the stat function (which fakes inodes)
+     * and will use the 'device + inodes' scheme as opposed to the
+     * Windows code further below.
+     */
+    dev_t device; /* file device number   */
+    ino_t inode;  /* file i-node number   */
+#else
+    /* Files in windows are uniquely identified by the volume serial
+     * number and the file index (both low and high parts).
+     *
+     * There are caveats where these numbers can change, especially
+     * on FAT file systems.  On NTFS, however, a file should keep
+     * those numbers the same until renamed or deleted (though you
+     * can use ReplaceFile() on NTFS to keep the numbers the same
+     * while renaming).
+     *
+     * See the MSDN "BY_HANDLE_FILE_INFORMATION Structure" entry for
+     * more information.
+     *
+     * http://msdn.microsoft.com/en-us/library/aa363788(v=VS.85).aspx
+     */
+    DWORD nFileIndexLow;
+    DWORD nFileIndexHigh;
+    DWORD dwVolumeSerialNumber;
+
+    HANDLE hFile; /* Native windows file handle */
+#endif /* H5_HAVE_WIN32_API */
+    int hdf_fd_dup;
+} H5FD_ioc_t;
 
 /*
  * These macros check for overflow of various quantities.  These macros
@@ -78,16 +114,6 @@ extern volatile int sf_shutdown_flag;
 #else
 #define H5FD_IOC_LOG_CALL(name) /* no-op */
 #endif                          /* H5FD_IOC_DEBUG_OP_CALLS */
-
-/* Public functions which are referenced but not found in this file */
-extern herr_t H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                          const void *bufs[] /* data_in */);
-extern herr_t H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                         void *bufs[] /* data_out */);
-extern int    H5FD__close_subfiles(int64_t context_id);
-extern int    H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags);
-extern hid_t  fid_map_to_context(hid_t sf_fid);
-extern subfiling_context_t *get__subfiling_object(int64_t context_id);
 
 /* Private functions */
 /* Prototypes */
@@ -126,10 +152,12 @@ static herr_t H5FD__ioc_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags,
                             const void *input, void **result);
 */
 
+static herr_t H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out);
+
 static const H5FD_class_t H5FD_ioc_g = {
     H5FD_CLASS_VERSION,        /* VFD interface version */
-    H5FD_IOC_VALUE,            /* value                 */
-    "ioc",                     /* name                  */
+    H5_VFD_IOC,                /* value                 */
+    H5FD_IOC_NAME,             /* name                  */
     MAXADDR,                   /* maxaddr               */
     H5F_CLOSE_WEAK,            /* fc_degree             */
     H5FD__ioc_term,            /* terminate             */
@@ -215,7 +243,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ioc_init
  *
- * Purpose:     Initialize the ioc driver by registering it with the
+ * Purpose:     Initialize the IOC driver by registering it with the
  *              library.
  *
  * Return:      Success:    The driver ID for the ioc driver.
@@ -227,12 +255,15 @@ H5FD_ioc_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_IOC_LOG_CALL(FUNC);
 
-    if (H5I_VFL != H5I_get_type(H5FD_IOC_g))
-        H5FD_IOC_g = H5FDregister(&H5FD_ioc_g);
+    /* Register the IOC VFD, if it isn't already registered */
+    if (H5I_VFL != H5I_get_type(H5FD_IOC_g)) {
+        if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), FALSE)) < 0)
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
+    }
 
     ret_value = H5FD_IOC_g;
 
@@ -349,9 +380,9 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 
     H5FD_IOC_LOG_CALL(FUNC);
 
-    if (H5FD_IOC_FAPL_T_MAGIC != vfd_config->common.magic)
+    if (H5FD_IOC_FAPL_MAGIC != vfd_config->magic)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid configuration (magic number mismatch)")
-    if (H5FD_CURR_IOC_FAPL_T_VERSION != vfd_config->common.version)
+    if (H5FD_CURR_IOC_FAPL_VERSION != vfd_config->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid config (version number mismatch)")
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid property list")
@@ -361,8 +392,8 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate file access property list struct")
 
     memcpy(info, vfd_config, sizeof(H5FD_ioc_config_t));
-    info->common.ioc_fapl_id = fapl_id;
-    ret_value                = H5P_set_driver(plist_ptr, H5FD_IOC, info, NULL);
+    info->ioc_fapl_id = fapl_id;
+    ret_value         = H5P_set_driver(plist_ptr, H5FD_IOC, info, NULL);
 
 done:
     if (info)
@@ -370,34 +401,6 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_ioc() */
-
-/*-------------------------------------------------------------------------
- * Function:    fapl_get_ioc_defaults
- *
- * Purpose:     This is called by H5Pget_fapl_ioc when called with no
- *              established configuration info.  This simply fills in
- *              in the basics.   This avoids the necessity of having
- *              the user write code to initialize the config structure.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-fapl_get_ioc_defaults(H5FD_ioc_config_t *fa)
-{
-    herr_t ret_value = SUCCEED;
-
-    fa->common.magic         = H5FD_IOC_FAPL_T_MAGIC;
-    fa->common.version       = H5FD_CURR_IOC_FAPL_T_VERSION;
-    fa->common.ioc_fapl_id   = H5P_DEFAULT;
-    fa->common.stripe_count  = 0;
-    fa->common.stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
-    fa->common.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-
-    /* Specific to this IO Concentrator */
-    fa->thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
-    return (ret_value);
-} /* end fapl_get_ioc_defaults() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ioc
@@ -414,9 +417,10 @@ fapl_get_ioc_defaults(H5FD_ioc_config_t *fa)
 herr_t
 H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
-    const H5FD_ioc_config_t *config_ptr = NULL;
-    H5P_genplist_t *         plist_ptr  = NULL;
-    herr_t                   ret_value  = SUCCEED;
+    const H5FD_ioc_config_t *config_ptr         = NULL;
+    H5P_genplist_t *         plist_ptr          = NULL;
+    hbool_t                  use_default_config = FALSE;
+    herr_t                   ret_value          = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*!", fapl_id, config_out);
@@ -427,28 +431,66 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     if (config_out == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out is NULL")
 
-    plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
-    if (plist_ptr == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+    if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    if (H5FD_IOC != H5P_peek_driver(plist_ptr))
+        use_default_config = TRUE;
+    else {
+        config_ptr = H5P_peek_driver_info(plist_ptr);
+        if (NULL == config_ptr)
+            use_default_config = TRUE;
     }
 
-    config_ptr = (const H5FD_ioc_config_t *)H5P_peek_driver_info(plist_ptr);
-    if (config_ptr == NULL) {
-        memset(config_out, 0, sizeof(H5FD_ioc_config_t));
-        ret_value = fapl_get_ioc_defaults(config_out);
+    if (use_default_config) {
+        if (H5FD__ioc_get_default_config(config_out) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get default IOC VFD configuration")
     }
     else {
-        /* Copy the subfiling fapl data out */
+        /* Copy the IOC fapl data out */
         HDmemcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
 
         /* Copy the driver info value */
-        if (H5FD__copy_plist(config_ptr->common.ioc_fapl_id, &(config_out->common.ioc_fapl_id)) < 0)
+        if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(config_out->ioc_fapl_id)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't copy IOC FAPL");
     }
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fapl_ioc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fapl_get_ioc_defaults
+ *
+ * Purpose:     This is called by H5Pget_fapl_ioc when called with no
+ *              established configuration info.  This simply fills in
+ *              the basics.   This avoids the necessity of having the
+ *              user write code to initialize the config structure.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
+{
+    herr_t ret_value = SUCCEED;
+
+    HDassert(config_out);
+
+    HDmemset(config_out, 0, sizeof(*config_out));
+
+    config_out->magic         = H5FD_IOC_FAPL_MAGIC;
+    config_out->version       = H5FD_CURR_IOC_FAPL_VERSION;
+    config_out->ioc_fapl_id   = H5P_DEFAULT;
+    config_out->stripe_count  = 0;
+    config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
+    config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
+
+    /* Specific to this I/O Concentrator */
+    config_out->thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
+
+    return ret_value;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_flush
@@ -690,10 +732,10 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
     HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
-    HDstrncpy(new_fa_ptr->common.file_path, old_fa_ptr->common.file_path, H5FD_IOC_PATH_MAX);
+    HDstrncpy(new_fa_ptr->file_path, old_fa_ptr->file_path, H5FD_IOC_PATH_MAX);
 
     /* Copy the FAPL */
-    if (H5FD__copy_plist(old_fa_ptr->common.ioc_fapl_id, &(new_fa_ptr->common.ioc_fapl_id)) < 0)
+    if (H5FD__copy_plist(old_fa_ptr->ioc_fapl_id, &(new_fa_ptr->ioc_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL");
 
     ret_value = (void *)new_fa_ptr;
@@ -727,7 +769,7 @@ H5FD__ioc_fapl_free(void *_fapl)
     /* Check arguments */
     HDassert(fapl);
 
-    if (H5I_dec_ref(fapl->common.ioc_fapl_id) < 0)
+    if (H5I_dec_ref(fapl->ioc_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close W/O FAPL ID")
 
     /* Free the property list */
@@ -784,12 +826,15 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
      * with MPI_Init_thread and that the library supports
      * MPI_THREAD_MULTIPLE
      */
-    if (MPI_Initialized(&mpi_enabled) == MPI_SUCCESS) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_enabled)))
+        HMPI_GOTO_ERROR(NULL, "MPI_Initialized failed", mpi_code)
+    if (mpi_enabled) {
         int mpi_provides = 0;
-        MPI_Query_thread(&mpi_provides);
-        if (mpi_provides != MPI_THREAD_MULTIPLE) {
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "Subfiling requires the use of MPI_THREAD_MULTIPLE")
-        }
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&mpi_provides)))
+            HMPI_GOTO_ERROR(NULL, "MPI_Query_thread failed", mpi_code)
+        if (mpi_provides != MPI_THREAD_MULTIPLE)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
     }
 
     file_ptr = (H5FD_ioc_t *)H5FL_CALLOC(H5FD_ioc_t);
@@ -813,19 +858,19 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
     memcpy(&file_ptr->fa, fapl_ptr, sizeof(H5FD_ioc_config_t));
 
     /* Extend the config info with file_path and file_dir */
-    if (HDrealpath(name, file_ptr->fa.common.file_path) != NULL) {
-        char *path      = HDstrdup(file_ptr->fa.common.file_path);
+    if (HDrealpath(name, file_ptr->fa.file_path) != NULL) {
+        char *path      = HDstrdup(file_ptr->fa.file_path);
         char *directory = dirname(path);
-        HDstrcpy(file_ptr->fa.common.file_dir, directory);
+        HDstrcpy(file_ptr->fa.file_dir, directory);
         HDfree(path);
     }
 
     /* Copy the ioc FAPL. */
-    if (H5FD__copy_plist(fapl_ptr->common.ioc_fapl_id, &(file_ptr->fa.common.ioc_fapl_id)) < 0)
+    if (H5FD__copy_plist(fapl_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy W/O FAPL");
 
     /* Check the "native" driver (sec2 or mpio) */
-    plist_ptr = (H5P_genplist_t *)H5I_object(fapl_ptr->common.ioc_fapl_id);
+    plist_ptr = (H5P_genplist_t *)H5I_object(fapl_ptr->ioc_fapl_id);
 
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
@@ -844,12 +889,18 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
 
         /* sec2 open the file */
         file_ptr->ioc_file =
-            H5FD_open(file_ptr->fa.common.file_path, flags, fapl_ptr->common.ioc_fapl_id, HADDR_UNDEF);
+            H5FD_open(file_ptr->fa.file_path, flags, fapl_ptr->ioc_fapl_id, HADDR_UNDEF);
         if (file_ptr->ioc_file) {
-            h5_stat_t    sb;
-            H5FD_sec2_t *hdf_file = (H5FD_sec2_t *)file_ptr->ioc_file;
-            if (HDfstat(hdf_file->fd, &sb) < 0)
+            h5_stat_t sb;
+            void *    file_handle = NULL;
+
+            if (H5FDget_vfd_handle(file_ptr->ioc_file, fapl_ptr->ioc_fapl_id,
+                                   &file_handle) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle")
+
+            if (HDfstat(*(int *)file_handle, &sb) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+
             /* Get the inode info and copy the open file descriptor
              * The latter is used to pass to the subfiling code to use
              * as an alternative to opening a new subfiling file, e.g. nnn_0_of_N.h5
@@ -875,7 +926,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
 
         else if (file_ptr->inode > 0) { /* No errors opening the subfiles */
-            subfiling_context_t *sf_context = get__subfiling_object(file_ptr->fa.common.context_id);
+            subfiling_context_t *sf_context = get__subfiling_object(file_ptr->fa.context_id);
             if (sf_context && sf_context->topology->rank_is_ioc) {
                 if (initialize_ioc_threads(sf_context) < 0) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Unable to initialize IOC threads")
@@ -952,7 +1003,7 @@ H5FD__ioc_close(H5FD_t *_file)
     /* Sanity check */
     HDassert(file);
 #ifdef VERBOSE
-    sf_context = (subfiling_context_t *)get__subfiling_object(file->fa.common.context_id);
+    sf_context = (subfiling_context_t *)get__subfiling_object(file->fa.context_id);
     if (sf_context->topology->rank_is_ioc)
         printf("[%s %d] fd=%d\n", __func__, file->mpi_rank, sf_context->sf_fid);
     else
@@ -960,7 +1011,7 @@ H5FD__ioc_close(H5FD_t *_file)
     fflush(stdout);
 #endif
 
-    if (H5I_dec_ref(file->fa.common.ioc_fapl_id) < 0)
+    if (H5I_dec_ref(file->fa.ioc_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close W/O FAPL")
 
     /* Call the sec2 close */
@@ -970,7 +1021,7 @@ H5FD__ioc_close(H5FD_t *_file)
     }
 
     /* See: H5FDsubfile_int.c */
-    if (H5FD__close_subfiles(file->fa.common.context_id) < 0)
+    if (H5FD__close_subfiles(file->fa.context_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)")
 
     /* dup'ed in the H5FD__ioc_open function (see above) */
@@ -1076,7 +1127,7 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     HDassert(file);
     HDassert(file->ioc_file);
 
-    sf_context = get__subfiling_object(file->fa.common.context_id);
+    sf_context = get__subfiling_object(file->fa.context_id);
     if (sf_context) {
         ret_value = (haddr_t)sf_context->sf_eof;
         goto done;
@@ -1263,7 +1314,7 @@ H5FD__ioc_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handl
     HDassert(file->ioc_file);
     HDassert(file_handle);
 
-    if (H5FD_get_vfd_handle(file->ioc_file, file->fa.common.ioc_fapl_id, file_handle) < 0)
+    if (H5FD_get_vfd_handle(file->ioc_file, file->fa.ioc_fapl_id, file_handle) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to get handle of R/W file")
 
 done:
@@ -1469,6 +1520,175 @@ H5FD__ioc_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsiz
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_free() */
+
+/*
+ * Function:   H5FD__write_vector_internal
+ *
+ * Purpose:    This function takes 'count' vector entries
+ *             and initiates an asynch write operation for each.
+ *             By asynchronous, we mean that MPI_Isends are utilized
+ *             to communicate the write operations to the 'count'
+ *             IO Concentrators.  The calling function will have
+ *             decomposed the actual user IO request into the
+ *             component segments, each IO having a maximum size
+ *             of "stripe_depth", which is recorded in the
+ *             subfiling_context_t 'sf_context' structure.
+ *
+ * Return:     SUCCEED if no errors, FAIL otherwise.
+ */
+herr_t
+H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
+                            const void *bufs[] /* in */)
+{
+    herr_t               ret_value = SUCCEED;
+    hssize_t             status = 0, k = 0;
+    hid_t                sf_context_id = fid_map_to_context((uint64_t)h5_fid);
+    subfiling_context_t *sf_context    = NULL;
+    io_req_t **          sf_async_reqs = NULL;
+    MPI_Request *        active_reqs   = NULL;
+    struct __mpi_req {
+        int          n_reqs;
+        MPI_Request *active_reqs;
+    } *mpi_reqs = NULL;
+
+    sf_context = get__subfiling_object(sf_context_id);
+    assert(sf_context != NULL);
+
+    active_reqs = (MPI_Request *)calloc((size_t)(count + 2), sizeof(struct __mpi_req));
+    assert(active_reqs);
+
+    sf_async_reqs = (io_req_t **)calloc((size_t)count, sizeof(void *));
+    assert(sf_async_reqs);
+
+    /*
+     * Note: We allocated extra space in the active_requests (above).
+     * The extra should be enough for an integer plus a pointer.
+     */
+    mpi_reqs              = (struct __mpi_req *)&active_reqs[count];
+    mpi_reqs->n_reqs      = (int)count;
+    mpi_reqs->active_reqs = active_reqs;
+
+    /* Each pass thru the following should queue an MPI write
+     * to a new IOC. Both the IOC selection and offset within the
+     * particular subfile are based on the combinatation of striping
+     * factors and the virtual file offset (addrs[k]).
+     */
+    for (k = 0; k < count; k++) {
+        if (sizes[k] == 0) {
+            puts("Something wrong with the size argument: size is 0!");
+            fflush(stdout);
+        }
+        status =
+            write__independent_async(sf_context->topology->n_io_concentrators, sf_context_id,
+                                     (int64_t)addrs[k], (int64_t)sizes[k], 1, bufs[k], &sf_async_reqs[k]);
+        if (status < 0) {
+            printf("%s - encountered an internal error!\n", __func__);
+            goto errors;
+        }
+        else {
+            mpi_reqs->active_reqs[k] = sf_async_reqs[k]->completion_func.io_args.io_req;
+        }
+    }
+
+    /* Here, we should have queued 'count' async requests.
+     * We can can now try to complete those before returning
+     * to the caller for the next set of IO operations.
+     */
+#if 1 /* JRM */ /* experiment with synchronous send */
+    if (sf_async_reqs[0]->completion_func.io_function)
+        ret_value = (*sf_async_reqs[0]->completion_func.io_function)(mpi_reqs);
+#endif /* JRM */
+
+    if (active_reqs)
+        free(active_reqs);
+
+    if (sf_async_reqs) {
+        for (k = 0; k < count; k++) {
+            if (sf_async_reqs[k]) {
+                free(sf_async_reqs[k]);
+            }
+        }
+        free(sf_async_reqs);
+    }
+    return ret_value;
+
+errors:
+    return FAIL;
+}
+
+/*
+ * Refactored version of the original sf_read_vector() function.
+ * The H5FD__ioc_read_vector VFD call included additional 'hid_t dxpl'
+ * and 'H5FD_mem_t types[]'. These are now removed.
+ */
+herr_t
+H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
+                           void *bufs[] /* out */)
+{
+    herr_t               ret_value = SUCCEED;
+    hssize_t             status = 0, k = 0;
+    hid_t                sf_context_id = fid_map_to_context((uint64_t)h5_fid);
+    subfiling_context_t *sf_context    = NULL;
+    io_req_t **          sf_async_reqs = NULL;
+    MPI_Request *        active_reqs   = NULL;
+    struct __mpi_req {
+        int          n_reqs;
+        MPI_Request *active_reqs;
+    } *mpi_reqs = NULL;
+
+    sf_context = get__subfiling_object(sf_context_id);
+    assert(sf_context != NULL);
+
+    active_reqs = (MPI_Request *)calloc((size_t)(count + 2), sizeof(struct __mpi_req));
+    assert(active_reqs);
+
+    sf_async_reqs = (io_req_t **)calloc((size_t)count, sizeof(void *));
+    assert(sf_async_reqs);
+
+    /*
+     * Note: We allocated extra space in the active_requests (above).
+     * The extra should be enough for an integer plus a pointer.
+     */
+    mpi_reqs              = (struct __mpi_req *)&active_reqs[count];
+    mpi_reqs->n_reqs      = (int)count;
+    mpi_reqs->active_reqs = active_reqs;
+
+    for (k = 0; k < count; k++) {
+        status = read__independent_async(sf_context->topology->n_io_concentrators, sf_context_id,
+                                         (int64_t)addrs[k], (int64_t)sizes[k], 1, bufs[k], &sf_async_reqs[k]);
+        if (status < 0) {
+            printf("%s - encountered an internal error!\n", __func__);
+            goto errors;
+        }
+        else {
+            mpi_reqs->active_reqs[k] = sf_async_reqs[k]->completion_func.io_args.io_req;
+        }
+    }
+    /* Here, we should have queued 'count' async requests
+     * (one to each required IOC).
+     *
+     * We can can now try to complete those before returning
+     * to the caller for the next set of IO operations.
+     */
+    if (sf_async_reqs[0]->completion_func.io_function)
+        ret_value = (*sf_async_reqs[0]->completion_func.io_function)(mpi_reqs);
+
+    if (active_reqs)
+        free(active_reqs);
+
+    if (sf_async_reqs) {
+        for (k = 0; k < count; k++) {
+            if (sf_async_reqs[k]) {
+                free(sf_async_reqs[k]);
+            }
+        }
+        free(sf_async_reqs);
+    }
+    return ret_value;
+
+errors:
+    return FAIL;
+}
 
 void
 H5FD_ioc_wait_thread_main(void)

@@ -181,6 +181,9 @@
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
+/* Define if IOC VFD is built */
+#cmakedefine H5_HAVE_IOC_VFD @H5_HAVE_IOC_VFD@
+
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
 
