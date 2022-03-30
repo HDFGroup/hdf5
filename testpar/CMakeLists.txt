@@ -90,8 +90,8 @@ set (H5P_TESTS
     t_shapesame
     t_filters_parallel
     t_subfiling_vfd
-    t_vfd
     t_2Gio
+    t_vfd
 )
 
 foreach (h5_testp ${H5P_TESTS})
