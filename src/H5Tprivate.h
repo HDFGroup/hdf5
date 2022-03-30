@@ -20,11 +20,11 @@
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5T_t H5T_t;
 
-/* Get package's public header */
+/* Include package's public header */
 #include "H5Tpublic.h"
 
 /* Other public headers needed by this file */
-#include "H5MMpublic.h" /* Memory management                    */
+#include "H5MMpublic.h" /* Memory management                        */
 
 /* Private headers needed by this file */
 #include "H5private.h"  /* Generic Functions                        */

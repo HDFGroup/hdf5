@@ -80,7 +80,7 @@
 #define H5O_SHMESG_MAX_LIST_SIZE 5000
 
 /* Flags for H5Oget_info.
- * Theses flags determine which fields will be filled in in the H5O_info_t
+ * These flags determine which fields will be filled in the H5O_info_t
  * struct.
  */
 #define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
@@ -497,7 +497,7 @@ H5_DLL herr_t H5Oget_info2(hid_t loc_id, H5O_info_t *oinfo, unsigned fields);
  *        location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \param[in] fields Flags specifying the fields to include in \p oinfo
  * \lapl_id
@@ -565,6 +565,7 @@ H5_DLL herr_t H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info_t *o
 H5_DLL herr_t H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                   H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields,
                                   hid_t lapl_id);
+
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
@@ -1027,7 +1028,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1134,14 +1135,13 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          a group have not been indexed by the index type, they will
  *          first be sorted by that index then the iteration will begin;
  *          if the links have been so indexed, the sorting step will be
- *          unnecessary, so the iteration may begin more quickly. Valid
- *          values include the following:
+ *          unnecessary, so the iteration may begin more quickly.
  *
  *          Note that the index type passed in \p idx_type is a
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1440,7 +1440,7 @@ H5_DLL herr_t H5Oget_info(hid_t loc_id, H5O_info_t *oinfo);
  *        by location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \lapl_id
  *
@@ -1618,7 +1618,7 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *o
  * \param[in] group_name Name of group in which object is located
  * \idx_type
  * \order
- * \param[in] n Position within the index
+ * \param[in]  n Position within the index
  * \param[out] oinfo Buffer in which to return object information
  * \lapl_id
  *
@@ -1632,7 +1632,7 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *o
  *          \p n within that index.
  *
  *          If \p loc_id fully specifies the group in which the object resides,
- *          \p group_name can be a dot (\c .).
+ *          i\p group_name can be a dot (\c .).
  *
  *          \p idx_type is of type #H5_index_t, defined in H5public.h as:
  *          \snippet H5public.h H5_index_t_snip
@@ -1710,7 +1710,7 @@ H5_DLL herr_t H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1817,7 +1817,7 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *

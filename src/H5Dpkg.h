@@ -430,7 +430,7 @@ typedef struct H5D_rdcdc_t {
 
 /*
  * A dataset is made of two layers, an H5D_t struct that is unique to
- * each instance of an opened datset, and a shared struct that is only
+ * each instance of an opened dataset, and a shared struct that is only
  * created once for a given dataset.  Thus, if a dataset is opened twice,
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */

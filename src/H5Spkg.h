@@ -197,7 +197,7 @@ struct H5S_hyper_span_info_t {
 typedef enum {
     H5S_DIMINFO_VALID_IMPOSSIBLE, /* 0: diminfo is not valid and can never be valid with the current selection
                                    */
-    H5S_DIMINFO_VALID_NO,         /* 1: diminfo is not valid but may or may not be possible to constuct */
+    H5S_DIMINFO_VALID_NO,         /* 1: diminfo is not valid but may or may not be possible to construct */
     H5S_DIMINFO_VALID_YES         /* 2: diminfo is valid */
 } H5S_diminfo_valid_t;
 
