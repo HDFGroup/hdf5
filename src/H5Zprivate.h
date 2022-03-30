@@ -80,12 +80,12 @@ H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, unsigne
                          const unsigned int cd_values[]);
 H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
                          size_t cd_nelmts, const unsigned int cd_values[]);
-H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/,
-                           H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
-                           size_t *buf_size /*in,out*/, void **buf /*in,out*/);
+H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, hid_t file_id, unsigned flags,
+                           unsigned *filter_mask /*in,out*/, H5Z_EDC_t edc_read, H5Z_cb_t cb_struct,
+                           size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/, void **buf /*in,out*/);
 H5_DLL H5Z_class2_t *H5Z_find(H5Z_filter_t id);
-H5_DLL herr_t        H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
-H5_DLL herr_t        H5Z_set_local(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t        H5Z_can_apply(hid_t file_id, hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t        H5Z_set_local(hid_t file_id, hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t        H5Z_can_apply_direct(const struct H5O_pline_t *pline);
 H5_DLL herr_t        H5Z_set_local_direct(const struct H5O_pline_t *pline);
 H5_DLL htri_t        H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space);

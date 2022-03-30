@@ -317,6 +317,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     H5D_storage_t store;                          /* union of EFL and chunk pointer in file space */
     hsize_t       nelmts;                         /* total number of elmts	*/
     hbool_t       io_op_init = FALSE;             /* Whether the I/O op has been initialized */
+    hid_t         file_id    = H5I_INVALID_HID;   /* File handle */
     char          fake_char;                      /* Temporary variable for NULL buffer pointers */
     herr_t        ret_value = SUCCEED;            /* Return value	*/
 
@@ -329,7 +330,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
-        if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+        file_id = H5F_get_id(dataset->oloc.file);
+        if (H5Z_can_apply(file_id, dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
 
         dataset->shared->checked_filters = TRUE;
@@ -504,6 +506,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
 #endif /* OLD_WAY */
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Shut down the I/O op information */
     if (io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")

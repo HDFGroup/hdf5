@@ -57,12 +57,16 @@ typedef enum {
 } H5Z_prelude_type_t;
 
 /* Local variables */
+static hid_t         H5Z_filter_fid_g  = -1;
 static size_t        H5Z_table_alloc_g = 0;
 static size_t        H5Z_table_used_g  = 0;
 static H5Z_class2_t *H5Z_table_g       = NULL;
 #ifdef H5Z_DEBUG
 static H5Z_stats_t *H5Z_stat_table_g = NULL;
 #endif /* H5Z_DEBUG */
+
+#define SET_FILTER_HANDLE(fid) H5Z_filter_fid_g = fid;
+#define GET_FILTER_HANDLE()    H5Z_filter_fid_g
 
 /* Local functions */
 static int H5Z__find_idx(H5Z_filter_t id);
@@ -689,6 +693,33 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_filter_avail() */
 
+/*----------------------------------------------------------------------------
+ * Function: H5Zget_pipeline_file_id
+ *
+ * Purpose:  Retrieve the file identifier associated with the filter pipeline
+ *           being currently executed. This function is expected to be called
+ *           from one of the filter callback routines, namely "can_apply",
+ *           "set_local", and "filter".
+ *
+ * Return:   Non-negative file handle on success/Negative on failure
+ *----------------------------------------------------------------------------
+ */
+hid_t
+H5Zget_pipeline_file_id(void)
+{
+    hid_t ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE0("i", "");
+
+    if (-1 == (ret_value = GET_FILTER_HANDLE()))
+        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "current pipeline has invalid file handle");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: H5Z__prelude_callback
  *
@@ -703,7 +734,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hid_t space_id,
+H5Z__prelude_callback(const H5O_pline_t *pline, hid_t file_id, hid_t dcpl_id, hid_t type_id, hid_t space_id,
                       H5Z_prelude_type_t prelude_type)
 {
     H5Z_class2_t *fclass;           /* Individual filter information */
@@ -713,6 +744,9 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
     FUNC_ENTER_STATIC
 
     HDassert(pline->nused > 0);
+
+    /* Initialize file handle structure needed by H5Zget_pipeline_file_id() */
+    SET_FILTER_HANDLE(file_id);
 
     /* Iterate over filters */
     for (u = 0; u < pline->nused; u++) {
@@ -767,6 +801,9 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
 
 done:
 
+    /* Reset file handle structure */
+    SET_FILTER_HANDLE(-1);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z__prelude_callback() */
 
@@ -784,7 +821,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
+H5Z__prepare_prelude_callback_dcpl(hid_t file_id, hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
 {
     hid_t         space_id    = -1;      /* ID for dataspace describing chunk */
     H5O_layout_t *dcpl_layout = NULL;    /* Dataset's layout information */
@@ -838,7 +875,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
                 }
 
                 /* Make the callbacks */
-                if (H5Z__prelude_callback(&dcpl_pline, dcpl_id, type_id, space_id, prelude_type) < 0)
+                if (H5Z__prelude_callback(&dcpl_pline, file_id, dcpl_id, type_id, space_id, prelude_type) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
             }
         }
@@ -870,14 +907,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_can_apply(hid_t dcpl_id, hid_t type_id)
+H5Z_can_apply(hid_t file_id, hid_t dcpl_id, hid_t type_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(file_id, dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -900,14 +937,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_set_local(hid_t dcpl_id, hid_t type_id)
+H5Z_set_local(hid_t file_id, hid_t dcpl_id, hid_t type_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prepare_prelude_callback_dcpl(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prepare_prelude_callback_dcpl(file_id, dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:
@@ -935,7 +972,7 @@ H5Z_can_apply_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_CAN_APPLY) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -967,7 +1004,7 @@ H5Z_set_local_direct(const H5O_pline_t *pline)
     HDassert(pline->nused > 0);
 
     /* Make "set local" callbacks for filters in pipeline */
-    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
+    if (H5Z__prelude_callback(pline, (hid_t)-1, (hid_t)-1, (hid_t)-1, (hid_t)-1, H5Z_PRELUDE_SET_LOCAL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:
@@ -1279,8 +1316,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/, H5Z_EDC_t edc_read,
-             H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/,
+H5Z_pipeline(const H5O_pline_t *pline, hid_t file_id, unsigned flags, unsigned *filter_mask /*in,out*/,
+             H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/, size_t *buf_size /*in,out*/,
              void **buf /*in,out*/)
 {
     size_t        idx;
@@ -1305,6 +1342,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     HDassert(buf_size && *buf_size > 0);
     HDassert(buf && *buf);
     HDassert(!pline || pline->nused < H5Z_MAX_NFILTERS);
+
+    /* Initialize file handle structure needed by H5Zget_pipeline_file_id() */
+    SET_FILTER_HANDLE(file_id);
 
 #ifdef H5Z_DEBUG
     H5_timer_init(&timer);
@@ -1449,6 +1489,10 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     *filter_mask = failed;
 
 done:
+
+    /* Reset file handle structure */
+    SET_FILTER_HANDLE(-1);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

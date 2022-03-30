@@ -294,6 +294,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
     void *   write_buf;             /* Pointer to buffer to write */
     size_t   write_size;            /* Size of [possibly filtered] object written to file */
     unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */
+    hid_t    file_id     = H5I_INVALID_HID; /* File handle */
     herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -341,8 +342,9 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
-        if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &write_size,
-                         &write_buf) < 0)
+        file_id = H5F_get_id(hdr->f);
+        if (H5Z_pipeline(&(hdr->pline), file_id, 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,
+                         &write_size, &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
 
         /* Update size of object on disk */
@@ -457,6 +459,10 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__huge_insert() */
 
@@ -668,6 +674,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     haddr_t  obj_addr;              /* Object's address in the file */
     size_t   obj_size    = 0;       /* Object's size in the file */
     unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */
+    hid_t    file_id     = H5I_INVALID_HID; /* File handle */
     herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -768,8 +775,9 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
         filter_cb.func    = NULL; /* no callback function when failed */
 
         /* De-filter the object */
+        file_id = H5F_get_id(hdr->f);
         read_size = nbytes = obj_size;
-        if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,
+        if (H5Z_pipeline(&(hdr->pline), file_id, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes,
                          &read_size, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "input filter failed")
         obj_size = nbytes;
@@ -794,6 +802,10 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     }     /* end if */
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Release the buffer for reading */
     if (read_buf && read_buf != op_data)
         read_buf = H5MM_xfree(read_buf);

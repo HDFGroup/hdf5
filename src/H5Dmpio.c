@@ -4339,6 +4339,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     hbool_t             should_fill  = FALSE;
     hbool_t             fb_info_init = FALSE;
     hbool_t             index_empty  = FALSE;
+    hid_t               file_id      = H5I_INVALID_HID; /* File handle */
     size_t              i;
     H5S_t *             fill_space    = NULL;
     void *              base_read_buf = NULL;
@@ -4491,7 +4492,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 
         /* Unfilter the chunk, unless we didn't read it from the file */
         if (chunk_list[i].need_read && !chunk_list[i].skip_filter_pline) {
-            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
+            file_id = H5F_get_id(io_info->dset->oloc.file);
+            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, file_id, H5Z_FLAG_REVERSE,
                              &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_list[i].chunk_new.length, &chunk_list[i].chunk_buf_size,
                              &chunk_list[i].buf) < 0)
@@ -4507,6 +4509,10 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     }
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Free all resources used by entries in the chunk list */
     for (i = 0; i < chunk_list_num_entries; i++) {
         if (chunk_list[i].buf) {
@@ -4561,6 +4567,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     hbool_t             fb_info_init  = FALSE;
     hbool_t             sel_iter_init = FALSE;
     hbool_t             index_empty   = FALSE;
+    hid_t               file_id       = H5I_INVALID_HID; /* File handle */
     size_t              i;
     H5S_t *             dataspace     = NULL;
     H5S_t *             fill_space    = NULL;
@@ -4748,7 +4755,8 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          * the file, so we need to unfilter it
          */
         if (chunk_list[i].need_read && !chunk_list[i].skip_filter_pline) {
-            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, H5Z_FLAG_REVERSE,
+            file_id = H5F_get_id(io_info->dset->oloc.file);
+            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, file_id, H5Z_FLAG_REVERSE,
                              &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_list[i].chunk_new.length, &chunk_list[i].chunk_buf_size,
                              &chunk_list[i].buf) < 0)
@@ -4826,7 +4834,8 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     /* Finally, filter all the chunks */
     for (i = 0; i < chunk_list_num_entries; i++) {
         if (!chunk_list[i].skip_filter_pline) {
-            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, 0,
+            file_id = H5F_get_id(io_info->dset->oloc.file);
+            if (H5Z_pipeline(&io_info->dset->shared->dcpl_cache.pline, file_id, 0,
                              &(chunk_list[i].index_info.filter_mask), err_detect, filter_cb,
                              (size_t *)&chunk_list[i].chunk_new.length, &chunk_list[i].chunk_buf_size,
                              &chunk_list[i].buf) < 0)
@@ -4841,6 +4850,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     }
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")

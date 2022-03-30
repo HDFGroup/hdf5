@@ -1148,6 +1148,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     hbool_t         fill_copied   = FALSE; /* Flag to indicate that fill-value message was copied */
     hbool_t         pline_copied  = FALSE; /* Flag to indicate that pipeline message was copied */
     hbool_t         efl_copied    = FALSE; /* Flag to indicate that external file list message was copied */
+    hid_t           file_id       = H5I_INVALID_HID; /* File handle */
     H5G_loc_t       dset_loc;              /* Dataset location */
     H5D_t *         ret_value = NULL;      /* Return value */
 
@@ -1214,12 +1215,15 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed")
 
         if (FALSE == ignore_filters) {
+            /* Obtain an identifier for the file */
+            file_id = H5F_get_id(file);
+
             /* Check if the filters in the DCPL can be applied to this dataset */
-            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_can_apply(file_id, new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
 
             /* Make the "set local" filter callbacks for this dataset */
-            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            if (H5Z_set_local(file_id, new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
         } /* ignore_filters */
 
@@ -1331,6 +1335,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     ret_value = new_dset;
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     if (!ret_value && new_dset) {
         if (new_dset->shared) {
             if (layout_init)
@@ -2905,8 +2913,9 @@ done:
 static herr_t
 H5D__check_filters(H5D_t *dataset)
 {
-    H5O_fill_t *fill;                /* Dataset's fill value */
-    herr_t      ret_value = SUCCEED; /* Return value */
+    H5O_fill_t *fill;                        /* Dataset's fill value */
+    hid_t       file_id   = H5I_INVALID_HID; /* File handle */
+    herr_t      ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2931,7 +2940,8 @@ H5D__check_filters(H5D_t *dataset)
             if (fill->fill_time == H5D_FILL_TIME_ALLOC ||
                 (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+                file_id = H5F_get_id(dataset->oloc.file);
+                if (H5Z_can_apply(file_id, dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
 
                 dataset->shared->checked_filters = TRUE;
@@ -2940,6 +2950,10 @@ H5D__check_filters(H5D_t *dataset)
     }         /* end if */
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__check_filters() */
 

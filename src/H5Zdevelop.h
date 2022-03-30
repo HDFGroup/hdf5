@@ -391,6 +391,21 @@ H5_DLL herr_t H5Zregister(const void *cls);
  * \since 1.6.0
  */
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
+/**
+ * \ingroup H5Z
+ *
+ * \brief Retrieves the file identifier associated with an I/O filter pipeline
+ *
+ * \return \hid_t
+ *
+ * \details This function enables I/O filter callbacks to obtain the file
+ *          identifier associated with the data buffer being processed. It
+ *          can be called from any one of the  filter callback routines,
+ *          namely "can_apply", "set_local", and "filter".
+ *
+ * \since 1.13.0
+ */
+H5_DLL hid_t H5Zget_pipeline_file_id(void);
 
 #ifdef __cplusplus
 }

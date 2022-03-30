@@ -3329,6 +3329,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
 {
     void *               buf                = NULL; /* Temporary buffer        */
     hbool_t              point_of_no_return = FALSE;
+    hid_t                file_id            = H5I_INVALID_HID; /* File handle */
     H5O_storage_chunk_t *sc                 = &(dset->shared->layout.storage.u.chunk);
     herr_t               ret_value          = SUCCEED; /* Return value            */
 
@@ -3391,7 +3392,9 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
                 ent->chunk         = NULL;
             } /* end else */
             H5_CHECKED_ASSIGN(nbytes, size_t, udata.chunk_block.length, hsize_t);
-            if (H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), err_detect,
+
+            file_id = H5F_get_id(dset->oloc.file);
+            if (H5Z_pipeline(&(dset->shared->dcpl_cache.pline), file_id, 0, &(udata.filter_mask), err_detect,
                              filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
@@ -3482,6 +3485,10 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
     } /* end if */
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Free the temp buffer only if it's different than the entry chunk */
     if (buf != ent->chunk)
         H5MM_xfree(buf);
@@ -3734,6 +3741,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t rel
     hbool_t             disable_filters = FALSE; /* Whether to disable filters (when adding to cache) */
     void *              chunk           = NULL;  /*the file chunk    */
     void *              ret_value       = NULL;  /* Return value         */
+    hid_t               file_id         = H5I_INVALID_HID; /* File handle */
 
     FUNC_ENTER_STATIC
 
@@ -3937,7 +3945,8 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t rel
                     if (H5CX_get_filter_cb(&filter_cb) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get I/O filter callback function")
 
-                    if (H5Z_pipeline(old_pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
+                    file_id = H5F_get_id(dset->oloc.file);
+                    if (H5Z_pipeline(old_pline, file_id, H5Z_FLAG_REVERSE, &(udata->filter_mask), err_detect,
                                      filter_cb, &my_chunk_alloc, &buf_alloc, &chunk) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, NULL, "data pipeline read failed")
 
@@ -4081,6 +4090,10 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t rel
     ret_value = chunk;
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't release fill buffer info")
@@ -4297,6 +4310,7 @@ herr_t
 H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const hsize_t old_dim[])
 {
     const H5D_t *          dset = io_info->dset;                           /* the dataset pointer */
+    hid_t                  file_id = H5I_INVALID_HID;                      /* File handle */
     H5D_chk_idx_info_t     idx_info;                                       /* Chunked index info */
     const H5D_chunk_ops_t *ops = dset->shared->layout.storage.u.chunk.ops; /* Chunk operations */
     hsize_t min_unalloc[H5O_LAYOUT_NDIMS]; /* First chunk in each dimension that is unallocated (in scaled
@@ -4350,6 +4364,9 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
 
     /* The last dimension in scaled chunk coordinates is always 0 */
     scaled[space_ndims] = (hsize_t)0;
+
+    /* Retrieve the file identifier, needed by H5Z_pipeline() */
+    file_id = H5F_get_id(dset->oloc.file);
 
     /* Check if any space dimensions are 0, if so we do not have to do anything
      */
@@ -4456,7 +4473,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
             /* Push the chunk through the filters */
-            if (H5Z_pipeline(pline, 0, &filter_mask, err_detect, filter_cb, &orig_chunk_size, &buf_size,
+            if (H5Z_pipeline(pline, file_id, 0, &filter_mask, err_detect, filter_cb, &orig_chunk_size, &buf_size,
                              &fb_info.fill_buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
@@ -4597,7 +4614,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function")
 
                     /* Push the chunk through the filters */
-                    if (H5Z_pipeline(pline, 0, &filter_mask, err_detect, filter_cb, &nbytes,
+                    if (H5Z_pipeline(pline, file_id, 0, &filter_mask, err_detect, filter_cb, &nbytes,
                                      &fb_info.fill_buf_size, &fb_info.fill_buf) < 0)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
@@ -4740,6 +4757,10 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
     H5D__chunk_cinfo_cache_reset(&dset->shared->cache.chunk.last);
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
@@ -6045,10 +6066,10 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
     H5D_chunk_it_ud3_t *udata = (H5D_chunk_it_ud3_t *)_udata; /* User data for callback */
     H5D_chunk_ud_t      udata_dst;                            /* User data about new destination chunk */
+    hid_t               file_id     = H5I_INVALID_HID;        /* File handle */
     hbool_t             is_vlen     = FALSE;                  /* Whether datatype is variable-length */
     hbool_t             fix_ref     = FALSE; /* Whether to fix up references in the dest. file */
     hbool_t             need_insert = FALSE; /* Whether the chunk needs to be inserted into the index */
-
     /* General information about chunk copy */
     void *             bkg      = udata->bkg;      /* Background buffer for datatype conversion */
     void *             buf      = udata->buf;      /* Chunk buffer for I/O & datatype conversions */
@@ -6069,6 +6090,9 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Initialize the filter callback struct */
     filter_cb.op_data = NULL;
     filter_cb.func    = NULL; /* no callback function when failed */
+
+    /* Obtain the file identifier, needed by H5Z_pipeline() */
+    file_id = H5F_get_id(udata->file_src);
 
     /* Check for filtered chunks */
     /* Check for an edge chunk that is not filtered */
@@ -6165,8 +6189,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
      */
     if (must_filter && (is_vlen || fix_ref) && !udata->chunk_in_cache) {
         unsigned filter_mask = chunk_rec->filter_mask;
-
-        if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
+        if (H5Z_pipeline(pline, file_id, H5Z_FLAG_REVERSE, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
                          &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
@@ -6227,7 +6250,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Need to compress variable-length or reference data elements or a chunk found in cache before writing to
      * file */
     if (must_filter && (is_vlen || fix_ref || udata->chunk_in_cache)) {
-        if (H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
+        if (H5Z_pipeline(pline, file_id, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, filter_cb, &nbytes, &buf_size,
                          &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
@@ -6269,6 +6292,10 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     H5_END_TAG
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_copy_cb() */
 
@@ -7096,6 +7123,7 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     haddr_t             chunk_addr;                           /* Chunk address */
     size_t              nbytes;                               /* Chunk size */
     void *              buf       = NULL;                     /* Pointer to buffer of chunk data */
+    hid_t               file_id   = H5I_INVALID_HID;          /* File handle */
     int                 ret_value = H5_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_STATIC
@@ -7133,7 +7161,8 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
 
         /* Pass the chunk through the pipeline */
-        if (H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size,
+        file_id = H5F_get_id(new_idx_info->f);
+        if (H5Z_pipeline(new_idx_info->pline, file_id, 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &read_size,
                          &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 
@@ -7166,6 +7195,10 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     if (buf)
         H5MM_xfree(buf);
 

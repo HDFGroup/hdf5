@@ -1604,6 +1604,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     const uint8_t *         image    = (const uint8_t *)_image;          /* Pointer into raw data buffer */
     H5HF_dblock_cache_ud_t *udata    = (H5HF_dblock_cache_ud_t *)_udata; /* User data for callback */
     void *                  read_buf = NULL;                             /* Pointer to buffer to read in */
+    hid_t                   file_id  = H5I_INVALID_HID;                  /* File handle */
     H5HF_hdr_t *            hdr;                                         /* Shared fractal heap information */
     H5HF_parent_t *         par_info;                                    /* Pointer to parent information */
     uint32_t                stored_chksum;                               /* Stored metadata checksum value */
@@ -1645,11 +1646,12 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         /* Set up parameters for filter pipeline */
         nbytes      = len;
         filter_mask = udata->filter_mask;
+        file_id     = H5F_get_id(udata->f);
         H5MM_memcpy(read_buf, image, len);
 
         /* Push direct block data through I/O filter pipeline */
-        if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
-                         &len, &read_buf) < 0)
+        if (H5Z_pipeline(&(hdr->pline), file_id, H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
+                         &nbytes, &len, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
 
         /* Update info about direct block */
@@ -1703,6 +1705,10 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     } /* end if */
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Release the read buffer */
     if (read_buf && read_buf != image)
         H5MM_xfree(read_buf);
@@ -1740,6 +1746,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     const uint8_t *         image    = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     void *                  read_buf = NULL;                          /* Pointer to buffer to decompress */
     haddr_t                 heap_addr;                                /* Address of heap header in the file */
+    hid_t                   file_id  = H5I_INVALID_HID;               /* File handle */
     void *                  ret_value = NULL;                         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1807,8 +1814,9 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
             /* Push direct block data through I/O filter pipeline */
             nbytes      = len;
             filter_mask = udata->filter_mask;
-            if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
-                             &nbytes, &len, &read_buf) < 0)
+            file_id     = H5F_get_id(udata->f);
+            if (H5Z_pipeline(&(hdr->pline), file_id, H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC,
+                             filter_cb, &nbytes, &len, &read_buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
 
             /* Sanity check */
@@ -1884,6 +1892,10 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     ret_value = (void *)dblock;
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* Release the read buffer */
     if (read_buf)
         H5MM_xfree(read_buf);
@@ -2057,6 +2069,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     void *           write_buf;                        /* Pointer to buffer to write out */
     size_t           write_size;                       /* Size of buffer to write out */
     uint8_t *        image;                            /* Pointer into raw data buffer */
+    hid_t            file_id      = H5I_INVALID_HID;   /* File handle */
     unsigned         dblock_flags = 0;
     herr_t           ret_value    = SUCCEED; /* Return value */
 
@@ -2178,8 +2191,9 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
-        if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &write_size,
-                         &write_buf) < 0)
+        file_id = H5F_get_id(f);
+        if (H5Z_pipeline(&(hdr->pline), file_id, 0, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
+                         &write_size, &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
         /* Use the compressed number of bytes as the size to write */
@@ -2389,6 +2403,10 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     HDassert(dblock->write_size > 0);
 
 done:
+    /* Update reference count of file id object */
+    if (H5I_INVALID_HID != file_id)
+        H5I_dec_ref(file_id);
+
     /* discard the write buf if we have an error */
     if (write_buf && (write_buf != dblock->blk) && (dblock->write_buf == NULL))
         H5MM_xfree(write_buf);
