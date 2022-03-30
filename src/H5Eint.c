@@ -957,7 +957,7 @@ H5E_dump_api_stack(hbool_t is_api)
 } /* end H5E_dump_api_stack() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5E_last_error
+ * Function:    H5E_get_last_error
  *
  * Purpose:     Private function to retrieve the major and minor numbers from
  *              the most recent frame of the error stack.
@@ -971,7 +971,7 @@ H5E_dump_api_stack(hbool_t is_api)
  *----------------------------------------------------------------------------
  */
 hbool_t
-H5E_last_error(hid_t *major, hid_t *minor)
+H5E_get_last_error(hid_t *major, hid_t *minor)
 {
     H5E_t   *estack    = NULL;  /* Error stack */
     hbool_t  ret_value = FALSE; /* Return value */
@@ -994,4 +994,4 @@ H5E_last_error(hid_t *major, hid_t *minor)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_last_error() */
+} /* end H5E_get_last_error() */
