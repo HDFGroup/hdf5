@@ -24,7 +24,6 @@
 /****************/
 
 #define H5F_FRIEND      /* Suppress error about including H5Fpkg */
-#define H5E_FRIEND      /* Suppress error about including H5Epkg */
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 /***********/
@@ -34,7 +33,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Epkg.h"      /* Error macros                             */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5FDpkg.h"     /* File Drivers                             */
 #include "H5Iprivate.h"  /* IDs                                      */
@@ -1144,146 +1142,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDfree() */
 
-/*----------------------------------------------------------------------------
- * Function:    H5FD__error_matches
- *
- * Purpose:     Checks if the most recent frame of the error stack have a
- *              major and minor numbers that match the provided arguments.
- *
- * Return:      TRUE if arguments match the most recent error, FALSE otherwise
- *
- *----------------------------------------------------------------------------
- */
-static hbool_t
-H5FD__error_matches(hid_t major, hid_t minor)
-{
-    H5E_t *estack = H5E__get_my_stack();
-    hid_t maj_type = estack->slot[estack->nused-1].maj_num;
-    hid_t min_type = estack->slot[estack->nused-1].min_num;
-    return maj_type == major && min_type == minor;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5FDalloc_mem
- *
- * Purpose:     Allocates memory for I/O. In the absence of a driver
- *              callback implementation, system memory is used. Otherwise
- *              the driver may resort to the use of a special memory
- *              allocator that best suits the underlying device. Memory
- *              allocated by this callback must be freed by a call to
- *              H5FDfree_mem().
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FDalloc_mem(H5FD_t *file, H5FD_ctl_alloc_args_t *args, void **out)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-    hbool_t use_system_memory = FALSE;
-
-    FUNC_ENTER_API(FAIL)
-
-    /* Check arguments */
-    if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
-    if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
-    if (!args)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "args pointer cannot be NULL")
-    if (!out)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pointer to output buffer cannot be NULL")
-
-    if (file->cls->ctl) {
-        /* Delegate memory allocation to the VFD driver */
-        uint64_t flags = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-        if ((file->cls->ctl)(file, H5FD_CTL__MEM_ALLOC, flags, args, out) < 0) {
-            /* Test if the topmost frame of the error stack indicates that the driver failed
-             * to recognize the requested ctl. If that was the case then we fallback to system
-             * memory allocation via H5MM_malloc().
-             */
-            if (H5FD__error_matches(H5E_VFL, H5E_FCNTL)) {
-                H5E_clear_stack(NULL);
-                use_system_memory = TRUE;
-            } else
-                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate memory via VFD")
-        }
-    } else {
-        /* VFD doesn't implement ctl method, fallback to system memory */
-        use_system_memory = TRUE;
-    }
-
-    if (use_system_memory && args->size) {
-        /* Allocate from system memory. We test for args->size because the calling application
-         * may be simply querying the allocation flags supported by the VFD driver -- in which
-         * case we don't want to throw an error.
-         */
-        if (NULL == (*out = H5MM_malloc(args->size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate memory")
-    }
-
-done:
-    FUNC_LEAVE_API(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5FDfree_mem
- *
- * Purpose:     Deallocates memory previously allocated via H5FDalloc_mem().
- *              In the absence of a driver callback implementation the
- *              default system memory allocator frees the provided buffer.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FDfree_mem(H5FD_t *file, H5FD_ctl_free_args_t *args)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-    hbool_t use_system_memory = FALSE;
-
-    FUNC_ENTER_API(FAIL)
-
-    /* Check arguments */
-    if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
-    if (!file->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
-    if (!args)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "args pointer cannot be NULL")
-
-    if (file->cls->ctl) {
-        /* Delegate memory deallocation to the VFD driver */
-        unsigned flags = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-
-        if ((file->cls->ctl)(file, H5FD_CTL__MEM_FREE, flags, args, NULL)) {
-            /* Test if the topmost frame of the error stack indicates that the driver failed
-             * to recognize the requested ctl. If that was the case then we fallback to system
-             * memory allocation via H5MM_malloc().
-             */
-            if (H5FD__error_matches(H5E_VFL, H5E_FCNTL)) {
-                H5E_clear_stack(NULL);
-                use_system_memory = TRUE;
-            } else
-                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to deallocate memory via VFD")
-        }
-    } else {
-        /* VFD doesn't implement ctl method, will fallback to system memory */
-        use_system_memory = TRUE;
-    }
-
-    if (use_system_memory) {
-        /* Deallocate system memory */
-        if (NULL != H5MM_xfree(args->buf))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to deallocate memory")
-    }
-
-done:
-    FUNC_LEAVE_API(ret_value)
-}
-
 /*-------------------------------------------------------------------------
  * Function:    H5FDget_eoa
  *
@@ -1914,8 +1772,14 @@ H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void 
      */
 
     /* Call private function */
-    if (H5FD_ctl(file, op_code, flags, input, output) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+    if (H5FD_ctl(file, op_code, flags, input, output) < 0) {
+        /* Propagate error condition set by the driver. H5E_FCNTL
+         * is propagated in case the error stack is empty.
+         */
+        hid_t major = H5E_VFL, minor = H5E_FCNTL;
+        H5E_get_last_error(&major, &minor);
+        HGOTO_ERROR(major, minor, FAIL, "VFD ctl request failed")
+    }
 
 done:
 
@@ -1962,13 +1826,21 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
      */
     if (file->cls->ctl) {
 
-        if ((file->cls->ctl)(file, op_code, flags, input, output) < 0)
-
-            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+        if ((file->cls->ctl)(file, op_code, flags, input, output) < 0) {
+            /* Propagate error condition set by the driver. H5E_FCNTL
+             * is propagated in case the error stack is empty.
+             * Error propagation is needed so that the caller can
+             * differentiate between an opcode that's not implemented
+             * by the driver and an actual error processing the ctl.
+             */
+            hid_t major = H5E_VFL, minor = H5E_FCNTL;
+            H5E_get_last_error(&major, &minor);
+            HGOTO_ERROR(major, minor, FAIL, "VFD ctl request failed")
+        }
     }
     else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL,
                     "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
     }
 
@@ -2073,6 +1945,38 @@ H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_vfd_handle() */
+
+/*-------------------------------------------------------------------------------
+ * Function:    H5FD_get_file_driver
+ *
+ * Purpose:     Retrieve the file driver structure of a file ID
+ *
+ * Return:      A pointer to the file driver structure on success, NULL otherwise
+ *
+ *-------------------------------------------------------------------------------
+ */
+H5FD_t *
+H5FD_get_file_driver(hid_t file_id)
+{
+    H5VL_object_t  *vol       = NULL;
+    H5F_t          *file      = NULL;
+    H5F_shared_t   *shared    = NULL;
+    H5FD_t         *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (NULL == (vol = (H5VL_object_t *) H5I_object(file_id)))
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, NULL, "can't get vol handle")
+    if (NULL == (file = (H5F_t *) H5VL_object_data(vol)))
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, NULL, "can't get file handle")
+    if (NULL == (shared = H5F_get_shared(file)))
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, NULL, "can't get shared file data")
+    if (FAIL == H5F_shared_get_file_driver(shared, &ret_value))
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, NULL, "can't get file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_file_driver() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5FD_set_base_addr

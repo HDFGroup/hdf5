@@ -1220,6 +1220,94 @@ H5allocate_memory(size_t size, hbool_t clear)
 } /* end H5allocate_memory() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5allocate_memory2
+ *
+ * Purpose:     Allocate a memory buffer with the semantics of malloc().
+ *
+ *              Memory allocation may be performed by the virtual file
+ *              driver (so that special memory allocators may be used).
+ *              Alternatively, if either the VFD does not implement
+ *              memory management functions or an invalid file handle
+ *              is provided to this function, then system memory is
+ *              used instead via H5MM_malloc/H5MM_calloc.
+ *
+ *              NOTE: This function is intended for use with filter
+ *              plugins so that all allocation and free operations
+ *              use the same memory allocator. It is not intended for
+ *              use as a general memory allocator in applications.
+ *
+ * Parameters:
+ *
+ *      file_id:    A valid file identifier obtained e.g., via
+ *                  H5Zget_pipeline_file_id().
+ *
+ *      size:       The size of the buffer.
+ *
+ *      clear:      Whether or not to memset the buffer to 0.
+ *
+ * Return:
+ *
+ *      Success:    A pointer to the allocated buffer.
+ *
+ *      Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5allocate_memory2(hid_t file_id, size_t size, hbool_t clear)
+{
+    void    *ret_value         = NULL;
+    hbool_t  use_system_memory = TRUE;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE3("*x", "izb", file_id, size, clear);
+
+    if (H5I_INVALID_HID != file_id) {
+        /* Allocate via VFD, falling back to system memory if the backend doesn't
+         * implement the required memory management callback.
+         */
+        H5FD_t                *file_driver;
+        H5FD_ctl_alloc_args_t  alloc_args;
+        uint64_t               op_code = H5FD_CTL__MEM_ALLOC;
+        uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+        if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to obtain file driver handle")
+
+        /* Initialize ctl alloc arguments */
+        alloc_args.size      = size;
+        alloc_args.alignment = 0;
+        alloc_args.flags     = clear ? H5FD_MEM_CLEAR : 0;
+        alloc_args.args      = NULL;
+
+        if (H5FD_ctl(file_driver, op_code, flags, (const void *) &alloc_args, (void **) &ret_value) < 0) {
+            hid_t major = H5I_INVALID_HID;
+            hid_t minor = H5I_INVALID_HID;
+            if (H5E_get_last_error(&major, &minor) && minor == H5E_UNSUPPORTED) {
+                /* Opcode MEM_ALLOC is not supported by the driver. Fallback to system memory. */
+                use_system_memory = TRUE;
+            } else {
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate memory via VFD")
+            }
+        } else {
+            /* Successfully allocated memory via VFD */
+            use_system_memory = FALSE;
+        }
+    }
+
+    if (use_system_memory) {
+        /* Allocate from system memory */
+        if (clear)
+            ret_value = H5MM_calloc(size);
+        else
+            ret_value = H5MM_malloc(size);
+    }
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5allocate_memory2() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5resize_memory
  *
  * Purpose:        Resize a memory buffer with the semantics of realloc().
@@ -1257,6 +1345,90 @@ H5resize_memory(void *mem, size_t size)
 } /* end H5resize_memory() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5resize_memory2
+ *
+ * Purpose:     Resize a memory buffer with the semantics of realloc().
+ *
+ *              Memory resizing may be performed by the virtual file
+ *              driver (so that special memory allocators may be used).
+ *              Alternatively, if either the VFD does not implement
+ *              memory management functions or an invalid file handle
+ *              is provided to this function, then the system memory
+ *              allocator is used instead (e.g., H5MM_realloc).
+ *
+ *              NOTE: This function is intended for use with filter
+ *              plugins so that all allocation and free operations
+ *              use the same memory allocator. It is not intended for
+ *              use as a general memory allocator in applications.
+ *
+ * Parameters:
+ *
+ *      file_id:    A valid file identifier obtained e.g., via
+ *                  H5Zget_pipeline_file_id().
+ *
+ *      mem:        The buffer to be resized.
+ *
+ *      size:       The size of the buffer.
+ *
+ * Return:
+ *
+ *      Success:    A pointer to the resized buffer.
+ *
+ *      Failure:    NULL (the input buffer will be unchanged)
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void *
+H5resize_memory2(hid_t file_id, void *mem, size_t size)
+{
+    void    *ret_value         = NULL;
+    hbool_t  use_system_memory = TRUE;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE3("*x", "i*xz", file_id, mem, size);
+
+    if (H5I_INVALID_HID != file_id) {
+        /* Allocate via VFD, falling back to system memory if the backend doesn't
+         * implement the required memory management callback.
+         */
+        H5FD_t                *file_driver;
+        H5FD_ctl_alloc_args_t  alloc_args;
+        uint64_t               op_code = H5FD_CTL__MEM_REALLOC;
+        uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+        if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to obtain file driver handle")
+
+        /* Initialize ctl alloc arguments */
+        alloc_args.size      = size;
+        alloc_args.alignment = 0;
+        alloc_args.flags     = 0;
+        alloc_args.args      = mem;
+
+        if (H5FD_ctl(file_driver, op_code, flags, (const void *) &alloc_args, (void **) &ret_value) < 0) {
+            hid_t major = H5I_INVALID_HID;
+            hid_t minor = H5I_INVALID_HID;
+            if (H5E_get_last_error(&major, &minor) && minor == H5E_UNSUPPORTED) {
+                /* Opcode MEM_REALLOC is not supported by the driver. Fallback to system memory. */
+                use_system_memory = TRUE;
+            } else {
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to reallocate memory via VFD")
+            }
+        } else {
+            /* Successfully reallocated memory via VFD */
+            use_system_memory = FALSE;
+        }
+    }
+
+    if (use_system_memory)
+        ret_value = H5MM_realloc(mem, size);
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5resize_memory2() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5free_memory
  *
  * Purpose:        Frees memory allocated by the library that it is the user's
@@ -1279,6 +1451,66 @@ H5free_memory(void *mem)
 
     FUNC_LEAVE_API_NOINIT(SUCCEED)
 } /* end H5free_memory() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5free_memory2
+ *
+ * Purpose:     Frees memory allocated by the library that it is the user's
+ *              responsibility to free.  Ensures that the same library
+ *              that was used to allocate the memory frees it.  Passing
+ *              NULL pointers is allowed.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5free_memory2(hid_t file_id, void *mem)
+{
+    hbool_t  use_system_memory = TRUE;
+    herr_t   ret_value         = SUCCEED;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE2("e", "i*x", file_id, mem);
+
+    if (H5I_INVALID_HID != file_id) {
+        /* Free memory via VFD, falling back to system memory if the backend doesn't
+         * implement the required memory management callback.
+         */
+        H5FD_t                *file_driver;
+        H5FD_ctl_free_args_t   free_args;
+        uint64_t               op_code = H5FD_CTL__MEM_FREE;
+        uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+        if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FALSE, "unable to obtain file driver handle")
+
+        /* Initialize ctl alloc arguments */
+        free_args.buf   = mem;
+        free_args.flags = 0;
+        free_args.args  = NULL;
+
+        if (H5FD_ctl(file_driver, op_code, flags, (const void *) &free_args, NULL) < 0) {
+            hid_t major = H5I_INVALID_HID;
+            hid_t minor = H5I_INVALID_HID;
+            if (H5E_get_last_error(&major, &minor) && minor == H5E_UNSUPPORTED) {
+                /* Opcode MEM_FREE is not supported by the driver. Fallback to system memory. */
+                use_system_memory = TRUE;
+            } else {
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FALSE, "unable to free memory via VFD")
+            }
+        } else {
+            /* Successfully freed memory via VFD */
+            use_system_memory = FALSE;
+        }
+    }
+
+    if (use_system_memory)
+        H5MM_xfree(mem);
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5free_memory2() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5is_library_threadsafe

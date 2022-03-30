@@ -196,7 +196,7 @@
 #define H5FD_CTL__MEM_ALLOC                   5
 #define H5FD_CTL__MEM_FREE                    6
 #define H5FD_CTL__MEM_COPY                    7
-#define H5FD_CTL__MEM_QUERY_SUPPORTED_FLAGS   8
+#define H5FD_CTL__MEM_REALLOC                 8
 
 /* ctl function flags: */
 
@@ -400,7 +400,7 @@ typedef struct H5FD_ctl_alloc_args_t {
     hsize_t       size;      /**< Memory allocation size */
     hsize_t       alignment; /**< Desired memory alignment */
     unsigned long flags;     /**< Request flags (H5FD_ALLOC*) */
-    const void   *args;      /**< Optional arguments wanted by the VFD given the request flags */
+    void         *args;      /**< Optional arguments wanted by the VFD given the request flags */
 } H5FD_ctl_alloc_args_t;
 //! <!-- [H5FD_ctl_alloc_args_t_snip] -->
 
@@ -420,6 +420,8 @@ typedef struct H5FD_ctl_free_args_t {
  */
 /* Handle memory request asynchronously */
 #define H5FD_MEM_ASYNC       0x00000001
+/* Set memory values to zero */
+#define H5FD_MEM_CLEAR       0x00000002
 
 /********************/
 /* Public Variables */

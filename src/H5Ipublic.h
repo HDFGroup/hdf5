@@ -56,11 +56,6 @@ typedef enum H5I_type_t {
 } H5I_type_t;
 //! <!-- [H5I_type_t_snip] -->
 
-/**
- * Type of IDs to return to users
- */
-typedef int64_t hid_t;
-
 #define PRIdHID PRId64
 #define PRIxHID PRIx64
 #define PRIXHID PRIX64

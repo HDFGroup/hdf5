@@ -955,3 +955,43 @@ H5E_dump_api_stack(hbool_t is_api)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5E_last_error
+ *
+ * Purpose:     Private function to retrieve the major and minor numbers from
+ *              the most recent frame of the error stack.
+ *
+ * Return:      TRUE if the most recent error was successfully copied to the
+ *              provided arguments, FALSE otherwise.
+ *
+ * Programmer:	Lucas C. Villa Real
+ *              Tuesday, March 29, 2022
+ *
+ *----------------------------------------------------------------------------
+ */
+hbool_t
+H5E_last_error(hid_t *major, hid_t *minor)
+{
+    H5E_t   *estack    = NULL;  /* Error stack */
+    hbool_t  ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_NOAPI(FALSE)
+
+    /* Sanity check */
+    HDassert(major);
+    HDassert(minor);
+
+    estack = H5E__get_my_stack();
+    if (NULL == estack)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FALSE, "can't get current error stack")
+
+    if (estack->nused) {
+        *major = estack->slot[estack->nused-1].maj_num;
+        *minor = estack->slot[estack->nused-1].min_num;
+        ret_value = TRUE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_last_error() */

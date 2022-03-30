@@ -186,5 +186,6 @@ H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func
                                hid_t maj_id, hid_t min_id, const char *fmt, ...) H5_ATTR_FORMAT(printf, 8, 9);
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
+H5_DLL hbool_t H5E_get_last_error(hid_t *major, hid_t *minor);
 
 #endif /* H5Eprivate_H */
