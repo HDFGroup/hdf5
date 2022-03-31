@@ -2070,8 +2070,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
-    MPI_Datatype *             sub_types         = NULL;
-    uint8_t *                  sub_types_created = NULL;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2619,7 +2617,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
          * in the file selection spans multiple vector elements and construct a
          * memory datatype to match this larger block in the file, but for now
          * just read in each element of the vector in a separate
-         * MPI_File_write_at() call.
+         * MPI_File_read_at() call.
          *
          * We could also just detect the case when the entire file selection is
          * contiguous, which would allow us to use
