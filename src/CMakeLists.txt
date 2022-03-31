@@ -227,6 +227,7 @@ set (H5FA_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5FA" "${H5FA_HDRS}" "${H5FA_SOURCES}" )
 
+
 set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FD.c
     ${HDF5_SRC_DIR}/H5FDcore.c
@@ -830,8 +831,6 @@ set (common_SRCS
     ${H5WB_SOURCES}
     ${H5Z_SOURCES}
 )
-
-
 
 set (H5_PUBLIC_HEADERS
     ${H5_HDRS}

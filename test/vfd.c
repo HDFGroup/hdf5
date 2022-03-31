@@ -5974,8 +5974,6 @@ main(void)
 
     setup_rand();
 
-    setup_rand();
-
     nerrors += test_sec2() < 0 ? 1 : 0;
     nerrors += test_core() < 0 ? 1 : 0;
     nerrors += test_direct() < 0 ? 1 : 0;
