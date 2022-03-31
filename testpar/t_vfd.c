@@ -2697,6 +2697,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         else {
 
             H5_FAILED();
+
             if ((disp_failure_mssgs) || (show_progress)) {
                 HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
             }
@@ -4301,6 +4302,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     return (!pass);
 
 } /* vector_write_test_7() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
