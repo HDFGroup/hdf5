@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:EG:LM:P:S:T:VXWY:Z:1:2:3:4:5:6:7:8:9:0:";
+static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:E*G:LM:P:S:T:VXWY:Z:1:2:3:4:5:6:7:8:9:0:";
 static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"block", require_arg, 'b'},
                                           {"compact", require_arg, 'c'},
@@ -52,7 +52,7 @@ static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"ublock", require_arg, 'u'},
                                           {"verbose", optional_arg, 'v'},
                                           {"sort_order", require_arg, 'z'},
-                                          {"enable-error-stack", no_arg, 'E'},
+                                          {"enable-error-stack", optional_arg, 'E'},
                                           {"fs_pagesize", require_arg, 'G'},
                                           {"latest", no_arg, 'L'},
                                           {"metadata_block_size", require_arg, 'M'},
@@ -92,15 +92,17 @@ usage(const char *prog)
     PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file1 file2\n", prog);
     PRINTVALSTREAM(rawoutstream, "  file1                    Input HDF5 File\n");
     PRINTVALSTREAM(rawoutstream, "  file2                    Output HDF5 File\n");
+    PRINTVALSTREAM(rawoutstream, "  ERROR\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack    Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help              Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -v N, --verbose=N       Verbose mode, print object information.\n");
     PRINTVALSTREAM(rawoutstream, "      N - is an integer greater than 1, 2 displays read/write timing\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
-    PRINTVALSTREAM(rawoutstream, "                           occur\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
@@ -771,7 +773,10 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'E':
-                enable_error_stack = 1;
+                if (H5_optarg != NULL)
+                    enable_error_stack = HDatoi(H5_optarg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case '1':
