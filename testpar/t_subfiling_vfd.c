@@ -46,7 +46,7 @@ typedef void (*test_func)(void);
 /* Utility functions */
 static herr_t build_test_filename(const char *base_filename, const char *test_dirname, hid_t fapl_id,
                                   H5FD_subfiling_config_t *subfiling_config);
-static hid_t create_subfiling_ioc_fapl(const char *base_filename);
+static hid_t  create_subfiling_ioc_fapl(const char *base_filename);
 
 /* Test functions */
 static void test_create_and_close(void);
@@ -119,9 +119,9 @@ static hid_t
 create_subfiling_ioc_fapl(const char *base_filename)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5FD_ioc_config_t *ioc_conf = NULL;
-    hid_t ioc_fapl = H5I_INVALID_HID;
-    hid_t ret_value = H5I_INVALID_HID;
+    H5FD_ioc_config_t *      ioc_conf       = NULL;
+    hid_t                    ioc_fapl       = H5I_INVALID_HID;
+    hid_t                    ret_value      = H5I_INVALID_HID;
 
     if (base_filename == NULL || *base_filename == '\0')
         TEST_ERROR;
@@ -179,10 +179,12 @@ error:
     HDfree(subfiling_conf);
 
     if ((H5I_INVALID_HID != ioc_fapl) && (H5Pclose(ioc_fapl) < 0)) {
-        H5_FAILED(); AT();
+        H5_FAILED();
+        AT();
     }
     if ((H5I_INVALID_HID != ret_value) && (H5Pclose(ret_value) < 0)) {
-        H5_FAILED(); AT();
+        H5_FAILED();
+        AT();
     }
 
     return H5I_INVALID_HID;
@@ -196,8 +198,8 @@ static void
 test_create_and_close(void)
 {
     H5FD_subfiling_config_t subfiling_config;
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t                   file_id = H5I_INVALID_HID;
+    hid_t                   fapl_id = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         TESTING("File creation and immediate close");

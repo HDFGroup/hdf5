@@ -23,9 +23,9 @@
 
 io_req_t pending_io_requests;
 
-static int sf_write_ops = 0;
-static double sf_pwrite_time     = 0.0;
-static double sf_write_wait_time = 0.0;
+static int    sf_write_ops        = 0;
+static double sf_pwrite_time      = 0.0;
+static double sf_write_wait_time  = 0.0;
 static int    sf_read_ops         = 0;
 static double sf_pread_time       = 0.0;
 static double sf_read_wait_time   = 0.0;

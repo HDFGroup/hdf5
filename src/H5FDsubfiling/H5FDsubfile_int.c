@@ -1056,7 +1056,7 @@ H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_se
             app_layout->node_ranks = (int *)&app_layout[1];
 
             /* TODO: this is broken */
-            app_layout->layout     = (layout_t *)&app_layout->node_ranks[world_size + 2];
+            app_layout->layout = (layout_t *)&app_layout->node_ranks[world_size + 2];
         }
 
         /* Once the application layout has been filled once, any additional
@@ -1449,8 +1449,7 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     /* Check to see who is calling the function::
      * We only allow the ioc or subfiling VFDs
      */
-    if ((config_info->magic != H5FD_IOC_FAPL_MAGIC) &&
-        (config_info->magic != H5FD_SUBFILING_FAPL_MAGIC)) {
+    if ((config_info->magic != H5FD_IOC_FAPL_MAGIC) && (config_info->magic != H5FD_SUBFILING_FAPL_MAGIC)) {
         HDputs("Unrecgonized driver!");
         return -1;
     }

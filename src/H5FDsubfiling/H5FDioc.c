@@ -834,7 +834,8 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
         if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&mpi_provides)))
             HMPI_GOTO_ERROR(NULL, "MPI_Query_thread failed", mpi_code)
         if (mpi_provides != MPI_THREAD_MULTIPLE)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL,
+                        "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
     }
 
     file_ptr = (H5FD_ioc_t *)H5FL_CALLOC(H5FD_ioc_t);
@@ -888,14 +889,12 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
             ioc_flags |= O_CREAT;
 
         /* sec2 open the file */
-        file_ptr->ioc_file =
-            H5FD_open(file_ptr->fa.file_path, flags, fapl_ptr->ioc_fapl_id, HADDR_UNDEF);
+        file_ptr->ioc_file = H5FD_open(file_ptr->fa.file_path, flags, fapl_ptr->ioc_fapl_id, HADDR_UNDEF);
         if (file_ptr->ioc_file) {
             h5_stat_t sb;
             void *    file_handle = NULL;
 
-            if (H5FDget_vfd_handle(file_ptr->ioc_file, fapl_ptr->ioc_fapl_id,
-                                   &file_handle) < 0)
+            if (H5FDget_vfd_handle(file_ptr->ioc_file, fapl_ptr->ioc_fapl_id, &file_handle) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle")
 
             if (HDfstat(*(int *)file_handle, &sb) < 0)

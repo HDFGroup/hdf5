@@ -38,18 +38,18 @@
 /* H5 Headers */
 /**************/
 
-#include "H5private.h"     /* Generic Functions                        */
-#include "H5CXprivate.h"   /* API Contexts                             */
-#include "H5Dprivate.h"    /* Datasets                                 */
-#include "H5Eprivate.h"    /* Error handling                           */
-#include "H5FDioc.h"       /* IOC VFD                                  */
-#include "H5Iprivate.h"    /* IDs                                      */
-#include "H5MMprivate.h"   /* Memory management                        */
-#include "H5Pprivate.h"    /* Property lists                           */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FDioc.h"     /* IOC VFD                                  */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Pprivate.h"  /* Property lists                           */
 
 #include "subfiling_common.h"
 
-#if 1 /* JRM */ /* For now, H5FDioc_priv.h needs mercury.  Since the code that needs it will           \
+#if 1 /* JRM */ /* For now, H5FDioc_priv.h needs mercury.  Since the code that needs it will                 \
                  * move to its own header, just hack it for now.                                             \
                  */
 #include "mercury_thread.h"
@@ -450,8 +450,8 @@ typedef struct _io_req {
 } io_req_t;
 
 extern H5FD_ioc_io_queue_t io_queue_g;
-extern atomic_int sf_work_pending;
-extern atomic_int sf_io_ops_pending;
+extern atomic_int          sf_work_pending;
+extern atomic_int          sf_io_ops_pending;
 
 #ifdef __cplusplus
 extern "C" {
@@ -508,8 +508,8 @@ H5_DLL int sf_truncate(int fd, int64_t length, int subfile_rank);
 
 H5_DLL int report_sf_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
 
-H5_DLL int write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset, int64_t elements,
-                                    int dtype_extent, const void *data, io_req_t **io_req);
+H5_DLL int write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset,
+                                    int64_t elements, int dtype_extent, const void *data, io_req_t **io_req);
 H5_DLL int read__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset, int64_t elements,
                                    int dtype_extent, void *data, io_req_t **io_req);
 

@@ -217,8 +217,8 @@ static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_
 static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
-static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
-                                   const void *input, void **output);
+static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                   void **output);
 
 static herr_t H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out);
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
@@ -301,7 +301,7 @@ H5FD_subfiling_init(void)
         env_var = HDgetenv(HDF5_DRIVER);
         if (env_var && !HDstrcmp(env_var, H5FD_SUBFILING_NAME)) {
             int mpi_initialized = 0;
-            int provided = 0;
+            int provided        = 0;
             int mpi_code;
 
             /* Initialize MPI if not already initialized */
@@ -312,7 +312,8 @@ H5FD_subfiling_init(void)
                 if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                     HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code)
                 if (provided != MPI_THREAD_MULTIPLE)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                                "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
             }
             else {
                 int required = MPI_THREAD_MULTIPLE;
@@ -324,7 +325,8 @@ H5FD_subfiling_init(void)
                 H5FD_mpi_self_initialized = TRUE;
 
                 if (provided != required)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                                "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
             }
         }
     }
@@ -515,7 +517,7 @@ done:
 static herr_t
 H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out)
 {
-    char *h5_require_ioc;
+    char * h5_require_ioc;
     herr_t ret_value = SUCCEED;
 
     HDassert(config_out);
@@ -758,13 +760,13 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
     H5FD_subfiling_config_t        default_config;
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
-    H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    MPI_Comm comm     = MPI_COMM_NULL; /* MPI Communicator, from plist */
-    MPI_Info info     = MPI_INFO_NULL; /* MPI Info, from plist */
-    int      mpi_rank = INT_MAX;       /* MPI rank of this process */
-    int      mpi_size;                 /* Total number of MPI processes */
-    int      mpi_code;                 /* MPI return code */
-    H5FD_t *ret_value = NULL;
+    H5FD_driver_prop_t             driver_prop;              /* Property for driver ID & info */
+    MPI_Comm                       comm     = MPI_COMM_NULL; /* MPI Communicator, from plist */
+    MPI_Info                       info     = MPI_INFO_NULL; /* MPI Info, from plist */
+    int                            mpi_rank = INT_MAX;       /* MPI rank of this process */
+    int                            mpi_size;                 /* Total number of MPI processes */
+    int                            mpi_code;                 /* MPI return code */
+    H5FD_t *                       ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -842,11 +844,11 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
         /* We've already opened the subfiles... */
         H5FD_subfiling_t *ioc_file = (H5FD_subfiling_t *)(file_ptr->sf_file);
         /* Get a copy of the context ID for later use */
-        file_ptr->fa.context_id = ioc_file->fa.context_id;
-        file_ptr->fa.require_ioc       = true;
+        file_ptr->fa.context_id  = ioc_file->fa.context_id;
+        file_ptr->fa.require_ioc = true;
     }
     else if (strncmp(driver->name, "sec2", 4) == 0) {
-        uint64_t inode_id = (uint64_t)-1;
+        uint64_t inode_id  = (uint64_t)-1;
         int      ioc_flags = O_RDWR;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
@@ -861,8 +863,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
                 h5_stat_t sb;
                 void *    file_handle = NULL;
 
-                if (H5FDget_vfd_handle(file_ptr->sf_file, config_ptr->ioc_fapl_id,
-                                       &file_handle) < 0)
+                if (H5FDget_vfd_handle(file_ptr->sf_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle")
 
                 /* We create a new file descriptor for our file structure.
@@ -965,8 +966,7 @@ H5FD__subfiling_close(H5FD_t *_file)
     }
 
     /* if set, close the copy of the plist for the underlying VFD. */
-    if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) &&
-        (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
+    if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close ioc FAPL")
 
     /* Release the file info */
@@ -1214,10 +1214,10 @@ done:
 } /* end H5FD__subfiling_get_eof() */
 
 #else /* JRM */ /* re-worked version */
-  /* this is a heavy weight implementation.  We need something like this
-   * for file open, and probably for file close.  However, in between, something
-   * similar to the current solution in the MPIIO VFD might be more appropriate.
-   */
+/* this is a heavy weight implementation.  We need something like this
+ * for file open, and probably for file close.  However, in between, something
+ * similar to the current solution in the MPIIO VFD might be more appropriate.
+ */
 
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
@@ -1282,8 +1282,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
-                     haddr_t addr, size_t size, void *buf /*out*/)
+H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                     void *buf /*out*/)
 {
     subfiling_context_t *sf_context         = NULL;
     H5FD_subfiling_t *   file_ptr           = (H5FD_subfiling_t *)_file;
@@ -1305,9 +1305,10 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR , addr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr)
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size)
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
+                    addr, size)
 
     /*
      * Apply the base address offset to the address for the read call.
@@ -1373,14 +1374,15 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
          *********************************/
 
         block_size = sf_context->sf_blocksize_per_stripe;
-        max_depth = (size / (size_t)block_size) + 2;
+        max_depth  = (size / (size_t)block_size) + 2;
 
         /*
          * Given the number of I/O concentrators, allocate vectors (one per IOC)
          * to contain the translation of the I/O request into a collection of I/O
          * requests.
          */
-        if (NULL == (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate source data offset I/O vector")
         if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile data size I/O vector")
@@ -1404,11 +1406,11 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                                             source_data_offset, /* OUT: Memory offset */
                                             sf_data_size,       /* OUT: Length of this contiguous block */
                                             sf_offset,          /* OUT: File offset */
-                                            &ioc_start,         /* OUT: IOC index corresponding to starting offset */
-                                            &ioc_count,         /* OUT: Number of actual IOCs used */
-                                            file_offset,        /* IN: Starting file offset */
-                                            io_size,            /* IN: I/O size */
-                                            1);                 /* IN: Data extent of the 'type' assumes byte */
+                                            &ioc_start,  /* OUT: IOC index corresponding to starting offset */
+                                            &ioc_count,  /* OUT: Number of actual IOCs used */
+                                            file_offset, /* IN: Starting file offset */
+                                            io_size,     /* IN: I/O size */
+                                            1);          /* IN: Data extent of the 'type' assumes byte */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -1447,7 +1449,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                     io_types[k] = type;
                     H5_CHECKED_ASSIGN(io_addrs[k], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[k], size_t, sf_data_size[idx], int64_t);
-                    io_bufs[k]  = ((char *)buf + source_data_offset[idx]);
+                    io_bufs[k] = ((char *)buf + source_data_offset[idx]);
 
                     /*
                      * TODO: this seems suspicious. may chop off last I/O
@@ -1467,8 +1469,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                 }
 
                 /* Make vector read call to subfile */
-                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs,
-                                    io_sizes, io_bufs) < 0)
+                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs, io_sizes,
+                                    io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed")
             }
 
@@ -1526,8 +1528,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
-                      haddr_t addr, size_t size, const void *buf /*in*/)
+H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                      const void *buf /*in*/)
 {
     subfiling_context_t *sf_context         = NULL;
     H5FD_subfiling_t *   file_ptr           = (H5FD_subfiling_t *)_file;
@@ -1549,9 +1551,10 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR , addr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr)
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size)
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
+                    addr, size)
 
     /*
      * Apply the base address offset to the address for the write call.
@@ -1617,14 +1620,15 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
          *********************************/
 
         block_size = sf_context->sf_blocksize_per_stripe;
-        max_depth = (size / (size_t)block_size) + 2;
+        max_depth  = (size / (size_t)block_size) + 2;
 
         /*
          * Given the number of I/O concentrators, allocate vectors (one per IOC)
          * to contain the translation of the I/O request into a collection of I/O
          * requests.
          */
-        if (NULL == (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate source data offset I/O vector")
         if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile data size I/O vector")
@@ -1648,11 +1652,11 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                                             source_data_offset, /* OUT: Memory offset */
                                             sf_data_size,       /* OUT: Length of this contiguous block */
                                             sf_offset,          /* OUT: File offset */
-                                            &ioc_start,         /* OUT: IOC index corresponding to starting offset */
-                                            &ioc_count,         /* OUT: Number of actual IOCs used */
-                                            file_offset,        /* IN: Starting file offset */
-                                            io_size,            /* IN: I/O size */
-                                            1);                 /* IN: Data extent of the 'type' assumes byte */
+                                            &ioc_start,  /* OUT: IOC index corresponding to starting offset */
+                                            &ioc_count,  /* OUT: Number of actual IOCs used */
+                                            file_offset, /* IN: Starting file offset */
+                                            io_size,     /* IN: I/O size */
+                                            1);          /* IN: Data extent of the 'type' assumes byte */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -1691,7 +1695,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                     io_types[k] = type;
                     H5_CHECKED_ASSIGN(io_addrs[k], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[k], size_t, sf_data_size[idx], int64_t);
-                    io_bufs[k]  = ((const char *)buf + source_data_offset[idx]);
+                    io_bufs[k] = ((const char *)buf + source_data_offset[idx]);
 
                     /*
                      * TODO: this seems suspicious. may chop off last I/O
@@ -1706,8 +1710,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                 }
 
                 /* Make vector write call to subfile */
-                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs,
-                                     io_sizes, io_bufs) < 0)
+                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs, io_sizes,
+                                     io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed")
             }
 
@@ -2232,4 +2236,3 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_ctl() */
-

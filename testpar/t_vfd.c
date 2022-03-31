@@ -330,18 +330,16 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
         else if (strcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
             hid_t                   ioc_fapl;
-            H5FD_ioc_config_t       ioc_config = {
-                /* magic         = */ H5FD_IOC_FAPL_MAGIC,
-                /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
-                /* stripe_count  = */ 0, /* will over write */
-                /* stripe_depth  = */ (INTS_PER_RANK / 2),
-                /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
-                /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                /* context_id    = */ 0,  /* will overwrite */
-                /* file_dir      = */ "", /* will overwrite */
-                /* file_path     = */ "",  /* will overwrite */
-                /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE
-            };
+            H5FD_ioc_config_t       ioc_config     = {/* magic         = */ H5FD_IOC_FAPL_MAGIC,
+                                            /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
+                                            /* stripe_count  = */ 0, /* will over write */
+                                            /* stripe_depth  = */ (INTS_PER_RANK / 2),
+                                            /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
+                                            /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
+                                            /* context_id    = */ 0,           /* will overwrite */
+                                            /* file_dir      = */ "",          /* will overwrite */
+                                            /* file_path     = */ "",          /* will overwrite */
+                                            /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE};
             H5FD_subfiling_config_t subfiling_conf = {
                 /* magic         = */ H5FD_IOC_FAPL_MAGIC,
                 /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
@@ -352,8 +350,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 /* context_id    = */ 0,           /* will overwrite */
                 /* file_dir      = */ "",          /* will overwrite */
                 /* file_path     = */ "",          /* will overwrite */
-                /* require_ioc   = */ TRUE
-            };
+                /* require_ioc   = */ TRUE};
 
             if ((pass) && ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)) {
 
@@ -4441,53 +4438,89 @@ main(int argc, char **argv)
         HDprintf("\n\n --- TESTING SUBFILING VFD --- \n\n");
     }
 
-    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                H5FD_SUBFILING_NAME);
 
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                H5FD_SUBFILING_NAME);
+    nerrs += vector_read_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_1(7, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_2(8, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_3(9, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_4(10, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_5(11, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_6(12, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO, H5FD_SUBFILING_NAME);
-    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_INDEPENDENT, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_INDIVIDUAL_IO,
+                                 H5FD_SUBFILING_NAME);
+    nerrs += vector_write_test_7(13, mpi_rank, mpi_size, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO,
+                                 H5FD_SUBFILING_NAME);
 #endif
 
 finish:

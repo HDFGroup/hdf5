@@ -24,9 +24,9 @@ static int sf_enable_directIO       = 0;
 #define SF_FILENAME_TEMPLATE ".subfile_%ld_%0*d_of_%d"
 static int *request_count_per_rank = NULL;
 
-atomic_int sf_file_open_count   = 0;
-atomic_int sf_ioc_ready         = 0;
-atomic_int sf_shutdown_flag     = 0;
+atomic_int sf_file_open_count = 0;
+atomic_int sf_ioc_ready       = 0;
+atomic_int sf_shutdown_flag   = 0;
 
 int n_io_pending = 0;
 
@@ -56,8 +56,8 @@ typedef struct _ioc_stats {
 
 static ioc_stats_t ioc_xfer_records;
 
-int                 client_op_index = 0;
-int                 client_op_size  = 0;
+int client_op_index = 0;
+int client_op_size  = 0;
 #if 0 /* TODO */
 client_xfer_info_t *client_ops      = NULL;
 #endif
@@ -617,7 +617,6 @@ init__indep_io(void *_sf_context, size_t maxdepth, int H5_ATTR_PARALLEL_UNUSED i
     return depth + 1;
 } /* end init__indep_io() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    get_ioc_subfile_path
  *
@@ -792,9 +791,9 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
 int
 subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
 {
-    int  errors = 0;
-    char filepath[PATH_MAX];
-    char linebuf[PATH_MAX];
+    int    errors = 0;
+    char   filepath[PATH_MAX];
+    char   linebuf[PATH_MAX];
     char * subfile_dir = NULL;
     char * base        = NULL;
     mode_t mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -828,7 +827,7 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
 
         /* Check if we need to create the subfiles */
         if (sf_context->sf_fid == -2) {
-            int  n_io_concentrators = sf_context->topology->n_io_concentrators;
+            int n_io_concentrators = sf_context->topology->n_io_concentrators;
             for (k = 0; k < retries; k++) {
                 int fd;
                 if ((fd = HDopen(filepath, O_CREAT | O_RDWR | O_TRUNC, mode)) > 0) {

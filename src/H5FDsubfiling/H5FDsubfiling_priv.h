@@ -70,14 +70,14 @@ typedef struct stat_record {
 } stat_record_t;
 
 typedef enum stat_category { /* Stat (OP) Categories  */
-    WRITE_STAT = 0,
-    WRITE_WAIT,
-    READ_STAT,
-    READ_WAIT,
-    FOPEN_STAT,
-    FCLOSE_STAT,
-    QUEUE_STAT,
-    TOTAL_STAT_COUNT
+                             WRITE_STAT = 0,
+                             WRITE_WAIT,
+                             READ_STAT,
+                             READ_WAIT,
+                             FOPEN_STAT,
+                             FCLOSE_STAT,
+                             QUEUE_STAT,
+                             TOTAL_STAT_COUNT
 } stat_category_t;
 
 typedef struct _info_header { /* Header for a driver info message */
