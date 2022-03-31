@@ -156,7 +156,7 @@ FileAccPropList::getDriver() const
 // Function:    FileAccPropList::setDriver
 ///\brief       Set file driver for this property list.
 ///\param       new_driver_id   - IN: File driver
-///\param       new_driver_info - IN: Struct containing the driver-specific properites
+///\param       new_driver_info - IN: Struct containing the driver-specific properties
 ///\exception   H5::PropListIException
 ///\par Description
 ///             For information, please refer to the H5Pset_driver API in

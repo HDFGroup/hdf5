@@ -370,7 +370,7 @@ error:
  *              1) verifying that API errors are caught.
  *
  *              2) verifying that the page buffer behaves more or less
- *                 as advertized.
+ *                 as advertised.
  *
  *              Any data mis-matches or unexpected failures or successes
  *              reported by the HDF5 library result in test failure.

@@ -1060,7 +1060,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     hsize_t      bounds_start[H5S_MAX_RANK]; /* Starting coordinate of bounding box */
     hsize_t      bounds_end[H5S_MAX_RANK];   /* Opposite coordinate of bounding box */
     hsize_t      max_size = 0;               /* Maximum selection size */
-    unsigned     u;                          /* Local index veriable */
+    unsigned     u;                          /* Local index variable */
     herr_t       ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
