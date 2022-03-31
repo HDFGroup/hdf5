@@ -203,21 +203,24 @@ static const H5FD_class_t H5FD_ctl_test_vfd_g = {
  * Core test function
  */
 static hbool_t
-check_pipeline_file_id(void)
+check_pipeline_file_id(hid_t file_id)
 {
     int     i;
     void   *data = NULL;
     size_t  alloc_size = 1024 * 1024 * 10;
 
     /* Test H5Zget_pipeline_file_id */
-    hid_t pipeline_file_id = H5Zget_pipeline_file_id();
-    if (pipeline_file_id < 0) {
-        HDputs("failed to get file handle from pipeline");
-        return FALSE;
-    } else if (pipeline_file_id != file_id_g) {
-        HDprintf("unexpected file handle obtained. expected %ld, got %ld\n",
-            file_id_g, pipeline_file_id);
-        return FALSE;
+    if (file_id < 0) {
+        file_id = H5Zget_pipeline_file_id();
+        if (file_id < 0) {
+            HDputs("failed to get file handle from pipeline");
+            return FALSE;
+        }
+        if (file_id != file_id_g) {
+            HDprintf("unexpected file handle obtained. expected %ld, got %ld\n",
+                file_id_g, file_id);
+            return FALSE;
+        }
     }
 
     /* Memory management functions loop. Here we test memory allocation
@@ -228,21 +231,21 @@ check_pipeline_file_id(void)
         hbool_t clear_mem = i == 0 ? FALSE : TRUE;
 
         /* Test H5allocate_memory2 */
-        data = H5allocate_memory2(pipeline_file_id, alloc_size, clear_mem);
+        data = H5allocate_memory2(file_id, alloc_size, clear_mem);
         if (NULL == data) {
             HDprintf("failed to allocate memory, clear flag=%d\n", clear_mem);
             return FALSE;
         }
 
         /* Test H5resize_memory2 */
-        data = H5resize_memory2(pipeline_file_id, data, alloc_size * 2);
+        data = H5resize_memory2(file_id, data, alloc_size * 2);
         if (NULL == data) {
             HDprintf("failed to resize memory\n");
             return FALSE;
         }
 
         /* Test H5free_memory2 */
-        if (FAIL == H5free_memory2(pipeline_file_id, data)) {
+        if (FAIL == H5free_memory2(file_id, data)) {
             HDprintf("failed to free memory\n");
             return FALSE;
         }
@@ -269,7 +272,7 @@ set_local_cb(hid_t H5_ATTR_UNUSED dcpl_id,
 {
     TESTING_2("I/O filter 'set_local' callback");
 
-    if (FALSE == check_pipeline_file_id())
+    if (FALSE == check_pipeline_file_id(H5I_INVALID_HID))
         return -1;
 
     PASSED();
@@ -294,7 +297,7 @@ can_apply_cb(hid_t H5_ATTR_UNUSED dcpl_id,
 {
     TESTING_2("I/O filter 'can_apply' callback");
 
-    if (FALSE == check_pipeline_file_id())
+    if (FALSE == check_pipeline_file_id(H5I_INVALID_HID))
         return -1;
 
     PASSED();
@@ -318,7 +321,7 @@ filter_cb(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 {
     TESTING_2("I/O filter 'filter' callback");
 
-    if (FALSE == check_pipeline_file_id())
+    if (FALSE == check_pipeline_file_id(H5I_INVALID_HID))
         return 0;
 
     PASSED();
@@ -367,6 +370,12 @@ test_filter_write(const char *filename, hid_t fapl_id)
     /* Create file */
     if ((file_id_g = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         goto error;
+
+    /* Check that we can invoke CTL functions using the newly created file ID */
+    TESTING_2("CTL functions outside the filter callbacks");
+    if (FALSE == check_pipeline_file_id(file_id_g))
+        TEST_ERROR;
+    PASSED();
 
     /* Register DUMMY filter */
     if (H5Zregister(H5Z_DUMMY) < 0)
@@ -459,6 +468,12 @@ test_filter_read(const char *filename, hid_t fapl_id)
     /* Create file */
     if ((file_id_g = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id)) < 0)
         goto error;
+
+    /* Check that we can invoke CTL functions using the retrieved file ID */
+    TESTING_2("CTL functions outside the filter callbacks");
+    if (FALSE == check_pipeline_file_id(file_id_g))
+        TEST_ERROR;
+    PASSED();
 
     /* Open the dataset */
     if ((dset_id = H5Dopen2(file_id_g, DSET_NAME, H5P_DEFAULT)) < 0)
