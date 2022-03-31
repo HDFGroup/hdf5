@@ -23,6 +23,26 @@
  * or writing data. Property lists can be modified by adding or changing
  * properties. Property lists are deleted by closing the associated handles.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  * \defgroup ALCAPL Attribute and Link Creation Properties
  * \ingroup H5P
  * Currently, there are only two creation properties that you can use to control
@@ -73,7 +93,8 @@
  *
  * \defgroup GAPL General Access Properties
  * \ingroup H5P
- * \todo Should this be as standalone page?
+ * The functions in this section can be applied to different kinds of property
+ * lists.
  *
  * \defgroup GCPL Group Creation Properties
  * \ingroup H5P
@@ -88,6 +109,26 @@
  *
  * Use the functions in this module to manage HDF5 property lists.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  * \defgroup GPLOA General Property List Operations (Advanced)
  * \ingroup H5P
  *
@@ -95,16 +136,38 @@
  * functions described below. Arbitrary user-defined properties can also
  * be inserted into existing property lists as so-called temporary properties.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ *
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c create_class
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c read_class
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c update_class
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5P_examples.c delete_class
+ *   </td>
+ * </tr>
+ * </table>
+ *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P
  *
- * \defgroup MAPL Map Access Properties
- * \ingroup H5P
+ *
  * \defgroup OCPL Object Creation Properties
  * \ingroup H5P
  *
+ *
  * \defgroup OCPPL Object Copy Properties
  * \ingroup H5P
+ *
  *
  */
 
@@ -186,7 +249,9 @@
 #define H5P_CRT_ORDER_TRACKED 0x0001
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
-/* Default value for all property list classes */
+/**
+ * Default value of type \ref hid_t for all property list classes
+ */
 #define H5P_DEFAULT (hid_t)0
 
 #ifdef __cplusplus
@@ -199,14 +264,72 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 //! <!-- [H5P_cls_create_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] prop_id     The identifier of the property list class being created
+ * \param[in] create_data User pointer to any class creation data required
+ * \return \herr_t
+ *
+ * \details This function is called when a new property list of the class
+ *          with which this function was registered is being created.  The
+ *          function is called after any registered parent create function is
+ *          called for each property value.
+ *
+ *          If the create function returns a negative value, the new list is not
+ *          returned to the user and the property list creation routine returns
+ *          an error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! <!-- [H5P_cls_create_func_t_snip] -->
 
 //! <!-- [H5P_cls_copy_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] new_prop_id The identifier of the property list copy
+ * \param[in] old_prop_id The identifier of the property list being copied
+ * \param[in] copy_data User pointer to any copy data required
+ * \return \herr_t
+ *
+ * \details This function is called when an existing property list of this
+ *          class is copied. The copy callback function is called after any
+ *          registered parent copy callback function is called for each property
+ *          value.
+ *
+ *          If the copy routine returns a negative value, the new list is not
+ *          returned to the user and the property list copy function returns an
+ *          error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! <!-- [H5P_cls_copy_func_t_snip] -->
 
 //! <!-- [H5P_cls_close_func_t_snip] -->
+/**
+ * \brief Callback function for H5Pcreate_class()
+ *
+ * \param[in] prop_id    The identifier of the property list class being created
+ * \param[in] close_data User pointer to any close data required
+ * \return \herr_t
+ *
+ * \details This function is called when a property list of the class
+ *          with which this function was registered is being closed.  The
+ *          function is called after any registered parent close function is
+ *          called for each property value.
+ *
+ *          If the close function returns a negative value, the new list is not
+ *          returned to the user and the property list close routine returns
+ *          an error value.
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! <!-- [H5P_cls_close_func_t_snip] -->
 
@@ -220,8 +343,8 @@ typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
  * \param[in,out] value The value for the property
  * \return \herr_t
  *
- * \details The H5P_prp_cb1_t() describes the parameters used by the
- *          property create,copy and close callback functions.
+ * \details The H5P_prp_cb1_t() function describes the parameters used by the
+ *          property create, copy and close callback functions.
  */
 typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb1_t_snip] -->
@@ -236,8 +359,8 @@ typedef herr_t (*H5P_prp_cb1_t)(const char *name, size_t size, void *value);
  * \param[in]     value The value for the property
  * \return \herr_t
  *
- * \details The H5P_prp_cb2_t() describes the parameters used by the
- *          property set ,copy and delete callback functions.
+ * \details The H5P_prp_cb2_t() function describes the parameters used by the
+ *          property set, copy and delete callback functions.
  */
 typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, void *value);
 //! <!-- [H5P_prp_cb2_t_snip] -->
@@ -249,6 +372,18 @@ typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 
 //! <!-- [H5P_prp_compare_func_t_snip] -->
+/**
+ * \brief Callback function for comparing property values
+ *
+ * \param[in] value1 A property value
+ * \param[in] value2 A property value
+ * \param[in] size   The size of the \p value1 and \p value2 buffers
+ * \return Returns a positive value if \c value1 is greater than \c value2, a
+ *         negative value if \c value2 is greater than \c value1 and zero if
+ *         \c value1 and \c value2 are equal.
+ *
+ * \see H5Pregister(), H5Pinsert()
+ */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
 
@@ -256,6 +391,21 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 //! <!-- [H5P_iterate_t_snip] -->
+/**
+ * \brief Callback function for H5Piterate()
+ *
+ * \param[in]     id        The identifier of a property list or property list class
+ * \param[in]     name      The name of the current property
+ * \param[in,out] iter_data The user context passed to H5Piterate()
+ * \return \herr_t_iter
+ *
+ * \details This function is called for each property encountered when
+ *          iterating over a property list or property list class
+ *          via H5Piterate().
+ *
+ * \since 1.4.0
+ *
+ */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
@@ -321,11 +471,12 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
-    /**< \todo FIXME! */
+    /**< Collective I/O was disabled by environment variable (\Code{HDF5_MPI_OPT_TYPES}) */
     H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
     /**< Collective I/O was not performed because one of the dataspaces was neither simple nor scalar */
     H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x20,
-    H5D_MPIO_FILTERS                           = 0x40
+    /**< Collective I/O was not performed because the dataset was neither contiguous nor chunked */
+    H5D_MPIO_FILTERS = 0x40
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
 
@@ -612,9 +763,9 @@ H5_DLL hid_t H5Pcreate(hid_t cls_id);
  *          those existing properties, only add or remove their own class
  *          properties. Property list classes defined and supported in the
  *          HDF5 library distribution are listed and briefly described in
- *          H5Pcreate(). The \p create routine is called when a new property
- *          list of this class is being created. The #H5P_cls_create_func_t
- *          callback function is defined as follows:
+ *          H5Pcreate(). The \p create, \p copy, \p close functions are called
+ *          when a property list of the new class is created, copied, or closed,
+ *          respectively.
  *
  *          \snippet this H5P_cls_create_func_t_snip
  *
@@ -1328,15 +1479,11 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          returned in this case, the iterator cannot be restarted if
  *          one of the calls to its operator returns non-zero.
  *
- *          The prototype for the #H5P_iterate_t operator is as follows:
- *          \snippet this H5P_iterate_t_snip
- *
- *          The operation receives the property list or class
+ *          The operation \p iter_func receives the property list or class
  *          identifier for the object being iterated over, \p id, the
  *          name of the current property within the object, \p name,
  *          and the pointer to the operator data passed in to H5Piterate(),
- *          \p iter_data. The valid return values from an operator are
- *          as follows:
+ *          \p iter_data.
  *
  *          <table>
  *           <tr>
@@ -1829,9 +1976,6 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *
  * \brief Returns information about a filter in a pipeline
  *
- * \todo Signature for H5Pget_filter2 is different in H5Pocpl.c than in
- *       H5Ppublic.h
- *
  * \ocpl_id{plist_id}
  * \param[in] idx    Sequence number within the filter pipeline of the filter
  *                   for which information is sought
@@ -2190,7 +2334,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2198,6 +2342,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \param[in] level Compression level
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_deflate() sets the deflate compression method and the
  *          compression level, \p level, for a dataset or group creation
@@ -3751,16 +3897,13 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *
  * \note Note: Raw dataset chunk caching is not currently
  *       supported when using the MPI I/O and MPI POSIX file drivers
- *       in read/write mode; see H5Pset_fapl_mpio() and
- *       H5Pset_fapl_mpiposix(), respectively. When using one of these
- *       file drivers, all calls to H5Dread() and H5Dwrite() will access
+ *       in read/write mode; see H5Pset_fapl_mpio(). When using this
+ *       file driver, all calls to H5Dread() and H5Dwrite() will access
  *       the disk directly, and H5Pset_cache() will have no effect on
  *       performance.
  *
  * \note Raw dataset chunk caching is supported when these drivers are
  *       used in read-only mode.
- *
- * \todo Check on H5Pset_fapl_mpio() and H5Pset_fapl_mpiposix().
  *
  * \version 1.8.0 The use of the \p mdc_nelmts parameter was discontinued.
  *                Metadata cache configuration is managed with
@@ -3869,7 +4012,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  * The <em>external link open file cache</em> holds files open after
  * they have been accessed via an external link. This cache reduces
  * the number of times such files are opened when external links are
- * accessed repeatedly and can siginificantly improves performance in
+ * accessed repeatedly and can significantly improves performance in
  * certain heavy-use situations and when low-level file opens or closes
  * are expensive.
  *
@@ -4638,6 +4781,7 @@ H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time /*o
  */
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/);
 /**
+ *
  * \ingroup DCPL
  *
  * \brief Returns information about an external file
@@ -5047,6 +5191,8 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
  *          in the dataset creation property list \p plist_id. The shuffle
  *          filter de-interlaces a block of data by reordering the bytes.
@@ -5116,6 +5262,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_nbit() sets the N-Bit filter, #H5Z_FILTER_NBIT, in the
  *          dataset creation property list \p plist_id.
  *
@@ -5138,10 +5286,10 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *            <td>byte 0</td>
  *          </tr>
  *          <tr>
- *            <td>????????</td>
- *            <td>????SPPP</td>
- *            <td>PPPPPPPP</td>
- *            <td>PPPP????</td>
+ *            <td> ???????? </td>
+ *            <td> ????SPPP </td>
+ *            <td> PPPPPPPP </td>
+ *            <td> PPPP???? </td>
  *          </tr>
  *          </table>
  *          Note: S - sign bit, P - significant bit, ? - padding bit; For
@@ -5208,6 +5356,8 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *                         non-negative
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_scaleoffset() sets the scale-offset filter,
  *          #H5Z_FILTER_SCALEOFFSET, for a dataset.
@@ -5317,6 +5467,8 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *            data block
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
  *          for a dataset. SZIP is a compression method designed for use with
@@ -5800,10 +5952,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
@@ -5867,8 +6015,11 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  * \details H5Pget_preserve() checks the status of the dataset transfer
  *          property list.
  *
+ * \since 1.0.0
+ *
  * \version 1.6.0 The flag parameter was changed from INTEGER to LOGICAL to
  *                better match the C API. (Fortran 90)
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL int H5Pget_preserve(hid_t plist_id);
@@ -5896,6 +6047,8 @@ H5_DLL int H5Pget_preserve(hid_t plist_id);
  *
  *          Please refer to the function H5Pset_type_conv_cb() for more details.
  *
+ * \since 1.8.0
+ *
  */
 H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void **operate_data);
 /**
@@ -5918,6 +6071,8 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
  * \details H5Pget_vlen_mem_manager() is the companion function to
  *          H5Pset_vlen_mem_manager(), returning the parameters set by
  *          that function.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func, void **alloc_info,
@@ -6162,8 +6317,9 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
  *          I/O pipeline treats the destination datapoints as completely
  *          uninitialized.
  *
- * \todo Add missing version information: introduction, deprecation, etc.
- *       Why is the declaration not in the deprecated section?
+ * \since 1.0.0
+ *
+ * \version 1.8.2 Deprecated.
  *
  */
 H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
@@ -6191,7 +6347,7 @@ H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
  *          function prototype is as follows:
  *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
  *
- * \todo Add version information.
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void *operate_data);
@@ -6241,7 +6397,8 @@ H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t op, void
  *          set to \c NULL and the \p alloc_info and \p free_info parameters are
  *          ignored.
  *
- * \todo Add version information.
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_info,
                                       H5MM_free_t free_func, void *free_info);
@@ -7720,9 +7877,6 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
- *
- * \cpp_c_api_note
- *
  */
 
 /* Function prototypes */
@@ -7836,8 +7990,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
-
- * \cpp_c_api_note
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,

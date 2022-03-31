@@ -11,6 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * This file contains public declarations for the H5T module.
+ */
+#ifndef H5Tpublic_H
+#define H5Tpublic_H
+
 /**\defgroup H5T H5T
  *
  * Use the functions in this module to manage HDF5 datatypes.
@@ -23,6 +29,26 @@
  * attributes and datasets. Additionally, datatype definitions can be persisted
  * to HDF5 files and linked to groups as HDF5 datatype objects or so-called
  * \Emph{committed datatypes}.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5T_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5T_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5T_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5T_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  * \defgroup ARRAY Array Datatypes
  * \ingroup H5T
@@ -90,12 +116,6 @@
  * \ingroup PDT
  *
  */
-
-/*
- * This file contains public declarations for the H5T module.
- */
-#ifndef H5Tpublic_H
-#define H5Tpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -228,7 +248,7 @@ typedef enum H5T_pad_t {
     H5T_PAD_ONE        = 1,  /**< always set to one               */
     H5T_PAD_BACKGROUND = 2,  /**< set to background value         */
 
-    H5T_NPAD = 3 /**< sentinal: THIS MUST BE LAST     */
+    H5T_NPAD = 3 /**< sentinel: THIS MUST BE LAST     */
 } H5T_pad_t;
 //! <!-- [H5T_pad_t_snip] -->
 
@@ -276,9 +296,9 @@ typedef enum H5T_pers_t {
  */
 //! <!-- [H5T_direction_t_snip] -->
 typedef enum H5T_direction_t {
-    H5T_DIR_DEFAULT = 0, /**< default direction is inscendent        */
-    H5T_DIR_ASCEND  = 1, /**< in inscendent order                    */
-    H5T_DIR_DESCEND = 2  /**< in descendent order                    */
+    H5T_DIR_DEFAULT = 0, /**< default direction is ascending         */
+    H5T_DIR_ASCEND  = 1, /**< in ascending order                     */
+    H5T_DIR_DESCEND = 2  /**< in descending order                    */
 } H5T_direction_t;
 //! <!-- [H5T_direction_t_snip] -->
 
@@ -359,7 +379,7 @@ typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, siz
  * \returns Valid callback function return values are #H5T_CONV_ABORT,
  *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
  *
- * \details If an exception like overflow happenes during conversion, this
+ * \details If an exception like overflow happens during conversion, this
  *          function is called if it's registered through H5Pset_type_conv_cb().
  *
  */
@@ -1278,7 +1298,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  *          the link(s) by which the new committed datatype is accessed and
  *          the creation of any intermediate groups that may be missing.
  *
- *          Once commited, this datatype may be used to define the datatype
+ *          Once committed, this datatype may be used to define the datatype
  *          of any other dataset or attribute in the file.
  *
  *          This function will not accept a datatype that cannot actually hold
@@ -1288,7 +1308,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  *          Committed datatypes are sometimes referred to as named datatypes.
  *
  * \version 1.8.7 Function modified in this release to reject datatypes that
- *          will not accomodate actual data, such as a compound datatype
+ *          will not accommodate actual data, such as a compound datatype
  *          with no fields or an enumerated datatype with no members.
  *
  * \since 1.8.0
@@ -1366,7 +1386,7 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  *          fields and enumerated datatypes with no members.
  *
  * \version 1.8.7 Function modified in this release to reject datatypes that
- *                will not accomodate actual data, such as a compound datatype
+ *                will not accommodate actual data, such as a compound datatype
  *                with no fields or an enumerated datatype with no members.
  *
  * \since 1.2.0
@@ -2698,7 +2718,6 @@ H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
  */
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
-/* Type conversion database */
 /**
  * \ingroup CONV
  *

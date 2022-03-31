@@ -33,6 +33,26 @@
  * reference count to zero, which can (but should not usually) be effected
  * by a function in this module.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5O_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5O_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5O_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5O_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  */
 
 /*-------------------------------------------------------------------------
@@ -59,14 +79,14 @@
 /*****************/
 
 /* Flags for object copy (H5Ocopy) */
-#define H5O_COPY_SHALLOW_HIERARCHY_FLAG     (0x0001u) /* Copy only immediate members */
-#define H5O_COPY_EXPAND_SOFT_LINK_FLAG      (0x0002u) /* Expand soft links into new objects */
-#define H5O_COPY_EXPAND_EXT_LINK_FLAG       (0x0004u) /* Expand external links into new objects */
-#define H5O_COPY_EXPAND_REFERENCE_FLAG      (0x0008u) /* Copy objects that are pointed by references */
-#define H5O_COPY_WITHOUT_ATTR_FLAG          (0x0010u) /* Copy object without copying attributes */
-#define H5O_COPY_PRESERVE_NULL_FLAG         (0x0020u) /* Copy NULL messages (empty space) */
-#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u) /* Merge committed datatypes in dest file */
-#define H5O_COPY_ALL                        (0x007Fu) /* All object copying flags (for internal checking) */
+#define H5O_COPY_SHALLOW_HIERARCHY_FLAG     (0x0001u) /**< Copy only immediate members */
+#define H5O_COPY_EXPAND_SOFT_LINK_FLAG      (0x0002u) /**< Expand soft links into new objects */
+#define H5O_COPY_EXPAND_EXT_LINK_FLAG       (0x0004u) /**< Expand external links into new objects */
+#define H5O_COPY_EXPAND_REFERENCE_FLAG      (0x0008u) /**< Copy objects that are pointed by references */
+#define H5O_COPY_WITHOUT_ATTR_FLAG          (0x0010u) /**< Copy object without copying attributes */
+#define H5O_COPY_PRESERVE_NULL_FLAG         (0x0020u) /**< Copy NULL messages (empty space) */
+#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u) /**< Merge committed datatypes in dest file */
+#define H5O_COPY_ALL                        (0x007Fu) /**< All object copying flags (for internal checking) */
 
 /* Flags for shared message indexes.
  * Pass these flags in using the mesg_type_flags parameter in
@@ -75,25 +95,27 @@
  * but we need to assign each kind of message to a different bit so that
  * one index can hold multiple types.)
  */
-#define H5O_SHMESG_NONE_FLAG    0x0000                  /* No shared messages */
-#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /* Simple Dataspace Message.  */
-#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /* Datatype Message.  */
-#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /* Fill Value Message. */
-#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /* Filter pipeline message.  */
-#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /* Attribute Message.  */
+#define H5O_SHMESG_NONE_FLAG    0x0000                  /**< No shared messages */
+#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /**< Simple Dataspace Message.  */
+#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /**< Datatype Message.  */
+#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /**< Fill Value Message. */
+#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /**< Filter pipeline message.  */
+#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /**< Attribute Message.  */
 #define H5O_SHMESG_ALL_FLAG                                                                                  \
     (H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_FILL_FLAG | H5O_SHMESG_PLINE_FLAG |        \
      H5O_SHMESG_ATTR_FLAG)
 
+/* clang-format off */
 /* Object header status flag definitions */
-#define H5O_HDR_CHUNK0_SIZE             0x03 /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
-#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04 /* Attribute creation order is tracked */
-#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08 /* Attribute creation order has index */
-#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10 /* Non-default attribute storage phase change values stored */
-#define H5O_HDR_STORE_TIMES             0x20 /* Store access, modification, change & birth times for object */
+#define H5O_HDR_CHUNK0_SIZE             0x03 /**< 2-bit field indicating # of bytes to store the size of chunk 0's data */
+#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04 /**< Attribute creation order is tracked */
+#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08 /**< Attribute creation order has index */
+#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10 /**< Non-default attribute storage phase change values stored */
+#define H5O_HDR_STORE_TIMES             0x20 /**< Store access, modification, change & birth times for object */
 #define H5O_HDR_ALL_FLAGS                                                                                    \
     (H5O_HDR_CHUNK0_SIZE | H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED |                 \
      H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
+/* clang-format on */
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
@@ -161,7 +183,7 @@ typedef struct H5O_info_t {
     struct {
         H5_ih_info_t obj;  /**< v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
         H5_ih_info_t attr; /**< v2 B-tree & heap for attributes */
-    } meta_size;
+    } meta_size;           /**< Extra metadata storage for obj & attributes */
 } H5O_info_t;
 //! <!-- [H5O_info_t_snip] -->
 
@@ -172,7 +194,18 @@ typedef uint32_t H5O_msg_crt_idx_t;
 
 //! <!-- [H5O_iterate_t_snip] -->
 /**
- * Prototype for H5Ovisit(), H5Ovisit_by_name() operator
+ * Prototype for H5Ovisit(), H5Ovisit_by_name() operator (version 3)
+ *
+ * \param[in] obj Object that serves as the root of the iteration;
+ *                the same value as the H5Ovisit() \c obj_id parameter
+ * \param[in] name Name of object, relative to \p obj, being examined at current
+ *                 step of the iteration
+ * \param[out] info Information about that object
+ * \param[in,out] op_data User-defined pointer to data required by the application
+ *                        in processing the object; a pass-through of the \c op_data
+ *                        pointer provided with the H5Ovisit3() function call
+ * \return \herr_t_iter
+ *
  */
 typedef herr_t (*H5O_iterate_t)(hid_t obj, const char *name, const H5O_info_t *info, void *op_data);
 //! <!-- [H5O_iterate_t_snip] -->
@@ -520,19 +553,19 @@ H5_DLL herr_t H5Oget_info(hid_t loc_id, H5O_info_t *oinfo);
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Retrieves the metadata for an object, identifying the object
- *        by location and relative name
+ * \brief Retrieves the metadata for an object, identifying the object by
+ *        location and relative name
  *
  * \fgdta_loc_obj_id{loc_id}
- * \param[in] name Name of group, relative to \p loc_id
+ * \param[in] name Name of object, relative to \p loc_id
  * \param[out] oinfo Buffer in which to return object information
  * \lapl_id
  *
  * \return \herr_t
  *
- * \details H5Oget_info_by_name() specifies an object’s location and name, \p loc_id
- *          and \p name, respectively, and retrieves the metadata describing that object
- *          in \p oinfo, an H5O_info1_t \c struct.
+ * \details H5Oget_info_by_name() specifies an object’s location and name,
+ *          \p loc_id and \p name, respectively, and retrieves the metadata
+ *          describing that object in \p oinfo, an H5O_info1_t struct.
  *
  *          The \c struct H5O_info_t is defined in H5Opublic.h and described
  *          in the H5Oget_info() function entry.
@@ -1029,10 +1062,10 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  * \details H5Ovisit() is a recursive iteration function to visit the
  *          object \p obj_id and, if \p obj_id is a group, all objects in
  *          and below it in an HDF5 file, thus providing a mechanism for
- *          an application to perform a common set of operations across all
- *          of those objects or a dynamically selected subset. For
- *          non-recursive iteration across the members of a group,
- *          see H5Literate().
+ *          an application to perform a common set of operations across
+ *          all of those objects or a dynamically selected subset.
+ *          For non-recursive iteration across the members of a group,
+ *          see H5Literate1().
  *
  *          If \p obj_id is a group identifier, that group serves as the
  *          root of a recursive iteration. If \p obj_id is a file identifier,
@@ -1058,7 +1091,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          <em>best effort</em> setting. If the application passes in
  *          a value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *
@@ -1156,7 +1189,7 @@ H5_DLL herr_t H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
  *-------------------------------------------------------------------------
  * \ingroup H5O
  *
- * \brief Recursively visits all objects starting from a specified object
+ * \brief Recursively visits all objects accessible from a specified object
  *
  * \fgdta_loc_obj_id{loc_id}
  * \param[in] obj_name Name of the object, generally relative to
@@ -1213,7 +1246,7 @@ H5_DLL herr_t H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
  *          <em>best effort</em> setting. If the application passes in a
  *          value indicating iteration in creation order and a group is
  *          encountered that was not tracked in creation order, that group
- *          will be iterated over in alpha-numeric order by name, or
+ *          will be iterated over in alphanumeric order by name, or
  *          <em>name order</em>.  (<em>Name order</em> is the native order
  *          used by the HDF5 library and is always available.)
  *

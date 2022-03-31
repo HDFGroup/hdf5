@@ -44,7 +44,8 @@
 #define H5C_MAX_ENTRY_SIZE ((size_t)(32 * 1024 * 1024))
 
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
- * on cache activity.  In general, this #define should be set to 0.
+ * on cache activity.  In general, this #define should be set to 1 in
+ * debug mode, and 0 in production mode..
  */
 #define H5C_COLLECT_CACHE_STATS 0
 

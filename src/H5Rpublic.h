@@ -11,6 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * This file contains public declarations for the H5R module.
+ */
+#ifndef H5Rpublic_H
+#define H5Rpublic_H
+
 /**
  * \defgroup H5R H5R
  *
@@ -18,13 +24,27 @@
  * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
  * regions.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5R_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5R_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5R_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5R_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  */
-
-/*
- * This file contains public declarations for the H5R module.
- */
-#ifndef H5Rpublic_H
-#define H5Rpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -62,7 +82,7 @@ typedef enum {
     H5R_BADTYPE = (-1), /**< Invalid reference type               */
     H5R_OBJECT,         /**< Object reference                     */
     H5R_DATASET_REGION, /**< Dataset Region Reference             */
-    H5R_MAXTYPE         /**< Highest type (Invalid as true type)  */
+    H5R_MAXTYPE         /**< Highest type (invalid)               */
 } H5R_type_t;
 //! <!-- [H5R_type_t_snip] -->
 

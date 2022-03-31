@@ -227,15 +227,15 @@ struct H5O_msg_class_t {
 };
 
 struct H5O_mesg_t {
-    const H5O_msg_class_t *type;     /*type of message		     */
-    hbool_t                dirty;    /*raw out of date wrt native	     */
-    hbool_t                locked;   /*message is locked into chunk	     */
-    uint8_t                flags;    /*message flags			     */
-    H5O_msg_crt_idx_t      crt_idx;  /*message creation index	     */
-    unsigned               chunkno;  /*chunk number for this mesg	     */
-    void *                 native;   /*native format message		     */
-    uint8_t *              raw;      /*ptr to raw data		     */
-    size_t                 raw_size; /*size with alignment		     */
+    const H5O_msg_class_t *type;     /* type of message                  */
+    hbool_t                dirty;    /* raw out of date wrt native       */
+    hbool_t                locked;   /* message is locked into chunk     */
+    uint8_t                flags;    /* message flags                    */
+    H5O_msg_crt_idx_t      crt_idx;  /* message creation index           */
+    unsigned               chunkno;  /* chunk number for this mesg       */
+    void *                 native;   /* native format message            */
+    uint8_t *              raw;      /* pointer to raw data              */
+    size_t                 raw_size; /* size with alignment              */
 };
 
 typedef struct H5O_chunk_t {

@@ -78,17 +78,17 @@ typedef struct H5D_type_info_t {
     hid_t        dst_type_id; /* Destination datatype ID */
 
     /* Computed/derived values */
-    size_t                   src_type_size;  /* Size of source type	*/
-    size_t                   dst_type_size;  /* Size of destination type*/
+    size_t                   src_type_size;  /* Size of source type */
+    size_t                   dst_type_size;  /* Size of destination type */
     size_t                   max_type_size;  /* Size of largest source/destination type */
     hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
     hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
     const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
     H5T_bkg_t                need_bkg;       /* Type of background buf needed */
-    size_t                   request_nelmts; /* Requested strip mine	*/
-    uint8_t *                tconv_buf;      /* Datatype conv buffer	*/
+    size_t                   request_nelmts; /* Requested strip mine */
+    uint8_t *                tconv_buf;      /* Datatype conv buffer */
     hbool_t                  tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    uint8_t *                bkg_buf;             /* Background buffer	*/
+    uint8_t *                bkg_buf;             /* Background buffer */
     hbool_t                  bkg_buf_allocated;   /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
@@ -385,7 +385,7 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t * head;              /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t * tail;              /* Tail of doubly linked list		*/
     size_t                  nbytes_used;       /* Current cached raw data in bytes */
-    int                     nused;             /* Number of chunk slots in use		*/
+    int                     nused;             /* Number of chunk slots in use        */
     H5D_chunk_cached_t      last;              /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot;              /* Chunk slots, each points to a chunk*/
     H5SL_t *                sel_chunks;        /* Skip list containing information for each chunk selected */
@@ -404,7 +404,7 @@ typedef struct H5D_rdcdc_t {
 
 /*
  * A dataset is made of two layers, an H5D_t struct that is unique to
- * each instance of an opened datset, and a shared struct that is only
+ * each instance of an opened dataset, and a shared struct that is only
  * created once for a given dataset.  Thus, if a dataset is opened twice,
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */

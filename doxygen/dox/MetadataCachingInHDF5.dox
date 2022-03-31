@@ -668,7 +668,7 @@ reduction.
 With the hit rate threshold cache size decrement algorithm, the remaining fields
 in the section are ignored.
 
-\subsubsection acsr Ageout Cache Size Reduction
+\subsubsection dacsr Ageout Cache Size Reduction
 
 If \ref H5AC_cache_config_t.decr_mode "decr_mode" is #H5C_decr__age_out the
 cache size is decreased by the ageout algorithm, and the remaining fields of the

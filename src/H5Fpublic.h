@@ -22,6 +22,27 @@
  * creation or access \c mode control the interaction with the underlying
  * storage such as file systems.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c read
+ *   </td>
+ * </tr>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  * In addition to general file management functions, there are three categories
  * of functions that deal with advanced file management tasks and use cases:
  * 1. The control of the HDF5 \ref MDC
@@ -61,7 +82,7 @@
  * We're assuming that these constants are used rather early in the hdf5
  * session.
  *
- * H5F_ACC_DEBUG no longer has any prints any special debug info. The symbol is
+ * H5F_ACC_DEBUG no longer prints any special debug info. The symbol is
  * being retained and will be listed as deprecated in HDF5 1.10.0.
  */
 #define H5F_ACC_RDONLY (H5CHECK 0x0000u) /**< Absence of RDWR: read-only */
@@ -967,10 +988,10 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
  *          \li \c hdr_size is the size of the shared object header message.
  *          \li \c msgs_info is an H5_ih_info_t struct defined in H5public.h as
  *              follows: \snippet H5public.h H5_ih_info_t_snip
- *
  *          \li \p index_size is the summed size of all the shared object
  *              header indexes. Each index might be either a B-tree or
  *              a list.
+ *
  *
  * \since 1.8.0
  *

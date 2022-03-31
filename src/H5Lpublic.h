@@ -11,16 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/**\defgroup H5L H5L
- *
- * Use the functions in this module to manage HDF5 links and link types.
- *
- * \defgroup TRAV Link Traversal
- * \ingroup H5L
- * \defgroup H5LA Advanced Link Functions
- * \ingroup H5L
- */
-
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Lpublic.h
@@ -33,6 +23,37 @@
  */
 #ifndef H5Lpublic_H
 #define H5Lpublic_H
+
+/**\defgroup H5L H5L
+ *
+ * Use the functions in this module to manage HDF5 links and link types.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5L_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5L_examples.c iter_cb
+ *   \snippet{lineno} H5L_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5L_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5L_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
+ * \defgroup TRAV Link Traversal
+ * \ingroup H5L
+ * \defgroup H5LA Advanced Link Functions
+ * \ingroup H5L
+ */
 
 /* Public headers needed by this file */
 #include "H5public.h"  /* Generic Functions            */
@@ -500,7 +521,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  *
  * \return \herr_t
  *
- * \details H5Lget_val() returns tha value of link \p name. For smbolic links,
+ * \details H5Lget_val() returns the value of link \p name. For smbolic links,
  *          this is the path to which the link points, including the null
  *          terminator. For external and user-defined links, it is the link
  *          buffer.
@@ -530,7 +551,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  *
  *          This function should be used only after H5Lget_info() has been
  *          called to verify that \p name is a symbolic link. This can be
- *          deteremined from the \c link_type field of the \ref H5L_info_t
+ *          determined from the \c link_type field of the \ref H5L_info_t
  *          \c struct.
  *
  * \note This function will fail if called on a hard link.
@@ -618,7 +639,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          name includes either a relative path or an absolute path to the
  *          target link, intermediate steps along the path must be verified
  *          before the existence of the target link can be safely checked. If
- *          the path is not verified and an intermediate element of the path
+ *          the path is not verified, and an intermediate element of the path
  *          does not exist, H5Lexists() will fail. The example in the next
  *          paragraph illustrates one step-by-step method for verifying the
  *          existence of a link with a relative or absolute path.
@@ -663,7 +684,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          root group of an HDF5 file, and let \c lapl denote a valid link
  *          access property list identifier. A call to H5Lexists() with
  *          arguments c root, \c "/", and \c lapl returns a positive value;
- *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a postive
+ *          in other words, \Code{H5Lexists(root, "/", lapl)} returns a positive
  *          value. In HDF5 version 1.8.16, this function returns 0.</li>
  *       </ol>
  *       Note that the function accepts link names and path names. This is
@@ -705,38 +726,37 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  *          specifies the link being queried.
  *
  *          \p lapl_id is the link access property list associated with the
- *          link \p name. In the general case, when default link access
- *          properties are acceptable, this can be passed in as #H5P_DEFAULT.
- *          An example of a situation that requires a non-default link access
- *          property list is when the link is an external link; an external
- *          link may require that a link prefix be set in a link access
- *          property list (see H5Pset_elink_prefix()).
+ *          link name. In the general case, when default link access properties
+ *          are acceptable, this can be passed in as #H5P_DEFAULT. An example
+ *          of a situation that requires a non-default link access property
+ *          list is when the link is an external link; an external link may
+ *          require that a link prefix be set in a link access property list
+ *          (see H5Pset_elink_prefix()).
  *
  *          H5Lget_info() returns information about name in the data structure
- *          \ref H5L_info_t, which is described below and defined in
- *          H5Lpublic.h. This structure is returned in the buffer \p linfo.
+ *          H5L_info_t, which is described below and defined in H5Lpublic.h.
+ *          This structure is returned in the buffer \p linfo.
  *          \snippet this H5L_info_t_snip
- *          In the above struct, type specifies the link class. Valid values
+ *          In the above struct, \c type specifies the link class. Valid values
  *          include the following:
  *          \link_types
  *          There will be additional valid values if user-defined links have
  *          been registered.
  *
- *          \c corder specifies the link’s creation order position while
- *          \c corder_valid indicates whether the value in \c corder is valid.
+ *          \p corder specifies the link’s creation order position while
+ *          \p corder_valid indicates whether the value in corder is valid.
  *
- *          If \c corder_valid is \c TRUE, the value in \c corder is known to
- *          be valid; if \c corder_valid is \c FALSE, the value in \c corder is
- *          presumed to be invalid;
+ *          If \p corder_valid is \c TRUE, the value in \p corder is known to
+ *          be valid; if \p corder_valid is \c FALSE, the value in \p corder is
+ *          presumed to be invalid; \p corder starts at zero (0) and is
+ *          incremented by one (1) as new links are created. But
+ *          higher-numbered entries are not adjusted when a lower-numbered link
+ *          is deleted; the deleted link's creation order position is simply
+ *          left vacant. In such situations, the value of \p corder for the
+ *          last link created will be larger than the number of links remaining
+ *          in the group.
  *
- *          \c corder starts at zero (0) and is incremented by one (1) as new
- *          links are created. But higher-numbered entries are not adjusted
- *          when a lower-numbered link is deleted; the deleted link’s creation
- *          order position is simply left vacant. In such situations, the value
- *          of \c corder for the last link created will be larger than the
- *          number of links remaining in the group.
- *
- *          \c cset specifies the character set in which the link name is
+ *          \p cset specifies the character set in which the link name is
  *          encoded. Valid values include the following:
  *          \csets
  *          This value is set with H5Pset_char_encoding().
@@ -776,9 +796,8 @@ H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo, hid
  * \return \herr_t
  *
  * \details H5get_info_by_idx() returns the metadata for a link in a group
- *          according to a specified field or index and a specified order.
- *
- *          The link for which information is to be returned is specified by \p
+ *          according to a specified field or index and a specified order. The
+ *          link for which information is to be returned is specified by \p
  *          idx_type, \p order, and \p n as follows:
  *
  *          - \p idx_type specifies the field by which the links in \p
@@ -939,19 +958,18 @@ H5_DLL herr_t H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t orde
 /**
  * \ingroup TRAV
  *
- * \brief Iterates through links in a group by its name
+ * \brief Iterates through links in a group
  *
  * \loc_id
  * \param[in] group_name Group name
  * \idx_type
  * \order
  * \param[in,out] idx iteration position at which to start (\Emph{IN}) or
- *                position at which an interrupted iteration may be restarted
- *                (\Emph{OUT})
+ *                    position at which an interrupted iteration may be restarted
+ *                    (\Emph{OUT})
  * \op
  * \op_data
  * \lapl_id
- *
  * \return \success{The return value of the first operator that returns
  *                  non-zero, or zero if all members were processed with no
  *                  operator returning non-zero.}
@@ -1014,7 +1032,6 @@ H5_DLL herr_t H5Literate_by_name(hid_t loc_id, const char *group_name, H5_index_
  * \order
  * \op
  * \op_data
- *
  * \return \success{The return value of the first operator that returns
  *                  non-zero, or zero if all members were processed with no
  *                  operator returning non-zero.}
@@ -1101,11 +1118,7 @@ H5_DLL herr_t H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
  * \op_data
  * \lapl_id
  *
- * \return \success{The return value of the first operator that returns
- *                  non-zero, or zero if all members were processed with no
- *                  operator returning non-zero.}
- * \return \failure{Negative if an error occurs in the library, or the negative
- *                  value returned by one of the operators.}
+ * \return \herr_t
  *
  * \details H5Lvisit_by_name() is a recursive iteration function to visit all
  *          links in and below a group in an HDF5 file, thus providing a
@@ -1130,7 +1143,7 @@ H5_DLL herr_t H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
  *          \p idx_type specifies the index to be used. If the links have not
  *          been indexed by the index type, they will first be sorted by that
  *          index then the iteration will begin; if the links have been so
- *          indexed, the sorting step will be unnecesary, so the iteration may
+ *          indexed, the sorting step will be unnecessary, so the iteration may
  *          begin more quickly. Valid values include the following:
  *          \indexes
  *

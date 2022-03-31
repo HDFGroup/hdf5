@@ -11,6 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * This file contains public declarations for the H5S module.
+ */
+#ifndef H5Spublic_H
+#define H5Spublic_H
+
 /**\defgroup H5S H5S
  *
  * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
@@ -23,13 +29,27 @@
  * using \Emph{selections}. Furthermore, certain set operations are supported
  * for selections.
  *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5S_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5S_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5S_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5S_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
  */
-
-/*
- * This file contains public declarations for the H5S module.
- */
-#ifndef H5Spublic_H
-#define H5Spublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -39,71 +59,90 @@
 #define H5S_ALL       (hid_t)0
 #define H5S_UNLIMITED ((hsize_t)(hssize_t)(-1))
 
-/* Define user-level maximum number of dimensions */
+/**
+ * The maximum dataspace rank or number of dimensions
+ */
 #define H5S_MAX_RANK 32
 
-/* Different types of dataspaces */
+/**
+ * Types of dataspaces
+ */
 typedef enum H5S_class_t {
-    H5S_NO_CLASS = -1, /*error                                      */
-    H5S_SCALAR   = 0,  /*scalar variable                            */
-    H5S_SIMPLE   = 1,  /*simple dataspace                           */
-    H5S_NULL     = 2   /*null dataspace                             */
+    H5S_NO_CLASS = -1, /**< Error                                      */
+    H5S_SCALAR   = 0,  /**< Singleton (scalar)                         */
+    H5S_SIMPLE   = 1,  /**< Regular grid                               */
+    H5S_NULL     = 2   /**< Empty set                                  */
 } H5S_class_t;
 
-/* Different ways of combining selections */
+/**
+ * Different ways of combining selections
+ */
 typedef enum H5S_seloper_t {
-    H5S_SELECT_NOOP = -1, /* error                                     */
-    H5S_SELECT_SET  = 0,  /* Select "set" operation              */
-    H5S_SELECT_OR,        /* Binary "or" operation for hyperslabs
+    H5S_SELECT_NOOP = -1, /**< Error                                     */
+    H5S_SELECT_SET  = 0,  /**< Select "set" operation 		             */
+    H5S_SELECT_OR,        /**< Binary "or" operation for hyperslabs
                            * (add new selection to existing selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A or B:           CCCCCCCCCCCCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_AND,       /* Binary "and" operation for hyperslabs
+    H5S_SELECT_AND,       /**< Binary "and" operation for hyperslabs
                            * (only leave overlapped regions in selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A and B:                CCCC
+                           * \endcode
                            */
-    H5S_SELECT_XOR,       /* Binary "xor" operation for hyperslabs
+    H5S_SELECT_XOR,       /**< Binary "xor" operation for hyperslabs
                            * (only leave non-overlapped regions in selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A xor B:          CCCCCC    CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_NOTB,      /* Binary "not" operation for hyperslabs
+    H5S_SELECT_NOTB,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in original selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * A not B:          CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_NOTA,      /* Binary "not" operation for hyperslabs
+    H5S_SELECT_NOTA,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in new selection)
+                           * \code
                            * Original region:  AAAAAAAAAA
                            * New region:             BBBBBBBBBB
                            * B not A:                    CCCCCC
+                           * \endcode
                            */
-    H5S_SELECT_APPEND,    /* Append elements to end of point selection */
-    H5S_SELECT_PREPEND,   /* Prepend elements to beginning of point selection */
-    H5S_SELECT_INVALID    /* Invalid upper bound on selection operations */
+    H5S_SELECT_APPEND,    /**< Append elements to end of point selection */
+    H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection */
+    H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations */
 } H5S_seloper_t;
 
-/* Enumerated type for the type of selection */
+/**
+ * Selection type
+ */
 typedef enum {
-    H5S_SEL_ERROR      = -1, /* Error            */
-    H5S_SEL_NONE       = 0,  /* Nothing selected         */
-    H5S_SEL_POINTS     = 1,  /* Points / elements selected    */
-    H5S_SEL_HYPERSLABS = 2,  /* Hyperslab selected           */
-    H5S_SEL_ALL        = 3,  /* Entire extent selected    */
-    H5S_SEL_N                /*THIS MUST BE LAST        */
+    H5S_SEL_ERROR      = -1, /**< Error                                 */
+    H5S_SEL_NONE       = 0,  /**< Empty selection                       */
+    H5S_SEL_POINTS     = 1,  /**< Set of points                         */
+    H5S_SEL_HYPERSLABS = 2,  /**< Hyperslab                             */
+    H5S_SEL_ALL        = 3,  /**< Everything	                        */
+    H5S_SEL_N                /**< Sentinel \internal THIS MUST BE LAST	*/
 } H5S_sel_type;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Operations on dataspaces */
+/* Operations on dataspaces, dataspace selections and selection iterators */
+
 /**
  * \ingroup H5S
  *
@@ -257,31 +296,31 @@ H5_DLL hid_t H5Sdecode(const void *buf);
  *
  * \space_id{obj_id}
  * \param[in,out] buf     Buffer for the object to be encoded into;
- *                        If the provided buffer is NULL, only the size of
- *                        buffer needed is returned through \p nalloc.
+ *                        If the provided buffer is NULL, only the size
+ *                        of buffer needed is returned through \p nalloc.
  * \param[in,out] nalloc  The size of the allocated buffer
  *
  * \return \herr_t
  *
  * \details Given the data space identifier \p obj_id, H5Sencode() converts
- *          a data space description into binary form in a buffer. Using
- *          this binary form in the buffer, a data space object can be
- *          reconstructed using H5Sdecode() to return a new object handle
- *          (\p hid_t) for this data space.
+ *          a data space description into binary form in a buffer. Using this
+ *          binary form in the buffer, a data space object can be
+ *          reconstructed with H5Sdecode() to return a new object handle
+ *          (#hid_t) for this data space.
  *
- *          A preliminary H5Sencode() call can be made to find out the size
- *          of the buffer needed. This value is returned as \p nalloc. That
- *          value can then be assigned to \p nalloc for a second H5Sencode1()
- *          call, which will retrieve the actual encoded object.
+ *          A preliminary H5Sencode() call can be made to determine the
+ *          size of the buffer needed. This value is returned in \p nalloc.
+ *          That value can then be assigned to \p nalloc for a second
+ *           H5Sencode()call, which will retrieve the actual encoded object.
  *
- *          If the library finds out \p nalloc is not big enough for the
+ *          If the library determines that \p nalloc is not big enough for the
  *          object, it simply returns the size of the buffer needed through
  *          \p nalloc without encoding the provided buffer.
  *
- *          The types of data space addressed in this function are null,
- *          scalar, and simple space. For a simple data space, the information
- *          on the selection, for example, hyperslab selection, is also
- *          encoded and decoded. A complex data space has not been
+ *          The types of data space that are addressed in this function are
+ *          null, scalar, and simple space. For a simple data space, the
+ *          information on the selection, for example, hyperslab selection,
+ *          is also encoded and decoded. A complex data space has not been
  *          implemented in the library.
  *
  * \since 1.8.0
