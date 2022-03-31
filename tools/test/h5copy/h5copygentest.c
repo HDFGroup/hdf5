@@ -923,7 +923,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: Test_Extlink_Copy
  *
- * Purpose: gerenate external link files
+ * Purpose: generate external link files
  *
  *------------------------------------------------------------------------*/
 static void
