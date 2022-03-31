@@ -1245,7 +1245,7 @@ Known Problems
   causes failures in several HDF5 library tests.
 * For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
   shared libraries (tested for 1.8.0-beta2)
-* For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
+* For SNL, Red Storm: only parallel HDF5 is supported.  The serial tests pass
   and the parallel tests also pass with lots of non-fatal error messages.
 * For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
   parallel fails with a known proglem in MPI.  ubgl: serial passes but
