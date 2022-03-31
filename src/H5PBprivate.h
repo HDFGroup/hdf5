@@ -24,10 +24,6 @@
 #ifndef H5PBprivate_H
 #define H5PBprivate_H
 
-/* Include package's public header */
-
-/* no H5PBpublic.h at present */
-
 /* Private headers needed by this header */
 #include "H5private.h" /* Generic Functions			*/
 

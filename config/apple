@@ -27,8 +27,14 @@ if test "X-" = "X-$CC"; then
 	    CC_BASENAME=gcc
 	    ;;
 	*)
-	    CC=clang
-	    CC_BASENAME=clang
+            if test "X-$enable_parallel" = "X-yes"; then
+                # default to use mpicc which is the defacto MPI compiler name
+                CC=mpicc
+                CC_BASENAME=mpicc
+            else
+                CC=clang
+                CC_BASENAME=clang
+            fi
 
 	    # Production
 	    PROD_CFLAGS="-O3" 
@@ -47,9 +53,11 @@ if test "X-" = "X-$CC"; then
     esac
 fi
 
-# Figure out compiler flags
+# Figure out C compiler flags
 . $srcdir/config/gnu-flags
 . $srcdir/config/clang-flags
+. $srcdir/config/intel-flags
+
 # temp patch: if GCC 4.2.1 is used in Lion or Mountain Lion systems, do not
 # use -O option as it causes failures in test/dt_arith.
 case "$host_os" in
@@ -65,15 +73,9 @@ case "$host_os" in
 	esac
 	;;
 esac
- 
-. $srcdir/config/intel-flags
+
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
-        clang)
-	    # clang has no fortran compiler. Use gfortran.
-            FC=gfortran
-            FC_BASENAME=gfortran
-            ;;
         gcc*)
             FC=gfortran
             FC_BASENAME=gfortran
@@ -82,15 +84,26 @@ if test "X-" = "X-$FC"; then
             FC=ifort
             FC_BASENAME=ifort
             ;;
+        mpicc*)
+            FC=mpif90
+            FC_BASENAME=mpif90
+            ;;
+        clang)
+	    # clang has no fortran compiler. Use gfortran.
+            FC=gfortran
+            FC_BASENAME=gfortran
+            ;;
     esac
 fi
 
+# Figure out FORTRAN compiler flags
+. $srcdir/config/gnu-fflags
+. $srcdir/config/intel-fflags
+
+
+# The default C++ compiler is `clang++'.
 if test "X-" = "X-$CXX"; then
     case $CC_BASENAME in
-        clang)
-            CXX=clang++
-            CXX_BASENAME=clang++
-            ;;
         gcc)
             CXX=g++
             CXX_BASENAME=g++
@@ -99,18 +112,21 @@ if test "X-" = "X-$CXX"; then
             CXX=icpc
             CXX_BASENAME=icpc
             ;;
+        mpicc*)
+            FC=mpif90
+            FC_BASENAME=mpif90
+            ;;
+        clang)
+            CXX=clang++
+            CXX_BASENAME=clang++
+            ;;
     esac
 fi
 
-case $CXX_BASENAME in
-    clang++)
-	PROD_CXXFLAGS="-O3"
-	DEBUG_CXXFLAGS="-g -O0"
-	# Use this for profiling with gprof
-	# Just "-g" for now. More later.
-	PROFILE_CXXFLAGS="-g"
-	;;
-esac
+# Figure out C++ compiler flags
+. $srcdir/config/intel-cxxflags # Do this ahead of GNU to avoid icpc being detected as g++
+. $srcdir/config/gnu-cxxflags
+. $srcdir/config/clang-cxxflags
 
 # compiler version strings
 case $CC in
@@ -133,16 +149,15 @@ case $CC in
         echo "No match to get cc_version_info for $CC"
         ;;
 esac
+
 # Figure out Fortran compiler flags and version strings
 case $FC in
     *gfortran*)
-        . $srcdir/config/gnu-fflags
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
         ;;
 
     *ifc*|*ifort*)
-        . $srcdir/config/intel-fflags
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
@@ -156,13 +171,11 @@ esac
 # get c++ version info
 case $CXX in
     clang++)
-        . $srcdir/config/clang-cxxflags
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'Apple' | sed 's/(.*//'`
         ;;
 
     *g++*)
-        . $srcdir/config/gnu-cxxflags
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
         ;;

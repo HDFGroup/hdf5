@@ -17,10 +17,6 @@
 #ifndef H5CSprivate_H
 #define H5CSprivate_H
 
-#ifdef NOT_YET
-#include "H5CSpublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this file */
 #include "H5private.h"
 

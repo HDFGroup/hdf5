@@ -50,6 +50,11 @@
  */
 /* #define H5FL_TRACK */
 #ifdef H5FL_TRACK
+
+#ifndef H5_HAVE_CODESTACK
+#error "Free list tracking requires code stack to be enabled"
+#endif
+
 /* Macro for inclusion in the free list allocation calls */
 #define H5FL_TRACK_INFO , __FILE__, __func__, __LINE__
 
@@ -273,16 +278,17 @@ typedef struct H5FL_arr_head_t {
 #define H5FL_BARR_DEFINE_STATIC(b, t, m) static H5FL_ARR_DEFINE_COMMON(sizeof(b), t, m)
 
 /* Allocate an array of type 't' */
-#define H5FL_ARR_MALLOC(t, elem) H5FL_arr_malloc(&(H5FL_ARR_NAME(t)), elem)
+#define H5FL_ARR_MALLOC(t, elem) H5FL_arr_malloc(&(H5FL_ARR_NAME(t)), elem H5FL_TRACK_INFO)
 
 /* Allocate an array of type 't' and clear it to all zeros */
-#define H5FL_ARR_CALLOC(t, elem) H5FL_arr_calloc(&(H5FL_ARR_NAME(t)), elem)
+#define H5FL_ARR_CALLOC(t, elem) H5FL_arr_calloc(&(H5FL_ARR_NAME(t)), elem H5FL_TRACK_INFO)
 
 /* Free an array of type 't' */
 #define H5FL_ARR_FREE(t, obj) (t *)H5FL_arr_free(&(H5FL_ARR_NAME(t)), obj)
 
 /* Re-allocate an array of type 't' */
-#define H5FL_ARR_REALLOC(t, obj, new_elem) H5FL_arr_realloc(&(H5FL_ARR_NAME(t)), obj, new_elem)
+#define H5FL_ARR_REALLOC(t, obj, new_elem)                                                                   \
+    H5FL_arr_realloc(&(H5FL_ARR_NAME(t)), obj, new_elem H5FL_TRACK_INFO)
 
 #else /* H5_NO_ARR_FREE_LISTS */
 /* Common macro for H5FL_ARR_DEFINE & H5FL_ARR_DEFINE_STATIC (and H5FL_BARR variants) */
@@ -405,10 +411,10 @@ H5_DLL void *H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void *H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
 
 /* Array free lists */
-H5_DLL void *H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem);
-H5_DLL void *H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem);
+H5_DLL void *H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS);
+H5_DLL void *H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS);
 H5_DLL void *H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
-H5_DLL void *H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
+H5_DLL void *H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS);
 
 /* Sequence free lists */
 H5_DLL void *H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
