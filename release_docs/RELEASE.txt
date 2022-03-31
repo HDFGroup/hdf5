@@ -121,15 +121,6 @@ New Features
 
       (DER - 2021/05/23)
 
-    - Add CMake variable HDF5_LIB_INFIX
-
-      This infix is added to all library names after 'hdf5'.
-      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
-      This name is used in packages on debian based systems.
-      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
-
-      (barcode - 2021/03/22)
-
 
     Library:
     --------
@@ -151,49 +142,6 @@ New Features
       be exact. An environment variable still controls the logic.
 
       (ADB - 2021/07/27)
-
-    - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
-
-      The size_hint value is ultimately stored in a uint32_t struct field,
-      so specifying a value larger than this on a 64-bit machine can cause
-      undefined behavior including crashing the system.
-
-      The documentation for this API call was also incorrect, stating that
-      passing a negative value would cause the library to use a default
-      value. Instead, passing a "negative" value actually passes a very large
-      value, which is probably not what the user intends and can cause
-      crashes on 64-bit systems.
-
-      The Doxygen documentation has been updated and passing values larger
-      than UINT32_MAX for size_hint will now produce a normal HDF5 error.
-
-      (DER - 2021/04/29, HDFFV-11241)
-
-
-    - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
-
-      When passed an invalid fapl ID, H5Pset_fapl_log() would usually
-      segfault when attempting to free an uninitialized pointer in the error
-      handling code. This behavior is more common in release builds or
-      when the memory sanitization checks were not selected as a build
-      option.
-
-      The pointer is now correctly initialized and the API call now
-      produces a normal HDF5 error when fed an invalid fapl ID.
-
-      (DER - 2021/04/28, HDFFV-11240)
-
-    - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
-
-      The call incorrectly attempts to free an internal copy of the previous
-      log location string, which causes a segfault. This only happens
-      when the call is invoked multiple times on the same property list.
-      On the first call to a given fapl, the log location is set to NULL so
-      the segfault does not occur.
-
-      The string is now handled properly and the segfault no longer occurs.
-
-      (DER - 2021/04/27, HDFFV-11239)
 
 
     Parallel Library:
@@ -491,12 +439,7 @@ Bug Fixes since HDF5-1.12.1 release
 
     C++ APIs
     --------
-    - Added DataSet::operator=
-
-      Some compilers complain if the copy constructor is given explicitly
-      but the assignment operator is implicitly set to default.
-
-      (2021/05/19)
+    - 
 
 
     Testing
