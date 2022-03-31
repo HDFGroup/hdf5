@@ -2065,26 +2065,16 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 {
     H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
     hbool_t                    vector_was_sorted = TRUE;
-    hbool_t                    fixed_size        = FALSE;
-    size_t                     size;
-    H5FD_mem_t *               s_types           = NULL;
     haddr_t *                  s_addrs           = NULL;
     size_t *                   s_sizes           = NULL;
     void **                    s_bufs            = NULL;
-    int *                      mpi_block_lengths = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     void *                     mpi_bufs_base     = NULL;
-    MPI_Aint                   mpi_bufs_base_Aint;
-    MPI_Aint *                 mpi_bufs          = NULL;
-    MPI_Aint *                 mpi_displacements = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
     hbool_t                    file_type_created = FALSE;
-    MPI_Datatype *             sub_types         = NULL;
-    uint8_t *                  sub_types_created = NULL;
     int                        i;
-    int                        j;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
     MPI_Status                 mpi_stat;      /* Status from I/O operation */
@@ -2624,14 +2614,14 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         hbool_t fixed_size = FALSE;
         size_t  size;
 
-        /* The write is part of an independent operation. As a result,
+        /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
          * and thus we can't use the above code to construct the MPI datatypes.
          * In the future, we could write code to detect when a contiguous slab
          * in the file selection spans multiple vector elements and construct a
          * memory datatype to match this larger block in the file, but for now
          * just read in each element of the vector in a separate
-         * MPI_File_write_at() call.
+         * MPI_File_read_at() call.
          *
          * We could also just detect the case when the entire file selection is
          * contiguous, which would allow us to use
