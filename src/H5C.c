@@ -3495,7 +3495,6 @@ H5C_set_vfd_swmr_reader(H5C_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_
     FUNC_ENTER_NOAPI(FAIL)
 
     if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
-
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
 
     cache_ptr->vfd_swmr_reader = vfd_swmr_reader;
@@ -7653,7 +7652,7 @@ H5C__load_entry(H5F_t *f,
         h5_retry_t retry;
 
         /*
-         * This do/while loop performs the following till the metadata checksum
+         * This for loop performs the following till the metadata checksum
          * is correct or the file's number of allowed read attempts are reached.
          *   --read the metadata
          *   --determine the actual size of the metadata

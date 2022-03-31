@@ -66,8 +66,8 @@ typedef struct {
     uint32_t     ps;
     uint32_t     pbs;
     uint32_t     check_interval;
-    bool         use_vfd_swmr;
-    bool         first_proc;
+    hbool_t      use_vfd_swmr;
+    hbool_t      first_proc;
 } state_t;
 
 /* Assign the initialized values to struct state_t declared above */
@@ -89,8 +89,8 @@ state_initializer(void)
                      .ps             = 4096,
                      .pbs            = 4096,
                      .check_interval = 1,
-                     .use_vfd_swmr   = true,
-                     .first_proc     = true};
+                     .use_vfd_swmr   = TRUE,
+                     .first_proc     = TRUE};
 }
 
 /* Obtain the data value at index [i][j] for the 2D matrix.
@@ -102,7 +102,7 @@ matget(const mat_t *mat, unsigned i, unsigned j)
 }
 
 /* Set the data value at index [i][j] for the 2D matrix. */
-static bool
+static hbool_t
 matset(mat_t *mat, unsigned i, unsigned j, uint32_t v)
 {
     if (i >= mat->rows || j >= mat->cols) {
@@ -112,10 +112,10 @@ matset(mat_t *mat, unsigned i, unsigned j, uint32_t v)
 
     mat->elt[i * mat->cols + j] = v;
 
-    return true;
+    return TRUE;
 
 error:
-    return false;
+    return FALSE;
 }
 
 /* Allocate memory for the 2-D matrix. */
@@ -140,7 +140,7 @@ error:
 }
 
 /* Write or verify the dataset test pattern in the matrix `mat`.
- * If `do_set` is true, write the pattern; otherwise, verify.
+ * If `do_set` is TRUE, write the pattern; otherwise, verify.
  *
  * The basic test pattern consists of increasing
  * integers written in nested corners of the dataset
@@ -163,11 +163,11 @@ error:
  * In an actual pattern, the dataset number, `which`, is added to each integer.
  *
  */
-static bool
-set_or_verify_matrix(mat_t *mat, unsigned int which, bool do_set)
+static hbool_t
+set_or_verify_matrix(mat_t *mat, unsigned int which, hbool_t do_set)
 {
     unsigned row, col;
-    bool     ret = true;
+    hbool_t  ret = TRUE;
 
     for (row = 0; row < mat->rows; row++) {
         for (col = 0; col < mat->cols; col++) {
@@ -183,17 +183,17 @@ set_or_verify_matrix(mat_t *mat, unsigned int which, bool do_set)
             if (do_set) {
                 if (!matset(mat, row, col, v)) {
                     HDfprintf(stderr, "data initialization failed\n");
-                    ret = false;
+                    ret = FALSE;
                     break;
                 }
             }
             else if (matget(mat, row, col) != v) {
-                /* If the data doesn't match, return false
+                /* If the data doesn't match, return FALSE
                  */
                 dbgf(1, "vrfy_matrix failed at row %u,col %u\n", row, col);
                 dbgf(1, "real value is %u\n", matget(mat, row, col));
                 dbgf(1, "expected value is %u\n", v);
-                ret = false;
+                ret = FALSE;
                 break;
             }
         }
@@ -203,17 +203,17 @@ set_or_verify_matrix(mat_t *mat, unsigned int which, bool do_set)
 }
 
 /* Initialize the matrix values. The parameter 'which' determines the data value. */
-static bool
+static hbool_t
 init_matrix(mat_t *mat, unsigned int which)
 {
-    return set_or_verify_matrix(mat, which, true);
+    return set_or_verify_matrix(mat, which, TRUE);
 }
 
 /* Verify the matrix values at each point. The parameter 'which" determines the data value. */
-static bool
+static hbool_t
 verify_matrix(mat_t *mat, unsigned int which)
 {
-    return set_or_verify_matrix(mat, which, false);
+    return set_or_verify_matrix(mat, which, FALSE);
 }
 
 /* Usage of this program when running with the -h option */
@@ -243,14 +243,16 @@ usage(const char *progname)
 }
 
 /* Initialize the state_t with different options specified by the user. */
-static bool
+static hbool_t
 state_init(state_t *s, int argc, char **argv)
 {
-    unsigned long tmp;
-    int           ch;
-    char *        tfile = NULL;
-    char *        end;
-    const char *  personality;
+    unsigned long          tmp;
+    int                    opt;
+    char *                 tfile = NULL;
+    char *                 end;
+    const char *           personality;
+    const char *           s_opts   = "Sqc:r:t:m:B:s:u:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = state_initializer();
 
@@ -266,10 +268,10 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "Sqc:r:t:m:B:s:u:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+        switch (opt) {
             case 'S':
-                s->use_vfd_swmr = false;
+                s->use_vfd_swmr = FALSE;
                 break;
             case 'c':
             case 'r':
@@ -279,37 +281,37 @@ state_init(state_t *s, int argc, char **argv)
             case 's':
             case 'u':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", ch, optarg);
+                    HDfprintf(stderr, "couldn't parse -%c argument %s\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDfprintf(stderr, "-%c argument %lu too large", ch, tmp);
+                    HDfprintf(stderr, "-%c argument %lu too large", opt, tmp);
                     TEST_ERROR;
                 }
-                if ((ch == 'c' || ch == 'r') && tmp == 0) {
-                    HDfprintf(stderr, "-%c argument %lu must be >= 1", ch, tmp);
+                if ((opt == 'c' || opt == 'r') && tmp == 0) {
+                    HDfprintf(stderr, "-%c argument %lu must be >= 1", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'c')
+                if (opt == 'c')
                     s->cols = (unsigned)tmp;
-                else if (ch == 'r')
+                else if (opt == 'r')
                     s->rows = (unsigned)tmp;
-                else if (ch == 't')
+                else if (opt == 't')
                     s->tick_len = (unsigned)tmp;
-                else if (ch == 'm')
+                else if (opt == 'm')
                     s->max_lag = (unsigned)tmp;
-                else if (ch == 'B')
+                else if (opt == 'B')
                     s->pbs = (unsigned)tmp;
-                else if (ch == 's')
+                else if (opt == 's')
                     s->ps = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->check_interval = (unsigned)tmp;
                 break;
             case 'q':
@@ -321,8 +323,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     if (argc > 0) {
         HDprintf("unexpected command-line arguments\n");
@@ -337,27 +339,27 @@ state_init(state_t *s, int argc, char **argv)
     personality = HDstrstr(s->progname, "vfd_swmr_indep_wr");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_indep_wr_p0") == 0)
-        s->first_proc = true;
+        s->first_proc = TRUE;
     else if (personality != NULL && HDstrcmp(personality, "vfd_swmr_indep_wr_p1") == 0)
-        s->first_proc = false;
+        s->first_proc = FALSE;
     else {
         HDprintf("unknown personality, expected vfd_swmr_indep_wr_{p0,p1}\n");
         TEST_ERROR;
     }
 
-    return true;
+    return TRUE;
 
 error:
     if (tfile)
         HDfree(tfile);
-    return false;
+    return FALSE;
 }
 
 /* Initialize the configuration and the file creation and access property lists
  *  for the VFD SMWR independence of the reader/writer test.
  */
-static bool
-indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
+static hbool_t
+indep_init_vfd_swmr_config_plist(state_t *s, hbool_t writer, const char *mdf_path)
 {
 
     H5F_vfd_swmr_config_t config;
@@ -367,7 +369,7 @@ indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
     init_vfd_swmr_config(&config, s->tick_len, s->max_lag, writer, TRUE, FALSE, TRUE, 128, mdf_path, NULL);
 
     /* Pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
-    if ((s->fapl = vfd_swmr_create_fapl(true, s->use_vfd_swmr, true, s->pbs, &config)) < 0) {
+    if ((s->fapl = vfd_swmr_create_fapl(TRUE, s->use_vfd_swmr, TRUE, s->pbs, &config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
@@ -378,14 +380,14 @@ indep_init_vfd_swmr_config_plist(state_t *s, bool writer, const char *mdf_path)
         TEST_ERROR;
     }
 
-    return true;
+    return TRUE;
 
 error:
-    return false;
+    return FALSE;
 }
 
 /* Write the matrix mat to a dataset. The dataset name depends on the process it runs. */
-static bool
+static hbool_t
 write_dataset(const state_t *s, mat_t *mat)
 {
 
@@ -438,7 +440,7 @@ write_dataset(const state_t *s, mat_t *mat)
     else
         dbgf(1, "Process 1: Successfully write the dataset %s for file %s.\n", dname, s->filename[which]);
 
-    return true;
+    return TRUE;
 
 error:
     H5E_BEGIN_TRY
@@ -448,12 +450,12 @@ error:
     }
     H5E_END_TRY;
 
-    return false;
+    return FALSE;
 }
 
 /* Open the dataset according to the dataset name related to the process.
    The dataset ID is saved in the state_t s */
-static bool
+static hbool_t
 open_dset(state_t *s)
 {
 
@@ -500,16 +502,16 @@ open_dset(state_t *s)
         dbgf(1, "Process 0: Successfully open the dataset %s for file %s.\n", dname, s->filename[fopen_idx]);
     else
         dbgf(1, "Process 1: Successfully open the dataset %s for file %s.\n", dname, s->filename[fopen_idx]);
-    return true;
+    return TRUE;
 
 error:
-    return false;
+    return FALSE;
 }
 
 /* Verify a dataset, this routine must be called after the open_dset().
  * It will use the dataset ID assigned by open_dset().
  */
-static bool
+static hbool_t
 vrfy_dset(const state_t *s, mat_t *mat)
 {
 
@@ -546,7 +548,7 @@ vrfy_dset(const state_t *s, mat_t *mat)
     if (s->first_proc)
         which = 1;
 
-    if (verify_matrix(mat, which) == false) {
+    if (verify_matrix(mat, which) == FALSE) {
         HDfprintf(stderr, "dataset verification failed\n");
         TEST_ERROR;
     }
@@ -556,22 +558,22 @@ vrfy_dset(const state_t *s, mat_t *mat)
     else
         dbgf(1, "Process 1: Successfully verify a dataset.\n");
 
-    return true;
+    return TRUE;
 
 error:
-    return false;
+    return FALSE;
 }
 
 /* The wrapper routine of open_dset() and vrfy_dset() for readers to verify a dataset.  */
-static bool
+static hbool_t
 read_vrfy_dataset(state_t *s, mat_t *mat)
 {
 
-    if (false == open_dset(s)) {
+    if (FALSE == open_dset(s)) {
         HDfprintf(stderr, "Reader: open_dataset() failed\n");
         TEST_ERROR;
     }
-    if (false == vrfy_dset(s, mat)) {
+    if (FALSE == vrfy_dset(s, mat)) {
         HDfprintf(stderr, "Reader: vrfy_dataset() failed\n");
         TEST_ERROR;
     }
@@ -580,7 +582,7 @@ read_vrfy_dataset(state_t *s, mat_t *mat)
         HDfprintf(stderr, "Reader: H5Dclose() failed\n");
         TEST_ERROR;
     }
-    return true;
+    return TRUE;
 
 error:
 
@@ -589,11 +591,11 @@ error:
         H5Dclose(s->r_dsetid);
     }
     H5E_END_TRY;
-    return false;
+    return FALSE;
 }
 
 /* Close the file access and creation property lists. */
-static bool
+static hbool_t
 close_pl(const state_t *s)
 {
 
@@ -607,7 +609,7 @@ close_pl(const state_t *s)
         TEST_ERROR;
     }
 
-    return true;
+    return TRUE;
 
 error:
     H5E_BEGIN_TRY
@@ -617,15 +619,15 @@ error:
     }
     H5E_END_TRY;
 
-    return false;
+    return FALSE;
 }
 
 int
 main(int argc, char **argv)
 {
-    bool     writer = true;
+    hbool_t  writer = TRUE;
     state_t  s;
-    bool     ret = false;
+    hbool_t  ret = FALSE;
     unsigned i;
     mat_t *  mat = NULL;
 
@@ -642,8 +644,8 @@ main(int argc, char **argv)
     /* The first process writes a dataset in the first file and then reads a dataset from the second file.*/
     if (s.first_proc) {
 
-        writer = true;
-        if (false == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
+        writer = TRUE;
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
             HDfprintf(stderr, "Writer: Cannot initialize file property lists for file %s\n", s.filename[0]);
             TEST_ERROR;
         }
@@ -654,7 +656,7 @@ main(int argc, char **argv)
         }
 
         ret = write_dataset(&s, mat);
-        if (ret == false) {
+        if (ret == FALSE) {
             HDfprintf(stderr, "write_dataset failed for the file %s\n", s.filename[0]);
             TEST_ERROR;
         }
@@ -670,13 +672,13 @@ main(int argc, char **argv)
             H5E_END_TRY;
         }
 
-        if (false == close_pl(&s)) {
+        if (FALSE == close_pl(&s)) {
             HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s.filename[0]);
             TEST_ERROR;
         }
 
-        writer = false;
-        if (false == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
+        writer = FALSE;
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
             HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -687,12 +689,12 @@ main(int argc, char **argv)
         }
 
         ret = read_vrfy_dataset(&s, mat);
-        if (ret == false) {
+        if (ret == FALSE) {
             HDfprintf(stderr, "read and verify dataset failed for file %s\n", s.filename[1]);
             TEST_ERROR;
         }
 
-        if (false == close_pl(&s)) {
+        if (FALSE == close_pl(&s)) {
             HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -712,8 +714,8 @@ main(int argc, char **argv)
         /* The second process reads the dataset of the first file generated by the first process,
          * then writes a dataset in the second file for the first process to read.
          */
-        writer = false;
-        if (false == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
+        writer = FALSE;
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
             HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[0]);
             TEST_ERROR;
         }
@@ -724,18 +726,18 @@ main(int argc, char **argv)
             TEST_ERROR;
         }
         ret = read_vrfy_dataset(&s, mat);
-        if (ret == false) {
+        if (ret == FALSE) {
             HDfprintf(stderr, "read and verify dataset failed for file %s\n", s.filename[0]);
             TEST_ERROR;
         }
 
-        if (false == close_pl(&s)) {
+        if (FALSE == close_pl(&s)) {
             HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s.filename[0]);
             TEST_ERROR;
         }
 
-        writer = true;
-        if (false == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
+        writer = TRUE;
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
             HDfprintf(stderr, "writer: Cannot initialize file property lists for file %s\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -746,7 +748,7 @@ main(int argc, char **argv)
             TEST_ERROR;
         }
         ret = write_dataset(&s, mat);
-        if (ret == false) {
+        if (ret == FALSE) {
             HDfprintf(stderr, "write_dataset failed for the file %s\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -762,7 +764,7 @@ main(int argc, char **argv)
             H5E_END_TRY;
         }
 
-        if (false == close_pl(&s)) {
+        if (FALSE == close_pl(&s)) {
             HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -806,6 +808,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */

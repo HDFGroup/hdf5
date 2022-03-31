@@ -2508,7 +2508,7 @@ H5AC_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned fl
     HDassert(f);
     HDassert(f->shared);
 
-    /* Call cache level function to expunge all tagged entries */
+    /* Call cache-level function to expunge all tagged entries */
     if (H5C_expunge_all_tagged_metadata(f, tag, type_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge all entries")
 
@@ -2856,7 +2856,8 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  Vailin Choi; Dec 2021
+ * Programmer:  Vailin Choi
+ *              Dec 2021
  *
  *-------------------------------------------------------------------------
  */

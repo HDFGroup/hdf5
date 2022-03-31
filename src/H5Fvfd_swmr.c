@@ -157,8 +157,7 @@ H5FL_DEFINE(eot_queue_entry_t);
  *                  --set f->shared->tick_num to the current tick read from the
  *                    metadata file
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -298,8 +297,7 @@ done:
  *                  --start a new tick (??check with JM for sure)
  *                    ??update end_of_tick
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
