@@ -1272,7 +1272,7 @@ H5allocate_memory2(hid_t file_id, size_t size, hbool_t clear)
         uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
         if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to obtain file driver handle")
+            HGOTO_ERROR(H5E_VFL, H5E_BADID, NULL, "unable to obtain file driver handle")
 
         /* Initialize ctl alloc arguments */
         alloc_args.size      = size;
@@ -1398,7 +1398,7 @@ H5resize_memory2(hid_t file_id, void *mem, size_t size)
         uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
         if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to obtain file driver handle")
+            HGOTO_ERROR(H5E_VFL, H5E_BADID, NULL, "unable to obtain file driver handle")
 
         /* Initialize ctl alloc arguments */
         alloc_args.size      = size;
@@ -1483,7 +1483,7 @@ H5free_memory2(hid_t file_id, void *mem)
         uint64_t               flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
         if (NULL == (file_driver = H5FD_get_file_driver(file_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FALSE, "unable to obtain file driver handle")
+            HGOTO_ERROR(H5E_VFL, H5E_BADID, FALSE, "unable to obtain file driver handle")
 
         /* Initialize ctl alloc arguments */
         free_args.buf   = mem;
