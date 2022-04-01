@@ -658,8 +658,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "  ERROR\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                        Optional value 2 also prints file open errors.\n");
+    PRINTVALSTREAM(rawoutstream, "                        Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help\n");
     PRINTVALSTREAM(rawoutstream, "         Print a usage message and exit.\n");

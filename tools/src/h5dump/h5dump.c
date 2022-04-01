@@ -170,8 +170,7 @@ usage(const char *prog)
                    "     --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          Optional value 2 also prints file open errors.\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                          Default setting disables any error reporting.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Default setting disables any error reporting.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -n,   --contents     Print a list of the file contents and exit\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 1 also prints attributes.\n");
