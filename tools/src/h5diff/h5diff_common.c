@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
+static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"version", no_arg, 'V'},
                                        {"report", no_arg, 'r'},
@@ -41,7 +41,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"no-dangling-links", no_arg, 'x'},
                                        {"exclude-path", require_arg, 'E'},
                                        {"exclude-attribute", require_arg, 'A'},
-                                       {"enable-error-stack", no_arg, 'S'},
+                                       {"enable-error-stack", optional_arg, 'S'},
                                        {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -288,7 +288,10 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'S':
-                enable_error_stack = 1;
+                if (opt_arg != NULL)
+                    enable_error_stack = HDatoi(opt_arg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case 'E':
@@ -576,6 +579,10 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "  [obj1]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "  [obj2]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  ERROR\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream, "                        Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help\n");
     PRINTVALSTREAM(rawoutstream, "         Print a usage message and exit.\n");
@@ -598,7 +605,6 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "          3 : All level 2 information plus file names.\n");
     PRINTVALSTREAM(rawoutstream, "   -q, --quiet\n");
     PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
-    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
     PRINTVALSTREAM(rawoutstream,
                    "                   Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
@@ -722,7 +728,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
-                   "  Default mode: print the number of differences found and where they occured\n");
+                   "  Default mode: print the number of differences found and where they occurred\n");
     PRINTVALSTREAM(rawoutstream, "  -r Report mode: print the above plus the differences\n");
     PRINTVALSTREAM(rawoutstream, "  -v Verbose mode: print the above plus a list of objects and warnings\n");
     PRINTVALSTREAM(rawoutstream, "  -q Quiet mode: do not print output\n");

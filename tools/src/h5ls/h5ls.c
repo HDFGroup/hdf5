@@ -2494,7 +2494,7 @@ done:
  *              were borrowed from the GNU less(1).
  *
  * Return:      Success: Number of columns.
- *              Failure: Some default number of columms.
+ *              Failure: Some default number of columns.
  *-------------------------------------------------------------------------
  */
 static int
@@ -2683,9 +2683,9 @@ main(int argc, char *argv[])
         }
         else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
             enable_error_stack = 1;
-            /* deprecated --errors */
         }
         else if (!HDstrcmp(argv[argno], "--errors")) {
+            /* deprecated --errors */
             enable_error_stack = 1;
         }
         else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
