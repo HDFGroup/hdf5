@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "hVrv*qn:d:p:NcelxE*:A:S*";
+static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"version", no_arg, 'V'},
                                           {"report", no_arg, 'r'},
