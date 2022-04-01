@@ -442,7 +442,6 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         write_dset(gid1, 2, dims2, "d2", H5T_NATIVE_DOUBLE, data14);
     }
 
-#if H5_SIZEOF_LONG_DOUBLE != 0
     {
 
         /*-------------------------------------------------------------------------
@@ -454,7 +453,6 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
 
         write_dset(gid1, 2, dims2, "ld", H5T_NATIVE_LDOUBLE, data15);
     }
-#endif
 
     /*-------------------------------------------------------------------------
      * NaNs in H5T_NATIVE_FLOAT
