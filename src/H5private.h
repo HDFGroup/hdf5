@@ -1990,8 +1990,11 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 /* Extern global to determine if we should use selection I/O if available (this
  * variable should be removed once selection I/O performs as well as the
- * previous scalar I/O implementation */
-extern hbool_t H5_use_selection_io_g;
+ * previous scalar I/O implementation
+ *
+ * NOTE: Must be exposed via H5_DLLVAR so parallel tests pass on Windows.
+ */
+H5_DLLVAR hbool_t H5_use_selection_io_g;
 
 #ifdef H5_HAVE_CODESTACK
 
