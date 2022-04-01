@@ -148,7 +148,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts = "Aa:Ddm:EFfhGgl:STO:Vw:H:";
+static const char *s_opts = "Aa:Ddm:E*FfhGgl:STO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"hel", no_arg, 'h'},
@@ -225,7 +225,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"attr", no_arg, 'A'},
                                        {"att", no_arg, 'A'},
                                        {"at", no_arg, 'A'},
-                                       {"enable-error-stack", no_arg, 'E'},
+                                       {"enable-error-stack", optional_arg, 'E'},
                                        {"numattrs", require_arg, 'a'},
                                        {"numattr", require_arg, 'a'},
                                        {"numatt", require_arg, 'a'},
@@ -265,6 +265,9 @@ usage(const char *prog)
     HDfflush(stdout);
     HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
     HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "      ERROR\n");
+    HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    HDfprintf(stdout, "                           Optional value 2 also prints file open errors\n");
     HDfprintf(stdout, "      OPTIONS\n");
     HDfprintf(stdout, "     -h, --help            Print a usage message and exit\n");
     HDfprintf(stdout, "     -V, --version         Print version number and exit\n");
@@ -288,7 +291,6 @@ usage(const char *prog)
               "                           information for small # of attributes.  N is an integer greater\n");
     HDfprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
-    HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
     HDfprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     HDfprintf(stdout, "                           <cred> :: (region,id,key)\n");
     HDfprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
@@ -839,7 +841,10 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 break;
 
             case 'E':
-                enable_error_stack = 1;
+                if (opt_arg != NULL)
+                    enable_error_stack = HDatoi(opt_arg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case 'F':
