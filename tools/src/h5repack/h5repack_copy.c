@@ -1172,7 +1172,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         /* compression ratio = uncompressed size /  compressed size */
                                         if (dsize_out != 0)
                                             ratio = (double)dsize_in / (double)dsize_out;
-                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1);
+                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1, options,
+                                                           read_time, write_time);
                                     }
                                     else
                                         print_dataset_info(dcpl_in, travt->objs[i].name, ratio, 0, options,
