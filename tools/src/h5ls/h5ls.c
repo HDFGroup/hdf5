@@ -2718,9 +2718,9 @@ main(int argc, char *argv[])
         }
         else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
             enable_error_stack = 1;
-            /* deprecated --errors */
         }
         else if (!HDstrcmp(argv[argno], "--errors")) {
+            /* deprecated --errors */
             enable_error_stack = 1;
         }
         else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
