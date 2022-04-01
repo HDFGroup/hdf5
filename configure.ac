@@ -3269,12 +3269,16 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_SUBFILING_VFD], [1],
                 [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
+        AC_DEFINE([HAVE_IOC_VFD], [1],
+                [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
 else
     AC_MSG_RESULT([no])
 fi
 
-## Subfiling VFD files are not built if not required.
+## Subfiling and IOC VFD files are not built if not required.
 AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# IOC VFD is currently only built when subfiling is enabled
+AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
 
 
 ## ----------------------------------------------------------------------

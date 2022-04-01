@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,40 +10,34 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the subfiling driver.
- */
+/* Purpose: The public header file for the subfiling driver. */
 #ifndef H5FDsubfiling_H
 #define H5FDsubfiling_H
 
-#define H5FD_SUBFILING       (H5FD_subfiling_init())
-#define H5FD_SUBFILING_VALUE H5_VFD_SUBFILING
+#include "H5FDioc.h"
 
-#if 1 /* JRM */ /* For now, H5FDsubfiling_priv.h needs mercury.  Since the code that needs it will           \
-                 * move to its own header, just hack it for now.                                             \
-                 */
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
-#include "mercury_thread_pool.h"
-#endif /* JRM */
-
-#include "H5FDsubfiling_priv.h"
-
-#ifndef H5FD_SUBFILING_FAPL_T_MAGIC
-#define H5FD_CURR_SUBFILING_FAPL_T_VERSION 1
-#define H5FD_SUBFILING_FAPL_T_MAGIC        0xFED01331
+#ifdef H5_HAVE_SUBFILING_VFD
+#define H5FD_SUBFILING (H5FDperform_init(H5FD_subfiling_init))
+#else
+#define H5FD_SUBFILING (H5I_INVALID_HID)
 #endif
+
+#define H5FD_SUBFILING_NAME "subfiling"
+
+#ifndef H5FD_SUBFILING_FAPL_MAGIC
+#define H5FD_CURR_SUBFILING_FAPL_VERSION 1
+#define H5FD_SUBFILING_FAPL_MAGIC        0xFED01331
+#endif
+
+#define H5FD_SUBFILING_PATH_MAX 4096
 
 /****************************************************************************
  *
- * Structure: H5FD_subfiling_fapl_t
+ * Structure: H5FD_subfiling_config_t
  *
  * Purpose:
  *
- *     H5FD_subfiling_fapl_t is a public structure that is used to pass
+ *     H5FD_subfiling_config_t is a public structure that is used to pass
  *     subfiling configuration data to the appropriate subfiling VFD via
  *     the FAPL.  A pointer to an instance of this structure is a parameter
  *     to H5Pset_fapl_subfiling() and H5Pget_fapl_subfiling().
@@ -54,15 +47,15 @@
  *     Magic is a somewhat unique number which identifies this VFD from
  *     other VFDs.  Used in combination with a version number, we can
  *     validate a user generated file access property list (fapl).
- *     This field should be set to H5FD_SUBFILING_FAPL_T_MAGIC.
+ *     This field should be set to H5FD_SUBFILING_FAPL_MAGIC.
  *
  * `version` (uint32_t)
  *
- *     Version number of the H5FD_subfiling_fapl_t structure.  Any instance
+ *     Version number of the H5FD_subfiling_config_t structure.  Any instance
  *     passed to the above calls must have a recognized version number, or
  *     an error will be flagged.
  *
- *     This field should be set to H5FD_CURR_SUBFILING_FAPL_T_VERSION.
+ *     This field should be set to H5FD_CURR_SUBFILING_FAPL_VERSION.
  *
  ***   IO Concentrator Info ***
  ***   These fields will be replicated in the stacked IOC VFD which
@@ -121,23 +114,6 @@
  *
  *     The full pathname of the user HDF5 file.
  *
-
-WARNING -- this code is commented out
-
-#define H5FD_SUBFILING_PATH_MAX 4096
-
-typedef struct config_common_t {
-    uint32_t        magic;
-    uint32_t        version;
-    int32_t         stripe_count;
-    int64_t         stripe_depth;
-    ioc_selection_t ioc_selection;
-    hid_t           ioc_fapl_id;
-    char            subfile_dir[H5FD_SUBFILING_PATH_MAX +1];
-    char            subfile_path[H5FD_SUBFILING_PATH_MAX +1];
-    char            h5_filename[H5FD_SUBFILING_PATH_MAX +1];
-} config_common_t;
-
  ****************************************************************************/
 
 /*
@@ -155,10 +131,18 @@ typedef struct config_common_t {
 
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 /**
- * Configure struct for  H5Pget_fapl_subfiling() / H5Pset_fapl_subfiling()
+ * Configuration structure for H5Pset_fapl_subfiling() / H5Pget_fapl_subfiling()
  */
 typedef struct H5FD_subfiling_config_t {
-    config_common_t common;
+    uint32_t        magic;                              /* set to H5FD_SUBFILING_FAPL_MAGIC */
+    uint32_t        version;                            /* set to H5FD_CURR_SUBFILING_FAPL_VERSION */
+    int32_t         stripe_count;                       /* How many io concentrators */
+    int64_t         stripe_depth;                       /* Max # of bytes in contiguous IO to an IOC */
+    ioc_selection_t ioc_selection;                      /* Method to select IO Concentrators */
+    hid_t           ioc_fapl_id;                        /* The hid_t value of the stacked VFD  */
+    int64_t         context_id;                         /* The value used to lookup an IOC context */
+    char            file_dir[H5FD_SUBFILING_PATH_MAX];  /* Directory where we find files */
+    char            file_path[H5FD_SUBFILING_PATH_MAX]; /* The user defined filename */
     hbool_t         require_ioc;
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->
@@ -167,27 +151,7 @@ typedef struct H5FD_subfiling_config_t {
 extern "C" {
 #endif
 
-extern FILE *sf_logfile;
-extern FILE *client_log;
-
 H5_DLL hid_t H5FD_subfiling_init(void);
-/**
- * \ingroup FAPL
- *
- * \brief Queries subfiling file driver properties
- *
- * \fapl_id
- * \param[out] config_out The subfiling fapl data.
- *
- * \returns \herr_t
- *
- * \details H5Pget_fapl_subfiling() queries the #H5FD_SUBFILING driver properties as set
- *          by H5Pset_fapl_subfiling().
- *
- * \since 1.14.0
- *
- */
-H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 /**
  * \ingroup FAPL
  *
@@ -207,75 +171,27 @@ H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *conf
  *
  */
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config);
-H5_DLL herr_t H5FD__get_file_ino(const char *name, uint64_t *st_ino);
-H5_DLL char * H5FD__get_file_directory(void *h5file);
-H5_DLL herr_t H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
-                                             int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
-                                             hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
-                                             const void *buf);
-H5_DLL herr_t H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
-                                            int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
-                                            hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
-                                            void *buf);
-
-H5_DLL char *get_ioc_selection_criteria(ioc_selection_t *);
-H5_DLL void *get__subfiling_object(int64_t object_id);
-H5_DLL hid_t fid_map_to_context(uint64_t h5_fid);
-
-/* return arguments are vector of vectors - function return is the length
- * (depth) of the sub vectors. Note that we don't need to include the
- * MPI_Datatype return argument!
+/**
+ * \ingroup FAPL
+ *
+ * \brief Queries subfiling file driver properties
+ *
+ * \fapl_id
+ * \param[out] config_out The subfiling fapl data.
+ *
+ * \returns \herr_t
+ *
+ * \details H5Pget_fapl_subfiling() queries the #H5FD_SUBFILING driver properties as set
+ *          by H5Pset_fapl_subfiling(). If the #H5FD_SUBFILING driver has not been set on
+ *          the File Access Property List, a default configuration is returned.
+ *
+ * \since 1.14.0
+ *
  */
-H5_DLL int subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags);
-
-H5_DLL int init__indep_io(void *_sf_context, size_t depth, int ioc_total, int64_t *sf_source_data_offset,
-                          int64_t *sf_datasize, int64_t *f_offset, int *first_index, int *n_containers,
-                          int64_t offset, int64_t elements, int dtype_extent);
-
-H5_DLL int    H5FD__open_subfiles(void *_config_info, uint64_t inode_id, int flags);
-H5_DLL int    H5FD__close_subfiles(hid_t context_id);
-H5_DLL int    H5FD__read_independent(hid_t H5FD__fid, int64_t offset, int64_t elements, int dtype_extent,
-                                     void *data);
-H5_DLL int    H5FD__write_independent(hid_t H5FD__fid, int64_t offset, int64_t elements, int dtype_extent,
-                                      const void *data);
-H5_DLL herr_t H5FD__read_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, hsize_t sizes[],
-                                void *bufs[] /* in */);
-H5_DLL herr_t H5FD__write_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, hsize_t sizes[],
-                                 void *bufs[] /* in */);
-H5_DLL int    H5FD__truncate(hid_t h5_fid, haddr_t addr);
-H5_DLL int    H5FD__shutdown_local_ioc(hid_t fid);
-H5_DLL void   manage_client_logfile(int client_rank, int flag_value);
-#if 0  /* JRM */
-H5_DLL int    initialize_ioc_threads(void *sf_context);
-#endif /* JRM */
-H5_DLL herr_t H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                          const void *bufs[] /* data_in */);
-
-H5_DLL herr_t H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                         void *bufs[] /* data_out */);
-#if 0  /* JRM */
-H5_DLL int    queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-#else  /* JRM */
-H5_DLL int queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
-                             int counter);
-#endif /* JRM */
-
-H5_DLL int queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-
-H5_DLL int sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
-
-H5_DLL int sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
-
-H5_DLL int sf_truncate(int fd, int64_t length, int subfile_rank);
-
-H5_DLL herr_t H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id);
-
-H5_DLL int report_sf_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-
-H5_DLL herr_t H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id);
+H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* H5FDsubfiling_H */

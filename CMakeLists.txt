@@ -750,7 +750,10 @@ if (HDF5_BUILD_SUBFILING)
   endif()
 
   set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
+  include_directories(${H5FD_SUBFILING_DIR})
   set (H5_HAVE_SUBFILING_VFD 1)
+  # IOC VFD is currently only built when subfiling is enabled
+  set (H5_HAVE_IOC_VFD 1)
 
   message (STATUS "Setting up to use Mercury components")
   include_directories(${H5FD_SUBFILING_DIR}/mercury/include)
