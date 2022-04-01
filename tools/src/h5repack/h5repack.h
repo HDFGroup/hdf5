@@ -27,6 +27,12 @@
 #define FORMAT_OBJ_ATTR   "  %-27s %s\n"     /* obj type, name */
 #define MAX_COMPACT_DSIZE 64512              /* max data size for compact layout. -1k for header size */
 
+/* timing formats */
+#define FORMAT_OBJ_TIME        " %-27s  %e/%e   %s\n"                      /* obj type, name */
+#define FORMAT_OBJ_ATTR_TIME   "  %-27s  %e/%e   %s\n"                     /* obj type, name */
+#define FORMAT_OBJ_NOTIME      " %-27s                              %s\n"  /* obj type, name */
+#define FORMAT_OBJ_ATTR_NOTIME "  %-27s                              %s\n" /* obj type, name */
+
 /* File space default information */
 #define FS_PAGESIZE_DEF  4096
 #define FS_STRATEGY_DEF  H5F_FSPACE_STRATEGY_FSM_AGGR

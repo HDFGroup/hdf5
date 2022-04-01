@@ -221,6 +221,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *          to free the stack.
  *-------------------------------------------------------------------------
  */
+
 hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
                     pack_opt_t *options)
@@ -346,24 +347,28 @@ done:
 int
 copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
-    hid_t       attr_id  = H5I_INVALID_HID; /* attr ID */
-    hid_t       attr_out = H5I_INVALID_HID; /* attr ID */
-    hid_t       space_id = H5I_INVALID_HID; /* space ID */
-    hid_t       ftype_id = H5I_INVALID_HID; /* file type ID */
-    hid_t       wtype_id = H5I_INVALID_HID; /* read/write type ID */
-    size_t      msize;                      /* size of type */
-    void *      buf = NULL;                 /* data buffer */
-    hsize_t     nelmts;                     /* number of elements in dataset */
-    int         rank;                       /* rank of dataset */
-    htri_t      is_named;                   /* Whether the datatype is named */
-    hsize_t     dims[H5S_MAX_RANK];         /* dimensions of dataset */
-    char        name[255];
-    H5O_info_t  oinfo; /* object info */
-    int         j;
-    unsigned    u;
-    hbool_t     is_ref     = 0;
-    H5T_class_t type_class = -1;
-    int         ret_value  = 0;
+    hid_t          attr_id  = H5I_INVALID_HID; /* attr ID */
+    hid_t          attr_out = H5I_INVALID_HID; /* attr ID */
+    hid_t          space_id = H5I_INVALID_HID; /* space ID */
+    hid_t          ftype_id = H5I_INVALID_HID; /* file type ID */
+    hid_t          wtype_id = H5I_INVALID_HID; /* read/write type ID */
+    size_t         msize;                      /* size of type */
+    void *         buf = NULL;                 /* data buffer */
+    hsize_t        nelmts;                     /* number of elements in dataset */
+    int            rank;                       /* rank of dataset */
+    htri_t         is_named;                   /* Whether the datatype is named */
+    hsize_t        dims[H5S_MAX_RANK];         /* dimensions of dataset */
+    H5_timer_t     timer;                      /* Timer for read/write operations */
+    H5_timevals_t  times;                      /* Elapsed time for each operation */
+    static double  read_time  = 0;
+    static double  write_time = 0;
+    char           name[255];
+    H5O_info_t     oinfo; /* object info */
+    int            j;
+    unsigned       u;
+    hbool_t        is_ref     = 0;
+    H5T_class_t    type_class = -1;
+    int            ret_value  = 0;
 
     if (H5Oget_info2(loc_in, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Oget_info failed");
