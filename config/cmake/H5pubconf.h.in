@@ -502,6 +502,9 @@
 /* Define if the high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
 
+/* Define if new-style references should be used with dimension scales */
+#cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
+
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
 #cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
