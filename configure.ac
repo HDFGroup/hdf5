@@ -1566,67 +1566,6 @@ case "X-$withval" in
 esac
 
 
-## ----------------------------------------------------------------------
-## Is mercury(an external RPC Framework library) requested? It has a 
-## header file `mercury.h' and a library `-lmercury_util' and their 
-## install locations might be specified with the `--with-mercury'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
-##
-AC_SUBST([HAVE_MERCURY])
-
-## Default is not present
-HAVE_MERCURY=no
-
-AC_ARG_WITH([mercury],
-            [AS_HELP_STRING([--with-mercury=DIR],
-                            [Use the mercury library [default=no]])],,
-            [withval=no])
-
-case "X-$withval" in
-  X-yes)
-    HAVE_MERCURY="yes"
-    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find mercury library])
-    fi
-    echo "HAVE_MERCURY flag = $HAVE_MERCURY"
-    ;;
-  X-|X-no|X-none)
-    HAVE_MERCURY="no"
-    AC_MSG_CHECKING([for mercury library])
-    AC_MSG_RESULT([suppressed])
-    ;;
-  *)
-    HAVE_MERCURY="yes"
-    case "$withval" in
-      *,*)
-        mercury_inc="`echo $withval |cut -f1 -d,`"
-        mercury_lib="`echo $withval |cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          mercury_inc="$withval/include"
-          mercury_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    echo "checking include path: $mercury_inc"
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    saved_AM_LDFLAGS="$AM_LDFLAGS"
-
-    if test -n "$mercury_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$mercury_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
-    fi
-
-    AC_CHECK_HEADERS([mercury.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_MERCURY])
-    ;;
-esac
-
-AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
@@ -3253,9 +3192,11 @@ fi
 ## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
 ##
 AC_SUBST([SUBFILING_VFD])
+AC_SUBST([HAVE_MERCURY])
 
 ## Default is no subfiling VFD
 SUBFILING_VFD=no
+HAVE_MERCURY="no"
 
 AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
 
@@ -3266,11 +3207,19 @@ AC_ARG_ENABLE([subfiling-vfd],
               [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
 
 if test "X$SUBFILING_VFD" = "Xyes"; then
-        AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_SUBFILING_VFD], [1],
-                [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
-        AC_DEFINE([HAVE_IOC_VFD], [1],
-                [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_SUBFILING_VFD], [1],
+            [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
+    AC_DEFINE([HAVE_IOC_VFD], [1],
+            [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
+
+    # Set-up mercury
+    HAVE_MERCURY="yes"
+    mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
+    mercury_inc="$mercury_dir/include"
+
+    CPPFLAGS="$CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
+    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
 else
     AC_MSG_RESULT([no])
 fi
@@ -3279,6 +3228,8 @@ fi
 AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
 # IOC VFD is currently only built when subfiling is enabled
 AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# Mercury is currently only needed if  subfiling is enabled
+AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
 
 
 ## ----------------------------------------------------------------------
@@ -4367,6 +4318,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/test/Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
+
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

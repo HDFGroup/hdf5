@@ -79,6 +79,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                                MPE: @H5_HAVE_LIBLMPE@
                         Direct VFD: @H5_HAVE_DIRECT@
                         Mirror VFD: @H5_HAVE_MIRROR_VFD@
+                     Subfiling VFD: @H5_HAVE_SUBFILING_VFD@
                 (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@
               (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@
                            dmalloc: @H5_HAVE_LIBDMALLOC@
