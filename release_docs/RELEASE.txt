@@ -223,6 +223,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added an optional verbose value for reporting R/W timing.
+
+      In addition to adding timing capture around the read/write calls in
+      h5repack, added help text to indicate how to show timing for read/write;
+           -v N, --verbose=N       Verbose mode, print object information.
+              N - is an integer greater than 1, 2 displays read/write timing
+      (ADB - 2022/04/01)
+      
     - Refactored the perform tools and removed depends on test library.
 
         Moved the perf and h5perf tools from tools/test/perform to
