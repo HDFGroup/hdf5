@@ -3220,6 +3220,14 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
 
     CPPFLAGS="$CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
+
+    # subfiling requires atomic operations support
+    HAVE_STDATOMIC_H="yes"
+    AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
+    if test "x$HAVE_STDATOMIC_H" = "xno"; then
+      AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
+    fi
+
 else
     AC_MSG_RESULT([no])
 fi
