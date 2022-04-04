@@ -335,6 +335,9 @@
 /* Define if Subfiling VFD is built */
 #cmakedefine H5_HAVE_SUBFILING_VFD @H5_HAVE_SUBFILING_VFD@
 
+/* Define if have stdatomic.h for Subfiling VFD */
+#cmakedefine H5_HAVE_STDATOMIC_H @H5_HAVE_STDATOMIC_H@
+
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@
 
