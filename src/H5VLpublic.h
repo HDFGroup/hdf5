@@ -334,6 +334,19 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  * \since 1.12.0
  */
 H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);
+/**
+ * \ingroup H5VL
+ * \brief Determines whether an object ID represents a native
+ *        VOL connector object.
+ *
+ * \param[in] obj_id Object identifier
+ * \param[in] is_native Boolean determining whether object is a native
+ *            VOL connector object
+ * \return \herr_t
+ *
+ * \since 1.13.0
+ */
+H5_DLL herr_t H5VLobject_is_native(hid_t obj_id, hbool_t *is_native);
 
 #ifdef __cplusplus
 }
