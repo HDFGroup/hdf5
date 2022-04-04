@@ -90,6 +90,7 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
+    H5FD_VFD_SWMR_VALUE,       /* value                */
     "vfd_swmr",                /* name                 */
     MAXADDR,                   /* maxaddr              */
     H5F_CLOSE_WEAK,            /* fc_degree            */
@@ -122,6 +123,7 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD__vfd_swmr_lock,       /* lock                 */
     H5FD__vfd_swmr_unlock,     /* unlock               */
     NULL,                      /* del                  */
+    NULL,                      /* ctl                  */
     H5FD_FLMAP_DICHOTOMY       /* fl_map               */
 };
 
@@ -132,30 +134,6 @@ H5FL_DEFINE_STATIC(H5FD_vfd_swmr_t);
 H5FL_SEQ_DEFINE(H5FD_vfd_swmr_idx_entry_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
-b
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_vfd_swmr_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize swmr VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -164,9 +142,6 @@ done:
  * Return:      Success:    The driver ID for the VFD SWMR driver.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -174,7 +149,7 @@ H5FD_vfd_swmr_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_VFD_SWMR_g))
         H5FD_VFD_SWMR_g = H5FD_register(&H5FD_vfd_swmr_g, sizeof(H5FD_class_t), FALSE);
@@ -182,7 +157,6 @@ H5FD_vfd_swmr_init(void)
     /* Set return value */
     ret_value = H5FD_VFD_SWMR_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_init() */
 
@@ -192,9 +166,6 @@ done:
  * Purpose:     Shut down the VFD
  *
  * Returns:     SUCCEED (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
  *
  *---------------------------------------------------------------------------
  */
@@ -231,15 +202,22 @@ H5Pset_fapl_vfd_swmr(hid_t fapl_id)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_VFD_SWMR, NULL, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_vfd_swmr() */
 
-/* Perform the reader-only aspects of opening in VFD SWMR mode:
- * initialize histogram of ticks spent in API calls, wait for the
- * shadow file to appear, load the header and index.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__swmr_reader_open
+ *
+ * Purpose:     Perform the reader-only aspects of opening in VFD SWMR mode:
+ *              initialize histogram of ticks spent in API calls, wait for
+ *              the shadow file to appear, load the header and index.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
@@ -258,9 +236,9 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "could not allocate API elapsed ticks")
 
     /* Retry on opening the metadata file */
-    for (do_try         = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
+    for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
                                 H5_RETRY_DEFAULT_MAXIVAL);
-         do_try; do_try = h5_retry_next(&retry)) {
+         do_try; do_try = H5_retry_next(&retry)) {
         if ((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
             break;
     }
@@ -374,14 +352,23 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__vfd_swmr_open() */
 
-/* Perform the reader-only aspects of closing in VFD SWMR mode: optionally
- * log and always release the histogram of ticks spent in API calls,
- * close the shadow file, release the shadow index.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__swmr_reader_close
+ *
+ * Purpose:     Perform the reader-only aspects of closing in VFD SWMR mode:
+ *              optionally log and always release the histogram of ticks spent
+ *              in API calls, close the shadow file, release the shadow index.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
-    vfd_swmr_reader_did_increase_tick_to(0);
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
 
     if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
@@ -389,11 +376,14 @@ H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
     /* Close the metadata file */
     if (file->md_fd >= 0 && HDclose(file->md_fd) < 0)
         /* Push error, but keep going */
-        HERROR(H5E_VFL, H5E_CANTCLOSEFILE, "unable to close the metadata file");
+        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file");
 
     /* Free the index entries */
     if (file->md_index.num_entries && file->md_index.entries)
         file->md_index.entries = H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, file->md_index.entries);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5FD__swmr_reader_close() */
 
 /*-------------------------------------------------------------------------
@@ -793,7 +783,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
     /* Try finding the addr from the index */
     target_page = addr / fs_page_size;
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
+    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
 
     if (entry == NULL) {
         /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -1034,9 +1024,9 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 
     FUNC_ENTER_STATIC
 
-    for (do_try         = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX, H5_RETRY_ONE_SECOND / 10,
+    for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX, H5_RETRY_ONE_SECOND / 10,
                                 H5_RETRY_ONE_SECOND);
-         do_try; do_try = h5_retry_next(&retry)) {
+         do_try; do_try = H5_retry_next(&retry)) {
 
         /* Load and decode the header.  Go around again on a temporary
          * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
@@ -1193,7 +1183,8 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
     UINT32DECODE(p, md_header->fs_page_size);
     UINT64DECODE(p, md_header->tick_num);
     UINT64DECODE(p, md_header->index_offset);
-    if ((index_length = uint64_decode(&p)) > SIZE_MAX)
+    UINT64DECODE(p, index_length);
+    if (index_length > SIZE_MAX)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "index is too large to hold in core")
 
     md_header->index_length = (size_t)index_length;
@@ -1204,13 +1195,6 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
     /* Sanity check */
     HDassert((size_t)(p - image) <= H5FD_MD_HEADER_SIZE);
 
-#if 0  /* JRM */
-    HDfprintf(stderr,
-        "---read header ps/tick/idx_off/idx_len = %d / %lld / %lld / %lld\n",
-             md_header->fs_page_size, md_header->tick_num,
-             md_header->index_offset, md_header->index_length);
-#endif /* JRM */
-
     ret_value = TRUE;
 
 done:
@@ -1219,7 +1203,7 @@ done:
 
 } /* H5FD__vfd_swmr_header_deserialize() */
 
-/*
+/*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_index_deserialize()
  *
  * Purpose:     Load and decode the index in the metadata file
@@ -1230,10 +1214,8 @@ done:
  *              --Decode the index entries if the tick number in the header and
  *                the index match
  *
- * Return:      Success:    TRUE
- *              Failure:    FAIL
- *              Retry:     FALSE
- *
+ * Return:      TRUE/FALSE/FAIL
+ *-------------------------------------------------------------------------
  */
 static htri_t
 H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_index *md_index,
@@ -1343,12 +1325,6 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
     /* Sanity check */
     HDassert((size_t)(p - image) <= md_header->index_length);
 
-#if 0  /* JRM */
-    HDfprintf(stderr,
-             " ---- read index tick/num_entries = %lld / %d \n",
-             md_index->tick_num, md_index->num_entries);
-#endif /* JRM */
-
 done:
     if (image != NULL)
         image = H5MM_xfree(image);
@@ -1379,8 +1355,7 @@ done:
  *              --Return tick_num, num_entries and index from the VFD's
  *                local copies.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi
  *
@@ -1429,8 +1404,7 @@ done:
  * Purpose:     Dump a variety of information about the vfd swmr reader
  *              vfd to stderr for debugging purposes.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -1513,7 +1487,6 @@ H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file)
  * Programmer:  JRM -- 1/29/19
  *
  *-------------------------------------------------------------------------
- *
  */
 void
 H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)

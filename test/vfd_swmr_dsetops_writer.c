@@ -79,7 +79,7 @@ typedef struct {
     bool         reg_ref;            /* For -R option */
     bool         compact;            /* -p option: create compact dataset */
     bool         compact_write;      /* -t option: write to the whole compact dataset */
-    unsigned int compact_elmts;      /* -e <elmts> option: # of elments for the compact dataset */
+    unsigned int compact_elmts;      /* -e <elmts> option: # of elements for the compact dataset */
     bool         contig;             /* -g option: create contiguous dataset */
     bool         chunked;            /* -k option: create chunked datasets with 5 indexing types */
     unsigned int rows;               /* -m <rows> option for contiguous and/or chunked datasets */
@@ -192,8 +192,6 @@ static bool verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool 
 static bool closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
                                np_state_t *np);
 
-static const hid_t badhid = H5I_INVALID_HID;
-
 /* Names for datasets */
 #define DSET_COMPACT_NAME  "compact_dset"
 #define DSET_CONTIG_NAME   "contig_dset"
@@ -265,10 +263,12 @@ usage(const char *progname)
 static bool
 state_init(state_t *s, int argc, char **argv)
 {
-    unsigned long tmp;
-    int           ch;
-    char *        tfile = NULL;
-    char *        end;
+    unsigned long          tmp;
+    int                    opt;
+    char *                 tfile = NULL;
+    char *                 end;
+    const char *           s_opts   = "pte:gkm:n:s:r:l:w:bqSNUORu:c:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = ALL_HID_INITIALIZER;
 
@@ -284,8 +284,8 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "pte:gkm:n:s:r:l:w:bqSNUORu:c:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+        switch (opt) {
 
             case 'p': /* compact dataset */
                 s->compact = true;
@@ -341,37 +341,37 @@ state_init(state_t *s, int argc, char **argv)
             case 'u': /* ticks for raeder to wait before verification */
             case 'c': /* communication interval */
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDprintf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    HDprintf("`-%c` argument `%lu` too large\n", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'e')
+                if (opt == 'e')
                     s->compact_elmts = (unsigned)tmp;
-                else if (ch == 'm')
+                else if (opt == 'm')
                     s->rows = (unsigned)tmp;
-                else if (ch == 'n')
+                else if (opt == 'n')
                     s->cols = (unsigned)tmp;
-                else if (ch == 's')
+                else if (opt == 's')
                     s->swrites = (unsigned)tmp;
-                else if (ch == 'r')
+                else if (opt == 'r')
                     s->rwrites = (unsigned)tmp;
-                else if (ch == 'l')
+                else if (opt == 'l')
                     s->lwrites = (unsigned)tmp;
-                else if (ch == 'w')
+                else if (opt == 'w')
                     s->wwrites = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->update_interval = (unsigned)tmp;
-                else if (ch == 'c')
+                else if (opt == 'c')
                     s->csteps = (unsigned)tmp;
 
                 break;
@@ -382,8 +382,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     /* Require to specify at least -p or -g or -k option */
     if (!s->compact && !s->contig && !s->chunked) {
@@ -476,11 +476,11 @@ error:
 static bool
 create_dsets(const state_t *s, dsets_state_t *ds)
 {
-    hid_t      dcpl = badhid;
-    hid_t      dtid = badhid;
+    hid_t      dcpl = H5I_INVALID_HID;
+    hid_t      dtid = H5I_INVALID_HID;
     unsigned   i;
     H5R_ref_t *obj_buf  = NULL; /* Buffer for object references */
-    hid_t      sid      = badhid;
+    hid_t      sid      = H5I_INVALID_HID;
     hsize_t    obj_dims = OBJ_REF_DIMS; /* Dimension for object reference dataset */
     hsize_t    reg_dims = REG_REF_DIMS; /* Dimension for region reference dataset */
 
@@ -1095,12 +1095,12 @@ error:
 static bool
 close_dset_real(hid_t did, hid_t sid)
 {
-    if (did != badhid && H5Dclose(did) < 0) {
+    if (did != H5I_INVALID_HID && H5Dclose(did) < 0) {
         HDprintf("H5Dclose dataset failed\n");
         TEST_ERROR;
     }
 
-    if (sid != badhid && H5Sclose(sid) < 0) {
+    if (sid != H5I_INVALID_HID && H5Sclose(sid) < 0) {
         HDprintf("H5Sclose dataspace for dataset failed\n");
         TEST_ERROR;
     }
@@ -1783,7 +1783,7 @@ verify_dset(hid_t did, hid_t tid, hid_t sid, hid_t mem_sid, hsize_t *start, hsiz
 
     /* If region reference is enabled, obtain the dataset selection from the reference buffer */
     if (reg_buf != NULL) { /* Imply region reference is enabled */
-        hid_t temp_sid = badhid;
+        hid_t temp_sid = H5I_INVALID_HID;
 
         H5E_BEGIN_TRY
         {
@@ -1841,7 +1841,7 @@ error:
 static bool
 verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool fileclosed, bool flush_raw_data)
 {
-    unsigned int *rbuf;
+    unsigned int *rbuf = NULL;
     unsigned      i;
 
     /* Refresh the dataset */
@@ -1999,7 +1999,10 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
         /* At communication interval, notify the reader about the failure and quit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
     }
@@ -2054,7 +2057,10 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
         /* At communication interval, tell the writer about the failure and exit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
         /* The verification succeeds */
@@ -2337,7 +2343,7 @@ error:
     }
 
     return EXIT_FAILURE;
-} /* main */
+}
 
 #else /* H5_HAVE_WIN32_API */
 
@@ -2346,6 +2352,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */

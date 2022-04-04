@@ -18,7 +18,6 @@
  *
  *************************************************************/
 
-#include "H5queue.h"
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -113,7 +112,7 @@ static unsigned test_updater_generate_md_checksums(hbool_t file_create);
  *                   then updater_file_path field shouldn't be empty
  *              B) Verify that info set in the fapl is retrieved correctly.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; July 2018
@@ -123,9 +122,9 @@ static unsigned test_updater_generate_md_checksums(hbool_t file_create);
 static unsigned
 test_fapl(void)
 {
-    hid_t                  fapl      = -1;   /* File access property list */
-    H5F_vfd_swmr_config_t *my_config = NULL; /* Configuration for VFD SWMR */
-    herr_t                 ret;              /* Return value */
+    hid_t                  fapl      = H5I_INVALID_HID; /* File access property list */
+    H5F_vfd_swmr_config_t *my_config = NULL;            /* Configuration for VFD SWMR */
+    herr_t                 ret;                         /* Return value */
 
     TESTING("Configure VFD SWMR with fapl");
 
@@ -277,8 +276,7 @@ test_fapl(void)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    if (my_config)
-        HDfree(my_config);
+    HDfree(my_config);
 
     PASSED();
     return 0;
@@ -289,8 +287,9 @@ error:
         H5Pclose(fapl);
     }
     H5E_END_TRY;
-    if (my_config)
-        HDfree(my_config);
+
+    HDfree(my_config);
+
     return 1;
 } /* test_fapl() */
 
@@ -307,7 +306,7 @@ error:
  *                 used to create/open the file is the same as the
  *                 configuration retrieved from the file's fapl.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; July 2018
@@ -317,12 +316,12 @@ error:
 static unsigned
 test_file_fapl(void)
 {
-    hid_t                  fid         = -1;   /* File ID */
-    hid_t                  fid2        = -1;   /* File ID */
-    hid_t                  fcpl        = -1;   /* File creation property list ID */
-    hid_t                  fapl1       = -1;   /* File access property list ID */
-    hid_t                  fapl2       = -1;   /* File access property list ID */
-    hid_t                  file_fapl   = -1;   /* File access property list ID associated with the file */
+    hid_t fid       = H5I_INVALID_HID;         /* File ID */
+    hid_t fid2      = H5I_INVALID_HID;         /* File ID */
+    hid_t fcpl      = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t fapl1     = H5I_INVALID_HID;         /* File access property list ID */
+    hid_t fapl2     = H5I_INVALID_HID;         /* File access property list ID */
+    hid_t file_fapl = H5I_INVALID_HID;         /* File access property list ID associated with the file */
     H5F_vfd_swmr_config_t *config1     = NULL; /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *config2     = NULL; /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *file_config = NULL; /* Configuration for VFD SWMR */
@@ -603,12 +602,9 @@ test_file_fapl(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (file_config)
-        HDfree(file_config);
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(file_config);
 
     PASSED();
     return 0;
@@ -624,12 +620,11 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (file_config)
-        HDfree(file_config);
+
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(file_config);
+
     return 1;
 } /* test_file_fapl() */
 
@@ -639,7 +634,7 @@ error:
  * Purpose:     Verify the public routine H5Fvfd_swmr_end_tick() works
  *              as described in the RFC for VFD SWMR.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -831,12 +826,9 @@ test_file_end_tick(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (config3)
-        HDfree(config3);
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(config3);
 
     PASSED();
     return 0;
@@ -854,12 +846,9 @@ error:
     }
     H5E_END_TRY;
 
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (config3)
-        HDfree(config3);
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(config3);
 
     return 1;
 } /* test_file_end_tick() */
@@ -882,7 +871,7 @@ error:
  *                  --Verify info in the header and index read from
  *                    the metadata file is as expected (empty index)
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -957,15 +946,12 @@ test_writer_create_open_flush(void)
     if (H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
 
-    if (my_config)
-        HDfree(my_config);
+    HDfree(my_config);
 
     PASSED();
     return 0;
 
 error:
-    if (my_config)
-        HDfree(my_config);
 
     H5E_BEGIN_TRY
     {
@@ -974,6 +960,8 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
+
+    HDfree(my_config);
 
     return 1;
 } /* test_writer_create_open_flush() */
@@ -994,7 +982,7 @@ error:
  *                file is as expected:
  *                --num_entries and index
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -1004,15 +992,15 @@ error:
 static unsigned
 test_writer_md(void)
 {
-    hid_t          fid         = -1;                                   /* File ID */
-    hid_t          fapl        = -1;                                   /* File access property list */
-    hid_t          fcpl        = -1;                                   /* File creation property list */
+    hid_t          fid         = H5I_INVALID_HID;                      /* File ID */
+    hid_t          fapl        = H5I_INVALID_HID;                      /* File access property list */
+    hid_t          fcpl        = H5I_INVALID_HID;                      /* File creation property list */
     const unsigned num_entries = 10;                                   /* index size */
     unsigned       i           = 0;                                    /* Local index variables */
     uint8_t *      buf         = NULL;                                 /* Data page from the page buffer */
-    hid_t          dcpl        = -1;                                   /* Dataset creation property list */
-    hid_t          sid         = -1;                                   /* Dataspace ID */
-    hid_t          did         = -1;                                   /* Dataset ID */
+    hid_t          dcpl        = H5I_INVALID_HID;                      /* Dataset creation property list */
+    hid_t          sid         = H5I_INVALID_HID;                      /* Dataspace ID */
+    hid_t          did         = H5I_INVALID_HID;                      /* Dataset ID */
     int *          rwbuf       = NULL;                                 /* Data buffer for writing */
     H5O_info2_t    oinfo;                                              /* Object metadata information */
     char           dname[100];                                         /* Name of dataset */
@@ -1203,28 +1191,15 @@ test_writer_md(void)
         FAIL_STACK_ERROR;
 
     /* Free resources */
-    if (my_config)
-        HDfree(my_config);
-    if (buf)
-        HDfree(buf);
-    if (rwbuf)
-        HDfree(rwbuf);
-    if (index)
-        HDfree(index);
+    HDfree(my_config);
+    HDfree(buf);
+    HDfree(rwbuf);
+    HDfree(index);
 
     PASSED();
     return 0;
 
 error:
-    if (my_config)
-        HDfree(my_config);
-    if (buf)
-        HDfree(buf);
-    if (rwbuf)
-        HDfree(rwbuf);
-    if (index)
-        HDfree(index);
-
     H5E_BEGIN_TRY
     {
         H5Dclose(did);
@@ -1235,6 +1210,11 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
+
+    HDfree(my_config);
+    HDfree(buf);
+    HDfree(rwbuf);
+    HDfree(index);
 
     return 1;
 } /* test_writer__md() */
@@ -1297,7 +1277,7 @@ test_file_end_tick_concur(void)
  *                    Index entries are constructed at the front end by the
  *                    writer and verified at the back end by the reader.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2018
@@ -1307,30 +1287,30 @@ test_file_end_tick_concur(void)
 static unsigned
 test_reader_md_concur(void)
 {
-    unsigned    i     = 0;              /* Local index variables */
-    uint8_t *   buf   = NULL;           /* Data page from the page buffer */
-    hid_t       dcpl  = -1;             /* Dataset creation property list */
-    hid_t       sid   = -1;             /* Dataspace ID */
-    hid_t       did   = -1;             /* Dataset ID */
-    int *       rwbuf = NULL;           /* Data buffer for writing */
-    H5O_info2_t oinfo;                  /* Object metadata information */
-    char        dname[100];             /* Name of dataset */
-    hsize_t     dims[2]     = {50, 20}; /* Dataset dimension sizes */
-    hsize_t     max_dims[2] =           /* Dataset maximum dimension sizes */
+    unsigned    i     = 0;               /* Local index variables */
+    uint8_t *   buf   = NULL;            /* Data page from the page buffer */
+    hid_t       dcpl  = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t       sid   = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t       did   = H5I_INVALID_HID; /* Dataset ID */
+    int *       rwbuf = NULL;            /* Data buffer for writing */
+    H5O_info2_t oinfo;                   /* Object metadata information */
+    char        dname[100];              /* Name of dataset */
+    hsize_t     dims[2]     = {50, 20};  /* Dataset dimension sizes */
+    hsize_t     max_dims[2] =            /* Dataset maximum dimension sizes */
         {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t                    chunk_dims[2] = {2, 5}; /* Dataset chunked dimension sizes */
     unsigned                   num_entries   = 0;      /* Number of entries in the index */
     H5FD_vfd_swmr_idx_entry_t *index         = NULL;   /* Pointer to the index entries */
 
-    hid_t                  fcpl          = -1;    /* File creation property list */
-    hid_t                  fid_writer    = -1;    /* File ID for writer */
-    hid_t                  fapl_writer   = -1;    /* File access property list for writer */
-    H5F_vfd_swmr_config_t *config_writer = NULL;  /* VFD SWMR Configuration for writer */
-    pid_t                  tmppid;                /* Child process ID returned by waitpid */
-    pid_t                  childpid = 0;          /* Child process ID */
-    int                    child_status;          /* Status passed to waitpid */
-    int                    child_wait_option = 0; /* Options passed to waitpid */
-    int                    child_exit_val;        /* Exit status of the child */
+    hid_t                  fcpl          = H5I_INVALID_HID; /* File creation property list */
+    hid_t                  fid_writer    = H5I_INVALID_HID; /* File ID for writer */
+    hid_t                  fapl_writer   = H5I_INVALID_HID; /* File access property list for writer */
+    H5F_vfd_swmr_config_t *config_writer = NULL;            /* VFD SWMR Configuration for writer */
+    pid_t                  tmppid;                          /* Child process ID returned by waitpid */
+    pid_t                  childpid = 0;                    /* Child process ID */
+    int                    child_status;                    /* Status passed to waitpid */
+    int                    child_wait_option = 0;           /* Options passed to waitpid */
+    int                    child_exit_val;                  /* Exit status of the child */
 
     int    parent_pfd[2]; /* Pipe for parent process as writer */
     int    child_pfd[2];  /* Pipe for child process as reader */
@@ -1384,13 +1364,13 @@ test_reader_md_concur(void)
      * Child process as reader
      */
     if (childpid == 0) {
-        int                        child_notify = 0;         /* Notification between child and parent */
-        hid_t                      fid_reader   = -1;        /* File ID for reader */
-        hid_t                      fapl_reader  = -1;        /* File access property list for reader */
-        H5F_t *                    file_reader;              /* File pointer for reader */
-        H5F_vfd_swmr_config_t *    config_reader     = NULL; /* VFD SWMR configuration for reader */
-        unsigned                   child_num_entries = 0;    /* Number of entries passed to reader */
-        H5FD_vfd_swmr_idx_entry_t *child_index       = NULL; /* Index passed to reader */
+        int                        child_notify = 0;               /* Notification between child and parent */
+        hid_t                      fid_reader   = H5I_INVALID_HID; /* File ID for reader */
+        hid_t                      fapl_reader  = H5I_INVALID_HID; /* File access property list for reader */
+        H5F_t *                    file_reader;                    /* File pointer for reader */
+        H5F_vfd_swmr_config_t *    config_reader     = NULL;       /* VFD SWMR configuration for reader */
+        unsigned                   child_num_entries = 0;          /* Number of entries passed to reader */
+        H5FD_vfd_swmr_idx_entry_t *child_index       = NULL;       /* Index passed to reader */
 
         /* Close unused write end for writer pipe */
         if (HDclose(parent_pfd[1]) < 0)
@@ -1590,10 +1570,8 @@ test_reader_md_concur(void)
             HDexit(EXIT_FAILURE);
 
         /* Free resources */
-        if (child_index)
-            HDfree(child_index);
-        if (config_reader)
-            HDfree(config_reader);
+        HDfree(child_index);
+        HDfree(config_reader);
 
         /* Closing */
         if (H5Fclose(fid_reader) < 0)
@@ -1634,7 +1612,7 @@ test_reader_md_concur(void)
     /* Get the file pointer */
     file_writer = H5VL_object(fid_writer);
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -1906,27 +1884,19 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR;
 
     /* Free resources */
-    if (config_writer)
-        HDfree(config_writer);
-    if (buf)
-        HDfree(buf);
-    if (rwbuf)
-        HDfree(rwbuf);
-    if (index)
-        HDfree(index);
+    HDfree(config_writer);
+    HDfree(buf);
+    HDfree(rwbuf);
+    HDfree(index);
 
     PASSED();
     return 0;
 
 error:
-    if (config_writer)
-        HDfree(config_writer);
-    if (buf)
-        HDfree(buf);
-    if (rwbuf)
-        HDfree(rwbuf);
-    if (index)
-        HDfree(index);
+    HDfree(config_writer);
+    HDfree(buf);
+    HDfree(rwbuf);
+    HDfree(index);
 
     H5E_BEGIN_TRY
     {
@@ -1945,7 +1915,7 @@ error:
  * Purpose:     Verify the entries on the EOT queue when opening files
  *              with and without VFD SWMR configured.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; 11/18/2019
@@ -1963,9 +1933,11 @@ test_multiple_file_opens_concur(void)
     int                    child_exit_val;        /* Exit status of the child */
     int                    parent_pfd[2];         /* Pipe for parent process as writer */
     int                    child_pfd[2];          /* Pipe for child process as reader */
-    int                    notify = 0;            /* Notification between parent and child */
-    hid_t                  fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
-    hid_t                  fapl1 = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID;
+    int                    notify  = 0;           /* Notification between parent and child */
+    hid_t                  fid1    = H5I_INVALID_HID;
+    hid_t                  fid2    = H5I_INVALID_HID;
+    hid_t                  fapl1   = H5I_INVALID_HID;
+    hid_t                  fapl2   = H5I_INVALID_HID;
     H5F_vfd_swmr_config_t *config1 = NULL; /* VFD SWMR configuration */
     H5F_vfd_swmr_config_t *config2 = NULL; /* VFD SWMR configuration */
     H5F_t *                f1, *f2;        /* File pointer */
@@ -2009,10 +1981,10 @@ test_multiple_file_opens_concur(void)
      * Child process
      */
     if (childpid == 0) {
-        int                    child_notify  = 0;    /* Notification between child and parent */
-        hid_t                  fid_writer    = -1;   /* File ID for writer */
-        hid_t                  fapl_writer   = -1;   /* File access property list for writer */
-        H5F_vfd_swmr_config_t *config_writer = NULL; /* VFD SWMR configuration for reader */
+        int                    child_notify  = 0;               /* Notification between child and parent */
+        hid_t                  fid_writer    = H5I_INVALID_HID; /* File ID for writer */
+        hid_t                  fapl_writer   = H5I_INVALID_HID; /* File access property list for writer */
+        H5F_vfd_swmr_config_t *config_writer = NULL;            /* VFD SWMR configuration for reader */
 
         /* Close unused write end for writer pipe */
         if (HDclose(parent_pfd[1]) < 0)
@@ -2063,8 +2035,7 @@ test_multiple_file_opens_concur(void)
                 HDexit(EXIT_FAILURE);
         }
 
-        if (config_writer)
-            HDfree(config_writer);
+        HDfree(config_writer);
 
         /* Close the file */
         if (H5Fclose(fid_writer) < 0)
@@ -2222,19 +2193,15 @@ test_multiple_file_opens_concur(void)
         FAIL_STACK_ERROR;
 
     /* Free resources */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+    HDfree(config1);
+    HDfree(config2);
 
     PASSED();
     return 0;
 
 error:
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+    HDfree(config1);
+    HDfree(config2);
 
     H5E_BEGIN_TRY
     {
@@ -2258,7 +2225,7 @@ error:
  *              enables/disables EOT when the files are opened
  *              concurrently.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -2268,15 +2235,15 @@ error:
 static unsigned
 test_disable_enable_eot_concur(void)
 {
-    hid_t                  fcpl          = -1;    /* File creation property list */
-    hid_t                  fid_writer    = -1;    /* File ID for writer */
-    hid_t                  fapl_writer   = -1;    /* File access property list for writer */
-    H5F_vfd_swmr_config_t *config_writer = NULL;  /* VFD SWMR Configuration for writer */
-    pid_t                  tmppid;                /* Child process ID returned by waitpid */
-    pid_t                  childpid = 0;          /* Child process ID */
-    int                    child_status;          /* Status passed to waitpid */
-    int                    child_wait_option = 0; /* Options passed to waitpid */
-    int                    child_exit_val;        /* Exit status of the child */
+    hid_t                  fcpl          = H5I_INVALID_HID; /* File creation property list */
+    hid_t                  fid_writer    = H5I_INVALID_HID; /* File ID for writer */
+    hid_t                  fapl_writer   = H5I_INVALID_HID; /* File access property list for writer */
+    H5F_vfd_swmr_config_t *config_writer = NULL;            /* VFD SWMR Configuration for writer */
+    pid_t                  tmppid;                          /* Child process ID returned by waitpid */
+    pid_t                  childpid = 0;                    /* Child process ID */
+    int                    child_status;                    /* Status passed to waitpid */
+    int                    child_wait_option = 0;           /* Options passed to waitpid */
+    int                    child_exit_val;                  /* Exit status of the child */
 
     int parent_pfd[2]; /* Pipe for parent process as writer */
     int child_pfd[2];  /* Pipe for child process as reader */
@@ -2453,8 +2420,8 @@ test_disable_enable_eot_concur(void)
             HDexit(EXIT_FAILURE);
         if (H5Pclose(fapl_reader) < 0)
             HDexit(EXIT_FAILURE);
-        if (config_reader)
-            HDfree(config_reader);
+
+        HDfree(config_reader);
 
         /* Close the pipes */
         if (HDclose(parent_pfd[0]) < 0)
@@ -2485,7 +2452,7 @@ test_disable_enable_eot_concur(void)
     if ((fid_writer = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_writer)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -2522,15 +2489,13 @@ test_disable_enable_eot_concur(void)
         FAIL_STACK_ERROR;
 
     /* Free resources */
-    if (config_writer)
-        HDfree(config_writer);
+    HDfree(config_writer);
 
     PASSED();
     return 0;
 
 error:
-    if (config_writer)
-        HDfree(config_writer);
+    HDfree(config_writer);
 
     H5E_BEGIN_TRY
     {
@@ -2550,7 +2515,7 @@ error:
  *              triggers end of tick processing when the files
  *              are opened concurrently.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -2560,15 +2525,15 @@ error:
 static unsigned
 test_file_end_tick_concur(void)
 {
-    hid_t                  fcpl          = -1;    /* File creation property list */
-    hid_t                  fid_writer    = -1;    /* File ID for writer */
-    hid_t                  fapl_writer   = -1;    /* File access property list for writer */
-    H5F_vfd_swmr_config_t *config_writer = NULL;  /* VFD SWMR Configuration for writer */
-    pid_t                  tmppid;                /* Child process ID returned by waitpid */
-    pid_t                  childpid = 0;          /* Child process ID */
-    int                    child_status;          /* Status passed to waitpid */
-    int                    child_wait_option = 0; /* Options passed to waitpid */
-    int                    child_exit_val;        /* Exit status of the child */
+    hid_t                  fcpl          = H5I_INVALID_HID; /* File creation property list */
+    hid_t                  fid_writer    = H5I_INVALID_HID; /* File ID for writer */
+    hid_t                  fapl_writer   = H5I_INVALID_HID; /* File access property list for writer */
+    H5F_vfd_swmr_config_t *config_writer = NULL;            /* VFD SWMR Configuration for writer */
+    pid_t                  tmppid;                          /* Child process ID returned by waitpid */
+    pid_t                  childpid = 0;                    /* Child process ID */
+    int                    child_status;                    /* Status passed to waitpid */
+    int                    child_wait_option = 0;           /* Options passed to waitpid */
+    int                    child_exit_val;                  /* Exit status of the child */
 
     int parent_pfd[2]; /* Pipe for parent process as writer */
     int child_pfd[2];  /* Pipe for child process as reader */
@@ -2727,8 +2692,8 @@ test_file_end_tick_concur(void)
 
         if (H5Pclose(fapl_reader) < 0)
             HDexit(EXIT_FAILURE);
-        if (config_reader)
-            HDfree(config_reader);
+
+        HDfree(config_reader);
 
         /* Close the pipes */
         if (HDclose(parent_pfd[0]) < 0)
@@ -2759,7 +2724,7 @@ test_file_end_tick_concur(void)
     if ((fid_writer = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_writer)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Send notification 1 to reader to start verfication */
+    /* Send notification 1 to reader to start verification */
     notify = 1;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
@@ -2796,15 +2761,13 @@ test_file_end_tick_concur(void)
         FAIL_STACK_ERROR;
 
     /* Free resources */
-    if (config_writer)
-        HDfree(config_writer);
+    HDfree(config_writer);
 
     PASSED();
     return 0;
 
 error:
-    if (config_writer)
-        HDfree(config_writer);
+    HDfree(config_writer);
 
     H5E_BEGIN_TRY
     {
@@ -2825,7 +2788,7 @@ error:
  * Purpose:     Verify the entries on the EOT queue when opening files
  *              with and without VFD SWMR configured.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; 11/18/2019
@@ -2836,15 +2799,15 @@ error:
 static unsigned
 test_multiple_file_opens(void)
 {
-    hid_t                  fid1  = -1;     /* File ID */
-    hid_t                  fid2  = -1;     /* File ID */
-    hid_t                  fid   = -1;     /* File ID */
-    hid_t                  fcpl  = -1;     /* File creation property list ID */
-    hid_t                  fapl1 = -1;     /* File access property list ID */
-    hid_t                  fapl2 = -1;     /* File access property list ID */
-    H5F_t *                f1, *f2, *f;    /* File pointer */
-    H5F_vfd_swmr_config_t *config1 = NULL; /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_config_t *config2 = NULL; /* Configuration for VFD SWMR */
+    hid_t                  fid1  = H5I_INVALID_HID; /* File ID */
+    hid_t                  fid2  = H5I_INVALID_HID; /* File ID */
+    hid_t                  fid   = H5I_INVALID_HID; /* File ID */
+    hid_t                  fcpl  = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t                  fapl1 = H5I_INVALID_HID; /* File access property list ID */
+    hid_t                  fapl2 = H5I_INVALID_HID; /* File access property list ID */
+    H5F_t *                f1, *f2, *f;             /* File pointer */
+    H5F_vfd_swmr_config_t *config1 = NULL;          /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;          /* Configuration for VFD SWMR */
     eot_queue_entry_t *    curr;
 
     TESTING("EOT queue entries when opening files with/without VFD SWMR");
@@ -2968,10 +2931,8 @@ test_multiple_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+    HDfree(config1);
+    HDfree(config2);
 
     PASSED();
     return 0;
@@ -2987,10 +2948,9 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+
+    HDfree(config1);
+    HDfree(config2);
 
     return 1;
 } /* test_multiple_file_opens() */
@@ -3018,7 +2978,7 @@ error:
  *        f: the open fails
  *        s: the open succeeds
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2019
@@ -3028,13 +2988,13 @@ error:
 static unsigned
 test_same_file_opens(void)
 {
-    hid_t                  fid     = -1;   /* File ID */
-    hid_t                  fid2    = -1;   /* File ID */
-    hid_t                  fcpl    = -1;   /* File creation property list ID */
-    hid_t                  fapl1   = -1;   /* File access property list ID */
-    hid_t                  fapl2   = -1;   /* File access property list ID */
-    H5F_vfd_swmr_config_t *config1 = NULL; /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_config_t *config2 = NULL; /* Configuration for VFD SWMR */
+    hid_t                  fid     = H5I_INVALID_HID; /* File ID */
+    hid_t                  fid2    = H5I_INVALID_HID; /* File ID */
+    hid_t                  fcpl    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t                  fapl1   = H5I_INVALID_HID; /* File access property list ID */
+    hid_t                  fapl2   = H5I_INVALID_HID; /* File access property list ID */
+    H5F_vfd_swmr_config_t *config1 = NULL;            /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;            /* Configuration for VFD SWMR */
 
     TESTING("Multiple opens of the same file with VFD SWMR configuration");
 
@@ -3298,10 +3258,8 @@ test_same_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+    HDfree(config1);
+    HDfree(config2);
 
     PASSED();
     return 0;
@@ -3316,10 +3274,10 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
+
+    HDfree(config1);
+    HDfree(config2);
+
     return 1;
 } /* test_same_file_opens() */
 
@@ -3391,7 +3349,7 @@ test_shadow_index_lookup(void)
         for (j = 0; j < cursize; j++) {
             H5FD_vfd_swmr_idx_entry_t *found;
 
-            found = vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize, idx[j].hdf5_page_offset, FALSE);
+            found = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize, idx[j].hdf5_page_offset, FALSE);
             if ((have_failj && failj == j) || found != &idx[j])
                 break;
         }
@@ -3420,7 +3378,7 @@ out:
  *                  H5Fvfd_swmr_disable_end_of_tick()
  *               enables/disables EOT for the specified file
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; June 2020
@@ -3655,12 +3613,9 @@ test_enable_disable_eot(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (config3)
-        HDfree(config3);
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(config3);
 
     PASSED();
     return 0;
@@ -3678,12 +3633,10 @@ error:
         H5Fclose(fid3);
     }
     H5E_END_TRY;
-    if (config1)
-        HDfree(config1);
-    if (config2)
-        HDfree(config2);
-    if (config3)
-        HDfree(config3);
+
+    HDfree(config1);
+    HDfree(config2);
+    HDfree(config3);
 
     return 1;
 } /* test_enable_disable_eot() */
@@ -3694,8 +3647,7 @@ error:
  * Purpose:     This is the helper routine used to verify whether
  *              "flags" in the updater file is as expected.
  *
- * Return:      0 if test is sucessful
- *              1 if test fails
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi; October 2021
  *
@@ -3725,10 +3677,10 @@ verify_updater_flags(char *ud_name, uint16_t expected_flags)
     if (HDfclose(ud_fp) < 0)
         FAIL_STACK_ERROR;
 
-    return 0;
+    return SUCCEED;
 
 error:
-    return 1;
+    return FAIL;
 
 } /* verify_updater_flags() */
 
@@ -3738,7 +3690,7 @@ error:
  * Purpose:     Verify "flags" in the updater file is as expected for
  *              file creation.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -3748,10 +3700,10 @@ error:
 static unsigned
 test_updater_flags(void)
 {
-    hid_t                  fid         = -1;   /* File ID */
-    hid_t                  fcpl        = -1;   /* File creation property list ID */
-    hid_t                  fapl        = -1;   /* File access property list ID */
-    hid_t                  file_fapl   = -1;   /* File access property list ID associated with the file */
+    hid_t fid       = H5I_INVALID_HID;         /* File ID */
+    hid_t fcpl      = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t fapl      = H5I_INVALID_HID;         /* File access property list ID */
+    hid_t file_fapl = H5I_INVALID_HID;         /* File access property list ID associated with the file */
     H5F_vfd_swmr_config_t *config      = NULL; /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *file_config = NULL; /* Configuration for VFD SWMR */
     uint64_t               seq_num     = 0;    /* Sequence number for updater file */
@@ -3850,10 +3802,8 @@ test_updater_flags(void)
     }
 
     /* Free buffers */
-    if (config)
-        HDfree(config);
-    if (file_config)
-        HDfree(file_config);
+    HDfree(config);
+    HDfree(file_config);
 
     PASSED();
     return 0;
@@ -3867,10 +3817,9 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    if (config)
-        HDfree(config);
-    if (file_config)
-        HDfree(file_config);
+
+    HDfree(config);
+    HDfree(file_config);
 
     return 1;
 } /* test_updater_flags() */
@@ -3881,7 +3830,7 @@ error:
  * Purpose:     Verify "flags" in the updater file is as expected for
  *              multiple opens of the same file.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -3891,10 +3840,10 @@ error:
 static unsigned
 test_updater_flags_same_file_opens(void)
 {
-    hid_t                  fid     = -1;                             /* File ID */
-    hid_t                  fid2    = -1;                             /* File ID */
-    hid_t                  fcpl    = -1;                             /* File creation property list ID */
-    hid_t                  fapl1   = -1;                             /* File access property list ID */
+    hid_t                  fid     = H5I_INVALID_HID;                /* File ID */
+    hid_t                  fid2    = H5I_INVALID_HID;                /* File ID */
+    hid_t                  fcpl    = H5I_INVALID_HID;                /* File creation property list ID */
+    hid_t                  fapl1   = H5I_INVALID_HID;                /* File access property list ID */
     H5F_vfd_swmr_config_t *config1 = NULL;                           /* Configuration for VFD SWMR */
     uint64_t               seq_num = 0;                              /* Sequence number for updater file */
     uint64_t               i       = 0;                              /* Local index variable */
@@ -4000,8 +3949,7 @@ test_updater_flags_same_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Free buffers */
-    if (config1)
-        HDfree(config1);
+    HDfree(config1);
 
     PASSED();
     return 0;
@@ -4015,8 +3963,9 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-    if (config1)
-        HDfree(config1);
+
+    HDfree(config1);
+
     return 1;
 } /* test_updater_flags_same_file_opens() */
 
@@ -4074,7 +4023,7 @@ clean_chk_ud_files(char *md_file_path, char *updater_file_path)
  *                is consistent with num_change_list_entries in each updater's
  *                change list header
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4175,7 +4124,7 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
     return 0;
 
 error:
-    return (-1);
+    return -1;
 
 } /* verify_ud_chk() */
 
@@ -4189,7 +4138,7 @@ error:
  *                  --Generate checksum for the metadata file
  *                  --Write the tick number and the checksum to the checksum file
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4261,14 +4210,13 @@ md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
     if (chk_fp && HDfclose(chk_fp) != 0)
         FAIL_STACK_ERROR;
 
-    if (buf)
-        HDfree(buf);
+    HDfree(buf);
 
     return 0;
 
 error:
-    if (buf)
-        HDfree(buf);
+    HDfree(buf);
+
     if (md_fp)
         HDfclose(md_fp);
     if (chk_fp)
@@ -4288,7 +4236,7 @@ error:
  *              The test is invoked when the file is created via H5Fcreate()
  *              and via H5Fopen().
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  Vailin Choi; October 2021
@@ -4300,11 +4248,11 @@ error:
 static unsigned
 test_updater_generate_md_checksums(hbool_t file_create)
 {
-    hid_t                   fid  = -1; /* File ID */
-    hid_t                   fcpl = -1; /* File creation property list ID */
-    hid_t                   fapl = -1; /* File access property list ID */
-    H5F_vfd_swmr_config_t   config;    /* Configuration for VFD SWMR */
-    H5F_generate_md_ck_cb_t cb_info;   /* Callback */
+    hid_t                   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t                   fcpl = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t                   fapl = H5I_INVALID_HID; /* File access property list ID */
+    H5F_vfd_swmr_config_t   config;                 /* Configuration for VFD SWMR */
+    H5F_generate_md_ck_cb_t cb_info;                /* Callback */
 
     if (file_create) {
         TESTING("VFD SWMR updater generate checksums for metadata file with H5Fcreate");
@@ -4391,7 +4339,7 @@ error:
  *
  * Purpose:     Main function for VFD SWMR tests.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  *-------------------------------------------------------------------------
@@ -4399,7 +4347,7 @@ error:
 int
 main(void)
 {
-    hid_t fapl = -1;                 /* File access property list for */
+    hid_t fapl = H5I_INVALID_HID;    /* File access property list for */
                                      /* data files                    */
     unsigned    nerrors      = 0;    /* Cumulative error count */
     char *      lock_env_var = NULL; /* File locking env var pointer */

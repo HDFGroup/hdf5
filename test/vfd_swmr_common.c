@@ -51,7 +51,7 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
 
     /* NOTE: timespec_get() is C11. This may need further tweaks. */
 #ifdef H5_HAVE_WIN32_API
-    if (timespec_get(&now, TIME_UTC) != TIME_UTC) {
+    if (HDtimespec_get(&now, TIME_UTC) != TIME_UTC) {
 #else
     if (HDclock_gettime(CLOCK_MONOTONIC, &now) == -1) {
 #endif
@@ -167,12 +167,12 @@ block_signals(sigset_t *oldset)
 {
     sigset_t fullset;
 
-    if (sigfillset(&fullset) == -1) {
+    if (HDsigfillset(&fullset) == -1) {
         HDfprintf(stderr, "%s.%d: could not initialize signal masks", __func__, __LINE__);
         HDexit(EXIT_FAILURE);
     }
 
-    if (sigprocmask(SIG_BLOCK, &fullset, oldset) == -1) {
+    if (HDsigprocmask(SIG_BLOCK, &fullset, oldset) == -1) {
         HDfprintf(stderr, "%s.%d: sigprocmask", __func__, __LINE__);
         HDexit(EXIT_FAILURE);
     }
@@ -182,28 +182,11 @@ block_signals(sigset_t *oldset)
 void
 restore_signals(sigset_t *oldset)
 {
-    if (sigprocmask(SIG_SETMASK, oldset, NULL) == -1) {
+    if (HDsigprocmask(SIG_SETMASK, oldset, NULL) == -1) {
         HDfprintf(stderr, "%s.%d: sigprocmask", __func__, __LINE__);
         HDexit(EXIT_FAILURE);
     }
 }
-
-#if 0
-static const char *
-strsignal(int signum)
-{
-    switch (signum) {
-    case SIGUSR1:
-        return "SIGUSR1";
-    case SIGINT:
-        return "SIGINT";
-    case SIGPIPE:
-        return "SIGPIPE";
-    default:
-        return "<unknown>";
-    }
-}
-#endif
 
 #ifndef H5_HAVE_SIGTIMEDWAIT
 
@@ -223,7 +206,7 @@ timer_function(void *arg)
     hbool_t         done = FALSE;
 
     /* Ignore any signals */
-    sigfillset(&sleepset);
+    HDsigfillset(&sleepset);
     pthread_sigmask(SIG_SETMASK, &sleepset, NULL);
 
     for (;;) {
@@ -265,7 +248,7 @@ await_signal(hid_t fid)
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
     sigset_t        sleepset;
 
-    if (sigfillset(&sleepset) == -1) {
+    if (HDsigfillset(&sleepset) == -1) {
         HDfprintf(stderr, "%s.%d: could not initialize signal mask", __func__, __LINE__);
         HDexit(EXIT_FAILURE);
     }
@@ -313,10 +296,10 @@ await_signal(hid_t fid)
 #else
     for (;;) {
         /* Linux and other systems */
-        const int rc = sigtimedwait(&sleepset, NULL, &tick);
+        const int rc = HDsigtimedwait(&sleepset, NULL, &tick);
 
         if (rc != -1) {
-            HDfprintf(stderr, "Received %s, wrapping things up.\n", strsignal(rc));
+            HDfprintf(stderr, "Received %s, wrapping things up.\n", HDstrsignal(rc));
             break;
         }
         else if (rc == -1 && errno == EAGAIN) {

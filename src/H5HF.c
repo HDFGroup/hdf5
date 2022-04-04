@@ -63,9 +63,6 @@
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -358,7 +355,7 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
     if (size > hdr->max_man_size) {
         /* Store 'huge' object in heap
          *
-         * Although not ideal, we can quiet the const warning here becuase no
+         * Although not ideal, we can quiet the const warning here because no
          * obj pointer that was originally const should ever arrive here.
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")

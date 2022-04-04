@@ -84,9 +84,6 @@ static size_t  H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *h
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Declare a free list to manage the H5HG_heap_t struct */
 H5FL_DEFINE(H5HG_heap_t);
 
@@ -132,7 +129,7 @@ H5HG__create(H5F_t *f, size_t size)
     size_t       n;
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__GLOBALHEAP_TAG)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(f);
@@ -221,7 +218,7 @@ done:
         } /* end if */
     }     /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG__create() */
 
 /*-------------------------------------------------------------------------

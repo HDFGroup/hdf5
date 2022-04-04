@@ -164,7 +164,7 @@ typedef struct {
 
 /* local functions */
 static hsize_t         parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, const char *argv[]);
+static struct options *parse_command_line(int argc, const char *const *argv);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -173,7 +173,7 @@ static void            accumulate_minmax_stuff(const minmax *mm, int count, minm
 static void output_results(const struct options *options, const char *name, minmax *table, int table_size,
                            off_t data_size);
 static void output_report(const char *fmt, ...);
-static void print_indent(register int indent);
+static void print_indent(int indent);
 static void usage(const char *prog);
 static void report_parameters(struct options *opts);
 
@@ -185,7 +185,7 @@ static void report_parameters(struct options *opts);
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
@@ -197,7 +197,7 @@ main(int argc, const char *argv[])
 
     output = stdout;
 
-    opts = parse_command_line(argc, argv);
+    opts = parse_command_line(argc, (const char *const *)argv);
 
     if (!opts) {
         exit_value = EXIT_FAILURE;
@@ -277,7 +277,7 @@ run_test_loop(struct options *opts)
     }
 
     /* print size information */
-    output_report("Transfer Buffer Size (bytes): %d\n", buf_bytes);
+    output_report("Transfer Buffer Size (bytes): %zu\n", buf_bytes);
     output_report("File Size(MB): %.2f\n", ((double)parms.num_bytes) / ONE_MB);
 
     print_indent(0);
@@ -299,25 +299,25 @@ run_test_loop(struct options *opts)
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
 {
-    results      res;
-    register int i, ret_value = SUCCESS;
-    off_t        raw_size;
-    minmax *     write_sys_mm_table   = NULL;
-    minmax *     write_mm_table       = NULL;
-    minmax *     write_gross_mm_table = NULL;
-    minmax *     write_raw_mm_table   = NULL;
-    minmax *     read_sys_mm_table    = NULL;
-    minmax *     read_mm_table        = NULL;
-    minmax *     read_gross_mm_table  = NULL;
-    minmax *     read_raw_mm_table    = NULL;
-    minmax       write_sys_mm         = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_mm             = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_gross_mm       = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_raw_mm         = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_sys_mm          = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_mm              = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_gross_mm        = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_raw_mm          = {0.0F, 0.0F, 0.0F, 0};
+    results res;
+    int     i, ret_value = SUCCESS;
+    off_t   raw_size;
+    minmax *write_sys_mm_table   = NULL;
+    minmax *write_mm_table       = NULL;
+    minmax *write_gross_mm_table = NULL;
+    minmax *write_raw_mm_table   = NULL;
+    minmax *read_sys_mm_table    = NULL;
+    minmax *read_mm_table        = NULL;
+    minmax *read_gross_mm_table  = NULL;
+    minmax *read_raw_mm_table    = NULL;
+    minmax  write_sys_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  write_mm             = {0.0, 0.0, 0.0, 0};
+    minmax  write_gross_mm       = {0.0, 0.0, 0.0, 0};
+    minmax  write_raw_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  read_sys_mm          = {0.0, 0.0, 0.0, 0};
+    minmax  read_mm              = {0.0, 0.0, 0.0, 0};
+    minmax  read_gross_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  read_raw_mm          = {0.0, 0.0, 0.0, 0};
 
     raw_size      = (off_t)parms.num_bytes;
     parms.io_type = iot;
@@ -427,7 +427,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show sys write statics */
+    /* show sys write statistics */
 #if 0
     if (sio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -473,7 +473,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
 #if 0
         if (sio_debug_level >= 3) {
             /* output all of the times for all iterations */
@@ -574,7 +574,7 @@ accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
 {
     int i;
 
-    total_mm->sum = 0.0F;
+    total_mm->sum = 0.0;
     total_mm->max = -DBL_MAX;
     total_mm->min = DBL_MAX;
     total_mm->num = count;
@@ -657,10 +657,9 @@ output_report(const char *fmt, ...)
  *              things.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. October 2001
- * Modifications:
  */
 static void
-print_indent(register int indent)
+print_indent(int indent)
 {
     indent *= TAB_SPACE;
 
@@ -817,7 +816,7 @@ report_parameters(struct options *opts)
  *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int             opt;
     struct options *cl_opts;
@@ -1278,7 +1277,7 @@ usage(const char *prog)
     HDprintf("\n");
     HDprintf("      Example: 2K,2K,3K\n");
     HDprintf("\n");
-    HDprintf("      The example defines an object (dataset, tranfer buffer) with three\n");
+    HDprintf("      The example defines an object (dataset, transfer buffer) with three\n");
     HDprintf("      dimensions. Be aware that as the number of dimensions increases, the\n");
     HDprintf("      the total size of the object increases exponentially.\n");
     HDprintf("\n");

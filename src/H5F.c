@@ -1306,7 +1306,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Funmount
  *
- * Purpose:     Given a mount point, dissassociate the mount point's file
+ * Purpose:     Given a mount point, disassociate the mount point's file
  *              from the file mounted there. Do not close either file.
  *
  *              The mount point can either be the group in the parent or the
@@ -2262,7 +2262,7 @@ done:
  *              1) The file being opened has v3 superblock
  *              2) The file is opened with H5F_ACC_RDWR
  *              3) The file is not already marked for SWMR writing
- *              4) Current implementaion for opened objects:
+ *              4) Current implementation for opened objects:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects
@@ -2809,7 +2809,7 @@ H5Fvfd_swmr_end_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
@@ -2848,7 +2848,7 @@ H5Fvfd_swmr_disable_end_of_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
@@ -2886,7 +2886,7 @@ H5Fvfd_swmr_enable_end_of_tick(hid_t file_id)
     if (NULL == vol_obj)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    /* Check on this when go parallel for VFD SWMR */
+    /* TODO: Revisit this when VFD SWMR + parallel works */
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")

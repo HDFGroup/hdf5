@@ -103,7 +103,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv("HDF5_NOCLEANUP"))
+    if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     HDfree(filename);
 }
@@ -267,7 +267,7 @@ usage(void)
     HDfprintf(stdout, "                                data you want [default: 0]");
     HDfprintf(stdout, "     -s S, --file-size=S        Maximum size of uncompressed file [default: 64M]\n");
     HDfprintf(stdout, "     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
-    HDfprintf(stdout, "     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
+    HDfprintf(stdout, "     -b S, --min-buffer_size=S  Minimum size of buffer [default: 128K]\n");
     HDfprintf(stdout, "     -p D, --prefix=D           The directory prefix to place the file\n");
     HDfprintf(stdout, "     -r, --random-test          Use random data to write to the file\n");
     HDfprintf(stdout, "                                [default: no]\n");
@@ -336,8 +336,8 @@ parse_size_directive(const char *size)
 static void
 fill_with_random_data(Bytef *src, uLongf src_len)
 {
-    register unsigned u;
-    h5_stat_t         stat_buf;
+    unsigned  u;
+    h5_stat_t stat_buf;
 
     if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
@@ -386,7 +386,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
     Bytef *        src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
-        register unsigned long i, iters;
+        unsigned long i, iters;
 
         iters = file_size / src_len;
         src   = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
@@ -396,7 +396,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
             error("out of memory");
         }
 
-        compression_time = 0.0F;
+        compression_time = 0.0;
 
         if (random_test)
             fill_with_random_data(src, src_len);
@@ -489,7 +489,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;
@@ -500,7 +500,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':
@@ -551,7 +551,7 @@ main(int argc, const char *argv[])
     }
 
     if (min_buf_size > max_buf_size)
-        error("minmum buffer size (%d) exceeds maximum buffer size (%d)", min_buf_size, max_buf_size);
+        error("minimum buffer size (%d) exceeds maximum buffer size (%d)", min_buf_size, max_buf_size);
 
     HDfprintf(stdout, "Filesize: %ld\n", file_size);
 

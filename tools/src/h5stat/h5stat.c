@@ -33,7 +33,7 @@
 #define H5_NFILTERS_IMPL                                                                                     \
     8 /* Number of currently implemented filters + one to                                                    \
          accommodate for user-define filters + one                                                           \
-         to accomodate datasets whithout any filters */
+         to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
@@ -830,7 +830,7 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, const char *const *argv, struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
@@ -1677,7 +1677,7 @@ print_statistics(const char *name, const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     iter_t            iter;
     const char *      fname   = NULL;
@@ -1693,7 +1693,7 @@ main(int argc, const char *argv[])
 
     HDmemset(&iter, 0, sizeof(iter));
 
-    if (parse_command_line(argc, argv, &hand) < 0)
+    if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
     fname = argv[H5_optind];
@@ -1704,26 +1704,10 @@ main(int argc, const char *argv[])
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
-        vfd_info.info  = NULL;
-        vfd_info.name  = drivername;
-        vfd_info.fname = fname;
-
-        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            error_msg("Read-Only S3 VFD not enabled.\n");
-            goto done;
-#endif
-        }
-        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            error_msg("HDFS VFD not enabled.\n");
-            goto done;
-#endif
-        }
+        vfd_info.type   = VFD_BY_NAME;
+        vfd_info.info   = NULL;
+        vfd_info.u.name = drivername;
+        vfd_info.fname  = fname;
 
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
@@ -1740,7 +1724,7 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

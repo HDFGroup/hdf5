@@ -591,7 +591,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      *
      * Note that at present, dirty can't be set to true with prefetched
      * entries.  However this may change, so include this functionality
-     * against that posibility.
+     * against that possibility.
      *
      * Also, note that it is possible for a prefetched entry to be dirty --
      * hence the value assigned to ds_entry_ptr->is_dirty below.
@@ -860,53 +860,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C__free_image_entries_array() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_force_cache_image_load()
- *
- * Purpose:     On rare occasions, it is necessary to run
- *		H5MF_tidy_self_referential_fsm_hack() prior to the first
- *              metadata cache access.  This is a problem as if there is a
- *              cache image at the end of the file, that routine will
- *              discard it.
- *
- *              We solve this issue by calling this function, which will
- *		load the cache image and then call
- *              H5MF_tidy_self_referential_fsm_hack() to discard it.
- *
- * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              1/11/17
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_force_cache_image_load(H5F_t *f)
-{
-    H5C_t *cache_ptr;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr->load_image);
-
-    /* Load the cache image, if requested */
-    if (cache_ptr->load_image) {
-        cache_ptr->load_image = FALSE;
-        if (H5C__load_cache_image(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_force_cache_image_load() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_get_cache_image_config
@@ -1192,7 +1145,7 @@ done:
  *		image superblock extension message must be deleted from
  *		the superblock extension and the image block freed
  *
- *		Contrawise, if the file is openened R/O, the metadata
+ *		Contrawise, if the file is opened R/O, the metadata
  *		cache image superblock extension message and image block
  *		must be left as is.  Further, any dirty entries in the
  *		cache image block must be marked as clean to avoid
@@ -1884,7 +1837,7 @@ done:
  * Purpose:     Decode the metadata cache image entry from the supplied
  *		buffer into the supplied instance of H5C_image_entry_t.
  *		This includes allocating a buffer for the entry image,
- *		loading it, and seting ie_ptr->image_ptr to point to
+ *		loading it, and setting ie_ptr->image_ptr to point to
  *		the buffer.
  *
  *		Advances the buffer pointer to the first byte
@@ -2401,7 +2354,7 @@ done:
  *		also be a flush dependency child.
  *
  *		Finally, note that for purposes of the cache image, flush
- *		dependency height ends when a flush dependecy relation
+ *		dependency height ends when a flush dependency relation
  *		passes off the cache image.
  *
  *		On exit, the flush dependency height of each entry in the
@@ -2563,7 +2516,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
         entry_ptr = entry_ptr->il_next;
     } /* while (entry_ptr != NULL) */
 
-    /* At present, no extenal parent or child flush dependency links
+    /* At present, no external parent or child flush dependency links
      * should exist -- hence the following assertions.  This will change
      * if we support ageout of entries in the cache image.
      */
@@ -3444,7 +3397,7 @@ done:
  *		creating if specified.
  *
  *		In general, the size and location of the cache image block
- *		will be unknow at the time that the cache image superblock
+ *		will be unknown at the time that the cache image superblock
  *		message is created.  A subsequent call to this routine will
  *		be used to write the correct data.
  *

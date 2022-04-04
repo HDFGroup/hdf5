@@ -186,7 +186,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -326,7 +326,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -486,7 +486,7 @@ error:
  *              Any data mis-matches or unexpected failures or successes
  *              reported by the HDF5 library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -666,7 +666,7 @@ error:
  *              check that it appears *immediately* after max_lag + 1
  *              ticks, since the LRU list does not hold onto MPMDEs.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  David Young
@@ -811,7 +811,7 @@ error:
  *              XXX reduce duplication with test_spmde_delay_basic!
  *              XXX
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  David Young
@@ -989,7 +989,7 @@ error:
  *              XXX reduce duplication with test_mpmde_delay_basic!
  *              XXX
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  David Young
@@ -1118,7 +1118,7 @@ error:
  *           Any data mis-matches or failures reported by the HDF5
  *           library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  David Young
@@ -1453,7 +1453,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1706,7 +1706,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1725,7 +1725,7 @@ error:
  *
  *                                                    JRM -- 2/23/17
  *
- *              Reworked test for new implementatin of the page buffer.
+ *              Reworked test for new implementation of the page buffer.
  *              The major change was adapting the test for the new
  *              page buffers refusal to buffer any raw data when
  *              min_md_pages == max_pages, or any metadata pages wwhen
@@ -2126,7 +2126,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->curr_rd_pages != 2)
         TEST_ERROR;
 
-    /* adding more meta entires should replace meta entries since raw data
+    /* adding more meta entries should replace meta entries since raw data
      * is at its minimum
      */
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 600), sizeof(int) * 100, data) < 0)
@@ -2141,7 +2141,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->curr_rd_pages != 2)
         TEST_ERROR;
 
-    /* bring existing raw entires up the LRU */
+    /* bring existing raw entries up the LRU */
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 750), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
@@ -2180,7 +2180,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->curr_rd_pages != 3)
         TEST_ERROR;
 
-    /* adding 2 meta entries should replace 2 entires at the bottom
+    /* adding 2 meta entries should replace 2 entries at the bottom
      * of the LRU
      */
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 98), sizeof(int) * 100, data) < 0)
@@ -2368,7 +2368,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -2715,7 +2715,7 @@ error:
  *              At present, page buffering should be disabled in parallel
  *              builds.  Verify this.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  John Mainzer
@@ -2883,7 +2883,7 @@ error:
  *              though it is not generating the I/O requests in this
  *              test.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  John Mainzer
@@ -2956,8 +2956,8 @@ md_entry_splitting_smoke_check(hid_t orig_fapl, const char *env_h5_drvr, bool vf
      * from the free space manager, and perform several reads and writes to
      * verify expected behaviour.
      *
-     * The synthetic set of metadata entries are constucted of integers
-     * so as to allow easy assignement of unique values.  It is constructed
+     * The synthetic set of metadata entries are constructed of integers
+     * so as to allow easy assignment of unique values.  It is constructed
      * as follows:
      *
      *          size    values:                addr:
@@ -3178,7 +3178,7 @@ error:
  *              split correctly under a variety of conditions that
  *              are unlikely unless the user chooses at odd page size.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  John Mainzer
@@ -3251,7 +3251,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     if (base_page_cnt != 1)
         TEST_ERROR;
 
-    /* Test the folowing cases:
+    /* Test the following cases:
      *
      * 1) splittable md entry that is page aligned and exactly one
      *    page long.
@@ -3324,7 +3324,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
      *    should log 1 metadata insertions
      *
      *    Note that exposes an inefficiency in the page buffer, as page
-     *    aligned I/O requests of exactly oen page in length really should
+     *    aligned I/O requests of exactly one page in length really should
      *    bypass the page buffer.
      *
      *    This should be fixed, but I am bypassing it for now.
@@ -4096,7 +4096,7 @@ error:
  *
  * Purpose:     Main function for the page buffer tests.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown

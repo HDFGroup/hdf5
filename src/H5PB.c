@@ -50,14 +50,14 @@
 /* Round _x down to nearest _size. */
 /* not used at present */
 /*
-#ifndef rounddown
-#define rounddown(_x, _size) (((_x) / (_size)) * (_size))
+#ifndef H5PB_ROUNDDOWN
+#define H5PB_ROUNDDOWN(_x, _size) (((_x) / (_size)) * (_size))
 #endif
 */
 
 /* Round _x up to nearest _size. */
-#ifndef roundup
-#define roundup(_x, _size) ((((_x) + (_size)-1) / (_size)) * (_size))
+#ifndef H5PB_ROUNDUP
+#define H5PB_ROUNDUP(_x, _size) ((((_x) + (_size)-1) / (_size)) * (_size))
 #endif
 
 /******************/
@@ -109,9 +109,6 @@ static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, const
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -119,7 +116,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 /* Local Variables */
 /*******************/
-
 /* Declare a free list to manage the H5PB_t struct */
 H5FL_DEFINE_STATIC(H5PB_t);
 
@@ -297,7 +293,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
               (page_buf->bypasses[0] + page_buf->bypasses[1] + page_buf->bypasses[2]), page_buf->bypasses[0],
               page_buf->bypasses[1], page_buf->bypasses[2]);
 
-    HDfprintf(stdout, "acesses    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
+    HDfprintf(stdout, "accesses    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (page_buf->accesses[0] + page_buf->accesses[1] + page_buf->accesses[2]), page_buf->accesses[0],
               page_buf->accesses[1], page_buf->accesses[2]);
 
@@ -924,7 +920,7 @@ H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
  *                 max_pages), simply read from the HDF5 file and return.
  *
  *              The free space manager guarantees that allocations larger
- *              than one page will be page alligned, and that allocations
+ *              than one page will be page aligned, and that allocations
  *              of size less than or equal to page size will not cross page
  *              boundaries.  Further, unlike raw data, metadata is always
  *              written and read atomically.
@@ -1052,7 +1048,7 @@ H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
  * Changes:     Updated for discovery of the fact that the fixed and
  *              extensible array data structures allocate multiple
  *              metadata cache entries in a single block, and thus
- *              violate that invarient that metadata entries either
+ *              violate that invariant that metadata entries either
  *              do not cross page boundaries, or are page aligned.
  *
  *                                               JRM -- 3/28/20
@@ -1205,7 +1201,7 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, void
                      *         empty.
                      *
                      * Since we know that the read crosses at least one
-                     * page boundary, and we have aleady filtered out the
+                     * page boundary, and we have already filtered out the
                      * body only case, at least two of the above must be
                      * non-empty.
                      */
@@ -1362,18 +1358,18 @@ done:
  * this routine performs an O(n) copy of index entries.
  */
 static int
-shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
+H5PB__shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, hbool_t only_mark)
 {
     ptrdiff_t                  i;
     H5FD_vfd_swmr_idx_entry_t *entry;
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE);
+    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, FALSE);
 
     if (entry == NULL)
         return 0;
 
     if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0) {
-        if (shadow_image_defer_free(shared, entry) != 0)
+        if (H5F_shadow_image_defer_free(shared, entry) != 0)
             return -1;
         entry->md_file_page_offset = 0;
     }
@@ -1496,8 +1492,8 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
         HDassert(!shared->vfd_swmr_writer ||
-                 vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page,
-                                                  FALSE) == NULL);
+                 H5FD_vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page,
+                                                       FALSE) == NULL);
     }
 
 done:
@@ -1542,7 +1538,7 @@ done:
  *              In all contexts, there is no guarantee that the page buffer
  *              will contain any of the possible entries.
  *
- *              Space allocations larger than one page must be page alligned.
+ *              Space allocations larger than one page must be page aligned.
  *              Further, any space between the end of a multi-page allocation
  *              and the next page boundary will remain un-allocated until after
  *              the original allocation is freed.  This implies that:
@@ -1900,7 +1896,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
             }
         }
         /* if the entry is not a multi-page metadata entry, it must already
-         * be on either the replacment policy or the delayed write list.
+         * be on either the replacement policy or the delayed write list.
          * In either case, it will be flush when possible and necessary.
          */
     }
@@ -2102,7 +2098,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
 
         /* see if the shadow index already contains an entry for *entry. */
 
-        ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, target_page, FALSE);
+        ie_ptr = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(idx, shared->mdf_idx_entries_used, target_page, FALSE);
 
         if (ie_ptr == NULL) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -2110,7 +2106,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
             new_index_entry_index = shared->mdf_idx_entries_used + idx_ent_added++;
 
             if (new_index_entry_index >= shared->mdf_idx_len &&
-                (idx = vfd_swmr_enlarge_shadow_index(f)) == NULL) {
+                (idx = H5F_vfd_swmr_enlarge_shadow_index(f)) == NULL) {
                 HDfprintf(stderr, "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n", shared->mdf_idx_len);
                 HDfprintf(stderr, "tick = %" PRIu64 ".\n", tick_num);
                 HDexit(EXIT_FAILURE);
@@ -2140,7 +2136,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
             if (ie_ptr->length != (uint32_t)entry->size) {
                 int ret;
 
-                ret = shadow_image_defer_free(shared, ie_ptr);
+                ret = H5F_shadow_image_defer_free(shared, ie_ptr);
                 HDassert(ret == 0);
 
                 ie_ptr->md_file_page_offset = 0;
@@ -2236,7 +2232,7 @@ done:
  *                 max_pages), simply write to the HDF5 file and return.
  *
  *              The free space manager guarantees that allocations larger
- *              than one page will be page alligned, and that allocations
+ *              than one page will be page aligned, and that allocations
  *              of size less than or equal to page size will not cross page
  *              boundaries.  Further, unlike raw data, metadata is always
  *              written and read atomically.
@@ -2256,7 +2252,7 @@ done:
  *              structures, it complicates the metadata cache and the page
  *              buffer.
  *
- *              From the page buffer perspective, it breaks the invarient
+ *              From the page buffer perspective, it breaks the invariant
  *              that metadata entries of less than page size don't cross
  *              page boundaries, and those of size greater than or equal
  *              to page size start on page boundaries -- which is important
@@ -2511,7 +2507,7 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, con
                      *         empty.
                      *
                      * Since we know that the write crosses at least one
-                     * page boundary, and we have aleady filtered out the
+                     * page boundary, and we have already filtered out the
                      * body only case, at least two of the above must be
                      * non-empty.
                      */
@@ -2718,7 +2714,7 @@ H5PB__allocate_page(H5PB_t *page_buf, size_t size, hbool_t clean_image)
     void *        image_ptr = NULL;
     H5PB_entry_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -2790,7 +2786,7 @@ done:
 
             image_ptr = H5MM_xfree(image_ptr);
         }
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -2926,7 +2922,7 @@ done:
 static void
 H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* sanity checks */
     HDassert(entry_ptr);
@@ -2993,7 +2989,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force, 
     H5PB_t *page_buf  = shared->page_buf;
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3067,7 +3063,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force, 
      * the image will be bigger.  So the shadow file will never see the
      * entire image written, just the first page of the image.
      */
-    if (shared->vfd_swmr_writer && shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
+    if (shared->vfd_swmr_writer && H5PB__shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "failed to remove shadow index entry")
     }
 
@@ -3112,7 +3108,7 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *const en
     haddr_t eoa;                 /* Current EOA for the file */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(shared);
@@ -3139,7 +3135,7 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *const en
      *       true in all cases.
      */
 
-    /* Verify that the base addresss of the page is within the EOA.  If it
+    /* Verify that the base address of the page is within the EOA.  If it
      * isn't, the associated page has been discarded and should have been
      * removed from the page buffer.  This is a bug in the HDF5 library, so
      * an assertion is adequate here.
@@ -3219,7 +3215,7 @@ H5PB__load_page(H5F_shared_t *shared, H5PB_t *page_buf, haddr_t addr, H5FD_mem_t
     void *        image_ptr = NULL;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(shared);
@@ -3228,18 +3224,6 @@ H5PB__load_page(H5F_shared_t *shared, H5PB_t *page_buf, haddr_t addr, H5FD_mem_t
     HDassert(page_buf->magic == H5PB__H5PB_T_MAGIC);
     HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
 
-#if 0  /* JRM */
-    haddr_t eoa;
-    /* Retrieve the 'eoa' for the file */
-    if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, type)))
-
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
-                    "driver get_eoa request failed")
-    if ( addr + ((haddr_t)(page_buf->page_size)) > eoa )
-
-        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                    "Attempt to load page that extends past EOA")
-#endif /* JRM */
     if (HADDR_UNDEF == (eof = H5FD_get_eof(shared->lf, H5FD_MEM_DEFAULT)))
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "driver get_eof request failed")
@@ -3354,7 +3338,7 @@ done:
  *
  *              evict the entry and test to see if page_buf->curr_pages <
  *              page_buf->max_pages.  If it is, return.  Otherwise, continue
- *              the scan until either the above condidtion is fulfilled,
+ *              the scan until either the above condition is fulfilled,
  *              or the head of the LRU is reach.
  *
  *              Under normal circumstances, it should always be possible
@@ -3388,7 +3372,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *page_buf, H5FD_mem_t inserted_typ
     H5PB_entry_t *evict_ptr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3502,7 +3486,7 @@ H5PB__mark_entry_clean(H5PB_t *page_buf, H5PB_entry_t *entry_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3562,7 +3546,7 @@ H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *ent
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3586,7 +3570,7 @@ H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *ent
         HDassert(entry_ptr->delay_write_until == 0);
 
         if ((page_buf->vfd_swmr_writer) && (entry_ptr->loaded) && (entry_ptr->mem_type != H5FD_MEM_DRAW) &&
-            (H5F_vfd_swmr_writer__delay_write(shared, entry_ptr->page, &(entry_ptr->delay_write_until)) < 0))
+            (H5F_vfd_swmr_writer_delay_write(shared, entry_ptr->page, &(entry_ptr->delay_write_until)) < 0))
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "get delayed write request failed")
 
@@ -3725,7 +3709,7 @@ done:
  *   Y   |  Y   | MPMDE  |  N   |    X    | Error (case 9)
  * ------+------+--------+------+---------+-------------------------------------
  *   Y   |  Y   | MPMDE  |  Y   |    X    | Clip read to MPE size if required.
- *       |      |        |      |         | Satify read from MPE (case 9)
+ *       |      |        |      |         | Satisfy read from MPE (case 9)
  * ------+------+--------+------+---------+-------------------------------------
  *       |      |        |      |         |
  * ------+------+--------+------+---------+-------------------------------------
@@ -3778,7 +3762,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        clipped_size;        /* possibley clipped size */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4086,7 +4070,7 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4195,7 +4179,7 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
                     else {
 
                         /* this is an internal page -- copy it in its
-                         * entireity.
+                         * entirety.
                          */
 
                         offset =
@@ -4375,11 +4359,11 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
     H5PB_t *      page_buf;            /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
     uint64_t      page;                /* page offset of addr */
-    haddr_t       page_addr;           /* page containg addr */
+    haddr_t       page_addr;           /* page containing addr */
     size_t        offset;              /* offset of write in page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);
@@ -4436,7 +4420,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
             H5PB_entry_t *overlap;
             void *        new_image = H5MM_malloc(size);
             uint64_t      iter_page;
-            uint64_t      last_page = page + roundup(size, page_buf->page_size) / page_buf->page_size;
+            uint64_t      last_page = page + H5PB_ROUNDUP(size, page_buf->page_size) / page_buf->page_size;
 
             for (iter_page = page + 1; iter_page < last_page; iter_page++) {
                 H5PB__SEARCH_INDEX(page_buf, iter_page, overlap, FAIL)
@@ -4596,7 +4580,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        offset;              /* offset of write in a page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(shared);

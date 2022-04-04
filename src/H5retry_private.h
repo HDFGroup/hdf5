@@ -39,13 +39,13 @@ typedef struct h5_retry_t {
  *
  * XXX This is not part of the API. XXX
  */
-static inline bool
-h5_retry_decrement(struct h5_retry_t *r)
+static inline hbool_t
+H5__retry_decrement(struct h5_retry_t *r)
 {
     if (r->tries == 0)
-        return false;
+        return FALSE;
     --r->tries;
-    return true;
+    return TRUE;
 }
 
 /* Establish state for a retry loop in `r`.  The loop will retry no
@@ -69,28 +69,28 @@ h5_retry_decrement(struct h5_retry_t *r)
  * Note well: the program will enter the body of the loop, above, no more
  * than 101 times: once for an initial try, and then 100 times for retries.
  */
-static inline bool
-h5_retry_init(struct h5_retry_t *r, unsigned int maxtries, uint64_t minival, uint64_t maxival)
+static inline hbool_t
+H5_retry_init(h5_retry_t *r, unsigned int maxtries, uint64_t minival, uint64_t maxival)
 {
-    memset(r, '\0', sizeof(*r));
-    assert(0 < maxtries);
-    assert(0 < minival && minival <= maxival);
+    HDmemset(r, '\0', sizeof(*r));
+    HDassert(0 < maxtries);
+    HDassert(0 < minival && minival <= maxival);
     r->tries = r->maxtries = maxtries;
     r->ival                = minival;
     r->maxival             = maxival;
-    return h5_retry_decrement(r);
+    return H5__retry_decrement(r);
 }
 
-/* If any tries remain, sleep for the mininum interval, or twice the
+/* If any tries remain, sleep for the minimum interval, or twice the
  * previous sleep time, and return true.  If no tries remain, return false.
  */
-static inline bool
-h5_retry_next(struct h5_retry_t *r)
+static inline hbool_t
+H5_retry_next(h5_retry_t *r)
 {
     uint64_t ival;
 
-    if (!h5_retry_decrement(r))
-        return false;
+    if (!H5__retry_decrement(r))
+        return FALSE;
     ival = r->ival;
     if (r->maxival < ival)
         ival = r->maxival;
@@ -99,14 +99,14 @@ h5_retry_next(struct h5_retry_t *r)
 
     H5_nanosleep(ival);
 
-    return true;
+    return TRUE;
 }
 
 /* Return the number of tries performed since `h5_retry_init()`
  * was called on `r`.
  */
 static inline unsigned
-h5_retry_tries(struct h5_retry_t *r)
+H5_retry_tries(h5_retry_t *r)
 {
     return r->maxtries - r->tries;
 }

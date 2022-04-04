@@ -1,0 +1,1796 @@
+#!/us/bin/env bash
+#
+# Copyright by Akadio, Inc.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the vfd swmr feature.
+
+###############################################################################
+# VFD SWMR concurrent tests which are modified from existing swmr concurrent tests.
+# This is copied and modified from testswmr.sh.in
+#
+###############################################################################
+
+srcdir=@srcdir@
+
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
+
+###############################################################################
+## test parameters
+###############################################################################
+
+nerrors=0
+nsofterrors=0		# soft errors are expected to occur some of the time
+			        # on a couple of nondeterministic tests.
+
+###############################################################################
+## test parameters for vfd_swmr_bigset_writer.c and vfd_swmr_group_writer.c
+## based on HDF5TestExpress:
+## 0:  Exhaustive run: Tests take a long time to run.
+## 1:  Default run.
+## 2+: Quick run
+###############################################################################
+#
+if [[ -z $HDF5TestExpress ]]; then    # Set to default when not set
+    HDF5TestExpress=1
+fi
+
+###############################################################################
+## For legacy tests:
+##  definitions for message file to coordinate test runs
+###############################################################################
+#
+WRITER_MESSAGE=VFD_SWMR_WRITER_MESSAGE  # The message file created by writer that the open is complete
+                                        # This should be the same as the define in "./swmr_common.h"
+MESSAGE_TIMEOUT=300                     # Message timeout length in secs
+                                        # This should be the same as the define in "./h5test.h"
+ 
+###############################################################################
+## For attrdset test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+ATTRDSET_FIFO_WRITER_TO_READER=fifo_attrdset_writer_to_reader
+ATTRDSET_FIFO_READER_TO_WRITER=fifo_attrdset_reader_to_writer
+
+###############################################################################
+## For dsetops test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+DSETOPS_FIFO_WRITER_TO_READER=fifo_dsetops_writer_to_reader
+DSETOPS_FIFO_READER_TO_WRITER=fifo_dsetops_reader_to_writer
+
+###############################################################################
+## For dsetchks test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+DSETCHKS_FIFO_WRITER_TO_READER=fifo_dsetchks_writer_to_reader
+DSETCHKS_FIFO_READER_TO_WRITER=fifo_dsetchks_reader_to_writer
+
+###############################################################################
+## For gfail{1,2,3,4} test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+GFAIL_FIFO_WRITER_TO_READER=fifo_group_writer_to_reader
+GFAIL_FIFO_READER_TO_WRITER=fifo_group_reader_to_writer
+
+###############################################################################
+## Was the aux process built?
+###############################################################################
+#
+USING_AUX_PROCESS=@AUX_PROCESS@
+
+###############################################################################
+## short hands and function definitions
+###############################################################################
+#
+DPRINT=:              # Set to "echo Debug:" for debugging printing,
+                        # else ":" for noop.
+IFDEBUG=:             # Set to null to turn on debugging, else ":" for noop.
+
+# For legacy tests:
+# To wait for the writer message file or till the maximum # of seconds is reached
+# $1 is the message file to wait for
+# This performs similar function as the routine h5_wait_message() in test/h5test.c
+WAIT_MESSAGE() {
+    message=$1                                  # Get the name of the message file to wait for
+    t0=`date +%s`                               # Get current time in seconds
+    difft=0                                     # Initialize the time difference
+    mexist=0                                    # Indicate whether the message file is found
+    while [ $difft -lt $MESSAGE_TIMEOUT ] ;     # Loop till message times out
+    do
+        t1=`date +%s`                           # Get current time in seconds
+        difft=`expr $t1 - $t0`                  # Calculate the time difference
+        if [ -e $message ]; then                # If message file is found:
+            mexist=1                            #       indicate the message file is found
+            rm $message                         #       remove the message file
+            break                               #       get out of the while loop
+        fi
+    done;
+    if test $mexist -eq 0; then
+        # Issue warning that the writer message file is not found, continue with launching the reader(s)
+        echo warning: $WRITER_MESSAGE is not found after waiting $MESSAGE_TIMEOUT seconds
+    else
+        echo $WRITER_MESSAGE is found
+    fi
+}
+
+# catch_out_err_and_rc outbase command [arguments]
+#
+# Run `command` with any `arguments` provided.  Redirect `command`'s
+# stderr and stdout to the file `outbase.out`.  Record the result code
+# of `command` in `outbase.rc`.
+#
+catch_out_err_and_rc()
+{
+    if [ $# -lt 2 ]; then
+        echo "usage: catch_output_and_rc outbase command [arguments]" \
+            1>&2
+        exit 1
+    fi
+    outbase=$1
+    shift
+    {
+        "$@" < ${STDIN_PATH:-/dev/stdin} > ${STDOUT_PATH:-/dev/stdout} &
+        echo $! > ${outbase}.pid
+        wait $(cat ${outbase}.pid)
+        echo $? > ${outbase}.rc
+    } 2>&1 | tee ${outbase}.out
+}
+
+###############################################################################
+## Main
+##
+## Modifications:
+##   Vailin Choi; July 2013
+##     Add waiting of message file before launching the reader(s).
+##     Due to the implementation of file locking, coordination
+##     is needed in file opening for the writer/reader tests
+##     to proceed as expected.
+##
+###############################################################################
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+# Check to see if the VFD specified by the HDF5_DRIVER environment variable
+# supports SWMR.
+$utils_testdir/swmr_check_compat_vfd
+rc=$?
+if [ $rc -ne 0 ] ; then
+    echo
+    echo "The VFD specified by the HDF5_DRIVER environment variable"
+    echo "does not support SWMR."
+    echo
+    echo "SWMR acceptance tests skipped"
+    echo
+    exit 0
+fi
+
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
+all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small"
+
+# For exhaustive run, add: 
+#   attrdset, dsetops, dsetops_ref, dsetchks
+#   os_groups_attrs, os_groups_ops, os_groups_seg, independ_wr,
+#   gfail_entry_length, gfail_checksum, gfail_page_size, gfail_index_space
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    all_tests="${all_tests} attrdset dsetops dsetops_ref dsetchks"
+    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg independ_wr"
+    all_tests="${all_tests} gfail_entry_length gfail_checksum gfail_page_size gfail_index_space"
+fi
+
+tests=${all_tests}
+
+if [ $# -gt 0 ]; then
+	tests=
+fi
+
+for t; do
+	if ! echo $all_tests | grep -q "\<${t}\>"; then
+		echo "$t: Unknown test, ${t}"
+		exit 1
+	fi
+	tests="${tests} ${t}"
+done
+
+echo tests=${tests}
+for t in ${tests}; do
+	eval do_${t}=yes
+done
+
+# HDF5 has several tests that create and delete signal files to communicate
+# between processes, and it seems that even though the names of the files are
+# different, occasionally the wrong file is deleted, interrupting the flow of
+# the test.  Running each of these tests in its own directory should eliminate
+# the problem.
+rm -rf vfd_swmr_test
+mkdir vfd_swmr_test
+
+## With the --disable-shared option, swmr program files are built in the test
+## directory, otherwise they are in test/.libs with a corresponding wrapper
+## script in the test directory.  The programs or wrapper scripts in test should
+## always be copied, swmr files in .libs should be copied only if they exists.
+#if [ -f .libs/vfd_swmr ]; then
+#    mkdir vfd_swmr_test/.libs
+#    for FILE in .libs/vfd_swmr*; do
+#        case "$FILE" in
+#            *.o) continue ;;    ## don't copy the .o files
+#        esac
+#        cp $FILE vfd_swmr_test/.libs
+#    done
+#fi
+
+cd vfd_swmr_test
+
+
+###############################################################################
+#
+# Legacy SWMR tests
+#
+###############################################################################
+#
+#
+# Default setting
+Nreaders=5              # number of readers to launch
+Nrdrs_spa=3             # number of sparse readers to launch
+Nrecords=200000         # number of records to write
+Nrecs_rem=40000         # number of times to shrink
+Nrecs_spa=20000         # number of records to write in the sparse test
+Nsecs_add=5             # number of seconds per read interval
+Nsecs_rem=3             # number of seconds per read interval
+Nsecs_addrem=8          # number of seconds per read interval
+compress_list=("")      # No filter for default and quick runs
+#
+#
+# Setting for exhaustive run
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then      
+    Nrecords=400000                         # Increase the number of records to write
+    compress_list=("" "-c 5")               # Enable filter
+fi
+#
+#
+# Loop over index types
+for index_type in "-i ea" "-i b2" 
+do
+    # Try without compression, only; uncomment "-c 5" to try with compression.
+
+    for compress in "${compress_list[@]}";
+    do
+        echo
+        echo "** Loop testing parameters: $index_type $compress"
+        echo
+	if [ ${do_generator:-no} = yes ]; then
+		echo
+		echo "## Generator test"
+		# Launch the Generator without VFD SWMR write
+		echo launch the vfd_swmr_generator
+		../vfd_swmr_generator $compress $index_type
+		if test $? -ne 0; then
+		    echo generator had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+
+		# Launch the Generator with VFD SWMR write
+		echo launch the vfd_swmr_generator with VFD SWMR write
+		../vfd_swmr_generator -s $compress $index_type
+		if test $? -ne 0; then
+		    echo generator had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+	fi
+
+	if [ ${do_expand:-no} = yes ]; then
+		echo
+		echo "## Writer test - test expanding the dataset"
+
+		# Launch the Generator
+		echo launch the vfd_swmr_generator with VFD SWMR write
+		../vfd_swmr_generator -s $compress $index_type
+		if test $? -ne 0; then
+		    echo generator had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+
+		# Remove any possible writer message file before launching writer
+		rm -f $WRITER_MESSAGE
+		#
+		# Launch the Writer
+		echo launch the vfd_swmr_writer
+		seed="" # Put -r <random seed> command here
+		catch_out_err_and_rc vfd_swmr_writer \
+		    ../vfd_swmr_writer -q -o $Nrecords $seed &
+		pid_writer=$!
+		$DPRINT pid_writer=$pid_writer
+
+		# Wait for message from writer process before starting reader(s)
+		WAIT_MESSAGE $WRITER_MESSAGE
+		#
+		# Launch the Readers
+		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
+		echo launch $Nreaders vfd_swmr_readers ......may take some time......
+		pid_readers=""
+		n=0
+		while [ $n -lt $Nreaders ]; do
+		    #seed="-r ${seeds[$n]}"
+		    seed=""
+		    catch_out_err_and_rc vfd_swmr_reader.$n \
+			../vfd_swmr_reader -q $Nsecs_add $seed &
+		    pid_readers="$pid_readers $!"
+		    n=`expr $n + 1`
+		done
+		$DPRINT pid_readers=$pid_readers
+		$IFDEBUG ps
+
+		# Wait for the readers to finish before signalling the
+		# writer to quit: the writer holds the file open so that the
+		# readers will find the shadow file when they reopen
+		# the .h5 file.
+		wait $pid_readers
+		kill -USR1 $(cat vfd_swmr_writer.pid)
+		wait $pid_writer
+
+		# Collect exit codes of the readers
+		n=0
+		while [ $n -lt $Nreaders ]; do
+		    if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
+			echo reader had error
+			nerrors=$((nerrors + 1))
+		    fi
+		    n=$((n + 1))
+		done
+
+		# Collect exit code of the writer
+		$DPRINT checked writer $pid_writer
+		if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
+		    echo writer had error
+		    nerrors=$((nerrors + 1))
+		fi
+
+		# Clean up output files
+		rm -f vfd_swmr_writer.{out,rc}
+		rm -f vfd_swmr_reader.*.{out,rc}
+	fi
+
+	if [ ${do_shrink:-no} = yes ]; then
+		if [ ${do_expand:-no} != yes ]; then
+			echo "Cancelling the 'shrink' test: it depends on the .h5 file left behind by the 'expand' test." 1>&2
+			exit 1
+		fi
+		echo
+		echo "## Remove test - test shrinking the dataset"
+
+		# Remove any possible writer message file before launching writer
+		rm -f $WRITER_MESSAGE
+		# Launch the Remove Writer
+		echo launch the vfd_swmr_remove_writer
+		seed="" # Put -r <random seed> command here
+		catch_out_err_and_rc vfd_swmr_writer \
+		    ../vfd_swmr_remove_writer -q -o $Nrecs_rem $seed &
+		pid_writer=$!
+		$DPRINT pid_writer=$pid_writer
+
+		# Wait for message from writer process before starting reader(s)
+		WAIT_MESSAGE $WRITER_MESSAGE
+		#
+		# Launch the Remove Readers
+		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
+		n=0
+		pid_readers=""
+		echo launch $Nreaders swmr_remove_readers ......may take some time ......
+		while [ $n -lt $Nreaders ]; do
+		    #seed="-r ${seeds[$n]}"
+		    seed=""
+		    catch_out_err_and_rc vfd_swmr_reader.$n \
+			../vfd_swmr_remove_reader -q $Nsecs_rem $seed &
+		    pid_readers="$pid_readers $!"
+		    n=`expr $n + 1`
+		done
+		$DPRINT pid_readers=$pid_readers
+		$IFDEBUG ps
+
+		# Wait for the readers to finish before signalling the
+		# writer to quit: the writer holds the file open so that the
+		# readers will find the shadow file when they reopen
+		# the .h5 file.
+		wait $pid_readers
+		kill -USR1 $(cat vfd_swmr_writer.pid)
+		wait $pid_writer
+
+		# Collect exit codes of the readers
+		n=0
+		while [ $n -lt $Nreaders ]; do
+		    if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
+			echo reader had error
+			nerrors=$((nerrors + 1))
+		    fi
+		    n=$((n + 1))
+		done
+
+		# Collect exit code of the writer
+		$DPRINT checked writer $pid_writer
+		if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
+		    echo writer had error
+		    nerrors=$((nerrors + 1))
+		fi
+
+		# Clean up output files
+		rm -f vfd_swmr_writer.{out,rc}
+		rm -f vfd_swmr_reader.*.{out,rc}
+	fi
+
+	if [ ${do_expand_shrink:-no} = yes ]; then
+		echo
+		echo "## Expand/shrink test - randomly grow or shrink the dataset"
+
+		# Launch the Generator
+		echo launch the vfd_swmr_generator with VFD SWMR write
+		../vfd_swmr_generator -s $compress $index_type
+		if test $? -ne 0; then
+		    echo generator had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+
+		# Launch the Writer (not in parallel - just to rebuild the datasets)
+		echo launch the vfd_swmr_writer
+		seed="" # Put -r <random seed> command here
+		../vfd_swmr_writer -q -W $Nrecords $seed
+		if test $? -ne 0; then
+		    echo writer had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+
+		# Remove any possible writer message file before launching writer
+		rm -f $WRITER_MESSAGE
+		#
+		# Launch the Add/Remove Writer
+		echo launch the vfd_swmr_addrem_writer
+		seed="" # Put -r <random seed> command here
+		catch_out_err_and_rc vfd_swmr_writer \
+		    ../vfd_swmr_addrem_writer -q $Nrecords $seed &
+		pid_writer=$!
+		$DPRINT pid_writer=$pid_writer
+
+		# Wait for message from writer process before starting reader(s)
+		WAIT_MESSAGE $WRITER_MESSAGE
+		#
+		# Launch the Add/Remove Readers
+		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
+		n=0
+		pid_readers=""
+		echo launch $Nreaders vfd_swmr_remove_readers ...... may take some time ......
+		while [ $n -lt $Nreaders ]; do
+		    #seed="-r ${seeds[$n]}"
+		    seed=""
+		    catch_out_err_and_rc vfd_swmr_reader.$n \
+			../vfd_swmr_remove_reader -q $Nsecs_addrem $seed &
+		    pid_readers="$pid_readers $!"
+		    n=`expr $n + 1`
+		done
+		$DPRINT pid_readers=$pid_readers
+		$IFDEBUG ps
+
+		# Wait for the readers to finish before signalling the
+		# writer to quit: the writer holds the file open so that the
+		# readers will find the shadow file when they reopen
+		# the .h5 file.
+		wait $pid_readers
+		kill -USR1 $(cat vfd_swmr_writer.pid)
+		wait $pid_writer
+
+		# Collect exit codes of the readers
+		n=0
+		while [ $n -lt $Nreaders ]; do
+		    if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
+			echo reader had error
+			nerrors=$((nerrors + 1))
+		    fi
+		    n=$((n + 1))
+		done
+
+		# Collect exit code of the writer
+		$DPRINT checked writer $pid_writer
+		if [ ! -e vfd_swmr_writer.rc ] ||
+		   [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
+		    echo writer had error
+		    nerrors=$((nerrors + 1))
+		fi
+
+		# Clean up output files
+		rm -f vfd_swmr_writer.{out,rc}
+		rm -f vfd_swmr_reader.*.{out,rc}
+	fi
+
+	if [ ${do_sparse:-no} = yes ]; then
+		echo
+		echo "## Sparse writer test - write random dataset locations"
+
+		# Launch the Generator
+		# NOTE: Random seed is shared between readers and writers and is
+		#       created by the generator.
+		echo launch the vfd_swmr_generator with VFD SWMR write
+		seed="" # Put -r <random seed> command here
+		../vfd_swmr_generator -s $compress $index_type $seed
+		if test $? -ne 0; then
+		    echo generator had error
+		    nerrors=`expr $nerrors + 1`
+		fi
+
+		# Remove any possible writer message file before launching writer
+		rm -f $WRITER_MESSAGE
+		# Launch the Sparse writer
+		echo launch the vfd_swmr_sparse_writer
+		catch_out_err_and_rc vfd_swmr_writer nice -n 20 \
+		    ../vfd_swmr_sparse_writer -q $Nrecs_spa &
+		pid_writer=$!
+		$DPRINT pid_writer=$pid_writer
+
+		# Wait for message from writer process before starting reader(s)
+		WAIT_MESSAGE $WRITER_MESSAGE
+		#
+		# Launch the Sparse readers
+		n=0
+		pid_readers=""
+		echo launch $Nrdrs_spa vfd_swmr_sparse_readers ..... may take some time ......
+		while [ $n -lt $Nrdrs_spa ]; do
+		    # The sparse reader spits out a LOT of data so it's set to 'quiet'
+		    catch_out_err_and_rc vfd_swmr_reader.$n \
+			../vfd_swmr_sparse_reader -q $Nrecs_spa &
+		    pid_readers="$pid_readers $!"
+		    n=`expr $n + 1`
+		done
+		$DPRINT pid_readers=$pid_readers
+		$IFDEBUG ps
+
+		# Wait for the readers and the writer to finish.
+		echo "pid_readers=$pid_readers"
+		echo "pid_writer=$pid_writer"
+
+		# Wait for the readers to finish before signalling the
+		# writer to quit: the writer holds the file open so that the
+		# readers will find the shadow file when they reopen
+		# the .h5 file.
+		wait $pid_readers
+		kill -USR1 $(cat vfd_swmr_writer.pid)
+		wait $pid_writer
+
+		# Collect exit codes of the readers
+		n=0
+		while [ $n -lt $Nrdrs_spa ]; do
+		    if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
+			echo reader had error
+			nerrors=$((nerrors + 1))
+		    fi
+		    n=$((n + 1))
+		done
+
+		# Collect exit code of the writer
+		$DPRINT checked writer $pid_writer
+		if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
+		    echo writer had error
+		    nerrors=$((nerrors + 1))
+		fi
+
+		# Clean up output files
+		rm -f vfd_swmr_writer.{out,rc}
+		rm -f vfd_swmr_reader.*.{out,rc}
+	fi
+    done
+done
+
+###############################################################################
+#
+# "vlstr_null" and "vlstr_oob" tests
+#
+# Test variable-length strings, expecting errors.
+#
+###############################################################################
+#
+#
+for ty in null oob; do
+
+	if [ ${ty} = null ]; then
+		[ ${do_vlstr_null:-no} = no ] && continue
+		echo
+		echo "## VL string 1 - expect to read NULL"
+	else
+		[ ${do_vlstr_oob:-no} = no ] && continue
+		echo
+		echo "## VL string 2 - expect out-of-bounds access"
+	fi
+
+	echo launch vfd_swmr_vlstr_writer ..... may take some time ......
+	catch_out_err_and_rc vfd_swmr_vlstr_writer \
+	    ../vfd_swmr_vlstr_writer -n 500 -q -t ${ty} &
+	pid_writer=$!
+
+	# pause?
+
+	catch_out_err_and_rc vfd_swmr_vlstr_reader \
+	    ../vfd_swmr_vlstr_reader -n 500 -q -t ${ty} &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_vlstr_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_vlstr_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nsofterrors=$((nsofterrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_vlstr_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_vlstr_writer.{out,rc}
+	rm -f vfd_swmr_vlstr_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "zoo" tests
+#
+# Make sure that a "zoo"---the variety of HDF5 object types---can be
+# read and written by VFD SWMR.
+#
+###############################################################################
+#
+#
+if [ ${do_zoo:-no} = yes ]; then
+	rm -f ./shared_tick_num
+	echo launch vfd_swmr_zoo_writer
+	catch_out_err_and_rc vfd_swmr_zoo_writer \
+	    ../vfd_swmr_zoo_writer -q &
+	pid_writer=$!
+
+        # -l is the expected maximal number of ticks from the writer's finishing zoo creation or deletion
+        # to the reader's finishing validation of zoo creation or deletion
+	catch_out_err_and_rc vfd_swmr_zoo_reader \
+	    ../vfd_swmr_zoo_reader -l 4 -q &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_zoo_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_zoo_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_zoo_writer.{out,rc}
+	rm -f vfd_swmr_zoo_reader.*.{out,rc}
+fi
+
+
+###############################################################################
+#
+# "groups" test
+#
+# Make sure that we can create GROUP_n groups 
+# (10, 20, or 400 depending on the HDF5TestExpress level)
+# while a reader waits for each to appear.
+#
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_n=20                          # -n option: # of groups (for "groups" test)
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    GROUP_n=400                         
+elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
+    GROUP_n=10
+fi
+#
+#
+if [ ${do_groups:-no} = yes ]; then
+	echo launch vfd_swmr_group_writer ......may take some time......
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -c 10 -n $GROUP_n &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -c 10 -n $GROUP_n -u 5 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "groups_attrs" test
+#
+# The group attribute test takes longer. 
+# So for standard run and quick run, we shorten the number of tests. 
+# The standard run covers all the features we need to test.
+# The quick run doesn't cover the attribute storage change 
+# between dense and compact.
+# The exhaustive run tries to test a feature per test from scratch.
+#
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
+grp_attr_list=(
+                "dense-del-to-compact"
+                "modify"
+                "remove-vstr"
+                "modify-vstr"
+                "del-ohr-block"
+               )
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then        # exhaustive run
+    GROUP_attr_n=2                         
+    grp_attr_list=(
+                "compact"
+                "dense"
+                "compact-del"
+                "dense-del"
+                "compact-add-to-dense"
+                "dense-del-to-compact"
+                "modify"
+                "add-vstr"
+                "remove-vstr"
+                "modify-vstr"
+                "add-ohr-block"
+                "del-ohr-block"
+               )
+elif [[ "$HDF5TestExpress" -gt 1 ]] ; then      # quick run
+    grp_attr_list=(
+                "dense"
+                "modify"
+                "remove-vstr"
+                "modify-vstr"
+                "del-ohr-block"
+               )
+fi
+#
+#
+for options in ${grp_attr_list[*]}; do
+	if [ ${do_groups_attrs:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group attribute: $options ......may take some time......
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "os_groups_attrs" test
+#
+# Only for exhaustive run
+#
+# The following tests are for add/del/modify attributes for
+# groups created with the old-style. 
+# Check https://portal.hdfgroup.org/display/HDF5/Groups for 
+# the detailed group implementation note. 
+# The 'compact' and 'compact-del' are the attribute addition
+# and deletion tests. Other test names have the same meaning 
+# as those of the new-style group tests.
+# 
+###############################################################################
+#
+#
+os_grp_attr_list=(
+                "compact"
+                "compact-del"
+                "modify"
+                "add-vstr"
+                "remove-vstr"
+                "modify-vstr"
+                "add-ohr-block"
+                "del-ohr-block"
+                )
+#
+#
+for options in ${os_grp_attr_list[*]}; do
+	if [ ${do_os_groups_attrs:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group attribute with old-style group: $options  ......may take some time......
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -G -c 1 -n $GROUP_attr_n -a 1 -A $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "groups_ops" tests
+#
+# The group operation test takes longer. 
+# So for the quick run, we shorten the number of tests. 
+# The essential features are covered. 
+#
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_op_n=1                      # -n option: # of groups (for group operation test)
+grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-compact-t-dense"
+                "grp-dense-t-compact"
+               )
+#
+#
+# Setting for exhaustive and quick run
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then    # exhaustive run
+    GROUP_op_n=2                     
+    grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-ins-links"
+                "grp-del-links"
+                "grp-compact-t-dense"
+                "grp-dense-t-compact"
+               )
+elif [[ "$HDF5TestExpress" -gt 1 ]] ; then  # quick run
+    grp_op_list=(
+                "grp-move"
+                "grp-dense-t-compact"
+               )
+fi
+#
+#
+for options in ${grp_op_list[*]}; do
+	if [ ${do_groups_ops:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group operations: $options  ......may take some time......
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_op_n -O $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -c 1 -n $GROUP_op_n -O $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# Setting for "os_groups_ops" test
+#
+# Only for exhaustive run
+#
+# Test the group operations for old-style
+# 
+###############################################################################
+#
+#
+os_grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-ins-links"
+                "grp-del-links"
+               )
+#
+#
+for options in ${os_grp_op_list[*]}; do
+	if [ ${do_os_groups_ops:-no} = no ]; then
+		continue
+	fi
+	echo launch vfd_swmr_group operations with old-style group: $options  ......may take some time......
+	catch_out_err_and_rc vfd_swmr_group_writer \
+	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_op_n -O $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_group_reader -q -G -c 1 -n $GROUP_op_n -O $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_group_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_group_writer.{out,rc}
+	rm -f vfd_swmr_group_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# Setting for "os_groups_seg" test
+#
+# Only for exhaustive run
+#
+# Verify the segmentation fault is fixed when running with:
+# --1,000,000 groups
+# --as writer only
+# 
+###############################################################################
+#
+#
+GROUP_seg_n=1000000                      # Number of groups when segmentation fault occurs
+#
+if [ ${do_os_groups_seg:-no} != no ]; then
+    echo launch vfd_swmr_group operations with old-style group: $GROUP_seg_n groups ......may take some time......
+    catch_out_err_and_rc vfd_swmr_group_writer \
+        ../vfd_swmr_group_writer -q -N -G -n $GROUP_seg_n -a $GROUP_seg_n
+
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Clean up output files
+    rm -f vfd_swmr_group_writer.{out,rc}
+fi
+
+###############################################################################
+#
+# Setting for bigset (few_big and many_small) tests
+#
+###############################################################################
+#
+#
+# Default setting
+#
+BIGSET_n=25                         # -n option: # of iterations
+BIGSET_few_s=10                     # -s option: # of datasets (for few_big test)
+BIGSET_many_s=50                    # -s option: # of datasets (for many_small test)
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    BIGSET_n=100
+    BIGSET_few_s=25
+    BIGSET_many_s=100
+elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
+    BIGSET_n=10
+    BIGSET_few_s=3
+    BIGSET_many_s=25
+fi
+#
+#
+for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t -F" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+    if [ ${do_many_small:-no} = no ]; then
+        continue
+    fi
+    #
+    # Test many small datasets of two or three dimensions.
+    #
+    # Perform 25 iterations on 100 extensible datasets configured with
+    # 2D 16x16 chunks or 3D 1x16x16 chunks of 32-bit unsigned integer elements,
+    # expanding each dataset by a chunk in one dimension (up to 25x1
+    # 16x16 chunks) on each iteration.
+    #
+    # Perform the test again, extending each dataset
+    # in *two* dimensions (up to 25x25 16x16 chunks).
+    #
+    # If testing 3D datasets (-t option), extending each dataset along the
+    # first dimension (up to 25 1x16x16)
+    #
+
+    # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+    # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+    # VDS across multiple files (-M option), the program also skips for future support.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [[ $options == *"-M"* ]]; then
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+    fi
+
+    echo launch vfd_swmr_bigset_writer many small, options $options
+    catch_out_err_and_rc vfd_swmr_bigset_writer \
+        ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
+    pid_writer=$!
+
+    catch_out_err_and_rc vfd_swmr_bigset_reader \
+        ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -e 1 -r 16 -c 16 -q &
+    pid_reader=$!
+
+    # Wait for the reader to finish before signalling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file. Also wait for the auxiliary process to finish.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        wait $pid_aux_proc
+    fi
+    wait $pid_reader
+    wait $pid_writer
+
+    # Collect exit code of the auxiliary process
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [ $(cat aux_process.rc) -ne 0 ]; then
+            echo the auxiliary process had error
+            nerrors=$((nerrors + 1))
+        fi
+    fi
+
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+    rm -f vfd_swmr_bigset_writer.{out,rc}
+    rm -f vfd_swmr_bigset_reader.*.{out,rc}
+    rm -f aux_process.{out,rc}
+    rm -f mdfile bigset_updater.* bigset-shadow-*
+done
+
+# bigset test for bigger chunks
+for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d 1 -t -F -l 10" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+    #
+    # Test a few big datasets of two or three dimensions.
+    #
+    # Perform 25 iterations on 10 extensible datasets configured with
+    # 2D 256x256 chunks or 3D 8x256x256 of 32-bit unsigned integer elements,
+    # expanding each dataset by a chunk in one dimension (up to 25x1
+    # 256x256 chunks) on each iteration.
+    #
+    # Perform the test again, extending each dataset
+    # in *two* dimensions (up to 25x25 256x256 chunks).
+    #
+    # If testing 3D datasets (-t option), extending each dataset along the
+    # first dimension (up to 25 8x256x256)
+    #
+
+    if [ ${do_few_big:-no} = no ]; then
+        continue
+    fi
+    echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
+
+    # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
+    # If it isn't enabled, the auxiliary process simply exit without executing any code.  For the testing case of
+    # VDS across multiple files (-M option), the program also skips for future support.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [[ $options == *"-M"* ]]; then
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process -a mdfile bigset_updater &
+        else
+            catch_out_err_and_rc aux_process ../../utils/vfd_swmr/aux_process mdfile bigset_updater &
+        fi
+        pid_aux_proc=$!
+    fi
+
+    catch_out_err_and_rc vfd_swmr_bigset_writer \
+        ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
+    pid_writer=$!
+
+    catch_out_err_and_rc vfd_swmr_bigset_reader \
+        ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -e 8 -r 256 -c 256 -q &
+    pid_reader=$!
+
+    # Wait for the reader to finish before signalling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file. Also wait for the auxiliary process to finish.
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        wait $pid_aux_proc
+    fi
+    wait $pid_reader
+    wait $pid_writer
+
+	# Collect exit code of the auxiliary process
+    if test "X$USING_AUX_PROCESS" = "Xyes"; then
+        if [ $(cat aux_process.rc) -ne 0 ]; then
+            echo the auxiliary process had error
+            nerrors=$((nerrors + 1))
+        fi
+    fi
+
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_bigset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_bigset_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Clean up output files
+    rm -f vfd_swmr_bigset_writer.{out,rc}
+    rm -f vfd_swmr_bigset_reader.*.{out,rc}
+    rm -f aux_process.{out,rc}
+    rm -f mdfile bigset_updater.* bigset-shadow-*
+done
+
+###############################################################################
+#
+# "attrdset" test
+#
+###############################################################################
+#
+#
+# Default setting
+#
+attrdset_list=(
+                "-g -a 8 -v -m -d 8 -c 3 -u 5 -q"
+               )
+#
+#
+# Setting for exhaustive
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then        # exhaustive run
+    attrdset_list=(
+                "-p -g -a 10 -v -m -d 10 -c 3 -u 5 -q"
+                "-k -a 20 -v -m -d 5 -q"
+               )
+fi
+#
+#
+for options in "${attrdset_list[@]}"; do
+    if [ ${do_attrdset:-no} = no ]; then
+        continue
+    fi
+
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$ATTRDSET_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$ATTRDSET_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$ATTRDSET_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$ATTRDSET_FIFO_READER_TO_WRITER
+    fi
+
+    echo launch vfd_swmr_attrdset_writer attrdset, options $options ......may take some time......
+    catch_out_err_and_rc vfd_swmr_attrdset_writer \
+        ../vfd_swmr_attrdset_writer $options &
+    pid_writer=$!
+
+    catch_out_err_and_rc vfd_swmr_attrdset_reader \
+        ../vfd_swmr_attrdset_reader $options &
+    pid_reader=$!
+
+    # Wait for the reader to finish before signaling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file.
+    wait $pid_reader
+    wait $pid_writer
+
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_attrdset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_attrdset_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Clean up output files
+    rm -f vfd_swmr_attrdset_writer.{out,rc}
+    rm -f vfd_swmr_attrdset_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "dsetops" test
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+# Loop with flushing of raw data and then without
+for flush in "" "-U"; do
+    # Loop with different operations
+    for options in "-p -e 20 -t -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
+	    #
+	    #
+	    if [ ${do_dsetops:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetops_writer dsetops, options $options $flush......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	        ../vfd_swmr_dsetops_writer $options $flush &
+	    pid_writer=$!
+
+	    catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	        ../vfd_swmr_dsetops_reader $options $flush &
+	    pid_reader=$!
+
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
+
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
+
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
+
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetops_writer.{out,rc}
+	    rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+    done
+done
+
+###############################################################################
+#
+# "dsetops_ref" test (this is the dsetops test with options added for testing references)
+# --test object (-O) and region (-R) references
+# --test with raw data flush only
+# --test without flush will result in error because the references are not there 
+#   to continue further testing
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+# Loop with 
+for ref in "-O" "-R" "-O -R"; do
+    # Loop with different operations
+    for options in "-p -e 20 -t -g -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
+	    #
+	    #
+	    if [ ${do_dsetops_ref:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetops_writer dsetops, options $options $ref......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	        ../vfd_swmr_dsetops_writer $options $ref &
+	    pid_writer=$!
+
+	    catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	        ../vfd_swmr_dsetops_reader $options $ref &
+	    pid_reader=$!
+
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
+
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
+
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
+
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetops_writer.{out,rc}
+	    rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+    done
+done
+
+###############################################################################
+#
+# "dsetchks" test
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+dsetchks_list=(
+                "-s -m 8 -n 3 -g 1 -q"
+                "-i -o -g 3 -q"
+                "-f -p 4 -q"
+                "-e -m 3 -n 5 -t 1 -q"
+                "-r -m 11 -n 5 -l 7 -q"
+                "-f -x 5 -y 2 -q"
+               )
+#
+#
+# Loop with flushing of raw data and then without
+for flush in "" "-U"; do
+    for options in "${dsetchks_list[@]}"; do
+	    #
+	    #
+	    if [ ${do_dsetchks:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETCHKS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETCHKS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETCHKS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETCHKS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetchks_writer dsetchks, options $options $flush ......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetchks_writer \
+	        ../vfd_swmr_dsetchks_writer $options $flush &
+	    pid_writer=$!
+
+	    catch_out_err_and_rc vfd_swmr_dsetchks_reader \
+	        ../vfd_swmr_dsetchks_reader $options $flush &
+	    pid_reader=$!
+
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
+
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetchks_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
+
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetchks_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
+
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetchks_writer.{out,rc}
+	    rm -f vfd_swmr_dsetchks_reader.*.{out,rc}
+    done
+done
+
+if [ ${do_independ_wr:-no} = yes ]; then
+	echo launch vfd_swmr_indep_wr_p0 ..... process 0 ......
+	echo launch vfd_swmr_indep_wr_p1 ..... process 1 ......
+	catch_out_err_and_rc vfd_swmr_indep_wr_p0 \
+	    ../vfd_swmr_indep_wr_p0  &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_group_reader \
+	    ../vfd_swmr_indep_wr_p1  &
+	pid_reader=$!
+
+        wait $pid_reader
+        wait $pid_writer
+	# Clean up output files
+	rm -f vfd_swmr_indep_wr_p0.{out,rc}
+	rm -f vfd_swmr_indep_wr_p1.{out,rc}
+fi
+
+
+###############################################################################
+#
+# "gfail_entry_length" test
+#
+# Only for exhaustive run
+#
+# Verify that the assertion failure for old and new entry length is fixed.
+# (See issue #1 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_entry_length:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 10 -n 340000
+	catch_out_err_and_rc vfd_swmr_gfail_entry_length_writer \
+	    ../vfd_swmr_gfail_writer -q -m 10 -n 340000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 10 -n 340000
+	catch_out_err_and_rc vfd_swmr_gfail_entry_length_reader \
+	    ../vfd_swmr_gfail_reader -m 10 -n 340000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+    if [ $(cat vfd_swmr_gfail_entry_length_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+    fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_entry_length_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_entry_length_writer.{out,rc}
+	rm -f vfd_swmr_gfail_entry_length_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "gfail_checksum" test
+#
+# Only for exhaustive run
+#
+# Verify that meaningful message about increasing max_lag is printed when
+# incorrect metadata checksum error is encountered when loading the cache entry.
+#
+# Note that there will be messages from the error stack printed out for this test.
+# This is expected.
+#
+# (See issue #2 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_checksum:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -n 420000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_checksum_writer \
+	    ../vfd_swmr_gfail_writer -q -m 50 -t 10 -n 4000000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -n 420000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_checksum_reader \
+	    ../vfd_swmr_gfail_reader -q -m 50 -t 10 -n 4000000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+    if [ $(cat vfd_swmr_gfail_checksum_reader.rc) -ne 0 ]; then
+        grep "suggest to increase the value of max_lag" vfd_swmr_gfail_checksum_reader.out >/dev/null 2>&1
+        if test $? -ne 0; then
+            echo reader had error
+	        nerrors=$((nerrors + 1))
+        fi
+    fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_checksum_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_checksum_writer.{out,rc}
+	rm -f vfd_swmr_gfail_checksum_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "gfail_page_size" test
+#
+# Only for exhaustive run
+#
+# Verify that the assertion failure is fixed when non-default page size is set.
+# (See issue #3 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_page_size:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 10 -B 8192 -s 8192 -n 320000
+	catch_out_err_and_rc vfd_swmr_gfail_page_size_writer \
+	    ../vfd_swmr_gfail_writer -q -m 10 -B 8192 -s 8192 -n 320000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 10 -B 8192 -s 8192 -n 320000
+	catch_out_err_and_rc vfd_swmr_gfail_page_size_reader  \
+	    ../vfd_swmr_gfail_reader -m 10 -B 8192 -s 8192 -n 320000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_gfail_page_size_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_page_size_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_page_size_writer.{out,rc}
+	rm -f vfd_swmr_gfail_page_size_reader.*.{out,rc}
+fi
+
+###############################################################################
+#
+# "gfail_index_space" test
+#
+# Only for exhaustive run
+#
+# Verify that the failure is fixed when there is not enough space to copy the index.
+# (See issue #4 in Kent's documentation "Designed to Fail Tests and Issues".
+#
+###############################################################################
+#
+#
+if [ ${do_gfail_index_space:-no} = yes ]; then
+    #
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$GFAIL_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$GFAIL_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$GFAIL_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$GFAIL_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_gfail_writer -q -m 50 -t 10 -n 1000000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_index_space_writer \
+	    ../vfd_swmr_gfail_writer -q -m 50 -t 10 -n 1000000 &
+	pid_writer=$!
+
+	echo launch vfd_swmr_gfail_reader -m 50 -t 10 -n 1000000 ......may take some time......
+	catch_out_err_and_rc vfd_swmr_gfail_index_space_reader  \
+	    ../vfd_swmr_gfail_reader -m 50 -t 10 -n 1000000 &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_gfail_index_space_reader.rc) -ne 0 ]; then
+	    echo reader had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_gfail_index_space_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_gfail_index_space_writer.{out,rc}
+	rm -f vfd_swmr_gfail_index_space_reader.*.{out,rc}
+fi
+
+###############################################################################
+## Report and exit
+###############################################################################
+cd ..
+$DPRINT nerrors $nerrors nsofterrors $nsofterrors
+if test $nerrors -eq 0 ; then
+    echo "VFD SWMR tests passed."
+    if test $nsofterrors -ne 0 ; then
+	echo
+        echo "${nsofterrors} expected errors occurred.  Expected errors are ok."
+    fi
+    if test -z "$HDF5_NOCLEANUP"; then
+        # delete the test directory
+        rm -rf vfd_swmr_test
+    fi
+    exit 0
+else
+    echo -n "VFD SWMR tests failed with $nerrors unexpected errors "
+    echo "and $nsofterrors expected errors.  Expected errors are ok."
+    echo "Please report unexpected errors, they may indicate a bug."
+    exit 1
+fi
+

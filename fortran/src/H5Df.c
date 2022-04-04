@@ -145,7 +145,7 @@ DONE:
  *  Elena Pourmal
  *  Tuesday, May 14, 2002
  * HISTORY
- *  This function was added to accomodate h5dwrite_f with the
+ *  This function was added to accommodate h5dwrite_f with the
  *  dims argument being of INTEGER(HSIZE_T) type
  * SOURCE
  */
@@ -217,7 +217,7 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
  *  Elena Pourmal
  *  Wednesday, May 15, 2002
  * HISTORY
- *  This function was added to accomodate h5dread_f subroutine
+ *  This function was added to accommodate h5dread_f subroutine
  *  with the dims parameter being of INTEGER(HSIZE_T_F) size.
  * SOURCE
  */
@@ -495,10 +495,10 @@ h5dget_storage_size_c(hid_t_f *dset_id, hsize_t_f *size)
 
     c_dset_id = (hid_t)*dset_id;
     c_size    = H5Dget_storage_size(c_dset_id);
-    if (c_size == 0)
-        return ret_value;
-    *size     = (hsize_t_f)c_size;
-    ret_value = 0;
+    if (c_size != 0) {
+        ret_value = 0;
+    }
+    *size = (hsize_t_f)c_size;
     return ret_value;
 }
 
@@ -783,7 +783,7 @@ h5dwrite_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
         return ret_value;
     }
     /*
-     * Move data from temorary buffer
+     * Move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {

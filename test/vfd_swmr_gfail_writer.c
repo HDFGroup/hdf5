@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- *  Purpose: To demostrate the four issues uncovered during the test plan
+ *  Purpose: To demonstrate the four issues uncovered during the test plan
  *           1.4 part 1.
  *
  *           Setup:
@@ -19,7 +19,7 @@
  *            1) Create an HDF5 file
  *            2) Create many groups
  *            3) Use the named pipe to send the reader a message to start verifying
- *            4) Call H5Fvfd_swmr_end_tick immeidately after sending out the message to the reader
+ *            4) Call H5Fvfd_swmr_end_tick immediately after sending out the message to the reader
  *            5) Sleep for two ticks before receiving a message from the reader that informs the reader
  *               started verifying
  *            6) If the option to delete the group is off(by default), just sleep for a relatively long time,
@@ -163,7 +163,7 @@ usage(const char *progname)
               "-G:             old-style type of group\n"
               "-n ngroups:     the number of groups\n"
               "-N:             do not use named pipes, \n"
-              "                mainly for running the writer and reader seperately\n"
+              "                mainly for running the writer and reader separately\n"
               "-t tick_len:    length of a tick in tenths of a second.\n"
               "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
               "-B pbs:         page buffer size in bytes:\n"
@@ -631,7 +631,7 @@ main(int argc, char **argv)
 
         /* Delete 1000 groups if the del_grp option is true.  */
         if (s.del_grp && s.nsteps > 1000) {
-            printf("Deleting groups. \n");
+            HDprintf("Deleting groups. \n");
             for (step = s.nsteps - 1; step >= (s.nsteps - 1000); step--) {
                 dbgf(2, "writer: deleting step %d\n", step);
 
@@ -667,21 +667,21 @@ main(int argc, char **argv)
         }
 
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
-            fprintf(stderr, "HDclock_gettime failed");
+            HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
 
-        printf("Reader: call back function: check group names.\n");
+        HDprintf("Reader: call back function: check group names.\n");
         if (H5Literate(s.file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, NULL) < 0) {
-            printf("H5Literate failed \n");
+            HDprintf("H5Literate failed \n");
             TEST_ERROR;
         }
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-            fprintf(stderr, "HDclock_gettime failed");
+            HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
         temp_time = TIME_PASSED(start_time, end_time);
-        fprintf(stdout, "H5Literate: temp time                           = %lf\n", temp_time);
+        HDfprintf(stdout, "H5Literate: temp time                           = %lf\n", temp_time);
     }
 
     if (H5Pclose(fapl) < 0) {
@@ -768,22 +768,11 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
     (void)info;
     (void)operator_data;
 
-#if 0 /* Kent for debugging purpose. */
-    char *     subname;
-    int        grp_num;
-#endif
-
-    if (strncmp(name, "group", (size_t)5) != 0) {
-        printf("Iteration failed:  group name is %s\n", name);
+    if (HDstrncmp(name, "group", (size_t)5) != 0) {
+        HDprintf("Iteration failed:  group name is %s\n", name);
         return -1;
     }
     else {
-#if 0 /* Kent for debugging purpose. */
-        subname = name + 6;
-        grp_num = atoi((const char *)subname);
-        if (grp_num > 1450000 && grp_num % 5000 == 0)
-            dbgf(2, "Group name is %s\n", name);
-#endif
         return 0;
     }
 }

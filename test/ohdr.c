@@ -34,6 +34,13 @@
 #define H5G_FRIEND /* suppress error about including H5Gpkg */
 #include "H5Gpkg.h"
 
+/*
+ * This file needs to access private routines from the H5FD package.
+ */
+#define H5FD_FRIEND /* suppress error about including H5FDpkg */
+#define H5FD_TESTING
+#include "H5FDpkg.h"
+
 const char *FILENAME[] = {"ohdr", "ohdr_min_a", "ohdr_min_b", NULL};
 
 /* used for object header size comparison */
@@ -584,7 +591,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     TESTING("object with unknown header message & 'shareable' flag set");
 
-    /* Open the dataset with the unknown header message, adn "shareable" flag */
+    /* Open the dataset with the unknown header message, and "shareable" flag */
     if ((did = H5Dopen2(loc_bogus, "Dataset5", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
     if (H5Dclose(did) < 0)
@@ -1089,13 +1096,13 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
     /* IDs for non-minimized file open */
     hid_t file_f_id   = -1; /* lower 'f' for standard file setting */
     hid_t dset_f_x_id = -1; /* 'x' for default */
-    hid_t dset_f_N_id = -1; /* 'N' for explcit non-minimized dset */
+    hid_t dset_f_N_id = -1; /* 'N' for explicit non-minimized dset */
     hid_t dset_f_Y_id = -1; /* 'Y' for minimized dset */
 
     /* IDs for minimized file open */
     hid_t file_F_id   = -1; /* upper 'F' for minimized file setting */
     hid_t dset_F_x_id = -1; /* 'x' for default */
-    hid_t dset_F_N_id = -1; /* 'N' for explcit non-minimized dset */
+    hid_t dset_F_N_id = -1; /* 'N' for explicit non-minimized dset */
     hid_t dset_F_Y_id = -1; /* 'Y' for minimized dset */
 
     char filename_a[512] = "";
@@ -1813,13 +1820,12 @@ main(void)
     herr_t         ret;                    /* Generic return value */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                                HDstrcmp(env_h5_drvr, "family") != 0);
+    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, 0);
 
     /* Reset library */
     h5_reset();
@@ -2107,11 +2113,15 @@ main(void)
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)
         TEST_ERROR
 
-    /* A test to exercise the re-read of the object header for SWMR access */
-    if (test_ohdr_swmr(TRUE) < 0)
-        TEST_ERROR
-    if (test_ohdr_swmr(FALSE) < 0)
-        TEST_ERROR
+    if (H5FD__supports_swmr_test(env_h5_drvr)) {
+        /* A test to exercise the re-read of the object header for SWMR access */
+        if (test_ohdr_swmr(TRUE) < 0)
+            TEST_ERROR
+        if (test_ohdr_swmr(FALSE) < 0)
+            TEST_ERROR
+    }
+    else
+        HDputs("Skipped SWMR tests for SWMR-incompatible VFD");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)

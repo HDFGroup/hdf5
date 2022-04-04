@@ -130,7 +130,7 @@ mybzero(void *dest, size_t size)
  * Function:   _populate_filepath
  *
  * Purpose:    Given a directory name and a base name, concatenate the two and
- *             run h5fixname() to get the "actual" path to the intented target.
+ *             run h5fixname() to get the "actual" path to the intended target.
  *             `h5suffix' should be FALSE to keep the base name unaltered;
  *             TRUE will append the '.h5' h5suffix to the basename...
  *             FALSE -> h5fixname_no_suffix(), TRUE -> h5fixname()

@@ -950,6 +950,29 @@ done:
 } /* end H5F_get_eoa() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_shared_get_file_driver
+ *
+ * Purpose:     Returns a pointer to the file driver structure of the
+ *              file's 'shared' structure.
+ *
+ * Return:      file handle on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_shared_get_file_driver(const H5F_shared_t *f_sh, H5FD_t **file_handle)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f_sh);
+    HDassert(file_handle);
+
+    *file_handle = f_sh->lf;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5F_shared_get_file_driver() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_get_vfd_handle
  *
  * Purpose:     Returns a pointer to the file handle of the low-level file
@@ -1321,18 +1344,15 @@ H5F_get_file_locking(const H5F_t *f)
 } /* end H5F_get_file_locking */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_use_vfd_swmr
+ * Function: H5F_get_use_vfd_swmr
  *
- * Purpose:  Quick and dirty routine to determine if VFD SWMR is
- *           enabled for this file.
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
+ * Purpose:  Determine if VFD SWMR is enabled for this file.
  *
- * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
+ * Return:   TRUE/FALSE
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5F_use_vfd_swmr(const H5F_t *f)
+H5F_get_use_vfd_swmr(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR

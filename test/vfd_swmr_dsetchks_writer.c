@@ -52,7 +52,7 @@
 #define PWRITES  2 /* Writes that cover a partial chunk per write */
 #define TWRITES  3 /* Writes that cover multiple chunks per write  */
 #define LWRITES  4 /* Writes that cover multiple partial chunks per write */
-#define INCR_EXT 5 /* Increase dataset dimenion sizes */
+#define INCR_EXT 5 /* Increase dataset dimension sizes */
 #define DECR_EXT 6 /* Decrease dataset dimension sizes */
 
 /* Fill values */
@@ -185,8 +185,6 @@ static bool verify_dset_single(unsigned action, const state_t *s, const dsets_st
 static bool verify_dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool verify_dset_extent_real(unsigned action, hid_t did, unsigned rows, unsigned cols, unsigned which);
 
-static const hid_t badhid = H5I_INVALID_HID;
-
 static void
 usage(const char *progname)
 {
@@ -254,7 +252,7 @@ usage(const char *progname)
         "     -x <xincrs> or -y <ydecrs>\n"
         "\n");
 
-    exit(EXIT_FAILURE);
+    HDexit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -263,10 +261,12 @@ usage(const char *progname)
 static bool
 state_init(state_t *s, int argc, char **argv)
 {
-    unsigned long tmp;
-    int           ch;
-    char *        tfile = NULL;
-    char *        end;
+    unsigned long          tmp;
+    int                    opt;
+    char *                 tfile = NULL;
+    char *                 end;
+    const char *           s_opts   = "siferom:n:x:y:g:p:t:l:bqSNUu:c:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = ALL_HID_INITIALIZER;
 
@@ -282,8 +282,8 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "siferom:n:x:y:g:p:t:l:bqSNUu:c:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+        switch (opt) {
 
             case 's': /* A chunked dataset with single index */
                 s->single_index = true;
@@ -340,39 +340,39 @@ state_init(state_t *s, int argc, char **argv)
             case 'u': /* Ticks for reader to wait before verification */
             case 'c': /* Communication interval */
                 errno = 0;
-                tmp   = strtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDprintf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    HDprintf("`-%c` argument `%lu` too large\n", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'm')
+                if (opt == 'm')
                     s->rows = (unsigned)tmp;
-                else if (ch == 'n')
+                else if (opt == 'n')
                     s->cols = (unsigned)tmp;
-                else if (ch == 'x')
+                else if (opt == 'x')
                     s->xincrs = (unsigned)tmp;
-                else if (ch == 'y')
+                else if (opt == 'y')
                     s->ydecrs = (unsigned)tmp;
-                else if (ch == 'g')
+                else if (opt == 'g')
                     s->gwrites = (unsigned)tmp;
-                else if (ch == 'p')
+                else if (opt == 'p')
                     s->pwrites = (unsigned)tmp;
-                else if (ch == 't')
+                else if (opt == 't')
                     s->twrites = (unsigned)tmp;
-                else if (ch == 'l')
+                else if (opt == 'l')
                     s->lwrites = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->update_interval = (unsigned)tmp;
-                else if (ch == 'c')
+                else if (opt == 'c')
                     s->csteps = (unsigned)tmp;
 
                 break;
@@ -383,8 +383,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     /* Require to specify at least -s or -i or -f or -e or -r option */
     if (!s->single_index && !s->implicit_index && !s->fa_index && !s->ea_index && !s->bt2_index) {
@@ -475,9 +475,9 @@ error:
 static bool
 create_dsets(const state_t *s, dsets_state_t *ds)
 {
-    hid_t    dcpl  = badhid;
-    hid_t    dcpl2 = badhid;
-    hid_t    sid   = badhid;
+    hid_t    dcpl  = H5I_INVALID_HID;
+    hid_t    dcpl2 = H5I_INVALID_HID;
+    hid_t    sid   = H5I_INVALID_HID;
     hsize_t  dims[2];
     unsigned fillval = FILL_INIT;
 
@@ -782,31 +782,31 @@ static bool
 close_dsets(const dsets_state_t *ds)
 {
     /* Close dataset with single index */
-    if (ds->single_did != badhid && H5Dclose(ds->single_did) < 0) {
+    if (ds->single_did != H5I_INVALID_HID && H5Dclose(ds->single_did) < 0) {
         HDprintf("close_dset_real() dataset: single index failed\n");
         TEST_ERROR;
     }
 
     /* Close dataset with implicit index */
-    if (ds->implicit_did != badhid && H5Dclose(ds->implicit_did) < 0) {
+    if (ds->implicit_did != H5I_INVALID_HID && H5Dclose(ds->implicit_did) < 0) {
         HDprintf("close_dset_real() dataset: implicit index failed\n");
         TEST_ERROR;
     }
 
     /* Close dataset with fixed array index */
-    if (ds->fa_did != badhid && H5Dclose(ds->fa_did) < 0) {
+    if (ds->fa_did != H5I_INVALID_HID && H5Dclose(ds->fa_did) < 0) {
         HDprintf("close_dset_real() dataset: fa index failed\n");
         TEST_ERROR;
     }
 
     /* Close dataset with extensible array index */
-    if (ds->ea_did != badhid && H5Dclose(ds->ea_did) < 0) {
+    if (ds->ea_did != H5I_INVALID_HID && H5Dclose(ds->ea_did) < 0) {
         HDprintf("close_dset_real() : ea index failed\n");
         TEST_ERROR;
     }
 
     /* Close dataset with v2 btree index */
-    if (ds->bt2_did != badhid && H5Dclose(ds->bt2_did) < 0) {
+    if (ds->bt2_did != H5I_INVALID_HID && H5Dclose(ds->bt2_did) < 0) {
         HDprintf("close_dset_real() dataset: bt2 index failed\n");
         TEST_ERROR;
     }
@@ -846,7 +846,7 @@ error:
  *
  * Dataset with fixed array/extensible array/version 2 btree index:
  * --INCR_EXT: increase dataset dimension sizes
- * --DECR_EXT: decrease dataset dimenions sizes
+ * --DECR_EXT: decrease dataset dimension sizes
  */
 static bool
 perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
@@ -1184,8 +1184,8 @@ static bool
 write_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
              hsize_t *block)
 {
-    hid_t         sid     = badhid;
-    hid_t         mem_sid = badhid;
+    hid_t         sid     = H5I_INVALID_HID;
+    hid_t         mem_sid = H5I_INVALID_HID;
     hsize_t       mem_dims[2];
     unsigned int *buf = NULL;
     unsigned      i;
@@ -1253,7 +1253,7 @@ error:
 } /* write_chunks() */
 
 /*
- * Increase or decrease the dimenion sizes for the specified datasets.
+ * Increase or decrease the dimension sizes for the specified datasets.
  */
 static bool
 dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds)
@@ -1299,7 +1299,7 @@ dset_extent_real(unsigned action, hid_t did, const hsize_t *chunk_dims)
     hsize_t dims[2];
     hsize_t max_dims[2];
     hsize_t new[2];
-    hid_t sid = badhid;
+    hid_t sid = H5I_INVALID_HID;
 
     if ((sid = H5Dget_space(did)) < 0) {
         HDprintf("H5Sget_space failed\n");
@@ -1721,8 +1721,8 @@ static bool
 verify_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
               hsize_t *block, bool fileclosed, bool flush_raw_data)
 {
-    hid_t         mem_sid = badhid;
-    hid_t         sid     = badhid;
+    hid_t         mem_sid = H5I_INVALID_HID;
+    hid_t         sid     = H5I_INVALID_HID;
     hsize_t       mem_dims[2];
     unsigned int *rbuf = NULL;
     unsigned      i;
@@ -1827,7 +1827,7 @@ error:
 } /* verify_chunks() */
 
 /*
- * Verify the increase or decrease of dimenion sizes for the specified datasets.
+ * Verify the increase or decrease of dimension sizes for the specified datasets.
  */
 static bool
 verify_dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
@@ -1882,7 +1882,7 @@ static bool
 verify_dset_extent_real(unsigned action, hid_t did, unsigned rows, unsigned cols, unsigned which)
 {
     hsize_t dims[2];
-    hid_t   sid = badhid;
+    hid_t   sid = H5I_INVALID_HID;
 
     /* Refresh the dataset */
     if (H5Drefresh(did) < 0) {
@@ -2079,7 +2079,10 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
         /* At communication interval, notify the reader about the failure and quit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
         /* The action succeeds */
@@ -2135,7 +2138,10 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
         /* At communication interval, tell the writer about the failure and exit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
         /* The verification succeeds */
@@ -2277,8 +2283,9 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl, fcpl;
-    bool                  writer;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
+    bool                  writer = false;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
@@ -2422,7 +2429,7 @@ error:
     }
 
     return EXIT_FAILURE;
-} /* main */
+}
 
 #else /* H5_HAVE_WIN32_API */
 
@@ -2431,6 +2438,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */

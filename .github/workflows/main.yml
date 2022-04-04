@@ -184,7 +184,6 @@ jobs:
       if: matrix.generator == 'autogen'
       run: |
         sh ./autogen.sh
-        sh ./bin/chkmanifest
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
         $GITHUB_WORKSPACE/configure --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java

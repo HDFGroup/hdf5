@@ -799,7 +799,7 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
 
         /* Encode I/O filter information */
         if (H5O_msg_encode(hdr->f, H5O_PLINE_ID, FALSE, image, &(hdr->pline)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "can't encode I/O pipeline fiters")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, FAIL, "can't encode I/O pipeline filters")
         image += hdr->filter_len;
     } /* end if */
 
@@ -898,7 +898,7 @@ H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  * Function:    H5HF__cache_iblock_verify_chksum
  *
  * Purpose:     Verify the computed checksum of the data structure is the
- *              same as the stored chksum.
+ *              same as the stored checksum.
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative

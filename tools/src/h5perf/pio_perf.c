@@ -188,7 +188,7 @@ typedef struct _minmax {
 
 /* local functions */
 static off_t           parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, char *argv[]);
+static struct options *parse_command_line(int argc, const char *const *argv);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -199,8 +199,8 @@ static int             destroy_comm_world(void);
 static void  output_results(const struct options *options, const char *name, minmax *table, int table_size,
                             off_t data_size);
 static void  output_times(const struct options *options, const char *name, minmax *table, int table_size);
-static void  output_report(const char *fmt, ...);
-static void  print_indent(register int indent);
+static void  output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+static void  print_indent(int indent);
 static void  usage(const char *prog);
 static void  report_parameters(struct options *opts);
 static off_t squareo(off_t);
@@ -260,7 +260,7 @@ main(int argc, char *argv[])
     pio_comm_g = MPI_COMM_WORLD;
 
     h5_set_info_object();
-    opts = parse_command_line(argc, argv);
+    opts = parse_command_line(argc, (const char *const *)argv);
 
     if (!opts) {
         exit_value = EXIT_FAILURE;
@@ -336,7 +336,7 @@ run_test_loop(struct options *opts)
     /* start with max_num_procs and decrement it by half for each loop. */
     /* if performance needs restart, fewer processes may be needed. */
     for (num_procs = opts->max_num_procs; num_procs >= opts->min_num_procs; num_procs >>= 1) {
-        register size_t buf_size;
+        size_t buf_size;
 
         parms.num_procs = num_procs;
 
@@ -411,34 +411,34 @@ run_test_loop(struct options *opts)
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
 {
-    results      res;
-    register int i, ret_value = SUCCESS;
-    int          comm_size;
-    off_t        raw_size;
-    minmax *     write_mpi_mm_table   = NULL;
-    minmax *     write_mm_table       = NULL;
-    minmax *     write_gross_mm_table = NULL;
-    minmax *     write_raw_mm_table   = NULL;
-    minmax *     read_mpi_mm_table    = NULL;
-    minmax *     read_mm_table        = NULL;
-    minmax *     read_gross_mm_table  = NULL;
-    minmax *     read_raw_mm_table    = NULL;
-    minmax *     read_open_mm_table   = NULL;
-    minmax *     read_close_mm_table  = NULL;
-    minmax *     write_open_mm_table  = NULL;
-    minmax *     write_close_mm_table = NULL;
-    minmax       write_mpi_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       write_mm             = {0.0, 0.0, 0.0, 0};
-    minmax       write_gross_mm       = {0.0, 0.0, 0.0, 0};
-    minmax       write_raw_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       read_mpi_mm          = {0.0, 0.0, 0.0, 0};
-    minmax       read_mm              = {0.0, 0.0, 0.0, 0};
-    minmax       read_gross_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       read_raw_mm          = {0.0, 0.0, 0.0, 0};
-    minmax       read_open_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       read_close_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       write_open_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       write_close_mm       = {0.0, 0.0, 0.0, 0};
+    results res;
+    int     i, ret_value = SUCCESS;
+    int     comm_size;
+    off_t   raw_size;
+    minmax *write_mpi_mm_table   = NULL;
+    minmax *write_mm_table       = NULL;
+    minmax *write_gross_mm_table = NULL;
+    minmax *write_raw_mm_table   = NULL;
+    minmax *read_mpi_mm_table    = NULL;
+    minmax *read_mm_table        = NULL;
+    minmax *read_gross_mm_table  = NULL;
+    minmax *read_raw_mm_table    = NULL;
+    minmax *read_open_mm_table   = NULL;
+    minmax *read_close_mm_table  = NULL;
+    minmax *write_open_mm_table  = NULL;
+    minmax *write_close_mm_table = NULL;
+    minmax  write_mpi_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  write_mm             = {0.0, 0.0, 0.0, 0};
+    minmax  write_gross_mm       = {0.0, 0.0, 0.0, 0};
+    minmax  write_raw_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  read_mpi_mm          = {0.0, 0.0, 0.0, 0};
+    minmax  read_mm              = {0.0, 0.0, 0.0, 0};
+    minmax  read_gross_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  read_raw_mm          = {0.0, 0.0, 0.0, 0};
+    minmax  read_open_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  read_close_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  write_open_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  write_close_mm       = {0.0, 0.0, 0.0, 0};
 
     raw_size      = parms.num_files * (off_t)parms.num_dsets * (off_t)parms.num_bytes;
     parms.io_type = iot;
@@ -579,7 +579,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         output_results(opts, "Raw Data Write", write_raw_mm_table, parms.num_iters, raw_size);
     } /* end if */
 
-    /* show mpi write statics */
+    /* show mpi write statistics */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
         print_indent(3);
@@ -645,7 +645,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_results(opts, "Raw Data Read", read_raw_mm_table, parms.num_iters, raw_size);
         } /* end if */
 
-        /* show mpi read statics */
+        /* show mpi read statistics */
         if (pio_debug_level >= 3) {
             /* output all of the times for all iterations */
             print_indent(3);
@@ -904,7 +904,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
     int    i;
     minmax total_mm;
 
-    total_mm.sum = 0.0f;
+    total_mm.sum = 0.0;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;
     total_mm.num = count;
@@ -1098,10 +1098,9 @@ output_report(const char *fmt, ...)
  *              things.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. October 2001
- * Modifications:
  */
 static void
-print_indent(register int indent)
+print_indent(int indent)
 {
     int myrank;
 
@@ -1276,9 +1275,9 @@ report_parameters(struct options *opts)
  *    Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static struct options *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
-    register int    opt;
+    int             opt;
     struct options *cl_opts;
 
     cl_opts = (struct options *)malloc(sizeof(struct options));
@@ -1305,7 +1304,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
                 cl_opts->h5_alignment = parse_size_directive(H5_optarg);

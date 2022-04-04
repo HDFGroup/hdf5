@@ -443,7 +443,7 @@ check_file_creation_tags(hid_t fcpl_id, int type)
     /* Variable Declarations */
     hid_t fid = -1; /* File Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose test outout */
+    int verbose = FALSE;   /* verbose test output */
 #endif                     /* NDEBUG */
     hid_t   fapl     = -1; /* File access prop list */
     haddr_t root_tag = 0;
@@ -547,7 +547,7 @@ check_file_open_tags(hid_t fcpl, int type)
     /* Variable Declarations */
     hid_t fid = -1; /* File Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE; /* verbose file outout */
+    int verbose = FALSE; /* verbose file output */
 #endif                   /* NDEBUG */
     hid_t   fapl = -1;   /* File access prop list */
     haddr_t root_tag;    /* Root Group Tag */
@@ -677,7 +677,7 @@ check_group_creation_tags(void)
     hid_t fid = -1; /* File Identifier */
     hid_t gid = -1; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;            /* verbose file outout */
+    int verbose = FALSE;            /* verbose file output */
 #endif                              /* NDEBUG */
     hid_t   fapl     = -1;          /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF; /* Root Group Tag */
@@ -800,7 +800,7 @@ check_multi_group_creation_tags(void)
     hid_t fid = -1; /* File Identifier */
     hid_t gid = -1; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file outout */
+    int verbose = FALSE;   /* verbose file output */
 #endif                     /* NDEBUG */
     char    gname[16];     /* group name buffer */
     int     i        = 0;  /* iterator */
@@ -952,7 +952,7 @@ check_link_iteration_tags(void)
     hid_t sid = -1; /* Group Identifier */
     hid_t did = -1; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;        /* verbose file outout */
+    int verbose = FALSE;        /* verbose file output */
 #endif                          /* NDEBUG */
     int        i        = 0;    /* iterator */
     haddr_t    root_tag = 0;    /* Root Group Tag Value */
@@ -1094,7 +1094,7 @@ check_dense_attribute_tags(void)
     hid_t did  = -1; /* Group Identifier */
     hid_t dcpl = -1; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file outout */
+    int verbose = FALSE;   /* verbose file output */
 #endif                     /* NDEBUG */
     int     i        = 0;  /* iterator */
     hid_t   fapl     = -1; /* File access property list */
@@ -1455,7 +1455,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     hid_t gid = -1; /* Group Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file outout */
+    int verbose = FALSE;     /* verbose file output */
 #endif                       /* NDEBUG */
     hid_t   fapl       = -1; /* File access prop list */
     haddr_t root_tag   = 0;  /* Root group tag */
@@ -1620,7 +1620,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
     hid_t gid = -1; /* Group Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file outout */
+    int verbose = FALSE;     /* verbose file output */
 #endif                       /* NDEBUG */
     hid_t   fapl       = -1; /* File access prop list */
     haddr_t root_tag   = 0;
@@ -1787,7 +1787,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     hid_t aid = -1; /* Attribute Identifier */
     hid_t sid = -1; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;          /* verbose file outout */
+    int verbose = FALSE;          /* verbose file output */
 #endif                            /* NDEBUG */
     int *   data = NULL;          /* data buffer */
     int     i, j, k = 0;          /* iterators */
@@ -2000,7 +2000,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     hid_t aid = -1; /* Attribute Identifier */
     hid_t sid = -1; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;          /* verbose file outout */
+    int verbose = FALSE;          /* verbose file output */
 #endif                            /* NDEBUG */
     int *   data = NULL;          /* data buffer */
     int     i, j, k = 0;          /* iterators */
@@ -2191,7 +2191,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -2351,7 +2351,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -2517,7 +2517,7 @@ check_dataset_open_tags(void)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -2669,7 +2669,7 @@ check_dataset_write_tags(void)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -2836,7 +2836,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     hid_t aid = -1; /* Attribute Identifier */
     hid_t sid = -1; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file outout */
+    int verbose = FALSE;     /* verbose file output */
 #endif                       /* NDEBUG */
     int *   data = NULL;     /* data buffer */
     int     i, j, k = 0;     /* iterators */
@@ -3022,7 +3022,7 @@ check_dataset_read_tags(void)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -3184,7 +3184,7 @@ check_dataset_size_retrieval(void)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -3348,7 +3348,7 @@ check_dataset_extend_tags(void)
     hid_t did = -1; /* Dataset Identifier */
     hid_t sid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -3795,7 +3795,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     hid_t sid = -1; /* Dataspace Identifier */
     hid_t gid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -3984,7 +3984,7 @@ check_link_getname_tags(void)
     hid_t sid = -1; /* Dataspace Identifier */
     hid_t gid = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file outout */
+    int verbose = FALSE;         /* verbose file output */
 #endif                           /* NDEBUG */
     hid_t   dcpl       = -1;     /* dataset creation pl */
     hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
@@ -4161,7 +4161,7 @@ check_external_link_creation_tags(void)
     hid_t fid2 = -1; /* File Identifier */
     hid_t gid  = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file outout */
+    int verbose = FALSE;   /* verbose file output */
 #endif                     /* NDEBUG */
     hid_t   fapl     = -1; /* File access prop list */
     haddr_t root_tag = 0;
@@ -4288,7 +4288,7 @@ check_external_link_open_tags(void)
     hid_t   gid      = -1; /* Dataspace Identifier */
     hid_t   xid      = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;              /* verbose file outout */
+    int verbose = FALSE;              /* verbose file output */
 #endif                                /* NDEBUG */
     H5O_native_info_t ninfo;          /* Native object info struct */
     hid_t             fapl      = -1; /* File access prop list */
@@ -4572,6 +4572,12 @@ main(void)
     /* Open the HDF5 Library */
     H5open();
 
+    /* Only run with sec2/default driver */
+    if (!h5_using_default_driver(NULL)) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
+
     /* ========== */
     /* Test Setup */
     /* ========== */
@@ -4579,7 +4585,7 @@ main(void)
     /* Create a standard file creation property list */
     fcpl_default = H5Pcreate(H5P_FILE_CREATE);
 
-    /* Create an fcpl with shared messages and file space managment enabled */
+    /* Create an fcpl with shared messages and file space management enabled */
     fcpl_shmesg_all = H5Pcreate(H5P_FILE_CREATE);
     H5Pset_shared_mesg_nindexes(fcpl_shmesg_all, 1);
     H5Pset_shared_mesg_index(fcpl_shmesg_all, 0, H5O_SHMESG_ALL_FLAG, 20);

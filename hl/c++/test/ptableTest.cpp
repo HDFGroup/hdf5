@@ -223,7 +223,7 @@ TestGetNext()
     for (record = 1; record < 6; record++)
         wrapper.AppendPacket(&record);
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         wrapper.GetNextPacket(&record);
         if (record != i)
@@ -237,7 +237,7 @@ TestGetNext()
     if (error < 0)
         goto error;
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         error = wrapper.GetNextPacket(&record);
         if (record != i || error < 0)
@@ -622,7 +622,7 @@ TestHDFFV_9758()
         s1[i].a = static_cast<int>(i);
         s1[i].b = 1.0F * static_cast<float>(i * i);
         s1[i].c = 1.0 / static_cast<double>(i + 1);
-        HDsprintf(s1[i].d, "string%" PRIuHSIZE "", i);
+        HDsnprintf(s1[i].d, STRING_LENGTH, "string%" PRIuHSIZE "", i);
         s1[i].e = static_cast<int>(100 + i);
     }
 

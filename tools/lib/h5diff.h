@@ -74,7 +74,7 @@ typedef struct {
     struct exclude_path_list *exclude_attr;       /* keep exclude attribute list */
     int                       count_bool;         /* count, compare up to count */
     hsize_t                   count;              /* count value */
-    diff_err_t                err_stat;  /* an error ocurred (2, error, 1, differences, 0, no error) */
+    diff_err_t                err_stat;  /* an error occurred (2, error, 1, differences, 0, no error) */
     hsize_t                   nelmts;    /* total number of elements */
     hsize_t                   hs_nelmts; /* number of elements to read at a time*/
     int                       rank;      /* dimensionality */
@@ -89,7 +89,9 @@ typedef struct {
     char *                    obj_name[2];             /* name for object */
     struct subset_t *         sset[2];                 /* subsetting parameters */
     h5tools_vol_info_t        vol_info[2];             /* VOL information for input file, output file */
+    h5tools_vfd_info_t        vfd_info[2];             /* VFD information for input file, output file */
     hbool_t                   custom_vol[2];           /* Using a custom input, output VOL? */
+    hbool_t                   custom_vfd[2];           /* Using a custom input, output VFD? */
 } diff_opt_t;
 
 /*-------------------------------------------------------------------------

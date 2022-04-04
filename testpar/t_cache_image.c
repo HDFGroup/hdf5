@@ -449,7 +449,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
             }
 
             /* set the dataset creation plist to specify that the raw data is
-             * to be partioned into 10X10 element chunks.
+             * to be partitioned into 10X10 element chunks.
              */
 
             if (pass) {
@@ -477,7 +477,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -766,7 +766,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 
         while ( ( pass ) && ( i <= max_dset ) )
         {
-            HDsprintf(dset_name, "/dset%03d", i);
+            HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
 
         if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -795,7 +795,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
  *        Set pass to FALSE and issue a suitable failure
  *        message if either the file contains a metadata cache image
  *        superblock extension and mdci_sbem_expected is TRUE, or
- *        vise versa.
+ *        vice versa.
  *
  *        If mdci_sbem_expected is TRUE, also verify that the metadata
  *        cache has been advised of this.
@@ -807,7 +807,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
  *        FAPL entry when opening the file, and verify that the
  *        metadata cache is notified.
  *
- *        If config_fsm is TRUE, setup the persistant free space
+ *        If config_fsm is TRUE, setup the persistent free space
  *        manager.  Note that this flag may only be set if
  *        create_file is also TRUE.
  *
@@ -884,7 +884,7 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* create a file access propertly list. */
+    /* create a file access property list. */
     if (pass) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -956,7 +956,7 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* setup the persistant free space manager if indicated */
+    /* setup the persistent free space manager if indicated */
     if ((pass) && (config_fsm)) {
 
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -1138,13 +1138,13 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
         if ((file_ptr->shared->page_buf) && ((!enable_page_buffer) || (l_facc_type == FACC_MPIO))) {
 
             pass         = FALSE;
-            failure_mssg = "page buffer unexepectedly enabled.";
+            failure_mssg = "page buffer unexpectedly enabled.";
         }
         else if ((file_ptr->shared->page_buf != NULL) &&
                  ((enable_page_buffer) || (l_facc_type != FACC_MPIO))) {
 
             pass         = FALSE;
-            failure_mssg = "page buffer unexepectedly disabled.";
+            failure_mssg = "page buffer unexpectedly disabled.";
         }
     }
 
@@ -1334,7 +1334,7 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1360,7 +1360,7 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* set the dataset creation plist to specify that the raw data is
-     * to be partioned into 1X10X10 element chunks.
+     * to be partitioned into 1X10X10 element chunks.
      */
 
     if (pass) {
@@ -1707,7 +1707,7 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
 
     show_progress = (show_progress && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1840,7 +1840,7 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2208,7 +2208,7 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
     hid_t       dset_id      = -1;
     hid_t       filespace_id = -1;
 
-    HDsprintf(dset_name, "/dset%03d", dset_num);
+    HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
     if (show_progress) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2460,7 +2460,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
@@ -2796,7 +2796,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
         /* Verify that all other processes receive the cache image block
          * from process 0.
          *
-         * Since we have alread verified that only process 0 has read the
+         * Since we have already verified that only process 0 has read the
          * image, it is sufficient to verify that the image was loaded on
          * all processes.
          */
@@ -3067,7 +3067,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
         /* Verify that all other processes receive the cache image block
          * from process 0.
          *
-         * Since we have alread verified that only process 0 has read the
+         * Since we have already verified that only process 0 has read the
          * image, it is sufficient to verify that the image was loaded on
          * all processes.
          */
@@ -3393,7 +3393,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         /* Verify that all other processes receive the cache image block
          * from process 0.
          *
-         * Since we have alread verified that only process 0 has read the
+         * Since we have already verified that only process 0 has read the
          * image, it is sufficient to verify that the image was loaded on
          * all processes.
          */
@@ -3488,7 +3488,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         /* Verify that all other processes receive the cache image block
          * from process 0.
          *
-         * Since we have alread verified that only process 0 has read the
+         * Since we have already verified that only process 0 has read the
          * image, it is sufficient to verify that the image was loaded on
          * all processes.
          */
@@ -3533,9 +3533,9 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 13) Get the size of the file.  Verify that it is less
-     *     than 20 KB.  Without deletions and persistant free
+     *     than 20 KB.  Without deletions and persistent free
      *     space managers, size size is about 30 MB, so this
-     *     is sufficient to verify that the persistant free
+     *     is sufficient to verify that the persistent free
      *     space managers are more or less doing their job.
      *
      *     Note that this test will have to change if we use

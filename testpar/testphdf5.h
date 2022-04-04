@@ -186,10 +186,6 @@ enum H5TEST_COLL_CHUNK_API {
 #define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x010
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x020
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x040
-#define TEST_FILTERS                                    0x080
-/* TEST_FILTERS will take place of this after supporting mpio + filter for
- * H5Dcreate and H5Dwrite */
-#define TEST_FILTERS_READ 0x100
 
 /* Don't erase these lines, they are put here for debugging purposes */
 /*
@@ -218,8 +214,8 @@ typedef int DATATYPE;
 
 /* Shape Same Tests Definitions */
 typedef enum {
-    IND_CONTIG,  /* Independent IO on contigous datasets */
-    COL_CONTIG,  /* Collective IO on contigous datasets */
+    IND_CONTIG,  /* Independent IO on contiguous datasets */
+    COL_CONTIG,  /* Collective IO on contiguous datasets */
     IND_CHUNKED, /* Independent IO on chunked datasets */
     COL_CHUNKED  /* Collective IO on chunked datasets */
 } ShapeSameTestMethods;
@@ -245,7 +241,7 @@ void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_split_comm_access(void);
-// void test_page_buffer_access(void);
+void test_page_buffer_access(void);
 void dataset_atomicity(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);

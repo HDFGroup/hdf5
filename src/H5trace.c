@@ -1046,6 +1046,68 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
+                        case 'V': /* H5FD_class_value_t */
+                        {
+                            H5FD_class_value_t class_val =
+                                (H5FD_class_value_t)HDva_arg(ap, H5FD_class_value_t);
+
+                            switch (class_val) {
+                                case H5_VFD_INVALID:
+                                    H5RS_acat(rs, "H5_VFD_INVALID");
+                                    break;
+                                case H5_VFD_SEC2:
+                                    H5RS_acat(rs, "H5_VFD_SEC2");
+                                    break;
+                                case H5_VFD_CORE:
+                                    H5RS_acat(rs, "H5_VFD_CORE");
+                                    break;
+                                case H5_VFD_LOG:
+                                    H5RS_acat(rs, "H5_VFD_LOG");
+                                    break;
+                                case H5_VFD_FAMILY:
+                                    H5RS_acat(rs, "H5_VFD_FAMILY");
+                                    break;
+                                case H5_VFD_MULTI:
+                                    H5RS_acat(rs, "H5_VFD_MULTI");
+                                    break;
+                                case H5_VFD_STDIO:
+                                    H5RS_acat(rs, "H5_VFD_STDIO");
+                                    break;
+#ifdef H5_HAVE_PARALLEL
+                                case H5_VFD_MPIO:
+                                    H5RS_acat(rs, "H5_VFD_MPIO");
+                                    break;
+#endif
+#ifdef H5_HAVE_DIRECT
+                                case H5_VFD_DIRECT:
+                                    H5RS_acat(rs, "H5_VFD_DIRECT");
+                                    break;
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+                                case H5_VFD_MIRROR:
+                                    H5RS_acat(rs, "H5_VFD_MIRROR");
+                                    break;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+                                case H5_VFD_HDFS:
+                                    H5RS_acat(rs, "H5_VFD_HDFS");
+                                    break;
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+                                case H5_VFD_ROS3:
+                                    H5RS_acat(rs, "H5_VFD_ROS3");
+                                    break;
+#endif
+                                case H5_VFD_SWMR:
+                                    H5RS_acat(rs, "H5_VFD_SWMR");
+                                    break;
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)class_val);
+                                    break;
+                            }
+                        } /* end block */
+                        break;
+
                         default:
                             H5RS_asprintf_cat(rs, "BADTYPE(D%c)", type[1]);
                             goto error;
@@ -1189,7 +1251,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5FD_class_t cls = HDva_arg(ap, H5FD_class_t);
 
-                            H5RS_asprintf_cat(rs, "{'%s', " H5_PRINTF_HADDR_FMT ", ", cls.name, cls.maxaddr);
+                            H5RS_asprintf_cat(rs, "{'%s', %" PRIuHADDR ", ", cls.name, cls.maxaddr);
                             H5_trace_args_close_degree(rs, cls.fc_degree);
                             H5RS_acat(rs, ", ...}");
                         } /* end block */
@@ -3964,7 +4026,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
+                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
                 H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)

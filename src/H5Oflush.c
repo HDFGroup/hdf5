@@ -239,7 +239,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
             case H5I_DATASET:
                 ds            = (H5D_t *)vol_obj->data;
                 state.dapl_id = ds->shared->dapl_id;
-                if (H5I_inc_ref(state.dapl_id, false) < 0)
+                if (H5I_inc_ref(state.dapl_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not increase refcnt");
                 break;
             default:
@@ -405,6 +405,7 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, const H5O_refresh_sta
             break;
 
         case H5I_DATASET:
+            /* Re-open the dataset */
             object = H5D_open(obj_loc, (state == NULL) ? H5P_DATASET_ACCESS_DEFAULT : state->dapl_id);
             if (NULL == object)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")

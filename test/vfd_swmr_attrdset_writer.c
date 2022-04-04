@@ -37,9 +37,6 @@
  * compact<->dense storage and with/without continuation block.
  *
  */
-#include <err.h>
-#include <libgen.h>
-#include <unistd.h> /* getopt(3) */
 
 #include "hdf5.h"
 #include "testhdf5.h"
@@ -60,13 +57,13 @@ typedef struct {
     unsigned int asteps;             /* For -a <nattrs> option */
     unsigned int csteps;             /* For -c <csteps> option */
     unsigned int dattrs;             /* For -d <dattrs> option */
-    bool         compact;            /* For -p option */
-    bool         contig;             /* For -g option */
-    bool         chunked;            /* For -k option */
-    bool         vl_attr;            /* For -v option */
-    bool         mod_attr;           /* For -m option */
-    bool         use_np;             /* For -N option */
-    bool         use_vfd_swmr;       /* For -S option */
+    hbool_t      compact;            /* For -p option */
+    hbool_t      contig;             /* For -g option */
+    hbool_t      chunked;            /* For -k option */
+    hbool_t      vl_attr;            /* For -v option */
+    hbool_t      mod_attr;           /* For -m option */
+    hbool_t      use_np;             /* For -N option */
+    hbool_t      use_vfd_swmr;       /* For -S option */
 } state_t;
 
 /* Initializations for state_t */
@@ -74,9 +71,9 @@ typedef struct {
     (state_t)                                                                                                \
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 0, .csteps = 1, .dattrs = 0, .use_np = true,                \
-        .use_vfd_swmr = true, .compact = false, .contig = false, .chunked = false, .vl_attr = false,         \
-        .mod_attr = false, .update_interval = READER_WAIT_TICKS                                              \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 0, .csteps = 1, .dattrs = 0, .use_np = TRUE,                \
+        .use_vfd_swmr = TRUE, .compact = FALSE, .contig = FALSE, .chunked = FALSE, .vl_attr = FALSE,         \
+        .mod_attr = FALSE, .update_interval = READER_WAIT_TICKS                                              \
     }
 
 /* Structure to hold info for different dataset types */
@@ -133,42 +130,40 @@ typedef struct {
         .fd_reader_to_writer = -1, .notify = 0, .verify = 0                                                  \
     }
 
-static bool state_init(state_t *, int, char **);
+static herr_t state_init(state_t *s, int argc, const char *const *argv);
 
-static bool np_init(np_state_t *np, bool writer);
-static bool np_close(np_state_t *np, bool writer);
-static bool np_writer(bool result, unsigned step, const state_t *s, np_state_t *np,
-                      H5F_vfd_swmr_config_t *config);
-static bool np_reader(bool result, unsigned step, const state_t *s, np_state_t *np);
-static bool np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np);
-static bool np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config);
+static herr_t np_init(np_state_t *np, hbool_t writer);
+static herr_t np_close(np_state_t *np, hbool_t writer);
+static herr_t np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np,
+                        H5F_vfd_swmr_config_t *config);
+static herr_t np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np);
+static herr_t np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np);
+static herr_t np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config);
 
-static bool create_dsets(const state_t *s, dsets_state_t *ds);
-static bool open_dsets(const state_t *s, dsets_state_t *ds);
-static bool open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact,
-                           unsigned *min_dense);
-static bool close_dsets(const dsets_state_t *ds);
+static herr_t create_dsets(const state_t *s, dsets_state_t *ds);
+static herr_t open_dsets(const state_t *s, dsets_state_t *ds);
+static herr_t open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact,
+                             unsigned *min_dense);
+static herr_t close_dsets(const dsets_state_t *ds);
 
-static bool perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                     np_state_t *np);
-static bool attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
-static bool attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
-static bool add_attr(const state_t *s, hid_t did, unsigned int which);
-static bool modify_attr(const state_t *s, hid_t did, unsigned int which);
-static bool delete_attr(hid_t did, unsigned int which);
+static herr_t perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                       np_state_t *np);
+static herr_t attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
+static herr_t attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
+static herr_t add_attr(const state_t *s, hid_t did, unsigned int which);
+static herr_t modify_attr(const state_t *s, hid_t did, unsigned int which);
+static herr_t delete_attr(hid_t did, unsigned int which);
 
-static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                    np_state_t *np);
-static bool verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
-                                     unsigned which);
-static bool verify_attr_action(unsigned action, hid_t did, unsigned which);
-static bool verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which);
-static bool verify_delete_attr(hid_t did, char *attr_name);
-static bool verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact,
-                                unsigned min_dense, unsigned asteps);
-static bool verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point);
-
-static const hid_t badhid = H5I_INVALID_HID;
+static herr_t verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                      np_state_t *np);
+static herr_t verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
+                                       unsigned which);
+static herr_t verify_attr_action(unsigned action, hid_t did, unsigned which);
+static herr_t verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which);
+static herr_t verify_delete_attr(hid_t did, char *attr_name);
+static herr_t verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact,
+                                  unsigned min_dense, unsigned asteps);
+static herr_t verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point);
 
 /* Names for datasets */
 #define DSET_COMPACT_NAME  "compact_dset"
@@ -220,14 +215,16 @@ usage(const char *progname)
 /*
  * Initialize option info in state_t
  */
-static bool
-state_init(state_t *s, int argc, char **argv)
+static herr_t
+state_init(state_t *s, int argc, const char *const *argv)
 {
-    unsigned long tmp;
-    int           ch;
-    const hsize_t dims  = 1;
-    char *        tfile = NULL;
-    char *        end;
+    unsigned long          tmp;
+    int                    opt;
+    const hsize_t          dims  = 1;
+    char *                 tfile = NULL;
+    char *                 end;
+    const char *           s_opts   = "pgkvmbqSNa:d:u:c:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     *s = ALL_HID_INITIALIZER;
 
@@ -243,27 +240,27 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "pgkvmbqSNa:d:u:c:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch (opt) {
 
             case 'p':
-                s->compact = true;
+                s->compact = TRUE;
                 break;
 
             case 'g':
-                s->contig = true;
+                s->contig = TRUE;
                 break;
 
             case 'k':
-                s->chunked = true;
+                s->chunked = TRUE;
                 break;
 
             case 'v':
-                s->vl_attr = true;
+                s->vl_attr = TRUE;
                 break;
 
             case 'm':
-                s->mod_attr = true;
+                s->mod_attr = TRUE;
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
@@ -272,37 +269,37 @@ state_init(state_t *s, int argc, char **argv)
                 verbosity = 0;
                 break;
             case 'S':
-                s->use_vfd_swmr = false;
+                s->use_vfd_swmr = FALSE;
                 break;
             case 'N':
-                s->use_np = false;
+                s->use_np = FALSE;
                 break;
             case 'a':
             case 'd':
             case 'u':
             case 'c':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
-                if (end == optarg || *end != '\0') {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
+                if (end == H5_optarg || *end != '\0') {
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", opt, H5_optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    HDprintf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    HDprintf("`-%c` argument `%lu` too large\n", opt, tmp);
                     TEST_ERROR;
                 }
 
-                if (ch == 'a')
+                if (opt == 'a')
                     s->asteps = (unsigned)tmp;
-                else if (ch == 'd')
+                else if (opt == 'd')
                     s->dattrs = (unsigned)tmp;
-                else if (ch == 'u')
+                else if (opt == 'u')
                     s->update_interval = (unsigned)tmp;
-                else if (ch == 'c')
+                else if (opt == 'c')
                     s->csteps = (unsigned)tmp;
                 break;
 
@@ -312,8 +309,8 @@ state_init(state_t *s, int argc, char **argv)
                 break;
         }
     }
-    argc -= optind;
-    argv += optind;
+    argc -= H5_optind;
+    argv += H5_optind;
 
     /* Require to specify at least -p, -g or -k option */
     if (!s->compact && !s->contig && !s->chunked) {
@@ -350,29 +347,29 @@ state_init(state_t *s, int argc, char **argv)
     /* The test file name */
     esnprintf(s->filename, sizeof(s->filename), "vfd_swmr_attrdset.h5");
 
-    return true;
+    return SUCCEED;
 
 error:
     if (tfile)
         HDfree(tfile);
 
-    return false;
+    return FAIL;
 
 } /* state_init() */
 
 /*
  *  Create the datasets as specified on the command line.
  */
-static bool
+static herr_t
 create_dsets(const state_t *s, dsets_state_t *ds)
 {
-    hid_t dcpl      = badhid;
-    hid_t dtid      = badhid;
-    hid_t tmp_did   = badhid;
-    hid_t cmpd_tid  = badhid;
-    hid_t array_tid = badhid;
-    hid_t vl_tid    = badhid;
-    hid_t sid       = badhid;
+    hid_t dcpl      = H5I_INVALID_HID;
+    hid_t dtid      = H5I_INVALID_HID;
+    hid_t tmp_did   = H5I_INVALID_HID;
+    hid_t cmpd_tid  = H5I_INVALID_HID;
+    hid_t array_tid = H5I_INVALID_HID;
+    hid_t vl_tid    = H5I_INVALID_HID;
+    hid_t sid       = H5I_INVALID_HID;
 
     *ds = DSETS_INITIALIZER;
 
@@ -722,7 +719,7 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -744,14 +741,14 @@ error:
     }
     H5E_END_TRY;
 
-    return false;
+    return FAIL;
 
 } /* create_dsets() */
 
 /*
  * Open the datasets as specified.
  */
-static bool
+static herr_t
 open_dsets(const state_t *s, dsets_state_t *ds)
 {
     *ds = DSETS_INITIALIZER;
@@ -799,10 +796,10 @@ open_dsets(const state_t *s, dsets_state_t *ds)
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* open_dsets() */
 
@@ -810,10 +807,10 @@ error:
  * Do the real work of opening the dataset.
  * Retrieve the max_compact and min_dense values for the dataset.
  */
-static bool
+static herr_t
 open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact, unsigned *min_dense)
 {
-    hid_t dcpl = badhid;
+    hid_t dcpl = H5I_INVALID_HID;
 
     if ((*did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0) {
         HDprintf("H5Dopen dataset failed\n");
@@ -835,7 +832,7 @@ open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact, u
         TEST_ERROR;
     }
 
-    return true;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -845,31 +842,31 @@ error:
     }
     H5E_END_TRY;
 
-    return false;
+    return FAIL;
 } /* open_dset_real() */
 
 /*
  * Close all the datasets as specified.
  */
-static bool
+static herr_t
 close_dsets(const dsets_state_t *ds)
 {
-    if (ds->compact_did != badhid && H5Dclose(ds->compact_did) < 0) {
+    if (ds->compact_did != H5I_INVALID_HID && H5Dclose(ds->compact_did) < 0) {
         HDprintf("H5Dclose compact dataset failed\n");
         TEST_ERROR;
     }
 
-    if (ds->contig_did != badhid && H5Dclose(ds->contig_did) < 0) {
+    if (ds->contig_did != H5I_INVALID_HID && H5Dclose(ds->contig_did) < 0) {
         HDprintf("H5Dclose contig dataset failed\n");
         TEST_ERROR;
     }
 
-    if (ds->single_did != badhid && H5Dclose(ds->single_did) < 0) {
+    if (ds->single_did != H5I_INVALID_HID && H5Dclose(ds->single_did) < 0) {
         HDprintf("H5Dclose chunked dataset: single index failed\n");
         TEST_ERROR;
     }
 
-    if (ds->implicit_did != badhid && H5Dclose(ds->implicit_did) < 0) {
+    if (ds->implicit_did != H5I_INVALID_HID && H5Dclose(ds->implicit_did) < 0) {
         HDprintf("H5Dclose chunked dataset: implicit index failed\n");
         TEST_ERROR;
     }
@@ -889,7 +886,7 @@ close_dsets(const dsets_state_t *ds)
         TEST_ERROR;
     }
 
-    return true;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -904,7 +901,7 @@ error:
     }
     H5E_END_TRY;
 
-    return false;
+    return FAIL;
 } /* close_dsets() */
 
 /*
@@ -917,11 +914,11 @@ error:
  *      MODIFY_ATTR : -m option
  *      DELETE_ATTR : -d <dattrs> option
  */
-static bool
+static herr_t
 perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
     unsigned step;
-    bool     result;
+    hbool_t  result;
     unsigned dd;
 
     for (step = 0; step < s->asteps; step++) {
@@ -938,7 +935,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
     if (s->mod_attr) {
 
         /* Need to sync up writer/reader before moving onto the next phase */
-        if (s->use_np && !np_writer(true, 0, s, np, config)) {
+        if (s->use_np && !np_writer(TRUE, 0, s, np, config)) {
             HDprintf("np_writer() for modification failed\n");
             TEST_ERROR;
         }
@@ -959,7 +956,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
     if (s->dattrs) {
 
         /* Need to sync up writer/reader before moving onto the next phase */
-        if (s->use_np && !np_writer(true, 0, s, np, config)) {
+        if (s->use_np && !np_writer(TRUE, 0, s, np, config)) {
             HDprintf("np_writer() for deletion failed\n");
             TEST_ERROR;
         }
@@ -977,10 +974,10 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* perform_dsets_operations() */
 
@@ -990,55 +987,55 @@ error:
  *      -g: contiguous dataset
  *      -k: 5 chunked datasets with 5 indexing types
  */
-static bool
+static herr_t
 attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
-    int  nerrors = 0;
-    bool ret     = true;
+    int     nerrors = 0;
+    hbool_t ret     = TRUE;
 
     if (s->compact) {
-        HDassert(ds->compact_did != badhid);
+        HDassert(ds->compact_did != H5I_INVALID_HID);
         dbgf(2, "to compact dataset\n");
         if (!attr_action(action, s, ds->compact_did, which))
             ++nerrors;
     }
 
     if (s->contig) {
-        HDassert(ds->contig_did != badhid);
+        HDassert(ds->contig_did != H5I_INVALID_HID);
         dbgf(2, "to contiguous dataset\n");
         if (!attr_action(action, s, ds->contig_did, which))
             ++nerrors;
     }
 
     if (s->chunked) {
-        HDassert(ds->single_did != badhid);
+        HDassert(ds->single_did != H5I_INVALID_HID);
         dbgf(2, "to chunked dataset: single index\n");
         if (!attr_action(action, s, ds->single_did, which))
             ++nerrors;
 
-        HDassert(ds->implicit_did != badhid);
+        HDassert(ds->implicit_did != H5I_INVALID_HID);
         dbgf(2, "to chunked dataset: implicit index\n");
         if (!attr_action(action, s, ds->implicit_did, which))
             ++nerrors;
 
-        HDassert(ds->fa_did != badhid);
+        HDassert(ds->fa_did != H5I_INVALID_HID);
         dbgf(2, "to chunked dataset: fixed array index\n");
         if (!attr_action(action, s, ds->fa_did, which))
             ++nerrors;
 
-        HDassert(ds->ea_did != badhid);
+        HDassert(ds->ea_did != H5I_INVALID_HID);
         dbgf(2, "to chunked dataset: extensible array index\n");
         if (!attr_action(action, s, ds->ea_did, which))
             ++nerrors;
 
-        HDassert(ds->bt2_did != badhid);
+        HDassert(ds->bt2_did != H5I_INVALID_HID);
         dbgf(2, "to chunked dataset: version 2 btree index\n");
         if (!attr_action(action, s, ds->bt2_did, which))
             ++nerrors;
     }
 
     if (nerrors)
-        ret = false;
+        ret = FALSE;
 
     return (ret);
 
@@ -1050,10 +1047,10 @@ attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, un
  *      MODIFY_ATTR : modify `which` attribute
  *      DELETE_ATTR : delete `which` attribute
  */
-static bool
+static herr_t
 attr_action(unsigned action, const state_t *s, hid_t did, unsigned which)
 {
-    bool ret;
+    hbool_t ret;
 
     switch (action) {
         case ADD_ATTR:
@@ -1083,12 +1080,12 @@ attr_action(unsigned action, const state_t *s, hid_t did, unsigned which)
  *      H5T_NATIVE_UINT32 (-b) or
  *      H5T_NATIVE_UINT32 (default)
  */
-static bool
+static herr_t
 add_attr(const state_t *s, hid_t did, unsigned int which)
 {
-    hid_t aid    = badhid;
-    hid_t tid    = badhid;
-    hid_t vl_tid = badhid;
+    hid_t aid    = H5I_INVALID_HID;
+    hid_t tid    = H5I_INVALID_HID;
+    hid_t vl_tid = H5I_INVALID_HID;
     char  name[sizeof("attr-9999999999")];
     char *val = NULL;
 
@@ -1123,7 +1120,7 @@ add_attr(const state_t *s, hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Write to the attribure */
+    /* Write to the attribute */
     if (H5Awrite(aid, tid, s->vl_attr ? &val : (const void *)&which) < 0) {
         HDprintf("H5Awrite failed\n");
         TEST_ERROR;
@@ -1143,7 +1140,7 @@ add_attr(const state_t *s, hid_t did, unsigned int which)
     if (val)
         HDfree(val);
 
-    return true;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -1156,19 +1153,19 @@ error:
     if (val)
         HDfree(val);
 
-    return false;
+    return FAIL;
 
 } /* add_attr() */
 
 /*
  * Modify the attribute data.
  */
-static bool
+static herr_t
 modify_attr(const state_t *s, hid_t did, unsigned int which)
 {
-    hid_t    aid    = badhid;
-    hid_t    tid    = badhid;
-    hid_t    vl_tid = badhid;
+    hid_t    aid    = H5I_INVALID_HID;
+    hid_t    tid    = H5I_INVALID_HID;
+    hid_t    vl_tid = H5I_INVALID_HID;
     char     name[sizeof("attr-9999999999")];
     char *   val     = NULL;
     unsigned tmp_val = 0;
@@ -1207,7 +1204,7 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Write to the attribure */
+    /* Write to the attribute */
     if (H5Awrite(aid, tid, s->vl_attr ? &val : (const void *)&tmp_val) < 0) {
         HDprintf("H5Awrite failed\n");
         TEST_ERROR;
@@ -1227,7 +1224,7 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
     if (val)
         HDfree(val);
 
-    return true;
+    return SUCCEED;
 error:
     H5E_BEGIN_TRY
     {
@@ -1239,13 +1236,13 @@ error:
     if (val)
         HDfree(val);
 
-    return false;
+    return FAIL;
 } /* modify_attr() */
 
 /*
  * Delete the attribute
  */
-static bool
+static herr_t
 delete_attr(hid_t did, unsigned int which)
 {
     char name[sizeof("attr-9999999999")];
@@ -1258,10 +1255,10 @@ delete_attr(hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* delete_attr() */
 
@@ -1277,13 +1274,13 @@ error:
  *
  * Also verify continuation block and compact<->dense storage if:
  *      --[-c <csteps>] is 1
- *      --not appliable for -m option
+ *      --not applicable for -m option
  */
-static bool
+static herr_t
 verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
     unsigned step;
-    bool     result;
+    hbool_t  result;
     unsigned dd;
 
     /* Start verifying addition */
@@ -1363,11 +1360,11 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
 
-    return false;
+    return FAIL;
 } /* verify_dsets_operations() */
 
 /*
@@ -1376,14 +1373,14 @@ error:
  *      -g: contiguous dataset
  *      -k: 5 chunked datasets with 5 indexing types
  */
-static bool
+static herr_t
 verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
-    int  nerrors = 0;
-    bool ret     = true;
+    int     nerrors = 0;
+    hbool_t ret     = TRUE;
 
     if (s->compact) {
-        HDassert(ds->compact_did != badhid);
+        HDassert(ds->compact_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to compact dataset\n");
         if (!verify_attr_action(action, ds->compact_did, which))
             ++nerrors;
@@ -1395,7 +1392,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
     }
 
     if (s->contig) {
-        HDassert(ds->contig_did != badhid);
+        HDassert(ds->contig_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to contiguous dataset\n");
         if (!verify_attr_action(action, ds->contig_did, which))
             ++nerrors;
@@ -1407,7 +1404,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
     }
 
     if (s->chunked) {
-        HDassert(ds->single_did != badhid);
+        HDassert(ds->single_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to chunked dataset: single indedx\n");
         if (!verify_attr_action(action, ds->single_did, which))
             ++nerrors;
@@ -1417,7 +1414,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
                 ++nerrors;
         }
 
-        HDassert(ds->implicit_did != badhid);
+        HDassert(ds->implicit_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to chunked dataset: implicit index\n");
         if (!verify_attr_action(action, ds->implicit_did, which))
             ++nerrors;
@@ -1427,7 +1424,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
                 ++nerrors;
         }
 
-        HDassert(ds->fa_did != badhid);
+        HDassert(ds->fa_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to chunked dataset: fa index\n");
         if (!verify_attr_action(action, ds->fa_did, which))
             ++nerrors;
@@ -1437,7 +1434,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
                 ++nerrors;
         }
 
-        HDassert(ds->ea_did != badhid);
+        HDassert(ds->ea_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to chunked dataset: ea index\n");
         if (!verify_attr_action(action, ds->ea_did, which))
             ++nerrors;
@@ -1447,7 +1444,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
                 ++nerrors;
         }
 
-        HDassert(ds->bt2_did != badhid);
+        HDassert(ds->bt2_did != H5I_INVALID_HID);
         dbgf(2, "Verifying attribute to chunked dataset: bt2 index\n");
         if (!verify_attr_action(action, ds->bt2_did, which))
             ++nerrors;
@@ -1459,7 +1456,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
     }
 
     if (nerrors)
-        ret = false;
+        ret = FALSE;
 
     return (ret);
 
@@ -1468,11 +1465,11 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
 /*
  * Verify the attribute action on the specified dataset.
  */
-static bool
+static herr_t
 verify_attr_action(unsigned action, hid_t did, unsigned which)
 {
-    char name[sizeof("attr-9999999999")];
-    bool ret;
+    char    name[sizeof("attr-9999999999")];
+    hbool_t ret;
 
     esnprintf(name, sizeof(name), "attr-%u", which);
 
@@ -1499,19 +1496,19 @@ verify_attr_action(unsigned action, hid_t did, unsigned which)
 /*
  * Verify the attribute is added or modified
  */
-static bool
+static herr_t
 verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which)
 {
     unsigned int read_which;
     unsigned int tmp_val;
     char         tmp_vl_val[sizeof("attr-9999999999")];
     char *       read_vl_which;
-    bool         is_vl = false;
+    hbool_t      is_vl = FALSE;
     hid_t        aid   = H5I_INVALID_HID;
     hid_t        atid  = H5I_INVALID_HID;
-    bool         ret   = FALSE;
+    hbool_t      ret   = FALSE;
 
-    HDassert(did != badhid);
+    HDassert(did != H5I_INVALID_HID);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);
 
     if ((aid = H5Aopen(did, attr_name, H5P_DEFAULT)) < 0) {
@@ -1555,7 +1552,7 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     if (is_vl) {
         dbgf(2, "read_vl_which = %s, tmp_vl_val= %s\n", read_vl_which, tmp_vl_val);
         if (!HDstrcmp(read_vl_which, tmp_vl_val))
-            ret = true;
+            ret = TRUE;
     }
     else {
         dbgf(2, "read_which = %u, tmp_val = %u\n", read_which, tmp_val);
@@ -1578,14 +1575,14 @@ error:
     if (is_vl)
         H5free_memory(read_vl_which);
 
-    return false;
+    return FAIL;
 
 } /* verify_add_or_modify_attr() */
 
 /*
  * Verify the attribute does not exist.
  */
-static bool
+static herr_t
 verify_delete_attr(hid_t did, char *attr_name)
 {
     int ret;
@@ -1595,14 +1592,14 @@ verify_delete_attr(hid_t did, char *attr_name)
         TEST_ERROR;
     }
     else if (!ret) /* attribute does not exist */
-        ret = true;
+        ret = TRUE;
     else /* attribute exist */
-        ret = false;
+        ret = FALSE;
 
     return ret;
 
 error:
-    return false;
+    return FAIL;
 
 } /* verify_delete_attr() */
 
@@ -1620,11 +1617,11 @@ error:
  *          --`which` is at min_dense: dense storage, no continuation block
  *          --`which` is at (min_dense - 1): compact storage, continuation block exists
  */
-static bool
+static herr_t
 verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact, unsigned min_dense,
                     unsigned asteps)
 {
-    bool ret = true;
+    hbool_t ret = TRUE;
 
     HDassert(action == ADD_ATTR || action == DELETE_ATTR);
 
@@ -1663,7 +1660,7 @@ verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max
 /*
  * Verify the storage condition at the specific checkpoint
  */
-static bool
+static herr_t
 verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point)
 {
     H5O_native_info_t ninfo;
@@ -1690,7 +1687,7 @@ verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point)
     }
 
 error:
-    return false;
+    return FAIL;
 
 } /* verify_storage_cont_real() */
 
@@ -1701,8 +1698,8 @@ error:
 /*
  * Initialize the named pipes for test synchronization.
  */
-static bool
-np_init(np_state_t *np, bool writer)
+static herr_t
+np_init(np_state_t *np, hbool_t writer)
 {
     *np = NP_INITIALIZER;
 
@@ -1749,18 +1746,18 @@ np_init(np_state_t *np, bool writer)
         TEST_ERROR;
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* np_init() */
 
 /*
  * Close the named pipes.
  */
-static bool
-np_close(np_state_t *np, bool writer)
+static herr_t
+np_close(np_state_t *np, hbool_t writer)
 {
     /* Both the writer and reader close the named pipes */
     if (HDclose(np->fd_writer_to_reader) < 0) {
@@ -1785,17 +1782,17 @@ np_close(np_state_t *np, bool writer)
             TEST_ERROR;
         }
     }
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 } /* np_close() */
 
 /*
  *  Writer synchronization depending on the result from the attribute action performed.
  */
-static bool
-np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config)
+static herr_t
+np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config)
 {
     unsigned int i;
 
@@ -1808,7 +1805,10 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
         /* At communication interval, notify the reader about the failure and quit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
         /* The action succeeds */
@@ -1841,10 +1841,10 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
             }
         }
     }
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* np_writer() */
 
@@ -1852,8 +1852,8 @@ error:
  *
  *  Reader synchronization depending on the result from the verification.
  */
-static bool
-np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
+static herr_t
+np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np)
 {
     /* The verification fails */
     if (!result) {
@@ -1864,7 +1864,10 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
         /* At communication interval, tell the writer about the failure and exit */
         if (step % s->csteps == 0) {
             np->notify = -1;
-            HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int));
+            if (HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int)) < 0) {
+                HDprintf("HDwrite failed\n");
+                TEST_ERROR;
+            }
             goto error;
         }
         /* The verification succeeds */
@@ -1879,10 +1882,10 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
             }
         }
     }
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* np_reader() */
 
@@ -1890,7 +1893,7 @@ error:
  *  Handshake between writer and reader:
  *      Confirm `verify` is same as `notify`.
  */
-static bool
+static herr_t
 np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np)
 {
     if (step % s->csteps == 0) {
@@ -1911,17 +1914,17 @@ np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 } /* confirm_verify_notify() */
 
 /*
  * Synchronization done by the reader before moving onto the
  * next verification phase.
  */
-static bool
+static herr_t
 np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config)
 {
     if (s->use_np) {
@@ -1943,10 +1946,10 @@ np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_
         }
     }
 
-    return true;
+    return SUCCEED;
 
 error:
-    return false;
+    return FAIL;
 
 } /* np_reader_no_verification() */
 
@@ -1955,14 +1958,14 @@ main(int argc, char **argv)
 {
     hid_t                 fapl   = H5I_INVALID_HID;
     hid_t                 fcpl   = H5I_INVALID_HID;
-    bool                  writer = FALSE;
+    hbool_t               writer = FALSE;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
     np_state_t            np;
     dsets_state_t         ds;
 
-    if (!state_init(&s, argc, argv)) {
+    if (!state_init(&s, argc, (const char *const *)argv)) {
         HDprintf("state_init() failed\n");
         TEST_ERROR;
     }
@@ -1970,20 +1973,21 @@ main(int argc, char **argv)
     personality = HDstrstr(s.progname, "vfd_swmr_attrdset_");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_attrdset_writer") == 0)
-        writer = true;
+        writer = TRUE;
     else if (personality != NULL && HDstrcmp(personality, "vfd_swmr_attrdset_reader") == 0)
-        writer = false;
+        writer = FALSE;
     else {
         HDprintf("unknown personality, expected vfd_swmr_attrdset_{reader,writer}\n");
         TEST_ERROR;
     }
 
     /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path
+     */
     init_vfd_swmr_config(&config, 4, 7, writer, TRUE, FALSE, TRUE, 128, "./attrdset-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(TRUE, s.use_vfd_swmr, TRUE, 4096, &config)) < 0) {
         HDprintf("vfd_swmr_create_fapl() failed\n");
         TEST_ERROR;
     }

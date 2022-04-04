@@ -172,7 +172,7 @@ guide to the syntax.
 33. Make automated tests out of the `credel` and `gaussians` tests.
 
 34. Conserve space in the shadow file.  In
-    vfd_swmr_enlarge_shadow_index(), we postpone reclamation of the old
+    H5F_vfd_swmr_enlarge_shadow_index(), we postpone reclamation of the old
     shadow index for max\_lag ticks, but it's not necessary to wait that
     long.  David traded some space efficiency for simplicity, for now.
     See the note in the source code.

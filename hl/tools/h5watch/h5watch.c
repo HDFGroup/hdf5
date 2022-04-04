@@ -51,7 +51,7 @@ static herr_t process_cmpd_fields(hid_t fid, char *dsetname);
 static herr_t check_dataset(hid_t fid, char *dsetname);
 static void   leave(int ret);
 static void   usage(const char *prog);
-static void   parse_command_line(int argc, const char *argv[]);
+static void   parse_command_line(int argc, const char *const *argv);
 
 /*
  * Command-line options: The user can only specify long-named parameters.
@@ -174,9 +174,9 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     } /* end else */
 
     /* Floating point types should display full precision */
-    sprintf(fmt_float, "%%1.%dg", FLT_DIG);
+    snprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
     info.fmt_float = fmt_float;
-    sprintf(fmt_double, "%%1.%dg", DBL_DIG);
+    snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
 
     info.dset_format     = "DSET-%s ";
@@ -665,7 +665,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static void
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt; /* Command line option */
     int tmp;
@@ -790,7 +790,7 @@ catch_signal(int H5_ATTR_UNUSED signo)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     char  drivername[50]; /* VFD name */
     char *fname = NULL;   /* File name */
@@ -819,7 +819,7 @@ main(int argc, const char *argv[])
     }
 
     /* parse command line options */
-    parse_command_line(argc, argv);
+    parse_command_line(argc, (const char *const *)argv);
 
     if (argc <= H5_optind) {
         error_msg("missing dataset name\n");
@@ -921,7 +921,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    /* If everything is fine, start monitoring the datset */
+    /* If everything is fine, start monitoring the dataset */
     if (h5tools_getstatus() != EXIT_FAILURE)
         if (monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);

@@ -109,7 +109,7 @@ main(void)
      * This keeps the indexes simple when only a few messages are shared,
      * but allows them to scale for many messages.  If many messages are
      * deleted from the B-tree, it scales back down into a list.
-     * A "resonable" setting for maximum list size and minimum btree size
+     * A "reasonable" setting for maximum list size and minimum btree size
      * depends on what kinds of messages will be stored in the file.
      * These numbers are the same for all indexes in a file.
      * We'll guess at some numbers, though we could just as easily have kept
@@ -227,7 +227,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    create_standard_file
  *
- * Purpose:     A helper functon for the example.  Creates an HDF5 file
+ * Purpose:     A helper function for the example.  Creates an HDF5 file
  *              with many repeated messages using the file creation
  *              property list FCPL.
  *

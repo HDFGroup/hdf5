@@ -244,7 +244,7 @@ do_pio(parameters param)
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
             HDfprintf(stderr,
                       "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "trasfer buffer size (%zu)\n",
+                      "transfer buffer size (%zu)\n",
                       (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
         }
@@ -253,7 +253,7 @@ do_pio(parameters param)
         if (((size_t)snbytes % buf_size) != 0) {
             HDfprintf(stderr,
                       "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "trasfer buffer size (%zu)\n",
+                      "transfer buffer size (%zu)\n",
                       (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
         }
@@ -282,7 +282,7 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        HDsprintf(base_name, "#pio_tmp_%lu", nf);
+        HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
         if (pio_debug_level > 0)
             HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
@@ -420,7 +420,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         /* If the prefix specifies the HDF5_PARAPREFIX directory, then
          * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
          * directory instead. */
-        register char *user, *login, *subdir;
+        char *user, *login, *subdir;
 
         user   = HDgetenv("USER");
         login  = HDgetenv("LOGIN");
@@ -898,7 +898,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                     }     /* end if */
                 }         /* end else */
 
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, h5dcpl);
 
                 if (h5ds_id < 0) {
@@ -1183,7 +1183,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform write */
@@ -1320,7 +1320,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform write */
@@ -1879,7 +1879,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                 break;
 
             case PHDF5:
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DOPEN(fd->h5fd, dname);
                 if (h5ds_id < 0) {
                     HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -2154,7 +2154,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform collective read */
@@ -2291,7 +2291,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform read */
@@ -2676,7 +2676,7 @@ do_cleanupfile(iotype iot, char *fname)
         return;
 
     if (clean_file_g == -1)
-        clean_file_g = (getenv("HDF5_NOCLEANUP") == NULL) ? 1 : 0;
+        clean_file_g = (getenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
         switch (iot) {

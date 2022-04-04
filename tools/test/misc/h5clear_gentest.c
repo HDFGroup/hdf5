@@ -16,7 +16,7 @@
 /* The HDF5 test files */
 const char *FILENAME[] = {
     "h5clear_sec2_v3.h5", /* 0 -- sec2 file with superblock version 3 */
-    "h5clear_log_v3.h5",  /* 1 -- log file with superblock veresion 3 */
+    "h5clear_log_v3.h5",  /* 1 -- log file with superblock version 3 */
     "h5clear_sec2_v0.h5", /* 2 -- sec2 file with superblock version 0 */
     "h5clear_sec2_v2.h5"  /* 3 -- sec2 file with superblock version 2 */
 };
@@ -56,24 +56,26 @@ const char *FILENAME_ENHANCE[] = {
 static int
 gen_cache_image_file(const char *fname)
 {
-    hid_t                     fid = H5I_INVALID_HID;           /* File ID */
-    hid_t                     did = -1, sid = H5I_INVALID_HID; /* Dataset ID, dataspace ID */
-    hid_t                     fapl = H5I_INVALID_HID;          /* File access property list */
-    hid_t                     dcpl = H5I_INVALID_HID;          /* Dataset creation property list */
-    hsize_t                   dims[2];                         /* Dimension sizes */
-    hsize_t                   chunks[2];                       /* Chunked dimension sizes */
-    int                       i, j;                            /* Local index variables */
-    int **                    buf                = NULL;       /* Buffer for data to write */
-    H5AC_cache_image_config_t cache_image_config =             /* Cache image input configuration */
+    hid_t   fid = H5I_INVALID_HID;           /* File ID */
+    hid_t   did = -1, sid = H5I_INVALID_HID; /* Dataset ID, dataspace ID */
+    hid_t   fapl = H5I_INVALID_HID;          /* File access property list */
+    hid_t   dcpl = H5I_INVALID_HID;          /* Dataset creation property list */
+    hsize_t dims[2];                         /* Dimension sizes */
+    hsize_t chunks[2];                       /* Chunked dimension sizes */
+    int     i, j;                            /* Local index variables */
+    struct {
+        int arr[50][100];
+    } * buf;                                       /* Buffer for data to write */
+    H5AC_cache_image_config_t cache_image_config = /* Cache image input configuration */
         {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, 50, 100);
+    buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
     for (i = 0; i < 50; i++)
         for (j = 0; j < 100; j++)
-            buf[i][j] = i * j;
+            buf->arr[i][j] = i * j;
 
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -108,7 +110,7 @@ gen_cache_image_file(const char *fname)
         goto error;
 
     /* Write to the dataset */
-    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     /* Closing */
@@ -426,7 +428,7 @@ main(void)
         if ((my_fapl = H5Pcopy(fapl2)) < 0)
             goto error;
         /* Create the file */
-        HDsprintf(fname, "%s%s", new_format ? "latest_" : "", FILENAME[0]);
+        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[0]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;
@@ -451,7 +453,7 @@ main(void)
             goto error;
 
         /* Create the file */
-        HDsprintf(fname, "%s%s", new_format ? "latest_" : "", FILENAME[1]);
+        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[1]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;

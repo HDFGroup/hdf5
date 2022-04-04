@@ -63,9 +63,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c H5FDfamily.c H5FDint.c H5FDlog.c \
-        H5FDmulti.c H5FDsec2.c H5FDspace.c \
-        H5FDsplitter.c H5FDstdio.c H5FDtest.c \
-        H5FDvfd_swmr.c H5FDvfd_swmr_instr.c \
+        H5FDmulti.c H5FDperform.c H5FDsec2.c H5FDspace.c \
+        H5FDsplitter.c H5FDstdio.c H5FDtest.c H5FDvfd_swmr.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c H5Gcompact.c H5Gdense.c H5Gdeprec.c \
@@ -76,13 +75,12 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c \
-        H5HP.c \
         H5I.c H5Idbg.c H5Iint.c H5Itest.c \
         H5L.c H5Ldeprec.c H5Lexternal.c H5Lint.c \
         H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
+        H5MM.c \
         H5MV.c H5MVsection.c \
-        H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Odeprec.c H5Oainfo.c H5Oalloc.c H5Oattr.c H5Oattribute.c \
         H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c H5Ochunk.c \
         H5Ocont.c H5Ocopy.c H5Ocopy_ref.c H5Odbg.c H5Odrvinfo.c H5Odtype.c \

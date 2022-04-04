@@ -29,7 +29,6 @@
 /* Headers */
 /***********/
 
-#include <inttypes.h> /* for PRIu64 */
 #include "h5test.h"
 #include "swmr_common.h"
 
@@ -343,7 +342,7 @@ usage(void)
 } /* end usage() */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     long     nrecords     = 0; /* # of records to read */
     int      poll_time    = 1; /* # of seconds to sleep when waiting for writer */

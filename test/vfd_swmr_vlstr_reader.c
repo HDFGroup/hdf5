@@ -27,21 +27,20 @@
 
 typedef enum _step { CREATE = 0, LENGTHEN, SHORTEN, DELETE, NSTEPS } step_t;
 
-static const hid_t badhid               = H5I_INVALID_HID; // abbreviate
-static bool        caught_out_of_bounds = false;
-static bool        read_null            = false;
+static hbool_t caught_out_of_bounds = FALSE;
+static hbool_t read_null            = FALSE;
 
-static bool
+static hbool_t
 read_vl_dset(hid_t dset, hid_t type, char **data)
 {
-    bool           success;
+    hbool_t        success;
     estack_state_t es;
 
     es      = disable_estack();
     success = H5Dread(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) >= 0;
     if (*data == NULL) {
-        read_null = true;
-        return false;
+        read_null = TRUE;
+        return FALSE;
     }
     restore_estack(es);
 
@@ -62,33 +61,34 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl, fid, space, type;
-    hid_t                 dset[2];
-    char *                content[2];
-    char                  name[2][96];
-    int                   ch, i, ntimes = 100;
-    unsigned long         tmp;
-    bool                  use_vfd_swmr = true;
-    char *                end;
-    const long            millisec_in_nanosecs = 1000 * 1000;
-    const struct timespec delay                = {.tv_sec = 0, .tv_nsec = millisec_in_nanosecs * 11 / 10};
-    testsel_t             sel                  = TEST_NONE;
-    H5F_vfd_swmr_config_t config;
+    hid_t                  fapl, fid, space, type;
+    hid_t                  dset[2];
+    char *                 content[2];
+    char                   name[2][96];
+    int                    opt, i, ntimes = 100;
+    unsigned long          tmp;
+    hbool_t                use_vfd_swmr = TRUE;
+    char *                 end;
+    const uint64_t         delay_ns = 1100 * 1000; /* 1.1 ms */
+    testsel_t              sel      = TEST_NONE;
+    H5F_vfd_swmr_config_t  config;
+    const char *           s_opts   = "Sn:qt:";
+    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    HDassert(H5T_C_S1 != badhid);
+    HDassert(H5T_C_S1 != H5I_INVALID_HID);
 
-    while ((ch = getopt(argc, argv, "Sn:qt:")) != -1) {
-        switch (ch) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+        switch (opt) {
             case 'S':
-                use_vfd_swmr = false;
+                use_vfd_swmr = FALSE;
                 break;
             case 'n':
                 errno = 0;
-                tmp   = HDstrtoul(optarg, &end, 0);
+                tmp   = HDstrtoul(H5_optarg, &end, 0);
                 if (end == optarg || *end != '\0')
-                    errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
+                    errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
                 else if (errno != 0)
-                    err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
+                    err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
                 else if (tmp > INT_MAX)
                     errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
                 ntimes = (int)tmp;
@@ -97,9 +97,9 @@ main(int argc, char **argv)
                 verbosity = 1;
                 break;
             case 't':
-                if (HDstrcmp(optarg, "oob") == 0)
+                if (HDstrcmp(H5_optarg, "oob") == 0)
                     sel = TEST_OOB;
-                else if (HDstrcmp(optarg, "null") == 0)
+                else if (HDstrcmp(H5_optarg, "null") == 0)
                     sel = TEST_NULL;
                 else
                     usage(argv[0]);
@@ -109,18 +109,18 @@ main(int argc, char **argv)
                 break;
         }
     }
-    argv += optind;
-    argc -= optind;
+    argv += H5_optind;
+    argc -= H5_optind;
 
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
      * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(&config, 4, 7, false, TRUE, FALSE, TRUE, 128, "./vlstr-shadow", NULL);
+    init_vfd_swmr_config(&config, 4, 7, FALSE, TRUE, FALSE, TRUE, 128, "./vlstr-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
+    fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
@@ -128,24 +128,24 @@ main(int argc, char **argv)
     fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl);
 
     /* Create the VL string datatype and a scalar dataspace */
-    if ((type = H5Tcopy(H5T_C_S1)) == badhid)
+    if ((type = H5Tcopy(H5T_C_S1)) == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Tcopy");
 
     if (H5Tset_size(type, H5T_VARIABLE) < 0)
         errx(EXIT_FAILURE, "H5Tset_size");
     space = H5Screate(H5S_SCALAR);
 
-    if (space == badhid)
+    if (space == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Screate");
 
-    if (fid == badhid)
+    if (fid == H5I_INVALID_HID)
         errx(EXIT_FAILURE, "H5Fcreate");
 
     /* content 0 seq 1 short
      * content 1 seq 1 long long long long long long long long
      * content 1 seq 1 medium medium medium
      */
-    for (i = 0; !caught_out_of_bounds && i < ntimes; (i % 2 == 0) ? nanosleep(&delay, NULL) : 0, i++) {
+    for (i = 0; !caught_out_of_bounds && i < ntimes; (i % 2 == 0) ? H5_nanosleep(delay_ns) : 0, i++) {
         estack_state_t es;
         const int      ndsets = 2;
         const int      which  = i % ndsets;
@@ -161,7 +161,7 @@ main(int argc, char **argv)
         es          = disable_estack();
         dset[which] = H5Dopen2(fid, name[which], H5P_DEFAULT);
         restore_estack(es);
-        if (caught_out_of_bounds || dset[which] == badhid) {
+        if (caught_out_of_bounds || dset[which] == H5I_INVALID_HID) {
             dbgf(2, ": couldn't open\n");
             continue;
         }
@@ -219,6 +219,6 @@ main(void)
 {
     HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
-} /* end main() */
+}
 
 #endif /* H5_HAVE_WIN32_API */

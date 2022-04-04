@@ -29,9 +29,6 @@
 #define START_OF_DATA       0x0001
 #define END_OF_DATA         0x0002
 
-/* format for hsize_t */
-#define HSIZE_T_FORMAT "%" H5_PRINTF_LL_WIDTH "u"
-
 #define H5TOOLS_DUMP_MAX_RANK H5S_MAX_RANK
 
 /* Stream macros */
@@ -240,7 +237,7 @@ typedef struct h5tool_format_t {
      *
      *   fmt_schar:  The printf() format to use when rendering data which is
      *               typed `signed char'. The default is `%d'. This format is
-     *               used ony if the `ascii' field is zero.
+     *               used only if the `ascii' field is zero.
      *
      *   fmt_uchar:  The printf() format to use when rendering data which is
      *               typed `unsigned char'. The default is `%u'. This format
@@ -411,9 +408,9 @@ typedef struct h5tool_format_t {
      *   sep:       Each integer in the index list will be separated from the
      *              others by this string, which defaults to a comma.
      *
-     *   fmt:       After the index values are formated individually and
+     *   fmt:       After the index values are formatted individually and
      *              separated from one another by some string, the entire
-     *              resulting string will be formated according to this
+     *              resulting string will be formatted according to this
      *              printf(3c) format which should include a format for a
      *              character string.  The default is "%s".
      */
@@ -483,7 +480,7 @@ typedef struct h5tool_format_t {
     const char *line_suf;       /*string to append to each line */
     const char *line_sep;       /*separates lines               */
     int         line_multi_new; /*split multi-line outputs?     */
-    const char *line_indent;    /*for extra identation if we need it*/
+    const char *line_indent;    /*for extra indentation if we need it*/
 
     /*used to skip the first set of checks for line length*/
     int skip_first;
@@ -553,6 +550,7 @@ typedef struct h5tools_context_t {
  */
 
 typedef enum { VOL_BY_NAME, VOL_BY_VALUE } h5tools_vol_info_type_t;
+typedef enum { VFD_BY_NAME, VFD_BY_VALUE } h5tools_vfd_info_type_t;
 
 typedef struct h5tools_vol_info_t {
     h5tools_vol_info_type_t type;
@@ -568,14 +566,18 @@ typedef struct h5tools_vol_info_t {
 } h5tools_vol_info_t;
 
 typedef struct h5tools_vfd_info_t {
+    h5tools_vfd_info_type_t type;
 
     /* Pointer to information to be passed to the driver for its setup */
     const void *info;
 
-    /* Name of the VFD */
-    const char *name;
+    /* Field specifying either the driver's name or value (ID) */
+    union {
+        const char *       name;
+        H5FD_class_value_t value;
+    } u;
 
-    /* Name of the file to open with the VFD */
+    /* Name of the file to open with the VFD (only needed by VFD SWMR) */
     const char *fname;
 } h5tools_vfd_info_t;
 
@@ -605,7 +607,7 @@ typedef enum {
 } driver_idx;
 
 /* The following include, h5tools_str.h, must be after the
- * above stucts are defined. There is a dependency in the following
+ * above structs are defined. There is a dependency in the following
  * include that hasn't been identified yet. */
 
 #include "h5tools_str.h"

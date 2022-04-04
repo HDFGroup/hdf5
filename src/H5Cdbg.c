@@ -1012,9 +1012,9 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t du
  *          If either the parent or the child is not in the metadata
  *          cache, the function sets *fd_exists_ptr to FALSE.
  *
- *          If both are in the cache, the childs list of parents is
+ *          If both are in the cache, the child's list of parents is
  *          searched for the proposed parent.  If the proposed parent
- *          is found in the childs parent list, the function sets
+ *          is found in the child's parent list, the function sets
  *          *fd_exists_ptr to TRUE.  In all other non-error cases,
  *          the function sets *fd_exists_ptr FALSE.
  *
