@@ -751,6 +751,8 @@ if (HDF5_BUILD_SUBFILING)
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
   if (NOT HAVE_STDATOMIC_H)
     message (FATAL_ERROR "Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.")
+  else()
+    set (H5_HAVE_STDATOMIC_H 1)
   endif()
 
   set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
