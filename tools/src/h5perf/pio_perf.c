@@ -904,7 +904,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
     int    i;
     minmax total_mm;
 
-    total_mm.sum = 0.0f;
+    total_mm.sum = 0.0;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;
     total_mm.num = count;

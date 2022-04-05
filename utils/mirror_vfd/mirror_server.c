@@ -94,14 +94,14 @@
  * ---------------------------------------------------------------------------
  */
 struct op_args {
-    uint32_t magic;
-    int      help;
-    int      main_port;
-    int      verbosity;
-    int      log_prepend_serv;
-    int      log_prepend_type;
-    char     log_path[PATH_MAX + 1];
-    char     writer_log_path[PATH_MAX + 1];
+    uint32_t     magic;
+    int          help;
+    int          main_port;
+    unsigned int verbosity;
+    int          log_prepend_serv;
+    int          log_prepend_type;
+    char         log_path[PATH_MAX + 1];
+    char         writer_log_path[PATH_MAX + 1];
 };
 
 /* ---------------------------------------------------------------------------
@@ -224,7 +224,7 @@ parse_args(int argc, char **argv, struct op_args *args_out)
         } /* end if port */
         else if (!HDstrncmp(argv[i], "--verbosity=", 12)) {
             mirror_log(NULL, V_INFO, "parsing 'verbosity' (%s)", argv[i] + 12);
-            args_out->verbosity = HDatoi(argv[i] + 12);
+            args_out->verbosity = (unsigned int)HDatoi(argv[i] + 12);
         } /* end if verbosity */
         else if (!HDstrncmp(argv[i], "--logpath=", 10)) {
             mirror_log(NULL, V_INFO, "parsing 'logpath' (%s)", argv[i] + 10);
@@ -456,7 +456,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static void
-wait_for_child(int sig)
+wait_for_child(int H5_ATTR_UNUSED sig)
 {
     while (HDwaitpid(-1, NULL, WNOHANG) > 0)
         ;
@@ -476,7 +476,7 @@ handle_requests(struct server_run *run)
 {
     int              connfd = -1;                       /**/
     char             mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE]; /**/
-    int              ret;                               /* general-purpose error-checking */
+    ssize_t          ret;                               /* general-purpose error-checking */
     int              pid;                               /* process ID of fork */
     struct sigaction sa;
     int              ret_value = 0;
@@ -521,14 +521,13 @@ handle_requests(struct server_run *run)
         /* Read handshake from port connection.
          */
 
-        ret = (int)HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE);
-        if (-1 == ret) {
+        if ((ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0) {
             mirror_log(run->loginfo, V_ERR, "read:%d", ret);
             goto error;
         }
         mirror_log(run->loginfo, V_INFO, "received %d bytes", ret);
         mirror_log(run->loginfo, V_ALL, "```");
-        mirror_log_bytes(run->loginfo, V_ALL, ret, (const unsigned char *)mybuf);
+        mirror_log_bytes(run->loginfo, V_ALL, (size_t)ret, (const unsigned char *)mybuf);
         mirror_log(run->loginfo, V_ALL, "```");
 
         /* Respond to handshake message.
