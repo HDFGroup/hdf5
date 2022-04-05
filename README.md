@@ -85,7 +85,8 @@ are tentative and may move around a bit as development progresses.
 | 1.13.3 | Multi-Dataset I/O |
 | 1.13.4 | Subfiling |
 
-This list of features is also tentative and may change as development progresses.
+This list of feature release versions is also tentative and the specific release
+in which a feature is introduced may change as development progresses.
 
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
