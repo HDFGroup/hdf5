@@ -215,7 +215,7 @@ test_plist_ed(void)
     dxpl = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
-    ret = H5Pset_btree_ratios(dxpl, 0.2f, 0.6f, 0.2f);
+    ret = H5Pset_btree_ratios(dxpl, 0.2, 0.6, 0.2);
     VRFY((ret >= 0), "H5Pset_btree_ratios succeeded");
 
     ret = H5Pset_hyper_vector_size(dxpl, 5);
@@ -354,7 +354,7 @@ test_plist_ed(void)
     ret = H5Pset_alignment(fapl, 2, 1024);
     VRFY((ret >= 0), "H5Pset_alignment succeeded");
 
-    ret = H5Pset_cache(fapl, 1024, 128, 10485760, 0.3f);
+    ret = H5Pset_cache(fapl, 1024, 128, 10485760, 0.3);
     VRFY((ret >= 0), "H5Pset_cache succeeded");
 
     ret = H5Pset_elink_file_cache_size(fapl, 10485760);
@@ -556,7 +556,7 @@ external_links(void)
 
             /* test opening a group that is to an external link, the external linked
                file should inherit the source file's access properties */
-            HDsprintf(link_path, "%s%s%s", group_path, "/", link_name);
+            HDsnprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
             group = H5Gopen2(fid, link_path, H5P_DEFAULT);
             VRFY((group >= 0), "H5Gopen succeeded");
             ret = H5Gclose(group);

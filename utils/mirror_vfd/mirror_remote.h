@@ -42,7 +42,7 @@ typedef struct mirror_log_info {
 
 void       mirror_log(loginfo_t *info, unsigned int level, const char *format, ...);
 void       mirror_log_bytes(loginfo_t *info, unsigned int level, size_t n_bytes, const unsigned char *buf);
-loginfo_t *mirror_log_init(char *path, char *prefix, unsigned int verbosity);
+loginfo_t *mirror_log_init(char *path, const char *prefix, unsigned int verbosity);
 int        mirror_log_term(loginfo_t *loginfo);
 
 herr_t run_writer(int socketfd, H5FD_mirror_xmit_open_t *xmit_open);

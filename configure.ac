@@ -843,7 +843,8 @@ AC_LANG_POP(C++)
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
 
-## The high-level library is enabled unless the build mode is clean.
+## The high-level library and high-level tools are enabled unless the build mode
+## is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
   HDF5_HL=no
   HDF5_HL_TOOLS=no
@@ -2298,7 +2299,7 @@ for hdf5_cv_printf_ll in ll l L q unknown; do
         ],[[
             char *s = malloc(128);
             long long x = (long long)1048576 * (long long)1048576;
-            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
             exit(strcmp(s,"1099511627776"));
         ]])]
    , [break],,[continue])
@@ -3691,8 +3692,8 @@ fi
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
-## HDF5 version from the first line of the README.txt file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+## HDF5 version from the first line of the README.md file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
 AC_SUBST([H5_VERSION])
 
 ## Configuration date

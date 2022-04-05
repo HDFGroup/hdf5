@@ -100,7 +100,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
         dims[1] = gifImageDesc->ImageWidth;
 
         /* create the image name */
-        sprintf(ImageName, "Image%d", i);
+        snprintf(ImageName, sizeof(ImageName), "Image%d", i);
 
         /* write image */
         if (H5IMmake_image_8bit(file_id, ImageName, dims[1], dims[0], (gifImageDesc->Image)) < 0)

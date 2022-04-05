@@ -448,7 +448,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
      * difficulties with the notion.
      *
      * To solve this, we check to see if H5S_select_shape_same() returns true,
-     * and if the ranks of the mem and file spaces are different.  If the are,
+     * and if the ranks of the mem and file spaces are different.  If they are,
      * construct a new mem space that is equivalent to the old mem space, and
      * use that instead.
      *

@@ -2905,12 +2905,12 @@ none_selection_chunk(void)
 static void
 test_actual_io_mode(int selection_mode)
 {
-    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_write    = -1;
-    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_read     = -1;
-    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_expected = -1;
-    H5D_mpio_actual_io_mode_t        actual_io_mode_write           = -1;
-    H5D_mpio_actual_io_mode_t        actual_io_mode_read            = -1;
-    H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = -1;
+    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_write    = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_read     = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+    H5D_mpio_actual_io_mode_t        actual_io_mode_write           = H5D_MPIO_NO_COLLECTIVE;
+    H5D_mpio_actual_io_mode_t        actual_io_mode_read            = H5D_MPIO_NO_COLLECTIVE;
+    H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
     const char *                     filename;
     const char *                     test_name;
     hbool_t                          direct_multi_chunk_io;
@@ -3163,8 +3163,8 @@ test_actual_io_mode(int selection_mode)
 
         default:
             test_name                      = "Undefined Selection Mode";
-            actual_chunk_opt_mode_expected = -1;
-            actual_io_mode_expected        = -1;
+            actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+            actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
             break;
     }
 
@@ -3667,10 +3667,12 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Test values */
     HDmemset(message, 0, sizeof(message));
-    HDsprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
     HDmemset(message, 0, sizeof(message));
-    HDsprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message),
+               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */

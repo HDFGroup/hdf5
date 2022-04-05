@@ -2094,7 +2094,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
     /* Re-open all the attributes by name and verify the data */
     for (u = 0; u < max_attr; u++) {
         /* Open attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Aopen(loc_id, attrname, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Aopen");
 
@@ -2119,7 +2119,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         CHECK(attr, FAIL, "H5Aopen_by_idx");
 
         /* Verify Name */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
         VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
         if (HDstrcmp(check_name, attrname) != 0)
@@ -2219,7 +2219,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     /* Add attributes, until just before converting to dense storage */
     for (u = 0; u < max_compact; u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -2238,7 +2238,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
 
     /* Add one more attribute, to push into "dense" storage */
     /* Create attribute */
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -2359,7 +2359,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     /* Add attributes, until just before converting to dense storage */
     for (u = 0; u < max_compact; u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -2382,7 +2382,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
 
     /* Add one more attribute, to push into "dense" storage */
     /* Create attribute */
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -2515,7 +2515,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     /* Add attributes, until well into dense storage */
     for (u = 0; u < (max_compact * 2); u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -2560,7 +2560,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     /* Delete attributes until the attributes revert to compact storage again */
     for (u--; u >= min_dense; u--) {
         /* Delete attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -2574,7 +2574,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     VERIFY(is_dense, TRUE, "H5O__is_attr_dense_test");
 
     /* Delete one more attribute, which should cause reversion to compact storage */
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     ret = H5Adelete(dataset, attrname);
     CHECK(ret, FAIL, "H5Adelete");
 
@@ -2587,7 +2587,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "test_attr_dense_verify");
 
     /* Delete another attribute, to verify deletion in compact storage */
-    HDsprintf(attrname, "attr %02u", (u - 1));
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", (u - 1));
     ret = H5Adelete(dataset, attrname);
     CHECK(ret, FAIL, "H5Adelete");
 
@@ -2710,7 +2710,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         /* Add attributes, until well into dense storage */
         for (u = 0; u < (max_compact * 2); u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, H5I_INVALID_HID, "H5Acreate2");
 
@@ -2776,7 +2776,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         unsigned value; /* Attribute value */
 
         /* Open attribute */
-        HDsprintf(attrname, "new attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "new attr %02u", u);
         attr = H5Aopen(dataset, attrname, H5P_DEFAULT);
         CHECK(attr, H5I_INVALID_HID, "H5Aopen");
 
@@ -2894,7 +2894,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     /* Add attributes, until well into dense storage */
     for (u = 0; u < (max_compact * 2); u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3035,7 +3035,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 
     /* Create attribute */
     u = 0;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3055,7 +3055,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 
     /* Create attribute */
     u = 1;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3085,7 +3085,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 
     /* Delete attribute */
     u = 0;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     ret = H5Adelete(dataset, attrname);
     CHECK(ret, FAIL, "H5Adelete");
 
@@ -3192,7 +3192,7 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     /* Add attributes, until just before converting to dense storage */
     for (u = 0; u < max_compact; u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3215,7 +3215,7 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Create attribute */
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3498,7 +3498,7 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     /* Delete a few attributes until the storage switches to compact */
     for (u = min_dense - 1; u <= max_compact; u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         add_attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(add_attr, FAIL, "H5Acreate2");
 
@@ -3566,7 +3566,7 @@ test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
     /* Add attributes, until just before converting to dense storage */
     for (u = 0; u < max_compact; u++) {
         /* Create attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(gid1, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3732,7 +3732,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
     /* Create attribute */
     u = 0;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3750,7 +3750,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
     /* Create attribute */
     u = 1;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3768,7 +3768,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
     /* Create attribute */
     u = 2;
-    HDsprintf(attrname, "attr %02u", u);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
     if (low == H5F_LIBVER_LATEST) {
         CHECK(attr, FAIL, "H5Acreate2");
@@ -3791,7 +3791,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
         /* Create attribute */
         u = 3;
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -3813,7 +3813,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
         /* Delete attribute */
         u = 1;
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -3827,7 +3827,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
         /* Delete attribute */
         u = 3;
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -3841,7 +3841,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
         /* Delete attribute */
         u = 2;
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -3855,7 +3855,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
 
         /* Delete attribute */
         u = 0;
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         ret = H5Adelete(dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -4250,7 +4250,7 @@ test_attr_many(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
     /* Create many attributes */
     for (u = 0; u < nattr; u++) {
-        HDsprintf(attrname, "a-%06u", u);
+        HDsnprintf(attrname, sizeof(attrname), "a-%06u", u);
 
         exists = H5Aexists(gid, attrname);
         VERIFY(exists, FALSE, "H5Aexists");
@@ -4302,7 +4302,7 @@ test_attr_many(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (u = 0; u < nattr; u++) {
         unsigned value; /* Attribute value */
 
-        HDsprintf(attrname, "a-%06u", u);
+        HDsnprintf(attrname, sizeof(attrname), "a-%06u", u);
 
         exists = H5Aexists(gid, attrname);
         VERIFY(exists, TRUE, "H5Aexists");
@@ -4550,7 +4550,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
         /* Create several attributes, but keep storage in compact form */
         for (u = 0; u < max_compact; u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate2");
 
@@ -4639,7 +4639,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
             H5A_info_t ainfo; /* Attribute information */
 
             /* Retrieve information for attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             ret = H5Aget_info_by_name(my_dataset, ".", attrname, &ainfo, H5P_DEFAULT);
             CHECK(ret, FAIL, "H5Aget_info_by_name");
 
@@ -4754,7 +4754,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
         /* Create several attributes, but keep storage in compact form */
         for (u = 0; u < max_compact; u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate2");
 
@@ -4777,7 +4777,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
         } /* end for */
 
         /* Create another attribute, to push into dense storage */
-        HDsprintf(attrname, "attr %02u", max_compact);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", max_compact);
         attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -4870,7 +4870,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
             H5A_info_t ainfo; /* Attribute information */
 
             /* Retrieve information for attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             ret = H5Aget_info_by_name(my_dataset, ".", attrname, &ainfo, H5P_DEFAULT);
             CHECK(ret, FAIL, "H5Aget_info_by_name");
 
@@ -5143,7 +5143,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         /* Create several attributes, but keep storage in compact form */
         for (u = 0; u < max_compact; u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5166,7 +5166,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         } /* end for */
 
         /* Create another attribute, to push into dense storage */
-        HDsprintf(attrname, "attr %02u", max_compact);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", max_compact);
         attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5194,7 +5194,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 
         /* Delete several attributes from object, until attribute storage resumes compact form */
         for (u = max_compact; u >= min_dense; u--) {
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             ret = H5Adelete(my_dataset, attrname);
             CHECK(ret, FAIL, "H5Adelete");
 
@@ -5214,7 +5214,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         } /* end for */
 
         /* Delete another attribute, to push attribute storage into compact form */
-        HDsprintf(attrname, "attr %02u", (min_dense - 1));
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", (min_dense - 1));
         ret = H5Adelete(my_dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -5230,7 +5230,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         /* Re-add attributes to get back into dense form */
         for (u = (min_dense - 1); u < (max_compact + 1); u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5317,7 +5317,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 
         /* Delete several attributes from object, until attribute storage resumes compact form */
         for (u = max_compact; u >= min_dense; u--) {
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             ret = H5Adelete(my_dataset, attrname);
             CHECK(ret, FAIL, "H5Adelete");
 
@@ -5337,7 +5337,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         } /* end for */
 
         /* Delete another attribute, to push attribute storage into compact form */
-        HDsprintf(attrname, "attr %02u", (min_dense - 1));
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", (min_dense - 1));
         ret = H5Adelete(my_dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
 
@@ -5353,7 +5353,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
         /* Re-add attributes to get back into dense form */
         for (u = (min_dense - 1); u < (max_compact + 1); u++) {
             /* Create attribute */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5382,11 +5382,11 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 
         /* Delete all attributes */
         for (u = max_compact; u > 0; u--) {
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
             ret = H5Adelete(my_dataset, attrname);
             CHECK(ret, FAIL, "H5Adelete");
         } /* end for */
-        HDsprintf(attrname, "attr %02u", 0);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", 0);
         ret = H5Adelete(my_dataset, attrname);
         CHECK(ret, FAIL, "H5Adelete");
     } /* end for */
@@ -5526,7 +5526,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
             /* Create attributes, until attribute storage is in dense form */
             for (u = 0; u < max_compact * 2; u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5869,7 +5869,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create attributes, up to limit of compact form */
             for (u = 0; u < max_compact; u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
@@ -5909,7 +5909,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create more attributes, to push into dense form */
             for (; u < (max_compact * 2); u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
@@ -6353,7 +6353,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create attributes, up to limit of compact form */
                     for (u = 0; u < max_compact; u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -6428,9 +6428,9 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0,
                                                          tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if (order == H5_ITER_INC)
-                            HDsprintf(attrname, "attr %02u", (u + 1));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", (u + 1));
                         else
-                            HDsprintf(attrname, "attr %02u", (max_compact - (u + 2)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", (max_compact - (u + 2)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6466,7 +6466,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create more attributes, to push into dense form */
                     for (u = 0; u < (max_compact * 2); u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -6556,9 +6556,10 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0,
                                                          tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if (order == H5_ITER_INC)
-                            HDsprintf(attrname, "attr %02u", (u + 1));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", (u + 1));
                         else
-                            HDsprintf(attrname, "attr %02u", ((max_compact * 2) - (u + 2)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - (u + 2)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6600,7 +6601,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create attributes, to push into dense form */
                     for (u = 0; u < (max_compact * 2); u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -6669,9 +6670,10 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u,
                                                          tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if (order == H5_ITER_INC)
-                            HDsprintf(attrname, "attr %02u", ((u * 2) + 1));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 1));
                         else
-                            HDsprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 2)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - ((u * 2) + 2)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6721,9 +6723,10 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0,
                                                          tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if (order == H5_ITER_INC)
-                            HDsprintf(attrname, "attr %02u", ((u * 2) + 3));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u", ((u * 2) + 3));
                         else
-                            HDsprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 4)));
+                            HDsnprintf(attrname, sizeof(attrname), "attr %02u",
+                                       ((max_compact * 2) - ((u * 2) + 4)));
                         ret = HDstrcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
@@ -6804,7 +6807,7 @@ attr_iterate2_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, vo
     } /* end if */
 
     /* Verify name of link */
-    HDsprintf(attrname, "attr %02u", (unsigned)my_info.corder);
+    HDsnprintf(attrname, sizeof(attrname), "attr %02u", (unsigned)my_info.corder);
     if (HDstrcmp(attr_name, attrname) != 0)
         return (H5_ITER_ERROR);
 
@@ -7314,7 +7317,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create attributes, up to limit of compact form */
                     for (u = 0; u < max_compact; u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -7386,7 +7389,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create more attributes, to push into dense form */
                     for (u = max_compact; u < (max_compact * 2); u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -7678,7 +7681,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create attributes, up to limit of compact form */
                     for (u = 0; u < max_compact; u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -7737,7 +7740,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     /* Create more attributes, to push into dense form */
                     for (u = max_compact; u < (max_compact * 2); u++) {
                         /* Create attribute */
-                        HDsprintf(attrname, "attr %02u", u);
+                        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                         attr =
                             H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                         CHECK(attr, FAIL, "H5Acreate2");
@@ -7842,7 +7845,7 @@ attr_open_check(hid_t fid, const char *dsetname, hid_t obj_id, unsigned max_attr
     /* Open each attribute on object by index and check that it's the correct one */
     for (u = 0; u < max_attrs; u++) {
         /* Open the attribute */
-        HDsprintf(attrname, "attr %02u", u);
+        HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
         attr_id = H5Aopen(obj_id, attrname, H5P_DEFAULT);
         CHECK(attr_id, FAIL, "H5Aopen");
 
@@ -8011,7 +8014,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create attributes, up to limit of compact form */
             for (u = 0; u < max_compact; u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
@@ -8077,7 +8080,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create more attributes, to push into dense form */
             for (u = max_compact; u < (max_compact * 2); u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate2(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
@@ -8260,7 +8263,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create attributes, up to limit of compact form */
             for (u = 0; u < max_compact; u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate_by_name(fid, dsetname, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT,
                                          H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate_by_name");
@@ -8317,7 +8320,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Create more attributes, to push into dense form */
             for (u = max_compact; u < (max_compact * 2); u++) {
                 /* Create attribute */
-                HDsprintf(attrname, "attr %02u", u);
+                HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
                 attr = H5Acreate_by_name(fid, dsetname, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT,
                                          H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate_by_name");
@@ -8542,7 +8545,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         /* Add attributes to each dataset, until after converting to dense storage */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Alternate between creating "small" & "big" attributes */
             if (u % 2) {
@@ -8877,7 +8880,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         /* Add attributes to each dataset, until after converting to dense storage */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Alternate between creating "small" & "big" attributes */
             if (u % 2) {
@@ -9322,7 +9325,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         /* Add attributes to each dataset, until after converting to dense storage */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Alternate between creating "small" & "big" attributes */
             if (u % 2) {
@@ -9430,7 +9433,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         /* Delete attributes from second dataset */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Delete second dataset's attribute */
             ret = H5Adelete_by_name(fid, DSET2_NAME, attrname, H5P_DEFAULT);
@@ -9692,7 +9695,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         /* Add attributes to each dataset, until after converting to dense storage */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Alternate between creating "small" & "big" attributes */
             if (u % 2) {
@@ -9816,7 +9819,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         /* Check ref count on  attributes of first dataset */
         for (u = 0; u < max_compact * 2; u++) {
             /* Create attribute name */
-            HDsprintf(attrname, "attr %02u", u);
+            HDsnprintf(attrname, sizeof(attrname), "attr %02u", u);
 
             /* Open attribute on first dataset */
             attr = H5Aopen(dataset, attrname, H5P_DEFAULT);

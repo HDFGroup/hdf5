@@ -232,7 +232,7 @@
  */
 #define BEGIN_MPE_LOG                                                                                        \
     if (H5_MPEinit_g) {                                                                                      \
-        sprintf(p_event_start, "start %s", FUNC);                                                            \
+        snprintf(p_event_start, sizeof(p_event_start), "start %s", FUNC);                                    \
         if (eventa(FUNC) == -1 && eventb(FUNC) == -1) {                                                      \
             const char *p_color = "red";                                                                     \
             eventa(FUNC)        = MPE_Log_get_event_number();                                                \

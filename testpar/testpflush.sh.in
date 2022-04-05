@@ -50,7 +50,7 @@ RUNPARALLELSCRIPT=`echo "@RUNPARALLEL@" | sed "s/$$/\$/g"`
 echo "*** NOTE ***********************************************************"
 echo "You may see complaints from mpiexec et al. that not all processes"
 echo "called MPI_Finalize(). This is an intended characteristic of the"
-echo "test and should not be considered an  error."
+echo "test and should not be considered an error."
 echo "********************************************************************"
 eval ${RUNPARALLELSCRIPT} ./t_pflush1
 

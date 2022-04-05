@@ -3784,7 +3784,7 @@ setDefaultValues(struct Input *in, int count)
     in->path.count     = 1;
 
     HDstrcpy(temp, "dataset");
-    HDsprintf(num, "%d", count);
+    HDsnprintf(num, sizeof(num), "%d", count);
     HDstrcat(temp, num);
     HDstrcpy(in->path.group[0], temp);
 
