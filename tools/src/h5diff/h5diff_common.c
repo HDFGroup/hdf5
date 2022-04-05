@@ -49,9 +49,9 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"vol-name-2", require_arg, '5'},
                                           {"vol-info-2", require_arg, '6'},
                                           {"vfd-name-1", require_arg, '7'},
-                                          {"vfd-value-1", require_arg, '8'},
+                                          {"vfd-info-1", require_arg, '8'},
                                           {"vfd-name-2", require_arg, '9'},
-                                          {"vfd-value-2", require_arg, '0'},
+                                          {"vfd-info-2", require_arg, '0'},
                                           {NULL, 0, '\0'}};
 
 static H5FD_onion_fapl_info_t onion_fa_g_1 = {
@@ -720,6 +720,16 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-1            Name of the VFD driver to use for opening the first\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-1            VFD-specific info to open the first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-2            Name of the VFD driver to use for opening the second\n");
+    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-info-2            VFD-specific info to open the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Follow symbolic links (soft links and external links and compare the)\n");
