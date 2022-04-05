@@ -16,23 +16,6 @@ project, tools and services can be found at the Group's website.
     
    https://www.hdfgroup.org/
 
-RELEASE SCHEDULE
-----------------
-
-![HDF5 release schedule](doc/img/release-schedule.png) 
-
-HDF5 does not release on a regular schedule. Instead, releases are driven by
-new features and bugfixes, though we try to have at least one release of each
-maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative and may move around a bit as development progresses. 
-
-| Release | New Features |
-| ------- | ------------ |
-| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
-| 1.13.3 | Multi-Dataset I/O |
-| 1.13.4 | Subfiling |
-
-This list of features is also tentative and may change as development progresses.
 
 DOCUMENTATION
 -------------
@@ -84,6 +67,25 @@ Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the following instructions pertaining to the Forum's
 use and configuration
     https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
+
+
+RELEASE SCHEDULE
+----------------
+
+![HDF5 release schedule](doc/img/release-schedule.png) 
+
+HDF5 does not release on a regular schedule. Instead, releases are driven by
+new features and bugfixes, though we try to have at least one release of each
+maintenance branch per year. Future HDF5 releases indicated on this schedule
+are tentative and may move around a bit as development progresses. 
+
+| Release | New Features |
+| ------- | ------------ |
+| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
+| 1.13.3 | Multi-Dataset I/O |
+| 1.13.4 | Subfiling |
+
+This list of features is also tentative and may change as development progresses.
 
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
