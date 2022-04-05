@@ -838,7 +838,7 @@ dump_group(hid_t gid, const char *name)
                 type = H5Dget_type(dset);
 
                 H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                HDsprintf(type_name, "#%s", obj_tok_str);
+                HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 dump_function_table->dump_named_datatype_function(type, type_name);
@@ -1970,7 +1970,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, int pe,
 
                 /* unnamed datatype */
                 H5Otoken_to_str(fid, &type_table->objs[idx].obj_token, &obj_tok_str);
-                HDsprintf(name, "/#%s", obj_tok_str);
+                HDsnprintf(name, sizeof(name), "/#%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 if (!HDstrcmp(name, real_name))

@@ -164,7 +164,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -443,7 +443,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
         i = min_dset;
 
         while ((pass) && (i <= max_dset)) {
-            HDsprintf(dset_name, "/dset%03d", i);
+            HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
 
             if (H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -1019,7 +1019,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if (pass) {
 
-                HDsprintf(dset_name, "/dset%03d", i);
+                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
@@ -4624,7 +4624,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     /* 2) Create a process specific group. */
     if (pass) {
 
-        HDsprintf(process_group_name, "/process_%d", min_group);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", min_group);
 
         proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4728,7 +4728,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
         if (pass) {
 
             max_group++;
-            HDsprintf(process_group_name, "/process_%d", max_group);
+            HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", max_group);
 
             proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4802,7 +4802,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     /* 11) Validate all the zoos. */
     i = min_group;
     while (pass && i <= max_group) {
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 
@@ -4854,7 +4854,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while ((pass) && (i <= max_group)) {
 
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 
@@ -4914,7 +4914,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
      */
     i = min_group;
     while ((pass) && (i <= max_group)) {
-        HDsprintf(process_group_name, "/process_%d", i);
+        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 

@@ -144,7 +144,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     if ((top_gid = H5Gopen2(fid, "top_group", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < NGROUPS; i++) {
-        HDsprintf(group_name, "group%02d", i);
+        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gopen2(top_gid, group_name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
