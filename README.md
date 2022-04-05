@@ -75,7 +75,7 @@ RELEASE SCHEDULE
 ![HDF5 release schedule](doc/img/release-schedule.png) 
 
 HDF5 does not release on a regular schedule. Instead, releases are driven by
-new features and bugfixes, though we try to have at least one release of each
+new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
 are tentative. 
 
@@ -85,7 +85,7 @@ are tentative.
 | 1.13.3 | Multi-Dataset I/O |
 | 1.13.4 | Subfiling |
 
-This list of feature release versions is also tentative and the specific release
+This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
 
 
