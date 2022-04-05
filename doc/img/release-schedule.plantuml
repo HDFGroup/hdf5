@@ -38,7 +38,8 @@ Project starts 2021-01-01
 [1.13.4] displays on same row as [1.13.0]
 [1.13] is colored in #44AA99
 
-[1.14] starts at 2022-12-31 and lasts 10 weeks [1.14.0] happens at 2022-12-31
+[1.14] starts at 2022-12-31 and lasts 10 weeks
+[1.14.0] happens at 2022-12-31
 [1.14] is colored in #AA4499
 @enduml
 
