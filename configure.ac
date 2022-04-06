@@ -3202,7 +3202,7 @@ AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
 
 AC_ARG_ENABLE([subfiling-vfd],
               [AS_HELP_STRING([--enable-subfiling-vfd],
-                              [Build the subfiling I/O virtual file driver (VFD).
+                              [Build the subfiling I/O virtual file driver (VFD). Requires --enable-parallel.
                                [default=no]])],
               [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
 
@@ -3221,7 +3221,10 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     CPPFLAGS="$CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
 
-    # subfiling requires atomic operations support
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
     if test "x$HAVE_STDATOMIC_H" = "xno"; then
