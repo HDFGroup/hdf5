@@ -21,7 +21,6 @@
 #define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
 #define H5FD_ONION_VALUE H5_VFD_ONION
 
-
 #define H5FD_ONION_ENABLE_INDEX_STATS 0
 
 #define H5FD_ONION_FAPL_INFO_VERSION_CURR                         1
