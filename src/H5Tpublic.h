@@ -2039,7 +2039,7 @@ H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
  */
 H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
 /**
- * \ingroup COMPOUND ENUM
+ * \ingroup COMPENUM
  *
  * \brief Retrieves the number of elements in a compound or enumeration datatype
  *
@@ -2056,7 +2056,7 @@ H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
  */
 H5_DLL int H5Tget_nmembers(hid_t type_id);
 /**
- * \ingroup COMPOUND ENUM
+ * \ingroup COMPENUM
  *
  * \brief Retrieves the name of a compound or enumeration datatype member
  *
@@ -2083,7 +2083,7 @@ H5_DLL int H5Tget_nmembers(hid_t type_id);
  */
 H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
 /**
- * \ingroup COMPOUND ENUM
+ * \ingroup COMPENUM
  *
  * \brief Retrieves the index of a compound or enumeration datatype member
  *
