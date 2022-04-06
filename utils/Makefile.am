@@ -20,7 +20,25 @@ include $(top_srcdir)/config/commence.am
 
 CONFIG=ordered
 
+if BUILD_TESTS_CONDITIONAL
+   TESTUTIL_DIR =test
+else
+   TESTUTIL_DIR=
+endif
+
+if MIRROR_VFD_CONDITIONAL
+   MIRROR_VFD_DIR = mirror_vfd
+else
+   MIRROR_VFD_DIR=
+endif
+
+if BUILD_TOOLS_CONDITIONAL
+   TOOLS_DIR =tools
+else
+   TOOLS_DIR=
+endif
+
 # All subdirectories
-SUBDIRS=mirror_vfd
+SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR) $(TOOLS_DIR)
 
 include $(top_srcdir)/config/conclude.am

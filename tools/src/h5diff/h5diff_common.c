@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
+static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"version", no_arg, 'V'},
                                           {"report", no_arg, 'r'},
@@ -41,43 +41,20 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"no-dangling-links", no_arg, 'x'},
                                           {"exclude-path", require_arg, 'E'},
                                           {"exclude-attribute", require_arg, 'A'},
-                                          {"enable-error-stack", no_arg, 'S'},
+                                          {"enable-error-stack", optional_arg, 'S'},
                                           {"vol-value-1", require_arg, '1'},
                                           {"vol-name-1", require_arg, '2'},
                                           {"vol-info-1", require_arg, '3'},
                                           {"vol-value-2", require_arg, '4'},
                                           {"vol-name-2", require_arg, '5'},
                                           {"vol-info-2", require_arg, '6'},
-                                          {"vfd-name-1", require_arg, '7'},
-                                          {"vfd-info-1", require_arg, '8'},
-                                          {"vfd-name-2", require_arg, '9'},
-                                          {"vfd-info-2", require_arg, '0'},
+                                          {"vfd-value-1", require_arg, '7'},
+                                          {"vfd-name-1", require_arg, '8'},
+                                          {"vfd-info-1", require_arg, '9'},
+                                          {"vfd-value-2", require_arg, '0'},
+                                          {"vfd-name-2", require_arg, 'Y'},
+                                          {"vfd-info-2", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
-
-static H5FD_onion_fapl_info_t onion_fa_g_1 = {
-    H5FD_ONION_FAPL_INFO_VERSION_CURR,
-    H5P_DEFAULT,                   /* backing_fapl_id                */
-    32,                            /* page_size                      */
-    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
-    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-    0,                        /* force_write_open               */
-    0,                        /* creation_flags                 */
-    "indoor speaking voices", /* comment                        */
-};
-
-static H5FD_onion_fapl_info_t onion_fa_g_2 = {
-    H5FD_ONION_FAPL_INFO_VERSION_CURR,
-    H5P_DEFAULT,                   /* backing_fapl_id                */
-    32,                            /* page_size                      */
-    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
-    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-    0,                        /* force_write_open               */
-    0,                        /* creation_flags                 */
-    "indoor speaking voices", /* comment                        */
-};
-
-static const char *driver_name_g_1 = NULL; /* The driver to open the first file with. */
-static const char *driver_name_g_2 = NULL; /* The driver to open the second file with. */
 
 /*-------------------------------------------------------------------------
  * Function: check_options
@@ -229,7 +206,7 @@ parse_subset_params(const char *dset)
  */
 
 void
-parse_command_line(int argc, const char *argv[], const char **fname1, const char **fname2,
+parse_command_line(int argc, const char *const *argv, const char **fname1, const char **fname2,
                    const char **objname1, const char **objname2, diff_opt_t *opts)
 {
     int                       i;
@@ -306,7 +283,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'q':
-                /* use quiet mode; supress the message "0 differences found" */
+                /* use quiet mode; suppress the message "0 differences found" */
                 opts->mode_quiet = 1;
                 break;
 
@@ -323,7 +300,10 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'S':
-                enable_error_stack = 1;
+                if (H5_optarg != NULL)
+                    enable_error_stack = HDatoi(H5_optarg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case 'E':
@@ -461,42 +441,40 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
             case '6':
                 opts->vol_info[1].info_string = H5_optarg;
                 break;
+
             case '7':
-                driver_name_g_1 = HDstrdup(H5_optarg);
+                opts->vfd_info[0].type    = VFD_BY_VALUE;
+                opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->custom_vfd[0]       = TRUE;
                 break;
+
             case '8':
-                onion_fa_g_1.revision_id = (uint64_t)HDatol(H5_optarg);
+                opts->vfd_info[0].type   = VFD_BY_NAME;
+                opts->vfd_info[0].u.name = H5_optarg;
+                opts->custom_vol[0]      = TRUE;
                 break;
+
             case '9':
-                driver_name_g_2 = HDstrdup(H5_optarg);
+                opts->vfd_info[0].info = (const void *)H5_optarg;
                 break;
+
             case '0':
-                onion_fa_g_2.revision_id = (uint64_t)HDatol(H5_optarg);
+                opts->vfd_info[1].type    = VFD_BY_VALUE;
+                opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->custom_vfd[1]       = TRUE;
+                break;
+
+            case 'Y':
+                opts->vfd_info[1].type   = VFD_BY_NAME;
+                opts->vfd_info[1].u.name = H5_optarg;
+                opts->custom_vfd[1]      = TRUE;
+                break;
+
+            case 'Z':
+                opts->vfd_info[1].info = (const void *)H5_optarg;
+                break;
         }
     }
-
-    /* Copy the VFD driver info for both the files */
-    if (driver_name_g_1) {
-        if (!HDstrcmp(driver_name_g_1, "onion")) {
-            opts->vfd_info[0].name = HDstrdup(driver_name_g_1);
-            opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(opts->vfd_info[0].info, &onion_fa_g_1, sizeof(H5FD_onion_fapl_info_t));
-        }
-
-        if (driver_name_g_1)
-            HDfree(driver_name_g_1);
-    } /* driver name defined */
-
-    if (driver_name_g_2) {
-        if (!HDstrcmp(driver_name_g_2, "onion")) {
-            opts->vfd_info[1].name = HDstrdup(driver_name_g_2);
-            opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(opts->vfd_info[1].info, &onion_fa_g_2, sizeof(H5FD_onion_fapl_info_t));
-        }
-
-        if (driver_name_g_2)
-            HDfree(driver_name_g_2);
-    } /* driver name defined */
 
     /* check options */
     check_options(opts);
@@ -677,6 +655,10 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "  [obj1]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "  [obj2]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  ERROR\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream, "                        Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help\n");
     PRINTVALSTREAM(rawoutstream, "         Print a usage message and exit.\n");
@@ -699,9 +681,6 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "          3 : All level 2 information plus file names.\n");
     PRINTVALSTREAM(rawoutstream, "   -q, --quiet\n");
     PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
-    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                   Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-value-1           Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
@@ -721,15 +700,23 @@ usage(void)
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
-                   "   --vfd-name-1            Name of the VFD driver to use for opening the first\n");
+                   "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-1            Name of the VFL driver to use for opening the first\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
-                   "   --vfd-info-1            VFD-specific info to open the first HDF5 file specified\n");
+                   "   --vfd-info-1            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the first HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
-                   "   --vfd-name-2            Name of the VFD driver to use for opening the second\n");
+                   "   --vfd-value-2           Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --vfd-name-2            Name of the VFL driver to use for opening the second\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
-                   "   --vfd-info-2            VFD-specific info to open the second HDF5 file specified\n");
+                   "   --vfd-info-2            VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
     PRINTVALSTREAM(rawoutstream,
                    "         Follow symbolic links (soft links and external links and compare the)\n");
@@ -851,7 +838,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
-                   "  Default mode: print the number of differences found and where they occured\n");
+                   "  Default mode: print the number of differences found and where they occurred\n");
     PRINTVALSTREAM(rawoutstream, "  -r Report mode: print the above plus the differences\n");
     PRINTVALSTREAM(rawoutstream, "  -v Verbose mode: print the above plus a list of objects and warnings\n");
     PRINTVALSTREAM(rawoutstream, "  -q Quiet mode: do not print output\n");

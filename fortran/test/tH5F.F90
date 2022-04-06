@@ -554,7 +554,7 @@ CONTAINS
           do i = 1, NX
               do j = 1, NY
                   IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-                      write(*, *) "reopen test error occured"
+                      write(*, *) "reopen test error occurred"
                   END IF
               end do
           end do
@@ -584,17 +584,23 @@ CONTAINS
 !    The following subroutine checks that h5fget_name_f produces
 !    correct output for a given obj_id and filename.
 !
-        SUBROUTINE check_get_name(obj_id, fix_filename, total_error)
+        SUBROUTINE check_get_name(obj_id, fix_filename, len_filename, total_error)
           USE HDF5  ! This module contains all necessary modules
           USE TH5_MISC
           IMPLICIT NONE
           INTEGER(HID_T) :: obj_id                          ! Object identifier
           CHARACTER(LEN=80), INTENT(IN) :: fix_filename     ! Expected filename
+          INTEGER, INTENT(IN) :: len_filename               ! The length of the filename
           INTEGER, INTENT(INOUT) :: total_error             ! Error count
 
           CHARACTER(LEN=80):: file_name  ! Filename buffer
           INTEGER:: error                ! HDF5 error code
           INTEGER(SIZE_T):: name_size    ! Filename length
+
+          INTEGER, PARAMETER :: sm_len = 2
+          CHARACTER(LEN=len_filename) :: filename_exact
+          CHARACTER(LEN=len_filename-sm_len) :: filename_sm
+
           !
           !Get file name from the dataset identifier
           !
@@ -637,6 +643,30 @@ CONTAINS
             total_error = total_error + 1
          END IF
 
+         ! Use a buffer which is the exact size needed to hold the filename
+         CALL h5fget_name_f(obj_id, filename_exact, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. len_filename)THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(filename_exact .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer which is smaller than needed to hold the filename
+         CALL h5fget_name_f(obj_id, filename_sm, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. len_filename)THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(filename_sm(1:len_filename-sm_len) .NE. fix_filename(1:len_filename-sm_len)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
         END SUBROUTINE check_get_name
 
 !    The following subroutine tests h5fget_name_f.
@@ -653,6 +683,7 @@ CONTAINS
 
           CHARACTER(LEN=*), PARAMETER :: filename = "filename"
           CHARACTER(LEN=80)  :: fix_filename
+          INTEGER :: len_filename
 
           INTEGER(HID_T) :: file_id          ! File identifier
           INTEGER(HID_T) :: g_id             ! Group identifier
@@ -679,8 +710,9 @@ CONTAINS
           CALL h5gopen_f(file_id,"/",g_id, error)
           CALL check("h5gopen_f",error,total_error)
 
-          CALL check_get_name(file_id, fix_filename, total_error)
-          CALL check_get_name(g_id, fix_filename, total_error)
+          len_filename = LEN_TRIM(fix_filename)
+          CALL check_get_name(file_id, fix_filename, len_filename, total_error)
+          CALL check_get_name(g_id, fix_filename, len_filename, total_error)
 
           ! Close the group.
           !

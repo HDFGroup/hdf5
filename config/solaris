@@ -39,7 +39,7 @@ if test "X-" = "X-$cc_flags_set"; then
 
   # Debug
   # NDEBUG is handled explicitly by the configure script
-  # -g is hanled by the symbols flags
+  # -g is handled by the symbols flags
   DEBUG_CFLAGS=
 
   # Symbols
@@ -101,7 +101,7 @@ if test "X-" = "X-$f9x_flags_set"; then
 
   # Debug
   # NDEBUG is handled explicitly by the configure script
-  # -g is hanled by the symbols flags
+  # -g is handled by the symbols flags
   DEBUG_FCFLAGS=
 
   # Symbols
@@ -157,7 +157,7 @@ if test -z "$cxx_flags_set"; then
 
   # Debug
   # NDEBUG is handled explicitly by the configure script
-  # -g is hanled by the symbols flags
+  # -g is handled by the symbols flags
   DEBUG_CXXFLAGS=
 
   # Symbols

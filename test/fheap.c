@@ -466,40 +466,24 @@ error:
     return (1);
 } /* add_obj() */
 
-/*-------------------------------------------------------------------------
- * Function:  get_del_string
- *
- * Purpose:   Return string describing the kind of deletion to perform
- *
- * Return:    Success:    0
- *
- *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
- *
- *-------------------------------------------------------------------------
- */
-static char *
+/* Return a string describing the kind of deletion to perform. */
+static const char *
 get_del_string(const fheap_test_param_t *tparam)
 {
-    char *str;
-
     /* Remove half of total objects from heap */
     if (tparam->del_dir == FHEAP_DEL_FORWARD)
         if (tparam->drain_half == FHEAP_DEL_DRAIN_ALL)
-            str = H5MM_strdup("(all - forward)");
+            return "(all - forward)";
         else
-            str = H5MM_strdup("(half, refill, all - forward)");
+            return "(half, refill, all - forward)";
     else if (tparam->del_dir == FHEAP_DEL_REVERSE)
         if (tparam->drain_half == FHEAP_DEL_DRAIN_ALL)
-            str = H5MM_strdup("(all - reverse)");
+            return "(all - reverse)";
         else
-            str = H5MM_strdup("(half, refill, all - reverse)");
+            return "(half, refill, all - reverse)";
     else
-        str = H5MM_strdup("(all - deleting heap)");
+        return "(all - deleting heap)";
 
-    return (str);
 } /* get_del_string() */
 
 /*-------------------------------------------------------------------------
@@ -547,28 +531,20 @@ get_fill_size(const fheap_test_param_t *tparam)
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      test_desc in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *keep_ids, size_t *fill_size)
 {
-    char *del_str   = NULL; /* Deletion order description */
-    char *test_desc = NULL; /* Test description */
+    char *      test_desc; /* Test description */
+    const char *del_str = get_del_string(tparam);
 
     /*
      * Test filling & removing all (small) objects from root direct block of absolute heap
      */
-    del_str = get_del_string(tparam);
-    HDassert(del_str);
-    test_desc = (char *)H5MM_malloc(HDstrlen(del_str) + HDstrlen(base_desc));
-    HDsprintf(test_desc, base_desc, del_str);
+    size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
+    test_desc            = H5MM_malloc(test_desc_len);
+    (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
+
     TESTING(test_desc);
-    H5MM_xfree(del_str);
     H5MM_xfree(test_desc);
 
     /* Initialize the heap ID structure */
@@ -581,7 +557,6 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
     /* Success */
     return (0);
 } /* end begin_test() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:  reopen_file
@@ -2469,7 +2444,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     size_t        id_len;                       /* Size of fractal heap IDs */
     size_t        tiny_max_len;                 /* Max. length of tiny objects */
     hbool_t       tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
-    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly acccessed? */
+    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly accessed? */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -7769,7 +7744,7 @@ test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from root direct block of absolute heap %s";
+    const char *base_desc = "removing all objects from root direct block of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -7842,7 +7817,7 @@ test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from two direct blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from two direct blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -7930,7 +7905,7 @@ test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from first row of direct blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from first row of direct blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8000,7 +7975,7 @@ test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from first two rows of direct blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from first two rows of direct blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8072,7 +8047,7 @@ test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from first four rows of direct blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from first four rows of direct blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8148,7 +8123,7 @@ test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from all direct blocks of root group in absolute heap %s";
+    const char *base_desc = "removing all objects from all direct blocks of root group in absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8218,7 +8193,7 @@ test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from 2nd level indirect blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from 2nd level indirect blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8292,7 +8267,7 @@ test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     size_t             fill_size;                    /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "removing all objects from 3rd level indirect blocks of absolute heap %s";
+    const char *base_desc = "removing all objects from 3rd level indirect blocks of absolute heap";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8373,8 +8348,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     size_t             obj_size;                     /* Size of object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc =
-        "inserting object that is too large for starting block, then remove all objects %s";
+    const char *base_desc = "inserting object that is too large for starting block, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -8453,7 +8427,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
     const char *base_desc =
-        "skipping starting block, then adding object back to first block, then remove all objects %s";
+        "skipping starting block, then adding object back to first block, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -8553,7 +8527,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
     const char *base_desc =
-        "skipping starting block, then adding objects to backfill and extend, then remove all objects %s";
+        "skipping starting block, then adding objects to backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8662,7 +8636,7 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
     const char *base_desc = "insert object to initial block, then add object too large for starting direct "
-                            "blocks, then remove all objects %s";
+                            "blocks, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -8761,7 +8735,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     unsigned           v;                            /* Local index variables */
     /* Test description */
     const char *base_desc = "insert object to initial block, then add object too large for starting direct "
-                            "blocks, then backfill and extend, then remove all objects %s";
+                            "blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -8907,7 +8881,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     unsigned           u;                            /* Local index variable */
     /* Test description */
     const char *base_desc =
-        "skipping blocks with indirect root, then backfill and extend, then remove all objects %s";
+        "skipping blocks with indirect root, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9072,7 +9046,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
     const char *base_desc =
-        "filling first row, then skipping rows, then backfill and extend, then remove all objects %s";
+        "filling first row, then skipping rows, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9202,7 +9176,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     unsigned           v;               /* Local index variables */
     /* Test description */
     const char *base_desc = "skipping direct blocks to last row and skipping two rows of root indirect "
-                            "block, then backfill and extend, then remove all objects %s";
+                            "block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -9328,7 +9302,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
     const char *base_desc = "filling direct blocks and skipping blocks in non-root indirect block, then "
-                            "backfill and extend, then remove all objects %s";
+                            "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9457,7 +9431,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     unsigned           u;                          /* Local index variable */
     /* Test description */
     const char *base_desc = "filling direct blocks and skipping row of non-root indirect blocks, then "
-                            "backfill and extend, then remove all objects %s";
+                            "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9589,7 +9563,7 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
     /* Test description */
     const char *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, except last one, and insert object too "
-        "large for 2nd level indirect blocks, then backfill and extend, then remove all objects %s";
+        "large for 2nd level indirect blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9735,7 +9709,7 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
     unsigned           u;          /* Local index variable */
     /* Test description */
     const char *base_desc = "filling direct blocks and skipping row of non-root indirect blocks, then skip "
-                            "row of direct blocks, then backfill and extend, then remove all objects %s";
+                            "row of direct blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -9898,7 +9872,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     unsigned           u, v;            /* Local index variables */
     /* Test description */
     const char *base_desc = "filling direct blocks and skipping two rows of root indirect block, then "
-                            "backfill and extend, then remove all objects %s";
+                            "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10055,7 +10029,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     /* Test description */
     const char *base_desc =
         "filling direct blocks and skipping two rows of root indirect block, skip one row of root indirect "
-        "block, then backfill and extend, then remove all objects %s";
+        "block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10235,7 +10209,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     /* Test description */
     const char *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, and skip first rows of direct blocks of "
-        "3rd level indirect block, then backfill and extend, then remove all objects %s";
+        "3rd level indirect block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10367,7 +10341,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     const char *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect block's direct "
         "blocks, and skip first rows of direct blocks of 3rd level indirect block's 2nd level indirect "
-        "block, then backfill and extend, then remove all objects %s";
+        "block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10511,7 +10485,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
     /* Test description */
     const char *base_desc = "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level "
                             "indirect block's direct blocks, and skip first row of indirect blocks of 3rd "
-                            "level indirect block, then backfill and extend, then remove all objects %s";
+                            "level indirect block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10664,7 +10638,7 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
     /* Test description */
     const char *base_desc = "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level "
                             "indirect block's direct blocks, and skip first two rows of indirect blocks of "
-                            "3rd level indirect block, then backfill and extend, then remove all objects %s";
+                            "3rd level indirect block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10822,7 +10796,7 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
     const char *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect "
         "blocks, except last one, fill all direct blocks in last 3rd level indirect block, and insert object "
-        "too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects %s";
+        "too large for it's 2nd level indirect blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -10986,7 +10960,7 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
         "filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect "
         "blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level "
         "indirect blocks, except last one, and insert object too large for 2nd level indirect block, then "
-        "backfill and extend, then remove all objects %s";
+        "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -11154,7 +11128,7 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
     const char *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill "
         "4th level indirect block's direct blocks, and skip first row of 2nd indirect blocks of 4th level "
-        "indirect block, then backfill and extend, then remove all objects %s";
+        "indirect block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -11318,7 +11292,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
         "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill "
         "4th level indirect block's direct, 2nd level indirect blocks and 3rd level direct block, and skip "
         "first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then "
-        "backfill and extend, then remove all objects %s";
+        "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -11502,7 +11476,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
         "first row of 4th level indirect blocks, fill 2nd row 4th level indirect block's direct, 2nd level "
         "indirect blocks, first row of 3rd level indirect blocks, 3rd level direct block in 2nd row, and "
         "skip first row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect block, then "
-        "backfill and extend, then remove all objects %s";
+        "backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -11721,7 +11695,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
         "filling direct blocks, filling 2nd level indirect blocks, filling 3rd level indirect blocks, fill "
         "first row of 3rd level indirect blocks in 4th level indirect block except last 3rd level block, "
         "fill direct blocks in 3rd level block, and skip row of 2nd indirect blocks of 4th level indirect "
-        "block's 3rd level indirect block, then backfill and extend, then remove all objects %s";
+        "block's 3rd level indirect block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -11922,7 +11896,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
         "first row of 4th level indirect blocks, except last one, fill first row of 3rd level indirect "
         "blocks in last 4th level indirect block except last 3rd level block, fill direct blocks in 3rd "
         "level block, and skip row of 2nd indirect blocks of 4th level indirect block's 3rd level indirect "
-        "block, then backfill and extend, then remove all objects %s";
+        "block, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -12143,7 +12117,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           u;                            /* Local index variables */
     /* Test description */
-    const char *base_desc = "fragmenting small blocks, then backfill and extend, then remove all objects %s";
+    const char *base_desc = "fragmenting small blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -12275,7 +12249,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           u, v;                         /* Local index variables */
     /* Test description */
-    const char *base_desc = "fragmenting direct blocks, then backfill and extend, then remove all objects %s";
+    const char *base_desc = "fragmenting direct blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -12449,7 +12423,7 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     unsigned           u, v;       /* Local index variables */
     /* Test description */
     const char *base_desc = "fill root direct blocks, then fragment 2nd level indirect block's direct "
-                            "blocks, then backfill and extend, then remove all objects %s";
+                            "blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -12561,7 +12535,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     /* Test description */
     const char *base_desc =
         "fill root direct blocks and 2nd level indirect blocks, then fragment 3rd level indirect block's "
-        "direct blocks, then backfill and extend, then remove all objects %s";
+        "direct blocks, then backfill and extend, then remove all objects";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, &fill_size) < 0)
@@ -12675,7 +12649,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert one huge object, then remove %s";
+    const char *base_desc = "insert one huge object, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -12826,7 +12800,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert two huge objects, then remove %s";
+    const char *base_desc = "insert two huge objects, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -13057,7 +13031,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert three huge objects, then remove %s";
+    const char *base_desc = "insert three huge objects, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -13364,7 +13338,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert mix of normal & huge objects, then remove %s";
+    const char *base_desc = "insert mix of normal & huge objects, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -13785,10 +13759,10 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           deflate_level;                /* Deflation level */
     size_t             old_actual_id_len = 0;        /* Old actual ID length */
-    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly acccessed? */
+    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly accessed? */
     hbool_t            pline_init = FALSE;           /* Whether the I/O pipeline has been initialized */
     /* Test description */
-    const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";
+    const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
     HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
@@ -13996,7 +13970,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert one tiny object, then remove %s";
+    const char *base_desc = "insert one tiny object, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -14147,7 +14121,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert two tiny objects, then remove %s";
+    const char *base_desc = "insert two tiny objects, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -14383,7 +14357,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     unsigned char      obj_type;                     /* Type of storage for object */
     fheap_heap_state_t state;                        /* State of fractal heap */
     /* Test description */
-    const char *base_desc = "insert mix of normal, huge & tiny objects, then remove %s";
+    const char *base_desc = "insert mix of normal, huge & tiny objects, then remove";
 
     /* Perform common test initialization operations */
     if (begin_test(tparam, base_desc, &keep_ids, NULL) < 0)
@@ -14984,7 +14958,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     fheap_heap_state_t state;                /* State of fractal heap */
     unsigned           deflate_level;        /* Deflation level */
     /* Test description */
-    const char *base_desc = "insert one 'managed' object into heap with I/O filters, then remove %s";
+    const char *base_desc = "insert one 'managed' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
     HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
@@ -15158,7 +15132,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     fheap_heap_state_t state;                 /* State of fractal heap */
     unsigned           deflate_level;         /* Deflation level */
     /* Test description */
-    const char *base_desc = "insert two 'managed' objects into heap with I/O filters, then remove %s";
+    const char *base_desc = "insert two 'managed' objects into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
     HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
@@ -16361,15 +16335,15 @@ main(void)
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
     const char *envval;        /* Environment variable */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
+    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
-    /* Current VFD that does not support contigous address space */
+    /* Current VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Reset library */

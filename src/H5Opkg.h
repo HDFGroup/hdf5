@@ -378,7 +378,7 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t *  oh;      /* Object header for this chunk */
     unsigned chunkno; /* Chunk number for this chunk */
 
-    /* Flush depencency parent information (not stored)
+    /* Flush dependency parent information (not stored)
      *
      * The following field is used to store a pointer
      * to the in-core representation of a new chunk proxy's flush dependency
@@ -551,7 +551,7 @@ H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_ty
                          H5O_iterate2_t op, void *op_data, unsigned fields);
 H5_DLL herr_t H5O__inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O__dec_rc(H5O_t *oh);
-H5_DLL herr_t H5O__free(H5O_t *oh);
+H5_DLL herr_t H5O__free(H5O_t *oh, hbool_t force);
 
 /* Object header message routines */
 H5_DLL herr_t   H5O__msg_alloc(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, unsigned *mesg_flags,

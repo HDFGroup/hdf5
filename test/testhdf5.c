@@ -45,7 +45,6 @@ main(int argc, char *argv[])
     AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL);
     AddTest("metadata", test_metadata, cleanup_metadata, "Encoding/decoding metadata", NULL);
     AddTest("checksum", test_checksum, cleanup_checksum, "Checksum algorithm", NULL);
-    AddTest("heap", test_heap, NULL, "Memory Heaps", NULL);
     AddTest("skiplist", test_skiplist, NULL, "Skip Lists", NULL);
     AddTest("refstr", test_refstr, NULL, "Reference Counted Strings", NULL);
     AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL);
@@ -81,7 +80,7 @@ main(int argc, char *argv[])
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !HDgetenv("HDF5_NOCLEANUP"))
+    if (GetTestCleanup() && !HDgetenv(HDF5_NOCLEANUP))
         TestCleanup();
 
     /* Release test infrastructure */

@@ -482,7 +482,7 @@ done:
  *        transfer property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -543,7 +543,7 @@ done:
  *              transfer property list.  The FLAGS argument specifies certain
  *              general properties of the filter and is documented below.
  *              The CD_VALUES is an array of CD_NELMTS integers which are
- *              auxiliary data for the filter.  The integer vlues will be
+ *              auxiliary data for the filter.  The integer values will be
  *              stored in the dataset object header as part of the filter
  *              information.
  *
@@ -609,7 +609,7 @@ done:
  *        creation property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -671,7 +671,7 @@ done:
  *        creation property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -782,7 +782,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The IDX
+ *      field containing encode/decode flags from H5Zpublic.h.  The IDX
  *      should be a value between zero and N-1 as described for
  *      H5Pget_nfilters() and the function will return failure if the
  *      filter number is out of range.
@@ -867,7 +867,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The ID
+ *      field containing encode/decode flags from H5Zpublic.h.  The ID
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
@@ -916,7 +916,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The ID
+ *      field containing encode/decode flags from H5Zpublic.h.  The ID
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
@@ -940,6 +940,8 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE8("e", "iZfx*zxzxx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
@@ -1838,6 +1840,8 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE7("e", "iZfx*zxzx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so

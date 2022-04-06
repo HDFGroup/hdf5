@@ -223,7 +223,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 
     /* Check whether standard or BIGIO processing will be employeed */
     if (bigio_count >= num_points) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
         /* Create an MPI datatype for the whole point selection */
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed_block((int)num_points, 1, disp, elmt_type, new_type)))
@@ -284,7 +284,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 #endif
 
         for (i = 0; i < num_big_types; i++) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)bigio_count, 1,
                                                                           &disp[(hsize_t)i * bigio_count],
                                                                           elmt_type, &inner_types[i])))
@@ -300,7 +300,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
         } /* end for*/
 
         if (remaining_points) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(
                                     remaining_points, 1, &disp[(hsize_t)num_big_types * bigio_count],
                                     elmt_type, &inner_types[num_big_types])))
@@ -1145,7 +1145,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
         /* If this is the fastest changing dimension, it is the base case for derived datatype. */
         span = spans->head;
         if (NULL == span->down) {
-            hbool_t large_block = FALSE; /* Wether the block length is larger than 32 bit integer */
+            hbool_t large_block = FALSE; /* Whether the block length is larger than 32 bit integer */
 
             outercount = 0;
             while (span) {

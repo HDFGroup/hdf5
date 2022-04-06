@@ -74,7 +74,7 @@ typedef union H5VL_native_attr_optional_args_t {
 #define H5VL_NATIVE_DATASET_CHUNK_WRITE             7  /* H5Dchunk_write               */
 #define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8  /* H5Dvlen_get_buf_size         */
 #define H5VL_NATIVE_DATASET_GET_OFFSET              9  /* H5Dget_offset                */
-#define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /* H5Dget_offset                */
+#define H5VL_NATIVE_DATASET_CHUNK_ITER              10 /* H5Dchunk_iter                */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */
@@ -208,8 +208,8 @@ typedef union H5VL_native_dataset_optional_args_t {
 #ifdef H5_HAVE_PARALLEL
 #define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY 26 /* H5Fget_mpi_atomicity                 */
 #define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY 27 /* H5Fset_mpi_atomicity                 */
-#endif                                        /* H5_HAVE_PARALLEL */
-#define H5VL_NATIVE_FILE_POST_OPEN 28         /* Adjust file after open, with wrapping context */
+#endif
+#define H5VL_NATIVE_FILE_POST_OPEN 28 /* Adjust file after open, with wrapping context */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */

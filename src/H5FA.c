@@ -64,9 +64,6 @@ static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Fixed array client ID to class mapping */
 
 /* Remember to add client ID to H5FA_cls_id_t in H5FAprivate.h when adding a new
@@ -95,7 +92,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
 /*-------------------------------------------------------------------------
  * Function:	H5FA__new
  *
- * Purpose:	Allocate and initialize a new fixe array wrapper in memory
+ * Purpose:	Allocate and initialize a new fixed array wrapper in memory
  *
  * Return:	Pointer to farray wrapper success
  *              NULL on failure

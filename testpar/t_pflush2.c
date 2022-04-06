@@ -43,7 +43,7 @@ static int data_g[100][100];
  *-------------------------------------------------------------------------
  */
 static herr_t
-check_test_file(char *name, hid_t fapl_id)
+check_test_file(char *name, size_t name_length, hid_t fapl_id)
 {
     hid_t   fid           = H5I_INVALID_HID;
     hid_t   sid           = H5I_INVALID_HID;
@@ -89,7 +89,7 @@ check_test_file(char *name, hid_t fapl_id)
     if ((top_level_gid = H5Gopen2(fid, "some_groups", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsprintf(name, "grp%02u", (unsigned)i);
+        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gopen2(top_level_gid, name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -157,7 +157,7 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part2 with flush)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
@@ -167,7 +167,7 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_FAILURE);
+        HDexit(EXIT_SUCCESS);
     }
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -182,7 +182,7 @@ main(int argc, char *argv[])
 
     /* Check the case where the file was flushed */
     h5_fixname(FILENAME[0], fapl_id1, name, sizeof(name));
-    if (check_test_file(name, fapl_id1)) {
+    if (check_test_file(name, sizeof(name), fapl_id1)) {
         H5_FAILED()
         goto error;
     }
@@ -199,7 +199,7 @@ main(int argc, char *argv[])
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
-    if (check_test_file(name, fapl_id2)) {
+    if (check_test_file(name, sizeof(name), fapl_id2)) {
         if (mpi_rank == 0)
             PASSED();
     }

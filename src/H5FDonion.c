@@ -29,8 +29,7 @@
 #include "H5Iprivate.h"     /* IDs                         */
 #include "H5MMprivate.h"    /* Memory management           */
 
-/* The driver identification number, initialized at runtime
- */
+/* The driver identification number, initialized at runtime */
 static hid_t H5FD_ONION_g = 0;
 
 /******************************************************************************
@@ -171,6 +170,8 @@ static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsi
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_onion_g = {
+    H5FD_CLASS_VERSION,             /* struct version       */
+    H5FD_ONION_VALUE,               /* value                */
     "onion",                        /* name                 */
     MAXADDR,                        /* maxaddr              */
     H5F_CLOSE_WEAK,                 /* fc_degree            */
@@ -198,37 +199,18 @@ static const H5FD_class_t H5FD_onion_g = {
     NULL,                           /* get_handle           */
     H5FD__onion_read,               /* read                 */
     H5FD__onion_write,              /* write                */
+    NULL,                           /* read_vector          */
+    NULL,                           /* write_vector         */
+    NULL,                           /* read_selection       */
+    NULL,                           /* write_selection      */
     NULL,                           /* flush                */
     NULL,                           /* truncate             */
     NULL,                           /* lock                 */
     NULL,                           /* unlock               */
-    NULL,                           /* del */
+    NULL,                           /* del                  */
+    NULL,                           /* ctl                  */
     H5FD_FLMAP_DICHOTOMY            /* fl_map               */
 };
-
-/*-----------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_onion_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize Onion VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5FD__init_package() */
 
 /*-----------------------------------------------------------------------------
  * Function:    H5FD_onion_init
@@ -246,7 +228,7 @@ H5FD_onion_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_ONION_g))
         H5FD_ONION_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), FALSE);
@@ -254,9 +236,7 @@ H5FD_onion_init(void)
     /* Set return value */
     ret_value = H5FD_ONION_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_onion_init() */
 
 /*-----------------------------------------------------------------------------
@@ -271,7 +251,7 @@ done:
 static herr_t
 H5FD__onion_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_STATIC_NOERR
 
     /* Reset VFL ID */
     H5FD_ONION_g = 0;
@@ -368,7 +348,7 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid backing fapl id")
     }
 
-    ret_value = H5P_set_driver(plist, H5FD_ONION, (const void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_ONION, (const void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

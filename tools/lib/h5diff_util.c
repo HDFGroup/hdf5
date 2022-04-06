@@ -39,11 +39,11 @@ print_dimensions(int rank, hsize_t *dims)
         else {
             parallel_print("[");
             for (i = 0; i < rank - 1; i++) {
-                parallel_print(HSIZE_T_FORMAT, dims[i]);
+                parallel_print("%" PRIuHSIZE, dims[i]);
                 parallel_print("x");
             }
 
-            parallel_print(HSIZE_T_FORMAT, dims[rank - 1]);
+            parallel_print("%" PRIuHSIZE, dims[rank - 1]);
             parallel_print("]");
         }
     }
@@ -133,10 +133,8 @@ print_type(hid_t type)
                 parallel_print("H5T_NATIVE_FLOAT");
             else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
                 parallel_print("H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
             else if (H5Tequal(type, H5T_NATIVE_LDOUBLE))
                 parallel_print("H5T_NATIVE_LDOUBLE");
-#endif
             else
                 parallel_print("undefined float");
             break;

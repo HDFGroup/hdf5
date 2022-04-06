@@ -150,8 +150,8 @@ error:
 static herr_t
 test_multiple_registration(void)
 {
-    htri_t is_registered = FAIL;
-    hid_t  vol_ids[N_REGISTRATIONS];
+    htri_t is_registered            = FAIL;
+    hid_t  vol_ids[N_REGISTRATIONS] = {0};
     int    i;
 
     TESTING("registering a VOL connector multiple times");

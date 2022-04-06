@@ -2217,8 +2217,10 @@ test_array(void)
 
     test_array_bkg(); /* Read compound datatype with array fields and background fields read  */
 
-    /* This test uses a custom file */
-    test_compat(); /* Test compatibility changes for compound datatype fields              */
+    if (!h5_driver_uses_modified_filename()) {
+        /* This test uses a custom file */
+        test_compat(); /* Test compatibility changes for compound datatype fields              */
+    }
 
 } /* end test_array() */
 

@@ -123,7 +123,7 @@
 #endif
 
 /* Define an internal macro for converting unsigned long long to long double.  SGI compilers give
- * some incorect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
+ * some incorrect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
  * not support unsigned long long.  For FreeBSD(sleipnir), the last 2 bytes of mantissa are lost when
  * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly.
  * Mac OS 10.4 gives some incorrect result. */
@@ -401,9 +401,7 @@ H5_DLLVAR size_t H5T_NATIVE_LONG_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_LLONG_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 H5_DLLVAR size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
-#endif
 
 H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
@@ -429,9 +427,7 @@ H5_DLLVAR size_t H5T_NATIVE_LLONG_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_ULLONG_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_FLOAT_ALIGN_g;
 H5_DLLVAR size_t H5T_NATIVE_DOUBLE_ALIGN_g;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 H5_DLLVAR size_t H5T_NATIVE_LDOUBLE_ALIGN_g;
-#endif
 
 /* C9x alignment constraints */
 H5_DLLVAR size_t H5T_NATIVE_INT8_ALIGN_g;
@@ -468,10 +464,8 @@ H5_DLLVAR float  H5T_NATIVE_FLOAT_POS_INF_g;
 H5_DLLVAR float  H5T_NATIVE_FLOAT_NEG_INF_g;
 H5_DLLVAR double H5T_NATIVE_DOUBLE_POS_INF_g;
 H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
-#if H5_SIZEOF_LONG_DOUBLE != 0
 H5_DLLVAR double H5T_NATIVE_LDOUBLE_POS_INF_g;
 H5_DLLVAR double H5T_NATIVE_LDOUBLE_NEG_INF_g;
-#endif
 
 /* Declare extern the free lists for H5T_t's and H5T_shared_t's */
 H5FL_EXTERN(H5T_t);

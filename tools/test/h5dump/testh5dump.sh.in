@@ -1180,7 +1180,7 @@ TOOLTEST tcomp-1.ddl --enable-error-stack tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5
-# test for unamed type
+# test for unnamed type
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5

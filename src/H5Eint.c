@@ -930,7 +930,7 @@ H5E_dump_api_stack(hbool_t is_api)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Only dump the error stack during an API call */
     if (is_api) {
@@ -953,6 +953,5 @@ H5E_dump_api_stack(hbool_t is_api)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }  /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */

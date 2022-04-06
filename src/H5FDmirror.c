@@ -160,6 +160,8 @@ static herr_t  H5FD__mirror_unlock(H5FD_t *_file);
 static herr_t H5FD__mirror_verify_reply(H5FD_mirror_t *file);
 
 static const H5FD_class_t H5FD_mirror_g = {
+    H5FD_CLASS_VERSION,     /* struct version       */
+    H5FD_MIRROR_VALUE,      /* value                */
     "mirror",               /* name                 */
     MAXADDR,                /* maxaddr              */
     H5F_CLOSE_WEAK,         /* fc_degree            */
@@ -187,11 +189,16 @@ static const H5FD_class_t H5FD_mirror_g = {
     NULL,                   /* get_handle           */
     H5FD__mirror_read,      /* read                 */
     H5FD__mirror_write,     /* write                */
+    NULL,                   /* read_vector          */
+    NULL,                   /* write_vector         */
+    NULL,                   /* read_selection       */
+    NULL,                   /* write_selection      */
     NULL,                   /* flush                */
     H5FD__mirror_truncate,  /* truncate             */
     H5FD__mirror_lock,      /* lock                 */
     H5FD__mirror_unlock,    /* unlock               */
     NULL,                   /* del                  */
+    NULL,                   /* ctl                  */
     H5FD_FLMAP_DICHOTOMY    /* fl_map               */
 };
 
@@ -203,30 +210,6 @@ H5FL_DEFINE_STATIC(H5FD_mirror_t);
 
 /* Declare a free list to manage the H5FD_mirror_xmit_open_t struct */
 H5FL_DEFINE_STATIC(H5FD_mirror_xmit_open_t);
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    LOG_OP_CALL(__func__);
-
-    if (H5FD_mirror_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize mirror VFD");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
 
 /* -------------------------------------------------------------------------
  * Function:    H5FD_mirror_init
@@ -247,9 +230,11 @@ H5FD_mirror_init(void)
 
     LOG_OP_CALL(__func__);
 
-    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g))
+    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g)) {
         H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), FALSE);
-
+        if (H5I_INVALID_HID == H5FD_MIRROR_g)
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register mirror");
+    }
     ret_value = H5FD_MIRROR_g;
 
 done:
@@ -1167,7 +1152,7 @@ done:
 /* -------------------------------------------------------------------------
  * Function:    H5FD__mirror_fapl_get
  *
- * Purpose:     Get the file access propety list which could be used to create
+ * Purpose:     Get the file access property list which could be used to create
  *              an identical file.
  *
  * Return:      Success: pointer to the new file access property list value.
@@ -1335,7 +1320,7 @@ H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa)
     if (H5FD_MIRROR_CURR_FAPL_T_VERSION != fa->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown fapl_t version");
 
-    ret_value = H5P_set_driver(plist, H5FD_MIRROR, (const void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_MIRROR, (const void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

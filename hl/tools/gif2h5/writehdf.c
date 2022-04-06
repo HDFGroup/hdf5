@@ -27,7 +27,7 @@
  * Programmer: Unknown
  *
  * Modifications:  pvn
- *   Use the HDF5 IMAGE API to write the HDF5 image and pallete
+ *   Use the HDF5 IMAGE API to write the HDF5 image and palette
  *
  * Date: January, 31, 2006
  *
@@ -68,7 +68,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
 #endif /* UNUSED */
 
     if ((file_id = H5Fcreate(HDFName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        /* error occured opening the HDF File for write */
+        /* error occurred opening the HDF File for write */
         fprintf(stderr, "HDF file could not be opened for writing\n");
         fprintf(stderr,
                 "NOTE: GIF file must be present in the same directory as the binary on UNIX systems.\n");
@@ -100,7 +100,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
         dims[1] = gifImageDesc->ImageWidth;
 
         /* create the image name */
-        sprintf(ImageName, "Image%d", i);
+        snprintf(ImageName, sizeof(ImageName), "Image%d", i);
 
         /* write image */
         if (H5IMmake_image_8bit(file_id, ImageName, dims[1], dims[0], (gifImageDesc->Image)) < 0)

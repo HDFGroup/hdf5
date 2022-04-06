@@ -137,10 +137,15 @@ static int test_attach_detach(void);
 #define DIM0_LABEL "Latitude"
 #define DIM1_LABEL "Longitude"
 
+#ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
+#define FOREIGN_FILE1 "test_ds_le_new_ref.h5"
+#define FOREIGN_FILE2 "test_ds_be_new_ref.h5"
+#else
 #define FOREIGN_FILE1 "test_ds_le.h5"
 #define FOREIGN_FILE2 "test_ds_be.h5"
-#define FILENAME      "test_ds"
-#define FILEEXT       ".h5"
+#endif
+#define FILENAME "test_ds"
+#define FILEEXT  ".h5"
 
 #define FILE1 "test_ds3.h5"
 #define FILE2 "test_ds4.h5"
@@ -161,10 +166,15 @@ static int test_attach_detach(void);
 int
 main(void)
 {
-    int nerrors = 0;
+    hid_t file_id = H5I_INVALID_HID;
+    int   nerrors = 0;
 
     /* create file to be used in following tests */
-    if (create_test_file("1") < 0) {
+    if ((file_id = create_test_file("1")) < 0) {
+        nerrors = 1;
+        goto error;
+    }
+    if (H5Fclose(file_id) < 0) {
         nerrors = 1;
         goto error;
     }
@@ -179,7 +189,11 @@ main(void)
     nerrors += test_long_scalenames("1") < 0 ? 1 : 0;
     nerrors += test_float_scalenames("1") < 0 ? 1 : 0;
     nerrors += test_numberofscales("1") < 0 ? 1 : 0;
-    if (create_test_file("2") < 0) {
+    if ((file_id = create_test_file("2")) < 0) {
+        nerrors = 1;
+        goto error;
+    }
+    if (H5Fclose(file_id) < 0) {
         nerrors = 1;
         goto error;
     }
@@ -254,10 +268,9 @@ open_test_file(const char *fileext)
 herr_t
 create_char_dataset(hid_t fid, const char *dsidx, int fulldims)
 {
-    int     rank    = 3;
-    int     rankds  = 1;
-    hsize_t dims[3] = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE};
-    char    buf[DIM1_SIZE * DIM2_SIZE * DIM3_SIZE];
+    int     rank                = 3;
+    int     rankds              = 1;
+    hsize_t dims[3]             = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE};
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     hsize_t s3_dim[1]           = {DIM3_SIZE};
@@ -275,7 +288,7 @@ create_char_dataset(hid_t fid, const char *dsidx, int fulldims)
     HDsnprintf(name, sizeof(name), "%s%s", DATASET_NAME, dsidx);
 
     /* make a dataset */
-    if (H5LTmake_dataset_char(fid, name, rank, dims, buf) >= 0) {
+    if (H5LTmake_dataset_char(fid, name, rank, dims, NULL) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_char_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
@@ -309,10 +322,9 @@ create_char_dataset(hid_t fid, const char *dsidx, int fulldims)
 herr_t
 create_short_dataset(hid_t fid, const char *dsidx, int fulldims)
 {
-    int     rank    = 3;
-    int     rankds  = 1;
-    hsize_t dims[3] = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE};
-    short   buf[DIM1_SIZE * DIM2_SIZE * DIM3_SIZE];
+    int     rank                = 3;
+    int     rankds              = 1;
+    hsize_t dims[3]             = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE};
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     hsize_t s3_dim[1]           = {DIM3_SIZE};
@@ -330,7 +342,7 @@ create_short_dataset(hid_t fid, const char *dsidx, int fulldims)
     HDsnprintf(name, sizeof(name), "%s%s", DATASET_NAME, dsidx);
 
     /* make a dataset */
-    if (H5LTmake_dataset_short(fid, name, rank, dims, buf) >= 0) {
+    if (H5LTmake_dataset_short(fid, name, rank, dims, NULL) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_short_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
@@ -364,10 +376,9 @@ create_short_dataset(hid_t fid, const char *dsidx, int fulldims)
 herr_t
 create_int_dataset(hid_t fid, const char *dsidx, int fulldims)
 {
-    int     rank       = RANK;
-    int     rankds     = 1;
-    hsize_t dims[RANK] = {DIM1_SIZE, DIM2_SIZE};
-    int     buf[DIM1_SIZE * DIM2_SIZE];
+    int     rank                = RANK;
+    int     rankds              = 1;
+    hsize_t dims[RANK]          = {DIM1_SIZE, DIM2_SIZE};
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     int     s1_wbuf[DIM1_SIZE]  = {10, 20, 30};
@@ -380,7 +391,7 @@ create_int_dataset(hid_t fid, const char *dsidx, int fulldims)
     HDsnprintf(name, sizeof(name), "%s%s", DATASET_NAME, dsidx);
 
     /* make a dataset */
-    if (H5LTmake_dataset_int(fid, name, rank, dims, buf) >= 0) {
+    if (H5LTmake_dataset_int(fid, name, rank, dims, NULL) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_int_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
@@ -409,7 +420,6 @@ create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldi
     int     rank                = 4;
     int     rankds              = 1;
     hsize_t dims[4]             = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE, DIM4_SIZE};
-    long *  buf                 = NULL;
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     hsize_t s3_dim[1]           = {DIM3_SIZE};
@@ -429,12 +439,8 @@ create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldi
     long    s43_wbuf[DIM4_SIZE] = {180, 180};
     long    s44_wbuf[DIM4_SIZE] = {280, 280};
 
-    /* Allocate buffer */
-    if (NULL == (buf = (long *)HDmalloc(sizeof(long) * DIM1_SIZE * DIM2_SIZE * DIM3_SIZE * DIM4_SIZE)))
-        goto error;
-
     /* make a dataset */
-    if (H5LTmake_dataset_long(fid, dsname, rank, dims, buf) >= 0) {
+    if (H5LTmake_dataset_long(fid, dsname, rank, dims, NULL) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
@@ -471,23 +477,18 @@ create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldi
     else
         goto error;
 
-    HDfree(buf);
-
     return SUCCEED;
 
 error:
-    HDfree(buf);
-
     return FAIL;
 }
 
 herr_t
 create_float_dataset(hid_t fid, const char *dsidx, int fulldims)
 {
-    int     rank       = RANK;
-    int     rankds     = 1;
-    hsize_t dims[RANK] = {DIM1_SIZE, DIM2_SIZE};
-    float   buf[DIM1_SIZE * DIM2_SIZE];
+    int     rank                = RANK;
+    int     rankds              = 1;
+    hsize_t dims[RANK]          = {DIM1_SIZE, DIM2_SIZE};
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     float   s1_wbuf[DIM1_SIZE]  = {10, 20, 30};
@@ -500,7 +501,7 @@ create_float_dataset(hid_t fid, const char *dsidx, int fulldims)
     HDsnprintf(name, sizeof(name), "%s%s", DATASET_NAME, dsidx);
 
     /* make a dataset */
-    if (H5LTmake_dataset_float(fid, name, rank, dims, buf) >= 0) {
+    if (H5LTmake_dataset_float(fid, name, rank, dims, NULL) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_float_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
@@ -3020,7 +3021,7 @@ test_simple(void)
     }
 
     /*-------------------------------------------------------------------------
-     * dettach for DIM0
+     * detach for DIM0
      *-------------------------------------------------------------------------
      */
 
@@ -3318,11 +3319,11 @@ test_simple(void)
         goto out;
     dim = 0;
 
-    /* iterate trough the 1st dimension of "dset_a" and verify that its DS is valid  */
+    /* iterate through the 1st dimension of "dset_a" and verify that its DS is valid  */
     if (H5DSiterate_scales(did, dim, NULL, verify_scale, NULL) < 0)
         goto out;
 
-    /* iterate trough the 2nd dimension of "dset_a" and verify that its DS is valid
+    /* iterate through the 2nd dimension of "dset_a" and verify that its DS is valid
     start at DS index 2 */
     dim       = 1;
     scale_idx = 2;
@@ -3343,11 +3344,11 @@ test_simple(void)
         goto out;
     dim = 0;
 
-    /* iterate trough the 1st dimension of "dset_a" and read the DS  */
+    /* iterate through the 1st dimension of "dset_a" and read the DS  */
     if (H5DSiterate_scales(did, dim, NULL, read_scale, s1_wbuf) < 0)
         goto out;
 
-    /* iterate trough the 2nd dimension of "dset_a" and read the DS
+    /* iterate through the 2nd dimension of "dset_a" and read the DS
     start at DS index 2 */
     dim       = 1;
     scale_idx = 2;
@@ -3380,9 +3381,9 @@ test_simple(void)
         goto out;
     {
         int match_size; /* does this scale size matches the dataset DIM size */
-        int idx = 0;    /* scale index to start iterating, on return, index where iterator stoped */
+        int idx = 0;    /* scale index to start iterating, on return, index where iterator stopped */
 
-        /* iterate trough all the dimensions  */
+        /* iterate through all the dimensions  */
         for (dim = 0; dim < (unsigned)rank; dim++) {
             if ((match_size = H5DSiterate_scales(did, dim, &idx, match_dim_scale, NULL)) < 0)
                 goto out;
@@ -3474,9 +3475,9 @@ test_simple(void)
         goto out;
     {
         int match_size; /* does this scale size matches the dataset DIM size */
-        int idx;        /* scale index to start iterating, on return, index where iterator stoped */
+        int idx;        /* scale index to start iterating, on return, index where iterator stopped */
 
-        /* iterate trough all the dimensions  */
+        /* iterate through all the dimensions  */
         for (dim = 0; dim < (unsigned)rank; dim++) {
             /* always start at 1st scale */
             idx = 0;
@@ -4024,7 +4025,7 @@ test_errors(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * try to attach a scale to an image, pallete or table
+     * try to attach a scale to an image, palette or table
      *-------------------------------------------------------------------------
      */
 
@@ -4035,7 +4036,7 @@ test_errors(void)
         goto out;
 
     /* make a palette */
-    if (H5IMmake_palette(fid, "pallete", pal_dims, NULL) < 0)
+    if (H5IMmake_palette(fid, "palette", pal_dims, NULL) < 0)
         goto out;
 
     /* open the previous written "ds_b" */
@@ -4247,7 +4248,7 @@ test_iterators(void)
     if ((did = H5Dopen2(fid, "dset_a", H5P_DEFAULT)) < 0)
         goto out;
 
-    /* try to iterate trough the 1st dimension of "dset_a", return error */
+    /* try to iterate through the 1st dimension of "dset_a", return error */
     if (H5DSiterate_scales(did, 0, NULL, verify_scale, NULL) < 0)
         goto out;
 
@@ -4268,7 +4269,7 @@ test_iterators(void)
     if ((did = H5Dopen2(fid, "dset_a", H5P_DEFAULT)) < 0)
         goto out;
 
-    /* try to iterate trough the 3rd dimension of "dset_a", return error */
+    /* try to iterate through the 3rd dimension of "dset_a", return error */
     if (H5DSiterate_scales(did, 3, NULL, verify_scale, NULL) == SUCCEED)
         goto out;
 
@@ -4305,7 +4306,7 @@ test_iterators(void)
             goto out;
     }
 
-    /* iterate trough the 1st dimension of "dset_a" */
+    /* iterate through the 1st dimension of "dset_a" */
     if (H5DSiterate_scales(did, 0, NULL, op_continue, NULL) < 0)
         goto out;
 
