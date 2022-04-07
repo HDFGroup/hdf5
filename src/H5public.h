@@ -71,13 +71,6 @@
 #endif
 #endif
 
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Macros for enabling/disabling particular GCC warnings */
 /* (see the following web-sites for more info:
  *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
@@ -484,6 +477,13 @@ typedef struct H5_alloc_stats_t {
     size_t             curr_alloc_blocks_count;  /**< Current # of blocks allocated */
     size_t             peak_alloc_blocks_count;  /**< Peak # of blocks allocated */
 } H5_alloc_stats_t;
+
+/* API adapter header (defines H5_DLL, etc.) */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5.c */
 /**
