@@ -165,6 +165,12 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "     -h,   --help         Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream, "     -V,   --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Error Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          Optional value 2 also prints file open errors.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Default setting disables any error reporting.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -n,   --contents     Print a list of the file contents and exit\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 1 also prints attributes.\n");
@@ -253,10 +259,6 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
     PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "     --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                          Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
     PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
@@ -828,7 +830,7 @@ free_handler(struct handler_t *hand, int len)
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     struct handler_t *hand      = NULL;
     struct handler_t *last_dset = NULL;
@@ -1329,7 +1331,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t             fid     = H5I_INVALID_HID;
     hid_t             gid     = H5I_INVALID_HID;
@@ -1349,7 +1351,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    if ((hand = parse_command_line(argc, argv)) == NULL) {
+    if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;
     }
 

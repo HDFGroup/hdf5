@@ -176,6 +176,7 @@ static herr_t  H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
+    H5FD_CLASS_VERSION,        /* struct version       */
     H5_VFD_MULTI,              /* value             */
     "multi",                   /* name              */
     HADDR_MAX,                 /* maxaddr           */
@@ -204,6 +205,10 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_handle,     /* get_handle        */
     H5FD_multi_read,           /* read              */
     H5FD_multi_write,          /* write             */
+    NULL,                      /*read_vector        */
+    NULL,                      /*write_vector       */
+    NULL,                      /* read_selection    */
+    NULL,                      /* write_selection   */
     H5FD_multi_flush,          /* flush             */
     H5FD_multi_truncate,       /* truncate          */
     H5FD_multi_lock,           /* lock              */
@@ -517,7 +522,7 @@ H5FD_split_populate_config(const char *meta_ext, hid_t meta_plist_id, const char
             meta_name_g[sizeof(meta_name_g) - 1] = '\0';
         }
         else
-            sprintf(meta_name_g, "%%s%s", meta_ext);
+            snprintf(meta_name_g, sizeof(meta_name_g), "%%s%s", meta_ext);
     }
     else {
         strncpy(meta_name_g, "%s.meta", sizeof(meta_name_g));
@@ -535,7 +540,7 @@ H5FD_split_populate_config(const char *meta_ext, hid_t meta_plist_id, const char
             raw_name_g[sizeof(raw_name_g) - 1] = '\0';
         }
         else
-            sprintf(raw_name_g, "%%s%s", raw_ext);
+            snprintf(raw_name_g, sizeof(raw_name_g), "%%s%s", raw_ext);
     }
     else {
         strncpy(raw_name_g, "%s.raw", sizeof(raw_name_g));
@@ -634,7 +639,7 @@ H5FD_multi_populate_config(const H5FD_mem_t *memb_map, const hid_t *memb_fapl, c
     if (!memb_name) {
         assert(strlen(letters) == H5FD_MEM_NTYPES);
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-            sprintf(_memb_name_g[mt], "%%s-%c.h5", letters[mt]);
+            snprintf(_memb_name_g[mt], 16, "%%s-%c.h5", letters[mt]);
             _memb_name_ptrs[mt] = _memb_name_g[mt];
         }
         memb_name = _memb_name_ptrs;

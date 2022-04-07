@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
+static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"version", no_arg, 'V'},
                                           {"report", no_arg, 'r'},
@@ -41,7 +41,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"no-dangling-links", no_arg, 'x'},
                                           {"exclude-path", require_arg, 'E'},
                                           {"exclude-attribute", require_arg, 'A'},
-                                          {"enable-error-stack", no_arg, 'S'},
+                                          {"enable-error-stack", optional_arg, 'S'},
                                           {"vol-value-1", require_arg, '1'},
                                           {"vol-name-1", require_arg, '2'},
                                           {"vol-info-1", require_arg, '3'},
@@ -217,7 +217,7 @@ parse_subset_params(const char *dset)
  */
 
 void
-parse_command_line(int argc, const char *argv[], const char **fname1, const char **fname2,
+parse_command_line(int argc, const char *const *argv, const char **fname1, const char **fname2,
                    const char **objname1, const char **objname2, diff_opt_t *opts)
 {
     int                       i;
@@ -311,7 +311,10 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'S':
-                enable_error_stack = 1;
+                if (H5_optarg != NULL)
+                    enable_error_stack = HDatoi(H5_optarg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case 'E':
@@ -705,6 +708,10 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "  [obj1]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "  [obj2]            Name of an HDF5 object, in absolute path\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  ERROR\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream, "                        Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help\n");
     PRINTVALSTREAM(rawoutstream, "         Print a usage message and exit.\n");
@@ -727,9 +734,6 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "          3 : All level 2 information plus file names.\n");
     PRINTVALSTREAM(rawoutstream, "   -q, --quiet\n");
     PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
-    PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                   Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-value-1           Value (ID) of the VOL connector to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");

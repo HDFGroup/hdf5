@@ -77,7 +77,7 @@ typedef enum H5D_chunk_index_t {
  */
 typedef enum H5D_alloc_time_t {
     H5D_ALLOC_TIME_ERROR   = -1, /**< Error */
-    H5D_ALLOC_TIME_DEFAULT = 0,  /**< \todo Define this! */
+    H5D_ALLOC_TIME_DEFAULT = 0,  /**< Default (layout dependent) */
     H5D_ALLOC_TIME_EARLY   = 1,  /**< Allocate on creation */
     H5D_ALLOC_TIME_LATE    = 2,  /**< Allocate on first write */
     H5D_ALLOC_TIME_INCR    = 3   /**< Allocate incrementally (by chunk) */
@@ -91,9 +91,9 @@ typedef enum H5D_alloc_time_t {
 typedef enum H5D_space_status_t {
     H5D_SPACE_STATUS_ERROR          = -1, /**< Error */
     H5D_SPACE_STATUS_NOT_ALLOCATED  = 0,  /**< Space has not been allocated for this dataset. */
-    H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been allocated for this dataset. */
-    H5D_SPACE_STATUS_ALLOCATED = 2 /**< Space has been partially allocated for this dataset. (Used only for
-                                      datasets with chunked storage.) */
+    H5D_SPACE_STATUS_PART_ALLOCATED = 1,  /**< Space has been partially allocated for this dataset.
+                                               (Used only for datasets with chunked storage.) */
+    H5D_SPACE_STATUS_ALLOCATED = 2        /**< Space has been allocated for this dataset. */
 } H5D_space_status_t;
 //! <!-- [H5D_space_status_t_snip] -->
 
@@ -127,8 +127,8 @@ typedef enum H5D_fill_value_t {
  */
 typedef enum H5D_vds_view_t {
     H5D_VDS_ERROR          = -1, /**< Error */
-    H5D_VDS_FIRST_MISSING  = 0,  /**< \todo Define this! */
-    H5D_VDS_LAST_AVAILABLE = 1   /**< \todo Define this! */
+    H5D_VDS_FIRST_MISSING  = 0,  /**< Include all data before the first missing mapped data */
+    H5D_VDS_LAST_AVAILABLE = 1   /**< Include all available mapped data */
 } H5D_vds_view_t;
 //! <!-- [H5D_vds_view_t_snip] -->
 
@@ -682,8 +682,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
  *
- * \version 1.?.?
- * \todo When was this function introduced?
+ * \since 1.13.0
  *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);

@@ -223,65 +223,63 @@ set (LINUX_LFS 0)
 set (HDF_EXTRA_C_FLAGS)
 set (HDF_EXTRA_FLAGS)
 if (MINGW OR NOT WINDOWS)
-  # Might want to check explicitly for Linux and possibly Cygwin
-  # instead of checking for not Solaris or Darwin.
-  if (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
-  # Linux Specific flags
-  # This was originally defined as _POSIX_SOURCE which was updated to
-  # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
-  # functionality so clock_gettime and CLOCK_MONOTONIC are defined
-  # correctly. This was later updated to 200112L so that
-  # posix_memalign() is visible for the direct VFD code on Linux
-  # systems.
-  # POSIX feature information can be found in the gcc manual at:
-  # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # Linux Specific flags
+    # This was originally defined as _POSIX_SOURCE which was updated to
+    # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
+    # functionality so clock_gettime and CLOCK_MONOTONIC are defined
+    # correctly. This was later updated to 200112L so that
+    # posix_memalign() is visible for the direct VFD code on Linux
+    # systems.
+    # POSIX feature information can be found in the gcc manual at:
+    # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+    set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
-  # Need to add this so that O_DIRECT is visible for the direct
-  # VFD on Linux systems.
-  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
+    # Need to add this so that O_DIRECT is visible for the direct
+    # VFD on Linux systems.
+    set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
 
-  option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
-  if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
-    set (msg "Performing TEST_LFS_WORKS")
-    try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-        COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
-    )
+    option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
+    if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
+      set (msg "Performing TEST_LFS_WORKS")
+      try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
+          ${CMAKE_BINARY_DIR}
+          ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
+          COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
+      )
 
-    # The LARGEFILE definitions were from the transition period
-    # and are probably no longer needed. The FILE_OFFSET_BITS
-    # check should be generalized for all POSIX systems as it
-    # is in the Autotools.
-    if (TEST_LFS_WORKS_COMPILE)
-      if (TEST_LFS_WORKS_RUN MATCHES 0)
-        set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
-        set (LARGEFILE 1)
-        set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... yes")
+      # The LARGEFILE definitions were from the transition period
+      # and are probably no longer needed. The FILE_OFFSET_BITS
+      # check should be generalized for all POSIX systems as it
+      # is in the Autotools.
+      if (TEST_LFS_WORKS_COMPILE)
+        if (TEST_LFS_WORKS_RUN MATCHES 0)
+          set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
+          set (LARGEFILE 1)
+          set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
+          if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+            message (VERBOSE "${msg}... yes")
+          endif ()
+        else ()
+          set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
+          if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+            message (VERBOSE "${msg}... no")
+          endif ()
+          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+                "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
+          )
         endif ()
       else ()
         set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... no")
+            message (VERBOSE "${msg}... no")
         endif ()
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-              "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
+            "Test TEST_LFS_WORKS Compile failed\n"
         )
       endif ()
-    else ()
-      set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... no")
-      endif ()
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Test TEST_LFS_WORKS Compile failed\n"
-      )
     endif ()
-  endif ()
-  set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
+    set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
   endif ()
 endif ()
 

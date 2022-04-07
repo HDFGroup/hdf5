@@ -282,7 +282,7 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        HDsprintf(base_name, "#pio_tmp_%lu", nf);
+        HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
         if (pio_debug_level > 0)
             HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
@@ -420,7 +420,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         /* If the prefix specifies the HDF5_PARAPREFIX directory, then
          * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
          * directory instead. */
-        register char *user, *login, *subdir;
+        char *user, *login, *subdir;
 
         user   = HDgetenv("USER");
         login  = HDgetenv("LOGIN");
@@ -898,7 +898,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                     }     /* end if */
                 }         /* end else */
 
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, h5dcpl);
 
                 if (h5ds_id < 0) {
@@ -1879,7 +1879,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                 break;
 
             case PHDF5:
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DOPEN(fd->h5fd, dname);
                 if (h5ds_id < 0) {
                     HDfprintf(stderr, "HDF5 Dataset open failed\n");

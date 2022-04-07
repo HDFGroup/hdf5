@@ -997,6 +997,9 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
 #endif /* H5_HAVE_PARALLEL */
 
             /* Read the buffer (if serial access, or rank 0 of parallel access) */
+            /* NOTE: if this block read is being performed on rank 0 only, throwing
+             * an error here will cause other ranks to hang in the following MPI_Bcast.
+             */
             if (H5F_block_read(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len,
                                cache_ptr->image_buffer) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read metadata cache image block")

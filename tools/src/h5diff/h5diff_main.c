@@ -65,7 +65,7 @@
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int         ret;
     int         i;
@@ -86,7 +86,7 @@ main(int argc, const char *argv[])
      * process the command-line
      *-------------------------------------------------------------------------
      */
-    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
+    parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
     /* enable error reporting if command line option */
     h5tools_error_report();

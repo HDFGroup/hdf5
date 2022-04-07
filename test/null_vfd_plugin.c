@@ -35,41 +35,46 @@ static herr_t  H5FD_null_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_null_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 
 static const H5FD_class_t H5FD_null_g = {
-    NULL_VFD_VALUE,      /* value        */
-    NULL_VFD_NAME,       /* name         */
-    1,                   /* maxaddr      */
-    H5F_CLOSE_WEAK,      /* fc_degree    */
-    NULL,                /* terminate    */
-    NULL,                /* sb_size      */
-    NULL,                /* sb_encode    */
-    NULL,                /* sb_decode    */
-    0,                   /* fapl_size    */
-    NULL,                /* fapl_get     */
-    NULL,                /* fapl_copy    */
-    NULL,                /* fapl_free    */
-    0,                   /* dxpl_size    */
-    NULL,                /* dxpl_copy    */
-    NULL,                /* dxpl_free    */
-    H5FD_null_open,      /* open         */
-    H5FD_null_close,     /* close        */
-    NULL,                /* cmp          */
-    NULL,                /* query        */
-    NULL,                /* get_type_map */
-    NULL,                /* alloc        */
-    NULL,                /* free         */
-    H5FD_null_get_eoa,   /* get_eoa      */
-    H5FD_null_set_eoa,   /* set_eoa      */
-    H5FD_null_get_eof,   /* get_eof      */
-    NULL,                /* get_handle   */
-    H5FD_null_read,      /* read         */
-    H5FD_null_write,     /* write        */
-    NULL,                /* flush        */
-    NULL,                /* truncate     */
-    NULL,                /* lock         */
-    NULL,                /* unlock       */
-    NULL,                /* del          */
-    NULL,                /* ctl          */
-    H5FD_FLMAP_DICHOTOMY /* fl_map       */
+    H5FD_CLASS_VERSION,  /* struct version  */
+    NULL_VFD_VALUE,      /* value           */
+    NULL_VFD_NAME,       /* name            */
+    1,                   /* maxaddr         */
+    H5F_CLOSE_WEAK,      /* fc_degree       */
+    NULL,                /* terminate       */
+    NULL,                /* sb_size         */
+    NULL,                /* sb_encode       */
+    NULL,                /* sb_decode       */
+    0,                   /* fapl_size       */
+    NULL,                /* fapl_get        */
+    NULL,                /* fapl_copy       */
+    NULL,                /* fapl_free       */
+    0,                   /* dxpl_size       */
+    NULL,                /* dxpl_copy       */
+    NULL,                /* dxpl_free       */
+    H5FD_null_open,      /* open            */
+    H5FD_null_close,     /* close           */
+    NULL,                /* cmp             */
+    NULL,                /* query           */
+    NULL,                /* get_type_map    */
+    NULL,                /* alloc           */
+    NULL,                /* free            */
+    H5FD_null_get_eoa,   /* get_eoa         */
+    H5FD_null_set_eoa,   /* set_eoa         */
+    H5FD_null_get_eof,   /* get_eof         */
+    NULL,                /* get_handle      */
+    H5FD_null_read,      /* read            */
+    H5FD_null_write,     /* write           */
+    NULL,                /* read_vector     */
+    NULL,                /* write_vector    */
+    NULL,                /* read_selection  */
+    NULL,                /* write_selection */
+    NULL,                /* flush           */
+    NULL,                /* truncate        */
+    NULL,                /* lock            */
+    NULL,                /* unlock          */
+    NULL,                /* del             */
+    NULL,                /* ctl             */
+    H5FD_FLMAP_DICHOTOMY /* fl_map          */
 };
 
 static H5FD_t *

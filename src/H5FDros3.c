@@ -237,6 +237,7 @@ static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static const H5FD_class_t H5FD_ros3_g = {
+    H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_ROS3_VALUE,          /* value                */
     "ros3",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
@@ -265,6 +266,10 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_get_handle,    /* get_handle           */
     H5FD__ros3_read,          /* read                 */
     H5FD__ros3_write,         /* write                */
+    NULL,                     /* read_vector          */
+    NULL,                     /* write_vector         */
+    NULL,                     /* read_selection       */
+    NULL,                     /* write_selection      */
     NULL,                     /* flush                */
     H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */
@@ -304,8 +309,12 @@ H5FD_ros3_init(void)
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g))
+    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
         H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_ROS3_g) {
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
+        }
+    }
 
 #if ROS3_STATS
     /* pre-compute statsbin boundaries

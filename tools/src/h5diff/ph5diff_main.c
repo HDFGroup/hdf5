@@ -46,7 +46,7 @@
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     const char *fname1   = NULL;
     const char *fname2   = NULL;
@@ -68,12 +68,12 @@ main(int argc, const char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, (int *)&g_nID);
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
-    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
-
     if (g_nTasks == 1) {
         HDprintf("Only 1 task available...doing serial diff\n");
 
         g_Parallel = 0;
+
+        parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
         h5diff(fname1, fname2, objname1, objname2, &opts);
 
@@ -81,9 +81,26 @@ main(int argc, const char *argv[])
     }
     /* Parallel h5diff */
     else {
-        ph5diff(fname1, fname2, objname1, objname2, &opts);
 
-        print_info(&opts);
+        /* Have the manager process the command-line */
+        if (nID == 0) {
+            parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
+                               &opts);
+
+            h5diff(fname1, fname2, objname1, objname2, &opts);
+
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            print_info(&opts);
+            print_manager_output();
+        }
+        /* All other tasks become workers and wait for assignments. */
+        else {
+            ph5diff_worker(nID);
+
+            MPI_Barrier(MPI_COMM_WORLD);
+        } /* end else */
+
     } /* end else */
 
     MPI_Finalize();

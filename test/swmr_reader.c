@@ -275,7 +275,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     if ((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* Log I/O when verbose output it enbabled */
+    /* Log I/O when verbose output it enabled */
     if (use_log_vfd) {
         char verbose_name[1024];
 
@@ -387,7 +387,7 @@ usage(void)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     long     nseconds     = 0;     /* # of seconds to test */
     int      poll_time    = 1;     /* # of seconds between polling */

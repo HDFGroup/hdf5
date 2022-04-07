@@ -138,6 +138,7 @@ static herr_t  H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flag
                                   void **output);
 
 static const H5FD_class_t H5FD_splitter_g = {
+    H5FD_CLASS_VERSION,           /* struct version       */
     H5FD_SPLITTER_VALUE,          /* value                */
     "splitter",                   /* name                 */
     MAXADDR,                      /* maxaddr              */
@@ -166,6 +167,10 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD__splitter_get_handle,    /* get_handle           */
     H5FD__splitter_read,          /* read                 */
     H5FD__splitter_write,         /* write                */
+    NULL,                         /* read_vector          */
+    NULL,                         /* write_vector         */
+    NULL,                         /* read_selection       */
+    NULL,                         /* write_selection      */
     H5FD__splitter_flush,         /* flush                */
     H5FD__splitter_truncate,      /* truncate             */
     H5FD__splitter_lock,          /* lock                 */
@@ -527,20 +532,20 @@ H5FD__splitter_get_default_wo_path(char *new_path, size_t new_path_len, const ch
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "filename exceeds max length")
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = strstr(base_filename, ".h5"))) {
+    if ((file_extension = HDstrstr(base_filename, ".h5"))) {
         /* Insert the suffix between the filename and ".h5" extension. */
         HDstrcpy(new_path, base_filename);
-        file_extension = strstr(new_path, ".h5");
+        file_extension = HDstrstr(new_path, ".h5");
         HDsprintf(file_extension, "%s%s", suffix, ".h5");
     }
-    else if ((file_extension = strrchr(base_filename, '.'))) {
+    else if ((file_extension = HDstrrchr(base_filename, '.'))) {
         char *new_extension_loc = NULL;
 
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the suffix before that extension.
          */
         HDstrcpy(new_path, base_filename);
-        new_extension_loc = strrchr(new_path, '.');
+        new_extension_loc = HDstrrchr(new_path, '.');
         HDsprintf(new_extension_loc, "%s%s", suffix, file_extension);
     }
     else {
