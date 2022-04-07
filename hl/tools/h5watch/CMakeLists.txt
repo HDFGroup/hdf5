@@ -40,29 +40,6 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
-  #-- Add swmr_check_compat_vfd program
-  set (hl_swmr_check_compat_vfd_SOURCES
-      ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/swmr_check_compat_vfd.c
-  )
-  add_executable (hl_swmr_check_compat_vfd ${hl_swmr_check_compat_vfd_SOURCES})
-  target_compile_options(hl_swmr_check_compat_vfd PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_include_directories (hl_swmr_check_compat_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (NOT ONLY_SHARED_LIBS)
-    TARGET_C_PROPERTIES (hl_swmr_check_compat_vfd STATIC)
-    target_link_libraries (hl_swmr_check_compat_vfd PRIVATE ${HDF5_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (hl_swmr_check_compat_vfd SHARED)
-    target_link_libraries (hl_swmr_check_compat_vfd PRIVATE ${HDF5_LIBSH_TARGET})
-  endif ()
-  set_target_properties (hl_swmr_check_compat_vfd PROPERTIES FOLDER tools/hl)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_HL_TOOLS_H5WATCH_hl_swmr_check_compat_vfd_FORMAT hl_swmr_check_compat_vfd)
-  endif ()
-
   #-- Add extend_dset program
   set (extend_dset_SOURCES
       ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/extend_dset.c

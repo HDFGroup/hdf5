@@ -178,7 +178,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     DataMask = (1 << ((GifHead->PackedField & 0x07) + 1)) - 1;
     Raster   = GifImageDesc->GIFImage;
 
-    /* Check for image seperator */
+    /* Check for image separator */
 
     /* Now read in values from the image descriptor */
     IWidth    = GifImageDesc->ImageWidth;
@@ -193,7 +193,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
      */
 
     /*
-     * Start reading the raster data. First we get the intial code size and
+     * Start reading the raster data. First we get the initial code size and
      * compute decompressor constant values, based on this code size.
      */
 

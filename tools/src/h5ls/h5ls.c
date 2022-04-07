@@ -32,7 +32,7 @@
 
 #define NAME_BUF_SIZE 2048
 /*
- *  Alternative formating for data dumped by H5LS
+ *  Alternative formatting for data dumped by H5LS
  *
  *  This table only affects H5LS output.
  */
@@ -78,9 +78,9 @@ static h5tool_format_t ls_dataformat = {
     ",",  /*elmt_suf1 */
     " ",  /*elmt_suf2 */
 
-    HSIZE_T_FORMAT, /*idx_n_fmt */
-    ",",            /*idx_sep */
-    "(%s)",         /*idx_fmt */
+    "%" PRIuHSIZE, /*idx_n_fmt */
+    ",",           /*idx_sep */
+    "(%s)",        /*idx_fmt */
 
     65535,
     /*line_ncols */ /*standard default columns */
@@ -239,6 +239,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-value     Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-name      Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-info      VFD-specific info to pass to the VFL driver used for\n");
     PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
@@ -936,8 +942,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print members */
         for (i = 0; i < (unsigned)nmembs; i++) {
-            unsigned char *copy;   /* a pointer to value array */
-            int            nchars; /* number of output characters */
+            int nchars; /* number of output characters */
 
             h5tools_str_append(buffer, "\n%*s", ind + 4, "");
             nchars = print_string(buffer, name[i], TRUE);
@@ -951,16 +956,16 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                     h5tools_str_append(buffer, "%02x", value[i * dst_size + j]);
             }
             else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, HSIZE_T_FORMAT, *((unsigned long long *)((void *)copy)));
+                unsigned long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%llu", copy);
             }
             else {
-                /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-                 *strangely, unless use another pointer "copy".*/
-                copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
+                long long copy;
+
+                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                h5tools_str_append(buffer, "%lld", copy);
             }
         }
 
@@ -1179,13 +1184,13 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Print dimensions */
         for (i = 0; i < ndims; i++)
-            h5tools_str_append(buffer, "%s" HSIZE_T_FORMAT, i ? "," : "[", dims[i]);
+            h5tools_str_append(buffer, "%s%" PRIuHSIZE, i ? "," : "[", dims[i]);
         h5tools_str_append(buffer, "]");
 
         HDfree(dims);
     }
     else
-        h5tools_str_append(buffer, " [SCALAR]\n", rawoutstream);
+        h5tools_str_append(buffer, " [SCALAR]\n");
 
     /* Print parent type */
     h5tools_str_append(buffer, " ");
@@ -1695,7 +1700,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", size[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", size[i]);
                     nelmts *= size[i];
                 }
                 h5tools_str_append(&buffer, "}\n");
@@ -1783,12 +1788,12 @@ dataset_list1(hid_t dset)
     ndims      = H5Sget_simple_extent_dims(space, cur_size, max_size);
     h5tools_str_append(&buffer, " {");
     for (i = 0; i < ndims; i++) {
-        h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", cur_size[i]);
+        h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", cur_size[i]);
         if (max_size[i] == H5S_UNLIMITED) {
             h5tools_str_append(&buffer, "/%s", "Inf");
         }
         else if (max_size[i] != cur_size[i] || verbose_g > 0) {
-            h5tools_str_append(&buffer, "/" HSIZE_T_FORMAT, max_size[i]);
+            h5tools_str_append(&buffer, "/%" PRIuHSIZE, max_size[i]);
         }
     }
     if (space_type == H5S_SCALAR)
@@ -1862,10 +1867,10 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
                 total = H5Tget_size(type);
                 for (i = 0; i < ndims; i++) {
-                    h5tools_str_append(&buffer, "%s" HSIZE_T_FORMAT, i ? ", " : "", chsize[i]);
+                    h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", chsize[i]);
                     total *= chsize[i];
                 }
-                h5tools_str_append(&buffer, "} " HSIZE_T_FORMAT " bytes\n", total);
+                h5tools_str_append(&buffer, "} %" PRIuHSIZE " bytes\n", total);
             } break;
             case H5D_COMPACT:
                 break;
@@ -1891,15 +1896,13 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                         if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size) <
                             0) {
                             h5tools_str_append(
-                                &buffer,
-                                "        #%03d %10" H5_PRINTF_LL_WIDTH "u %10s %10s ***ERROR*** %s\n", i,
+                                &buffer, "        #%03d %10" PRIuHSIZE " %10s %10s ***ERROR*** %s\n", i,
                                 total, "", "", i + 1 < nf ? "Following addresses are incorrect" : "");
                         }
                         else if (H5S_UNLIMITED == f_size) {
                             h5tools_str_append(&buffer,
-                                               "        #%03d %10" H5_PRINTF_LL_WIDTH
-                                               "u %10" H5_PRINTF_LL_WIDTH "u %10s ",
-                                               i, total, (hsize_t)f_offset, "INF");
+                                               "        #%03d %10" PRIuHSIZE " %10" PRIuHSIZE " %10s ", i,
+                                               total, (hsize_t)f_offset, "INF");
                             print_string(&buffer, f_name, TRUE);
                         }
                         else {
@@ -1979,8 +1982,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             case H5T_ARRAY:
             case H5T_NCLASSES:
             default:
-                h5tools_str_append(&buffer,
-                                   HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
+                h5tools_str_append(&buffer, "%" PRIuHSIZE " logical byte%s, %" PRIuHSIZE " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
                     utilization = ((double)total * 100.0) / (double)used;
@@ -2297,7 +2299,7 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 iter->symlink_list->dangle_link = TRUE;
 
             h5tools_str_append(&buffer, "Soft Link {");
-            h5tools_str_append(&buffer, buf);
+            h5tools_str_append(&buffer, "%s", buf);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);
@@ -2365,11 +2367,11 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
                 goto done;
 
             h5tools_str_append(&buffer, "External Link {");
-            h5tools_str_append(&buffer, filename);
+            h5tools_str_append(&buffer, "%s", filename);
             h5tools_str_append(&buffer, "/");
             if (*path != '/')
                 h5tools_str_append(&buffer, "/");
-            h5tools_str_append(&buffer, path);
+            h5tools_str_append(&buffer, "%s", path);
             h5tools_str_append(&buffer, "}");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                    (hsize_t)0, (hsize_t)0);
@@ -2520,7 +2522,7 @@ done:
  *              were borrowed from the GNU less(1).
  *
  * Return:      Success: Number of columns.
- *              Failure: Some default number of columms.
+ *              Failure: Some default number of columns.
  *-------------------------------------------------------------------------
  */
 static int
@@ -2640,7 +2642,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t              file_id = H5I_INVALID_HID;
     char *             fname = NULL, *oname = NULL, *x = NULL;
@@ -2649,11 +2651,12 @@ main(int argc, const char *argv[])
     int                argno;
     static char        root_name[] = "/";
     char               drivername[50];
-    const char *       preferred_driver = NULL;
-    int                err_exit         = 0;
-    hid_t              fapl_id          = H5P_DEFAULT;
-    hbool_t            custom_vol_fapl  = FALSE;
+    int                err_exit        = 0;
+    hid_t              fapl_id         = H5P_DEFAULT;
+    hbool_t            custom_vol_fapl = FALSE;
+    hbool_t            custom_vfd_fapl = FALSE;
     h5tools_vol_info_t vol_info;
+    h5tools_vfd_info_t vfd_info;
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
@@ -2684,8 +2687,9 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Initialize fapl info struct */
+    /* Initialize fapl info structs */
     HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2714,9 +2718,9 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
             enable_error_stack = 1;
-            /* deprecated --errors */
         }
         else if (!HDstrcmp(argv[argno], "--errors")) {
+            /* deprecated --errors */
             enable_error_stack = 1;
         }
         else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
@@ -2747,9 +2751,6 @@ main(int argc, const char *argv[])
         else if (!HDstrcmp(argv[argno], "--string")) {
             string_g = TRUE;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
-            preferred_driver = argv[argno] + 6;
-        }
         else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
             vol_info.type    = VOL_BY_VALUE;
             vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno] + 12);
@@ -2762,6 +2763,25 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
             vol_info.info_string = argv[argno] + 11;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
+            vfd_info.type   = VFD_BY_NAME;
+            vfd_info.u.name = argv[argno] + 6;
+            vfd_info.info   = NULL;
+            custom_vfd_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
+            vfd_info.type    = VFD_BY_VALUE;
+            vfd_info.u.value = (H5FD_class_value_t)HDatoi(argv[argno] + 12);
+            custom_vfd_fapl  = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-name=", (size_t)11)) {
+            vfd_info.type   = VFD_BY_NAME;
+            vfd_info.u.name = argv[argno] + 11;
+            custom_vfd_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-info=", (size_t)11)) {
+            vfd_info.info = (const void *)(argv[argno] + 11);
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)HDstrtol(argv[argno] + 8, &rest, 0);
@@ -2959,38 +2979,10 @@ main(int argc, const char *argv[])
     }
 
     /* Setup a custom fapl for file accesses */
-    if (custom_vol_fapl) {
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info, NULL)) < 0) {
+    if (custom_vol_fapl || custom_vfd_fapl) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, custom_vol_fapl ? &vol_info : NULL,
+                                        custom_vfd_fapl ? &vfd_info : NULL)) < 0) {
             error_msg("failed to setup file access property list (fapl) for file\n");
-            leave(EXIT_FAILURE);
-        }
-    }
-
-    if (preferred_driver) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.info = NULL;
-        vfd_info.name = preferred_driver;
-
-        if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-        else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
             leave(EXIT_FAILURE);
         }
     }
@@ -3019,8 +3011,8 @@ main(int argc, const char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE,
-                                    drivername, sizeof drivername);
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), drivername,
+                                    sizeof drivername);
 
             if (file_id >= 0) {
                 if (verbose_g)

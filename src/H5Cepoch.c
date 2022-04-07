@@ -78,22 +78,21 @@ static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED *thing,
 /* Local Variables */
 /*******************/
 
-const H5AC_class_t H5AC_EPOCH_MARKER[1] = {{
-    /* id               = */ H5AC_EPOCH_MARKER_ID,
-    /* name             = */ "epoch marker",
-    /* mem_type         = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
-    /* flags		= */ H5AC__CLASS_NO_FLAGS_SET,
-    /* get_initial_load_size = */ H5C__epoch_marker_get_initial_load_size,
-    /* get_final_load_size = */ H5C__epoch_marker_get_final_load_size,
-    /* verify_chksum    = */ H5C__epoch_marker_verify_chksum,
-    /* deserialize      = */ H5C__epoch_marker_deserialize,
-    /* image_len        = */ H5C__epoch_marker_image_len,
-    /* pre_serialize    = */ H5C__epoch_marker_pre_serialize,
-    /* serialize        = */ H5C__epoch_marker_serialize,
-    /* notify           = */ H5C__epoch_marker_notify,
-    /* free_icr         = */ H5C__epoch_marker_free_icr,
-    /* fsf_size         = */ H5C__epoch_marker_fsf_size,
-}};
+const H5AC_class_t H5AC_EPOCH_MARKER[1] = {
+    {/* id                    = */ H5AC_EPOCH_MARKER_ID,
+     /* name                  = */ "epoch marker",
+     /* mem_type              = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
+     /* flags                 = */ H5AC__CLASS_NO_FLAGS_SET,
+     /* get_initial_load_size = */ H5C__epoch_marker_get_initial_load_size,
+     /* get_final_load_size   = */ H5C__epoch_marker_get_final_load_size,
+     /* verify_chksum         = */ H5C__epoch_marker_verify_chksum,
+     /* deserialize           = */ H5C__epoch_marker_deserialize,
+     /* image_len             = */ H5C__epoch_marker_image_len,
+     /* pre_serialize         = */ H5C__epoch_marker_pre_serialize,
+     /* serialize             = */ H5C__epoch_marker_serialize,
+     /* notify                = */ H5C__epoch_marker_notify,
+     /* free_icr              = */ H5C__epoch_marker_free_icr,
+     /* fsf_size              = */ H5C__epoch_marker_fsf_size}};
 
 /***************************************************************************
  * Class functions for H5C__EPOCH_MAKER_TYPE:

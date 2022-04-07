@@ -15,7 +15,7 @@
  * This program illustrates assertion errors when linked
  * to HDF5 1.4.1-post2 or 1.4.2-pre3 debug library.
  *
- * If the assertion errors are ignored, the program eventially causes
+ * If the assertion errors are ignored, the program eventually causes
  * an error in H5Gcreate2 when writing object 83381.
  *
  * When writing in single file mode, the assertion errors still occur
@@ -195,7 +195,7 @@ main(void)
 
             start[0] = 0;
             status   = H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, start, stride, count, NULL);
-            start[0] = (hssize_t)j;
+            start[0] = (hsize_t)j;
             status   = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start, stride, count, NULL);
             status   = H5Dwrite(dataset_id, type_id, memspace_id, dataspace_id, H5P_DEFAULT, &floatval);
             if (status < 0) {

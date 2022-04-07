@@ -125,7 +125,7 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
  *
  * Parameters:
  *              fid: file ID for the SWMR test file
- *              comp_level: the compresssion level
+ *              comp_level: the compression level
  *              index_type: The chunk index type (b1 | b2 | ea | fa)
  *              verbose: whether verbose console output is desired.
  *              verbose_file: file pointer for verbose output
@@ -352,7 +352,7 @@ usage(void)
  *H5Fstart_swmr_write(), add_records(), H5Fclose().
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t       fid;                  /* File ID for file opened */
     long        nrecords     = 0;     /* # of records to append */

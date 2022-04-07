@@ -437,7 +437,7 @@ done:
  */
 herr_t
 H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space)
+                   H5S_t *file_space, H5S_t *mem_space)
 {
     void *          buf            = io_info->u.rbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
@@ -577,7 +577,7 @@ done:
  */
 herr_t
 H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                    const H5S_t *file_space, const H5S_t *mem_space)
+                    H5S_t *file_space, H5S_t *mem_space)
 {
     const void *    buf            = io_info->u.wbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/

@@ -1856,46 +1856,6 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
 }
 
 /*-------------------------------------------------------------------------
- * Function: find_attr
- *
- * Purpose: operator function used by H5LT_find_attribute
- *
- * Programmer: Pedro Vicente
- *
- * Date: June 21, 2001
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
-          void *op_data)
-{
-    int ret = H5_ITER_CONT;
-
-    /* check the arguments */
-    if (name == NULL)
-        return H5_ITER_CONT;
-
-    /* Shut compiler up */
-    (void)loc_id;
-    (void)ainfo;
-
-    /* Define a positive value for return value if the attribute was found. This will
-     * cause the iterator to immediately return that positive value,
-     * indicating short-circuit success
-     */
-
-    if (HDstrncmp(name, (char *)op_data, MAX(HDstrlen((char *)op_data), HDstrlen(name))) == 0)
-        ret = H5_ITER_STOP;
-
-    return ret;
-}
-
-/*-------------------------------------------------------------------------
  * Function: H5LTfind_attribute
  *
  * Purpose: Inquires if an attribute named attr_name exists attached to
@@ -1926,32 +1886,22 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  *
  * Date: June 21, 2001
  *
- * Comments:
- *  The function uses H5Aiterate2 with the operator function find_attr
- *
  * Return:
- *  Success: The return value of the first operator that
- *              returns non-zero, or zero if all members were
- *              processed with no operator returning non-zero.
+ *  Success: Positive if the attribute exists attached to the
+ *              object loc_id. Zero if the attribute does not
+ *              exist attached to the object loc_id.
  *
  *  Failure: Negative if something goes wrong within the
- *              library, or the negative value returned by one
- *              of the operators.
+ *              library.
  *
  *-------------------------------------------------------------------------
  */
-/* H5Aiterate wants a non-const pointer but we have a const pointer in the API
- * call. It's safe to ignore this because we control the callback, don't
- * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
- * library never modifies that buffer.
- */
-H5_GCC_CLANG_DIAG_OFF("cast-qual")
 herr_t
 H5LT_find_attribute(hid_t loc_id, const char *attr_name)
 {
-    return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
+    htri_t attr_exists = H5Aexists(loc_id, attr_name);
+    return (attr_exists < 0) ? (herr_t)-1 : (attr_exists) ? (herr_t)1 : (herr_t)0;
 }
-H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ndims
@@ -2579,11 +2529,9 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
             }
             else if (H5Tequal(dtype, H5T_NATIVE_DOUBLE)) {
                 HDsnprintf(dt_str, *slen, "H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
             }
             else if (H5Tequal(dtype, H5T_NATIVE_LDOUBLE)) {
                 HDsnprintf(dt_str, *slen, "H5T_NATIVE_LDOUBLE");
-#endif
             }
             else {
                 HDsnprintf(dt_str, *slen, "undefined float");

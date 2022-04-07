@@ -182,8 +182,11 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     /* create the reference, -1 parameter for objects */
                                     if (H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
-                                    if (options->verbose) {
-                                        HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
+                                    if (options->verbose > 0) {
+                                        if (options->verbose == 2)
+                                            HDprintf(FORMAT_OBJ_NOTIME, "dset", travt->objs[i].name);
+                                        else
+                                            HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
                                         HDprintf("object <%s> object reference created to <%s>\n",
                                                  travt->objs[i].name, refname);
                                     }
@@ -276,7 +279,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rcreate failed");
                                     if (H5Sclose(region_id) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
-                                    if (options->verbose) {
+                                    if (options->verbose > 0) {
                                         HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
                                         HDprintf("object <%s> region reference created to <%s>\n",
                                                  travt->objs[i].name, refname);
@@ -536,7 +539,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             }
             /* This line below needs to be moved in this loop instead of inserting outside. Otherwise,
                ref_comp_field_n may be >0 for the next attribute, which may not be
-               the reference type and will be accidently treated as the reference type.
+               the reference type and will be accidentally treated as the reference type.
                It will then cause the H5Acreate2 failed since that attribute is already created.
                KY 2020-02-07
             */

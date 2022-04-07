@@ -18,7 +18,8 @@
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-#define H5FD_ONION (H5FD_onion_init())
+#define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
+#define H5FD_ONION_VALUE H5_VFD_ONION
 
 #define H5FD_ONION_ENABLE_INDEX_STATS 0
 
@@ -126,10 +127,6 @@ typedef struct H5FD_onion_fapl_info_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- * PUBLIC PROTOTYPES
- */
 
 H5_DLL hid_t  H5FD_onion_init(void);
 H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);

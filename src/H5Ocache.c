@@ -275,7 +275,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *
  *		Note that the object header is read with with a speculative read.
  *		If the initial read is too small, make note of this fact and return
- *     		without error.  H5C__load_entry() will note the size discrepency
+ *     		without error.  H5C__load_entry() will note the size discrepancy
  *		and retry the deserialize operation with the correct size read.
  *
  * Return:      Success:        Pointer to in core representation
@@ -346,7 +346,7 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
 done:
     /* Release the [possibly partially initialized] object header on errors */
     if (!ret_value && oh)
-        if (H5O__free(oh) < 0)
+        if (H5O__free(oh, FALSE) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -639,7 +639,7 @@ H5O__cache_free_icr(void *_thing)
     HDassert(oh->cache_info.type == H5AC_OHDR);
 
     /* Destroy object header */
-    if (H5O__free(oh) < 0)
+    if (H5O__free(oh, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
 
 done:
@@ -1242,7 +1242,7 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 
         /* Save the object header for later use in 'deserialize' callback */
         udata->oh = oh;
-        if (H5O__free(saved_oh) < 0)
+        if (H5O__free(saved_oh, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
         udata->free_oh = FALSE;
     }
@@ -1255,7 +1255,7 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 done:
     /* Release the [possibly partially initialized] object header on errors */
     if (ret_value < 0 && oh)
-        if (H5O__free(oh) < 0)
+        if (H5O__free(oh, FALSE) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)

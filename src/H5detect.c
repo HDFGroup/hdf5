@@ -772,7 +772,7 @@ done:\n\
     fprintf(rawoutstream, "/* sigprocmask() support: no */\n");
 #endif
 
-    /* Print the statics of signal handlers called for debugging */
+    /* Print the statistics of signal handlers called for debugging */
     fprintf(rawoutstream, "\n"
                           "/******************************/\n"
                           "/* signal handlers statistics */\n"
@@ -1412,7 +1412,7 @@ detect_C99_floats(void)
      */
     DETECT_F(double, LDOUBLE, d_g[nd_g]);
     nd_g++;
-#elif H5_SIZEOF_LONG_DOUBLE != 0
+#else
     DETECT_F(long double, LDOUBLE, d_g[nd_g]);
     nd_g++;
 #endif
@@ -1475,7 +1475,7 @@ verify_signal_handlers(int signum, void (*handler)(int))
         }
         else {
             if (val == signum) {
-                /* return from signum handler. Record a sucess. */
+                /* return from signum handler. Record a success. */
                 nsuccesses++;
             }
             else {

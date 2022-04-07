@@ -71,13 +71,13 @@
 /* Define Fortran compiler ID */
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
+/* Define number of valid Fortran INTEGER KINDs (must be defined before F_IKIND)*/
+#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
+
 /* Define valid Fortran INTEGER KINDs */
 #cmakedefine H5_H5CONFIG_F_IKIND @H5_H5CONFIG_F_IKIND@
 
-/* Define number of valid Fortran INTEGER KINDs */
-#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
-
-/* Define number of valid Fortran REAL KINDs */
+/* Define number of valid Fortran REAL KINDs (must be defined before F_RKIND) */
 #cmakedefine H5_H5CONFIG_F_NUM_RKIND @H5_H5CONFIG_F_NUM_RKIND@
 
 /* Define valid Fortran REAL KINDs */
@@ -265,6 +265,9 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
+/* Define if we have support for writing to filtered datasets in parallel */
+#cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@
+
 /* Define if both pread and pwrite exist. */
 #cmakedefine H5_HAVE_PREADWRITE @H5_HAVE_PREADWRITE@
 
@@ -405,6 +408,9 @@
 
 /* Define if the high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
+
+/* Define if new-style references should be used with dimension scales */
+#cmakedefine H5_DIMENSION_SCALES_WITH_NEW_REF @H5_DIMENSION_SCALES_WITH_NEW_REF@
 
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
@@ -660,7 +666,7 @@
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
-/* Data accuracy is prefered to speed during data conversions */
+/* Data accuracy is preferred to speed during data conversions */
 #cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */

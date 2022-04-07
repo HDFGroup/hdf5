@@ -70,9 +70,6 @@ static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -143,29 +140,7 @@ H5AC_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_init() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__init_package
- *
- * Purpose:     Initialize interface-specific information
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, July 18, 2002
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC__init_package(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_NOAPI_NOERR
 
 #ifdef H5_HAVE_PARALLEL
     /* check whether to enable strict collective function calling
@@ -182,8 +157,8 @@ H5AC__init_package(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5AC__init_package() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_term_package
@@ -203,10 +178,6 @@ int
 H5AC_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR)
-        /* Reset interface initialization flag */
-        H5_PKG_INIT_VAR = FALSE;
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5AC_term_package() */
@@ -332,7 +303,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsprintf(prefix, "%d:", mpi_rank);
+        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1228,7 +1199,7 @@ done:
  *              metadata cache flush.
  *
  *              Initially, this means setting up the slist prior to the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list
@@ -1280,7 +1251,7 @@ done:
  *              flush.
  *
  *              Initially, this means taking down the slist after the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list
@@ -1469,20 +1440,81 @@ H5AC_resize_entry(void *thing, size_t new_size)
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
-    /* Resize the entry */
-    if (H5C_resize_entry(thing, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
-
 #ifdef H5_HAVE_PARALLEL
-    {
+    /* Log the generation of dirty bytes of metadata iff:
+     *
+     * 1) The entry is clean on entry, and this resize will dirty it
+     *    (i.e. the current and new sizes are different), and
+     *
+     * 2) This is a parallel computation -- which it is if the aux_ptr
+     *    is non-null.
+     *
+     * A few points to note about this section of the code:
+     *
+     * 1) This call must occur before the call to H5C_resize_entry() since
+     *    H5AC__log_dirtied_entry() expects the target entry to be clean
+     *    on entry.
+     *
+     * 2) This code has some basic issues in terms of the number of bytes
+     *    added to the dirty bytes count.
+     *
+     *    First, it adds the initial entry size to aux_ptr->dirty_bytes,
+     *    not the final size.  Note that this code used to use the final
+     *    size, but code to support this has been removed from
+     *    H5AC__log_dirtied_entry() for reasons unknown since I wrote this
+     *    code.
+     *
+     *    As long as all ranks do the same thing here, this probably doesn't
+     *    matter much, although it will delay initiation of sync points.
+     *
+     *    A more interesting point is that this code will not increment
+     *    aux_ptr->dirty_bytes if a dirty entry is resized.  At first glance
+     *    this seems major, as particularly with the older file formats,
+     *    resizes can be quite large.  However, this is probably not an
+     *    issue either, since such resizes will be accompanied by large
+     *    amounts of dirty metadata creation in other areas -- which will
+     *    cause aux_ptr->dirty_bytes to be incremented.
+     *
+     *    The bottom line is that this code is probably OK, but the above
+     *    points should be kept in mind.
+     *
+     * One final observation:  This comment is occasioned by a bug caused
+     * by moving the call to H5AC__log_dirtied_entry() after the call to
+     * H5C_resize_entry(), and then only calling H5AC__log_dirtied_entry()
+     * if entry_ptr->is_dirty was false.
+     *
+     * Since H5C_resize_entry() marks the target entry dirty unless there
+     * is not change in size, this had the effect of not calling
+     * H5AC__log_dirtied_entry() when it should be, and corrupting
+     * the cleaned and dirtied lists used by rank 0 in the parallel
+     * version of the metadata cache.
+     *
+     * The point here is that you should be very careful when working with
+     * this code, and not modify it unless you fully understand it.
+     *
+     *                                          JRM -- 2/28/22
+     */
+
+    if ((!entry_ptr->is_dirty) && (entry_ptr->size != new_size)) {
+
+        /* the entry is clean, and will be marked dirty in the resize
+         * operation.
+         */
         H5AC_aux_t *aux_ptr;
 
         aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((!entry_ptr->is_dirty) && (NULL != aux_ptr))
+
+        if (NULL != aux_ptr) {
+
             if (H5AC__log_dirtied_entry(entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
+        }
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Resize the entry */
+    if (H5C_resize_entry(thing, new_size) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
 
 done:
     /* If currently logging, generate a message */
@@ -1665,9 +1697,14 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
             if (H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
 
-        if (deleted && aux_ptr->mpi_rank == 0)
-            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+        if (deleted && aux_ptr->mpi_rank == 0) {
+            if (H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0) {
+                /* If we fail to log the deleted entry, push an error but still
+                 * participate in a possible sync point ahead
+                 */
+                HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed")
+            }
+        }
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 

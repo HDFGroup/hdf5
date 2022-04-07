@@ -145,7 +145,7 @@ test_properties(void)
 
     /* Check that sizes are the same, and that the buffers are identical but separate */
     VERIFY(temp_size == size, "Sizes of buffers don't match");
-    VERIFY(temp2 != NULL, "Recieved buffer not set");
+    VERIFY(temp2 != NULL, "Received buffer not set");
     VERIFY(temp2 != buffer, "Retrieved buffer is the same as original");
     VERIFY(temp2 != temp, "Retrieved buffer is the same as previously retrieved buffer");
     VERIFY(0 == HDmemcmp(temp2, buffer, size), "Buffers contain different data");
@@ -260,7 +260,7 @@ free_cb(void *ptr, H5FD_file_image_op_t op, void *udata)
  * Function:    udata_copy_cb
  *
  * Purpose:     This function allows calls to the udata_copy callback to be tracked.
- *              No copying actualy takes place; it is easier to deal with only one
+ *              No copying actually takes place; it is easier to deal with only one
  *              instance of the udata.
  *
  * Returns:     A pointer to the same udata that was passed in.
@@ -954,7 +954,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     err = H5Fclose(core_file_id);
     VERIFY(err == SUCCEED, "H5Fclose(core_file_id) failed.");
 
-    /* dicard core fapl */
+    /* discard core fapl */
     err = H5Pclose(core_fapl_id);
     VERIFY(err == SUCCEED, "H5Pclose(core_fapl_id) failed.");
 
@@ -1078,7 +1078,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(bytes_read < 0, "H5Fget_file_image(2 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
-     * but non-existant file_id.  Should fail.
+     * but non-existent file_id.  Should fail.
      */
     H5E_BEGIN_TRY
     {
@@ -1361,7 +1361,10 @@ main(void)
 
     errors += test_properties();
     errors += test_callbacks();
-    errors += test_core();
+
+    if (!h5_driver_uses_modified_filename()) {
+        errors += test_core();
+    }
 
     /* Perform tests with/without user block */
     for (user = FALSE; user <= TRUE; user++) {

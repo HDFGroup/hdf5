@@ -166,8 +166,7 @@ test_non_extendible(hid_t file)
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
-                 (unsigned long)max_size[0] * sizeof(int));
+        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -890,8 +889,8 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         char name1[64], name2[64];
 
-        HDsprintf(name1, "extern_%dr.raw", i + 1);
-        HDsprintf(name2, "extern_%dw.raw", i + 1);
+        HDsnprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
+        HDsnprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
         if (!files_have_same_contents(name1, name2))
             FAIL_PUTS_ERROR("   Output differs from expected value.")
     } /* end for */
@@ -986,11 +985,11 @@ test_path_absolute(hid_t fapl)
     if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
         TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "%s%sextern_%dr.raw", cwdpath, H5_DIR_SEPS, (int)i + 1);
+        HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
 #if defined(H5_HAVE_WINDOW_PATH)
         /* For windows, test path-absolute case (\dir\file.raw) for the second file */
         if (i == 1)
-            HDsnprintf(filename, sizeof(filename), "%s%sextern_%dr.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
+            HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
 #endif
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR
@@ -1217,7 +1216,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));
@@ -1233,7 +1232,7 @@ test_path_relative_cwd(hid_t fapl)
     if (H5Dclose(dset) < 0)
         FAIL_STACK_ERROR
 
-    /* Open dataset (use a differend prefix than for create.
+    /* Open dataset (use a different prefix than for create.
      * This works because the dataset was closed.
      */
     if (H5Pset_efile_prefix(dapl2, "${ORIGIN}/.") < 0)
@@ -1254,7 +1253,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));

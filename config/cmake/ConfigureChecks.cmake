@@ -30,7 +30,7 @@ MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
-# conversions.  If not, some hard conversions will still be prefered even
+# conversions.  If not, some hard conversions will still be preferred even
 # though the data may be wrong (for example, some compilers don't
 # support denormalized floating values) to maximize speed.
 #-----------------------------------------------------------------------------
@@ -195,7 +195,7 @@ endif ()
 # Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
-if (H5FD_ENABLE_MIRROR_VFD)
+if (HDF5_ENABLE_MIRROR_VFD)
   if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
        ${HDF_PREFIX}_HAVE_NETDB_H      AND
        ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
@@ -232,7 +232,7 @@ endif ()
 # so this one is used.
 #-----------------------------------------------------------------------------
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
-macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
+macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
       message (VERBOSE "Detecting C ${FUNCTION_NAME}")
     endif ()
@@ -248,7 +248,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
         RUN_OUTPUT_VARIABLE OUTPUT_VAR
     )
 
-    set (${RETURN_VAR} ${OUTPUT_VAR})
+    set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
     if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
       message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
@@ -304,12 +304,11 @@ set (PROG_SRC
 #define C_LDBL_DIG DECIMAL_DIG\n\
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main() {\nFILE *pFile = fopen(\"pac_Cconftest.out\",\"w\")\\\;\nfprintf(pFile, \"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+#endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
      "
 )
 
-C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES)
-file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_Cconftest.out" PROG_OUTPUT4)
+C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
 message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
 # dnl The output from the above program will be:

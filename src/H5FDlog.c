@@ -180,6 +180,8 @@ static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
+    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_LOG_VALUE,          /* value               */
     "log",                   /* name                */
     MAXADDR,                 /* maxaddr             */
     H5F_CLOSE_WEAK,          /*  fc_degree          */
@@ -207,49 +209,24 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD__log_get_handle,    /* get_handle          */
     H5FD__log_read,          /* read                */
     H5FD__log_write,         /* write               */
+    NULL,                    /* read vector         */
+    NULL,                    /* write vector        */
+    NULL,                    /* read_selection      */
+    NULL,                    /* write_selection     */
     NULL,                    /* flush               */
     H5FD__log_truncate,      /* truncate            */
     H5FD__log_lock,          /* lock                */
     H5FD__log_unlock,        /* unlock              */
     H5FD__log_delete,        /* del                 */
+    NULL,                    /* ctl                 */
     H5FD_FLMAP_DICHOTOMY     /* fl_map              */
 };
 
+/* Default configuration, if none provided */
+static const H5FD_log_fapl_t H5FD_log_default_config_g = {NULL, H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC, 4096};
+
 /* Declare a free list to manage the H5FD_log_t struct */
 H5FL_DEFINE_STATIC(H5FD_log_t);
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    herr_t ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
-
-    if (H5FD_log_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_log_init
@@ -268,9 +245,19 @@ done:
 hid_t
 H5FD_log_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_LOG_g))
         H5FD_LOG_g = H5FD_register(&H5FD_log_g, sizeof(H5FD_class_t), FALSE);
@@ -278,7 +265,6 @@ H5FD_log_init(void)
     /* Set return value */
     ret_value = H5FD_LOG_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_init() */
 
@@ -347,7 +333,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
 
     fa.flags    = flags;
     fa.buf_size = buf_size;
-    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa);
+    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa, NULL);
 
 done:
     if (fa.logfile)
@@ -482,10 +468,11 @@ static H5FD_t *
 H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_log_t *           file = NULL;
-    H5P_genplist_t *       plist;   /* Property list */
-    const H5FD_log_fapl_t *fa;      /* File access property list information */
-    int                    fd = -1; /* File descriptor */
-    int                    o_flags; /* Flags for open() call */
+    H5P_genplist_t *       plist; /* Property list */
+    const H5FD_log_fapl_t *fa;    /* File access property list information */
+    H5FD_log_fapl_t        default_fa = H5FD_log_default_config_g;
+    int                    fd         = -1; /* File descriptor */
+    int                    o_flags;         /* Flags for open() call */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -523,8 +510,10 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Get the driver specific information */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
+    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist))) {
+        /* Use default driver configuration*/
+        fa = &default_fa;
+    }
 
     /* Start timer for open() call */
     if (fa->flags & H5FD_LOG_TIME_OPEN)
@@ -1559,7 +1548,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr,
                   (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
-        /* Check if this is the first write into a "default" section, grabbed by the metadata agregation
+        /* Check if this is the first write into a "default" section, grabbed by the metadata aggregation
          * algorithm */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {

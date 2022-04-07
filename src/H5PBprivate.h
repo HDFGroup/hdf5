@@ -23,11 +23,6 @@
 #ifndef H5PBprivate_H
 #define H5PBprivate_H
 
-/* Include package's public header */
-#ifdef NOT_YET
-#include "H5PBpublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this header */
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Fprivate.h"  /* File access				*/
@@ -91,6 +86,7 @@ H5_DLL herr_t H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, con
 H5_DLL herr_t H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr);
 H5_DLL herr_t H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/);
 H5_DLL herr_t H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled);
 
 /* Statistics routines */
 H5_DLL herr_t H5PB_reset_stats(H5PB_t *page_buf);

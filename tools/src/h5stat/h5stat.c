@@ -33,7 +33,7 @@
 #define H5_NFILTERS_IMPL                                                                                     \
     8 /* Number of currently implemented filters + one to                                                    \
          accommodate for user-define filters + one                                                           \
-         to accomodate datasets whithout any filters */
+         to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
@@ -169,7 +169,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts = "Aa:Ddm:EFfhGgl:sSTO:Vw:H:";
+static const char *s_opts = "Aa:Ddm:E*FfhGgl:sSTO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"filemetadata", no_arg, 'F'},
@@ -181,7 +181,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"object", require_arg, 'O'},
                                           {"version", no_arg, 'V'},
                                           {"attribute", no_arg, 'A'},
-                                          {"enable-error-stack", no_arg, 'E'},
+                                          {"enable-error-stack", optional_arg, 'E'},
                                           {"numattrs", require_arg, 'a'},
                                           {"freespace", no_arg, 's'},
                                           {"summary", no_arg, 'S'},
@@ -211,6 +211,9 @@ usage(const char *prog)
     HDfflush(stdout);
     HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
     HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "      ERROR\n");
+    HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    HDfprintf(stdout, "                           Optional value 2 also prints file open errors\n");
     HDfprintf(stdout, "      OPTIONS\n");
     HDfprintf(stdout, "     -h, --help            Print a usage message and exit\n");
     HDfprintf(stdout, "     -V, --version         Print version number and exit\n");
@@ -235,7 +238,6 @@ usage(const char *prog)
     HDfprintf(stdout, "                           than 0.  The default threshold is 10.\n");
     HDfprintf(stdout, "     -s, --freespace       Print free space information\n");
     HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
-    HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
     HDfprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     HDfprintf(stdout, "                           <cred> :: (region,id,key)\n");
     HDfprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
@@ -830,7 +832,7 @@ hand_free(struct handler_t *hand)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
+parse_command_line(int argc, const char *const *argv, struct handler_t **hand_ret)
 {
     int               opt;
     unsigned          u;
@@ -852,7 +854,10 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'E':
-                enable_error_stack = 1;
+                if (H5_optarg != NULL)
+                    enable_error_stack = HDatoi(H5_optarg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             case 'F':
@@ -1677,7 +1682,7 @@ print_statistics(const char *name, const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     iter_t            iter;
     const char *      fname   = NULL;
@@ -1693,7 +1698,7 @@ main(int argc, const char *argv[])
 
     HDmemset(&iter, 0, sizeof(iter));
 
-    if (parse_command_line(argc, argv, &hand) < 0)
+    if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
     /* enable error reporting if command line option */
@@ -1702,25 +1707,9 @@ main(int argc, const char *argv[])
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
-        vfd_info.info = NULL;
-        vfd_info.name = drivername;
-
-        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            error_msg("Read-Only S3 VFD not enabled.\n");
-            goto done;
-#endif
-        }
-        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            error_msg("HDFS VFD not enabled.\n");
-            goto done;
-#endif
-        }
+        vfd_info.type   = VFD_BY_NAME;
+        vfd_info.info   = NULL;
+        vfd_info.u.name = drivername;
 
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
@@ -1737,7 +1726,7 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
@@ -1752,7 +1741,7 @@ main(int argc, const char *argv[])
             warn_msg("Unable to retrieve file size\n");
         HDassert(iter.filesize != 0);
 
-        /* Get storge info for file-level structures */
+        /* Get storage info for file-level structures */
         if (H5Fget_info2(fid, &finfo) < 0)
             warn_msg("Unable to retrieve file info\n");
         else {
