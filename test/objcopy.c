@@ -2789,7 +2789,7 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     char    dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): empty and openend contiguous dataset");
+        TESTING("H5Ocopy(): empty and opened contiguous dataset");
     }
     else {
         TESTING("H5Ocopy(): empty contiguous dataset");
@@ -8679,7 +8679,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
     char    dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): openend object through soft link");
+        TESTING("H5Ocopy(): opened object through soft link");
     }
     else {
         TESTING("H5Ocopy(): object through soft link");
@@ -9674,7 +9674,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
-    TESTING("H5Ocopy(): contigous dataset with named VLEN datatype");
+    TESTING("H5Ocopy(): contiguous dataset with named VLEN datatype");
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
@@ -10434,10 +10434,10 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     char         dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): contigous and opened dataset with nested VLEN datatype");
+        TESTING("H5Ocopy(): contiguous and opened dataset with nested VLEN datatype");
     }
     else {
-        TESTING("H5Ocopy(): contigous dataset with nested VLEN datatype");
+        TESTING("H5Ocopy(): contiguous dataset with nested VLEN datatype");
     }
 
     /* set initial data values */
@@ -13763,7 +13763,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
         TEST_ERROR
 
     /*
-     * Test 3: copy datsets in /g0 at SRC to DST group /uncopied
+     * Test 3: copy datasets in /g0 at SRC to DST group /uncopied
      */
     if (H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_DSET1, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_DSET1, ocpypl_id,
                 H5P_DEFAULT) < 0)

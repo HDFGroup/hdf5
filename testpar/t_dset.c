@@ -3359,11 +3359,11 @@ actual_io_mode_tests(void)
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
 
-    /* The Multi Chunk Mixed test requires atleast three processes. */
+    /* The Multi Chunk Mixed test requires at least three processes. */
     if (mpi_size > 2)
         test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
     else
-        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
+        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
 
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 

@@ -664,7 +664,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
     /* Check to see if the process is reading the entire dataset */
     if (H5S_GET_SELECT_TYPE(file_space) != H5S_SEL_ALL)
         local_cause[1] |= H5D_MPIO_RANK0_NOT_H5S_ALL;
-    /* Only perform this optimization for contigous datasets, currently */
+    /* Only perform this optimization for contiguous datasets, currently */
     else if (H5D_CONTIGUOUS != io_info->dset->shared->layout.type)
         /* Flag to do a MPI_Bcast of the data from one proc instead of
          * having all the processes involved in the collective I/O.
@@ -1329,9 +1329,9 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
                               int sum_chunk, int mpi_rank, int mpi_size)
 {
     H5D_chunk_addr_info_t *chunk_addr_info_array = NULL;
-    MPI_Datatype           chunk_final_mtype; /* Final memory MPI datatype for all chunks with seletion */
+    MPI_Datatype           chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
     hbool_t                chunk_final_mtype_is_derived = FALSE;
-    MPI_Datatype           chunk_final_ftype; /* Final file MPI datatype for all chunks with seletion */
+    MPI_Datatype           chunk_final_ftype; /* Final file MPI datatype for all chunks with selection */
     hbool_t                chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t          ctg_store; /* Storage info for "fake" contiguous dataset */
     size_t                 total_chunks;
@@ -2895,7 +2895,7 @@ done:
  *
  *              1) Each process provides two piece of information for all chunks having selection
  *                 a) chunk index
- *                 b) wheather this chunk is regular(for MPI derived datatype not working case)
+ *                 b) whether this chunk is regular(for MPI derived datatype not working case)
  *
  *              2) Gather all the information to the root process
  *

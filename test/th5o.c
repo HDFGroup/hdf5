@@ -594,7 +594,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Oget_info_by_name3");
     VERIFY(oinfo.rc, 1, "reference count in H5Oget_info_by_name3");
 
-    /* Increment the reference counts and then close the file to make sure the increment is permanant */
+    /* Increment the reference counts and then close the file to make sure the increment is permanent */
     ret = H5Oincr_refcount(grp);
     CHECK(ret, FAIL, "H5Oincr_refcount");
     ret = H5Oincr_refcount(dtype);

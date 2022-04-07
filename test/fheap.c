@@ -2470,7 +2470,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     size_t        id_len;                       /* Size of fractal heap IDs */
     size_t        tiny_max_len;                 /* Max. length of tiny objects */
     hbool_t       tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
-    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly acccessed? */
+    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly accessed? */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -13786,7 +13786,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           deflate_level;                /* Deflation level */
     size_t             old_actual_id_len = 0;        /* Old actual ID length */
-    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly acccessed? */
+    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly accessed? */
     hbool_t            pline_init = FALSE;           /* Whether the I/O pipeline has been initialized */
     /* Test description */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";
@@ -16362,7 +16362,7 @@ main(void)
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
     const char *envval;        /* Environment variable */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
+    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
@@ -16370,7 +16370,7 @@ main(void)
     if (envval == NULL)
         envval = "nomatch";
 
-    /* Current VFD that does not support contigous address space */
+    /* Current VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Reset library */

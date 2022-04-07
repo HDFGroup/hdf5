@@ -82,7 +82,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define EXCLUDE_FILE3_2 "h5diff_exclude3-2.h5"
 /* compound type with multiple vlen string types */
 #define COMP_VL_STRS_FILE "h5diff_comp_vl_strs.h5"
-/* attribute compre with verbose level */
+/* attribute compare with verbose level */
 #define ATTR_VERBOSE_LEVEL_FILE1 "h5diff_attr_v_level1.h5"
 #define ATTR_VERBOSE_LEVEL_FILE2 "h5diff_attr_v_level2.h5"
 /* file containing valid/invalid enum value mix */
@@ -2904,7 +2904,7 @@ test_group_recurse2(void)
      * FILE 2-3
      *------------------------------------------------------------------------*/
 
-    /* crate target file */
+    /* create target file */
     fileid4 = H5Fcreate(GRP_RECURSE2_EXT3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*-----------------------------------------------
@@ -2938,7 +2938,7 @@ test_group_recurse2(void)
      * FILE 2-2
      *------------------------------------------------------------------------*/
 
-    /* crate target file */
+    /* create target file */
     fileid3 = H5Fcreate(GRP_RECURSE2_EXT2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*-----------------------------------------------
@@ -2990,7 +2990,7 @@ test_group_recurse2(void)
      * FILE 2-1
      *------------------------------------------------------------------------*/
 
-    /* crate target file */
+    /* create target file */
     fileid2 = H5Fcreate(GRP_RECURSE2_EXT1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*-----------------------------------------------
@@ -4856,7 +4856,7 @@ test_data_nocomparables(const char *fname, int make_diffs)
     /* attr1 - non-compatible : different type */
     write_attr(did2, 1, dims1_1, "attr1", tid_attr1, attr_data_ptr2);
 
-    /* attr2 - non-compatible : same rank, different dimention */
+    /* attr2 - non-compatible : same rank, different dimension */
     write_attr(did2, 1, (hsize_t *)attr2_dim_ptr, "attr2", H5T_NATIVE_INT, data3);
 
     /* attr3 - non-compatible : different rank */
@@ -7905,7 +7905,7 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
  * Function: test_hyperslab
  *
  * Purpose: test diff by hyperslabs. create a dataset with 1GB dimensions
- *  by iterating trough 1KB hyperslabs
+ *  by iterating through 1KB hyperslabs
  *
  *-------------------------------------------------------------------------
  */

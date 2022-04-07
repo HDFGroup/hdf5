@@ -1140,7 +1140,7 @@ done:
  *
  *		While the list of candidate cache entries is prepared
  *		elsewhere, this function is the main routine for distributing
- *		and applying the list.  It must be run simultaniously on
+ *		and applying the list.  It must be run simultaneously on
  *		all processes that have the relevant file open.  To ensure
  *		proper synchronization, there is a barrier at the beginning
  *		of this function.
@@ -1319,7 +1319,7 @@ done:
  *
  *		This function is the main routine for handling this
  *		notification procedure.  It must be called
- *		simultaniously on all processes that have the relevant
+ *		simultaneously on all processes that have the relevant
  *		file open.  To this end, it is called only during a
  *		sync point, with a barrier prior to the call.
  *

@@ -45,7 +45,7 @@
 /* Macros */
 /**********/
 
-/* Whether to display log messge when callback is invoked */
+/* Whether to display log message when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_PASSTHRU_LOGGING */
 

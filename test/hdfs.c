@@ -1454,7 +1454,7 @@ test_noops_and_autofails(void)
     JSVERIFY(SUCCEED, H5FDlock(file, FALSE), "lock issue")
     JSVERIFY(SUCCEED, H5FDunlock(file), "unlock issue")
     /* Lock/unlock with null file or similar error crashes tests.
-     * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
+     * HDassert in calling hierarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
      */
 
     /************

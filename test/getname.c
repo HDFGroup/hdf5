@@ -1526,7 +1526,7 @@ test_main(hid_t file_id, hid_t fapl)
         {
             char name[NAME_BUF_SIZE]; /* Buffer to hold name and its size */
 
-            /* Get name for non commited datatype, it should fail */
+            /* Get name for non committed datatype, it should fail */
             H5E_BEGIN_TRY
             {
                 if (H5Iget_name(type_id, name, NAME_BUF_SIZE) > 0)

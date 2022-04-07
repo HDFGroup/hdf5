@@ -1229,7 +1229,7 @@ done:
  *              metadata cache flush.
  *
  *              Initially, this means setting up the slist prior to the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list
@@ -1281,7 +1281,7 @@ done:
  *              flush.
  *
  *              Initially, this means taking down the slist after the
- *              flush.  We do this in a seperate call because
+ *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
  *              the overhead of setting up and taking down the skip list

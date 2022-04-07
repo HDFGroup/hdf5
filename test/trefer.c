@@ -2732,7 +2732,7 @@ test_reference_compat_conv(void)
     hid_t   sid1, sid2, sid3; /* Dataspace IDs            */
     hid_t   tid1, tid2;       /* Datatype ID              */
     hsize_t dims1[] = {SPACE1_DIM1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2},
-            dims3[] = {SPACE1_DIM1};      /* Purposedly set dimension larger to test NULL references */
+            dims3[] = {SPACE1_DIM1};      /* Purposely set dimension larger to test NULL references */
     hsize_t          start[SPACE2_RANK];  /* Starting location of hyperslab */
     hsize_t          stride[SPACE2_RANK]; /* Stride of hyperslab      */
     hsize_t          count[SPACE2_RANK];  /* Element count of hyperslab */

@@ -552,7 +552,7 @@ test_value_dsnt_exist(void)
     if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT)) < 0)
         goto error;
 
-    /* These calls should fail, since no memebrs exist yet */
+    /* These calls should fail, since no members exist yet */
     if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0)
         goto error;
     val = 3;

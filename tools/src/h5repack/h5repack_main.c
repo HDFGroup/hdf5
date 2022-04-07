@@ -39,13 +39,13 @@ static struct long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                        {"file", require_arg, 'e'},
                                        {"filter", require_arg, 'f'},
                                        {"help", no_arg, 'h'},
-                                       {"infile", require_arg, 'i'}, /* for backward compability */
+                                       {"infile", require_arg, 'i'}, /* for backward compatibility */
                                        {"low", require_arg, 'j'},
                                        {"high", require_arg, 'k'},
                                        {"layout", require_arg, 'l'},
                                        {"minimum", require_arg, 'm'},
                                        {"native", no_arg, 'n'},
-                                       {"outfile", require_arg, 'o'}, /* for backward compability */
+                                       {"outfile", require_arg, 'o'}, /* for backward compatibility */
                                        {"sort_by", require_arg, 'q'},
                                        {"ssize", require_arg, 's'},
                                        {"threshold", require_arg, 't'},

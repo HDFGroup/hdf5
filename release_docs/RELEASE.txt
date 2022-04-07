@@ -350,7 +350,7 @@ Bug Fixes since HDF5-1.12.1 release
         function. This improves the I/O performance. In the case of the parallel
         library, it also avoids breaking to independent I/O, which makes it
         possible to apply a filter when writing or reading data to or from
-        teh HDF5 file.
+        the HDF5 file.
 
         (JWSB - 2021/09/13)
 

@@ -285,7 +285,7 @@ typedef struct H5TS_rw_lock_stats_t {
  *              If this structure is allocated dynamically, remember to set
  *              it to some invalid value before discarding the structure.
  *
- * policy       Integer containing a code indicating the precidence policy
+ * policy       Integer containing a code indicating the precedence policy
  *              used by the R/W lock.  The supported policies are listed
  *              below:
  *
@@ -362,13 +362,13 @@ typedef struct H5TS_rw_lock_t {
  *
  * Structure H5TS_rec_entry_count
  *
- * Strucure associated with the reader_rec_entry_count_key defined in
+ * Structure associated with the reader_rec_entry_count_key defined in
  * H5TS_rw_lock_t.
  *
  * The primary purpose of this structure is to maintain a count of recursive
  * locks so that the lock can be dropped when the count drops to zero.
  *
- * Aditional fields are included for purposes of sanity checking.
+ * Additional fields are included for purposes of sanity checking.
  *
  * Individual fields are discussed below.
  *

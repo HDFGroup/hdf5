@@ -44,7 +44,7 @@ const H5O_msg_class_t H5O_MSG_FSINFO[1] = {{
     H5O_FSINFO_ID,        /* message id number                 */
     "fsinfo",             /* message name for debugging        */
     sizeof(H5O_fsinfo_t), /* native message size               */
-    0,                    /* messages are sharable?            */
+    0,                    /* messages are shareable?            */
     H5O__fsinfo_decode,   /* decode message                    */
     H5O__fsinfo_encode,   /* encode message                    */
     H5O__fsinfo_copy,     /* copy the native value             */
@@ -175,7 +175,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
 
         H5F_DECODE_LENGTH(f, p, fsinfo->page_size); /* File space page size */
-        UINT16DECODE(p, fsinfo->pgend_meta_thres);  /* Page end metdata threshold */
+        UINT16DECODE(p, fsinfo->pgend_meta_thres);  /* Page end metadata threshold */
         H5F_addr_decode(f, &p,
                         &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 

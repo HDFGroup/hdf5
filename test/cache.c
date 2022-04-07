@@ -2774,8 +2774,8 @@ write_permitted_check(int
  *              Test the behaviour with different flags.
  *
  *              This test was added primarily to test basic insert
- *              pinned entry functionallity, but I through in explicit
- *              tests for other functionallity that is tested implicitly
+ *              pinned entry functionality, but I through in explicit
+ *              tests for other functionality that is tested implicitly
  *              elsewhere.
  *
  * Return:      void
@@ -2893,7 +2893,7 @@ check_insert_entry(unsigned paged)
             }
         }
 
-        /* Thats all we can get from H5C_get_entry_status().
+        /* That's all we can get from H5C_get_entry_status().
          * Now start looking at the cache data structures directly.
          */
 
@@ -5131,7 +5131,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *
          * 10/8/07 -- JRM
          * Added a resize operation to this test to satisfy the new
-         * requiremnt that any resize of an entry on flush will always
+         * requirement that any resize of an entry on flush will always
          * be accompanied by a resize.  Note that as a result, this
          * test becomes redundant with later tests.
          */
@@ -5223,7 +5223,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *
          * 10/8/07 -- JRM
          * Added a resize operation to this test to satisfy the new
-         * requiremnt that any resize of an entry on flush will always
+         * requirement that any resize of an entry on flush will always
          * be accompanied by a resize.  Note that as a result, this
          * test becomes redundant with later tests.
          */
@@ -9601,7 +9601,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
          *
          * (VET, 9)    Y    10 KB    N    N    -    dirty (VET, 8)
          *
-         * Recall that in this test bed, flush operations are excuted the
+         * Recall that in this test bed, flush operations are executed the
          * first time the associated entry is flushed, and are then
          * deleted.
          */
@@ -10154,7 +10154,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
          * returns to the serialize function for (VET, 9).
          *
          * When the serialize function for (VET, 9) is done with (VET, 8), it
-         * calls H5C_unprotect(VET, 8), which markes (VET, 8) as dirty and
+         * calls H5C_unprotect(VET, 8), which marks (VET, 8) as dirty and
          * unprotected, and places it at the head of the LRU.
          *
          * (VET, 0) is the next item on the LRU -- it is clean and is therefore
@@ -10553,7 +10553,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
  *         Added tests for pinned entries.
  *
  *         JRM -- 5/17/06
- *         Complete reqrite of pinned entry tests to accomodate
+ *         Complete reqrite of pinned entry tests to accommodate
  *         the new H5C_mark_entry_dirty() call.
  *
  *-------------------------------------------------------------------------
@@ -12978,7 +12978,7 @@ check_expunge_entry(unsigned paged)
  * Function:    check_multiple_read_protect()
  *
  * Purpose:    Verify that multiple, simultaneous read protects of a
- *         single entry perform as expectd.
+ *         single entry perform as expected.
  *
  * Return:    void
  *
@@ -13324,7 +13324,7 @@ check_multiple_read_protect(unsigned paged)
         if (pass && (entry_ptr->header.is_pinned)) {
 
             pass         = FALSE;
-            failure_mssg = "enty (0,4) still pinned.\n";
+            failure_mssg = "entry (0,4) still pinned.\n";
         }
 
         unprotect_entry(file_ptr, 0, 4, /* (0,4) unprotect */
@@ -15527,7 +15527,7 @@ check_destroy_protected_err(unsigned paged)
  * Function:    check_duplicate_insert_err()
  *
  * Purpose:    Verify that an attempt to insert and entry that is
- *        alread in the cache will generate an error.
+ *        already in the cache will generate an error.
  *
  * Return:    void
  *
@@ -18083,7 +18083,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* eigth epoch -- force the hit rate to 100% again -- should be steady
+    /* eighth epoch -- force the hit rate to 100% again -- should be steady
      * state.
      */
     if (pass) {
@@ -18179,7 +18179,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    if (pass) { /* twelth epoch -- at minimum size so no more ageouts */
+    if (pass) { /* twelfth epoch -- at minimum size so no more ageouts */
         rpt_fcn_called = FALSE;
         i              = 0;
         while (pass && (i < 1000)) {
@@ -18460,7 +18460,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* eigth epoch -- still 100% hit rate
+    /* eighth epoch -- still 100% hit rate
      */
     if (pass) {
 
@@ -18563,7 +18563,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* twelth epoch -- force the hit rate to 100% again -- should be steady
+    /* twelfth epoch -- force the hit rate to 100% again -- should be steady
      * state.
      */
     if (pass) {
@@ -18939,7 +18939,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* eigth epoch -- force the hit rate to 100% again -- should be steady
+    /* eighth epoch -- force the hit rate to 100% again -- should be steady
      * state.
      */
     if (pass) {
@@ -19039,7 +19039,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    if (pass) { /* twelth epoch -- at minimum size so no more ageouts */
+    if (pass) { /* twelfth epoch -- at minimum size so no more ageouts */
 
         rpt_fcn_called = FALSE;
         i              = 0;
@@ -19690,7 +19690,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* twelth  epoch -- hit rate 1.0 -- decrease as before.
+    /* twelfth  epoch -- hit rate 1.0 -- decrease as before.
      */
     if (pass) {
 
@@ -20703,7 +20703,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* protect and unprotect two more large entries -- shouldnt trigger a
+    /* protect and unprotect two more large entries -- shouldn't trigger a
      * flash cache size increase.
      */
     if (pass) {
@@ -23263,7 +23263,7 @@ check_auto_cache_resize_disable(unsigned paged)
      * mode (add space), which is triggered whenever the size of a newly
      * loaded or inserted entry, or the delta between old and new entry
      * sizes exceeds some fraction of the current maximum cache size, and
-     * the cache doesn't have enough free space to accomodate the new/
+     * the cache doesn't have enough free space to accommodate the new/
      * resize entry without performing evictions.  The range of permissible
      * values for the flash_threshold (0.1 to 1.0 as of this writing), and
      * for the flash_multiple (0.1 to 10.0) do not permit the facility to
@@ -23272,7 +23272,7 @@ check_auto_cache_resize_disable(unsigned paged)
      * current max_cache_size equal to max_size.
      *
      * We have already tested the latter in check_auto_cache_resize(), so
-     * we need only thest the former here.  Do this by disabling flash
+     * we need only test the former here.  Do this by disabling flash
      * cache size increments via the flash_incr_mode, and then creating
      * situations that would trigger flash cache size increases were that
      * code enabled.
@@ -26345,7 +26345,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_auto_cache_resize_aux_fcns()
  *
- * Purpose:    Verify that the auxilary functions associated with
+ * Purpose:    Verify that the auxiliary functions associated with
  *        the automatic cache resize capability are operating
  *        correctly.  These functions are:
  *
@@ -26422,13 +26422,13 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
     };
 
     if (paged)
-        TESTING("automatic cache resize auxilary functions (paged aggregation)")
+        TESTING("automatic cache resize auxiliary functions (paged aggregation)")
     else
-        TESTING("automatic cache resize auxilary functions")
+        TESTING("automatic cache resize auxiliary functions")
 
     pass = TRUE;
 
-    /* allocate a cache, and then test the various auxilary functions.
+    /* allocate a cache, and then test the various auxiliary functions.
      */
 
     if (pass) {
@@ -27075,7 +27075,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
         if (file_ptr == NULL) {
 
             pass         = FALSE;
-            failure_mssg = "bad return from cache intialization.\n";
+            failure_mssg = "bad return from cache initialization.\n";
         }
         else
             cache_ptr = file_ptr->shared->cache;
@@ -27294,7 +27294,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
                                 H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
-            /* Expected staus is that after each insertion, the entry
+            /* Expected status is that after each insertion, the entry
              * inserted 26 insertions ago has been flushed, and the
              * entry currently getting inserted is now in the cache and
              * dirty.
@@ -29699,7 +29699,7 @@ check_flush_deps_err(unsigned paged)
                 result =
                     H5C_destroy_flush_dependency(&((entries[entry_type])[0]), &((entries[entry_type])[1]));
                 if (result != FAIL)
-                    CACHE_ERROR("Destroying [non-existant] dependency when parent isn't protected")
+                    CACHE_ERROR("Destroying [non-existent] dependency when parent isn't protected")
                 break;
 
             /* Verify that parent entry has flush dependency */
@@ -33055,7 +33055,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
         if (file_ptr == NULL) {
 
             pass         = FALSE;
-            failure_mssg = "bad return from cache intialization.\n";
+            failure_mssg = "bad return from cache initialization.\n";
         }
         else
             cache_ptr = file_ptr->shared->cache;
@@ -33565,7 +33565,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
  *        an entry that is no longer in the cache, and which may have
  *        been deleted.
  *
- *        This function contans tests for correct handling on this
+ *        This function contains tests for correct handling on this
  *        situation.
  *
  *              Do nothing if pass is FALSE on entry.
@@ -33796,7 +33796,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
          *
          * (HET, 3)    Y    16 KB    Y       N          -      -
          *
-         * Recall that in this test bed, flush operations are excuted the
+         * Recall that in this test bed, flush operations are executed the
          * first time the associated entry is flushed, and are then
          * deleted.
          */
@@ -34046,7 +34046,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
          *
          * (HET, 3)    Y    16 KB    N    N    -    -
          *
-         * Recall that in this test bed, flush operations are excuted the
+         * Recall that in this test bed, flush operations are executed the
          * first time the associated entry is flushed, and are then
          * deleted.
          */
@@ -34461,7 +34461,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
          *
          * (MET, 1-31)    Y    64 KB    N    N    -    -
          *
-         * Recall that in this test bed, flush operations are excuted the
+         * Recall that in this test bed, flush operations are executed the
          * first time the associated entry is flushed, and are then
          * deleted.
          */
