@@ -136,7 +136,7 @@ void *tts_rw_lock_smoke_check_test_thread(void *_udata);
  *
  *  8) Drop the read lock a second time.
  *
- *  9) Verify the exptected stats, and then reset them.
+ *  9) Verify the expected stats, and then reset them.
  *
  * 10) Obtain a write lock.
  *
@@ -170,7 +170,7 @@ void *tts_rw_lock_smoke_check_test_thread(void *_udata);
  *
  * 25) Shut down the recursive R/W lock.
  *
- * Creted Sept. 3. 2020.
+ * Created Sept. 3. 2020.
  *
  * Programmer: John Mainzer
  *
@@ -242,7 +242,7 @@ tts_rec_rw_lock_smoke_check_1(void)
     result = H5TS_rw_unlock(&rec_rw_lock);
     CHECK_I(result, "H5TS_rw_unlock -- 3");
 
-    /* 9) Verify the exptected stats, and then reset them. */
+    /* 9) Verify the expected stats, and then reset them. */
     result = H5TS_rw_lock_get_stats(&rec_rw_lock, &stats);
     CHECK_I(result, "H5TS_rw_lock_get_stats -- 2");
 
@@ -442,7 +442,7 @@ cleanup_rec_rw_lock_smoke_check_1(void)
  * number of recursive lock and unlock calls is random, as is the
  * order of read and write locks if both are enabled.
  *
- * Creted Sept. 3. 2020.
+ * Created Sept. 3. 2020.
  *
  * Programmer: John Mainzer
  *
@@ -593,7 +593,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
  * repeats the process until the spcified number of read locks have
  * been acquired and dropped.
  *
- * Creted Sept. 3. 2020.
+ * Created Sept. 3. 2020.
  *
  * Programmer: John Mainzer
  *
@@ -839,7 +839,7 @@ cleanup_rec_rw_lock_smoke_check_2(void)
  * repeats the process until the spcified number of write locks have
  * been acquired and dropped.
  *
- * Creted Sept. 3. 2020.
+ * Created Sept. 3. 2020.
  *
  * Programmer: John Mainzer
  *
@@ -1085,7 +1085,7 @@ cleanup_rec_rw_lock_smoke_check_3(void)
  * repeats the process until the spcified number of locks have
  * been acquired and dropped.
  *
- * Creted Sept. 3. 2020.
+ * Created Sept. 3. 2020.
  *
  * Programmer: John Mainzer
  *

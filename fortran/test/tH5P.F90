@@ -349,8 +349,8 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   DO i = 1, 4
      DO j = 1, 6
         IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-           WRITE(*, *) "dataset test error occured"
-           WRITE(*,*) "data read is not the same as the data writen"
+           WRITE(*, *) "dataset test error occurred"
+           WRITE(*,*) "data read is not the same as the data written"
         END IF
      END DO
   END DO
@@ -575,7 +575,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error)
 
-  ! Similary, test use of H5Dcreate2 with H5P_DEFAULT
+  ! Similarly, test use of H5Dcreate2 with H5P_DEFAULT
   CALL H5Dclose_f(dsid, error)
   CALL check("H5Dclose_f", error, total_error)
 

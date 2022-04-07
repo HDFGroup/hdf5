@@ -54,7 +54,7 @@
  *
  * If the system, in which the writer and reader processes run, the readers
  * will always get all chain-linked blocks correctly. If the order of write
- * is not maintained, some reader processes may found unexpect block data.
+ * is not maintained, some reader processes may found unexpected block data.
  *
  *************************************************************/
 

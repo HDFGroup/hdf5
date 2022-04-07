@@ -351,7 +351,7 @@ done:
     last operator if it was non-zero, or zero if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id'.  For each attribute of the object, the
     'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*attr_number'

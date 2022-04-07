@@ -422,7 +422,7 @@ coll_write_test(int chunk_factor)
          the correctedness of collective write compared with
          independent write,
 
-         In order to throughly test this feature, we choose
+         In order to thoroughly test this feature, we choose
          a different selection set for reading the data out.
 
 
@@ -888,8 +888,8 @@ coll_read_test(void)
 **    edge_size, and a checker_edge_size, select a checker
 **    board selection of a sel_rank (sel_rank < tgt_rank)
 **    dimensional slice through the dataspace parallel to the
-**      sel_rank fastest changing indicies, with origin (in the
-**    higher indicies) as indicated by the start array.
+**      sel_rank fastest changing indices, with origin (in the
+**    higher indices) as indicated by the start array.
 **
 **    Note that this function, is hard coded to presume a
 **    maximum dataspace rank of 5.
@@ -1228,7 +1228,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **    or writing a checker board selection of an m (1 <= m <
 **      rank) dimensional slice through this processes slice
 **    of the target data set.  Also, this slice must be parallel
-**    to the fastest changing indicies.
+**    to the fastest changing indices.
 **
 **    It is further presumed that the buffer was zeroed before
 **    the read/write, and that the full target data set (i.e.
@@ -1263,7 +1263,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **    of the buffer resides either at the origin of either
 **    a selected or an unselected checker.  (Translation:
 **    if partial checkers appear in the buffer, they will
-**    intersect the edges of the n-cube oposite the origin.)
+**    intersect the edges of the n-cube opposite the origin.)
 **
 ****************************************************************/
 
@@ -1725,7 +1725,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     if (!use_collective_io) {
 
         ret = H5Pset_dxpl_mpio_collective_opt(xfer_plist, H5FD_MPIO_INDIVIDUAL_IO);
-        VRFY((ret >= 0), "H5Pset_dxpl_mpio_collective_opt() suceeded");
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio_collective_opt() succeeded");
     }
 
     /* setup selection to write initial data to the small data sets */
@@ -1757,10 +1757,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     /* setup selections for writing initial data to the small data set */
     ret = H5Sselect_hyperslab(mem_small_ds_sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(file_small_ds_sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid, set) succeeded");
 
     if (MAINPROCESS) { /* add an additional slice to the selections */
 
@@ -1781,10 +1781,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
         ret = H5Sselect_hyperslab(mem_small_ds_sid, H5S_SELECT_OR, start, stride, count, block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, or) succeeded");
 
         ret = H5Sselect_hyperslab(file_small_ds_sid, H5S_SELECT_OR, start, stride, count, block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid, or) succeeded");
     }
 
     check = H5Sselect_valid(mem_small_ds_sid);
@@ -1863,10 +1863,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
     ret = H5Sselect_hyperslab(mem_large_ds_sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(file_large_ds_sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid, set) succeeded");
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
@@ -1896,10 +1896,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
         ret = H5Sselect_hyperslab(mem_large_ds_sid, H5S_SELECT_OR, start, stride, count, block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, or) succeeded");
 
         ret = H5Sselect_hyperslab(file_large_ds_sid, H5S_SELECT_OR, start, stride, count, block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid, or) succeeded");
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
@@ -2426,7 +2426,7 @@ link_chunk_collective_io_test(void)
     /* select the file and mem spaces */
     start[0] = (hsize_t)(mpi_rank * LINK_CHUNK_COLLECTIVE_IO_TEST_CHUNK_SIZE);
     ret      = H5Sselect_hyperslab(file_ds_sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_ds_sid, set) succeeded");
 
     ret = H5Sselect_all(write_mem_ds_sid);
     VRFY((ret != FAIL), "H5Sselect_all(mem_ds_sid) succeeded");

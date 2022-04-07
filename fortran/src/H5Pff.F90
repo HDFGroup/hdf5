@@ -500,7 +500,7 @@ CONTAINS
 !  a chunked layout dataset.
 !
 ! INPUTS
-!  prp_id  - datatset creation property list identifier
+!  prp_id  - dataset creation property list identifier
 !  ndims   - number of dimensions for each chunk
 !  dims	   - array with dimension sizes for each chunk
 ! OUTPUTS
@@ -1880,7 +1880,7 @@ CONTAINS
 ! INPUTS
 !
 !  prp_id	- file access property list identifier
-!  gc_reference	- flag for stting garbage collection on
+!  gc_reference	- flag for string garbage collection on
 !		  and off (1 or 0)
 ! OUTPUTS
 !
@@ -1931,7 +1931,7 @@ CONTAINS
 !  prp_id	- file access property list identifier
 ! OUTPUTS
 !
-!  gc_reference	- flag for stting garbage collection on
+!  gc_reference	- flag for string garbage collection on
 !		  and off (1 or 0)
 !  hdferr       - error code
 !	           Success:  0
@@ -2659,7 +2659,7 @@ CONTAINS
 !  h5pequal_f
 !
 ! PURPOSE
-!  Checks if two property lists are eqaul
+!  Checks if two property lists are equal
 !
 ! INPUTS
 !
@@ -3059,7 +3059,7 @@ CONTAINS
 ! INPUTS
 !
 !  plist_id	- file access property list identifier
-!  size		- metatdata block size
+!  size		- metadata block size
 ! OUTPUTS
 !
 !  hdferr	- error code
@@ -3103,7 +3103,7 @@ CONTAINS
 !  plist_id	- file access property list identifier
 ! OUTPUTS
 !
-!  size		- metatdata block size
+!  size		- metadata block size
 !  hdferr	- error code
 !  		   Success:  0
 !  		   Failure: -1
@@ -3596,7 +3596,7 @@ CONTAINS
 !  h5pget_class_parent_f
 !
 ! PURPOSE
-!  Retrieves the parent class of a genric property class.
+!  Retrieves the parent class of a generic property class.
 !
 ! INPUTS
 !
@@ -5391,7 +5391,7 @@ CONTAINS
 !
 ! HISTORY
 !
-! Should hdferr return just 0 or 1 and add another arguement for the size?
+! Should hdferr return just 0 or 1 and add another argument for the size?
 ! Fortran90 Interface:
 SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     IMPLICIT NONE

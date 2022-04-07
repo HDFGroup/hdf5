@@ -104,7 +104,7 @@ H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED 
     H5F_t *    parent      = NULL;  /*file containing mount point	*/
     unsigned   lt, rt, md;          /*binary search indices		*/
     int        cmp;                 /*binary search comparison value*/
-    H5G_loc_t  mp_loc;              /* entry of moint point to be opened */
+    H5G_loc_t  mp_loc;              /* entry of mount point to be opened */
     H5G_name_t mp_path;             /* Mount point group hier. path */
     H5O_loc_t  mp_oloc;             /* Mount point object location */
     H5G_loc_t  root_loc;            /* Group location of root of file to mount */
@@ -489,7 +489,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Funmount
  *
- * Purpose:     Given a mount point, dissassociate the mount point's file
+ * Purpose:     Given a mount point, disassociate the mount point's file
  *              from the file mounted there. Do not close either file.
  *
  *              The mount point can either be the group in the parent or the

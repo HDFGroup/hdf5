@@ -419,7 +419,7 @@ done:
  * Function:    H5G__compact_lookup_cb
  *
  * Purpose:     Callback routine for searching 'link' messages for a particular
- *              name & gettting object location for it
+ *              name & getting object location for it
  *
  * Return:      SUCCEED/FAIL
  *

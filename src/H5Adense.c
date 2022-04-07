@@ -337,7 +337,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     H5HF_t *            fheap        = NULL; /* Fractal heap handle */
     H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
     H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
-    htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
+    htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              attr_exists;         /* Attribute exists in v2 B-tree */
     H5A_t *             ret_value = NULL;    /* Return value */
 
@@ -356,7 +356,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -428,7 +428,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     H5WB_t *         wb           = NULL;         /* Wrapped buffer for attribute data */
     uint8_t          attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     unsigned         mesg_flags = 0;              /* Flags for storing message */
-    htri_t           attr_sharable;               /* Flag indicating attributes are sharable */
+    htri_t           attr_sharable;               /* Flag indicating attributes are shareable */
     herr_t           ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -442,7 +442,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
         htri_t  shared_mesg;       /* Should this message be stored in the Shared Message table? */
@@ -726,7 +726,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     H5HF_t *            fheap        = NULL; /* Fractal heap handle */
     H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
     H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
-    htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
+    htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -742,7 +742,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -864,7 +864,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
     H5B2_t *            bt2_corder   = NULL; /* v2 B-tree handle for creation order ndex */
     H5A_t *             attr_copy    = NULL; /* Copy of attribute to rename */
-    htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
+    htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
     htri_t              attr_exists;         /* Attribute exists in v2 B-tree */
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -881,7 +881,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -1178,7 +1178,7 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
     /* Check on iteration order */
     if (order == H5_ITER_NATIVE && H5F_addr_defined(bt2_addr)) {
         H5A_bt2_ud_it_t udata;         /* User data for iterator callback */
-        htri_t          attr_sharable; /* Flag indicating attributes are sharable */
+        htri_t          attr_sharable; /* Flag indicating attributes are shareable */
 
         /* Open the fractal heap */
         if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -1188,7 +1188,7 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
         if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-        /* Get handle for shared message heap, if attributes are sharable */
+        /* Get handle for shared message heap, if attributes are shareable */
         if (attr_sharable) {
             haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -1335,7 +1335,7 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     H5HF_t *        shared_fheap = NULL; /* Fractal heap handle for shared header messages */
     H5B2_t *        bt2_name     = NULL; /* v2 B-tree handle for name index */
     H5A_t *         attr_copy    = NULL; /* Copy of attribute to remove */
-    htri_t          attr_sharable;       /* Flag indicating attributes are sharable */
+    htri_t          attr_sharable;       /* Flag indicating attributes are shareable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1353,7 +1353,7 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -1582,7 +1582,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
     /* If there is an index defined for the field, use it */
     if (H5F_addr_defined(bt2_addr)) {
         H5A_bt2_ud_rmbi_t udata;         /* User data for v2 B-tree record removal */
-        htri_t            attr_sharable; /* Flag indicating attributes are sharable */
+        htri_t            attr_sharable; /* Flag indicating attributes are shareable */
 
         /* Open the fractal heap */
         if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -1592,7 +1592,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
         if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-        /* Get handle for shared message heap, if attributes are sharable */
+        /* Get handle for shared message heap, if attributes are shareable */
         if (attr_sharable) {
             haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 
@@ -1672,7 +1672,7 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     H5HF_t *            fheap        = NULL; /* Fractal heap handle */
     H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
     H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
-    htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
+    htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1690,7 +1690,7 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't determine if attributes are shared")
 
-    /* Get handle for shared message heap, if attributes are sharable */
+    /* Get handle for shared message heap, if attributes are shareable */
     if (attr_sharable) {
         haddr_t shared_fheap_addr; /* Address of fractal heap to use */
 

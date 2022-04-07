@@ -131,7 +131,7 @@ test_vltypes_dataset_create(void)
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
-    /* Set fill value writting time to be NEVER */
+    /* Set fill value writing time to be NEVER */
     ret = H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
     CHECK(ret, FAIL, "H5Pset_fill_time");
 

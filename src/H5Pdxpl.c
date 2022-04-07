@@ -1968,7 +1968,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_mpio_actual_io_mode
  *
- * Purpose:	Retrieves the type of I/O actually preformed when collective I/O
+ * Purpose:	Retrieves the type of I/O actually performed when collective I/O
  *		is requested.
  *
  * Return:	Non-negative on success/Negative on failure

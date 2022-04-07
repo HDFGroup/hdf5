@@ -95,7 +95,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
 /*-------------------------------------------------------------------------
  * Function:	H5FA__new
  *
- * Purpose:	Allocate and initialize a new fixe array wrapper in memory
+ * Purpose:	Allocate and initialize a new fixed array wrapper in memory
  *
  * Return:	Pointer to farray wrapper success
  *              NULL on failure

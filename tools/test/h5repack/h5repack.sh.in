@@ -525,7 +525,7 @@ VERIFY_LAYOUT_ALL()
 
     #---------------------------------
     # check the layout from a dataset
-    # check if the other layouts still exsit
+    # check if the other layouts still exist
     VERIFY  "layouts"
     (
         cd $TESTDIR
@@ -1713,10 +1713,10 @@ TOOLTEST1 family tfamily%05d.h5
 TOOLTEST bug1814 h5repack_refs.h5
 
 # test attribute with various references (bug1797 / HDFFV-5932)
-# the references in attribute of compund or vlen datatype
+# the references in attribute of compound or vlen datatype
 TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 
-# Add test for memory leak in attirbute. This test is verified by CTEST.
+# Add test for memory leak in attribute. This test is verified by CTEST.
 # 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )

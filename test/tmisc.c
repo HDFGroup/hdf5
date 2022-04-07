@@ -1280,7 +1280,7 @@ test_misc8(void)
         for (v = 0; v < MISC8_DIM1; v++)
             *tdata++ = (int)(((u * MISC8_DIM1) + v) % 13);
 
-    /* Create a file acccess property list */
+    /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
@@ -3892,7 +3892,7 @@ test_misc21(void)
 
 /****************************************************************
 **
-**  test_misc22(): Test SZIP bits-per-pixel paramter.
+**  test_misc22(): Test SZIP bits-per-pixel parameter.
 **                      This should be set according to the datatype.
 **                      Tests for precision and offset combo's.
 **

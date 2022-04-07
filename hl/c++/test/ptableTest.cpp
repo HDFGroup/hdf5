@@ -223,7 +223,7 @@ TestGetNext()
     for (record = 1; record < 6; record++)
         wrapper.AppendPacket(&record);
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         wrapper.GetNextPacket(&record);
         if (record != i)
@@ -237,7 +237,7 @@ TestGetNext()
     if (error < 0)
         goto error;
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         error = wrapper.GetNextPacket(&record);
         if (record != i || error < 0)

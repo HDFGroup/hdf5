@@ -118,7 +118,7 @@ H5S__init_package(void)
     if (H5I_register_type(H5I_DATASPACE_CLS) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize dataspace ID class")
 
-    /* Initialize the atom group for the dataspace selction iterator IDs */
+    /* Initialize the atom group for the dataspace selection iterator IDs */
     if (H5I_register_type(H5I_SPACE_SEL_ITER_CLS) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
                     "unable to initialize dataspace selection iterator ID class")

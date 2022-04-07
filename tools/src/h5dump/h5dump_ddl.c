@@ -1959,7 +1959,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, int pe,
     const char *real_name = display_name ? display_name : type;
 
     if ((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) {
-        /* check if type is unamed datatype */
+        /* check if type is unnamed datatype */
         unsigned idx = 0;
 
         while (idx < type_table->nobjs) {

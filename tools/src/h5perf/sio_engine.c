@@ -181,7 +181,7 @@ do_sio(parameters param, results *res)
         if ((param.dset_size[i] % param.buf_size[i]) != 0) {
             HDfprintf(stderr,
                       "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
-                      "trasfer buffer size[%d] (%zu)\n",
+                      "transfer buffer size[%d] (%zu)\n",
                       param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
             GOTOERROR(FAIL);
         }

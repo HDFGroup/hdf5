@@ -20,7 +20,7 @@ dnl  Contains Macros for HDF5 C++
 dnl *********************************
 dnl
 dnl Special characteristics that have no autoconf counterpart but that
-dnl we need as part of the C++ support.  To distinquish these, they
+dnl we need as part of the C++ support.  To distinguish these, they
 dnl have a [PAC] prefix.
 
 dnl Checking if C++ needs old style header files in includes

@@ -136,7 +136,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             }
 
             /* set the dataset creation plist to specify that the raw data is
-             * to be partioned into 10X10 element chunks.
+             * to be partitioned into 10X10 element chunks.
              */
 
             if (pass) {
@@ -470,7 +470,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
  *        Set pass to FALSE and issue a suitable failure
  *        message if either the file contains a metadata cache image
  *        superblock extension and mdci_sbem_expected is TRUE, or
- *        vise versa.
+ *        vice versa.
  *
  *        If mdci_sbem_expected is TRUE, also verify that the metadata
  *        cache has been advised of this.
@@ -544,7 +544,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* create a file access propertly list. */
+    /* create a file access property list. */
     if (pass) {
 
         fapl_id = h5_fileaccess();
@@ -879,7 +879,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
-    /* create a file access propertly list. */
+    /* create a file access property list. */
     if (pass) {
 
         fapl_id = h5_fileaccess();
@@ -1505,7 +1505,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
  *        processed as part of the first protect operation after the
  *        superblock is loaded.)
  *
- *        In this particular test, we preform the following operations:
+ *        In this particular test, we perform the following operations:
  *
  *        1) Create a HDF5 file with the cache image FAPL entry.
  *
@@ -7001,7 +7001,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
  *        image.
  *
  *        The objective of this test is to create a test file
- *        with both non-empty self referential presistant
+ *        with both non-empty self referential persistent
  *              free space managers, and a cache image, and then
  *              verify that this situation is handled correctly if
  *              H5Fget_free_sections() is called before the metadata

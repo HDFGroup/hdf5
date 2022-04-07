@@ -959,7 +959,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
             if (!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
-            /* Inital 'power2up' values for scaled dimensions */
+            /* Initial 'power2up' values for scaled dimensions */
             rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
@@ -2535,7 +2535,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
         HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
                  (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
-        /* Check for non-existant chunk & skip it if appropriate */
+        /* Check for non-existent chunk & skip it if appropriate */
         if (H5F_addr_defined(udata.chunk_block.offset) || UINT_MAX != udata.idx_hint ||
             !skip_missing_chunks) {
             H5D_io_info_t *chk_io_info;  /* Pointer to I/O info object for this chunk */
@@ -3603,7 +3603,7 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
      * traversing the list when pointer pN reaches wN percent of the original
      * list.  In other words, preemption method N gets to consider entries in
      * approximate least recently used order w0 percent before method N+1
-     * where 100% means tha method N will run to completion before method N+1
+     * where 100% means that method N will run to completion before method N+1
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
@@ -6043,7 +6043,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
     const H5O_pline_t *pline    = udata->pline;    /* I/O pipeline for applying filters */
 
-    /* needed for commpressed variable length data */
+    /* needed for compressed variable length data */
     hbool_t  must_filter = FALSE;      /* Whether chunk must be filtered during copy */
     size_t   nbytes;                   /* Size of chunk in file (in bytes) */
     H5Z_cb_t filter_cb;                /* Filter failure callback struct */

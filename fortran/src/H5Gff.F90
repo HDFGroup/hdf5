@@ -73,7 +73,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 5, 2001
 !
-!  Added additional optional paramaters in 1.8
+!  Added additional optional parameters in 1.8
 !  MSB - February 27, 2008
 !
 ! SOURCE
@@ -491,8 +491,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
 
-    INTEGER :: current_namelen ! Lenghth of the current_name string
-    INTEGER :: new_namelen     ! Lenghth of the new_name string
+    INTEGER :: current_namelen ! Length of the current_name string
+    INTEGER :: new_namelen     ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5glink_c(loc_id, link_type, current_name, &
@@ -524,7 +524,7 @@ CONTAINS
 ! PURPOSE
 !  Creates a link of the specified type from new_name
 !  to current_name. current_name and new_name are interpreted
-!  releative to current and new location identifiers.
+!  relative to current and new location identifiers.
 !
 ! INPUTS
 !  cur_loc_id 	 - location identifier
@@ -559,8 +559,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
 !*****
 
-    INTEGER :: cur_namelen ! Lenghth of the current_name string
-    INTEGER :: new_namelen ! Lenghth of the new_name string
+    INTEGER :: cur_namelen ! Length of the current_name string
+    INTEGER :: new_namelen ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5glink2_c(cur_loc_id, cur_name, cur_namelen, &
@@ -617,7 +617,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of an object
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the name character string
+    INTEGER :: namelen ! Length of the name character string
 
     INTERFACE
        INTEGER FUNCTION h5gunlink_c(loc_id, name, namelen) BIND(C,NAME='h5gunlink_c')
@@ -666,8 +666,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: new_name ! New name of an object
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
 !*****
-    INTEGER :: namelen         ! Lenghth of the current_name string
-    INTEGER :: new_namelen     ! Lenghth of the new_name string
+    INTEGER :: namelen         ! Length of the current_name string
+    INTEGER :: new_namelen     ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen) BIND(C,NAME='h5gmove_c')
@@ -715,7 +715,7 @@ CONTAINS
     INTEGER, INTENT(OUT)         :: hdferr      ! Error code
 !*****
     INTEGER :: src_namelen         ! Length of the current_name string
-    INTEGER :: dst_namelen         ! Lenghth of the new_name string
+    INTEGER :: dst_namelen         ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5gmove2_c(src_loc_id, src_name, src_namelen, &
@@ -776,7 +776,7 @@ CONTAINS
                                            ! points to
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
+    INTEGER :: namelen ! Length of the current_name string
 
     INTERFACE
        INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer) BIND(C,NAME='h5gget_linkval_c')
@@ -827,8 +827,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: comment ! New name of an object
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
-    INTEGER :: commentlen     ! Lenghth of the comment string
+    INTEGER :: namelen ! Length of the current_name string
+    INTEGER :: commentlen     ! Length of the comment string
 
     INTERFACE
        INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
@@ -1024,7 +1024,7 @@ CONTAINS
 !
 ! HISTORY
 !
-!  - Added 'mounted' paramater
+!  - Added 'mounted' parameter
 !    M. Scot Breitenfeld
 !    July 16, 2008
 !
@@ -1104,7 +1104,7 @@ CONTAINS
 !  February 18, 2008
 !
 ! HISTORY
-!  Added 'mounted' paramater
+!  Added 'mounted' parameter
 !  M. Scot Breitenfeld
 !  July 16, 2008
 !
@@ -1206,7 +1206,7 @@ CONTAINS
 !  February 18, 2008
 !
 ! HISTORY
-!  Added 'mounted' paramater
+!  Added 'mounted' parameter
 !  M. Scot Breitenfeld
 !  July 16, 2008
 ! SOURCE

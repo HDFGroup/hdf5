@@ -80,7 +80,7 @@
  *      line.
  *
  * `log_prepend_type` (int)
- *      Flag that the logging messages should have the assocaited verbosity
+ *      Flag that the logging messages should have the associated verbosity
  *      level present in the line (e.g., "WARN", "ERROR", or "INFO").
  *
  * `log_path` (char *)
