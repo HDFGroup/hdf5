@@ -1428,7 +1428,7 @@ Known Problems
 
     exit $RETURN_VALUE
 
-  You get the HDF make files and test scipts to execute your filter script
+  You get the HDF make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.
