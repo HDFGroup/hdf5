@@ -1371,7 +1371,7 @@ hyperslab_pdiff(hid_t file1_id, const char *path1, hid_t file2_id, const char *p
              * This should be the princpal use case for this function.
              * We may may also deal with links.
              * NOTE: This particular function is ONLY called when we have identified
-             * the specfic input object as a dataset which contain a moderately
+             * the specific input object as a dataset which contain a moderately
              * large number of elements (DEFAULT_LARGE_DSET_SIZE = 1M).  The concern
              * is two fold. 1) By utilizing parallelism, we can improve performance;
              * and 2) The memory footprint utilized for processing the dataset
@@ -3382,7 +3382,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                     H5TOOLS_DEBUG("Beginning of big else block");
                     /* We're in parallel mode */
                     /* Since the data type of diff value is hsize_t which can
-                     * be arbitary large such that there is no MPI type that
+                     * be arbitrary large such that there is no MPI type that
                      * matches it, the value is passed between processes as
                      * an array of bytes in order to be portable.  But this
                      * may not work in non-homogeneous MPI environments.

@@ -966,7 +966,7 @@ done:
 
 /*-----------------------------------------------------------
  * PURPOSE :
- * Intialize a context which is used as an input to the
+ * Initialize a context which is used as an input to the
  * h5tools_get_hyperslab_data() function, which is designed
  * to be callable repeatedly until all data from the dataset
  * has be retrieved.
@@ -1045,7 +1045,7 @@ h5tools_initialize_hyperslab_context(hid_t dset_id, dataset_context_t **context)
      * throws off the starting offsets for higher numbered mpi ranks.
      * The following if, else if, end else handle the low mpi
      * ranks, followed by the high numbered ranks, and the final
-     * else handles the equally distibuted arrays.
+     * else handles the equally distributed arrays.
      */
     if ((row_diff > 0) && ((hsize_t)mpi_rank < row_diff)) {
         new_context->hs_block[0] += 1;

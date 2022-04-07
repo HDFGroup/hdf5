@@ -894,7 +894,7 @@ select_objs_by_rank(hid_t fidin, trav_table_t *orig, int **table_index)
         for (k = 0; k < (int)orig->nobjs; k++) {
             int mod_rank = (int)((int)k % g_nTasks);
 
-            /* For debugging only, make it alwasy true - Ray */
+            /* For debugging only, make it always true - Ray */
             // orig->objs[k].use_hyperslab = true;
 
             if ((orig->objs[k].use_hyperslab) || (mod_rank == (int)g_nID)) {
@@ -1633,7 +1633,7 @@ pcopy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, int *obj_index, in
                     // read_time  = 0.0;
                     write_time = 0.0;
 
-                    /* Potentially override the default size where we will transistion
+                    /* Potentially override the default size where we will transition
                      * to using hyperslab selections to divide the work between mpi ranks.
                      */
 
