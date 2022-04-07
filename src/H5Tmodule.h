@@ -66,16 +66,19 @@
  * \ingroup H5T
  * \defgroup ATOM Atomic Datatypes
  * \ingroup H5T
- * \defgroup COMPOUND Compound Datatypes
- * \ingroup H5T
  * \defgroup CONV Conversion Function
- * \ingroup H5T
- * \defgroup ENUM Enumeration Datatypes
  * \ingroup H5T
  * \defgroup OPAQUE Opaque Datatypes
  * \ingroup H5T
  * \defgroup VLEN Variable-length Sequence Datatypes
  * \ingroup H5T
+ *
+ * \defgroup COMPENUM Compound and Enumeration Datatypes
+ * \ingroup H5T
+ * \defgroup COMPOUND Compound Datatypes
+ * \ingroup COMPENUM
+ * \defgroup ENUM Enumeration Datatypes
+ * \ingroup COMPENUM
  *
  * \defgroup PDT Predefined Datatypes
  * \ingroup H5T
