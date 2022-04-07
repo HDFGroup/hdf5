@@ -239,7 +239,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
 
         /* Check if switching to "dense" attribute storage is possible */
         if (!H5F_addr_defined(ainfo.fheap_addr)) {
-            htri_t shareable;     /* Whether the attribute will be shared */
+            htri_t shareable;    /* Whether the attribute will be shared */
             size_t raw_size = 0; /* Raw size of message */
 
             /* Check for attribute being shareable */
