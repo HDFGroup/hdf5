@@ -623,7 +623,7 @@ H5_DLL herr_t H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int a
  *          garbage collected with H5garbage_collect(). These lists are global
  *          for the entire library.
  *
- * \since 1.12.1
+ * \since 1.10.7
  */
 H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size);
 /**
@@ -644,7 +644,7 @@ H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *
  *          entire library, but do not include allocations from chunked dataset
  *          I/O filters or non-native VOL connectors.
  *
- * \since 1.12.1
+ * \since 1.10.7
  */
 H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
 /**
