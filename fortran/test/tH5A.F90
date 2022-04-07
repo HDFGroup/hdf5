@@ -81,7 +81,7 @@ CONTAINS
      INTEGER(HID_T) :: atype5_id      !Integer Attribute Datatype identifier
      INTEGER(HSIZE_T), DIMENSION(1) :: adims = (/2/) ! Attribute dimension
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-     INTEGER     ::   arank = 1                      ! Attribure rank
+     INTEGER     ::   arank = 1                      ! Attribute rank
      INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string
 
      INTEGER(HID_T) :: attr_space     !Returned String Attribute Space identifier
