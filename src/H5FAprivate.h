@@ -24,11 +24,6 @@
 #ifndef H5FAprivate_H
 #define H5FAprivate_H
 
-/* Include package's public header */
-#ifdef NOT_YET
-#include "H5FApublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this file */
 #include "H5ACprivate.h" /* Metadata cache               */
 #include "H5Fprivate.h"  /* File access                  */

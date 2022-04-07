@@ -23,11 +23,6 @@
 #ifndef H5PBprivate_H
 #define H5PBprivate_H
 
-/* Include package's public header */
-#ifdef NOT_YET
-#include "H5PBpublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this header */
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Fprivate.h"  /* File access				*/
