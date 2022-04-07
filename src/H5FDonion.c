@@ -69,7 +69,7 @@ static hid_t H5FD_ONION_g = 0;
  *
  *      String allocated and populated on file-open in write mode and freed on
  *      file-close, stores the path/name of the 'recovery' file. The file
- *      created at this location is to be removed upon succesful file-close
+ *      created at this location is to be removed upon successful file-close
  *      from write mode.
  *
  * `is_open_rw` (hbool_t)
@@ -264,7 +264,7 @@ H5FD__onion_term(void)
  *
  * Function:    H5Pget_fapl_onion
  *
- * Purpose:     Copy the Onion configuraiton information from the FAPL at
+ * Purpose:     Copy the Onion configuration information from the FAPL at
  *              `fapl_id` to the destination pointer `fa_out`.
  *
  * Return:      Success: Non-negative value (SUCCEED).
@@ -1423,12 +1423,12 @@ done:
  *
  * Create/truncate HDF5 and onion data for a fresh file.
  *
- * Speical open operation required to instantiate the canonical file and
+ * Special open operation required to instantiate the canonical file and
  * history simultaneously. If successful, the required backing files are
  * craeated and given initial population on the backing store, and the Onion
  * virtual file handle is set; open effects a write-mode open.
  *
- * Cannot create 'template' history and proceeed with normal write-mode open,
+ * Cannot create 'template' history and proceed with normal write-mode open,
  * as this would in effect create an empty first revision, making the history
  * unintuitive. (create file -> initialize and commit empty first revision
  * (revision 0); any data written to file during the 'create' open, as seen by
@@ -1486,7 +1486,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, 8) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
-    /* must use public API to correclty set DXPL context :( */
+    /* must use public API to correctly set DXPL context :( */
     if (H5FDwrite(file->backing_canon, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 8, "ONIONEOF") < 0)
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing h5 file")
 
@@ -1499,7 +1499,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode whole-history")
     if (H5FD_set_eoa(file->backing_recov, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
-    /* Must use public API to correclty set DXPL context :(
+    /* Must use public API to correctly set DXPL context :(
      * TODO: Revisit this...
      */
     if (H5FDwrite(file->backing_recov, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
@@ -1886,7 +1886,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     /* Assign the page size */
     /* TODO: Is this really the best way to do this? Why not just store the
      *       page size directly? It looks like this is so we can do bit shifts
-     *       instead of division, which is some severly premature optimization
+     *       instead of division, which is some severely premature optimization
      *       with a major hit on maintainability.
      */
     double log2_page_size                          = HDlog2((double)(fa->page_size));
@@ -1986,7 +1986,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 size = H5FD_onion_history_header_encode(hdr_p, head_buf, &hdr_p->checksum);
                 if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history header")
-                /* must use public API to correclty set DXPL context :( */
+                /* must use public API to correctly set DXPL context :( */
 
                 wh_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
                 if (NULL == wh_buf)
@@ -2001,7 +2001,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
 
-                /* must use public API to correclty set DXPL context :( */
+                /* must use public API to correctly set DXPL context :( */
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, saved_size, head_buf) < 0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write header to the backing onion file")
