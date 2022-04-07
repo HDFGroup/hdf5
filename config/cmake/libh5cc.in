@@ -29,7 +29,7 @@ printf 'dir is %s\n' "$dir"
 
 
 # Show the configuration summary of the library recorded in the
-# libhdf5.settings file residing in the lib directory.
+# libhdf5.settings file reside in the lib directory.
 showconfigure()
 {
   cat $dir/lib/libhdf5.settings

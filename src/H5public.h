@@ -71,13 +71,6 @@
 #endif
 #endif
 
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Macros for enabling/disabling particular GCC warnings */
 /* (see the following web-sites for more info:
  *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
@@ -485,6 +478,13 @@ typedef struct H5_alloc_stats_t {
     size_t             peak_alloc_blocks_count;  /**< Peak # of blocks allocated */
 } H5_alloc_stats_t;
 
+/* API adapter header (defines H5_DLL, etc.) */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Functions in H5.c */
 /**
  * \ingroup H5
@@ -623,7 +623,7 @@ H5_DLL herr_t H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int a
  *          garbage collected with H5garbage_collect(). These lists are global
  *          for the entire library.
  *
- * \since 1.10.7
+ * \since 1.12.1
  */
 H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size);
 /**
@@ -644,7 +644,7 @@ H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *
  *          entire library, but do not include allocations from chunked dataset
  *          I/O filters or non-native VOL connectors.
  *
- * \since 1.10.7
+ * \since 1.12.1
  */
 H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
 /**
