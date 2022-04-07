@@ -33,7 +33,7 @@
 #include "mpi.h"
 
 /* For this test, we don't want to inherit the RANK definition
- * from testphdf5.h.  We'll define MAX_RANK to accomodate 3D arrays
+ * from testphdf5.h.  We'll define MAX_RANK to accommodate 3D arrays
  * and use that definition rather than RANK.
  */
 #ifndef MAX_RANK
@@ -3323,7 +3323,7 @@ none_selection_chunk(void)
  *                  Simple independent I/O. This tests that the defaults are properly set.
  *
  *              TEST_ACTUAL_IO_RESET:
- *                  Perfroms collective and then independent I/O wit hthe same dxpl to
+ *                  Performs collective and then independent I/O with the same dxpl to
  *                  make sure the peroperty is correctly reset to the default on each use.
  *                  Specifically, this test runs TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE
  *                  (The most complex case that works on all builds) and then performs
@@ -3332,7 +3332,7 @@ none_selection_chunk(void)
  *          Note: DIRECT_MULTI_CHUNK_MIX and DIRECT_MULTI_CHUNK_MIX_DISAGREE
  *          is not needed as they are covered by DIRECT_CHUNK_MIX and
  *          MULTI_CHUNK_MIX_DISAGREE cases. _DIRECT_ cases are only for testing
- *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO insted of num-threshold.
+ *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO instead of num-threshold.
  *
  * Modification:
  *  - Refctore to remove multi-chunk-without-opimization test and update for
@@ -3520,7 +3520,7 @@ test_actual_io_mode(int selection_mode)
             break;
 
         /* RESET tests that the properties are properly reset to defaults each time I/O is
-         * performed. To acheive this, we have RESET perform collective I/O (which would change
+         * performed. To achieve this, we have RESET perform collective I/O (which would change
          * the values from the defaults) followed by independent I/O (which should report the
          * default values). RESET doesn't need to have a unique selection, so we reuse
          * MULTI_CHUMK_MIX_DISAGREE, which was chosen because it is a complex case that works
@@ -3536,7 +3536,7 @@ test_actual_io_mode(int selection_mode)
              * assgigned collective I/O, while each other process gets independent I/O.
              * Since the root process with only access the first chunk, it will report
              * collective I/O. The subsequent processes will access the first chunk
-             * collectively, and their other chunk indpendently, reporting mixed I/O.
+             * collectively, and their other chunk independently, reporting mixed I/O.
              */
 
             if (mpi_rank == 0) {
@@ -3644,14 +3644,14 @@ test_actual_io_mode(int selection_mode)
         /* Set the threshold number of processes per chunk to twice mpi_size.
          * This will prevent the threshold from ever being met, thus forcing
          * multi chunk io instead of link chunk io.
-         * This is via deault.
+         * This is via default.
          */
         if (multi_chunk_io) {
             /* force multi-chunk-io by threshold */
             ret = H5Pset_dxpl_mpio_chunk_opt_num(dxpl_write, (unsigned)mpi_size * 2);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_num succeeded");
 
-            /* set this to manipulate testing senario about allocating processes
+            /* set this to manipulate testing scenario about allocating processes
              * to chunks */
             ret = H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl_write, (unsigned)99);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_ratio succeeded");
@@ -3675,12 +3675,12 @@ test_actual_io_mode(int selection_mode)
         H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
 
-    /* Retreive Actual io valuess */
+    /* Retrieve Actual io values */
     ret = H5Pget_mpio_actual_io_mode(dxpl_write, &actual_io_mode_write);
-    VRFY((ret >= 0), "retriving actual io mode suceeded");
+    VRFY((ret >= 0), "retrieving actual io mode succeeded");
 
     ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_write, &actual_chunk_opt_mode_write);
-    VRFY((ret >= 0), "retriving actual chunk opt mode succeeded");
+    VRFY((ret >= 0), "retrieving actual chunk opt mode succeeded");
 
     /* Read */
     ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl_read, buffer);
@@ -3688,12 +3688,12 @@ test_actual_io_mode(int selection_mode)
         H5Eprint2(H5E_DEFAULT, stdout);
     VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
 
-    /* Retreive Actual io values */
+    /* Retrieve Actual io values */
     ret = H5Pget_mpio_actual_io_mode(dxpl_read, &actual_io_mode_read);
-    VRFY((ret >= 0), "retriving actual io mode succeeded");
+    VRFY((ret >= 0), "retrieving actual io mode succeeded");
 
     ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_read, &actual_chunk_opt_mode_read);
-    VRFY((ret >= 0), "retriving actual chunk opt mode succeeded");
+    VRFY((ret >= 0), "retrieving actual chunk opt mode succeeded");
 
     /* Check write vs read */
     VRFY((actual_io_mode_read == actual_io_mode_write),
@@ -3714,7 +3714,7 @@ test_actual_io_mode(int selection_mode)
                   actual_io_mode_write);
     }
 
-    /* To test that the property is succesfully reset to the default, we perform some
+    /* To test that the property is successfully reset to the default, we perform some
      * independent I/O after the collective I/O
      */
     if (selection_mode == TEST_ACTUAL_IO_RESET) {
@@ -3731,9 +3731,9 @@ test_actual_io_mode(int selection_mode)
 
             /* Check Properties */
             ret = H5Pget_mpio_actual_io_mode(dxpl_write, &actual_io_mode_write);
-            VRFY((ret >= 0), "retriving actual io mode succeeded");
+            VRFY((ret >= 0), "retrieving actual io mode succeeded");
             ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_write, &actual_chunk_opt_mode_write);
-            VRFY((ret >= 0), "retriving actual chunk opt mode succeeded");
+            VRFY((ret >= 0), "retrieving actual chunk opt mode succeeded");
 
             VRFY(actual_chunk_opt_mode_write == H5D_MPIO_NO_CHUNK_OPTIMIZATION,
                  "actual_chunk_opt_mode has correct value for reset write (independent)");
@@ -3746,9 +3746,9 @@ test_actual_io_mode(int selection_mode)
 
             /* Check Properties */
             ret = H5Pget_mpio_actual_io_mode(dxpl_read, &actual_io_mode_read);
-            VRFY((ret >= 0), "retriving actual io mode succeeded");
+            VRFY((ret >= 0), "retrieving actual io mode succeeded");
             ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_read, &actual_chunk_opt_mode_read);
-            VRFY((ret >= 0), "retriving actual chunk opt mode succeeded");
+            VRFY((ret >= 0), "retrieving actual chunk opt mode succeeded");
 
             VRFY(actual_chunk_opt_mode_read == H5D_MPIO_NO_CHUNK_OPTIMIZATION,
                  "actual_chunk_opt_mode has correct value for reset read (independent)");
@@ -3794,11 +3794,11 @@ actual_io_mode_tests(void)
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
 
-    /* The Multi Chunk Mixed test requires atleast three processes. */
+    /* The Multi Chunk Mixed test requires at least three processes. */
     if (mpi_size > 2)
         test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
     else
-        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 proceses minimum\n");
+        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
 
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
@@ -3842,7 +3842,7 @@ actual_io_mode_tests(void)
  *         Test for Data Type Conversion as the cause of breaking collective I/O.
  *
  *       TEST_DATA_TRANSFORMS:
- *         Test for Data Transfrom feature as the cause of breaking collective I/O.
+ *         Test for Data Transform feature as the cause of breaking collective I/O.
  *
  *       TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES:
  *         Test for NULL dataspace as the cause of breaking collective I/O.
@@ -3980,7 +3980,7 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
-        test_name = "Broken Collective I/O - DATA Transfroms";
+        test_name = "Broken Collective I/O - DATA Transforms";
         no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS;
         no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS;
     }
@@ -4070,7 +4070,7 @@ test_no_collective_cause_mode(int selection_mode)
     /* Get the cause of broken collective I/O */
     ret = H5Pget_mpio_no_collective_cause(dxpl_write, &no_collective_cause_local_write,
                                           &no_collective_cause_global_write);
-    VRFY((ret >= 0), "retriving no collective cause succeeded");
+    VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
     /*---------------------
      * Test Read access
@@ -4090,7 +4090,7 @@ test_no_collective_cause_mode(int selection_mode)
     /* Get the cause of broken collective I/O */
     ret = H5Pget_mpio_no_collective_cause(dxpl_read, &no_collective_cause_local_read,
                                           &no_collective_cause_global_read);
-    VRFY((ret >= 0), "retriving no collective cause succeeded");
+    VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
     /* Check write vs read */
     VRFY((no_collective_cause_local_read == no_collective_cause_local_write),
@@ -4274,7 +4274,7 @@ dataset_atomicity(void)
     /* file locking allows only one file open (serial) for writing */
     if (MAINPROCESS) {
         fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
-        VRFY((fid >= 0), "H5Fopen succeeed");
+        VRFY((fid >= 0), "H5Fopen succeeded");
     }
 
     /* should fail */
