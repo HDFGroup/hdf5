@@ -337,8 +337,11 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk->stack);
-        trk->file = H5MM_xfree(trk->file);
-        trk->func = H5MM_xfree(trk->func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk->file = NULL;
+        trk->func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if (trk == H5FL_out_head_g) {
@@ -443,8 +446,11 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -908,8 +914,11 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -1007,8 +1016,11 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
-        trk.file = H5MM_xfree(trk.file);
-        trk.func = H5MM_xfree(trk.func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk.file = NULL;
+        trk.func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if ((void *)block_ptr == (void *)H5FL_out_head_g) {
@@ -1128,14 +1140,20 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
 
                 /* Release previous tracking information */
                 H5CS_close_stack(trk.stack);
-                trk.file = H5MM_xfree(trk.file);
-                trk.func = H5MM_xfree(trk.func);
+                /* The 'func' & 'file' strings are statically allocated (by the compiler)
+                 * and are not allocated, so there's no need to free them.
+                 */
+                trk.file = NULL;
+                trk.func = NULL;
 
                 /* Store new tracking information */
                 trk.stack = H5CS_copy_stack();
                 HDassert(trk.stack);
-                trk.file = H5MM_strdup(call_file);
-                trk.func = H5MM_strdup(call_func);
+                /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+                 * there's no need to duplicate them.
+                 */
+                trk.file = call_file;
+                trk.func = call_func;
                 trk.line = call_line;
 
                 HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
@@ -1435,8 +1453,11 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
-        trk.file = H5MM_xfree(trk.file);
-        trk.func = H5MM_xfree(trk.func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk.file = NULL;
+        trk.func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if ((void *)block_ptr == H5FL_out_head_g) {
@@ -1573,8 +1594,11 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -1689,14 +1713,20 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
 
             /* Release previous tracking information */
             H5CS_close_stack(trk.stack);
-            trk.file = H5MM_xfree(trk.file);
-            trk.func = H5MM_xfree(trk.func);
+            /* The 'func' & 'file' strings are statically allocated (by the compiler)
+             * and are not allocated, so there's no need to free them.
+             */
+            trk.file = NULL;
+            trk.func = NULL;
 
             /* Store new tracking information */
             trk.stack = H5CS_copy_stack();
             HDassert(trk.stack);
-            trk.file = H5MM_strdup(call_file);
-            trk.func = H5MM_strdup(call_func);
+            /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+             * there's no need to duplicate them.
+             */
+            trk.file = call_file;
+            trk.func = call_func;
             trk.line = call_line;
 
             HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
@@ -2098,8 +2128,11 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk->stack);
-        trk->file = H5MM_xfree(trk->file);
-        trk->func = H5MM_xfree(trk->func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk->file = NULL;
+        trk->func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if (trk == H5FL_out_head_g) {
@@ -2201,8 +2234,11 @@ H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
