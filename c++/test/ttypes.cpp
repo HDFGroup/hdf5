@@ -28,7 +28,7 @@ using namespace H5;
 #include "h5cpputil.h" // C++ utilility header file
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1
@@ -110,8 +110,8 @@ test_classes()
         // PredType::NATIVE_DOUBLE should be in H5T_FLOAT class
         tcls = PredType::NATIVE_DOUBLE.getClass();
         if (H5T_FLOAT != tcls) {
-            verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__,
-                       __FILE__);
+            verify_val(static_cast<long>(tcls), static_cast<long>(H5T_FLOAT),
+                       "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__, __FILE__);
         }
         PASSED();
     } // end of try block
@@ -699,7 +699,7 @@ test_named()
         }
 
         // Check that it is committed.
-        if (itype.committed() == false)
+        if (!itype.committed())
             cerr << "IntType::committed() returned false" << endl;
 
         // We should not be able to modify a type after it has been committed.
@@ -804,8 +804,7 @@ test_named()
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (ds_type)
-        delete ds_type;
+    delete ds_type;
 } // test_named
 
 /*-------------------------------------------------------------------------
@@ -990,7 +989,8 @@ test_encode_decode()
         // Create an IntType instance from the decoded pointer and verify it
         IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
-        verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
+        verify_val(static_cast<long>(int_sign), static_cast<long>(H5T_SGN_NONE), "DataType::decode", __LINE__,
+                   __FILE__);
         verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_int_ptr;

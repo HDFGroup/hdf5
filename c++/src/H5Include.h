@@ -25,7 +25,8 @@
  */
 #define H5O_VERSION_2 2
 
-// Define H5_OVERRIDE to override for C++11.
+// H5_OVERRIDE enables using the override keyword with C++11
+// (HDF5 1.12.x and earlier do not require C++11)
 #if defined(__cplusplus) && (201103L <= __cplusplus)
 #define H5_OVERRIDE override
 #else

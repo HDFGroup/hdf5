@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string>
 #include <cstdlib>
+#include <string>
 
 #include "H5CppDoc.h" // included only for Doxygen to generate part of RM
 #include "H5Include.h"

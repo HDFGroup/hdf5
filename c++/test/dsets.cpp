@@ -23,6 +23,8 @@
 
  ***************************************************************************/
 
+#include <cfloat>
+#include <cmath>
 #include <iostream>
 using std::cerr;
 using std::endl;
@@ -158,8 +160,7 @@ test_create(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
     // catch all other exceptions
@@ -167,8 +168,7 @@ test_create(H5File &file)
         issue_fail_msg("test_create", __LINE__, __FILE__);
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
+        delete dataset;
         return -1;
     }
 } // test_create
@@ -245,8 +245,7 @@ test_simple_io(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_simple_io
@@ -409,8 +408,14 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
 static size_t
 filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes,
              size_t *buf_size, void **buf)
-// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
+    // Unused
+    (void)flags;
+    (void)cd_nelmts;
+    (void)cd_values;
+    (void)buf_size;
+    (void)buf;
+
     return nbytes;
 }
 
@@ -679,10 +684,8 @@ test_compression(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (dataset != NULL)
-            delete dataset;
-        if (tconv_buf)
-            delete[] tconv_buf;
+        delete dataset;
+        delete[] tconv_buf;
         return -1;
     }
 } // test_compression
@@ -717,6 +720,9 @@ test_nbit_compression(H5File &file)
     hsize_t       i, j;
 
     SUBTEST("N-bit compression (setup)");
+
+    HDmemset(orig_data, 0, DIM1 * DIM2 * sizeof(s1_t));
+    HDmemset(new_data, 0, DIM1 * DIM2 * sizeof(s1_t));
 
     try {
         // Define datatypes of members of compound datatype
@@ -865,8 +871,7 @@ test_multiopen(H5File &file)
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
 
         // clean up and return with failure
-        if (space != NULL)
-            delete space;
+        delete space;
         return -1;
     }
 } // test_multiopen
@@ -941,8 +946,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             return -1;
         }
 
@@ -973,8 +977,7 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "bitfield_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
+            delete dset;
             throw E; // propagate the exception
         }
 
@@ -1008,10 +1011,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_1: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1044,10 +1045,8 @@ test_types(H5File &file)
             cerr << "    <<<  "
                  << "opaque_2: " << E.getFuncName() << " - " << E.getDetailMsg() << "  >>>" << endl
                  << endl;
-            if (dset != NULL)
-                delete dset;
-            if (optype != NULL)
-                delete optype;
+            delete dset;
+            delete optype;
             throw E; // propagate the exception
         }
 
@@ -1091,7 +1090,7 @@ test_getnativeinfo(H5File &file)
         H5O_native_info_t ninfo;
         HDmemset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
@@ -1099,7 +1098,7 @@ test_getnativeinfo(H5File &file)
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
         HDmemset(&ninfo, 0, sizeof(ninfo));
         dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
-        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
+        verify_val(static_cast<long>(ninfo.hdr.nchunks), 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         PASSED();
@@ -1151,12 +1150,15 @@ test_chunk_cache(const FileAccPropList &fapl)
         dapl.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_1, nslots_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_1, nbytes_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
-        verify_val(w0_1, w0_4, "DSetAccPropList::getChunkCache", __LINE__, __FILE__);
+        if (abs(w0_1 - w0_4) > DBL_EPSILON)
+            TestErrPrintf("%d: w0_1 and w0_4 different: w0_1=%f, "
+                          "w0_4=%f\n",
+                          __LINE__, w0_1, w0_4);
 
         // Set a link access property on dapl to verify property list inheritance
-        dapl.setNumLinks((size_t)134);
+        dapl.setNumLinks(134);
         size_t nlinks = dapl.getNumLinks();
-        verify_val(nlinks, (size_t)134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nlinks), 134, "DSetAccPropList::getNumLinks", __LINE__, __FILE__);
 
         // Make a copy of the external fapl
         FileAccPropList fapl_local(fapl);
@@ -1267,7 +1269,8 @@ test_virtual()
 
         // Get the current layout, should be default, H5D_CONTIGUOUS
         H5D_layout_t layout = dcpl.getLayout();
-        verify_val(layout, H5D_CONTIGUOUS, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_CONTIGUOUS),
+                   "DSetCreatPropList::getLayout", __LINE__, __FILE__);
 
         // Create fixed mapping
         hsize_t dims[RANK];
@@ -1289,7 +1292,8 @@ test_virtual()
 
         // Get and verify the new layout
         layout = dcpl.getLayout();
-        verify_val(layout, H5D_VIRTUAL, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+        verify_val(static_cast<long>(layout), static_cast<long>(H5D_VIRTUAL), "DSetCreatPropList::getLayout",
+                   __LINE__, __FILE__);
 
         PASSED();
         return 0;

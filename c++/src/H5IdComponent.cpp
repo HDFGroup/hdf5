@@ -11,9 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <cstring>
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"
@@ -399,8 +399,8 @@ IdComponent::p_get_file_name() const
     }
 
     // Call H5Fget_name again to get the actual file name
-    char *name_C = new char[name_size + 1]; // temporary C-string for C API
-    HDmemset(name_C, 0, name_size + 1);     // clear buffer
+    char *name_C = new char[name_size + 1];
+    memset(name_C, 0, name_size + 1);
 
     name_size = H5Fget_name(temp_id, name_C, name_size + 1);
 
@@ -434,10 +434,7 @@ IdComponent::p_valid_id(const hid_t obj_id)
         return false;
 
     H5I_type_t id_type = H5Iget_type(obj_id);
-    if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
-        return false;
-    else
-        return true;
+    return (id_type > H5I_BADID && id_type < H5I_NTYPES);
 }
 
 // Notes about IdComponent::id

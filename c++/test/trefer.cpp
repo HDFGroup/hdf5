@@ -81,9 +81,9 @@ test_reference_params()
 
         // Allocate write & read buffers
         int temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
-        wbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
-        rbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
-        tbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
+        wbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        rbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        tbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
 
         // Create file FILE1
         file1 = new H5File(FILE1, H5F_ACC_TRUNC);
@@ -103,7 +103,7 @@ test_reference_params()
 
         unsigned *tu32; // Temporary pointer to uint32 data
         int       i;
-        for (tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
+        for (tu32 = reinterpret_cast<unsigned *>(wbuf), i = 0; i < SPACE1_DIM1; i++)
             *tu32++ = i * 3; // from C test
 
         // Write selection to disk
@@ -179,8 +179,7 @@ test_reference_params()
         issue_fail_msg("test_reference_param()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } /* test_reference_param() */
 
 /*-------------------------------------------------------------------------
@@ -209,9 +208,9 @@ test_reference_obj()
 
         // Allocate write & read buffers
         int temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
-        wbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
-        rbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
-        tbuf          = (hobj_ref_t *)HDmalloc(temp_size * SPACE1_DIM1);
+        wbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        rbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        tbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
 
         // Create file FILE1
         file1 = new H5File(FILE1, H5F_ACC_TRUNC);
@@ -233,7 +232,7 @@ test_reference_obj()
         DataSet dataset = group.createDataSet(DSET1_NAME, PredType::NATIVE_UINT, sid1);
 
         unsigned *tu32; // Temporary pointer to uint32 data
-        for (tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
+        for (tu32 = reinterpret_cast<unsigned *>(wbuf), i = 0; i < SPACE1_DIM1; i++)
             *tu32++ = i * 3; // from C test
 
         // Write selection to disk
@@ -269,22 +268,26 @@ test_reference_obj()
         // Create reference to dataset and test getRefObjType
         file1->reference(&wbuf[0], "/Group1/Dataset1");
         H5O_type_t refobj_type = dataset.getRefObjType(&wbuf[0], H5R_OBJECT);
-        verify_val(refobj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to dataset and test getRefObjType
         file1->reference(&wbuf[1], "/Group1/Dataset2");
         refobj_type = dataset.getRefObjType(&wbuf[1], H5R_OBJECT);
-        verify_val(refobj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_DATASET),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to group
         file1->reference(&wbuf[2], "/Group1");
         refobj_type = dataset.getRefObjType(&wbuf[2], H5R_OBJECT);
-        verify_val(refobj_type, H5O_TYPE_GROUP, "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_GROUP),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Create reference to named datatype
         file1->reference(&wbuf[3], "/Group1/Datatype1");
         refobj_type = dataset.getRefObjType(&wbuf[3], H5R_OBJECT);
-        verify_val(refobj_type, H5O_TYPE_NAMED_DATATYPE, "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(refobj_type), static_cast<long>(H5O_TYPE_NAMED_DATATYPE),
+                   "DataSet::getRefObjType", __LINE__, __FILE__);
 
         // Write selection to disk
         dataset.write(wbuf, PredType::STD_REF_OBJ);
@@ -310,13 +313,14 @@ test_reference_obj()
         // Check information in the referenced dataset
         sid1                = dset2.getSpace();
         hssize_t n_elements = sid1.getSimpleExtentNpoints();
-        verify_val((long)n_elements, 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(n_elements), 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
         // Read from disk
         dset2.read(tbuf, PredType::NATIVE_UINT);
 
-        for (tu32 = (unsigned *)tbuf, i = 0; i < SPACE1_DIM1; i++, tu32++)
-            verify_val(*tu32, (uint32_t)(i * 3), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        for (tu32 = reinterpret_cast<unsigned *>(tbuf), i = 0; i < SPACE1_DIM1; i++, tu32++)
+            verify_val(*tu32, static_cast<uint32_t>(i * 3), "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
         // Close dereferenced dataset
         dset2.close();
@@ -354,7 +358,8 @@ test_reference_obj()
         H5T_class_t tclass;
 
         tclass = dtype1.getClass();
-        verify_val(tclass, H5T_COMPOUND, "DataType::getClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(tclass), static_cast<long>(H5T_COMPOUND), "DataType::getClass", __LINE__,
+                   __FILE__);
         int n_members = dtype1.getNmembers();
         verify_val(n_members, 3, "CompType::getNmembers", __LINE__, __FILE__);
 
@@ -374,8 +379,7 @@ test_reference_obj()
         issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // test_reference_obj()
 
 /*-------------------------------------------------------------------------
@@ -470,11 +474,11 @@ test_reference_group()
 
         // Check number of objects in the group dereferenced by constructor
         hsize_t nobjs = refgroup.getNumObjs();
-        verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), 3, "H5Group::getNumObjs", __LINE__, __FILE__);
 
         // Check number of objects in the group dereferenced by ::reference
         nobjs = group.getNumObjs();
-        verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), 3, "H5Group::getNumObjs", __LINE__, __FILE__);
 
         // Check getting file name given the group dereferenced via constructor
         H5std_string fname = refgroup.getFileName();
@@ -487,13 +491,14 @@ test_reference_group()
         // Check object type using Group::getObjinfo()
         H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
-        group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, oinfo);
-        verify_val(oinfo.type, H5O_TYPE_DATASET, "Group::getObjinfo", __LINE__, __FILE__);
+        group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, 0, oinfo);
+        verify_val(static_cast<long>(oinfo.type), static_cast<long>(H5O_TYPE_DATASET), "Group::getObjinfo",
+                   __LINE__, __FILE__);
 
         // Check for out of bound query by index
         try {
             HDmemset(&oinfo, 0, sizeof(oinfo));
-            group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)9, oinfo);
+            group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, 9, oinfo);
 
             // Should FAIL but didn't, so throw an invalid action exception
             throw InvalidActionException("Group::getObjinfo", "Out of bound index.");
@@ -504,7 +509,7 @@ test_reference_group()
         // Unlink one of the objects in the dereferenced group, and re-check
         refgroup.unlink(GROUPNAME2);
         nobjs = refgroup.getNumObjs();
-        verify_val(nobjs, (hsize_t)2, "H5Group::getNumObjs", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), 2, "H5Group::getNumObjs", __LINE__, __FILE__);
 
         // Close resources
         group.close();
@@ -518,8 +523,7 @@ test_reference_group()
         issue_fail_msg("test_reference_group()", __LINE__, __FILE__, E.getCFuncName(), E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } /* test_reference_group() */
 
 /*-------------------------------------------------------------------------
@@ -553,10 +557,10 @@ test_reference_region_1D()
             *drbuf;            // Buffer for reading numeric data from disk
 
         // Allocate write & read buffers
-        wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
-        rbuf  = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-        dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE3_DIM1);
-        drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), (size_t)SPACE3_DIM1);
+        wbuf  = static_cast<hdset_reg_ref_t *>(HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1));
+        rbuf  = static_cast<hdset_reg_ref_t *>(HDmalloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1));
+        dwbuf = static_cast<uint8_t *>(HDmalloc(sizeof(uint8_t) * SPACE3_DIM1));
+        drbuf = static_cast<uint8_t *>(HDcalloc(sizeof(uint8_t), SPACE3_DIM1));
 
         // Create file FILE1
         H5File file1(FILE2, H5F_ACC_TRUNC);
@@ -573,7 +577,7 @@ test_reference_region_1D()
 
         uint8_t *tu8; // Temporary pointer to uint8 data
         for (tu8 = dwbuf, i = 0; i < SPACE3_DIM1; i++)
-            *tu8++ = i * 3; // from C test
+            *tu8++ = static_cast<uint8_t>(i); // from C test
 
         // Write selection to disk
         dset3.write(dwbuf, PredType::STD_U8LE);
@@ -610,7 +614,8 @@ test_reference_region_1D()
 
         // Get and verify object type
         H5O_type_t obj_type = dset1.getRefObjType(&wbuf[0], H5R_DATASET_REGION);
-        verify_val(obj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
+        verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET), "DataSet::getRefObjType",
+                   __LINE__, __FILE__);
 
         /* Select sequence of ten points for second reference */
         coord1[0][0] = 16;
@@ -625,7 +630,7 @@ test_reference_region_1D()
         coord1[9][0] = 3;
 
         // Selects array elements to be included in the selection for sid3
-        sid3.selectElements(H5S_SELECT_SET, (size_t)POINT1_NPOINTS, (const hsize_t *)coord1);
+        sid3.selectElements(H5S_SELECT_SET, POINT1_NPOINTS, reinterpret_cast<const hsize_t *>(coord1));
 
         // Get and verify the number of elements in a dataspace selection
         nelms = sid3.getSelectNpoints();
@@ -661,12 +666,14 @@ test_reference_region_1D()
 
             // Get and verify object type
             obj_type = dset1.getRefObjType(&rbuf[0], H5R_DATASET_REGION);
-            verify_val(obj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
+            verify_val(static_cast<long>(obj_type), static_cast<long>(H5O_TYPE_DATASET),
+                       "DataSet::getRefObjType", __LINE__, __FILE__);
 
             // Get dataspace of dset3 the verify number of elements
             sid1  = dset3.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val((long)nelms, 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
         } // End of test DataSet::dereference
 
         { // Test DataSet constructor -by dereference
@@ -677,7 +684,8 @@ test_reference_region_1D()
             // Get dataspace of newds then verify number of elements
             sid1  = newds.getSpace();
             nelms = sid1.getSimpleExtentNpoints();
-            verify_val((long)nelms, 100, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+            verify_val(static_cast<long>(nelms), 100, "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
             // Close objects for this mini test
             newds.close();
@@ -687,8 +695,9 @@ test_reference_region_1D()
         // Read from disk
         dset3.read(drbuf, PredType::STD_U8LE);
 
-        for (tu8 = (uint8_t *)drbuf, i = 0; i < SPACE3_DIM1; i++, tu8++)
-            verify_val(*tu8, (uint8_t)(i * 3), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+        for (tu8 = static_cast<uint8_t *>(drbuf), i = 0; i < SPACE3_DIM1; i++, tu8++)
+            verify_val(*tu8, static_cast<uint8_t>(i), "DataSpace::getSimpleExtentNpoints", __LINE__,
+                       __FILE__);
 
         /*
          * Test getting the referenced region
@@ -699,56 +708,56 @@ test_reference_region_1D()
 
         // Get and verify number of elements in a dataspace selection
         nelms = reg_sp.getSelectNpoints();
-        verify_val((long)nelms, 30, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nelms), 30, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
 
         // Get and verify number of hyperslab blocks
         nelms = reg_sp.getSelectHyperNblocks();
-        verify_val((long)nelms, 15, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nelms), 15, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
 
         /* Allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc(nelms * SPACE3_RANK * sizeof(hsize_t) * 2);
+        coords = static_cast<hsize_t *>(HDmalloc(nelms * SPACE3_RANK * sizeof(hsize_t) * 2));
 
         // Get the list of hyperslab blocks currently selected
-        reg_sp.getSelectHyperBlocklist((hsize_t)0, (hsize_t)nelms, coords);
+        reg_sp.getSelectHyperBlocklist(0, static_cast<hsize_t>(nelms), coords);
 
         // Verify values in the list
-        verify_val(coords[0], (hsize_t)2, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[1], (hsize_t)3, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[2], (hsize_t)7, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[3], (hsize_t)8, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[4], (hsize_t)12, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[5], (hsize_t)13, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[6], (hsize_t)17, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[7], (hsize_t)18, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[8], (hsize_t)22, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[9], (hsize_t)23, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[10], (hsize_t)27, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[11], (hsize_t)28, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[12], (hsize_t)32, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[13], (hsize_t)33, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[14], (hsize_t)37, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[15], (hsize_t)38, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[16], (hsize_t)42, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[17], (hsize_t)43, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[18], (hsize_t)47, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[19], (hsize_t)48, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[20], (hsize_t)52, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[21], (hsize_t)53, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[22], (hsize_t)57, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[23], (hsize_t)58, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[24], (hsize_t)62, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[25], (hsize_t)63, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[26], (hsize_t)67, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[27], (hsize_t)68, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[28], (hsize_t)72, "Hyperslab Coordinates", __LINE__, __FILE__);
-        verify_val(coords[29], (hsize_t)73, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[0]), 2, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[1]), 3, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[2]), 7, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[3]), 8, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[4]), 12, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[5]), 13, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[6]), 17, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[7]), 18, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[8]), 22, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[9]), 23, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[10]), 27, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[11]), 28, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[12]), 32, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[13]), 33, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[14]), 37, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[15]), 38, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[16]), 42, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[17]), 43, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[18]), 47, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[19]), 48, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[20]), 52, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[21]), 53, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[22]), 57, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[23]), 58, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[24]), 62, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[25]), 63, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[26]), 67, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[27]), 68, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[28]), 72, "Hyperslab Coordinates", __LINE__, __FILE__);
+        verify_val(static_cast<long>(coords[29]), 73, "Hyperslab Coordinates", __LINE__, __FILE__);
 
         HDfree(coords);
 
         // Check boundaries
         reg_sp.getSelectBounds(low, high);
-        verify_val(low[0], (hsize_t)2, "DataSpace::getSelectBounds", __LINE__, __FILE__);
-        verify_val(high[0], (hsize_t)73, "DataSpace::getSelectBounds", __LINE__, __FILE__);
+        verify_val(static_cast<long>(low[0]), 2, "DataSpace::getSelectBounds", __LINE__, __FILE__);
+        verify_val(static_cast<long>(high[0]), 73, "DataSpace::getSelectBounds", __LINE__, __FILE__);
 
         /* Close region space */
         reg_sp.close();
@@ -762,13 +771,13 @@ test_reference_region_1D()
 
         // Get and verify number of element points in the current selection
         hssize_t nelmspts = elm_sp.getSelectElemNpoints();
-        verify_val((long)nelmspts, 10, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nelmspts), 10, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
 
         /* Allocate space for the hyperslab blocks */
-        coords = (hsize_t *)HDmalloc(nelmspts * SPACE3_RANK * sizeof(hsize_t));
+        coords = static_cast<hsize_t *>(HDmalloc(nelmspts * SPACE3_RANK * sizeof(hsize_t)));
 
         // Get the list of element points currently selected
-        elm_sp.getSelectElemPointlist((hsize_t)0, (hsize_t)nelmspts, coords);
+        elm_sp.getSelectElemPointlist(0, static_cast<hsize_t>(nelmspts), coords);
 
         // Verify points
         verify_val(coords[0], coord1[0][0], "Element Coordinates", __LINE__, __FILE__);
@@ -786,8 +795,8 @@ test_reference_region_1D()
 
         // Check boundaries
         elm_sp.getSelectBounds(low, high);
-        verify_val(low[0], (hsize_t)3, "DataSpace::getSelectBounds", __LINE__, __FILE__);
-        verify_val(high[0], (hsize_t)97, "DataSpace::getSelectBounds", __LINE__, __FILE__);
+        verify_val(static_cast<long>(low[0]), 3, "DataSpace::getSelectBounds", __LINE__, __FILE__);
+        verify_val(static_cast<long>(high[0]), 97, "DataSpace::getSelectBounds", __LINE__, __FILE__);
 
         // Close element space
         elm_sp.close();
