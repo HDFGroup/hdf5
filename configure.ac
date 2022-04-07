@@ -231,9 +231,10 @@ AC_CACHE_CHECK([for cached host], [hdf5_cv_host], [hdf5_cv_host="none"]);
 if test $hdf5_cv_host = "none"; then
   hdf5_cv_host=$host
 elif test $hdf5_cv_host != $host; then
-  echo "The config.cache file was generated on $hdf5_cv_host but"
-  echo "this is $host.  Please remove that file and try again."
-  AC_MSG_ERROR([config.cache file is invalid])
+  AC_MSG_ERROR([
+     The config.cache file was generated on $hdf5_cv_host but
+     this is $host.  Please remove that file and try again.
+     config.cache file is invalid])
 fi
 
 ## ----------------------------------------------------------------------
@@ -573,11 +574,7 @@ AC_ARG_ENABLE([fortran],
                               [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  echo "yes"
-else
-  echo "no"
-fi
+AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
@@ -800,9 +797,9 @@ AC_ARG_ENABLE([cxx],
               [AS_HELP_STRING([--enable-cxx],
                               [Compile the C++ interface [default=no]])],
               [HDF_CXX=$enableval])
+AC_MSG_RESULT([$HDF_CXX])
 
 if test "X$HDF_CXX" = "Xyes"; then
-  echo "yes"
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
   ## Expose the compiler for *.in files
@@ -826,7 +823,6 @@ if test "X$HDF_CXX" = "Xyes"; then
   PAC_PROG_CXX_OFFSETOF
 
 else
-  AC_MSG_RESULT([no])
   CXX="no"
 fi
 
@@ -915,7 +911,7 @@ if test "X-$DIMENSION_SCALES_WITH_NEW_REF" = X- ; then
   DIMENSION_SCALES_WITH_NEW_REF=no
 fi
 
-case "X-$DIMENSION_SCALES_WITH_NEW_REF" in 
+case "X-$DIMENSION_SCALES_WITH_NEW_REF" in
   X-yes)
     AC_MSG_RESULT([yes])
     AC_DEFINE([DIMENSION_SCALES_WITH_NEW_REF], [1],
@@ -1042,7 +1038,7 @@ AC_ARG_ENABLE([java],
 
 if test "X$HDF_JAVA" = "Xyes"; then
   if test "X${enable_shared}" != "Xno"; then
-    echo "yes"
+    AC_MSG_RESULT([yes])
     if test "X$CLASSPATH" = "X"; then
       H5_CLASSPATH=".:$srcdir/java/lib"
     else
@@ -1135,12 +1131,7 @@ AC_ARG_ENABLE([tests],
                               [Compile the HDF5 tests [default=yes]])],
               [HDF5_TESTS=$enableval])
 
-if test "X$HDF5_TESTS" = "Xno"; then
-  AC_MSG_RESULT([yes])
-  echo "Building HDF5 tests is disabled"
-else
-  AC_MSG_RESULT([no])
-fi
+AC_MSG_RESULT([$HDF5_TESTS])
 
 ## These need to be exposed for some tests.
 AC_SUBST([H5_UTILS_TEST_BUILDDIR])
@@ -1165,12 +1156,7 @@ AC_ARG_ENABLE([tools],
                               [Compile the HDF5 tools [default=yes]])],
               [HDF5_TOOLS=$enableval])
 
-if test "X$HDF5_TOOLS" = "Xno"; then
-  AC_MSG_RESULT([yes])
-  echo "Building HDF5 tools is disabled"
-else
-  AC_MSG_RESULT([no])
-fi
+AC_MSG_RESULT([$HDF5_TOOLS])
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to enable building doxygen files
@@ -1189,8 +1175,9 @@ AC_ARG_ENABLE([doxygen],
                               [Compile the HDF5 doxygen files [default=no]])],
               [HDF5_DOXYGEN=$enableval])
 
+AC_MSG_RESULT([$HDF5_DOXYGEN])
+
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
-  AC_MSG_RESULT([yes])
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
   DX_HTML_FEATURE(ON)
@@ -1250,10 +1237,6 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
-
-else
-  AC_MSG_RESULT([no])
-  echo "Doxygen support is disabled"
 fi
 
 
@@ -1283,18 +1266,17 @@ AC_ARG_ENABLE([static_exec],
                               [Install only statically linked executables
                                [default=no]])],
               [STATIC_EXEC=$enableval])
+AC_MSG_RESULT([$STATIC_EXEC])
 
 if test "X$STATIC_EXEC" = "Xyes"; then
-  echo "yes"
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
-    echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+    AC_MSG_WARN([-static flag not supported on this system; executable won't statically link shared system libraries.])
     LT_STATIC_EXEC=""
   else
     LT_STATIC_EXEC="-all-static"
   fi
 else
-  echo "no"
   LT_STATIC_EXEC=""
 fi
 AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
@@ -1647,6 +1629,7 @@ case "X-$withval" in
     ;;
 esac
 
+
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
@@ -1755,6 +1738,7 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
@@ -1839,7 +1823,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
-  AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
+  LL_PATH="$LD_LIBRARY_PATH"
 
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_RUN_IFELSE(
@@ -1887,13 +1871,8 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library (requires Pthreads on POSIX
-## systems). We usually pick up the system Pthreads library, so --with-pthread
-## is only necessary if you are using a custom Pthreads library or if
-## your OS hides its implementation in an unusual location.
-##
-## On Windows, we use Win32 threads and no special configuration should be
-## required to use them.
+## Enable thread-safe version of library.  It requires Pthreads support
+## on POSIX systems.
 ##
 AC_SUBST([THREADSAFE])
 
@@ -3837,12 +3816,7 @@ AC_ARG_ENABLE([build-all],
                      [Build helper programs that only developers should need [default=no]])],
      [BUILD_ALL=$enableval],
      [BUILD_ALL=no])
-
-if test "X$BUILD_ALL" = "Xyes"; then
- echo "yes"
-else
- echo "no"
-fi
+AC_MSG_RESULT([$BUILD_ALL])
 AM_CONDITIONAL([BUILD_ALL_CONDITIONAL], [test "X$BUILD_ALL" = "Xyes"])
 
 ## ----------------------------------------------------------------------

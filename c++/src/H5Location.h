@@ -334,7 +334,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
     // Noop destructor.
-    virtual ~H5Location() override;
+    virtual ~H5Location();
 
 }; // end of H5Location
 } // namespace H5
