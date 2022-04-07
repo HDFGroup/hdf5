@@ -244,7 +244,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                  */
                 HDmemset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0,
                          (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
-                /* Does the comparision */
+                /* Does the comparison */
                 if (HDmemcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
                     FAIL_PUTS_ERROR("comparison of TMP vfd and user buffer failed");
                 /* Free the temporary buffer */

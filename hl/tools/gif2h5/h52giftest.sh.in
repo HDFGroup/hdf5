@@ -46,7 +46,7 @@ TOOLTEST()
 
 # Verify the test runs with failure (return code is not 0)
 # Use for testing if tool can handle error conditions like
-# illegal input, bad arguments, exeeding limits, ...
+# illegal input, bad arguments, exceeding limits, ...
 TOOLTESTFAIL()
 {
     # for now, discard any error messages generated.
