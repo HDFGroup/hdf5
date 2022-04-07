@@ -223,7 +223,7 @@ TestGetNext()
     for (record = 1; record < 6; record++)
         wrapper.AppendPacket(&record);
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         wrapper.GetNextPacket(&record);
         if (record != i)
@@ -237,7 +237,7 @@ TestGetNext()
     if (error < 0)
         goto error;
 
-    /* Ensure that we can interate through the records and get the right ones */
+    /* Ensure that we can iterate through the records and get the right ones */
     for (i = 1; i < 6; i++) {
         error = wrapper.GetNextPacket(&record);
         if (record != i || error < 0)
@@ -307,7 +307,7 @@ TestCompress()
         if (HDstrncmp(filter_name, "deflate", 7) != 0)
             H5_FAILED()
     }
-    catch (Exception e) {
+    catch (Exception const &) {
         H5_FAILED();
         return 1;
     }
@@ -605,8 +605,8 @@ const int     STRING_LENGTH = 19; // including terminating NULL
 int
 TestHDFFV_9758()
 {
-    hid_t  strtype;
-    hid_t  compound_type;
+    hid_t  strtype       = H5I_INVALID_HID;
+    hid_t  compound_type = H5I_INVALID_HID;
     herr_t err;
     struct s1_t {
         int    a;

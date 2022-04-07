@@ -78,8 +78,7 @@ DSetCreatPropList::getConstant()
 void
 DSetCreatPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -553,7 +552,7 @@ DSetCreatPropList::setShuffle() const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             The values of space allocation time can be one of the
-///             followings:
+///             following:
 ///             \li \c H5D_ALLOC_TIME_DEFAULT
 ///             \li \c H5D_ALLOC_TIME_EARLY
 ///             \li \c H5D_ALLOC_TIME_LATE

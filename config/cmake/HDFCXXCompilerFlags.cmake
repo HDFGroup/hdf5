@@ -9,6 +9,8 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+ENABLE_LANGUAGE (CXX)
+
 set (CMAKE_CXX_STANDARD 98)
 set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 

@@ -28,6 +28,14 @@
 /* PacketTable superclass       */
 /********************************/
 
+/* Null constructor
+ * Sets table_id to "invalid"
+ */
+PacketTable::PacketTable()
+{
+    table_id = H5I_INVALID_HID;
+}
+
 /* "Open" Constructor
  * Opens an existing packet table, which can contain either fixed-length or
  * variable-length packets.
@@ -59,10 +67,7 @@ PacketTable::~PacketTable()
 bool
 PacketTable::IsValid()
 {
-    if (H5PTis_valid(table_id) == 0)
-        return true;
-    else
-        return false;
+    return H5PTis_valid(table_id) == 0;
 }
 
 /* IsVariableLength
@@ -271,7 +276,7 @@ FL_PacketTable::GetPackets(hsize_t startIndex, hsize_t endIndex, void *data)
     if (startIndex > endIndex)
         return -1;
 
-    return H5PTread_packets(table_id, startIndex, (size_t)(endIndex - startIndex + 1), data);
+    return H5PTread_packets(table_id, startIndex, static_cast<size_t>(endIndex - startIndex + 1), data);
 }
 
 /* GetNextPacket (single packet)

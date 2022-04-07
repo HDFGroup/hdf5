@@ -11,11 +11,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <cstring>
 #include <iostream>
-
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -71,8 +70,7 @@ PropList::getConstant()
 void
 PropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -305,7 +303,7 @@ PropList::getId() const
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
 ///             object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
+//              The underlying reference counting in the C library ensures
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
@@ -461,8 +459,8 @@ PropList::getProperty(const char *name) const
     size_t size = getPropSize(name);
 
     // Allocate buffer then get the property
-    char *prop_strg_C = new char[size + 1]; // temporary C-string for C API
-    HDmemset(prop_strg_C, 0, size + 1);     // clear buffer
+    char *prop_strg_C = new char[size + 1];
+    memset(prop_strg_C, 0, size + 1);
 
     herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
 
@@ -634,11 +632,12 @@ PropList::setProperty(const char *name, void *value) const
 void
 PropList::setProperty(const char *name, const char *charptr) const
 {
-    herr_t ret_value = H5Pset(id, name, (const void *)charptr);
+    herr_t ret_value = H5Pset(id, name, static_cast<const void *>(charptr));
     if (ret_value < 0) {
         throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
     }
 }
+
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
 ///\brief       This is an overloaded member function, provided for convenience.

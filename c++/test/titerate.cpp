@@ -79,7 +79,7 @@ static void printelems(const Group &group, const H5std_string &dsname, const H5s
 static int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*(const char *const *)s1, *(const char *const *)s2));
+    return (HDstrcmp(*reinterpret_cast<const char *const *>(s1), *reinterpret_cast<const char *const *>(s2)));
 }
 
 /*-------------------------------------------------------------------------
@@ -92,7 +92,7 @@ static herr_t
 liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info,
          void *op_data)
 {
-    iter_info *info   = (iter_info *)op_data;
+    iter_info *info   = static_cast<iter_info *>(op_data);
     static int count  = 0;
     static int count2 = 0;
 
@@ -134,7 +134,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 static void
 test_iter_group(FileAccPropList &fapl)
 {
-    int       i;                     /* counting variable */
     hsize_t   idx;                   /* Index in the group */
     char      name[NAMELEN];         /* temporary name buffer */
     char *    lnames[NDATASETS + 2]; /* Names of the links created */
@@ -160,7 +159,7 @@ test_iter_group(FileAccPropList &fapl)
         // Create a scalar file space
         DataSpace filespace;
 
-        for (i = 0; i < NDATASETS; i++) {
+        for (int i = 0; i < NDATASETS; i++) {
             snprintf(name, sizeof(name), "Dataset %d", i);
 
             // Create a dataset in the file
@@ -181,7 +180,7 @@ test_iter_group(FileAccPropList &fapl)
         check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
 
         /* Sort the dataset names */
-        HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+        HDqsort(lnames, NDATASETS + 2, sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
 
@@ -193,10 +192,10 @@ test_iter_group(FileAccPropList &fapl)
 
         // Get the number of object in the root group
         hsize_t nobjs = root_group.getNumObjs();
-        verify_val(nobjs, (hsize_t)(NDATASETS + 2), "H5Gget_info", __LINE__, __FILE__);
+        verify_val(static_cast<long>(nobjs), NDATASETS + 2, "H5Gget_info", __LINE__, __FILE__);
 
         H5std_string obj_name;
-        for (i = 0; i < nobjs; i++) {
+        for (hsize_t i = 0; i < nobjs; i++) {
             // H5O_info2_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
@@ -222,7 +221,7 @@ test_iter_group(FileAccPropList &fapl)
         // Attempted to iterate with negative index, should fail
         try {
             info.command = RET_ZERO;
-            idx          = (hsize_t)-1;
+            idx          = HSIZE_UNDEF;
             obj_name     = root_group.getObjnameByIdx(idx);
 
             // Should FAIL but didn't, so throw an invalid action exception
@@ -268,7 +267,7 @@ test_iter_group(FileAccPropList &fapl)
         } // do nothing, exception expected
 
         /* Free the dataset names */
-        for (i = 0; i < (NDATASETS + 2); i++)
+        for (int i = 0; i < NDATASETS + 2; i++)
             HDfree(lnames[i]);
 
         // Everything will be closed as they go out of scope
