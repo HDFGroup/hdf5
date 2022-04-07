@@ -353,7 +353,7 @@ error:
  * Function:    test_4
  *
  * Purpose:     Tests the H5HG_remove() feature by writing lots of objects
- *              and occassionally removing some.  When we're done they're all
+ *              and occasionally removing some.  When we're done they're all
  *              removed.
  *
  * Return:      Success:    0

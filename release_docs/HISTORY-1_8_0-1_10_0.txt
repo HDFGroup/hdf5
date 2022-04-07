@@ -211,7 +211,7 @@ New Features
 
     Parallel Library:
     -----------------
-    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
+    - Add H5Pget_mpio_no_collective_cause() function that retrieves reasons
       why the collective I/O was broken during read/write IO access.
       (JKM - 2012/08/30 HDFFV-8143)
     - Special Collective IO (IO when some processes do not contribute to the
@@ -331,10 +331,10 @@ New Features
     - h5repack: Improved performance for big chunked datasets (size > 128MB)
                when used with layout (-l) or compression (-f) option.
                It would perform much better prior to the improvement,
-               especially for cases that chunk dimentions looks like
+               especially for cases that chunk dimensions looks like
                "1024x5x1" (compare to "1x5x1024"). When bigger numbers
                are toward front and smaller number is toward back in chunk
-               dimentions.  HDFFV-7862 (JKM - 2012/03/01)
+               dimensions.  HDFFV-7862 (JKM - 2012/03/01)
     - h5dump: Added new option --no-compact-subset. This option will not
                interpret the '[' character as starting the compact form of
                subsetting. This is useful when the "h5dump error: unable to
@@ -564,7 +564,7 @@ Bug Fixes since HDF5-1.8.0 release
     - Fixed rare corruption bugs that could occur when using the new object
             header format. (NAF - 2012/3/15 - HDFFV-7879)
     - Creating a dataset in a read-only file caused seg fault when the file
-            is closed.  It's fixed.  The attemp to create a dataset will fail
+            is closed.  It's fixed.  The attempt to create a dataset will fail
             with the error stack indicating the file is read-only. (SLU -
             2012/1/25. Issue 7756)
     - Fixed a seg fault that could occur when shrinking a dataset with chunks
@@ -700,7 +700,7 @@ Bug Fixes since HDF5-1.8.0 release
             (NAF - 2009/03/23 - 1189)
     - Removed the long_long #define and replaced all instances with
             "long long". This caused problems with third party products. All
-            currently supported compliers support the type. (ADB - 2009/03/05)
+            currently supported compilers support the type. (ADB - 2009/03/05)
     - Fixed various bugs that could prevent the fill value from being written
             in certain rare cases. (NAF - 2009/02/26 - 1469)
     - Fixed a bug that prevented more than one dataset chunk from being cached
@@ -995,7 +995,7 @@ Bug Fixes since HDF5-1.8.0 release
     - h5ls: fixed segfault when access region reference data in an
           attribute. HDFFV-7838 (JKM 2011/12/29)
     - h5diff: fixed segfault over non-comparable attribute with different
-          dimention or rank, along with '-c' option to display details.
+          dimension or rank, along with '-c' option to display details.
           HDFFV-7770 (JKM 2011/10/24)
     - Fixed h5diff to display all the comparable object and attribute
           regardless of non-comparables. HDFFV-7693 (JKM 2011/09/16)
@@ -1025,7 +1025,7 @@ Bug Fixes since HDF5-1.8.0 release
           when mutually exclusive options (-d, -p and --use-system-epsilon)
           are used together. HDFFV-7600  (JKM 2011/07/07)
     - Fixed h5dump to display the first line of each element into correct
-          position for multiple dimention array type.
+          position for multiple dimension array type.
           Before this fix, the first line of each element in array were
           displayed after the last line of previous element without
           moving to the next line (+indentation).
@@ -1077,7 +1077,7 @@ Bug Fixes since HDF5-1.8.0 release
           as source file. (XCAO 2011/3/8)
     - Fixed h5dump for skipping some values for long array type dataset on
           Windows. This issue only occurred on Windows due to the different
-          return behavior from _vsnprintf() funtion. Bug#2161 (JKM 2011/3/3)
+          return behavior from _vsnprintf() function. Bug#2161 (JKM 2011/3/3)
     - Fixed h5dump for skipping array indices every certain number
           when the array type dataset is relatively big. The certain number
           varies according to the size of array. Bug#2092 (JKM 2011/2/15).
@@ -1202,7 +1202,7 @@ Bug Fixes since HDF5-1.8.0 release
     ------
 
     - Lite: The h5ltget_attribute_string_f used to return the C NULL character in the
-              returned character buffer. The returned Fortran charactor buffer now does
+              returned character buffer. The returned Fortran character buffer now does
               not return the C NULL character. (MSB - 2012/3/23)
     - Lite: The h5ltget_dataset_info_f function (gets information about a dataset)
            was not correctly returning the dimension array. (PVN - 2009/3/23)
@@ -1262,7 +1262,7 @@ Bug Fixes since HDF5-1.8.0 release
       The strings command of Mac inspects library files and older
       versions of strings may not know newer library format, resulting
       in errors.  Fixed by sending the library file as stdin to the strings
-      coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+      command to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
 
     - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
       faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
@@ -1535,8 +1535,8 @@ Known Problems
   of GCC. (Issue 8017. SLU - 2012/6/12)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower down the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -1719,7 +1719,7 @@ Known Problems
 
   exit $RETURN_VALUE
 
-  You get the HDF make files and test scipts to execute your filter script
+  You get the HDF make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.

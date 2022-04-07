@@ -3176,7 +3176,7 @@ done:
  NAME
     H5P_exist_plist
  PURPOSE
-    Internal routine to query the existance of a property in a property list.
+    Internal routine to query the existence of a property in a property list.
  USAGE
     htri_t H5P_exist_plist(plist, name)
         const H5P_genplist_t *plist;  IN: Property list to check
@@ -3235,7 +3235,7 @@ done:
  NAME
     H5P__exist_pclass
  PURPOSE
-    Internal routine to query the existance of a property in a property class.
+    Internal routine to query the existence of a property in a property class.
  USAGE
     herr_t H5P__exist_pclass(pclass, name)
         H5P_genclass_t *pclass;  IN: Property class to check
@@ -3751,7 +3751,7 @@ H5P__cmp_plist_cb(H5P_genprop_t *prop, void *_udata)
 
     /* Check if the property exists in the second property list */
     if ((prop2_exist = H5P_exist_plist(udata->plist2, prop->name)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "can't lookup existance of property?")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "can't lookup existence of property?")
     if (prop2_exist) {
         const H5P_genprop_t *prop2; /* Pointer to property in second plist */
 
@@ -4702,7 +4702,7 @@ done:
     Returns non-negative on success, negative on failure.
  DESCRIPTION
         Removes a property from a property list.  Both properties which were
-    in existance when the property list was created (i.e. properties registered
+    in existence when the property list was created (i.e. properties registered
     with H5Pregister2) and properties added to the list after it was created
     (i.e. added with H5Pinsert2) may be removed from a property list.
     Properties do not need to be removed a property list before the list itself
@@ -4783,7 +4783,7 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist")
 
-    /* If the property exists in the destination alread */
+    /* If the property exists in the destination already */
     if (NULL != H5P__find_prop_plist(dst_plist, name)) {
         /* Delete the property from the destination list, calling the 'close' callback if necessary */
         if (H5P_remove(dst_plist, name) < 0)

@@ -5858,7 +5858,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             is_dense = H5O__is_attr_dense_test(my_dataset);
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
-            /* Check for query on non-existant attribute */
+            /* Check for query on non-existent attribute */
             ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo,
                                      H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
@@ -6346,7 +6346,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     is_dense = H5O__is_attr_dense_test(my_dataset);
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
-                    /* Check for deleting non-existant attribute */
+                    /* Check for deleting non-existent attribute */
                     ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
 
@@ -8001,7 +8001,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             is_dense = H5O__is_attr_dense_test(my_dataset);
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
-            /* Check for opening a non-existant attribute on an object with no attributes */
+            /* Check for opening a non-existent attribute on an object with no attributes */
             ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
             VERIFY(ret_id, FAIL, "H5Aopen");
 
@@ -8040,7 +8040,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             is_dense = H5O__is_attr_dense_test(my_dataset);
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
-            /* Check for opening a non-existant attribute on an object with compact attribute storage */
+            /* Check for opening a non-existent attribute on an object with compact attribute storage */
             ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
             VERIFY(ret_id, FAIL, "H5Aopen");
 
@@ -8121,7 +8121,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 VERIFY(name_count, (max_compact * 2), "H5O__attr_dense_info_test");
             } /* end if */
 
-            /* Check for opening a non-existant attribute on an object with dense attribute storage */
+            /* Check for opening a non-existent attribute on an object with dense attribute storage */
             ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
             VERIFY(ret_id, FAIL, "H5Aopen");
 
@@ -10989,7 +10989,7 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
 **      chunk.  Do this twice: once with only attributes in the
 **      object header chunk and once with a (small) soft link in
 **      the chunk as well.  In both cases, the shrunk chunk will
-**      initally be too small and a new NULL message must be
+**      initially be too small and a new NULL message must be
 **      created.
 **
 ****************************************************************/

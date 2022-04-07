@@ -1523,7 +1523,7 @@ add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hb
  *              Otherwise, set up a pinned entry dependency so we can
  *              test the pinned entry modifications to the flush routine.
  *
- *        Given the types and indicies of the pinned and pinning
+ *        Given the types and indices of the pinned and pinning
  *        entries, add the pinned entry to the list of pinned
  *        entries in the pinning entry, increment the
  *        pinning reference count of the pinned entry, and
@@ -1768,7 +1768,7 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
 
             case FLUSH_OP__EXPUNGE:
                 /* the expunge flush op exists to allow us to simulate the
-                 * case in which an entry is removed from the cashe as the
+                 * case in which an entry is removed from the cache as the
                  * the result of the flush of a second entry.  At present,
                  * this can only happen via the take ownership flag, but
                  * we will make this test feature more general to as to make
@@ -2313,7 +2313,7 @@ verify_clean(void)
  * Function:    verify_entry_status
  *
  * Purpose:    Verify that a list of entries have the expected status.
- *         If any discrepencies are found, set the failure message
+ *         If any discrepancies are found, set the failure message
  *         and set pass to FALSE.
  *
  *        Do nothing if pass is FALSE on entry.
@@ -3833,7 +3833,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     HDassert((!cache_ptr->slist_enabled) ||
                              (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
-            }     /* end elsef */
+            }     /* end elseif */
 
             if (verbose)
                 HDfprintf(stdout, "\n");
@@ -5241,7 +5241,7 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t
  *        has both internal and external configuration matching
  *        *config_ptr.
  *
- *        Do nothin on success.  On failure, set pass to FALSE, and
+ *        Do nothing on success.  On failure, set pass to FALSE, and
  *        load an error message into failue_mssg.  Note that
  *        failure_msg is assumed to be at least 128 bytes in length.
  *

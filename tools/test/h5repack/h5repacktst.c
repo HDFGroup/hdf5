@@ -624,7 +624,7 @@ main(void)
     SKIPPED();
 #endif
 
-    TESTING("    addding shuffle filter");
+    TESTING("    adding shuffle filter");
 
     /*-------------------------------------------------------------------------
      * test an individual object option
@@ -653,7 +653,7 @@ main(void)
      *-------------------------------------------------------------------------
      */
 
-    TESTING("    addding shuffle filter to all");
+    TESTING("    adding shuffle filter to all");
 
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -1592,17 +1592,17 @@ main(void)
 #endif
 
     /*-------------------------------------------------------------------------
-     * test file with aligment
+     * test file with alignment
      *-------------------------------------------------------------------------
      */
-    TESTING("    file with aligment");
+    TESTING("    file with alignment");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
 
-    /* add the options for aligment */
+    /* add the options for alignment */
     pack_options.alignment = 1;
     pack_options.threshold = 1;
 
@@ -1613,7 +1613,7 @@ main(void)
     if (h5repack_verify(FNAME8, FNAME8OUT, &pack_options) <= 0)
         GOERROR;
 
-    /* verify aligment */
+    /* verify alignment */
     {
         hsize_t threshold;
         hsize_t alignment;
@@ -6244,7 +6244,7 @@ gen_refered_objs(hid_t loc_id)
         goto out;
     }
 
-    /* create normal dataset which is refered */
+    /* create normal dataset which is referred */
     did2 = H5Dcreate2(loc_id, NAME_OBJ_DS2, H5T_STD_I8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did2 < 0) {
         HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
@@ -6284,7 +6284,7 @@ out:
  *  Generate object references to objects (dataset,group and named datatype)
  *
  * Note:
- *  copied from h5copygentest.c and upate to create named datatype
+ *  copied from h5copygentest.c and update to create named datatype
  *
  * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/

@@ -2089,11 +2089,11 @@ H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, uint
         } /* end else */
     }     /* end if */
 
-    /* Check if the section's class change will affect the mergable list */
+    /* Check if the section's class change will affect the mergeable list */
     if ((old_cls->flags & H5FS_CLS_SEPAR_OBJ) != (new_cls->flags & H5FS_CLS_SEPAR_OBJ)) {
-        hbool_t to_mergable; /* Flag if the section is changing to a mergable section */
+        hbool_t to_mergable; /* Flag if the section is changing to a mergeable section */
 
-        /* Determine if this section is becoming mergable or is becoming separate */
+        /* Determine if this section is becoming mergeable or is becoming separate */
         if (old_cls->flags & H5FS_CLS_SEPAR_OBJ)
             to_mergable = TRUE;
         else

@@ -1,0 +1,15 @@
+# GitHub Action to automate the identification of common misspellings in text files
+# https://github.com/codespell-project/codespell
+# https://github.com/codespell-project/actions-codespell
+name: codespell
+on: [push, pull_request]
+jobs:
+  codespell:
+    name: Check for spelling errors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: codespell-project/actions-codespell@master
+        with:
+          skip: ./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c
+          ignore_words_list: isnt,inout,nd,parms,parm,ba,offsetP,ser,ois,had,fiter,fo,clude,refere,minnum,offsetp,creat,ans:,eiter,lastr,ans,isn't,ifset,sur,trun,dne,tthe,hda,filname,te,htmp,minnum,ro,oce,ot

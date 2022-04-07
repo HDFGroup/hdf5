@@ -111,7 +111,7 @@
 #endif
 
 /*
- * Longjumps are used to detect alignment constrants
+ * Longjumps are used to detect alignment constraints
  */
 #ifdef H5_HAVE_SETJMP_H
 #include <setjmp.h>

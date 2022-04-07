@@ -41,7 +41,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Cancelability structure */
+/* Cancellability structure */
 typedef struct H5TS_cancel_struct {
     int          previous_state;
     unsigned int cancel_count;
@@ -548,9 +548,9 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
  *    Creates a cancellation counter for a thread if it is the first time
  *    the thread is entering the library.
  *
- *    if counter value is zero, then set cancelability type of the thread
+ *    if counter value is zero, then set cancellability type of the thread
  *    to PTHREAD_CANCEL_DISABLE as thread is entering the library and store
- *    the previous cancelability type into cancellation counter.
+ *    the previous cancellability type into cancellation counter.
  *
  *    Increase the counter value by 1.
  *
@@ -613,8 +613,8 @@ H5TS_cancel_count_inc(void)
  * Returns:     SUCCEED/FAIL
  *
  * Description:
- *    If counter value is one, then set cancelability type of the thread
- *    to the previous cancelability type stored in the cancellation counter.
+ *    If counter value is one, then set cancellability type of the thread
+ *    to the previous cancellability type stored in the cancellation counter.
  *    (the thread is leaving the library).
  *
  *    Decrement the counter value by 1.
@@ -658,7 +658,7 @@ H5TS_cancel_count_dec(void)
  *    H5TS_rec_entry_count, or NULL on failure.
  *
  * Description:
- *    Allocate and initalize an instance of H5TS_rec_entry_count.
+ *    Allocate and initialize an instance of H5TS_rec_entry_count.
  *
  * Programmer:  John Mainzer
  *              August 28, 2020
@@ -824,7 +824,7 @@ H5TS_rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
     }
     else {
 
-        /* We are commited to the destroy at this point.  Set magic
+        /* We are committed to the destroy at this point.  Set magic
          * to an invalid value, and call the appropriate pthread
          * destroy routines.  Call them all, even if one fails along
          * the way.

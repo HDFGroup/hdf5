@@ -432,7 +432,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
                          H5HF_indirect_t *par_iblock, unsigned par_entry, unsigned flags)
 {
     H5HF_direct_t *        dblock;           /* Direct block from cache */
-    H5HF_dblock_cache_ud_t udata;            /* parent and other infor for deserializing direct block */
+    H5HF_dblock_cache_ud_t udata;            /* parent and other info for deserializing direct block */
     H5HF_direct_t *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE

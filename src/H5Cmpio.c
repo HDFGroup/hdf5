@@ -1095,7 +1095,7 @@ done:
  *
  *              Note that this function is a modified version of
  *              H5C_flush_cache() -- any changes there may need to be
- *              reflected here and vise versa.
+ *              reflected here and vice versa.
  *
  * Return:      Non-negative on success/Negative on failure.
  *

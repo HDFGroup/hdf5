@@ -1015,7 +1015,7 @@ done:
  * assume one byte has 8 bit
  * assume padding bit is 0
  * assume size of unsigned char is one byte
- * assume one data item of certain datatype is stored continously in bytes
+ * assume one data item of certain datatype is stored continuously in bytes
  * atomic datatype is treated on byte basis
  */
 

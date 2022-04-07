@@ -50,7 +50,7 @@
 typedef struct {
     H5FS_t *fspace; /* Free space manager */
     FILE *  stream; /* Stream for output */
-    int     indent; /* Indention amount */
+    int     indent; /* Indentation amount */
     int     fwidth; /* Field width amount */
 } H5MF_debug_iter_ud_t;
 

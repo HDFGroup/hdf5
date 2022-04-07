@@ -4789,7 +4789,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL__link_copy
  *
- * Purpose:	Copys a link from src to dst.
+ * Purpose:	Copies a link from src to dst.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -4820,7 +4820,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_link_copy
  *
- * Purpose:	Copys a link from src to dst.
+ * Purpose:	Copies a link from src to dst.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -6086,7 +6086,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__request_wait
  *
- * Purpose:     Waits on an asychronous request through the VOL
+ * Purpose:     Waits on an asynchronous request through the VOL
  *
  * Note:	Releases the request if the operation has completed and the
  *		connector callback succeeds
@@ -6123,7 +6123,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_request_wait
  *
- * Purpose:     Waits on an asychronous request through the VOL
+ * Purpose:     Waits on an asynchronous request through the VOL
  *
  * Note:	Releases the request if the operation has completed and the
  *		connector callback succeeds
