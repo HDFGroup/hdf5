@@ -2914,7 +2914,7 @@ test_userblock_file_size(void)
     ret = H5Pset_userblock(fcpl2_id, USERBLOCK_SIZE);
     CHECK(ret, FAIL, "H5Pset_userblock");
 
-    /* Create files.  Only file2 with have a userblock. */
+    /* Create files.  Only file2 will have a userblock. */
     file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1_id, FAIL, "H5Fcreate");
     file2_id = H5Fcreate(FILE2, H5F_ACC_TRUNC, fcpl2_id, H5P_DEFAULT);

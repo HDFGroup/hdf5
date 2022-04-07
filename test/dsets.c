@@ -2009,7 +2009,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue in spite data is corrupted. */
+        /* Callback decides to continue even though data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2076,7 +2076,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue in spite data is corrupted. */
+        /* Callback decides to continue even though data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2140,7 +2140,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue in spite data is corrupted. */
+        /* Callback decides to continue even though data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2207,7 +2207,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue in spite data is corrupted. */
+        /* Callback decides to continue even though data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
