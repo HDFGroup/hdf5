@@ -1,0 +1,45 @@
+The release timeline was generated on PlantUML (https://plantuml.com)
+
+The current script:
+
+@startuml
+title HDF5 Release Schedule
+
+projectscale monthly
+Project starts 2021-01-01
+
+[1.8] starts 2021-01-01 and lasts 114 weeks
+[1.8.22] happens 2021-02-05
+[1.8.23] happens 2022-12-31
+[1.8.23] displays on same row as [1.8.22]
+[1.8] is colored in #CC6677
+
+[1.10] starts 2021-01-01 and lasts 114 weeks
+[1.10.8] happens 2021-10-22
+[1.10.9] happens 2022-05-31
+[1.10.9] displays on same row as [1.10.8]
+[1.10] is colored in #DDCC77
+
+[1.12] starts 2021-01-01 and lasts 114 weeks
+[1.12.1] happens 2021-07-01
+[1.12.2] happens 2022-04-30
+[1.12.2] displays on same row as [1.12.1]
+[1.12] is colored in #88CCEE
+
+[1.13] starts 2021-01-01 and lasts 104 weeks
+[1.13.0] happens 2021-12-01
+[1.13.1] happens 2022-03-02
+[1.13.2] happens 2022-06-31
+[1.13.3] happens 2022-08-31
+[1.13.4] happens 2022-10-31
+[1.13.1] displays on same row as [1.13.0]
+[1.13.2] displays on same row as [1.13.0]
+[1.13.3] displays on same row as [1.13.0]
+[1.13.4] displays on same row as [1.13.0]
+[1.13] is colored in #44AA99
+
+[1.14] starts at 2022-12-31 and lasts 10 weeks
+[1.14.0] happens at 2022-12-31
+[1.14] is colored in #AA4499
+@enduml
+
