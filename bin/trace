@@ -248,7 +248,9 @@ sub argstring ($$$) {
 
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
-  $atype =~ s/^\bconst\b//;
+  $atype =~ s/^\bconst\b//;     # Leading const
+  $atype =~ s/\s*const\s*//;    # const after type, possibly in the middle of '*'s
+  $atype =~ s/^\bstatic\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
   $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
   $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
@@ -276,7 +278,7 @@ sub argstring ($$$) {
   } else {
     $tstr = $TypeString{$atype};
   }
-  return ("*" x $ptr) . ($array?"[$array]":"") . $tstr;
+  return ("*" x $ptr) . ($array ? "[$array]" : "") . $tstr;
 }
 
 ##############################################################################
@@ -305,7 +307,7 @@ sub rewrite_func ($$$$$) {
     my %names;
 
     for $arg (@args) {
-      if($arg=~/\w*\.{3}\w*/){
+      if($arg=~/\w*\.{3}\w*/){  # Skip "..." for varargs parameter
         next;
       }
       unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)

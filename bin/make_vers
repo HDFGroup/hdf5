@@ -6,10 +6,10 @@ use warnings;
 # (The max_idx parameter is the only thing that needs to be changed when adding
 #       support for a new major release.  If support for a prior major release
 #       is added (like support for 1.4, etc), the min_sup_idx parameter will
-#       need to be decremented. - QAK)
+#       need to be decremented.)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, etc)
-$max_idx = 6;
+# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, etc)
+$max_idx = 7;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
