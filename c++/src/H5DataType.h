@@ -47,7 +47,7 @@ class H5_DLLCPP DataType : public H5Object {
     //        PropList& plist = PropList::DEFAULT);
 
     // Closes this datatype.
-    virtual void close()  H5_OVERRIDE;
+    virtual void close() H5_OVERRIDE;
 
     // Copies an existing datatype to this datatype object.
     void copy(const DataType &like_type);
