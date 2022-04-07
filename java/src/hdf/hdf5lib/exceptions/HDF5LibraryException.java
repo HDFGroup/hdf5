@@ -204,13 +204,13 @@ public class HDF5LibraryException extends HDF5Exception {
             return "Can't release object";
         }
         else if (err_code == HDF5Constants.H5E_BADATOM) {
-            return "Can't find atom information";
+            return "Can't find ID information";
         }
         else if (err_code == HDF5Constants.H5E_BADGROUP) {
             return "Can't find group information";
         }
         else if (err_code == HDF5Constants.H5E_CANTREGISTER) {
-            return "Can't register new atom";
+            return "Can't register new ID";
         }
         else if (err_code == HDF5Constants.H5E_CANTINC) {
             return "Can't increment reference count";

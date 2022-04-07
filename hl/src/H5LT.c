@@ -1776,6 +1776,32 @@ H5LTset_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5LTset_attribute_ullong
+ *
+ * Purpose: Create and write an attribute.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Alessandro Felder
+ *
+ * Date: August 27, 2021
+ *
+ * Comments:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LTset_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name,
+                         const unsigned long long *data, size_t size)
+{
+
+    if (H5LT_set_attribute_numerical(loc_id, obj_name, attr_name, size, H5T_NATIVE_ULLONG, data) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_float
  *
  * Purpose: Create and write an attribute.
@@ -1870,19 +1896,12 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  *
  *-------------------------------------------------------------------------
  */
-/* H5Aiterate wants a non-const pointer but we have a const pointer in the API
- * call. It's safe to ignore this because we control the callback, don't
- * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
- * library never modifies that buffer.
- */
-H5_GCC_DIAG_OFF("cast-qual")
 herr_t
 H5LT_find_attribute(hid_t loc_id, const char *attr_name)
 {
     htri_t attr_exists = H5Aexists(loc_id, attr_name);
     return (attr_exists < 0) ? (herr_t)-1 : (attr_exists) ? (herr_t)1 : (herr_t)0;
 }
-H5_GCC_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ndims
@@ -3266,6 +3285,33 @@ H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
 {
     /* Get the attribute */
     if (H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_ULONG, data) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5LTget_attribute_ullong
+ *
+ * Purpose: Reads an attribute named attr_name
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Alessandro Felder
+ *
+ * Date: August 27, 2021
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LTget_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name, unsigned long long *data)
+{
+    /* Get the attribute */
+    if (H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_ULLONG, data) < 0)
         return -1;
 
     return 0;

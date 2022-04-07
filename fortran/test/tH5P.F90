@@ -541,7 +541,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Dclose_f(dsid, error)
   CALL H5Oopen_f(fid, "dset", dsid, error, dapl1)
 
-  ! Retrieve dapl from dataset, verfiy cache values are the same as on dapl1
+  ! Retrieve dapl from dataset, verify cache values are the same as on dapl1
   !
   ! Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
   ! values directly from the dataset structure, and not from a copy of the
@@ -563,7 +563,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Oopen_f(fid, "dset", dsid, error)
   CALL check("H5Oopen_f", error, total_error)
 
-  ! Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local
+  ! Retrieve dapl from dataset, verify cache values are the same as on fapl_local
 
   CALL H5Dget_access_plist_f(dsid, dapl2, error)
   CALL check("H5Dget_access_plist_f", error, total_error)

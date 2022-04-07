@@ -776,8 +776,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
-  INTEGER(HSIZE_T) :: htmp
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -840,10 +839,6 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            my_dataset = dset3
         END SELECT
 
-        !  Check for query on non-existent attribute
-
-        n = 0
-
         ! -- CHECK PASSING AN INTEGER CONSTANT IN DIFFERENT FORMS --
 
         ! 1) call by passing an integer with the _hsize_t declaration
@@ -896,8 +891,8 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            !  Verify information for new attribute
 
 !EP        CALL attr_info_by_idx_check(my_dataset, attrname, INT(j,HSIZE_T), use_index(i), total_error )
-           htmp = j
-           CALL attr_info_by_idx_check(my_dataset, attrname, htmp, use_index(i), total_error )
+           n = INT(j, HSIZE_T)
+           CALL attr_info_by_idx_check(my_dataset, attrname, n, use_index(i), total_error )
 
            !CHECK(ret, FAIL, "attr_info_by_idx_check");
         ENDDO
@@ -1427,7 +1422,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER :: u     !  Local index variable
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -2268,7 +2263,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
   INTEGER :: error
 
   INTEGER :: crt_order_flags
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   !  Output message about test being performed
 !  WRITE(*,*) "     - Testing Basic Code for Attributes with Creation Order Info"

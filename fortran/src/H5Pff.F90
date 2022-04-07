@@ -1880,7 +1880,7 @@ CONTAINS
 ! INPUTS
 !
 !  prp_id	- file access property list identifier
-!  gc_reference	- flag for string garbage collection on
+!  gc_reference	- flag for setting garbage collection on
 !		  and off (1 or 0)
 ! OUTPUTS
 !
@@ -1931,7 +1931,7 @@ CONTAINS
 !  prp_id	- file access property list identifier
 ! OUTPUTS
 !
-!  gc_reference	- flag for string garbage collection on
+!  gc_reference	- flag for setting garbage collection on
 !		  and off (1 or 0)
 !  hdferr       - error code
 !	           Success:  0
