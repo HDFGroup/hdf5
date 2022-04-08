@@ -4362,6 +4362,7 @@ main(void)
     nerrors -= test_integration_create_delete_objects();
     nerrors -= test_integration_dset_extension();
 
+
 #if H5FD_ONION_ENABLE_INDEX_STATS
     nerrors -= test_working_index_stats(); /* TODO */
 #endif                                     /* H5FD_ONION_ENABLE_INDEX_STATS */
