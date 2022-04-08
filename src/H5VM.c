@@ -64,7 +64,7 @@ static void
 H5VM__stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, const hsize_t *size,
                        hsize_t *stride1)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
@@ -103,7 +103,7 @@ static void
 H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, const hsize_t *size,
                        hsize_t *stride1, hsize_t *stride2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* This has to be true because if we optimize the dimensionality down to
      * zero we still must make one reference.
@@ -792,7 +792,7 @@ H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsiz
     int            j; /* Local index variable */
     hbool_t        carry;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(elmt_size < SIZET_MAX);
     HDassert(dst_n > 0);

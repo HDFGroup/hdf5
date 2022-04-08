@@ -267,7 +267,7 @@ H5L__find_class_idx(H5L_type_t id)
     size_t i;                /* Local index variable */
     int    ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id)
@@ -544,7 +544,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     hbool_t obj_created   = FALSE;   /* Whether an object was created (through a hard link) */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid location */
     /* (which is not what we want) */
@@ -708,7 +708,7 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
     H5L_trav_cr_t   udata;                              /* User data for callback */
     herr_t          ret_value = SUCCEED;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(link_loc);
@@ -958,7 +958,7 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(lnk);
@@ -1015,7 +1015,7 @@ H5L__get_val_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, cons
     H5L_trav_gv_t *udata     = (H5L_trav_gv_t *)_udata; /* User data passed in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk == NULL)
@@ -1099,7 +1099,7 @@ H5L__get_val_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_A
     hbool_t          lnk_copied = FALSE;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
@@ -1187,7 +1187,7 @@ H5L__delete_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *ln
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the group resolved to a valid link */
     if (grp_loc == NULL)
@@ -1277,7 +1277,7 @@ H5L__delete_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_AT
     H5L_trav_gvbi_t *udata     = (H5L_trav_gvbi_t *)_udata; /* User data passed in */
     herr_t           ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC_TAG((obj_loc) ? (obj_loc->oloc->addr) : HADDR_UNDEF)
+    FUNC_ENTER_PACKAGE_TAG((obj_loc) ? (obj_loc->oloc->addr) : HADDR_UNDEF)
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
@@ -1361,7 +1361,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
     hbool_t         temp_loc_init = FALSE;
     herr_t          ret_value     = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make sure an object with this name doesn't already exist */
     if (obj_loc != NULL)
@@ -1472,7 +1472,7 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
     hbool_t        link_copied = FALSE;             /* Has udata_out.lnk been allocated? */
     herr_t         ret_value   = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -1662,7 +1662,7 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
 {
     H5L_trav_le_t *udata = (H5L_trav_le_t *)_udata; /* User data passed in */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid link */
     *udata->exists = (hbool_t)(lnk != NULL);
@@ -1695,7 +1695,7 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
     H5L_trav_le_t *udata     = (H5L_trav_le_t *)_udata; /* User data passed in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk != NULL) {
@@ -1859,7 +1859,7 @@ H5L__get_info_cb(H5G_loc_t *grp_loc /*in*/, const char H5_ATTR_UNUSED *name, con
     H5L_trav_gi_t *udata     = (H5L_trav_gi_t *)_udata; /* User data passed in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk == NULL)
@@ -1930,7 +1930,7 @@ H5L__get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     hbool_t          lnk_copied = FALSE;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
@@ -2016,7 +2016,7 @@ H5L__get_name_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     H5L_trav_gnbi_t *udata     = (H5L_trav_gnbi_t *)_udata; /* User data passed in */
     herr_t           ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)

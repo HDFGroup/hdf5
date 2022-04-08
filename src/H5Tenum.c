@@ -363,7 +363,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     hbool_t  alloc_name = FALSE; /* Whether name has been allocated */
     char *   ret_value  = NULL;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt && H5T_ENUM == dt->shared->type);
@@ -493,7 +493,7 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
     H5T_t *  copied_dt = NULL;    /*do sorting in copied datatype */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt && H5T_ENUM == dt->shared->type);

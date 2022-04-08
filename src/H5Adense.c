@@ -277,7 +277,7 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
     const H5A_t **user_attr = (const H5A_t **)_user_attr; /* User data from v2 B-tree attribute lookup */
     herr_t        ret_value = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(attr);
@@ -580,7 +580,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
     H5A_dense_bt2_corder_rec_t *record = (H5A_dense_bt2_corder_rec_t *)_record; /* Record from B-tree */
     H5O_fheap_id_t *new_heap_id        = (H5O_fheap_id_t *)_op_data; /* "op data" from v2 B-tree modify */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(record);
@@ -617,7 +617,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
     uint8_t                   attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
     herr_t                    ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(record);
@@ -820,7 +820,7 @@ H5A__dense_copy_fh_cb(const void *obj, size_t obj_len, void *_udata)
     H5A_fh_ud_cp_t *udata     = (H5A_fh_ud_cp_t *)_udata; /* User data for fractal heap 'op' callback */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Decode attribute information & keep a copy */
     /* (we make a copy instead of calling the user/library callback directly in
@@ -1046,7 +1046,7 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
     H5A_bt2_ud_it_t *bt2_udata = (H5A_bt2_ud_it_t *)_bt2_udata; /* User data for callback */
     herr_t           ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for skipping attributes */
     if (bt2_udata->skip > 0)
@@ -1276,7 +1276,7 @@ H5A__dense_remove_bt2_cb(const void *_record, void *_udata)
     H5B2_t *bt2_corder = NULL;    /* v2 B-tree handle for creation order index */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for removing the link from the creation order index */
     if (H5F_addr_defined(udata->corder_bt2_addr)) {
@@ -1428,7 +1428,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     hbool_t use_sh_loc;          /* Whether to use the attribute's shared location or the separate one */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Set up the user data for fractal heap 'op' callback */
     fh_udata.f      = bt2_udata->f;
@@ -1762,7 +1762,7 @@ H5A__dense_delete_bt2_cb(const void *_record, void *_bt2_udata)
     H5A_t *              attr      = NULL;                              /* Attribute being removed */
     herr_t               ret_value = SUCCEED;                           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for shared attribute */
     if (record->flags & H5O_MSG_FLAG_SHARED) {

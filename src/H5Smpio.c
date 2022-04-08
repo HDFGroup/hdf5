@@ -121,7 +121,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     hsize_t  bigio_count;         /* Transition point to create derived type */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -173,7 +173,7 @@ done:
 static herr_t
 H5S__mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* fill in the return values */
     *new_type        = MPI_BYTE;
@@ -212,7 +212,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
     int     mpi_code;            /* MPI error code */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Create an MPI datatype for an element */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
@@ -375,7 +375,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
     hsize_t         u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -513,7 +513,7 @@ H5S__mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute, 
     hsize_t        u;                     /* Local index variable */
     herr_t         ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -661,7 +661,7 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
     int              mpi_code; /* MPI return code */
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -994,7 +994,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
     int                     mpi_code;                     /* MPI return code */
     herr_t                  ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -1065,7 +1065,7 @@ H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list)
     H5S_mpio_mpitype_node_t *curr;                /* Pointer to head of list */
     herr_t                   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type_list);
@@ -1124,7 +1124,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
     int               mpi_code;            /* MPI return status code */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(spans);

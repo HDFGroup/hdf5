@@ -678,7 +678,7 @@ H5C__free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED
 {
     H5C_tag_info_t *tag_info = (H5C_tag_info_t *)_item;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(tag_info);
 
@@ -4131,7 +4131,7 @@ H5C__pin_entry_from_client(H5C_t
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -4175,9 +4175,9 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, hbool_t up
     herr_t ret_value = SUCCEED; /* Return value */
 
 #if H5C_DO_SANITY_CHECKS
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #else
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 #endif
 
     /* Sanity checking */
@@ -4218,7 +4218,7 @@ H5C__unpin_entry_from_client(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, hbo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(cache_ptr);
@@ -4276,7 +4276,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
     enum H5C_resize_status status    = in_spec; /* will change if needed */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(cache_ptr);
@@ -4556,7 +4556,7 @@ H5C__autoadjust__ageout(H5F_t *f, double hit_rate, enum H5C_resize_status *statu
     size_t test_size;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(cache_ptr);
@@ -4652,7 +4652,7 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
     int    i;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -4755,7 +4755,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
     H5C_cache_entry_t *prev_ptr;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(cache_ptr);
@@ -4938,7 +4938,7 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr)
     int    i;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5003,7 +5003,7 @@ H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr)
     int    i;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5073,7 +5073,7 @@ H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr)
     int    i;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5151,7 +5151,7 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
     double                 hit_rate;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -5343,7 +5343,7 @@ H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
     H5C_ring_t ring;
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(f->shared);
@@ -5536,7 +5536,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 #endif /* H5C_DO_SANITY_CHECKS */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(f->shared);
@@ -6058,7 +6058,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     int    i;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -7043,7 +7043,7 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
     haddr_t    eoa;                 /* End-of-allocation in the file */
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces
      * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
@@ -7114,7 +7114,7 @@ H5C__load_entry(H5F_t *f,
 #endif                                 /* H5_HAVE_PARALLEL */
     void *ret_value = NULL;            /* Return value                             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -8206,7 +8206,7 @@ H5C__mark_flush_dep_dirty(H5C_cache_entry_t *entry)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(entry);
@@ -8253,7 +8253,7 @@ H5C__mark_flush_dep_clean(H5C_cache_entry_t *entry)
     int    i;                   /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(entry);
@@ -8301,7 +8301,7 @@ H5C__mark_flush_dep_serialized(H5C_cache_entry_t *entry_ptr)
     int    i;                   /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -8351,7 +8351,7 @@ H5C__mark_flush_dep_unserialized(H5C_cache_entry_t *entry_ptr)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -8400,7 +8400,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry, const H5C_cache_en
 {
     unsigned u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(entry);
@@ -8639,7 +8639,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -8876,7 +8876,7 @@ H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -8955,7 +8955,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
     unsigned serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
     herr_t   ret_value       = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);

@@ -112,7 +112,7 @@ H5P__macc_reg_prop(H5P_genclass_t *pclass)
         H5M_ACS_KEY_ALLOC_SIZE_DEF; /* Default key prefetch allocation size for iteration */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register the key prefetch size for iteration */
     if (H5P__register_real(pclass, H5M_ACS_KEY_PREFETCH_SIZE_NAME, H5M_ACS_KEY_PREFETCH_SIZE_SIZE,

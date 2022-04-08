@@ -304,7 +304,7 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     H5VL_loc_params_t       loc_params;               /* Location parameters for object access */
     herr_t                  ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (link_loc_id == H5L_SAME_LOC)
@@ -446,7 +446,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
     H5VL_loc_params_t       link_loc_params;     /* Location parameters for link_loc_id object access */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (cur_loc_id == H5L_SAME_LOC && link_loc_id == H5L_SAME_LOC)
@@ -817,7 +817,7 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
     H5VL_loc_params_t         loc_params;             /* Location parameters for object access */
     herr_t                    ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -933,7 +933,7 @@ H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t i
     H5VL_loc_params_t         loc_params;             /* Location parameters for object access */
     herr_t                    ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!group_name || !*group_name)
@@ -1188,7 +1188,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t la
     H5VL_loc_params_t         loc_params;             /* Location parameters for object access */
     herr_t                    ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -1629,7 +1629,7 @@ H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t ord
     H5I_type_t                id_type;                  /* Type of ID */
     herr_t                    ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     id_type = H5I_get_type(group_id);

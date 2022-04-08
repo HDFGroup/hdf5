@@ -176,7 +176,7 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -225,7 +225,7 @@ done:
 static hbool_t
 H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -251,7 +251,7 @@ H5D__compact_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSE
                      hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
                      H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     io_info->store->compact.buf   = io_info->dset->shared->layout.storage.u.compact.buf;
     io_info->store->compact.dirty = &io_info->dset->shared->layout.storage.u.compact.dirty;
@@ -278,7 +278,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
     H5FD_t *                         file_handle = NULL;
     herr_t                           ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Retrieve pointer to file driver structure for ctl call */
     if (H5F_shared_get_file_driver(udata->f_sh, &file_handle) < 0)
@@ -326,7 +326,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 {
     ssize_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(io_info);
 
@@ -385,7 +385,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
 {
     ssize_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(io_info);
 
@@ -436,7 +436,7 @@ H5D__compact_flush(H5D_t *dset)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);
@@ -469,7 +469,7 @@ done:
 static herr_t
 H5D__compact_dest(H5D_t *dset)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(dset);

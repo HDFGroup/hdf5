@@ -91,7 +91,7 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
     int                     ret_value = H5_ITER_CONT;             /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Santify checks */
     HDassert(entry);

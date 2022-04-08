@@ -91,7 +91,7 @@ H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -241,7 +241,7 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
     H5F_super_t *sblock;              /* Pointer to the super block */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);

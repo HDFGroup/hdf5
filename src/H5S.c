@@ -217,7 +217,7 @@ H5S__close_cb(void *_space, void H5_ATTR_UNUSED **request)
     H5S_t *space     = (H5S_t *)_space; /* The dataspace to close */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(space);
@@ -1151,7 +1151,7 @@ H5S__is_simple(const H5S_t *sdim)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args and all the boring stuff. */
     HDassert(sdim);

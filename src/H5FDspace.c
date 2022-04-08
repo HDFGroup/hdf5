@@ -94,7 +94,7 @@ H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     haddr_t eoa;                     /* Address of end-of-allocated space */
     haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(file);

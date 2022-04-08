@@ -197,7 +197,7 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
     H5FS_sinfo_cache_ud_t cache_udata;         /* User-data for cache callback */
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr,
@@ -333,7 +333,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #ifdef H5FS_SINFO_DEBUG
     HDfprintf(stderr,
               "%s: Called, modified = %d, fspace->addr = %" PRIuHADDR ", fspace->sect_addr = %" PRIuHADDR
@@ -529,7 +529,7 @@ done:
 static herr_t
 H5FS__sect_serialize_size(H5FS_t *fspace)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(fspace);
@@ -585,7 +585,7 @@ H5FS__sect_increase(H5FS_t *fspace, const H5FS_section_class_t *cls, unsigned fl
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -640,7 +640,7 @@ H5FS__sect_decrease(H5FS_t *fspace, const H5FS_section_class_t *cls)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -692,7 +692,7 @@ H5FS__size_node_decr(H5FS_sinfo_t *sinfo, unsigned bin, H5FS_node_t *fspace_node
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sinfo);
@@ -779,7 +779,7 @@ H5FS__sect_unlink_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls, H5F
     unsigned             bin;                 /* Bin to put the free space section in */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sinfo);
@@ -829,7 +829,7 @@ H5FS__sect_unlink_rest(H5FS_t *fspace, const H5FS_section_class_t *cls, H5FS_sec
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -875,7 +875,7 @@ H5FS__sect_remove_real(H5FS_t *fspace, H5FS_section_info_t *sect)
     const H5FS_section_class_t *cls;                 /* Class of section */
     herr_t                      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -960,7 +960,7 @@ H5FS__sect_link_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls, H5FS_
     unsigned     bin;                       /* Bin to put the free space section in */
     herr_t       ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sinfo);
@@ -1058,7 +1058,7 @@ H5FS__sect_link_rest(H5FS_t *fspace, const H5FS_section_class_t *cls, H5FS_secti
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -1105,7 +1105,7 @@ H5FS__sect_link(H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flags)
     const H5FS_section_class_t *cls;                 /* Class of section */
     herr_t                      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -1150,7 +1150,7 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
     htri_t                status;              /* Status value */
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -1642,7 +1642,7 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
     const H5FS_section_class_t *cls; /* Class of section */
     hsize_t                     alignment;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace);
@@ -1848,7 +1848,7 @@ H5FS__iterate_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
     H5FS_iter_ud_t *     udata     = (H5FS_iter_ud_t *)_udata;     /* Callback info */
     herr_t               ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect_info);
@@ -1883,7 +1883,7 @@ H5FS__iterate_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
     H5FS_iter_ud_t *udata       = (H5FS_iter_ud_t *)_udata; /* Callback info */
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace_node);
