@@ -8,8 +8,8 @@ use warnings;
 #       is added (like support for 1.4, etc), the min_sup_idx parameter will
 #       need to be decremented.)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, etc)
-$max_idx = 7;
+# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, etc)
+$max_idx = 6;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
