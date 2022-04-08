@@ -23,8 +23,8 @@
  *      reporting macros.
  */
 #define H5PL_MODULE
-#define H5_MY_PKG      H5PL
-#define H5_MY_PKG_ERR  H5E_PLUGIN
+#define H5_MY_PKG     H5PL
+#define H5_MY_PKG_ERR H5E_PLUGIN
 
 /**\defgroup H5PL H5PL
  *

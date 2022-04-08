@@ -25,8 +25,8 @@
  *      reporting macros.
  */
 #define H5A_MODULE
-#define H5_MY_PKG      H5A
-#define H5_MY_PKG_ERR  H5E_ATTR
+#define H5_MY_PKG     H5A
+#define H5_MY_PKG_ERR H5E_ATTR
 
 /**\defgroup H5A H5A
  *

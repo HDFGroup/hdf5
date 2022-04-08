@@ -25,7 +25,7 @@
  *      reporting macros.
  */
 #define H5CX_MODULE
-#define H5_MY_PKG      H5CX
-#define H5_MY_PKG_ERR  H5E_CONTEXT
+#define H5_MY_PKG     H5CX
+#define H5_MY_PKG_ERR H5E_CONTEXT
 
 #endif /* H5CXmodule_H */

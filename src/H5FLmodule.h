@@ -25,7 +25,7 @@
  *      reporting macros.
  */
 #define H5FL_MODULE
-#define H5_MY_PKG      H5FL
-#define H5_MY_PKG_ERR  H5E_RESOURCE
+#define H5_MY_PKG     H5FL
+#define H5_MY_PKG_ERR H5E_RESOURCE
 
 #endif /* H5FLmodule_H */
