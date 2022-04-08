@@ -180,41 +180,46 @@ static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
-    H5FD_LOG_VALUE,          /* value                */
-    "log",                   /* name                 */
-    MAXADDR,                 /* maxaddr              */
-    H5F_CLOSE_WEAK,          /* fc_degree            */
-    H5FD__log_term,          /* terminate            */
-    NULL,                    /* sb_size              */
-    NULL,                    /* sb_encode            */
-    NULL,                    /* sb_decode            */
-    sizeof(H5FD_log_fapl_t), /* fapl_size            */
-    H5FD__log_fapl_get,      /* fapl_get             */
-    H5FD__log_fapl_copy,     /* fapl_copy            */
-    H5FD__log_fapl_free,     /* fapl_free            */
-    0,                       /* dxpl_size            */
-    NULL,                    /* dxpl_copy            */
-    NULL,                    /* dxpl_free            */
-    H5FD__log_open,          /* open                 */
-    H5FD__log_close,         /* close                */
-    H5FD__log_cmp,           /* cmp                  */
-    H5FD__log_query,         /* query                */
-    NULL,                    /* get_type_map         */
-    H5FD__log_alloc,         /* alloc                */
-    H5FD__log_free,          /* free                 */
-    H5FD__log_get_eoa,       /* get_eoa              */
-    H5FD__log_set_eoa,       /* set_eoa              */
-    H5FD__log_get_eof,       /* get_eof              */
-    H5FD__log_get_handle,    /* get_handle           */
-    H5FD__log_read,          /* read                 */
-    H5FD__log_write,         /* write                */
-    NULL,                    /* flush                */
-    H5FD__log_truncate,      /* truncate             */
-    H5FD__log_lock,          /* lock                 */
-    H5FD__log_unlock,        /* unlock               */
-    H5FD__log_delete,        /* del                  */
-    NULL,                    /* ctl                  */
-    H5FD_FLMAP_DICHOTOMY     /* fl_map               */
+    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_LOG_VALUE,          /* value               */
+    "log",                   /* name                */
+    MAXADDR,                 /* maxaddr             */
+    H5F_CLOSE_WEAK,          /*  fc_degree          */
+    H5FD__log_term,          /* terminate           */
+    NULL,                    /* sb_size             */
+    NULL,                    /* sb_encode           */
+    NULL,                    /* sb_decode           */
+    sizeof(H5FD_log_fapl_t), /* fapl_size           */
+    H5FD__log_fapl_get,      /* fapl_get            */
+    H5FD__log_fapl_copy,     /* fapl_copy           */
+    H5FD__log_fapl_free,     /* fapl_free           */
+    0,                       /* dxpl_size           */
+    NULL,                    /* dxpl_copy           */
+    NULL,                    /* dxpl_free           */
+    H5FD__log_open,          /* open                */
+    H5FD__log_close,         /* close               */
+    H5FD__log_cmp,           /* cmp                 */
+    H5FD__log_query,         /* query               */
+    NULL,                    /* get_type_map        */
+    H5FD__log_alloc,         /* alloc               */
+    H5FD__log_free,          /* free                */
+    H5FD__log_get_eoa,       /* get_eoa             */
+    H5FD__log_set_eoa,       /* set_eoa             */
+    H5FD__log_get_eof,       /* get_eof             */
+    H5FD__log_get_handle,    /* get_handle          */
+    H5FD__log_read,          /* read                */
+    H5FD__log_write,         /* write               */
+    NULL,                    /* read vector         */
+    NULL,                    /* write vector        */
+    NULL,                    /* read_selection      */
+    NULL,                    /* write_selection     */
+    NULL,                    /* flush               */
+    H5FD__log_truncate,      /* truncate            */
+    H5FD__log_lock,          /* lock                */
+    H5FD__log_unlock,        /* unlock              */
+    H5FD__log_delete,        /* del                 */
+    NULL,                    /* ctl                 */
+    H5FD_FLMAP_DICHOTOMY     /* fl_map              */
 };
 
 /* Default configuration, if none provided */

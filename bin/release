@@ -13,24 +13,6 @@
 #
 
 # Make a release of hdf5.
-#
-# Programmer: Robb Matzke
-# Creation date: on or before 1998-01-29.
-#
-# Modifications
-#   Robb Matzke, 1999-07-16
-#   The SunOS 5.6 sed *must* have slashes as delimiters. I changed things like
-#   `sed s+/CVS++' to `sed 's/\/CVS//'
-#
-#   Albert Cheng, 1999-10-26
-#   Moved the MANIFEST checking to a separate command file so that
-#   it can be invoked individually.
-#
-#   Albert Cheng, 2004-08-14
-#   Added the --private option.
-#
-#   James Laird, 2005-09-07
-#   Added the md5 method.
 
 # Function definitions
 #
@@ -38,14 +20,13 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR   The name of the directory where the release(es) should be
+Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] <methods> ...
+   -d DIR       The name of the directory where the release(s) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
-   --nocheck    Ignore errors in MANIFEST file.
    --private    Make a private release with today's date in version information.
 
 This must be run at the top level of the source directory.
@@ -99,11 +80,6 @@ EOF
 
 # Function name: tar2zip
 # Convert the release tarball to a Windows zipball.
-#
-# Programmer: Albert Cheng
-# Creation date: 2014-04-23
-#
-# Modifications
 #
 # Steps:
 # 1. untar the tarball in a temporary directory;
@@ -166,11 +142,6 @@ tar2zip()
 
 # Function name: tar2cmakezip
 # Convert the release tarball to a Windows zipball with files to run CMake build.
-#
-# Programmer: Larry Knox
-# Creation date: 2017-02-20
-#
-# Modifications
 #
 # Steps:
 # 1. untar the tarball in a temporary directory;
@@ -269,10 +240,6 @@ tar2cmakezip()
 # Function name: tar2cmaketgz
 # Convert the release tarball to a gzipped tar file with files to run CMake build.
 #
-# Programmer: Larry Knox
-# Creation date: 2017-02-20
-#
-# Modifications
 #
 # Steps:
 # 1. untar the tarball in a temporary directory;
@@ -346,11 +313,6 @@ tar2cmaketgz()
 # Convert the release tarball to a gzipped tarfile with files to run CMake build
 # and HDF5options.cmake files for parallel or serial only builds where build
 # tests are run on compute nodes using batch scripts.
-#
-# Programmer: Larry Knox
-# Creation date: 2019-01-28
-#
-# Modifications
 #
 # Steps:
 # 1. untar the tarball in a temporary directory;
@@ -443,7 +405,6 @@ VERS=`perl bin/h5vers`
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
-check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
@@ -481,9 +442,6 @@ while [ -n "$1" ]; do
         -d)
             DEST=$1
             shift
-            ;;
-        --nocheck)
-            check=no
             ;;
         -h)
             USAGE
@@ -546,35 +504,17 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
-# Check the validity of the MANIFEST file.
-bin/chkmanifest || fail=yes
-if [ "X$fail" = "Xyes" ]; then
-    if [ $check = yes ]; then
-        echo ""
-        echo "Note!  If you are running bin/release in a development branch"
-        echo "later than v 1.8 the MANIFEST check is expected to fail when"
-        echo "autogen.sh has not been run successfully. Either run autogen.sh "
-        echo "with /usr/hdf/bin/AUTOTOOLS at the beginning of PATH or add the"
-        echo "--nocheck argument to the bin/release command."
-        exit 1
-    else
-        echo "Continuing anyway..."
-    fi
-fi
-
-# Create a manifest that contains only files for distribution.
-MANIFEST=$tmpdir/H5_MANIFEST
-grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
-
-# Prepare the source tree for a release.
+# Create a symlink to the source so files in the tarball have the prefix
+# we want (gnu's --transform isn't portable)
 ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
+
 # Save a backup copy of Makefile if exists.
 test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
 
-# Update README.txt and release_docs/RELEASE.txt with release information in
+# Update README.md and release_docs/RELEASE.txt with release information in
 # line 1.
-for f in README.txt release_docs/RELEASE.txt; do
+for f in README.md release_docs/RELEASE.txt; do
     echo "HDF5 version $VERS released on $release_date" >$f.x
     sed -e 1d $f >>$f.x
     mv $f.x $f
@@ -582,18 +522,14 @@ for f in README.txt release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# trunk is different than branches.
+# develop is different than branches.
 if [ "${DOCVERSION}" ]; then
     DOC_URL="$DOC_URL -b ${DOCVERSION}"
 fi
 
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
-( \
-    cd $tmpdir; \
-    tar cf $HDF5_VERS.tar $HDF5_VERS/Makefile \
-    `sed 's/^\.\//hdf5-'$VERS'\//' $MANIFEST` || exit 1 \
-)
+(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_VERS" || exit 1 )
 
 # Compress
 MD5file=$HDF5_VERS.md5
@@ -679,5 +615,7 @@ fi
 
 # Remove temporary things
 rm -rf $tmpdir
+
+echo "DONE"
 
 exit 0

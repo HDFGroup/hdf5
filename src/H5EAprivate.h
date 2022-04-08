@@ -26,11 +26,6 @@
 #ifndef H5EAprivate_H
 #define H5EAprivate_H
 
-/* Include package's public header */
-#ifdef NOT_YET
-#include "H5EApublic.h"
-#endif /* NOT_YET */
-
 /* Private headers needed by this file */
 #include "H5ACprivate.h" /* Metadata cache               */
 #include "H5Fprivate.h"  /* File access                  */

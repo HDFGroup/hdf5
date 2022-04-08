@@ -192,10 +192,10 @@ H5TS_tid_destructor(void *_v)
         return;
 
     /* TBD use an atomic CAS */
-    HDpthread_mutex_lock(&H5TS_tid_mtx);
+    pthread_mutex_lock(&H5TS_tid_mtx);
     tid->next          = H5TS_tid_next_free;
     H5TS_tid_next_free = tid;
-    HDpthread_mutex_unlock(&H5TS_tid_mtx);
+    pthread_mutex_unlock(&H5TS_tid_mtx);
 }
 
 /*--------------------------------------------------------------------------
@@ -215,8 +215,8 @@ H5TS_tid_destructor(void *_v)
 static void
 H5TS_tid_init(void)
 {
-    HDpthread_mutex_init(&H5TS_tid_mtx, NULL);
-    HDpthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
+    pthread_mutex_init(&H5TS_tid_mtx, NULL);
+    pthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
 }
 
 /*--------------------------------------------------------------------------
@@ -246,7 +246,7 @@ H5TS_tid_init(void)
 uint64_t
 H5TS_thread_id(void)
 {
-    H5TS_tid_t *tid = HDpthread_getspecific(H5TS_tid_key);
+    H5TS_tid_t *tid = pthread_getspecific(H5TS_tid_key);
     H5TS_tid_t  proto_tid;
 
     /* An ID is already assigned. */
@@ -260,14 +260,14 @@ H5TS_thread_id(void)
      * point `tid` at `proto_tid` if we need to allocate some
      * memory.
      */
-    HDpthread_mutex_lock(&H5TS_tid_mtx);
+    pthread_mutex_lock(&H5TS_tid_mtx);
     if ((tid = H5TS_tid_next_free) != NULL)
         H5TS_tid_next_free = tid->next;
     else if (H5TS_tid_next_id != UINT64_MAX) {
         tid     = &proto_tid;
         tid->id = ++H5TS_tid_next_id;
     }
-    HDpthread_mutex_unlock(&H5TS_tid_mtx);
+    pthread_mutex_unlock(&H5TS_tid_mtx);
 
     /* If a prototype ID record was established, copy it to the heap. */
     if (tid == &proto_tid)
@@ -281,7 +281,7 @@ H5TS_thread_id(void)
      * to it.
      */
     tid->next = NULL;
-    if (HDpthread_setspecific(H5TS_tid_key, tid) != 0) {
+    if (pthread_setspecific(H5TS_tid_key, tid) != 0) {
         H5TS_tid_destructor(tid);
         return 0;
     }
@@ -323,29 +323,29 @@ H5TS_pthread_first_thread_init(void)
 #endif
 
     /* initialize global API mutex lock */
-    HDpthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
-    HDpthread_cond_init(&H5_g.init_lock.cond_var, NULL);
+    pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
+    pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
-    HDpthread_mutex_init(&H5_g.init_lock.atomic_lock2, NULL);
+    pthread_mutex_init(&H5_g.init_lock.atomic_lock2, NULL);
     H5_g.init_lock.attempt_lock_count = 0;
 
     /* Initialize integer thread identifiers. */
     H5TS_tid_init();
 
     /* initialize key for thread-specific error stacks */
-    HDpthread_key_create(&H5TS_errstk_key_g, H5TS__key_destructor);
+    pthread_key_create(&H5TS_errstk_key_g, H5TS__key_destructor);
 
 #ifdef H5_HAVE_CODESTACK
     /* initialize key for thread-specific function stacks */
-    HDpthread_key_create(&H5TS_funcstk_key_g, H5TS__key_destructor);
+    pthread_key_create(&H5TS_funcstk_key_g, H5TS__key_destructor);
 #endif /* H5_HAVE_CODESTACK */
 
     /* initialize key for thread-specific API contexts */
-    HDpthread_key_create(&H5TS_apictx_key_g, H5TS__key_destructor);
+    pthread_key_create(&H5TS_apictx_key_g, H5TS__key_destructor);
 
     /* initialize key for thread cancellability mechanism */
-    HDpthread_key_create(&H5TS_cancel_key_s, H5TS__key_destructor);
+    pthread_key_create(&H5TS_cancel_key_s, H5TS__key_destructor);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS_pthread_first_thread_init() */
@@ -380,13 +380,13 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
     *acquired = TRUE;
 #else  /* H5_HAVE_WIN_THREADS */
     /* Attempt to acquire the mutex lock */
-    if (0 == HDpthread_mutex_lock(&mutex->atomic_lock)) {
-        pthread_t my_thread_id = HDpthread_self();
+    if (0 == pthread_mutex_lock(&mutex->atomic_lock)) {
+        pthread_t my_thread_id = pthread_self();
 
         /* Check if locked already */
         if (mutex->lock_count) {
             /* Check for this thread already owning the lock */
-            if (HDpthread_equal(my_thread_id, mutex->owner_thread)) {
+            if (pthread_equal(my_thread_id, mutex->owner_thread)) {
                 /* Already owned by self - increment count */
                 mutex->lock_count += lock_count;
                 *acquired = TRUE;
@@ -401,7 +401,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
             *acquired           = TRUE;
         } /* end else */
 
-        if (0 != HDpthread_mutex_unlock(&mutex->atomic_lock))
+        if (0 != pthread_mutex_unlock(&mutex->atomic_lock))
             ret_value = -1;
     } /* end if */
     else
@@ -463,35 +463,35 @@ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex)
     EnterCriticalSection(&mutex->CriticalSection);
 #else  /* H5_HAVE_WIN_THREADS */
     /* Acquire the "attempt" lock, increment the attempt lock count, release the lock */
-    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock2);
+    ret_value = pthread_mutex_lock(&mutex->atomic_lock2);
     if (ret_value)
         HGOTO_DONE(ret_value);
     mutex->attempt_lock_count++;
-    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock2);
+    ret_value = pthread_mutex_unlock(&mutex->atomic_lock2);
     if (ret_value)
         HGOTO_DONE(ret_value);
 
     /* Acquire the library lock */
-    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    ret_value = pthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
         HGOTO_DONE(ret_value);
 
     /* Check if this thread already owns the lock */
-    if (mutex->lock_count && HDpthread_equal(HDpthread_self(), mutex->owner_thread))
+    if (mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread))
         /* already owned by self - increment count */
         mutex->lock_count++;
     else {
         /* Wait until the lock is released by current owner thread */
         while (mutex->lock_count)
-            HDpthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
+            pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
-        mutex->owner_thread = HDpthread_self();
+        mutex->owner_thread = pthread_self();
         mutex->lock_count   = 1;
     } /* end else */
 
     /* Release the library lock */
-    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
+    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
 
 done:
 #endif /* H5_HAVE_WIN_THREADS */
@@ -530,12 +530,12 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
 #else  /* H5_HAVE_WIN_THREADS */
 
     /* Reset the lock count for this thread */
-    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    ret_value = pthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
         HGOTO_DONE(ret_value);
     *lock_count       = mutex->lock_count;
     mutex->lock_count = 0;
-    ret_value         = HDpthread_mutex_unlock(&mutex->atomic_lock);
+    ret_value         = pthread_mutex_unlock(&mutex->atomic_lock);
 
     /* If the lock count drops to zero, signal the condition variable, to
      * wake another thread.
@@ -543,7 +543,7 @@ H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count)
     if (mutex->lock_count == 0) {
         int err;
 
-        err = HDpthread_cond_signal(&mutex->cond_var);
+        err = pthread_cond_signal(&mutex->cond_var);
         if (err != 0)
             ret_value = err;
     } /* end if */
@@ -586,11 +586,11 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 #else  /* H5_HAVE_WIN_THREADS */
 
     /* Decrement the lock count for this thread */
-    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    ret_value = pthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
         HGOTO_DONE(ret_value);
     mutex->lock_count--;
-    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
+    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
 
     /* If the lock count drops to zero, signal the condition variable, to
      * wake another thread.
@@ -598,7 +598,7 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     if (mutex->lock_count == 0) {
         int err;
 
-        err = HDpthread_cond_signal(&mutex->cond_var);
+        err = pthread_cond_signal(&mutex->cond_var);
         if (err != 0)
             ret_value = err;
     } /* end if */
@@ -630,13 +630,13 @@ H5TSmutex_get_attempt_count(unsigned int *count)
 #ifdef H5_HAVE_WIN_THREADS
     /* Add Win32 equivalent here when async is supported */
 #else  /* H5_HAVE_WIN_THREADS */
-    ret_value = HDpthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
+    ret_value = pthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
     if (ret_value)
         HGOTO_DONE(ret_value);
 
     *count = H5_g.init_lock.attempt_lock_count;
 
-    ret_value = HDpthread_mutex_unlock(&H5_g.init_lock.atomic_lock2);
+    ret_value = pthread_mutex_unlock(&H5_g.init_lock.atomic_lock2);
     if (ret_value)
         HGOTO_DONE(ret_value);
 
@@ -725,7 +725,7 @@ H5TS_cancel_count_inc(void)
             HGOTO_DONE(FAIL);
 
         /* Set the thread's cancellation counter with the new object */
-        ret_value = HDpthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter);
+        ret_value = pthread_setspecific(H5TS_cancel_key_s, (void *)cancel_counter);
         if (ret_value) {
             HDfree(cancel_counter);
             HGOTO_DONE(FAIL);
@@ -735,7 +735,7 @@ H5TS_cancel_count_inc(void)
     /* Check if thread entering library */
     if (cancel_counter->cancel_count == 0)
         /* Set cancellation state to 'disable', and remember previous state */
-        ret_value = HDpthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state);
+        ret_value = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancel_counter->previous_state);
 
     /* Increment # of times the library API was re-entered, to avoid resetting
      * previous cancellation state until the final API routine is returning.
@@ -788,7 +788,7 @@ H5TS_cancel_count_dec(void)
     /* Check for leaving last API routine */
     if (cancel_counter->cancel_count == 1)
         /* Reset to previous thread cancellation state, if last API */
-        ret_value = HDpthread_setcancelstate(cancel_counter->previous_state, NULL);
+        ret_value = pthread_setcancelstate(cancel_counter->previous_state, NULL);
 
     /* Decrement cancellation counter */
     --cancel_counter->cancel_count;
@@ -995,7 +995,7 @@ H5TS_create_thread(H5TS_thread_cb_t func, H5TS_attr_t *attr, void *udata)
 
 #else /* H5_HAVE_WIN_THREADS */
 
-    HDpthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
+    pthread_create(&ret_value, attr, (void *(*)(void *))func, udata);
 
 #endif /* H5_HAVE_WIN_THREADS */
 

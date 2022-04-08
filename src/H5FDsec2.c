@@ -143,6 +143,7 @@ static herr_t  H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
                               void **output);
 
 static const H5FD_class_t H5FD_sec2_g = {
+    H5FD_CLASS_VERSION,    /* struct version       */
     H5FD_SEC2_VALUE,       /* value                */
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
@@ -171,6 +172,10 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD__sec2_get_handle, /* get_handle           */
     H5FD__sec2_read,       /* read                 */
     H5FD__sec2_write,      /* write                */
+    NULL,                  /* read_vector          */
+    NULL,                  /* write_vector         */
+    NULL,                  /* read_selection       */
+    NULL,                  /* write_selection      */
     NULL,                  /* flush                */
     H5FD__sec2_truncate,   /* truncate             */
     H5FD__sec2_lock,       /* lock                 */

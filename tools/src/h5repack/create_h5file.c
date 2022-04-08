@@ -207,13 +207,13 @@ create_attributes(hid_t group_id)
         }
 
         if (H5Aclose(attr_id) < 0) {
-            fprintf(stderr, "failed to close the attribure\n");
+            fprintf(stderr, "failed to close the attribute\n");
             goto error;
         }
     }
 
     if (H5Sclose(attr_space) < 0) {
-        fprintf(stderr, "failed to close the attribure space\n");
+        fprintf(stderr, "failed to close the attribute space\n");
         goto error;
     }
 

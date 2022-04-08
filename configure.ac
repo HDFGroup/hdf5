@@ -23,7 +23,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.1-1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.2-1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -231,9 +231,10 @@ AC_CACHE_CHECK([for cached host], [hdf5_cv_host], [hdf5_cv_host="none"]);
 if test $hdf5_cv_host = "none"; then
   hdf5_cv_host=$host
 elif test $hdf5_cv_host != $host; then
-  echo "The config.cache file was generated on $hdf5_cv_host but"
-  echo "this is $host.  Please remove that file and try again."
-  AC_MSG_ERROR([config.cache file is invalid])
+  AC_MSG_ERROR([
+     The config.cache file was generated on $hdf5_cv_host but
+     this is $host.  Please remove that file and try again.
+     config.cache file is invalid])
 fi
 
 ## ----------------------------------------------------------------------
@@ -567,11 +568,7 @@ AC_ARG_ENABLE([fortran],
                               [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  echo "yes"
-else
-  echo "no"
-fi
+AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
@@ -794,9 +791,9 @@ AC_ARG_ENABLE([cxx],
               [AS_HELP_STRING([--enable-cxx],
                               [Compile the C++ interface [default=no]])],
               [HDF_CXX=$enableval])
+AC_MSG_RESULT([$HDF_CXX])
 
 if test "X$HDF_CXX" = "Xyes"; then
-  echo "yes"
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
   ## Expose the compiler for *.in files
@@ -806,7 +803,6 @@ if test "X$HDF_CXX" = "Xyes"; then
   AC_LANG_PUSH(C++)
 
 else
-  AC_MSG_RESULT([no])
   CXX="no"
 fi
 
@@ -1022,7 +1018,7 @@ AC_ARG_ENABLE([java],
 
 if test "X$HDF_JAVA" = "Xyes"; then
   if test "X${enable_shared}" != "Xno"; then
-    echo "yes"
+    AC_MSG_RESULT([yes])
     if test "X$CLASSPATH" = "X"; then
       H5_CLASSPATH=".:$srcdir/java/lib"
     else
@@ -1115,12 +1111,7 @@ AC_ARG_ENABLE([tests],
                               [Compile the HDF5 tests [default=yes]])],
               [HDF5_TESTS=$enableval])
 
-if test "X$HDF5_TESTS" = "Xno"; then
-  AC_MSG_RESULT([yes])
-  echo "Building HDF5 tests is disabled"
-else
-  AC_MSG_RESULT([no])
-fi
+AC_MSG_RESULT([$HDF5_TESTS])
 
 ## These need to be exposed for some tests.
 AC_SUBST([H5_UTILS_TEST_BUILDDIR])
@@ -1145,12 +1136,7 @@ AC_ARG_ENABLE([tools],
                               [Compile the HDF5 tools [default=yes]])],
               [HDF5_TOOLS=$enableval])
 
-if test "X$HDF5_TOOLS" = "Xno"; then
-  AC_MSG_RESULT([yes])
-  echo "Building HDF5 tools is disabled"
-else
-  AC_MSG_RESULT([no])
-fi
+AC_MSG_RESULT([$HDF5_TOOLS])
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to enable building doxygen files
@@ -1169,8 +1155,9 @@ AC_ARG_ENABLE([doxygen],
                               [Compile the HDF5 doxygen files [default=no]])],
               [HDF5_DOXYGEN=$enableval])
 
+AC_MSG_RESULT([$HDF5_DOXYGEN])
+
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
-  AC_MSG_RESULT([yes])
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
   DX_HTML_FEATURE(ON)
@@ -1230,10 +1217,6 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
-
-else
-  AC_MSG_RESULT([no])
-  echo "Doxygen support is disabled"
 fi
 
 
@@ -1263,18 +1246,17 @@ AC_ARG_ENABLE([static_exec],
                               [Install only statically linked executables
                                [default=no]])],
               [STATIC_EXEC=$enableval])
+AC_MSG_RESULT([$STATIC_EXEC])
 
 if test "X$STATIC_EXEC" = "Xyes"; then
-  echo "yes"
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
-    echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+    AC_MSG_WARN([-static flag not supported on this system; executable won't statically link shared system libraries.])
     LT_STATIC_EXEC=""
   else
     LT_STATIC_EXEC="-all-static"
   fi
 else
-  echo "no"
   LT_STATIC_EXEC=""
 fi
 AM_CONDITIONAL([USE_PLUGINS_CONDITIONAL], [test "X$LT_STATIC_EXEC" = X])
@@ -2154,7 +2136,7 @@ for hdf5_cv_printf_ll in ll l L q unknown; do
         ],[[
             char *s = malloc(128);
             long long x = (long long)1048576 * (long long)1048576;
-            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
             exit(strcmp(s,"1099511627776"));
         ]])]
    , [break],,[continue])
@@ -2710,9 +2692,11 @@ AC_ARG_ENABLE([memory-alloc-sanity-check],
                               [Enable this option to turn on internal memory
                               allocation sanity checking.  This could cause
                               more memory use and somewhat slower allocation.
-                              This option is orthogonal to the
-                              --enable-using-memchecker option.
-                               [default=yes if debug build, otherwise no]
+                              This option may also cause issues with HDF5
+                              filter plugins, so should not be enabled if
+                              filters are to be used.  This option is orthogonal
+                              to the --enable-using-memchecker option.
+                               [default=no]
                               ])],
               [MEMORYALLOCSANITYCHECK=$enableval])
 
@@ -2722,11 +2706,10 @@ AC_SUBST([MEMORYALLOCSANITYCHECK])
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+# Should consider enabling this option by default for
+# 'developer' builds if that build mode is added in
+# the future
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
@@ -2987,11 +2970,11 @@ if test -n "$PARALLEL"; then
   fi
 
   ## ----------------------------------------------------------------------
-  ## Check for the MPI-3 functions necessary for the Parallel Compression
+  ## Check for the MPI functions necessary for the Parallel Compression
   ## feature. If these are not present, issue a warning that Parallel
   ## Compression will be disabled.
   ##
-  AC_MSG_CHECKING([for MPI_Mprobe and MPI_Imrecv functions])
+  AC_MSG_CHECKING([for MPI_Ibarrier/MPI_Issend/MPI_Iprobe/MPI_Irecv functions])
 
   AC_LINK_IFELSE(
       [AC_LANG_PROGRAM(
@@ -2999,16 +2982,19 @@ if test -n "$PARALLEL"; then
               #include <mpi.h>
           ]],
           [[
-              MPI_Message message;
+              int flag;
               MPI_Init(0, (void *) 0);
-              MPI_Mprobe(0, 0, 0, &message, (void *) 0);
-              MPI_Imrecv((void *) 0, 0, 0, (void *) 0, (void *) 0);
+              MPI_Ibarrier(0, (void *) 0);
+              MPI_Issend((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
+              MPI_Iprobe(0, 0, 0, &flag, (void *) 0);
+              MPI_Irecv((void *) 0, 0, 0, 0, 0, 0, (void *) 0);
           ]]
       )],
       [AC_MSG_RESULT([yes])
-       PARALLEL_FILTERED_WRITES=yes],
+       PARALLEL_FILTERED_WRITES=yes
+       AC_DEFINE([HAVE_PARALLEL_FILTERED_WRITES], [1], [Define if we have support for writing to filtered datasets in parallel])],
       [AC_MSG_RESULT([no])
-       AC_MSG_WARN([A simple MPI program using the MPI_Mprobe and MPI_Imrecv functions could not be compiled and linked.
+       AC_MSG_WARN([A simple MPI program using the MPI_Ibarrier, MPI_Issend, MPI_Iprobe and MPI_Irecv functions could not be compiled and linked.
                     Parallel writes of filtered data will be disabled.])
        PARALLEL_FILTERED_WRITES=no]
   )
@@ -3675,8 +3661,8 @@ fi
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
-## HDF5 version from the first line of the README.txt file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+## HDF5 version from the first line of the README.md file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
 AC_SUBST([H5_VERSION])
 
 ## Configuration date
@@ -3820,12 +3806,7 @@ AC_ARG_ENABLE([build-all],
                      [Build helper programs that only developers should need [default=no]])],
      [BUILD_ALL=$enableval],
      [BUILD_ALL=no])
-
-if test "X$BUILD_ALL" = "Xyes"; then
- echo "yes"
-else
- echo "no"
-fi
+AC_MSG_RESULT([$BUILD_ALL])
 AM_CONDITIONAL([BUILD_ALL_CONDITIONAL], [test "X$BUILD_ALL" = "Xyes"])
 
 ## ----------------------------------------------------------------------
@@ -4161,20 +4142,19 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
-                 test/testabort_fail.sh
-                 test/testcheck_version.sh
-                 test/testerror.sh
-                 test/testexternal_env.sh
-                 test/testflushrefresh.sh
-                 test/testlibinfo.sh
-                 test/testlinks_env.sh
-                 test/testswmr.sh
-                 test/testvds_env.sh
-                 test/testvdsswmr.sh
-                 test/test_filter_plugin.sh
+                 test/test_abort_fail.sh
+                 test/test_check_version.sh
+                 test/test_error.sh
+                 test/test_external_env.sh
+                 test/test_flush_refresh.sh
+                 test/test_libinfo.sh
+                 test/test_links_env.sh
                  test/test_mirror.sh
-                 test/test_usecases.sh
-                 test/test_vol_plugin.sh
+                 test/test_plugin.sh
+                 test/test_swmr.sh
+                 test/test_use_cases.sh
+                 test/test_vds_env.sh
+                 test/test_vds_swmr.sh
                  testpar/Makefile
                  testpar/testpflush.sh
                  utils/Makefile

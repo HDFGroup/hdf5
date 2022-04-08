@@ -336,8 +336,8 @@ parse_size_directive(const char *size)
 static void
 fill_with_random_data(Bytef *src, uLongf src_len)
 {
-    register unsigned u;
-    h5_stat_t         stat_buf;
+    unsigned  u;
+    h5_stat_t stat_buf;
 
     if (HDstat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
@@ -386,7 +386,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
     Bytef *        src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
-        register unsigned long i, iters;
+        unsigned long i, iters;
 
         iters = file_size / src_len;
         src   = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
@@ -489,7 +489,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Modifications:
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     unsigned long min_buf_size = 128 * ONE_KB, max_buf_size = ONE_MB;
     unsigned long file_size = 64 * ONE_MB;
@@ -500,7 +500,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':

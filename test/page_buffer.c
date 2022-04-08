@@ -120,28 +120,28 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsprintf(dset_name, "D1dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "D2dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "D3dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
@@ -166,13 +166,13 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
             }
         }
 
-        HDsprintf(dset_name, "D1dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsprintf(dset_name, "D2dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsprintf(dset_name, "D3dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     }
@@ -259,7 +259,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsprintf(dset_name, "dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
@@ -370,7 +370,7 @@ error:
  *              1) verifying that API errors are caught.
  *
  *              2) verifying that the page buffer behaves more or less
- *                 as advertized.
+ *                 as advertised.
  *
  *              Any data mis-matches or unexpected failures or successes
  *              reported by the HDF5 library result in test failure.

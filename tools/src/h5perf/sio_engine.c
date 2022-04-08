@@ -328,7 +328,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         /* If the prefix specifies the HDF5_PREFIX directory, then
          * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
          * directory instead. */
-        register char *user, *login, *subdir;
+        char *user, *login, *subdir;
 
         user   = HDgetenv("USER");
         login  = HDgetenv("LOGIN");
@@ -1267,7 +1267,7 @@ done:
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
-    char  temp[2048];
+    char  temp[4096 + sizeof("-?.h5")];
     int   j;
     hid_t driver;
 

@@ -93,7 +93,7 @@ FILE *errorfile;
 /* ===================== */
 
 /* Main */
-int main(int argc, const char *argv[]);
+int main(int argc, char *argv[]);
 
 /* Flush Test Framework */
 herr_t test_flush(void);
@@ -137,7 +137,7 @@ herr_t end_verification(void);
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     /* Variables */
     const char *envval = NULL;

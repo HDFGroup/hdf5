@@ -46,7 +46,7 @@
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     const char *fname1   = NULL;
     const char *fname2   = NULL;

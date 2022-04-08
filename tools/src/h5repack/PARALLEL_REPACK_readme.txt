@@ -64,7 +64,7 @@ of a parallel version of repack. A quick summary of this is discussion follows:
 
   Q5. Can you collectively copy data using hyperslab selections
       rather than having each MPI rank copy the data from the
-      input dataset to the ouput dataset?
+      input dataset to the output dataset?
   A5. Probably yes.  I can look at implementing this improvement
       in the current design.
 

@@ -142,6 +142,7 @@ static herr_t  H5FD__direct_unlock(H5FD_t *_file);
 static herr_t  H5FD__direct_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_direct_g = {
+    H5FD_CLASS_VERSION,         /* struct version       */
     H5FD_DIRECT_VALUE,          /* value                */
     "direct",                   /* name                 */
     MAXADDR,                    /* maxaddr              */
@@ -170,6 +171,10 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD__direct_get_handle,    /* get_handle           */
     H5FD__direct_read,          /* read                 */
     H5FD__direct_write,         /* write                */
+    NULL,                       /* read_vector          */
+    NULL,                       /* write_vector         */
+    NULL,                       /* read_selection       */
+    NULL,                       /* write_selection      */
     NULL,                       /* flush                */
     H5FD__direct_truncate,      /* truncate             */
     H5FD__direct_lock,          /* lock                 */
@@ -213,8 +218,11 @@ H5FD_direct_init(void)
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
-    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g)) {
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_DIRECT_g)
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register direct");
+    }
 
     /* Set return value */
     ret_value = H5FD_DIRECT_g;

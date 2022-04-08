@@ -1303,6 +1303,75 @@ done:
 } /* end H5PB_write() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5PB_enabled
+ *
+ * Purpose:     Check if the page buffer may be enabled for the specified
+ *              file and data access type.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
+{
+    H5PB_t *page_buf;            /* Page buffering info for this file */
+    hbool_t bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity checks */
+    HDassert(f_sh);
+
+    /* Get pointer to page buffer info for this file */
+    page_buf = f_sh->page_buf;
+
+#ifdef H5_HAVE_PARALLEL
+    if (H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_HAS_MPI)) {
+#if 1
+        bypass_pb = TRUE;
+#else
+        /* MSC - why this stopped working ? */
+        int mpi_size;
+
+        if ((mpi_size = H5F_shared_mpi_get_size(f_sh)) < 0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size")
+        if (1 != mpi_size)
+            bypass_pb = TRUE;
+#endif
+    } /* end if */
+#endif
+
+    /* If page buffering is disabled, or if this is a parallel raw data access,
+     * bypass page buffering. Note that page buffering may still be disabled for
+     * large metadata access or large non-parallel raw data access, but this
+     * function doesn't take I/O size into account so if it returns TRUE the
+     * page buffer may still be disabled for some I/O. If it returns FALSE it is
+     * always disabled for this access type.
+     */
+    if (NULL == page_buf || (bypass_pb && H5FD_MEM_DRAW == type)) {
+        /* Update statistics, since wherever this function is called, if it
+         * returns FALSE, the calling function performs I/O avoiding the page
+         * buffer layer */
+        if (page_buf) {
+            HDassert(type == H5FD_MEM_DRAW);
+            page_buf->bypasses[1]++;
+        } /* end if */
+
+        /* Page buffer is disabled, at least for this data access type */
+        *enabled = FALSE;
+    } /* end if */
+    else
+        /* Page buffer may be enabled */
+        *enabled = TRUE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PB_enabled() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5PB__insert_entry()
  *
  * Purpose:     This function was created without documentation.

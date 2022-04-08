@@ -888,6 +888,7 @@ test_split_comm_access(char filenames[][PATH_MAX])
         mrc = MPI_File_delete(filenames[color], info);
         assert(mrc == MPI_SUCCESS);
     }
+    MPI_Comm_free(&comm);
 }
 
 /*
@@ -934,7 +935,7 @@ mkfilenames(char *prefix)
                "Need to adjust the code to accommodate the large size.\n");
     }
     for (i = 0; i < n; i++) {
-        sprintf(testfiles[i], "%s/ParaEg%d.h5", prefix, i);
+        snprintf(testfiles[i], PATH_MAX, "%s/ParaEg%d.h5", prefix, i);
     }
     return (0);
 }
@@ -1073,11 +1074,11 @@ main(int argc, char **argv)
 finish:
     if (mpi_rank == 0) { /* only process 0 reports */
         if (nerrors)
-            printf("***PHDF5 tests detected %d errors***\n", nerrors);
+            printf("***PHDF5 example detected %d errors***\n", nerrors);
         else {
-            printf("===================================\n");
-            printf("PHDF5 tests finished with no errors\n");
-            printf("===================================\n");
+            printf("=====================================\n");
+            printf("PHDF5 example finished with no errors\n");
+            printf("=====================================\n");
         }
     }
     if (docleanup)
