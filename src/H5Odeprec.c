@@ -91,7 +91,7 @@ static herr_t H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_p
 static herr_t
 H5O__reset_info1(H5O_info1_t *oinfo)
 {
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     /* Reset the passed-in info struct */
     HDmemset(oinfo, 0, sizeof(H5O_info1_t));
@@ -124,7 +124,7 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     unsigned              nat_fields;               /* Fields for native query */
     herr_t                ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oinfo2);
@@ -223,7 +223,7 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
     unsigned nat_fields;          /* Fields for native query */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(vol_obj);

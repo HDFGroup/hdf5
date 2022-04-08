@@ -129,7 +129,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     unsigned      flags     = 0;    /* Attribute flags */
     H5A_t *       ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -295,7 +295,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     unsigned     flags     = 0;   /* Attribute flags */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -397,7 +397,7 @@ H5O__attr_copy(const void *_src, void *_dst)
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(_src);
@@ -433,7 +433,7 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
     size_t       name_len;
     size_t       ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(attr);
 
@@ -509,7 +509,7 @@ H5O__attr_free(void *mesg)
     H5A_t *attr      = (H5A_t *)mesg;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(mesg);
 
@@ -616,7 +616,7 @@ H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, 
     const H5A_t *attr_src  = (const H5A_t *)native_src; /* Source attribute */
     herr_t       ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(deleted);
@@ -659,7 +659,7 @@ H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(native_src);
@@ -702,7 +702,7 @@ H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (H5A__attr_post_copy_file(src_oloc, (const H5A_t *)mesg_src, dst_oloc, (H5A_t *)mesg_dst, cpy_info) <
         0)
@@ -729,7 +729,7 @@ H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 {
     const H5A_t *attr = (const H5A_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(attr);
     HDassert(crt_idx);
@@ -757,7 +757,7 @@ H5O__attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 {
     H5A_t *attr = (H5A_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(attr);
 
@@ -793,7 +793,7 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
     char         buf[128];            /* Temporary string buffer */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);

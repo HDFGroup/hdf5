@@ -212,7 +212,7 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     size_t      nchars1, nchars2;  /* Number of characters in components */
     htri_t      ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Get component of each name */
     fullpath = H5RS_get_str(fullpath_r);
@@ -273,7 +273,7 @@ H5G__build_fullpath(const char *prefix, const char *name)
 {
     H5RS_str_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(prefix);
@@ -597,7 +597,7 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
     size_t      full_suffix_len;     /* Length of full suffix */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(path_r_ptr && *path_r_ptr);
@@ -690,7 +690,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
     hbool_t obj_in_child = FALSE;    /* Flag to indicate that the object is in the child mount hier. */
     herr_t  ret_value    = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(obj_ptr);
 
@@ -1086,7 +1086,7 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
     hbool_t          obj_found = FALSE;                 /* Object at 'path' found */
     herr_t           ret_value = H5_ITER_CONT;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(path);

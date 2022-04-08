@@ -191,7 +191,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
     size_t offset, size;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt);

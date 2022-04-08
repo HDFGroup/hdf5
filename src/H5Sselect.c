@@ -1222,7 +1222,7 @@ H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1300,7 +1300,7 @@ H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1384,7 +1384,7 @@ H5S__select_iter_next_block(H5S_sel_iter_t *iter)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);

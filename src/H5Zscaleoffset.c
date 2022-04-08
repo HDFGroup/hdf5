@@ -758,7 +758,7 @@ H5Z__can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5
     H5T_order_t  dtype_order;      /* Datatype's endianness order */
     htri_t       ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -808,7 +808,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
     enum H5Z_scaleoffset_t type      = t_bad; /* integer type */
     enum H5Z_scaleoffset_t ret_value = t_bad; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (dtype_class == H5Z_SCALEOFFSET_CLS_INTEGER) {
         if (dtype_sign == H5Z_SCALEOFFSET_SGN_NONE) { /* unsigned integer */
@@ -881,7 +881,7 @@ H5Z__scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist, H5T_t *type, enum
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (scale_type == t_uchar)
         H5Z_scaleoffset_set_filval_3(unsigned char, dcpl_plist, type, cd_values, need_convert);
@@ -944,7 +944,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     H5D_fill_value_t       status;              /* Status of fill value in property list */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -1126,7 +1126,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     unsigned               i;                    /* index */
     parms_atomic           p;                    /* parameters needed for compress/decompress functions */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     if (cd_nelmts != H5Z_SCALEOFFSET_TOTAL_NPARMS)
@@ -1563,7 +1563,7 @@ H5Z__scaleoffset_precompress_fd(void *data, unsigned d_nelmts, enum H5Z_scaleoff
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (type == t_float)
         H5Z_scaleoffset_precompress_3(float, HDpowf, HDfabsf, HDroundf, HDlroundf, HDllroundf, data, d_nelmts,
@@ -1586,7 +1586,7 @@ H5Z__scaleoffset_postdecompress_fd(void *data, unsigned d_nelmts, enum H5Z_scale
     long long sminval   = (long long)minval; /* for signed integer types */
     herr_t    ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (type == t_float)
         H5Z_scaleoffset_postdecompress_3(float, HDpowf, data, d_nelmts, filavail, cd_values, minbits, sminval,

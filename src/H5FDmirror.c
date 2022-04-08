@@ -252,7 +252,7 @@ done:
 static herr_t
 H5FD__mirror_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
     H5FD_MIRROR_g = 0;
@@ -1111,7 +1111,7 @@ H5FD__mirror_verify_reply(H5FD_mirror_t *file)
     ssize_t                         read_ret  = 0;
     herr_t                          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1166,7 +1166,7 @@ H5FD__mirror_fapl_get(H5FD_t *_file)
     H5FD_mirror_fapl_t *fa        = NULL;
     void *              ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1202,7 +1202,7 @@ H5FD__mirror_fapl_copy(const void *_old_fa)
     H5FD_mirror_fapl_t *      new_fa    = NULL;
     void *                    ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1234,7 +1234,7 @@ H5FD__mirror_fapl_free(void *_fa)
 {
     H5FD_mirror_fapl_t *fa = (H5FD_mirror_fapl_t *)_fa;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 
@@ -1352,7 +1352,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     H5FD_mirror_xmit_open_t *open_xmit = NULL;
     H5FD_t *                 ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1477,7 +1477,7 @@ H5FD__mirror_close(H5FD_t *_file)
     int            xmit_encoded = 0; /* monitor point of failure */
     herr_t         ret_value    = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1549,7 +1549,7 @@ done:
 static herr_t
 H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     LOG_OP_CALL(__func__);
 
@@ -1586,7 +1586,7 @@ H5FD__mirror_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_mirror_t *file = (const H5FD_mirror_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 
@@ -1613,7 +1613,7 @@ H5FD__mirror_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
     H5FD_mirror_t *        file      = (H5FD_mirror_t *)_file;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1668,7 +1668,7 @@ H5FD__mirror_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_mirror_t *file = (const H5FD_mirror_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 
@@ -1689,7 +1689,7 @@ static herr_t
 H5FD__mirror_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id,
                   haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 
@@ -1722,7 +1722,7 @@ H5FD__mirror_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     H5FD_mirror_t *          file      = (H5FD_mirror_t *)_file;
     herr_t                   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1785,7 +1785,7 @@ H5FD__mirror_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_AT
     H5FD_mirror_t *file      = (H5FD_mirror_t *)_file;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1833,7 +1833,7 @@ H5FD__mirror_lock(H5FD_t *_file, hbool_t rw)
     H5FD_mirror_t *         file      = (H5FD_mirror_t *)_file;
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
@@ -1880,7 +1880,7 @@ H5FD__mirror_unlock(H5FD_t *_file)
     H5FD_mirror_t *file      = (H5FD_mirror_t *)_file;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 

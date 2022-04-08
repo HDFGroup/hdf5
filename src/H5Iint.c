@@ -258,7 +258,7 @@ H5I__unwrap(void *object, H5I_type_t type)
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(object);
@@ -370,7 +370,7 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
     H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
     hbool_t              mark  = FALSE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(info);
@@ -876,7 +876,7 @@ H5I__remove_verify(hid_t id, H5I_type_t type)
 {
     void *ret_value = NULL; /*return value            */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Argument checking will be performed by H5I_remove() */
 
@@ -908,7 +908,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     H5I_id_info_t *info      = NULL; /* Pointer to the current ID */
     void *         ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type_info);
@@ -1002,7 +1002,7 @@ H5I__dec_ref(hid_t id, void **request)
     H5I_id_info_t *info      = NULL; /* Pointer to the ID */
     int            ret_value = 0;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(id >= 0);
@@ -1099,7 +1099,7 @@ H5I__dec_app_ref(hid_t id, void **request)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(id >= 0);
@@ -1214,7 +1214,7 @@ H5I__dec_app_ref_always_close(hid_t id, void **request)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(id >= 0);
@@ -1385,7 +1385,7 @@ H5I__inc_type_ref(H5I_type_t type)
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
     int              ret_value = -1;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type > 0 && (int)type < H5I_next_type_g);
@@ -1471,7 +1471,7 @@ H5I__get_type_ref(H5I_type_t type)
     H5I_type_info_t *type_info = NULL; /* Pointer to the type  */
     int              ret_value = -1;   /* Return value         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type >= 0);
@@ -1507,7 +1507,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_iterate_ud_t *udata     = (H5I_iterate_ud_t *)_udata; /* User data for callback */
     int               ret_value = H5_ITER_CONT;               /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Only invoke the callback function if this ID is visible externally and
      * its reference count is positive.
@@ -1705,7 +1705,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     const void *     object    = NULL;
     int              ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(info);

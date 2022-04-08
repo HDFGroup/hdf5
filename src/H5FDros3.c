@@ -347,7 +347,7 @@ done:
 static herr_t
 H5FD__ros3_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_term() called.\n");
@@ -427,7 +427,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa != NULL);
 
@@ -515,7 +515,7 @@ H5FD__ros3_fapl_get(H5FD_t *_file)
     H5FD_ros3_fapl_t *fa        = NULL;
     void *            ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     fa = (H5FD_ros3_fapl_t *)H5MM_calloc(sizeof(H5FD_ros3_fapl_t));
     if (fa == NULL)
@@ -556,7 +556,7 @@ H5FD__ros3_fapl_copy(const void *_old_fa)
     H5FD_ros3_fapl_t *      new_fa    = NULL;
     void *                  ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     new_fa = (H5FD_ros3_fapl_t *)H5MM_malloc(sizeof(H5FD_ros3_fapl_t));
     if (new_fa == NULL)
@@ -590,7 +590,7 @@ H5FD__ros3_fapl_free(void *_fa)
 {
     H5FD_ros3_fapl_t *fa = (H5FD_ros3_fapl_t *)_fa;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fa != NULL); /* sanity check */
 
@@ -627,7 +627,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
     unsigned i         = 0;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDprintf("ros3_reset_stats() called\n");
@@ -695,7 +695,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_ros3_fapl_t fa;
     H5FD_t *         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_open() called.\n");
@@ -852,7 +852,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (stream == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file stream cannot be null");
@@ -1080,7 +1080,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_close() called.\n");
@@ -1149,7 +1149,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const parsed_url_t *purl2     = NULL;
     int                 ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_cmp() called.\n");
@@ -1261,7 +1261,7 @@ done:
 static herr_t
 H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_query() called.\n");
@@ -1301,7 +1301,7 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_ros3_t *file = (const H5FD_ros3_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
@@ -1332,7 +1332,7 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_ros3_t *file = (H5FD_ros3_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
@@ -1366,7 +1366,7 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_ros3_t *file = (const H5FD_ros3_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_get_eof() called.\n");
@@ -1398,7 +1398,7 @@ H5FD__ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_get_handle() called.\n");
@@ -1448,7 +1448,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     unsigned       bin_i = 0;
 #endif /* ROS3_STATS */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_read() called.\n");
@@ -1518,7 +1518,7 @@ H5FD__ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
 {
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_write() called.\n");
@@ -1556,7 +1556,7 @@ H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD__ros3_truncate() called.\n");

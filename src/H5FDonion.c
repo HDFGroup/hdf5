@@ -251,7 +251,7 @@ H5FD_onion_init(void)
 static herr_t
 H5FD__onion_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
     H5FD_ONION_g = 0;
@@ -371,7 +371,7 @@ H5FD__onion_sb_size(H5FD_t *_file)
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     hsize_t       ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(file);
@@ -397,7 +397,7 @@ H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -424,7 +424,7 @@ H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -454,7 +454,7 @@ H5FD__onion_update_and_write_header(H5FD_onion_t *file)
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     /* Unset write-lock flag */
     if (file->is_open_rw)
@@ -495,7 +495,7 @@ H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs, H5FD_t *file_de
     unsigned char *buf       = NULL;
     uint64_t       ret_value = 0;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY +
                                    (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs->n_revisions))))
@@ -533,7 +533,7 @@ H5FD__onion_update_and_write_whole_history(H5FD_onion_t *file)
     uint64_t size      = 0;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
 
@@ -577,7 +577,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     time_t     rawtime;
     struct tm *info;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     time(&rawtime);
     info = gmtime(&rawtime);
@@ -675,7 +675,7 @@ H5FD__onion_close(H5FD_t *_file)
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -751,7 +751,7 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     FUNC_LEAVE_NOAPI(file->logi_eoa)
 } /* end H5FD__onion_get_eoa() */
@@ -771,7 +771,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     FUNC_LEAVE_NOAPI(file->logi_eof)
 } /* end H5FD__onion_get_eof() */
@@ -1398,7 +1398,7 @@ H5FD__onion_set_userinfo_in_record(H5FD_onion_revision_record_t *rec_p)
     struct passwd *user_info = NULL;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     uid = HDgetuid();
 
@@ -1448,7 +1448,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     uint64_t                      size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(file != NULL);
 
@@ -1559,7 +1559,7 @@ H5FD__onion_ingest_history_header(H5FD_onion_history_header_t *hdr_out, H5FD_t *
     haddr_t        size      = (haddr_t)H5FD__ONION_ENCODED_SIZE_HEADER;
     uint32_t       sum       = 0;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF")
@@ -1610,7 +1610,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     haddr_t        addr      = 0;
     haddr_t        size      = 0;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(r_out);
     HDassert(raw_file);
@@ -1755,7 +1755,7 @@ H5FD__onion_ingest_whole_history(H5FD_onion_whole_history_t *whs_out, H5FD_t *ra
     herr_t         ret_value = SUCCEED;
     uint32_t       sum       = 0;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size)) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF");
@@ -1825,7 +1825,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     bool    new_open        = false;
     haddr_t canon_eof       = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!filename || !*filename)
@@ -2171,7 +2171,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     uint32_t       _sum      = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     /* Guard against simultaneous write-open.
      * TODO: support recovery open with force-write-open flag in FAPL info.
@@ -2259,7 +2259,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     unsigned char *buf_out        = (unsigned char *)_buf_out;
     herr_t         ret_value      = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 #if 0
     HDprintf("ONION READ - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
 #endif
@@ -2379,7 +2379,7 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_onion_t *file = (H5FD_onion_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     file->logi_eoa = addr;
 
@@ -2413,7 +2413,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     const unsigned char *buf            = (const unsigned char *)_buf;
     herr_t               ret_value      = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 #if 0
     HDfprintf(stdout, "ONION WRITE - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
 #endif
@@ -2789,7 +2789,7 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
     uint64_t                                      new_n_keys_populated = 0;
     herr_t                                        ret_value            = SUCCEED;
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(rix);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);

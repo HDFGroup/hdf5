@@ -388,7 +388,7 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     double         split_ratios[3];     /* B-tree split ratios */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -693,7 +693,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
     H5B_shared_t *shared; /* Pointer to shared B-tree info */
     uint8_t *     base;   /* Base offset for move */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(bt);
     HDassert(bt_flags);
@@ -787,7 +787,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     H5B_ins_t      my_ins          = H5B_INS_ERROR;
     H5B_ins_t      ret_value       = H5B_INS_ERROR; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments
@@ -1120,7 +1120,7 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operato
     unsigned       u;                        /* Local index variable */
     herr_t         ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1235,7 +1235,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
     int            cmp       = 1;       /* Key comparison value */
     H5B_ins_t      ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
@@ -1778,7 +1778,7 @@ H5B__copy(const H5B_t *old_bt)
     H5B_shared_t *shared;           /* Pointer to shared B-tree info */
     H5B_t *       ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1848,7 +1848,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, const H5B_
     haddr_t        left_child;          /* Address of left-most child in node */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

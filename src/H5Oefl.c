@@ -93,7 +93,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     size_t      u;                /* Local index variable */
     void *      ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(f);
@@ -192,7 +192,7 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     size_t           u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -256,7 +256,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     hbool_t          slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
     void *           ret_value      = NULL;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -321,7 +321,7 @@ H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void 
     const H5O_efl_t *mesg      = (const H5O_efl_t *)_mesg;
     size_t           ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -357,7 +357,7 @@ H5O__efl_reset(void *_mesg)
     H5O_efl_t *mesg = (H5O_efl_t *)_mesg;
     size_t     u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(mesg);
@@ -439,7 +439,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     size_t     idx, size, name_offset, heap_size;
     void *     ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__COPIED_TAG)
+    FUNC_ENTER_PACKAGE_TAG(H5AC__COPIED_TAG)
 
     /* check args */
     HDassert(efl_src);
@@ -520,7 +520,7 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     size_t           u;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
