@@ -90,7 +90,7 @@ H5SM__bt2_crt_context(void *_f)
     H5SM_bt2_ctx_t *ctx;              /* Callback context structure */
     void *          ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -127,7 +127,7 @@ H5SM__bt2_dst_context(void *_ctx)
 {
     H5SM_bt2_ctx_t *ctx = (H5SM_bt2_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -158,7 +158,7 @@ H5SM__bt2_store(void *native, const void *udata)
 {
     const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *)udata;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Copy the source message to the B-tree */
     *(H5SM_sohm_t *)native = key->message;
@@ -184,7 +184,7 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const 
 {
     const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (sohm->location == H5SM_IN_HEAP)
         HDfprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,

@@ -139,7 +139,7 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
 static H5UC_t *
 H5G__node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
 
@@ -164,7 +164,7 @@ H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t *key = (H5G_node_key_t *)_key;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -192,7 +192,7 @@ H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
     const H5G_node_key_t *key = (const H5G_node_key_t *)_key;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(shared);
     HDassert(raw);
@@ -221,7 +221,7 @@ H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *_key, cons
     const H5G_node_key_t * key   = (const H5G_node_key_t *)_key;
     const H5G_bt_common_t *udata = (const H5G_bt_common_t *)_udata;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(key);
 
@@ -300,7 +300,7 @@ H5G__node_create(H5F_t *f, H5B_ins_t H5_ATTR_UNUSED op, void *_lt_key, void H5_A
     H5G_node_t *    sym       = NULL;
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -370,7 +370,7 @@ H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     const char *     s1, *s2;
     int              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -423,7 +423,7 @@ H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
     const char *     s;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(udata && udata->heap);
@@ -481,7 +481,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hboo
     const char *  s;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -579,7 +579,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
     H5G_entry_t     ent;                /* Entry to insert in node */
     H5B_ins_t       ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -737,7 +737,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
     int             cmp       = 1;
     H5B_ins_t       ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);

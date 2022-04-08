@@ -106,7 +106,7 @@ H5O__open_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **token
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
 
@@ -234,7 +234,7 @@ H5O__open_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     /* group_name, idx_type, order are checked in H5VL_setup_idx-args() */
@@ -425,7 +425,7 @@ H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, c
 
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!src_name || !*src_name)
@@ -621,7 +621,7 @@ H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_p
     H5VL_loc_params_t           loc_params;           /* Location parameters for object access */
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Setup and check args */
     if (H5VL_setup_loc_args(obj_id, vol_obj_ptr, &loc_params) < 0)
@@ -727,7 +727,7 @@ H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t **_vol_obj_pt
     H5VL_loc_params_t           loc_params;           /* Location parameters for object access */
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Setup and check args */
     if (H5VL_setup_loc_args(oid, vol_obj_ptr, &loc_params) < 0)
@@ -1160,7 +1160,7 @@ H5O__get_info_by_name_api_common(hid_t loc_id, const char *name, H5O_info2_t *oi
     H5VL_loc_params_t      loc_params;                /* Location parameters for object access */
     herr_t                 ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!oinfo)
@@ -1941,7 +1941,7 @@ H5O__close_check_type(hid_t object_id)
 {
     htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for closeable object */
     switch (H5I_get_type(object_id)) {

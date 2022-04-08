@@ -95,7 +95,7 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     H5MF_debug_iter_ud_t *udata     = (H5MF_debug_iter_ud_t *)_udata; /* User data for callbacks */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

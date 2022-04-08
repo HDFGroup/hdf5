@@ -158,7 +158,7 @@ static H5TS_key_t H5TS_tid_key;
 static void
 H5TS__key_destructor(void *key_val)
 {
-    FUNC_ENTER_STATIC_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5CS routines */
     if (key_val != NULL)
@@ -373,7 +373,7 @@ H5TS__mutex_acquire(H5TS_mutex_t *mutex, unsigned int lock_count, hbool_t *acqui
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
 #ifdef H5_HAVE_WIN_THREADS
     EnterCriticalSection(&mutex->CriticalSection);

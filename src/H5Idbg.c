@@ -80,7 +80,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     const H5G_name_t *path   = NULL;                   /* Path to file object */
     const void *      object = NULL;                   /* Pointer to VOL connector object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDfprintf(stderr, "         id = %" PRIdHID "\n", info->id);
     HDfprintf(stderr, "         count = %u\n", info->count);

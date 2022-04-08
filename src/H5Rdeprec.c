@@ -97,7 +97,7 @@ H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref
     H5VL_file_get_args_t  vol_cb_args; /* Arguments to VOL callback */
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifndef NDEBUG
     {
@@ -172,7 +172,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t t
     unsigned char *data      = NULL;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(obj_token);

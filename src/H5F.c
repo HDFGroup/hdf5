@@ -202,7 +202,7 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
     H5F_trav_obj_cnt_t *udata     = (H5F_trav_obj_cnt_t *)key;
     int                 ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     udata->obj_count++;
 
@@ -309,7 +309,7 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
     H5F_trav_obj_ids_t *udata     = (H5F_trav_obj_ids_t *)key;
     int                 ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (udata->obj_count >= udata->max_objs)
         HGOTO_DONE(H5_ITER_STOP);
@@ -524,7 +524,7 @@ H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
     uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
     herr_t   ret_value = SUCCEED; /* Return value     */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for 'post open' callback */
     supported = 0;
@@ -563,7 +563,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check/fix arguments */
     if (!filename || !*filename)
@@ -757,7 +757,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!filename || !*filename)
@@ -934,7 +934,7 @@ H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL
     H5VL_file_specific_args_t vol_cb_args;            /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED;    /* Return value     */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the type of object we're flushing + sanity check */
     obj_type = H5I_get_type(object_id);
@@ -1418,7 +1418,7 @@ H5F__reopen_api_common(hid_t file_id, void **token_ptr)
     void *                    reopen_file = NULL;            /* Pointer to the re-opened file object */
     hid_t                     ret_value   = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))

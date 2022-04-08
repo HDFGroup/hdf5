@@ -224,7 +224,7 @@ H5FD_splitter_init(void)
 static herr_t
 H5FD__splitter_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -249,7 +249,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -402,7 +402,7 @@ H5FD__splitter_populate_config(H5FD_splitter_vfd_config_t *vfd_config, H5FD_spli
     hbool_t         free_config = FALSE;
     herr_t          ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(fapl_out);
 
@@ -521,7 +521,7 @@ H5FD__splitter_get_default_wo_path(char *new_path, size_t new_path_len, const ch
     char *      file_extension   = NULL;
     herr_t      ret_value        = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(new_path);
     HDassert(base_filename);
@@ -573,7 +573,7 @@ H5FD__splitter_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closin
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -608,7 +608,7 @@ H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -648,7 +648,7 @@ H5FD__splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     H5P_genplist_t * plist_ptr = NULL;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -684,7 +684,7 @@ H5FD__splitter_fapl_get(H5FD_t *_file)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     void *           ret_value = NULL;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -709,7 +709,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
     H5FD_splitter_fapl_t *      new_fa_ptr = NULL;
     void *                      ret_value  = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -753,7 +753,7 @@ H5FD__splitter_fapl_free(void *_fapl)
     H5FD_splitter_fapl_t *fapl      = (H5FD_splitter_fapl_t *)_fapl;
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -792,7 +792,7 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
     H5P_genplist_t *            plist_ptr    = NULL;
     H5FD_t *                    ret_value    = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -903,7 +903,7 @@ H5FD__splitter_close(H5FD_t *_file)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -954,7 +954,7 @@ H5FD__splitter_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     const H5FD_splitter_t *file      = (const H5FD_splitter_t *)_file;
     haddr_t                ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -985,7 +985,7 @@ H5FD__splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t ad
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__)
 
@@ -1022,7 +1022,7 @@ H5FD__splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     const H5FD_splitter_t *file      = (const H5FD_splitter_t *)_file;
     haddr_t                ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1051,7 +1051,7 @@ H5FD__splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1089,7 +1089,7 @@ H5FD__splitter_sb_size(H5FD_t *_file)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     hsize_t          ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1117,7 +1117,7 @@ H5FD__splitter_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1148,7 +1148,7 @@ H5FD__splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *b
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1179,7 +1179,7 @@ H5FD__splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_splitter_t *f2        = (const H5FD_splitter_t *)_f2;
     herr_t                 ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1206,7 +1206,7 @@ H5FD__splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1237,7 +1237,7 @@ H5FD__splitter_lock(H5FD_t *_file, hbool_t rw)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
     herr_t           ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1270,7 +1270,7 @@ H5FD__splitter_unlock(H5FD_t *_file)
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
     herr_t           ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1317,7 +1317,7 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);
@@ -1361,7 +1361,7 @@ H5FD__splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
     const H5FD_splitter_t *file      = (const H5FD_splitter_t *)_file;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1398,7 +1398,7 @@ H5FD__splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
     haddr_t          ret_value = HADDR_UNDEF;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1432,7 +1432,7 @@ H5FD__splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
     const H5FD_splitter_t *file      = (const H5FD_splitter_t *)_file;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1462,7 +1462,7 @@ H5FD__splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file; /* VFD file struct */
     herr_t           ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -1497,7 +1497,7 @@ H5FD__splitter_delete(const char *filename, hid_t fapl_id)
     H5P_genplist_t *            plist;
     herr_t                      ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 
@@ -1561,7 +1561,7 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 

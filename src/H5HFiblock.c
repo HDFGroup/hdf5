@@ -99,7 +99,7 @@ H5HF__iblock_pin(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(iblock);
@@ -164,7 +164,7 @@ H5HF__iblock_unpin(H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(iblock);
@@ -679,7 +679,7 @@ H5HF__man_iblock_root_halve(H5HF_indirect_t *iblock)
     unsigned    u;                   /* Local index variable */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(iblock);
@@ -809,7 +809,7 @@ H5HF__man_iblock_root_revert(H5HF_indirect_t *root_iblock)
     size_t         dblock_size;         /* Direct block's size */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
