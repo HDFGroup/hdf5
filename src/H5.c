@@ -597,12 +597,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)
+H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t *blk_size /*out*/,
+                      size_t *fac_size /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -637,12 +638,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats)
+H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", stats);
+    H5TRACE1("e", "x", stats);
 
     /* Call the internal allocation stat routine to get the values */
     if (H5MM_get_alloc_stats(stats) < 0)
@@ -797,12 +798,12 @@ H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void 
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *relnum /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
+    H5TRACE3("e", "xxx", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -920,6 +921,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
 
     /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
+    /* Library develop release versions are incompatible by design */
     if (H5_VERS_RELEASE != relnum) {
         for (unsigned i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++) {
             /* Check for incompatible headers or incompatible library */
@@ -1024,7 +1026,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5close
  *
- * Purpose:	Terminate the library and release all resources.
+ * Purpose:    Terminate the library and release all resources.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -1158,21 +1160,24 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts)
+H5is_library_threadsafe(hbool_t *is_ts /*out*/)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*b", is_ts);
+    H5TRACE1("e", "x", is_ts);
 
-    HDassert(is_ts);
-
-    /* At this time, it is impossible for this to fail. */
+    if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-    *is_ts = TRUE;
+        *is_ts = TRUE;
 #else  /* H5_HAVE_THREADSAFE */
-    *is_ts = FALSE;
+        *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
+    }
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_threadsafe() */
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \

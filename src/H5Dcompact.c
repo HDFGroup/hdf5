@@ -71,13 +71,24 @@ static herr_t  H5D__compact_dest(H5D_t *dset);
 /*********************/
 
 /* Compact storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {
-    {H5D__compact_construct, NULL, H5D__compact_is_space_alloc, NULL, H5D__compact_io_init, H5D__contig_read,
-     H5D__contig_write,
+const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
+    H5D__compact_construct,      /* construct */
+    NULL,                        /* init */
+    H5D__compact_is_space_alloc, /* is_space_alloc */
+    NULL,                        /* is_data_cached */
+    H5D__compact_io_init,        /* io_init */
+    H5D__contig_read,            /* ser_read */
+    H5D__contig_write,           /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-     NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-     H5D__compact_readvv, H5D__compact_writevv, H5D__compact_flush, NULL, H5D__compact_dest}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    H5D__compact_readvv,  /* readvv */
+    H5D__compact_writevv, /* writevv */
+    H5D__compact_flush,   /* flush */
+    NULL,                 /* io_term */
+    H5D__compact_dest     /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -493,7 +504,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
-        /* Atomize */
+        /* Register */
         if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
             H5S_close(buf_space);
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
