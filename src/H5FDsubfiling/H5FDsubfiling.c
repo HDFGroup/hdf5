@@ -99,11 +99,16 @@ typedef struct H5FD_subfiling_t {
     int                     fd;  /* the filesystem file descriptor   */
     H5FD_subfiling_config_t fa;  /* driver-specific file access properties */
 
+    /* MPI Info */
+    MPI_Comm comm;
+    MPI_Info info;
+    int      mpi_rank;
+    int      mpi_size;
+
     /* the following fields are inherited from the sec2 VFD, and will
      * likely be deleted.
      */
-    int     mpi_rank; /* useful MPI information           */
-    int     mpi_size;
+
     H5FD_t *sf_file;
 
 #ifndef H5_HAVE_WIN32_API
@@ -149,15 +154,6 @@ typedef struct H5FD_subfiling_t {
     H5FD_file_op_t op;  /* last operation                   */
                         /* Copy of file name from open operation    */
     char     filename[H5FD_MAX_FILENAME_LEN];
-    MPI_Info info;
-    MPI_Comm comm;
-
-    /* Information from properties set by 'h5repart' tool
-     *
-     * Whether to eliminate the family driver info and convert this file to
-     * a single file.
-     */
-    hbool_t fam_to_single;
 } H5FD_subfiling_t;
 
 /*
@@ -398,12 +394,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
+H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5FD_ioc_config_t *      ioc_conf       = NULL;
     H5P_genplist_t *         plist          = NULL;
-    hid_t                    ioc_fapl       = H5I_INVALID_HID;
     herr_t                   ret_value      = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -412,48 +406,23 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    if (fa == NULL) {
+    if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration")
-
-        /* Create IOC fapl */
-        if ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create IOC FAPL")
 
         /* Get subfiling VFD defaults */
         if (H5FD__subfiling_get_default_config(subfiling_conf) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default subfiling VFD configuration")
 
-        if (subfiling_conf->require_ioc) {
-            if (NULL == (ioc_conf = HDcalloc(1, sizeof(*ioc_conf))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate IOC VFD configuration")
-
-            /* Get IOC VFD defaults */
-            if (H5Pget_fapl_ioc(ioc_fapl, ioc_conf) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default IOC VFD configuration")
-
-            /* Now we can set the IOC fapl. */
-            if (H5Pset_fapl_ioc(ioc_fapl, ioc_conf) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set IOC VFD on IOC FAPL")
-        }
-        else {
-            if (H5Pset_fapl_sec2(ioc_fapl) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 VFD on IOC fapl")
-        }
-
-        /* Assign the IOC fapl as the underlying VFD */
-        subfiling_conf->ioc_fapl_id = ioc_fapl;
-
-        fa = subfiling_conf;
+        vfd_config = subfiling_conf;
     }
 
-    if (H5FD__subfiling_validate_config(fa) < 0)
+    if (H5FD__subfiling_validate_config(vfd_config) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling VFD configuration")
 
-    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)fa, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)vfd_config, NULL);
 
 done:
-    HDfree(ioc_conf);
     HDfree(subfiling_conf);
 
     FUNC_LEAVE_API(ret_value)
@@ -520,16 +489,21 @@ H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out)
     char * h5_require_ioc;
     herr_t ret_value = SUCCEED;
 
+    FUNC_ENTER_STATIC
+
     HDassert(config_out);
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
     config_out->magic         = H5FD_SUBFILING_FAPL_MAGIC;
     config_out->version       = H5FD_CURR_SUBFILING_FAPL_VERSION;
-    config_out->ioc_fapl_id   = H5P_DEFAULT; /* TODO: create a real FAPL */
+    config_out->ioc_fapl_id   = H5I_INVALID_HID;
     config_out->stripe_count  = 0;
     config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
     config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    config_out->context_id    = -1;
+
+    HDsnprintf(config_out->file_dir, H5FD_SUBFILING_PATH_MAX, ".");
 
     config_out->require_ioc = TRUE;
 
@@ -539,7 +513,26 @@ H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out)
             config_out->require_ioc = FALSE;
     }
 
-    return ret_value;
+    /* Create a default FAPL and choose an appropriate underlying driver */
+    if ((config_out->ioc_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create default FAPL")
+
+    if (config_out->require_ioc) {
+        if (H5Pset_fapl_ioc(config_out->ioc_fapl_id, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set IOC VFD on IOC FAPL")
+    }
+    else {
+        if (H5Pset_fapl_sec2(config_out->ioc_fapl_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set Sec2 VFD on IOC FAPL")
+    }
+
+done:
+    if (ret_value < 0) {
+        if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL")
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -797,6 +790,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
         if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
+
+        if (comm == MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid or unset MPI communicator in FAPL")
     }
 
     /* Get the MPI rank of this process and the total number of processes */
@@ -833,21 +829,26 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file")
 
     /* Check the "native" driver (sec2 or mpio) */
-    plist_ptr = (H5P_genplist_t *)H5I_object(config_ptr->ioc_fapl_id);
+    if (NULL == (plist_ptr = H5I_object(config_ptr->ioc_fapl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid IOC FAPL")
 
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
     if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
 
-    if (strncmp(driver->name, H5FD_IOC_NAME, 3) == 0) {
+    if (driver->value != H5_VFD_IOC && driver->value != H5_VFD_SEC2)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name)
+
+    if (driver->value == H5_VFD_IOC) {
         /* We've already opened the subfiles... */
         H5FD_subfiling_t *ioc_file = (H5FD_subfiling_t *)(file_ptr->sf_file);
+
         /* Get a copy of the context ID for later use */
         file_ptr->fa.context_id  = ioc_file->fa.context_id;
         file_ptr->fa.require_ioc = true;
     }
-    else if (strncmp(driver->name, "sec2", 4) == 0) {
+    else if (driver->value == H5_VFD_SEC2) {
         uint64_t inode_id  = (uint64_t)-1;
         int      ioc_flags = O_RDWR;
 
@@ -892,10 +893,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
         if (H5FD__open_subfiles((void *)&file_ptr->fa, inode_id, ioc_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
-    else {
-        HDputs("We only support ioc and sec2 file opens at the moment.");
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
-    }
+
     ret_value = (H5FD_t *)file_ptr;
 
 done:
@@ -999,42 +997,10 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_STATIC_NOERR
 
-#ifdef H5_HAVE_WIN32_API
-    if (f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber)
-        HGOTO_DONE(-1)
-    if (f1->dwVolumeSerialNumber > f2->dwVolumeSerialNumber)
-        HGOTO_DONE(1)
+    HDassert(f1);
+    HDassert(f2);
 
-    if (f1->nFileIndexHigh < f2->nFileIndexHigh)
-        HGOTO_DONE(-1)
-    if (f1->nFileIndexHigh > f2->nFileIndexHigh)
-        HGOTO_DONE(1)
-
-    if (f1->nFileIndexLow < f2->nFileIndexLow)
-        HGOTO_DONE(-1)
-    if (f1->nFileIndexLow > f2->nFileIndexLow)
-        HGOTO_DONE(1)
-#else /* H5_HAVE_WIN32_API */
-#ifdef H5_DEV_T_IS_SCALAR
-    if (f1->device < f2->device)
-        HGOTO_DONE(-1)
-    if (f1->device > f2->device)
-        HGOTO_DONE(1)
-#else  /* H5_DEV_T_IS_SCALAR */
-    /* If dev_t isn't a scalar value on this system, just use memcmp to
-     * determine if the values are the same or not.  The actual return value
-     * shouldn't really matter...
-     */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
-        HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
-        HGOTO_DONE(1)
-#endif /* H5_DEV_T_IS_SCALAR */
-    if (f1->inode < f2->inode)
-        HGOTO_DONE(-1)
-    if (f1->inode > f2->inode)
-        HGOTO_DONE(1)
-#endif /* H5_HAVE_WIN32_API */
+    ret_value = H5FD_cmp(f1->sf_file, f2->sf_file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1157,7 +1123,7 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  *              Having a defined storage layout, the virtual file EOF
  *              calculation should be the MAXIMUM value returned by the
  *              collection of IOCs.  Every MPI rank which hosts an IOC
- *              maintains it's own EOF by updating that value for each
+ *              maintains its own EOF by updating that value for each
  *              WRITE operation that completes, i.e. if a new local EOF
  *              is greater than the existing local EOF, the new EOF
  *              will replace the old.  The local EOF calculation is as
@@ -1170,6 +1136,7 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  *
  *              2. For every write operation, the IOC receives a message
  *                 containing a file_offset and the data_size.
+ *
  *              3. The file_offset + data_size are in turn used to
  *                 create a stripe_id:
  *                   IOC-(ioc_rank)       IOC-(ioc_rank+1)
@@ -1193,32 +1160,6 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  *
  *-------------------------------------------------------------------------
  */
-#if 0 /* JRM */ /* original version */
-
-static haddr_t
-H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
-{
-    H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
-    haddr_t           ret_value = HADDR_UNDEF;
-    haddr_t           local_eof, global_eof = 0;
-    FUNC_ENTER_STATIC
-
-    local_eof = H5FD_get_eof(file->sf_file, type);
-    if (MPI_SUCCESS != MPI_Allreduce(&local_eof, &global_eof, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "mpi_allreduce failed")
-    /* Return the global max of all the subfile EOF values */
-
-    ret_value = global_eof;
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__subfiling_get_eof() */
-
-#else /* JRM */ /* re-worked version */
-/* this is a heavy weight implementation.  We need something like this
- * for file open, and probably for file close.  However, in between, something
- * similar to the current solution in the MPIIO VFD might be more appropriate.
- */
-
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
@@ -1228,8 +1169,20 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_STATIC
 
-    if (H5FD__subfiling__get_real_eof(&logical_eof, file->fa.context_id) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "can't get eof")
+#if 0 /* TODO */
+    int64_t local_eof = H5FDget_eof(file->sf_file, type);
+
+    if (MPI_SUCCESS != MPI_Allreduce(&local_eof, &logical_eof, 1, MPI_INT64_t, MPI_MAX, file->comm))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "MPI_Allreduce failed")
+#endif
+
+    /*
+     * TODO: this is a heavy weight implementation.  We need something like this
+     * for file open, and probably for file close.  However, in between, something
+     * similar to the current solution in the MPIIO VFD might be more appropriate.
+     */
+    if (H5FD__subfiling__get_real_eof(file->fa.context_id, &logical_eof) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "can't get EOF")
 
     /* Return the global max of all the subfile EOF values */
     ret_value = (haddr_t)(logical_eof);
@@ -1237,8 +1190,6 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_get_eof() */
-
-#endif /* JRM */ /* re-worked version */
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD__subfiling_get_handle

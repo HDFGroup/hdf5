@@ -37,7 +37,6 @@ sf_context_entries -- The number of contexts that are currently recorded.
 sf_context_cache   -- Storage for contexts
 --------------------------------------------------------------------------
 */
-// static size_t                 twoGIG_LIMIT = (1 << 30);
 static size_t               sf_context_limit  = 16;
 static subfiling_context_t *sf_context_cache  = NULL;
 static size_t               sf_topology_limit = 4;
@@ -1686,7 +1685,7 @@ done:
  *              Note: This code should be moved -- most likely to the IOC
  *                    code files.
  *
- * Purpose:     Query each subfile to get its local EOF, and then used this
+ * Purpose:     Query each subfile to get its local EOF, and then use this
  *              data to calculate the actual EOF.
  *
  *              Do this as follows:
@@ -1701,7 +1700,7 @@ done:
  *
  *              4) After all IOCs have replied, compute the offset of
  *                 each subfile in the logical file.  Take the maximum
- *                 of these values, and erport this value as the overall
+ *                 of these values, and report this value as the overall
  *                 EOF.
  *
  *              Note that this operation is not collective, and can return
@@ -1717,19 +1716,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
+H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
+    subfiling_context_t *sf_context  = NULL;
+    MPI_Status           status;
+    int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
+    int64_t              msg[3]      = {0, 0, 0};
+    int64_t              logical_eof = 0;
+    int64_t              sf_logical_eof;
     int                  i;
     int                  reply_count;
     int                  ioc_rank;
     int                  mpi_code;           /* MPI return code */
     int                  n_io_concentrators; /* copy of value in topology */
-    MPI_Status           status;
-    subfiling_context_t *sf_context  = NULL;
-    int64_t              msg[3]      = {0, 0, 0};
-    int64_t *            sf_eofs     = NULL; /* dynamically allocated array for sf EOFs */
-    int64_t              logical_eof = 0;
-    int64_t              sf_logical_eof;
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1799,7 +1798,7 @@ H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id)
 
     /* 4) After all IOCs have replied, compute the offset of
      *    each subfile in the logical file.  Take the maximum
-     *    of these values, and erport this value as the overall
+     *    of these values, and report this value as the overall
      *    EOF.
      */
 

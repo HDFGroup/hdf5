@@ -69,15 +69,16 @@ typedef struct stat_record {
     double  total;    /* average (time)        */
 } stat_record_t;
 
-typedef enum stat_category { /* Stat (OP) Categories  */
-                             WRITE_STAT = 0,
-                             WRITE_WAIT,
-                             READ_STAT,
-                             READ_WAIT,
-                             FOPEN_STAT,
-                             FCLOSE_STAT,
-                             QUEUE_STAT,
-                             TOTAL_STAT_COUNT
+/* Stat (OP) Categories  */
+typedef enum stat_category {
+    WRITE_STAT = 0,
+    WRITE_WAIT,
+    READ_STAT,
+    READ_WAIT,
+    FOPEN_STAT,
+    FCLOSE_STAT,
+    QUEUE_STAT,
+    TOTAL_STAT_COUNT
 } stat_category_t;
 
 typedef struct _info_header { /* Header for a driver info message */
@@ -111,7 +112,7 @@ extern "C" {
 #endif
 
 H5_DLL herr_t H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id);
-H5_DLL herr_t H5FD__subfiling__get_real_eof(int64_t *logical_eof_ptr, hid_t context_id);
+H5_DLL herr_t H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr);
 
 H5_DLL int init__indep_io(void *_sf_context, size_t depth, int ioc_total, int64_t *sf_source_data_offset,
                           int64_t *sf_datasize, int64_t *f_offset, int *first_index, int *n_containers,
