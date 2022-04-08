@@ -51,7 +51,7 @@ macro (ADD_H5P_EXE file)
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (${file}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
-      "$<$<BOOL:${HDF5_BUILD_SUBFILING}>:${H5FD_SUBFILING_DIR}>"
+      "$<$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>:${H5FD_SUBFILING_DIR}>"
   )
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${file} STATIC)

@@ -19,18 +19,18 @@
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
-#include "H5FDpublic.h"  /* Basic H5FD definitions   */
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDprivate.h" /* File drivers             */
-#include "H5FDioc.h"     /* IOC file driver          */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Fprivate.h"  /* File access              */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
-#include "H5Pprivate.h"  /* Property lists           */
-#include "H5private.h"   /* Generic Functions        */
-
-#include "H5FDioc_priv.h"
+#include "H5private.h"    /* Generic Functions        */
+#include "H5FDpublic.h"   /* Basic H5FD definitions   */
+#include "H5Eprivate.h"   /* Error handling           */
+#include "H5FDprivate.h"  /* File drivers             */
+#include "H5FDioc.h"      /* IOC file driver          */
+#include "H5FDioc_priv.h" /* IOC file driver          */
+#include "H5FDsec2.h"     /* Sec2 VFD                 */
+#include "H5FLprivate.h"  /* Free Lists               */
+#include "H5Fprivate.h"   /* File access              */
+#include "H5Iprivate.h"   /* IDs                      */
+#include "H5MMprivate.h"  /* Memory management        */
+#include "H5Pprivate.h"   /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
@@ -153,6 +153,8 @@ static herr_t H5FD__ioc_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags,
 */
 
 static herr_t H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out);
+static herr_t H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa);
+static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
 static const H5FD_class_t H5FD_ioc_g = {
     H5FD_CLASS_VERSION,        /* VFD interface version */
@@ -271,32 +273,10 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_ioc_init() */
 
-#if 0 /* JRM */ /* delete if all goes well */
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc_set_shutdown_flag
- *
- * Purpose:     IO Concentrator threads are told to terminate their service
- *              loop and exit by setting 'shutdown_flag' to a non-zero
- *              value.
- *
- * Return:      None
- *
- *-------------------------------------------------------------------------
- */
-void
-H5FD_ioc_set_shutdown_flag(int flag)
-{
-    sf_shutdown_flag = flag;
-    if (H5FD_IOC_g > 0)
-        usleep(100);
-    return;
-} /* end H5FD_ioc_set_shutdown_flag() */
-#endif          /* JRM */
-
 /*---------------------------------------------------------------------------
  * Function:    H5FD__ioc_term
  *
- * Purpose:     Shut down the ioc VFD.
+ * Purpose:     Shut down the IOC VFD.
  *
  * Returns:     SUCCEED (Can't fail)
  *---------------------------------------------------------------------------
@@ -304,60 +284,17 @@ H5FD_ioc_set_shutdown_flag(int flag)
 static herr_t
 H5FD__ioc_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    // FUNC_ENTER_STATIC_NOERR
+    herr_t ret_value = SUCCEED;
 
-#if 0  /* JRM */
-    HDfprintf(stdout, "Entering H5FD__ioc_term().\n");
-#endif /* JRM */
+    FUNC_ENTER_STATIC_NOERR
 
     H5FD_IOC_LOG_CALL(FUNC);
 
     /* Reset VFL ID */
-    H5FD_IOC_g = 0;
+    H5FD_IOC_g = H5I_INVALID_HID;
 
-#if 0  /* JRM */
-    HDfprintf(stdout, "Exiting H5FD__ioc_term().\n");
-#endif /* JRM */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_term() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__copy_plist
- *
- * Purpose:     Sanity-wrapped H5P_copy_plist() for each channel.
- *              Utility function for operation in multiple locations.
- *
- * Return:      0 on success, -1 on error.
- *-------------------------------------------------------------------------
- */
-static int
-H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
-{
-    int             ret_value = 0;
-    H5P_genplist_t *plist_ptr = NULL;
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    HDassert(id_out_ptr != NULL);
-
-    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
-
-    plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
-    if (NULL == plist_ptr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
-
-    *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
-    if (H5I_INVALID_HID == *id_out_ptr)
-        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__copy_plist() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ioc
@@ -371,7 +308,7 @@ done:
 herr_t
 H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 {
-    H5FD_ioc_config_t *info      = NULL;
+    H5FD_ioc_config_t *ioc_conf  = NULL;
     H5P_genplist_t *   plist_ptr = NULL;
     herr_t             ret_value = SUCCEED;
 
@@ -380,24 +317,27 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 
     H5FD_IOC_LOG_CALL(FUNC);
 
-    if (H5FD_IOC_FAPL_MAGIC != vfd_config->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid configuration (magic number mismatch)")
-    if (H5FD_CURR_IOC_FAPL_VERSION != vfd_config->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid config (version number mismatch)")
-    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid property list")
+    if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    info = H5FL_CALLOC(H5FD_ioc_config_t);
-    if (NULL == info)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate file access property list struct")
+    if (vfd_config == NULL) {
+        if (NULL == (ioc_conf = HDcalloc(1, sizeof(*ioc_conf))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate IOC VFD configuration")
 
-    memcpy(info, vfd_config, sizeof(H5FD_ioc_config_t));
-    info->ioc_fapl_id = fapl_id;
-    ret_value         = H5P_set_driver(plist_ptr, H5FD_IOC, info, NULL);
+        /* Get IOC VFD defaults */
+        if (H5FD__ioc_get_default_config(ioc_conf) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default IOC VFD configuration")
+
+        vfd_config = ioc_conf;
+    }
+
+    if (H5FD__ioc_validate_config(vfd_config) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC VFD configuration")
+
+    ret_value = H5P_set_driver(plist_ptr, H5FD_IOC, vfd_config, NULL);
 
 done:
-    if (info)
-        info = H5FL_FREE(H5FD_ioc_config_t, info);
+    HDfree(ioc_conf);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_ioc() */
@@ -460,9 +400,9 @@ done:
 } /* end H5Pget_fapl_ioc() */
 
 /*-------------------------------------------------------------------------
- * Function:    fapl_get_ioc_defaults
+ * Function:    H5FD__ioc_get_default_config
  *
- * Purpose:     This is called by H5Pget_fapl_ioc when called with no
+ * Purpose:     This is called by H5Pset/get_fapl_ioc when called with no
  *              established configuration info.  This simply fills in
  *              the basics.   This avoids the necessity of having the
  *              user write code to initialize the config structure.
@@ -475,33 +415,121 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
 {
     herr_t ret_value = SUCCEED;
 
+    FUNC_ENTER_STATIC
+
     HDassert(config_out);
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
     config_out->magic         = H5FD_IOC_FAPL_MAGIC;
     config_out->version       = H5FD_CURR_IOC_FAPL_VERSION;
-    config_out->ioc_fapl_id   = H5P_DEFAULT;
+    config_out->ioc_fapl_id   = H5I_INVALID_HID;
     config_out->stripe_count  = 0;
     config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
     config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
 
+    /* Create a default FAPL and choose an appropriate underlying driver */
+    if ((config_out->ioc_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create default FAPL")
+
+    /* Currently, only sec2 vfd supported */
+    if (H5Pset_fapl_sec2(config_out->ioc_fapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set Sec2 VFD on IOC FAPL")
+
     /* Specific to this I/O Concentrator */
     config_out->thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
 
-    return ret_value;
+done:
+    if (ret_value < 0) {
+        if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL")
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_flush
+ * Function:    H5FD__ioc_validate_config()
  *
- * Purpose:     Flushes all data to disk for both channels.
+ * Purpose:     Test to see if the supplied instance of
+ *              H5FD_ioc_config_t contains internally consistent data.
+ *              Return SUCCEED if so, and FAIL otherwise.
+ *
+ *              Note the difference between internally consistent and
+ *              correct.  As we will have to try to setup the IOC to
+ *              determine whether the supplied data is correct,
+ *              we will settle for internal consistency at this point
+ *
+ * Return:      SUCCEED if instance of H5FD_ioc_config_t contains
+ *              internally consistent data, FAIL otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(fa != NULL);
+
+    if (fa->version != H5FD_CURR_IOC_FAPL_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ioc_config_t version")
+
+    if (fa->magic != H5FD_IOC_FAPL_MAGIC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5FD_ioc_config_t magic value")
+
+    /* TODO: add extra IOC configuration validation code */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_validate_config() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_sb_size
+ *
+ * Purpose:     Obtains the number of bytes required to store the driver file
+ *              access data in the HDF5 superblock.
+ *
+ * Return:      Success:    Number of bytes required.
+ *
+ *              Failure:    0 if an error occurs or if the driver has no
+ *                          data to store in the superblock.
+ *
+ * NOTE: no public API for H5FD_sb_size, it needs to be added
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+H5FD__ioc_sb_size(H5FD_t *_file)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    hsize_t     ret_value = 0;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    /* Sanity check */
+    HDassert(file);
+    HDassert(file->ioc_file);
+
+    if (file->ioc_file)
+        ret_value = H5FD_sb_size(file->ioc_file);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_sb_size */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_sb_encode
+ *
+ * Purpose:     Encode driver-specific data into the output arguments.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__ioc_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED; /* Return value */
@@ -510,173 +538,47 @@ H5FD__ioc_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 
     H5FD_IOC_LOG_CALL(FUNC);
 
-    /* Public API for dxpl "context" */
-    if (H5FDflush(file->ioc_file, dxpl_id, closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush R/W file")
+    /* Sanity check */
+    HDassert(file);
+    HDassert(file->ioc_file);
+
+    if (file->ioc_file && H5FD_sb_encode(file->ioc_file, name, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_flush() */
+} /* end H5FD__ioc_sb_encode */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_read
+ * Function:    H5FD__ioc_sb_decode
  *
- * Purpose:     Reads SIZE bytes of data from the R/W channel, beginning at
- *              address ADDR into buffer BUF according to data transfer
- *              properties in DXPL_ID.
+ * Purpose:     Decodes the driver information block.
  *
- * Return:      Success:    SUCCEED
- *                          The read result is written into the BUF buffer
- *                          which should be allocated by the caller.
- *              Failure:    FAIL
- *                          The contents of BUF are undefined.
+ * Return:      SUCCEED/FAIL
+ *
+ * NOTE: no public API for H5FD_sb_size, need to add
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-               size_t size, void *buf)
+H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     H5FD_IOC_LOG_CALL(FUNC);
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    /* Sanity check */
+    HDassert(file);
+    HDassert(file->ioc_file);
 
-    /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
-    if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
-
-    /* Public API for dxpl "context" */
-    if (H5FDread(file->ioc_file, type, dxpl_id, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "Reading from R/W channel failed")
+    if (H5FD_sb_load(file->ioc_file, name, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_read() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_write
- *
- * Purpose:     Writes SIZE bytes of data to R/W and W/O channels, beginning
- *              at address ADDR from buffer BUF according to data transfer
- *              properties in DXPL_ID.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, haddr_t addr, size_t size,
-                const void *buf)
-{
-    H5FD_ioc_t *    file_ptr  = (H5FD_ioc_t *)_file;
-    H5P_genplist_t *plist_ptr = NULL;
-    herr_t          ret_value = SUCCEED;
-    hid_t           h5_fid;
-
-    FUNC_ENTER_STATIC
-
-    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    addr += _file->base_addr;
-    h5_fid    = (hid_t)file_ptr->inode;
-    ret_value = H5FD__write_vector_internal(h5_fid, 1, &addr, &size, &buf);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_write() */
-
-static herr_t
-H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                      size_t sizes[], void *bufs[] /* out */)
-{
-    H5FD_ioc_t *file_ptr  = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
-    hid_t       h5_fid;
-
-    FUNC_ENTER_STATIC
-
-    /* Check arguments */
-    if (!file_ptr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
-
-    if ((!types) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
-
-    if ((!addrs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
-
-    if ((!sizes) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
-
-    if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
-
-    /* Get the default dataset transfer property list if the user didn't provide
-     * one */
-    if (H5P_DEFAULT == dxpl_id) {
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    }
-    else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-    }
-
-    h5_fid    = (hid_t)file_ptr->inode;
-    ret_value = H5FD__read_vector_internal(h5_fid, count, addrs, sizes, bufs);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-static herr_t
-H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                       size_t sizes[], const void *bufs[] /* in */)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
-    hid_t       h5_fid;
-
-    FUNC_ENTER_STATIC
-
-    /* Check arguments */
-    if (!file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
-
-    if ((!types) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
-
-    if ((!addrs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
-
-    if ((!sizes) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
-
-    if ((!bufs) && (count > 0))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
-
-    /* Get the default dataset transfer property list if the user didn't provide
-     * one */
-    if (H5P_DEFAULT == dxpl_id) {
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    }
-    else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
-    }
-    h5_fid    = (hid_t)file->inode;
-    ret_value = H5FD__write_vector_internal(h5_fid, count, addrs, sizes, bufs);
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FDioc__write_vector() */
+} /* end H5FD__ioc_sb_decode */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_fapl_get
@@ -704,6 +606,42 @@ H5FD__ioc_fapl_get(H5FD_t *_file)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_fapl_get() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__copy_plist
+ *
+ * Purpose:     Sanity-wrapped H5P_copy_plist() for each channel.
+ *              Utility function for operation in multiple locations.
+ *
+ * Return:      0 on success, -1 on error.
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
+{
+    int             ret_value = 0;
+    H5P_genplist_t *plist_ptr = NULL;
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    HDassert(id_out_ptr != NULL);
+
+    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
+
+    plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
+    if (NULL == plist_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
+
+    *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
+    if (H5I_INVALID_HID == *id_out_ptr)
+        HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD__copy_plist() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_fapl_copy
@@ -921,7 +859,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
         }
 
         /* See: H5FDsubfile_int.c:  returns error count! */
-        if (H5FD__open_subfiles((void *)&file_ptr->fa, inode_id, ioc_flags) > 0)
+        if (H5FD__open_subfiles(file_ptr->fa.file_path, (void *)&file_ptr->fa, inode_id, ioc_flags) > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
 
         else if (file_ptr->inode > 0) { /* No errors opening the subfiles */
@@ -1035,6 +973,163 @@ done:
 } /* end H5FD__ioc_close() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_cmp
+ *
+ * Purpose:     Compare the keys of two files.
+ *
+ * Return:      Success:    A value like strcmp()
+ *              Failure:    Must never fail
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+{
+    const H5FD_ioc_t *f1        = (const H5FD_ioc_t *)_f1;
+    const H5FD_ioc_t *f2        = (const H5FD_ioc_t *)_f2;
+    herr_t            ret_value = 0; /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    HDassert(f1);
+    HDassert(f2);
+
+    ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_cmp */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_query
+ *
+ * Purpose:     Set the flags that this VFL driver is capable of supporting.
+ *              (listed in H5FDpublic.h)
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_query(const H5FD_t *_file, unsigned long *flags /* out */)
+{
+    const H5FD_ioc_t *file_ptr  = (const H5FD_ioc_t *)_file;
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    if (file_ptr == NULL) {
+        if (flags)
+            *flags = 0;
+    }
+    else if (file_ptr->ioc_file) {
+        if (H5FDquery(file_ptr->ioc_file, flags) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
+    }
+    else {
+        /* There is no file. Because this is a pure passthrough VFD,
+         * it has no features of its own.
+         */
+        if (flags)
+            *flags = 0;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_query() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_get_type_map
+ *
+ * Purpose:     Retrieve the memory type mapping for this file
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
+{
+    const H5FD_ioc_t *file      = (const H5FD_ioc_t *)_file;
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    /* Check arguments */
+    HDassert(file);
+    HDassert(file->ioc_file);
+
+    /* Retrieve memory type mapping for R/W channel only */
+    if (H5FD_get_fs_type_map(file->ioc_file, type_map) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to allocate for R/W file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_get_type_map() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_alloc
+ *
+ * Purpose:     Allocate file memory.
+ *
+ * Return:      Address of allocated space (HADDR_UNDEF if error).
+ *-------------------------------------------------------------------------
+ */
+static haddr_t
+H5FD__ioc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
+    haddr_t     ret_value = HADDR_UNDEF;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    /* Check arguments */
+    HDassert(file);
+    HDassert(file->ioc_file);
+
+    /* Allocate memory for each file, only return the return value for R/W file.
+     */
+    if ((ret_value = H5FDalloc(file->ioc_file, type, dxpl_id, size)) == HADDR_UNDEF)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate for R/W file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_alloc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_free
+ *
+ * Purpose:     Free the resources for the ioc VFD.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
+    herr_t      ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    /* Check arguments */
+    HDassert(file);
+    HDassert(file->ioc_file);
+
+    if (H5FDfree(file->ioc_file, type, dxpl_id, addr, size) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free for R/W file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_free() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_get_eoa
  *
  * Purpose:     Returns the end-of-address marker for the file. The EOA
@@ -1139,156 +1234,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_get_eof */
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_truncate
- *
- * Purpose:     Notify driver to truncate the file back to the allocated size.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    HDassert(file);
-    HDassert(file->ioc_file);
-    HDassert(file->ioc_file);
-
-    if (H5FDtruncate(file->ioc_file, dxpl_id, closing) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate R/W file")
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_truncate */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_sb_size
- *
- * Purpose:     Obtains the number of bytes required to store the driver file
- *              access data in the HDF5 superblock.
- *
- * Return:      Success:    Number of bytes required.
- *
- *              Failure:    0 if an error occurs or if the driver has no
- *                          data to store in the superblock.
- *
- * NOTE: no public API for H5FD_sb_size, it needs to be added
- *-------------------------------------------------------------------------
- */
-static hsize_t
-H5FD__ioc_sb_size(H5FD_t *_file)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    hsize_t     ret_value = 0;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    if (file->ioc_file)
-        ret_value = H5FD_sb_size(file->ioc_file);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_sb_size */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_sb_encode
- *
- * Purpose:     Encode driver-specific data into the output arguments.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    if (file->ioc_file && H5FD_sb_encode(file->ioc_file, name, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_sb_encode */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_sb_decode
- *
- * Purpose:     Decodes the driver information block.
- *
- * Return:      SUCCEED/FAIL
- *
- * NOTE: no public API for H5FD_sb_size, need to add
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    if (H5FD_sb_load(file->ioc_file, name, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_sb_decode */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_cmp
- *
- * Purpose:     Compare the keys of two files.
- *
- * Return:      Success:    A value like strcmp()
- *              Failure:    Must never fail
- *-------------------------------------------------------------------------
- */
-static int
-H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
-{
-    const H5FD_ioc_t *f1        = (const H5FD_ioc_t *)_f1;
-    const H5FD_ioc_t *f2        = (const H5FD_ioc_t *)_f2;
-    herr_t            ret_value = 0; /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    HDassert(f1);
-    HDassert(f2);
-
-    ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_cmp */
-
 /*--------------------------------------------------------------------------
  * Function:    H5FD__ioc_get_handle
  *
@@ -1319,6 +1264,219 @@ H5FD__ioc_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handl
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_get_handle */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_read
+ *
+ * Purpose:     Reads SIZE bytes of data from the R/W channel, beginning at
+ *              address ADDR into buffer BUF according to data transfer
+ *              properties in DXPL_ID.
+ *
+ * Return:      Success:    SUCCEED
+ *                          The read result is written into the BUF buffer
+ *                          which should be allocated by the caller.
+ *              Failure:    FAIL
+ *                          The contents of BUF are undefined.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+               size_t size, void *buf)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
+
+    /* Check for overflow conditions */
+    if (!H5F_addr_defined(addr))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
+    if (REGION_OVERFLOW(addr, size))
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
+
+    /* Public API for dxpl "context" */
+    if (H5FDread(file->ioc_file, type, dxpl_id, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "Reading from R/W channel failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_read() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_write
+ *
+ * Purpose:     Writes SIZE bytes of data to R/W and W/O channels, beginning
+ *              at address ADDR from buffer BUF according to data transfer
+ *              properties in DXPL_ID.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, haddr_t addr, size_t size,
+                const void *buf)
+{
+    H5FD_ioc_t *    file_ptr  = (H5FD_ioc_t *)_file;
+    H5P_genplist_t *plist_ptr = NULL;
+    herr_t          ret_value = SUCCEED;
+    hid_t           h5_fid;
+
+    FUNC_ENTER_STATIC
+
+    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    addr += _file->base_addr;
+    h5_fid    = (hid_t)file_ptr->inode;
+    ret_value = H5FD__write_vector_internal(h5_fid, 1, &addr, &size, &buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_write() */
+
+static herr_t
+H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                      size_t sizes[], void *bufs[] /* out */)
+{
+    H5FD_ioc_t *file_ptr  = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED; /* Return value */
+    hid_t       h5_fid;
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (!file_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if ((!types) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+
+    if ((!addrs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+
+    if ((!sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    /* Get the default dataset transfer property list if the user didn't provide
+     * one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    h5_fid    = (hid_t)file_ptr->inode;
+    ret_value = H5FD__read_vector_internal(h5_fid, count, addrs, sizes, bufs);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+static herr_t
+H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                       size_t sizes[], const void *bufs[] /* in */)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED; /* Return value */
+    hid_t       h5_fid;
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if ((!types) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive")
+
+    if ((!addrs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive")
+
+    if ((!sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    /* Get the default dataset transfer property list if the user didn't provide
+     * one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+    h5_fid    = (hid_t)file->inode;
+    ret_value = H5FD__write_vector_internal(h5_fid, count, addrs, sizes, bufs);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FDioc__write_vector() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_flush
+ *
+ * Purpose:     Flushes all data to disk for underlying VFD.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    if (H5FDflush(file->ioc_file, dxpl_id, closing) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush R/W file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_flush() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ioc_truncate
+ *
+ * Purpose:     Notify driver to truncate the file back to the allocated size.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
+{
+    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
+    herr_t      ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    H5FD_IOC_LOG_CALL(FUNC);
+
+    HDassert(file);
+    HDassert(file->ioc_file);
+    HDassert(file->ioc_file);
+
+    if (H5FDtruncate(file->ioc_file, dxpl_id, closing) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate R/W file")
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ioc_truncate */
 
 /*--------------------------------------------------------------------------
  * Function:    H5FD__ioc_lock
@@ -1391,135 +1549,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_unlock */
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_query
- *
- * Purpose:     Set the flags that this VFL driver is capable of supporting.
- *              (listed in H5FDpublic.h)
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_query(const H5FD_t *_file, unsigned long *flags /* out */)
-{
-    const H5FD_ioc_t *file_ptr  = (const H5FD_ioc_t *)_file;
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    if (file_ptr == NULL) {
-        if (flags)
-            *flags = 0;
-    }
-    else if (file_ptr->ioc_file) {
-        if (H5FDquery(file_ptr->ioc_file, flags) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
-    }
-    else {
-        /* There is no file. Because this is a pure passthrough VFD,
-         * it has no features of its own.
-         */
-        if (flags)
-            *flags = 0;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_query() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_alloc
- *
- * Purpose:     Allocate file memory.
- *
- * Return:      Address of allocated space (HADDR_UNDEF if error).
- *-------------------------------------------------------------------------
- */
-static haddr_t
-H5FD__ioc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    haddr_t     ret_value = HADDR_UNDEF;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    /* Allocate memory for each file, only return the return value for R/W file.
-     */
-    if ((ret_value = H5FDalloc(file->ioc_file, type, dxpl_id, size)) == HADDR_UNDEF)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate for R/W file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_alloc() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_get_type_map
- *
- * Purpose:     Retrieve the memory type mapping for this file
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
-{
-    const H5FD_ioc_t *file      = (const H5FD_ioc_t *)_file;
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    /* Retrieve memory type mapping for R/W channel only */
-    if (H5FD_get_fs_type_map(file->ioc_file, type_map) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to allocate for R/W file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_get_type_map() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__ioc_free
- *
- * Purpose:     Free the resources for the ioc VFD.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__ioc_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
-{
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    herr_t      ret_value = SUCCEED;             /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    H5FD_IOC_LOG_CALL(FUNC);
-
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    if (H5FDfree(file->ioc_file, type, dxpl_id, addr, size) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free for R/W file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__ioc_free() */
-
 /*
  * Function:   H5FD__write_vector_internal
  *
@@ -1551,7 +1580,7 @@ H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_
     } *mpi_reqs = NULL;
 
     sf_context = get__subfiling_object(sf_context_id);
-    assert(sf_context != NULL);
+    assert(sf_context);
 
     active_reqs = (MPI_Request *)calloc((size_t)(count + 2), sizeof(struct __mpi_req));
     assert(active_reqs);
@@ -1688,6 +1717,28 @@ H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t
 errors:
     return FAIL;
 }
+
+#if 0 /* JRM */ /* delete if all goes well */
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc_set_shutdown_flag
+ *
+ * Purpose:     IO Concentrator threads are told to terminate their service
+ *              loop and exit by setting 'shutdown_flag' to a non-zero
+ *              value.
+ *
+ * Return:      None
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5FD_ioc_set_shutdown_flag(int flag)
+{
+    sf_shutdown_flag = flag;
+    if (H5FD_IOC_g > 0)
+        usleep(100);
+    return;
+} /* end H5FD_ioc_set_shutdown_flag() */
+#endif          /* JRM */
 
 void
 H5FD_ioc_wait_thread_main(void)

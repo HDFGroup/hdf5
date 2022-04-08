@@ -743,8 +743,8 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 # Determine whether to build the HDF5 Subfiling VFD
-option (HDF5_BUILD_SUBFILING "Build Parallel HDF5 Subfiling" OFF)
-if (HDF5_BUILD_SUBFILING)
+option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
   endif()
