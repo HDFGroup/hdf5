@@ -28,10 +28,6 @@
 #include "H5public.h"
 #include "H5Cpublic.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /****************************************************************************
  *
  * structure H5AC_cache_config_t
@@ -783,7 +779,4 @@ typedef struct H5AC_cache_image_config_t {
 
 //! <!-- [H5AC_cache_image_config_t_snip] -->
 
-#ifdef __cplusplus
-}
-#endif
 #endif
