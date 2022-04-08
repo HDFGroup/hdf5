@@ -357,7 +357,7 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
     herr_t          ret_value = SUCCEED; /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache != NULL);
@@ -458,7 +458,7 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
     int                       ret_value = H5_ITER_CONT;               /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Santify checks */
     HDassert(entry);
@@ -585,7 +585,7 @@ static int
 H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
 {
     /* Function enter macro */
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(entry);
@@ -618,7 +618,7 @@ H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(cache);
@@ -810,7 +810,7 @@ H5C__expunge_tag_type_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
     int                      ret_value = H5_ITER_CONT;              /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Santify checks */
     HDassert(entry);

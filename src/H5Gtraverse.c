@@ -111,7 +111,7 @@ H5G__traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNU
     H5G_trav_slink_t *udata     = (H5G_trav_slink_t *)_udata; /* User data passed in */
     herr_t            ret_value = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for dangling soft link */
     if (obj_loc == NULL) {
@@ -163,7 +163,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     hid_t              cur_grp   = (-1);
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -284,7 +284,7 @@ H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *
     hbool_t          tmp_grp_loc_set = FALSE;   /* Flag to indicate that tmp group location is initialized */
     herr_t           ret_value       = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp_loc);
@@ -475,7 +475,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     hbool_t       last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check parameters */
     HDassert(_loc);

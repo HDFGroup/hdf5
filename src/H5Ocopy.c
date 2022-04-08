@@ -222,7 +222,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     size_t                 msghdr_size;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(oloc_src->addr)
+    FUNC_ENTER_PACKAGE_TAG(oloc_src->addr)
 
     HDassert(oloc_src);
     HDassert(oloc_src->file);
@@ -904,7 +904,7 @@ H5O__copy_free_addrmap_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UN
 {
     H5O_addr_map_t *item = (H5O_addr_map_t *)_item;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(item);
 
@@ -943,7 +943,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     unsigned                     cpy_option = 0; /* Copy options */
     herr_t                       ret_value  = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc_src);
@@ -1040,7 +1040,7 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_
     hbool_t    entry_inserted = FALSE;   /* Flag to indicate that the new entry was inserted into a group */
     herr_t     ret_value      = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(src_loc);
     HDassert(src_loc->oloc->file);
@@ -1098,7 +1098,7 @@ H5O__copy_free_comm_dt_cb(void *item, void *_key, void H5_ATTR_UNUSED *_op_data)
     haddr_t *                      addr = (haddr_t *)item;
     H5O_copy_search_comm_dt_key_t *key  = (H5O_copy_search_comm_dt_key_t *)_key;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(addr);
     HDassert(key);
@@ -1133,7 +1133,7 @@ H5O__copy_comm_dt_cmp(const void *_key1, const void *_key2)
     const H5O_copy_search_comm_dt_key_t *key2      = (const H5O_copy_search_comm_dt_key_t *)_key2;
     int                                  ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check fileno.  It is unlikely to be different so check if they are equal
      * first so only one comparison needs to be made. */
@@ -1176,7 +1176,7 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
     hbool_t                        obj_inserted = FALSE;   /* Object inserted into skip list */
     herr_t                         ret_value    = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(attr);
@@ -1256,7 +1256,7 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
     const H5O_obj_class_t *        obj_class = NULL;     /* Type of object */
     herr_t                         ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(obj_oloc);
@@ -1375,7 +1375,7 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
     hbool_t    obj_found = FALSE;               /* Object at 'name' found */
     herr_t     ret_value = H5_ITER_CONT;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(name);
@@ -1436,7 +1436,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
     H5O_copy_search_comm_dt_ud_t   udata;                       /* Group iteration user data */
     herr_t                         ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(oh_src);
@@ -1601,7 +1601,7 @@ H5O__copy_insert_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst, H5
     haddr_t *                      addr      = NULL;    /* Destination object address */
     herr_t                         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(oh_src);

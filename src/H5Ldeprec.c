@@ -93,7 +93,7 @@ H5L__iterate2_shim(hid_t group_id, const char *name, const H5L_info2_t *linfo2, 
     H5L_info1_t      linfo;
     herr_t           ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Copy the new-style members into the old-style struct */
     if (linfo2) {

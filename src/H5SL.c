@@ -628,7 +628,7 @@ H5SL__new_node(void *item, const void *key, uint32_t hashval)
 {
     H5SL_node_t *ret_value = NULL; /* New skip list node */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate the node */
     if (NULL == (ret_value = (H5SL_node_t *)H5FL_MALLOC(H5SL_node_t)))
@@ -678,7 +678,7 @@ H5SL__insert_common(H5SL_t *slist, void *item, const void *key)
     uint32_t     hashval   = 0;    /* Hash value for key */
     H5SL_node_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(slist);
@@ -794,7 +794,7 @@ H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     H5SL_node_t *node, *next_node; /* Pointers to skip list nodes */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(slist);
@@ -872,7 +872,7 @@ H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(slist);

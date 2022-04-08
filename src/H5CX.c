@@ -705,7 +705,7 @@ H5CX__get_context(void)
 {
     H5CX_node_t **ctx = NULL;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     ctx = (H5CX_node_t **)H5TS_get_thread_local_value(H5TS_apictx_key_g);
 
@@ -754,7 +754,7 @@ H5CX__push_common(H5CX_node_t *cnode)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(cnode);
@@ -3588,9 +3588,9 @@ H5CX__pop_common(hbool_t update_dxpl_props)
     H5CX_node_t * ret_value = NULL; /* Return value */
 
 #ifdef H5_HAVE_PARALLEL
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #else
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 #endif
 
     /* Sanity check */

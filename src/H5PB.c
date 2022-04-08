@@ -362,7 +362,7 @@ H5PB__flush_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
     H5F_shared_t *f_sh       = (H5F_shared_t *)_op_data;
     herr_t        ret_value  = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(page_entry);
@@ -428,7 +428,7 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
     H5PB_entry_t *page_entry = (H5PB_entry_t *)item; /* Pointer to page entry node */
     H5PB_ud1_t *  op_data    = (H5PB_ud1_t *)_op_data;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checking */
     HDassert(page_entry);
@@ -1398,7 +1398,7 @@ H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Insert entry in skip list */
     if (H5SL_insert(page_buf->slist_ptr, page_entry, &(page_entry->addr)) < 0)
@@ -1443,7 +1443,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
     H5PB_entry_t *page_entry;       /* Pointer to page eviction candidate */
     htri_t        ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f_sh);
@@ -1541,7 +1541,7 @@ H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry)
     haddr_t eoa;                 /* Current EOA for the file */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f_sh);

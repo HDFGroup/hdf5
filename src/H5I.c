@@ -707,7 +707,7 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
     herr_t           cb_ret_val;                        /* User callback return value */
     int              ret_value = H5_ITER_ERROR;         /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     cb_ret_val = (*udata->app_cb)(obj, id, udata->app_key);
 
@@ -795,7 +795,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
     herr_t                cb_ret_val = FAIL;                           /* User callback return value */
     int                   ret_value  = H5_ITER_ERROR;                  /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Invoke the callback */
     cb_ret_val = (*udata->op)(id, udata->op_data);

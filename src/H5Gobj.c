@@ -358,7 +358,7 @@ H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
     H5G_obj_oh_it_ud1_t *udata     = (H5G_obj_oh_it_ud1_t *)_udata; /* 'User data' passed in */
     herr_t               ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);
@@ -391,7 +391,7 @@ H5G__obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
     H5G_obj_stab_it_ud1_t *udata     = (H5G_obj_stab_it_ud1_t *)_udata; /* 'User data' passed in */
     herr_t                 ret_value = H5_ITER_CONT;                    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);
@@ -835,7 +835,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc);

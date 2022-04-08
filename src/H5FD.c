@@ -167,7 +167,7 @@ H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cls);
@@ -507,7 +507,7 @@ H5FD__sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);
@@ -1007,7 +1007,7 @@ H5FD__query(const H5FD_t *file, unsigned long *flags /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);

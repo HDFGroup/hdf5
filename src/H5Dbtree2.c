@@ -219,7 +219,7 @@ H5D__bt2_crt_context(void *_udata)
     uint32_t *        my_dim    = NULL;                   /* Pointer to copy of chunk dimension size */
     void *            ret_value = NULL;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(udata);
@@ -273,7 +273,7 @@ H5D__bt2_dst_context(void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -305,7 +305,7 @@ H5D__bt2_store(void *record, const void *_udata)
 {
     const H5D_bt2_ud_t *udata = (const H5D_bt2_ud_t *)_udata; /* User data */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5D_chunk_rec_t *)record = udata->rec;
 
@@ -334,7 +334,7 @@ H5D__bt2_compare(const void *_udata, const void *_rec2, int *result)
     const H5D_chunk_rec_t *rec2      = (const H5D_chunk_rec_t *)_rec2; /* The native record */
     herr_t                 ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(rec1);
@@ -366,7 +366,7 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
     unsigned               u;                                         /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -400,7 +400,7 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
     H5D_chunk_rec_t *record = (H5D_chunk_rec_t *)_record; /* The native record */
     unsigned         u;                                   /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -434,7 +434,7 @@ H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth, const void *_record,
     const H5D_bt2_ctx_t *  ctx    = (const H5D_bt2_ctx_t *)_ctx;      /* Callback context */
     unsigned               u;                                         /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(record);
@@ -471,7 +471,7 @@ H5D__bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
     unsigned               u;                                         /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -509,7 +509,7 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
     H5D_chunk_rec_t *record = (H5D_chunk_rec_t *)_record; /* The native record */
     unsigned         u;                                   /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -548,7 +548,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
     const H5D_bt2_ctx_t *  ctx    = (const H5D_bt2_ctx_t *)_ctx;      /* Callback context */
     unsigned               u;                                         /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(record);
@@ -583,7 +583,7 @@ static herr_t
 H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, const H5S_t H5_ATTR_UNUSED *space,
                   haddr_t dset_ohdr_addr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(H5F_addr_defined(dset_ohdr_addr));
@@ -615,7 +615,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     H5AC_proxy_entry_t *oh_proxy;            /* Dataset's object header proxy */
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info);
@@ -678,7 +678,7 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;               /* user data for creating context */
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info);
@@ -729,7 +729,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;               /* data for context call */
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info);
@@ -802,7 +802,7 @@ done:
 static hbool_t
 H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -830,7 +830,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
     H5D_bt2_ud_t *   op_data = (H5D_bt2_ud_t *)_op_data;   /* User data for v2 B-tree calls */
     H5D_chunk_rec_t *record  = (H5D_chunk_rec_t *)_record; /* Chunk record */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 /* Sanity check */
 #ifndef NDEBUG
@@ -878,7 +878,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     unsigned     u;                   /* Local index variable */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -942,7 +942,7 @@ done:
 static herr_t
 H5D__bt2_found_cb(const void *nrecord, void *op_data)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5D_chunk_rec_t *)op_data = *(const H5D_chunk_rec_t *)nrecord;
 
@@ -972,7 +972,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     hbool_t         found;               /* Whether chunk was found */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1066,7 +1066,7 @@ H5D__bt2_idx_iterate_cb(const void *_record, void *_udata)
     const H5D_chunk_rec_t *record    = (const H5D_chunk_rec_t *)_record; /* Native record */
     int                    ret_value = -1;                               /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Make "generic chunk" callback */
     if ((ret_value = (udata->cb)(record, udata->udata)) < 0)
@@ -1094,7 +1094,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
     H5D_bt2_it_ud_t udata;            /* User data for B-tree iterator callback */
     int             ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1153,7 +1153,7 @@ H5D__bt2_remove_cb(const void *_record, void *_udata)
     H5F_t *                f         = (H5F_t *)_udata;                  /* User data for removal callback */
     herr_t                 ret_value = SUCCEED;                          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -1186,7 +1186,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     unsigned     u;                   /* Local index variable */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1248,7 +1248,7 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_ctx_ud_t u_ctx;               /* data for context call */
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -1299,7 +1299,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Source file */
     HDassert(idx_info_src);
@@ -1352,7 +1352,7 @@ H5D__bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src, H5O_storage_chunk_t
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(storage_src);
@@ -1392,7 +1392,7 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     H5B2_t *bt2_cdset = NULL;    /* Pointer to v2 B-tree structure */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info);
@@ -1437,7 +1437,7 @@ done:
 static herr_t
 H5D__bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -1464,7 +1464,7 @@ H5D__bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 static herr_t
 H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(storage);
@@ -1491,7 +1491,7 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info);
