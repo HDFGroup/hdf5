@@ -101,15 +101,15 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 2
+#define H5_VERS_RELEASE 3
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE "2"
+#define H5_VERS_SUBRELEASE "1"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.12.2-2"
+#define H5_VERS_INFO "HDF5 library version: 1.12.3-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
