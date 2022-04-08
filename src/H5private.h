@@ -2304,7 +2304,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
-#define FUNC_ENTER_PACKAGE_NOERR_NOFS                                                                         \
+#define FUNC_ENTER_PACKAGE_NOERR_NOFS                                                                        \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         {
