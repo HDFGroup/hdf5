@@ -105,10 +105,6 @@ typedef struct H5FD_subfiling_t {
     int      mpi_rank;
     int      mpi_size;
 
-    /* the following fields are inherited from the sec2 VFD, and will
-     * likely be deleted.
-     */
-
     H5FD_t *sf_file;
 
 #ifndef H5_HAVE_WIN32_API
@@ -216,7 +212,7 @@ static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
 static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                                    void **output);
 
-static herr_t H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out);
+static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
@@ -411,7 +407,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration")
 
         /* Get subfiling VFD defaults */
-        if (H5FD__subfiling_get_default_config(subfiling_conf) < 0)
+        if (H5FD__subfiling_get_default_config(fapl_id, subfiling_conf) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default subfiling VFD configuration")
 
         vfd_config = subfiling_conf;
@@ -467,7 +463,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     }
 
     if (use_default_config) {
-        if (H5FD__subfiling_get_default_config(config_out) < 0)
+        if (H5FD__subfiling_get_default_config(fapl_id, config_out) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get default Subfiling VFD configuration")
     }
     else {
@@ -484,7 +480,7 @@ done:
 } /* end H5Pget_fapl_subfiling() */
 
 static herr_t
-H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out)
+H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
     char * h5_require_ioc;
     herr_t ret_value = SUCCEED;
@@ -518,6 +514,18 @@ H5FD__subfiling_get_default_config(H5FD_subfiling_config_t *config_out)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create default FAPL")
 
     if (config_out->require_ioc) {
+        MPI_Comm comm = MPI_COMM_NULL;
+        MPI_Info info = MPI_INFO_NULL;
+
+        /* Propagate MPI Info down to IOC FAPL if any is available */
+        if (H5Pget_mpi_params(fapl_id, &comm, &info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI Comm/Info")
+        if (comm == MPI_COMM_NULL)
+            comm = MPI_COMM_WORLD;
+
+        if (H5Pset_mpi_params(config_out->ioc_fapl_id, comm, info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get MPI Comm/Info on IOC FAPL")
+
         if (H5Pset_fapl_ioc(config_out->ioc_fapl_id, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set IOC VFD on IOC FAPL")
     }
@@ -746,7 +754,7 @@ H5FD__subfiling_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, haddr_t maxaddr)
+H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_subfiling_t *             file_ptr   = NULL; /* Subfiling VFD info */
     const H5FD_subfiling_config_t *config_ptr = NULL; /* Driver-specific property list */
@@ -754,10 +762,6 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop;              /* Property for driver ID & info */
-    MPI_Comm                       comm     = MPI_COMM_NULL; /* MPI Communicator, from plist */
-    MPI_Info                       info     = MPI_INFO_NULL; /* MPI Info, from plist */
-    int                            mpi_rank = INT_MAX;       /* MPI rank of this process */
-    int                            mpi_size;                 /* Total number of MPI processes */
     int                            mpi_code;                 /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
@@ -776,43 +780,33 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
 
     /* Get the driver-specific file access properties */
-    plist_ptr = (H5P_genplist_t *)H5I_object(subfiling_fapl_id);
-    if (NULL == plist_ptr)
+    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
     if (H5FD_mpi_self_initialized) {
-        comm = MPI_COMM_WORLD;
-        info = MPI_INFO_NULL;
+        file_ptr->comm = MPI_COMM_WORLD;
+        file_ptr->info = MPI_INFO_NULL;
     }
     else {
         /* Get the MPI communicator and info object from the property list */
-        if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_COMM_NAME, &file_ptr->comm) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
-        if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        if (H5P_get(plist_ptr, H5F_ACS_MPI_PARAMS_INFO_NAME, &file_ptr->info) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
 
-        if (comm == MPI_COMM_NULL)
+        if (file_ptr->comm == MPI_COMM_NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid or unset MPI communicator in FAPL")
     }
 
     /* Get the MPI rank of this process and the total number of processes */
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_ptr->comm, &file_ptr->mpi_rank)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(file_ptr->comm, &file_ptr->mpi_size)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code)
 
-    /* save MPI data in the instance of H5FD_subfiling_t.  This really should be
-     * done after we successfully open file, but for now follow the existing
-     * code.
-     */
-    file_ptr->comm     = comm;
-    file_ptr->info     = info;
-    file_ptr->mpi_rank = mpi_rank;
-    file_ptr->mpi_size = mpi_size;
-
     config_ptr = H5P_peek_driver_info(plist_ptr);
-    if (!config_ptr || (H5P_FILE_ACCESS_DEFAULT == subfiling_fapl_id)) {
-        if (H5FD__subfiling_get_default_config(&default_config) < 0)
+    if (!config_ptr || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
+        if (H5FD__subfiling_get_default_config(fapl_id, &default_config) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get default subfiling VFD configuration")
         config_ptr = &default_config;
     }
@@ -839,7 +833,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
     if (!file_ptr->sf_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file")
 
-    /* Check the "native" driver (sec2 or mpio) */
+    /* Check the "native" driver (IOC/sec2/etc.) */
     if (NULL == (plist_ptr = H5I_object(config_ptr->ioc_fapl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid IOC FAPL")
 
@@ -872,7 +866,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
             ioc_flags |= O_CREAT;
 
         /* Let MPI rank 0 to the file stat operation and broadcast a result */
-        if (mpi_rank == 0) {
+        if (file_ptr->mpi_rank == 0) {
             if (file_ptr->sf_file) {
                 h5_stat_t sb;
                 void *    file_handle = NULL;
@@ -893,7 +887,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
             }
         }
 
-        if (MPI_SUCCESS == MPI_Bcast(&inode_id, 1, MPI_UNSIGNED_LONG_LONG, 0, comm)) {
+        if (MPI_SUCCESS == MPI_Bcast(&inode_id, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)) {
             file_ptr->inode = inode_id;
         }
 
@@ -1015,7 +1009,6 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ret_value = H5FD_cmp(f1->sf_file, f2->sf_file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_cmp() */
 
@@ -2088,8 +2081,12 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 
     HDassert(file);
 
-    if (file->fa.require_ioc)
+    /* TODO: Consider lock only on IOC ranks for one IOC per subfile case */
+    if (file->fa.require_ioc) {
+#ifdef VERBOSE
         HDputs("Subfiling driver doesn't support file locking");
+#endif
+    }
     else {
         if (H5FD_lock(file->sf_file, rw) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")

@@ -223,7 +223,7 @@ set_verbose_flag(int subfile_rank, int new_value)
     sf_verbose_flag = (int)(new_value & 0x0FF);
     if (sf_verbose_flag) {
         char logname[64];
-        sprintf(logname, "ioc_%d.log", subfile_rank);
+        HDsnprintf(logname, sizeof(logname), "ioc_%d.log", subfile_rank);
         if (sf_open_file_count > 1)
             sf_logfile = fopen(logname, "a+");
         else
@@ -970,7 +970,7 @@ manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_va
 #ifndef NDEBUG
     if (flag_value) {
         char logname[64];
-        sprintf(logname, "sf_client_%d.log", client_rank);
+        HDsnprintf(logname, sizeof(logname), "sf_client_%d.log", client_rank);
         client_log = fopen(logname, "a+");
     }
     else if (client_log) {
@@ -1254,7 +1254,7 @@ H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
         }
         if ((envValue = HDgetenv("H5_IOC_SUBFILE_PREFIX")) != NULL) {
             char temp[PATH_MAX];
-            sprintf(temp, "%s", envValue);
+            HDsnprintf(temp, sizeof(temp), "%s", envValue);
             newContext->subfile_prefix = strdup(temp);
             /* sf_subfile_prefix = strdup(temp); */
         }

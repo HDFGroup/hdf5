@@ -57,6 +57,8 @@
 #include "mercury_thread_pool.h"
 #endif /* JRM */
 
+/* #define H5FD_IOC_DEBUG */
+
 #define H5FD_IOC__COLLECT_STATS TRUE
 
 /****************************************************************************

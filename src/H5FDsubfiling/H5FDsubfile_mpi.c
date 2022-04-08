@@ -642,7 +642,7 @@ get_ioc_subfile_path(int ioc, int ioc_count, subfiling_context_t *sf_context)
 
     int numD = numDigits(ioc_count);
     if (prefix != NULL) {
-        sprintf(filepath, "%s/" SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, numD, ioc, ioc_count);
+        HDsnprintf(filepath, sizeof(filepath), "%s/" SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, numD, ioc, ioc_count);
     }
     else {
         strcpy(filepath, sf_context->h5_filename);
@@ -851,7 +851,7 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
                 errors++;
                 goto done;
             }
-            sprintf(filepath, "%s/%s.subfile_%ld.config", subfile_dir, base, h5_file_id);
+            HDsnprintf(filepath, sizeof(filepath), "%s/%s.subfile_%ld.config", subfile_dir, base, h5_file_id);
             /* SUBFILE rank 0 does the work creating a config file */
             if ((subfile_rank == 0) && (flags & O_CREAT)) {
                 FILE *f = NULL;
@@ -864,18 +864,18 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
                 }
                 f = HDfopen(filepath, "w+");
                 if (f != NULL) {
-                    sprintf(linebuf, "stripe_size=%ld\n", sf_context->sf_stripe_size);
+                    HDsnprintf(linebuf, sizeof(linebuf), "stripe_size=%ld\n", sf_context->sf_stripe_size);
                     HDfwrite(linebuf, 1, strlen(linebuf), f);
-                    sprintf(linebuf, "aggregator_count=%d\n", n_io_concentrators);
+                    HDsnprintf(linebuf, sizeof(linebuf), "aggregator_count=%d\n", n_io_concentrators);
                     HDfwrite(linebuf, 1, strlen(linebuf), f);
-                    sprintf(linebuf, "hdf5_file=%s\n", sf_context->h5_filename);
+                    HDsnprintf(linebuf, sizeof(linebuf), "hdf5_file=%s\n", sf_context->h5_filename);
                     HDfwrite(linebuf, 1, strlen(linebuf), f);
-                    sprintf(linebuf, "subfile_dir=%s\n", subfile_dir);
+                    HDsnprintf(linebuf, sizeof(linebuf), "subfile_dir=%s\n", subfile_dir);
 
                     int numD = numDigits(n_io_concentrators);
                     for (k = 0; k < n_io_concentrators; k++) {
-                        sprintf(linebuf, "%s" SF_FILENAME_TEMPLATE "\n", base, h5_file_id, numD, k,
-                                n_io_concentrators);
+                        HDsnprintf(linebuf, sizeof(linebuf), "%s" SF_FILENAME_TEMPLATE "\n", base,
+                                h5_file_id, numD, k, n_io_concentrators);
                         HDfwrite(linebuf, 1, strlen(linebuf), f);
                     }
 
