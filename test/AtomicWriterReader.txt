@@ -11,7 +11,7 @@ atomic_reader.c: is the "read" part of the test.
 
 Building the Tests
 ------------------
-The two test parts are automically built during configure and make process.
+The two test parts are automatically built during configure and make process.
 But to build them individually, you can do in test/ directory:
 $ gcc atomic_writer
 $ gcc atomic_reader

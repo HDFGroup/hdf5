@@ -2053,7 +2053,7 @@ test_read_unallocated_chunk(hid_t file)
             /* Check that the chunk storage size call does not succeed. */
             if (status != -1)
                 TEST_ERROR
-            if (direct_chunk_nbytes != 0)
+            if (direct_chunk_nbytes != ULONG_MAX)
                 TEST_ERROR
         }
     }

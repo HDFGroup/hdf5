@@ -192,7 +192,7 @@ H5D__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the dataset IDs */
+    /* Initialize the ID group for the dataset IDs */
     if (H5I_register_type(H5I_DATASET_CLS) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -3854,7 +3854,7 @@ H5D__get_space(const H5D_t *dset)
     if (NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
-    /* Create an atom */
+    /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
@@ -3901,7 +3901,7 @@ H5D__get_type(const H5D_t *dset)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    /* Create an atom */
+    /* Create an ID */
     if (H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
          * two-level IDs, where the VOL object is a copy of the

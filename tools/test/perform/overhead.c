@@ -23,17 +23,11 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef H5_STDC_HEADERS
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#endif
-
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>

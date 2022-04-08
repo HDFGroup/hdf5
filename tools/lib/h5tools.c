@@ -1005,7 +1005,7 @@ done:
 H5_ATTR_PURE static size_t
 h5tools_count_ncols(const char *s)
 {
-    register size_t i;
+    size_t i;
 
     for (i = 0; *s; s++)
         if (*s >= ' ')

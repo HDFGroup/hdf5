@@ -107,9 +107,9 @@
 /*#define H5D_CHUNK_DEBUG */
 
 /* Flags for the "edge_chunk_state" field below */
-#define H5D_RDCC_DISABLE_FILTERS 0x01u /* Disable filters on this chunk */
+#define H5D_RDCC_DISABLE_FILTERS 0x01U /* Disable filters on this chunk */
 #define H5D_RDCC_NEWLY_DISABLED_FILTERS                                                                      \
-    0x02u /* Filters have been disabled since                                                                \
+    0x02U /* Filters have been disabled since                                                                \
            * the last flush */
 
 /******************/
@@ -322,13 +322,24 @@ static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_uda
 /*********************/
 
 /* Chunked storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {
-    {H5D__chunk_construct, H5D__chunk_init, H5D__chunk_is_space_alloc, H5D__chunk_is_data_cached,
-     H5D__chunk_io_init, H5D__chunk_read, H5D__chunk_write,
+const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
+    H5D__chunk_construct,      /* construct */
+    H5D__chunk_init,           /* init */
+    H5D__chunk_is_space_alloc, /* is_space_alloc */
+    H5D__chunk_is_data_cached, /* is_data_cached */
+    H5D__chunk_io_init,        /* io_init */
+    H5D__chunk_read,           /* ser_read */
+    H5D__chunk_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-     H5D__chunk_collective_read, H5D__chunk_collective_write,
-#endif /* H5_HAVE_PARALLEL */
-     NULL, NULL, H5D__chunk_flush, H5D__chunk_io_term, H5D__chunk_dest}};
+    H5D__chunk_collective_read,  /* par_read */
+    H5D__chunk_collective_write, /* par_write */
+#endif
+    NULL,               /* readvv */
+    NULL,               /* writevv */
+    H5D__chunk_flush,   /* flush */
+    H5D__chunk_io_term, /* io_term */
+    H5D__chunk_dest     /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -594,8 +605,6 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(offset);
     HDassert(storage_size);
-
-    *storage_size = 0;
 
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!(*layout->ops->is_space_alloc)(&layout->storage))
@@ -3603,7 +3612,7 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
      * traversing the list when pointer pN reaches wN percent of the original
      * list.  In other words, preemption method N gets to consider entries in
      * approximate least recently used order w0 percent before method N+1
-     * where 100% means that method N will run to completion before method N+1
+     * where 100% means the method N will run to completion before method N+1
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
@@ -6136,6 +6145,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         if (udata->chunk_in_cache) {
             HDassert(H5F_addr_defined(chunk_rec->chunk_addr));
+            HDassert(ent);
             HDassert(H5F_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
@@ -6417,7 +6427,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         if (NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
-        /* Atomize */
+        /* Register */
         if ((sid_buf = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
             (void)H5S_close(buf_space);
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
