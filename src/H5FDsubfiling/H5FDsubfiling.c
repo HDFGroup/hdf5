@@ -153,7 +153,7 @@ typedef struct H5FD_subfiling_t {
     haddr_t        pos; /* current file I/O position        */
     H5FD_file_op_t op;  /* last operation                   */
                         /* Copy of file name from open operation    */
-    char     filename[H5FD_MAX_FILENAME_LEN];
+    char filename[H5FD_MAX_FILENAME_LEN];
 } H5FD_subfiling_t;
 
 /*
@@ -819,6 +819,17 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
 
     HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
 
+    /*
+     * Extend the config info with file_path and file_dir
+     * TODO: revise how this is handled
+     */
+    if (HDrealpath(name, file_ptr->fa.file_path) != NULL) {
+        char *path      = HDstrdup(file_ptr->fa.file_path);
+        char *directory = dirname(path);
+        HDstrcpy(file_ptr->fa.file_dir, directory);
+        HDfree(path);
+    }
+
     /* Copy the FAPL from the config structure */
     /* JRM:  Why is this necessary?  If it is necessary, must close the property list on file close. */
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
@@ -838,7 +849,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
 
     if (driver->value != H5_VFD_IOC && driver->value != H5_VFD_SEC2)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                    "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles",
+                    name)
 
     if (driver->value == H5_VFD_IOC) {
         /* We've already opened the subfiles... */
@@ -890,7 +903,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t subfiling_fapl_id, 
 
         /* See: H5FDsubfile_int.c:
          * Note that the user defined HDF5 file is also considered subfile(0) */
-        if (H5FD__open_subfiles((void *)&file_ptr->fa, inode_id, ioc_flags) < 0)
+        if (H5FD__open_subfiles(file_ptr->fa.file_path, (void *)&file_ptr->fa, inode_id, ioc_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
 
@@ -1163,9 +1176,9 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
-    int64_t logical_eof = -1;
-    haddr_t ret_value = HADDR_UNDEF;
+    const H5FD_subfiling_t *file        = (const H5FD_subfiling_t *)_file;
+    int64_t                 logical_eof = -1;
+    haddr_t                 ret_value   = HADDR_UNDEF;
 
     FUNC_ENTER_STATIC
 

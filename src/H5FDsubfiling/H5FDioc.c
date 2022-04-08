@@ -859,7 +859,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
         }
 
         /* See: H5FDsubfile_int.c:  returns error count! */
-        if (H5FD__open_subfiles((void *)&file_ptr->fa, inode_id, ioc_flags) > 0)
+        if (H5FD__open_subfiles(file_ptr->fa.file_path, (void *)&file_ptr->fa, inode_id, ioc_flags) > 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
 
         else if (file_ptr->inode > 0) { /* No errors opening the subfiles */

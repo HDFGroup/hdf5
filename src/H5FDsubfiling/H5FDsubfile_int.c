@@ -1433,7 +1433,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
+H5FD__open_subfiles(const char *base_filename, void *_config_info, uint64_t h5_file_id, int flags)
 {
     int                  status;
     int64_t              context_id = -1;
@@ -1476,7 +1476,7 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     sf_context->sf_fid        = 0;
     sf_context->sf_context_id = context_id;
     sf_context->h5_file_id    = h5_file_id;
-    sf_context->h5_filename   = strdup(config_info->file_path);
+    sf_context->h5_filename   = strdup(base_filename);
     sf_context->sf_filename   = NULL;
     /* Ensure that the IOC service won't exit
      * as we prepare to start up..
@@ -1718,7 +1718,7 @@ done:
 herr_t
 H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
-    subfiling_context_t *sf_context  = NULL;
+    subfiling_context_t *sf_context = NULL;
     MPI_Status           status;
     int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
     int64_t              msg[3]      = {0, 0, 0};
@@ -1727,8 +1727,8 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     int                  i;
     int                  reply_count;
     int                  ioc_rank;
-    int                  mpi_code;           /* MPI return code */
-    int                  n_io_concentrators; /* copy of value in topology */
+    int                  mpi_code;            /* MPI return code */
+    int                  n_io_concentrators;  /* copy of value in topology */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

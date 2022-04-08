@@ -205,7 +205,7 @@ extern atomic_int sf_shutdown_flag;
 extern "C" {
 #endif
 
-H5_DLL int H5FD__open_subfiles(void *_config_info, uint64_t inode_id, int flags);
+H5_DLL int H5FD__open_subfiles(const char *base_filename, void *_config_info, uint64_t inode_id, int flags);
 H5_DLL int H5FD__close_subfiles(int64_t context_id);
 
 H5_DLL void *get__subfiling_object(int64_t object_id);
