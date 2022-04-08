@@ -27,6 +27,5 @@
 #define H5FD_MODULE
 #define H5_MY_PKG      H5FD
 #define H5_MY_PKG_ERR  H5E_VFL
-#define H5_MY_PKG_INIT YES
 
 #endif /* H5FDmodule_H */

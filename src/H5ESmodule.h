@@ -27,7 +27,6 @@
 #define H5ES_MODULE
 #define H5_MY_PKG      H5ES
 #define H5_MY_PKG_ERR  H5E_EVENTSET
-#define H5_MY_PKG_INIT YES
 
 /**\defgroup H5ES H5ES
  *

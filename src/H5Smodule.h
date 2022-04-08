@@ -27,7 +27,6 @@
 #define H5S_MODULE
 #define H5_MY_PKG      H5S
 #define H5_MY_PKG_ERR  H5E_DATASPACE
-#define H5_MY_PKG_INIT YES
 
 /**\defgroup H5S H5S
  *
