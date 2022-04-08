@@ -642,8 +642,8 @@ done:
 herr_t
 H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
-    H5VL_object_t *vol_obj;   /* Attribute object for ID */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *vol_obj;             /* Attribute object for ID */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
@@ -687,8 +687,8 @@ done:
 herr_t
 H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
 {
-    H5VL_object_t *vol_obj;   /* Attribute object for ID */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *vol_obj;             /* Attribute object for ID */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iix", attr_id, dtype_id, buf);
