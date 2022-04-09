@@ -346,7 +346,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
     hbool_t         vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value       = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check ID type & get VOL object */
     if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(id, id_type)))
@@ -987,7 +987,7 @@ H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cla
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.create)
@@ -1092,7 +1092,7 @@ H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.open)
@@ -1192,7 +1192,7 @@ H5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, void *buf
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.read)
@@ -1290,7 +1290,7 @@ H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, const vo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.write)
@@ -1388,7 +1388,7 @@ H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_args_t *args, h
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.get)
@@ -1488,7 +1488,7 @@ H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.specific)
@@ -1591,7 +1591,7 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *ar
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.optional)
@@ -1735,7 +1735,7 @@ H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->attr_cls.close)
@@ -1827,7 +1827,7 @@ H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.create)
@@ -1934,7 +1934,7 @@ H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.open)
@@ -2035,7 +2035,7 @@ H5VL__dataset_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, hid_t 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.read)
@@ -2137,7 +2137,7 @@ H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, hid_t
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.write)
@@ -2239,7 +2239,7 @@ H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *a
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.get)
@@ -2338,7 +2338,7 @@ H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.specific)
@@ -2438,7 +2438,7 @@ H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->dataset_cls.optional)
@@ -2579,7 +2579,7 @@ H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **re
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -2688,7 +2688,7 @@ H5VL__datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.commit)
@@ -2793,7 +2793,7 @@ H5VL__datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.open)
@@ -2894,7 +2894,7 @@ H5VL__datatype_get(void *obj, const H5VL_class_t *cls, H5VL_datatype_get_args_t 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.get)
@@ -2993,7 +2993,7 @@ H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specif
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.specific)
@@ -3093,7 +3093,7 @@ H5VL__datatype_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.optional)
@@ -3282,7 +3282,7 @@ H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **r
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->datatype_cls.close)
@@ -3383,7 +3383,7 @@ H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.create)
@@ -3487,7 +3487,7 @@ H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.open)
@@ -3533,7 +3533,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     hid_t                            fapl_id      = H5I_INVALID_HID;
     herr_t                           ret_value    = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(udata);
     HDassert(udata->filename);
@@ -3747,7 +3747,7 @@ H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, h
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.get)
@@ -3845,7 +3845,7 @@ H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_args_
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.specific)
@@ -3977,7 +3977,7 @@ H5VL__file_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *ar
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->file_cls.optional)
@@ -4118,7 +4118,7 @@ H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -4220,7 +4220,7 @@ H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.create)
@@ -4324,7 +4324,7 @@ H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_clas
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.open)
@@ -4424,7 +4424,7 @@ H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_args_t *args,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.get)
@@ -4522,7 +4522,7 @@ H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_arg
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.specific)
@@ -4621,7 +4621,7 @@ H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *a
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.optional)
@@ -4769,7 +4769,7 @@ H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
     HDassert(obj);
     HDassert(cls);
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->group_cls.close)
@@ -4869,7 +4869,7 @@ H5VL__link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_param
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.create)
@@ -4981,7 +4981,7 @@ H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.copy)
@@ -5088,7 +5088,7 @@ H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.move)
@@ -5194,7 +5194,7 @@ H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.get)
@@ -5294,7 +5294,7 @@ H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.specific)
@@ -5398,7 +5398,7 @@ H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->link_cls.optional)
@@ -5559,7 +5559,7 @@ H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t
 {
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->object_cls.open)
@@ -5661,7 +5661,7 @@ H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->object_cls.copy)
@@ -5772,7 +5772,7 @@ H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_clas
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->object_cls.get)
@@ -5872,7 +5872,7 @@ H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->object_cls.specific)
@@ -5976,7 +5976,7 @@ H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->object_cls.optional)
@@ -6139,7 +6139,7 @@ H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -6322,7 +6322,7 @@ H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t s
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->introspect_cls.opt_query)
@@ -6420,7 +6420,7 @@ H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout, H5VL_re
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(req);
@@ -6524,7 +6524,7 @@ H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t c
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(req);
@@ -6628,7 +6628,7 @@ H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(req);
@@ -6730,7 +6730,7 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(req);
@@ -6835,7 +6835,7 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(req);
@@ -6977,7 +6977,7 @@ H5VL__request_free(void *req, const H5VL_class_t *cls)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(req);
@@ -7078,7 +7078,7 @@ H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf, size_t size,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -7176,7 +7176,7 @@ H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id, void *bu
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -7274,7 +7274,7 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -7371,7 +7371,7 @@ H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_opti
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj);
@@ -7470,7 +7470,7 @@ H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1, c
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(obj);
@@ -7591,7 +7591,7 @@ H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, cons
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(obj);
@@ -7698,7 +7698,7 @@ H5VL__token_from_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, co
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(obj);
@@ -7804,7 +7804,7 @@ H5VL__optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args, h
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the corresponding VOL callback exists */
     if (NULL == cls->optional)

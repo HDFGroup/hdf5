@@ -151,7 +151,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
     H5O_t *oh        = NULL;    /* Object header */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(oloc);
@@ -290,7 +290,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
     hbool_t corked    = FALSE;   /* Whether object's metadata is corked */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make deep local copy of object's location information */
     if (obj_loc) {

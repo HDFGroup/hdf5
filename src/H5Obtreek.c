@@ -80,7 +80,7 @@ H5O__btreek_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsig
     H5O_btreek_t *mesg;             /* Native message */
     void *        ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -124,7 +124,7 @@ H5O__btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
 {
     const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -161,7 +161,7 @@ H5O__btreek_copy(const void *_mesg, void *_dest)
     H5O_btreek_t *      dest      = (H5O_btreek_t *)_dest;
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(mesg);
@@ -200,7 +200,7 @@ H5O__btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
 {
     size_t ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -230,7 +230,7 @@ H5O__btreek_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
 {
     const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);

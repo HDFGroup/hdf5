@@ -319,7 +319,7 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
     H5P_enc_iter_ud_t *udata     = (H5P_enc_iter_ud_t *)_udata; /* Pointer to user data */
     int                ret_value = H5_ITER_CONT;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(prop);

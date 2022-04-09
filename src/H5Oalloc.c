@@ -106,7 +106,7 @@ H5O__add_gap(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t *oh, unsigned chunkno, hbool_
     size_t  u;                   /* Local index variable */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -229,7 +229,7 @@ H5O__eliminate_gap(H5O_t *oh, hbool_t *chk_dirtied, H5O_mesg_t *mesg, uint8_t *g
     uint8_t *move_start, *move_end; /* Pointers to area of messages to move */
     hbool_t  null_before_gap;       /* Flag whether the null message is before the gap or not */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(oh);
@@ -329,7 +329,7 @@ H5O__alloc_null(H5F_t *f, H5O_t *oh, size_t null_idx, const H5O_msg_class_t *new
     H5O_mesg_t *       alloc_msg;           /* Pointer to null message to allocate out of */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -507,7 +507,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     size_t             u;                         /* Local index variable */
     htri_t             ret_value = TRUE;          /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f != NULL);
@@ -723,7 +723,7 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size, H5O_
     size_t      multi_size; /* Size of all the messages in the last chunk */
     unsigned    u;          /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(f);
@@ -1153,7 +1153,7 @@ H5O__alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t *new_idx)
     H5O_msg_alloc_info_t found_msg;           /* Best fit non-null message */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -1200,7 +1200,7 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
     size_t  idx;        /* Index of message which fits allocation */
     ssize_t found_null; /* Best fit null message         */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(oh);
@@ -1431,7 +1431,7 @@ H5O__move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u)
     hbool_t            chk_dirtied = FALSE; /* Flags for unprotecting chunk */
     htri_t             ret_value   = TRUE;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(f);
@@ -1603,7 +1603,7 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
     hbool_t            did_packing = FALSE;         /* Whether any messages were packed */
     htri_t             ret_value   = FAIL;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -1976,7 +1976,7 @@ H5O__merge_null(H5F_t *f, H5O_t *oh)
     hbool_t did_merging = FALSE; /* Whether any messages were merged */
     htri_t  ret_value   = FAIL;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh != NULL);
@@ -2124,7 +2124,7 @@ H5O__remove_empty_chunks(H5F_t *f, H5O_t *oh)
     hbool_t did_deleting = FALSE; /* Whether any chunks were deleted */
     htri_t  ret_value    = FAIL;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh != NULL);
@@ -2383,7 +2383,7 @@ H5O__alloc_shrink_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno)
     size_t             u;                         /* Index */
     herr_t             ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);

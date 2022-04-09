@@ -265,7 +265,7 @@ H5MF__sect_deserialize(const H5FS_section_class_t *cls, const uint8_t H5_ATTR_UN
     H5MF_free_section_t *sect;             /* New section */
     H5FS_section_info_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(cls);
@@ -307,7 +307,7 @@ H5MF__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_sect
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect; /* File free section */
 #endif                                                                    /* NDEBUG */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -333,7 +333,7 @@ H5MF__sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
     H5MF_free_section_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate space for new section */
     if (NULL == (ret_value = H5MF__sect_new(sect->type, sect->addr, frag_size)))
@@ -374,7 +374,7 @@ H5MF__sect_simple_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
     const H5MF_free_section_t *sect2     = (const H5MF_free_section_t *)_sect2; /* File free section */
     htri_t                     ret_value = FAIL;                                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -411,7 +411,7 @@ H5MF__sect_simple_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect
     H5MF_free_section_t * sect2     = (H5MF_free_section_t *)_sect2;  /* File free section */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect1);
@@ -453,7 +453,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t                    end;              /* End of section to extend */
     htri_t                     ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -557,7 +557,7 @@ H5MF__sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
     H5MF_sect_ud_t *      udata     = (H5MF_sect_ud_t *)_udata;      /* User data for callback */
     herr_t                ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -625,7 +625,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
     hsize_t               rem, prem;
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
     HDfprintf(stderr, "%s: Entering, section {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
@@ -688,7 +688,7 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     H5MF_sect_ud_t *           udata     = (H5MF_sect_ud_t *)_udata;            /* User data for callback */
     htri_t                     ret_value = FALSE;                               /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -735,7 +735,7 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     H5MF_sect_ud_t *      udata     = (H5MF_sect_ud_t *)_udata;       /* User data for callback */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect1);
@@ -798,7 +798,7 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     const H5MF_free_section_t *sect2     = (const H5MF_free_section_t *)_sect2; /* File free section */
     htri_t                     ret_value = FALSE;                               /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -836,7 +836,7 @@ H5MF__sect_large_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
     H5MF_free_section_t * sect2     = (H5MF_free_section_t *)_sect2;  /* File free section */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect1);
@@ -877,7 +877,7 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t                    end;               /* End of section to extend */
     htri_t                     ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -930,7 +930,7 @@ H5MF__sect_large_shrink(H5FS_section_info_t **_sect, void *_udata)
     hsize_t               frag_size = 0;                             /* Fragment size */
     herr_t                ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);

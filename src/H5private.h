@@ -2302,23 +2302,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         H5_PUSH_FUNC                                                                                         \
         {
 
-/* Use this macro for all "normal" staticly-scoped functions */
-#define FUNC_ENTER_STATIC                                                                                    \
-    {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
-        H5_PUSH_FUNC                                                                                         \
-        {
-
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
-#define FUNC_ENTER_STATIC_NOERR                                                                              \
-    {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
-        H5_PUSH_FUNC                                                                                         \
-        {
-
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
-#define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
+#define FUNC_ENTER_PACKAGE_NOERR_NOFS                                                                        \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         {
@@ -2330,20 +2316,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  *    API name itself.  Examples are static routines in the H5TS package.
  *
  */
-#define FUNC_ENTER_STATIC_NAMECHECK_ONLY                                                                     \
+#define FUNC_ENTER_PACKAGE_NAMECHECK_ONLY                                                                    \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));
-
-/* Use the following macro as replacement for the FUNC_ENTER_STATIC
- * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_STATIC_TAG(tag)                                                                           \
-    {                                                                                                        \
-        haddr_t prev_tag = HADDR_UNDEF;                                                                      \
-                                                                                                             \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
-        H5AC_tag(tag, &prev_tag);                                                                            \
-        H5_PUSH_FUNC                                                                                         \
-        {
 
 /*-------------------------------------------------------------------------
  * Purpose:  Register function exit for code profiling.  This should be

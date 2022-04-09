@@ -200,7 +200,7 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
     void *         ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(p);
@@ -321,7 +321,7 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
     void *         ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(p);
@@ -399,7 +399,7 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -495,7 +495,7 @@ H5O__fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
     HDassert(p);
@@ -531,7 +531,7 @@ H5O__fill_copy(const void *_src, void *_dst)
     H5O_fill_t *      dst       = (H5O_fill_t *)_dst;
     void *            ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(src);
 
@@ -649,7 +649,7 @@ H5O__fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
     const H5O_fill_t *fill      = (const H5O_fill_t *)_fill;
     size_t            ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
     HDassert(fill);
@@ -695,7 +695,7 @@ H5O__fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fill);
 
@@ -784,7 +784,7 @@ H5O__fill_reset(void *_fill)
 {
     H5O_fill_t *fill = (H5O_fill_t *)_fill;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fill);
 
@@ -814,7 +814,7 @@ H5O__fill_reset(void *_fill)
 static herr_t
 H5O__fill_free(void *fill)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fill);
 
@@ -843,7 +843,7 @@ H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, hb
     const H5O_fill_t *fill_src  = (const H5O_fill_t *)mesg_src; /* Source fill value */
     herr_t            ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(cpy_info);
@@ -876,7 +876,7 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
     H5D_fill_value_t  fill_status; /* Whether the fill value is defined */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
     HDassert(fill);

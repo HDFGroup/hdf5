@@ -82,7 +82,7 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *)_udata;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* If the encoding sizes are different, it's not the same object */
     if (udata->key->encoding_size > obj_len)
@@ -119,7 +119,7 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     H5SM_compare_udata_t *udata     = (H5SM_compare_udata_t *)_udata;
     herr_t                ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

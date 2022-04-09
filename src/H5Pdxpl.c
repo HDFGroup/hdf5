@@ -295,7 +295,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register the max. temp buffer size property */
     if (H5P__register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE,
@@ -467,7 +467,7 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
     const H5T_bkg_t *bkgr_buf_type = (const H5T_bkg_t *)value; /* Create local alias for values */
     uint8_t **       pp            = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(bkgr_buf_type);
@@ -504,7 +504,7 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
     H5T_bkg_t *     bkgr_buf_type = (H5T_bkg_t *)_value; /* Background buffer type */
     const uint8_t **pp            = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -538,7 +538,7 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
     const double *btree_split_ratio = (const double *)value; /* Create local alias for values */
     uint8_t **    pp                = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(btree_split_ratio);
@@ -589,7 +589,7 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
     const uint8_t **pp        = (const uint8_t **)_pp;
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -629,7 +629,7 @@ H5P__dxfr_xform_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -661,7 +661,7 @@ H5P__dxfr_xform_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -699,7 +699,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
     uint8_t **  pp        = (uint8_t **)_pp;
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
@@ -771,7 +771,7 @@ H5P__dxfr_xform_dec(const void **_pp, void *_value)
     uint64_t           enc_value;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -816,7 +816,7 @@ H5P__dxfr_xform_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(value);
 
@@ -846,7 +846,7 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -882,7 +882,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
     const char *pexp1, *pexp2;                    /* Pointers to transform expressions */
     herr_t      ret_value = 0;                    /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(xform1);
@@ -936,7 +936,7 @@ H5P__dxfr_xform_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(value);
 
@@ -1756,7 +1756,7 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
     const H5FD_mpio_xfer_t *xfer_mode = (const H5FD_mpio_xfer_t *)value; /* Create local alias for values */
     uint8_t **              pp        = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(xfer_mode);
@@ -1793,7 +1793,7 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
     H5FD_mpio_xfer_t *xfer_mode = (H5FD_mpio_xfer_t *)_value; /* I/O transfer mode */
     const uint8_t **  pp        = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -1828,7 +1828,7 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
         (const H5FD_mpio_collective_opt_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(coll_opt);
@@ -1866,7 +1866,7 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
         (H5FD_mpio_collective_opt_t *)_value; /* MPI-I/O collective optimization mode */
     const uint8_t **pp = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -1901,7 +1901,7 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
         (const H5FD_mpio_chunk_opt_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(chunk_opt);
@@ -1938,7 +1938,7 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
     H5FD_mpio_chunk_opt_t *chunk_opt = (H5FD_mpio_chunk_opt_t *)_value; /* MPI-I/O chunk optimization mode */
     const uint8_t **       pp        = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -2082,7 +2082,7 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
     const H5Z_EDC_t *check = (const H5Z_EDC_t *)value; /* Create local alias for values */
     uint8_t **       pp    = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(check);
@@ -2119,7 +2119,7 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
     H5Z_EDC_t *     check = (H5Z_EDC_t *)_value; /* EDC property */
     const uint8_t **pp    = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -2151,7 +2151,7 @@ H5P__dxfr_dset_io_hyp_sel_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     H5S_t *new_space  = NULL;             /* New dataspace for property */
     herr_t ret_value  = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* If there's a dataspace I/O selection set, copy it */
     if (orig_space) {
@@ -2192,7 +2192,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
     const H5S_t *const *space2    = (const H5S_t *const *)_space2; /* Create local aliases for values */
     herr_t              ret_value = 0;                             /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(space1);
@@ -2249,7 +2249,7 @@ H5P__dxfr_dset_io_hyp_sel_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     H5S_t *space     = *(H5S_t **)_value; /* Dataspace for property */
     herr_t ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Release any dataspace */
     if (space && H5S_close(space) < 0)

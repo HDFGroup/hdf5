@@ -375,7 +375,7 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     hvl_t vl; /* User's hvl_t information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check parameter */
     HDassert(_vl);
@@ -413,7 +413,7 @@ H5T__vlen_mem_seq_getptr(void *_vl)
     hvl_t vl; /* User's hvl_t information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters, return result */
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
@@ -449,7 +449,7 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
     hvl_t vl; /* User's hvl_t information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check parameters */
     HDassert(_vl);
@@ -482,7 +482,7 @@ H5T__vlen_mem_seq_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
 {
     hvl_t vl; /* Temporary hvl_t to use during operation */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters */
     HDassert(_vl);
@@ -518,7 +518,7 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
     hvl_t vl; /* User's hvl_t information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters, copy data */
     HDassert(buf);
@@ -556,7 +556,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     hvl_t  vl;                  /* Temporary hvl_t to use during operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check parameters */
     HDassert(_vl);
@@ -612,7 +612,7 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     const char *s = NULL; /* Pointer to the user's string information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters */
     HDassert(_vl);
@@ -647,7 +647,7 @@ H5T__vlen_mem_str_getptr(void *_vl)
     char *      s = NULL; /* Pointer to the user's string information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters */
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
@@ -681,7 +681,7 @@ H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
     char *s = NULL; /* Pointer to the user's string information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifndef H5_NO_ALIGNMENT_RESTRICTIONS
     H5MM_memcpy(&s, _vl, sizeof(char *));
@@ -709,7 +709,7 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
 {
     char *t = NULL; /* Pointer to temporary buffer allocated */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     H5MM_memcpy(_vl, &t, sizeof(char *));
@@ -738,7 +738,7 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
     char *s;        /* Pointer to the user's string information */
 #endif
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (len > 0) {
         /* check parameters */
@@ -776,7 +776,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     size_t len;                 /* Maximum length of the string to copy */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check parameters */
     HDassert(buf);
@@ -821,7 +821,7 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
 {
     const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check parameters */
     HDassert(vl);
@@ -852,7 +852,7 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
     uint8_t *                 vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t                    ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check parameters */
     HDassert(file);
@@ -893,7 +893,7 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     uint8_t *                 vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t                    ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check parameters */
     HDassert(file);
@@ -937,7 +937,7 @@ H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *buf, size_t len)
     const uint8_t *vl        = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t         ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check parameters */
     HDassert(file);
@@ -975,7 +975,7 @@ H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UN
     const uint8_t *bg        = (const uint8_t *)_bg; /* Pointer to the old data hvl_t */
     herr_t         ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check parameters */
     HDassert(vl);
@@ -1016,7 +1016,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl)
     const uint8_t *vl        = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t         ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check parameters */
     HDassert(file);

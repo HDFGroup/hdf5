@@ -98,7 +98,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
     void *         ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -599,7 +599,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     unsigned            u;
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -757,7 +757,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
     H5O_layout_t *      dest      = (H5O_layout_t *)_dest;
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -843,7 +843,7 @@ H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
     const H5O_layout_t *mesg      = (const H5O_layout_t *)_mesg;
     size_t              ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -875,7 +875,7 @@ H5O__layout_reset(void *_mesg)
     H5O_layout_t *mesg      = (H5O_layout_t *)_mesg;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (mesg) {
         /* Free the compact storage buffer */
@@ -912,7 +912,7 @@ H5O__layout_free(void *_mesg)
 {
     H5O_layout_t *mesg = (H5O_layout_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -942,7 +942,7 @@ H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
     H5O_layout_t *mesg      = (H5O_layout_t *)_mesg;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -1004,7 +1004,7 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src; /* Source layout */
     herr_t              ret_value  = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(cpy_info);
@@ -1044,7 +1044,7 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t             copied     = FALSE; /* Whether the data was copied */
     void *              ret_value  = NULL;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(file_src);
@@ -1146,7 +1146,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     const H5O_layout_t *mesg = (const H5O_layout_t *)_mesg;
     size_t              u;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

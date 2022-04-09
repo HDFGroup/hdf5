@@ -1074,7 +1074,7 @@ H5FS__sinfo_free_sect_cb(void *_sect, void H5_ATTR_UNUSED *key, void *op_data)
     H5FS_section_info_t *sect  = (H5FS_section_info_t *)_sect;  /* Section to free */
     const H5FS_sinfo_t * sinfo = (const H5FS_sinfo_t *)op_data; /* Free space manager for section */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(sect);
     HDassert(sinfo);
@@ -1102,7 +1102,7 @@ H5FS__sinfo_free_node_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5FS_node_t *fspace_node = (H5FS_node_t *)item; /* Temporary pointer to free space list node */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fspace_node);
     HDassert(op_data);

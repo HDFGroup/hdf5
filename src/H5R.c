@@ -506,7 +506,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
     void *            opened_obj = NULL;              /* Opened object */
     hid_t             ret_value  = H5I_INVALID_HID;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -648,7 +648,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
     hid_t                   space_id      = H5I_INVALID_HID; /* Dataspace ID */
     hid_t                   ret_value     = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -813,7 +813,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
     void *            opened_attr   = NULL;            /* Opened attribute */
     hid_t             ret_value     = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (ref_ptr == NULL)
