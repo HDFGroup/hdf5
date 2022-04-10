@@ -2250,11 +2250,11 @@ static int
 test_vanishing_datasets(void)
 {
     struct mirrortest_filenames names;
-    hid_t                       file_id        = H5I_INVALID_HID;
-    hid_t                       fapl_id        = H5I_INVALID_HID;
-    hid_t                       dset_id        = H5I_INVALID_HID;
-    hid_t                       dspace_id      = H5I_INVALID_HID;
-    hsize_t                     dims[2]        = {DATABUFFER_SIZE, DATABUFFER_SIZE};
+    hid_t                       file_id   = H5I_INVALID_HID;
+    hid_t                       fapl_id   = H5I_INVALID_HID;
+    hid_t                       dset_id   = H5I_INVALID_HID;
+    hid_t                       dspace_id = H5I_INVALID_HID;
+    hsize_t                     dims[2]   = {DATABUFFER_SIZE, DATABUFFER_SIZE};
     uint32_t                    buf[DATABUFFER_SIZE][DATABUFFER_SIZE]; /* consider malloc? */
     H5G_info_t                  group_info;
     unsigned int                i, j, k;
