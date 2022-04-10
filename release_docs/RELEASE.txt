@@ -254,7 +254,9 @@ New Features
 
 Support for new platforms, languages and compilers
 ==================================================
-    -
+    - macOS Apple M1 11.6 Darwin 20.6.0 arm64 with Apple clang version 12.0.5 
+
+    - Fedora34 Linux 5.13.14-200.fc34 with GCC 11.2.1 and clang version 12.0.1
 
 
 Bug Fixes since HDF5-1.12.1 release
