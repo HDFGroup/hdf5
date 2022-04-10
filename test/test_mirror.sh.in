@@ -45,7 +45,9 @@ done
 RUN_DIR=mirror_vfd_test
 MIRROR_UTILS=../utils/mirror_vfd # TODO: presupposes from test/
 
-mkdir $RUN_DIR
+if [[ ! -d $RUN_DIR ]] ; then
+    mkdir $RUN_DIR
+fi
 
 # Copy program files into dedicated test directory
 for FILE in $MIRROR_UTILS/mirror_* ; do
@@ -61,6 +63,10 @@ cp mirror_vfd $RUN_DIR
 # wrapper script. Copy these libs builds if appropriate.
 if [ -f $MIRROR_UTILS/.libs/mirror_server ] ; then
     RUN_LIBS=$RUN_DIR/.libs
+    # Delete previous .libs directory, to remove any generated libtool files
+    if [[ -d $RUN_LIBS ]] ; then
+        rm -rf $RUN_LIBS
+    fi
     mkdir $RUN_LIBS
     for FILE in $MIRROR_UTILS/.libs/mirror_* ; do
         case "$FILE" in
