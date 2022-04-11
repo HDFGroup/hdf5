@@ -203,6 +203,7 @@ New Features
 
       (JTH - 2022/2/23)
 
+
     Fortran Library:
     ----------------
     - H5Fget_name_f fixed to handle correctly trailing whitespaces and
@@ -215,11 +216,9 @@ New Features
     ------------
     -
 
-
     Java Library:
     -------------
     -
-
 
     Tools:
     ------
@@ -250,6 +249,30 @@ New Features
       names. These partial long options have been removed from all the tools.
 
       (DER - 2021/08/03)
+
+
+     High-Level APIs:
+    ----------------
+    - added set/get for unsigned long long attributes
+
+      The attribute writing high-level API has been expanded to include
+      public set/get functions for ULL attributes, analogously to the
+      existing set/get for other types.
+
+      (AF - 2021/09/08)
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+    Internal header file:
+    ---------------------
+    -
+
+    Documentation:
+    --------------
+    -
 
 
 Support for new platforms, languages and compilers
@@ -422,7 +445,6 @@ Bug Fixes since HDF5-1.12.1 release
     ------------
     -
 
-
     Configuration
     -------------
     - Reworked corrected path searched by CMake find_package command
@@ -482,7 +504,6 @@ Bug Fixes since HDF5-1.12.1 release
     -----------
     -
 
-
     High-Level Library
     ------------------
     - Fixed HL_test_packet, test for packet table vlen of vlen.
@@ -496,21 +517,17 @@ Bug Fixes since HDF5-1.12.1 release
     -----------------------
     -
 
-
     Documentation
     -------------
     -
-
 
     F90 APIs
     --------
     -
 
-
     C++ APIs
     --------
     - 
-
 
     Testing
     -------
