@@ -1,4 +1,4 @@
-HDF5 version 1.12.2-2 currently under development
+HDF5 version 1.12.2-3 currently under development
 ================================================================================
 
 
@@ -233,28 +233,30 @@ New Features
       
     - Refactored the perform tools and removed depends on test library.
 
-        Moved the perf and h5perf tools from tools/test/perform to
-        tools/src/h5perf so that they can be installed. This required
-        that the test library dependency be removed by copying the
-        needed functions from h5test.c.
-        The standalone scripts and other perform tools remain in the
-        tools/test/perform folder.
+      Moved the perf and h5perf tools from tools/test/perform to
+      tools/src/h5perf so that they can be installed. This required
+      that the test library dependency be removed by copying the
+      needed functions from h5test.c.
+      The standalone scripts and other perform tools remain in the
+      tools/test/perform folder.
 
-        (ADB - 2021/08/10)
+      (ADB - 2021/08/10)
 
     - Removed partial long exceptions
 
-        Some of the tools accepted shortened versions of the long options
-        (ex: --datas instead of --dataset). These were implemented inconsistently,
-        are difficult to maintain, and occasionally block useful long option
-        names. These partial long options have been removed from all the tools.
+      Some of the tools accepted shortened versions of the long options
+      (ex: --datas instead of --dataset). These were implemented inconsistently,
+      are difficult to maintain, and occasionally block useful long option
+      names. These partial long options have been removed from all the tools.
 
-        (DER - 2021/08/03)
+      (DER - 2021/08/03)
 
 
 Support for new platforms, languages and compilers
 ==================================================
-    -
+    - macOS Apple M1 11.6 Darwin 20.6.0 arm64 with Apple clang version 12.0.5 
+
+    - Fedora34 Linux 5.13.14-200.fc34 with GCC 11.2.1 and clang version 12.0.1
 
 
 Bug Fixes since HDF5-1.12.1 release
