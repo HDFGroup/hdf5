@@ -25,8 +25,7 @@
  *      reporting macros.
  */
 #define H5FA_MODULE
-#define H5_MY_PKG      H5FA
-#define H5_MY_PKG_ERR  H5E_FARRAY
-#define H5_MY_PKG_INIT NO
+#define H5_MY_PKG     H5FA
+#define H5_MY_PKG_ERR H5E_FARRAY
 
 #endif /* H5FAmodule_H */
