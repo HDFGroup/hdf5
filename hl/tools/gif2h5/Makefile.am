@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -29,9 +29,9 @@ bin_PROGRAMS=gif2h5 h52gif
 h52gif_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
-gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
+gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
 
-h52gif_SOURCES=hdf2gif.c hdfgifwr.c 
+h52gif_SOURCES=hdf2gif.c hdfgifwr.c
 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
@@ -42,7 +42,7 @@ if BUILD_TESTS_CONDITIONAL
   TEST_SCRIPT=h52giftest.sh
   check_SCRIPTS=$(TEST_SCRIPT)
   noinst_PROGRAMS=h52gifgentst
-  h52gifgentst_SOURCES=h52gifgentst.c 
+  h52gifgentst_SOURCES=h52gifgentst.c
 endif
 
 CHECK_CLEANFILES+=*.h5

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,11 +16,7 @@
  *   We will read from the file created by extend.cpp
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 
@@ -28,20 +24,20 @@ using std::endl;
 #include "H5Cpp.h"
 using namespace H5;
 
-const H5std_string FILE_NAME( "SDSextendible.h5" );
-const H5std_string DATASET_NAME( "ExtendibleArray" );
-const int      NX = 10;
-const int      NY = 5;
-const int      RANK = 2;
-const int      RANKC = 1;
+const H5std_string FILE_NAME("SDSextendible.h5");
+const H5std_string DATASET_NAME("ExtendibleArray");
+const int          NX    = 10;
+const int          NY    = 5;
+const int          RANK  = 2;
+const int          RANKC = 1;
 
-int main (void)
+int
+main(void)
 {
-    hsize_t     i, j;
+    hsize_t i, j;
 
     // Try block to detect exceptions raised by any of the calls inside it
-    try
-    {
+    try {
         /*
          * Turn off the auto-printing when failure occurs so that we can
          * handle the errors appropriately
@@ -51,8 +47,8 @@ int main (void)
         /*
          * Open the file and the dataset.
          */
-        H5File file( FILE_NAME, H5F_ACC_RDONLY );
-        DataSet dataset = file.openDataSet( DATASET_NAME );
+        H5File  file(FILE_NAME, H5F_ACC_RDONLY);
+        DataSet dataset = file.openDataSet(DATASET_NAME);
 
         /*
          * Get filespace for rank and dimension
@@ -67,10 +63,9 @@ int main (void)
         /*
          * Get and print the dimension sizes of the file dataspace
          */
-        hsize_t dims[2];        // dataset dimensions
-        rank = filespace.getSimpleExtentDims( dims );
-        cout << "dataset rank = " << rank << ", dimensions "
-             << (unsigned long)(dims[0]) << " x "
+        hsize_t dims[2]; // dataset dimensions
+        rank = filespace.getSimpleExtentDims(dims);
+        cout << "dataset rank = " << rank << ", dimensions " << (unsigned long)(dims[0]) << " x "
              << (unsigned long)(dims[1]) << endl;
 
         /*
@@ -81,13 +76,12 @@ int main (void)
         /*
          * Read dataset back and display.
          */
-        int data_out[NX][NY];  // buffer for dataset to be read
-        dataset.read( data_out, PredType::NATIVE_INT, mspace1, filespace );
+        int data_out[NX][NY]; // buffer for dataset to be read
+        dataset.read(data_out, PredType::NATIVE_INT, mspace1, filespace);
 
         cout << "\n";
         cout << "Dataset: \n";
-        for (j = 0; j < dims[0]; j++)
-        {
+        for (j = 0; j < dims[0]; j++) {
             for (i = 0; i < dims[1]; i++)
                 cout << data_out[j][i] << " ";
             cout << endl;
@@ -117,20 +111,20 @@ int main (void)
          */
         hsize_t col_dims[1];
         col_dims[0] = 10;
-        DataSpace mspace2( RANKC, col_dims );
+        DataSpace mspace2(RANKC, col_dims);
 
         /*
          * Define the column (hyperslab) to read.
          */
-        hsize_t offset[2] = { 0, 2 };
-        hsize_t  count[2] = { 10, 1 };
-        int column[10];  // buffer for column to be read
+        hsize_t offset[2] = {0, 2};
+        hsize_t count[2]  = {10, 1};
+        int     column[10]; // buffer for column to be read
 
         /*
          * Define hyperslab and read.
          */
-        filespace.selectHyperslab( H5S_SELECT_SET, count, offset );
-        dataset.read( column, PredType::NATIVE_INT, mspace2, filespace );
+        filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
+        dataset.read(column, PredType::NATIVE_INT, mspace2, filespace);
 
         cout << endl;
         cout << "Third column: " << endl;
@@ -161,20 +155,18 @@ int main (void)
          */
         hsize_t chunk_dims[2];
         int     rank_chunk;
-        if( H5D_CHUNKED == cparms.getLayout() )
-        {
+        if (H5D_CHUNKED == cparms.getLayout()) {
             /*
              * Get chunking information: rank and dimensions
              */
-            rank_chunk = cparms.getChunk( 2, chunk_dims);
-            cout << "chunk rank " << rank_chunk << "dimensions "
-                << (unsigned long)(chunk_dims[0]) << " x "
-                << (unsigned long)(chunk_dims[1]) << endl;
+            rank_chunk = cparms.getChunk(2, chunk_dims);
+            cout << "chunk rank " << rank_chunk << "dimensions " << (unsigned long)(chunk_dims[0]) << " x "
+                 << (unsigned long)(chunk_dims[1]) << endl;
 
             /*
              * Define the memory space to read a chunk.
              */
-            DataSpace mspace3( rank_chunk, chunk_dims );
+            DataSpace mspace3(rank_chunk, chunk_dims);
 
             /*
              * Define chunk in the file (hyperslab) to read.
@@ -183,17 +175,16 @@ int main (void)
             offset[1] = 0;
             count[0]  = chunk_dims[0];
             count[1]  = chunk_dims[1];
-            filespace.selectHyperslab( H5S_SELECT_SET, count, offset );
+            filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
 
             /*
              * Read chunk back and display.
              */
-            int chunk_out[2][5];   // buffer for chunk to be read
-            dataset.read( chunk_out, PredType::NATIVE_INT, mspace3, filespace );
+            int chunk_out[2][5]; // buffer for chunk to be read
+            dataset.read(chunk_out, PredType::NATIVE_INT, mspace3, filespace);
             cout << endl;
             cout << "Chunk:" << endl;
-            for (j = 0; j < chunk_dims[0]; j++)
-            {
+            for (j = 0; j < chunk_dims[0]; j++) {
                 for (i = 0; i < chunk_dims[1]; i++)
                     cout << chunk_out[j][i] << " ";
                 cout << endl;
@@ -204,25 +195,22 @@ int main (void)
              *   2 0 0 0 0
              */
         }
-    }  // end of try block
+    } // end of try block
 
     // catch failure caused by the H5File operations
-    catch( FileIException error )
-    {
+    catch (FileIException error) {
         error.printErrorStack();
         return -1;
     }
 
     // catch failure caused by the DataSet operations
-    catch( DataSetIException error )
-    {
+    catch (DataSetIException error) {
         error.printErrorStack();
         return -1;
     }
 
     // catch failure caused by the DataSpace operations
-    catch( DataSpaceIException error )
-    {
+    catch (DataSpaceIException error) {
         error.printErrorStack();
         return -1;
     }

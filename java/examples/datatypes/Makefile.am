@@ -1,12 +1,11 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -28,13 +27,13 @@ classes:
 
 pkgpath = examples/datatypes
 hdfjarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
-CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-1.7.25.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(JAVAROOT):$(top_builddir)/java/src/$(hdfjarfile):$(top_srcdir)/java/lib/slf4j-api-1.7.33.jar:$(top_srcdir)/java/lib/ext/slf4j-simple-1.7.33.jar:$$CLASSPATH
 
 jarfile = jar$(PACKAGE_TARNAME)datatypes.jar
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
-TESTPACKAGE = 
+TESTPACKAGE =
 
 noinst_JAVA = \
     H5Ex_T_Array.java \

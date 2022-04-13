@@ -1,0 +1,19 @@
+/** \page Cookbook Cookbook
+
+ Healthy, everyday recipes for every taste and budget...
+
+\ref Files
+\li \ref CB_FreeSpace
+\li \ref CB_RemoveUnusedSpace
+\li \ref CB_UserBlock
+
+\ref Attributes
+\li \ref CB_LargeAttributes
+
+\ref Accessibility
+\li \ref CB_MaintainCompat
+
+\ref Performance
+\li \ref CB_MDCPerf
+
+ */

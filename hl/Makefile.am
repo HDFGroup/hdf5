@@ -6,11 +6,11 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -37,7 +37,11 @@ else
   TEST_DIR =
 endif
 if BUILD_TOOLS_CONDITIONAL
+if BUILD_TOOLS_HL_CONDITIONAL
   TOOLS_DIR = tools
+else
+  TOOLS_DIR =
+endif
 else
   TOOLS_DIR =
 endif
@@ -46,12 +50,6 @@ endif
 ## use the HL library
 if BUILD_HDF5_HL_CONDITIONAL
    SUBDIRS=src $(TEST_DIR) $(TOOLS_DIR) $(CXX_DIR) $(FORTRAN_DIR)
-
-# Test with just the native connector, with a single pass-through connector
-# and with a doubly-stacked pass-through.
-VOL_LIST = native "pass_through under_vol=0;under_info={}" \
-           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
-
 endif
 DIST_SUBDIRS=src test tools c++ fortran examples
 

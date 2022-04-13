@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -111,17 +110,6 @@ public class TestH5Dparams {
     @Test(expected = HDF5LibraryException.class)
     public void testH5Dvlen_get_buf_size_invalid() throws Throwable {
         H5.H5Dvlen_get_buf_size(-1, -1, -1);
-    }
-
-    @Test(expected = HDF5LibraryException.class)
-    public void testH5Dvlen_reclaim_invalid() throws Throwable {
-        byte[] buf = new byte[2];
-        H5.H5Dvlen_reclaim(-1, -1, -1, buf);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testH5Dvlen_reclaim_null() throws Throwable {
-        H5.H5Dvlen_reclaim(-1, -1, -1, null);
     }
 
     @Test(expected = IllegalArgumentException.class)

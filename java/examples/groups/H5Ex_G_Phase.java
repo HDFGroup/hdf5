@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,11 +59,11 @@ public class H5Ex_G_Phase {
     }
 
     private static void CreateGroup() {
-        long file_id = -1;
-        long group_id = -1;
-        long subgroup_id = -1;
-        long fapl_id = -1;
-        long gcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long subgroup_id = HDF5Constants.H5I_INVALID_HID;
+        long fapl_id = HDF5Constants.H5I_INVALID_HID;
+        long gcpl_id = HDF5Constants.H5I_INVALID_HID;
         H5G_info_t ginfo;
         String name = "G0"; // Name of subgroup_id
         int i;

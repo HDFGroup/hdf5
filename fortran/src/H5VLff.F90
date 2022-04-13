@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -82,7 +82,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: vipl_id
        END FUNCTION H5VLregister_connector_by_name
     END INTERFACE
-    
+
     vipl_id_default = H5P_DEFAULT_F
     IF(PRESENT(vipl_id)) vipl_id_default = vipl_id
 
@@ -124,22 +124,23 @@ CONTAINS
   END SUBROUTINE H5VLregister_connector_by_value_f
 
 !
-!****s* H5VL/H5VLis_connector_registered_f
+!****s* H5VL/H5VLis_connector_registered_by_name_f
 !
 ! NAME
-!  H5VLis_connector_registered_f
+!  H5VLis_connector_registered_by_name_f
 !
 ! PURPOSE
-!  Tests whether a VOL class has been registered or not.
+!  Tests whether a VOL class has been registered or not
+!  according to a specified connector name.
 !
 ! INPUTS
 !  name - Connector name
 ! OUTPUTS
-!  registered - state of VOL class registration 
+!  registered - state of VOL class registration
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
-  SUBROUTINE H5VLis_connector_registered_f(name, registered,  hdferr)
+  SUBROUTINE H5VLis_connector_registered_by_name_f(name, registered,  hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: name
     LOGICAL, INTENT(OUT) :: registered
@@ -149,28 +150,108 @@ CONTAINS
     INTEGER(C_INT) :: registered_c
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5VLis_connector_registered(name) BIND(C,NAME='H5VLis_connector_registered')
+       INTEGER(C_INT) FUNCTION H5VLis_connector_registered_by_name(name) BIND(C,NAME='H5VLis_connector_registered_by_name')
          IMPORT :: C_CHAR
          IMPORT :: C_INT
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-       END FUNCTION H5VLis_connector_registered
+       END FUNCTION H5VLis_connector_registered_by_name
     END INTERFACE
-    
+
     c_name = TRIM(name)//C_NULL_CHAR
-    registered_c = H5VLis_connector_registered(c_name)
+    registered_c = H5VLis_connector_registered_by_name(c_name)
 
     hdferr = 0
     registered = .FALSE.
     IF(registered_c .GT. 0) registered = .TRUE.
     IF(registered_c .LT. 0) hdferr = INT(registered_c)
 
-  END SUBROUTINE H5VLis_connector_registered_f
+  END SUBROUTINE H5VLis_connector_registered_by_name_f
 
 !
-!****s* H5VL/H5VLis_connector_registered_f
+!****s* H5VL/H5VLis_connector_registered_by_value_f
 !
 ! NAME
-!  H5VLis_connector_registered_f
+!  H5VLis_connector_registered_by_value_f
+!
+! PURPOSE
+!  Tests whether a VOL class has been registered or not
+!  according to a specified connector value (ID).
+!
+! INPUTS
+!  value - Connector value
+! OUTPUTS
+!  registered - state of VOL class registration
+!  hdferr - Returns 0 if successful and -1 if fails
+! SOURCE
+
+  SUBROUTINE H5VLis_connector_registered_by_value_f(value, registered,  hdferr)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: value
+    LOGICAL, INTENT(OUT) :: registered
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    INTEGER(C_INT) :: registered_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLis_connector_registered_by_value(value) BIND(C,NAME='H5VLis_connector_registered_by_value')
+         IMPORT :: C_INT
+         INTEGER(C_INT), VALUE :: value
+       END FUNCTION H5VLis_connector_registered_by_value
+    END INTERFACE
+
+    registered_c = H5VLis_connector_registered_by_value(INT(value,C_INT))
+
+    hdferr = 0
+    registered = .FALSE.
+    IF(registered_c .GT. 0) registered = .TRUE.
+    IF(registered_c .LT. 0) hdferr = INT(registered_c)
+
+  END SUBROUTINE H5VLis_connector_registered_by_value_f
+
+!
+!****s* H5VL/H5VLget_connector_id_f
+!
+! NAME
+!  H5VLget_connector_id_f
+!
+! PURPOSE
+!  Retrieves the ID for a registered VOL connector.
+!
+! INPUTS
+!  obj_id - Object id
+! OUTPUTS
+!  vol_id - Connector id
+!  hdferr - Returns 0 if successful and -1 if fails
+! SOURCE
+
+  SUBROUTINE H5VLget_connector_id_f(obj_id, vol_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER(HID_T), INTENT(OUT) :: vol_id
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5VLget_connector_id(obj_id) BIND(C,NAME='H5VLget_connector_id')
+         IMPORT :: HID_T
+         INTEGER(HID_T), INTENT(IN) :: obj_id
+       END FUNCTION H5VLget_connector_id
+    END INTERFACE
+
+    vol_id = H5VLget_connector_id(obj_id)
+
+    IF(vol_id.LT.0)THEN
+       hdferr = -1
+       vol_id = H5I_INVALID_HID_F
+    ENDIF
+
+  END SUBROUTINE H5VLget_connector_id_f
+
+!
+!****s* H5VL/H5VLget_connector_id_by_name_f
+!
+! NAME
+!  H5VLget_connector_id_by_name_f
 !
 ! PURPOSE
 !  Retrieves the ID for a registered VOL connector.
@@ -182,7 +263,7 @@ CONTAINS
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
-  SUBROUTINE H5VLget_connector_id_f(name, vol_id, hdferr)
+  SUBROUTINE H5VLget_connector_id_by_name_f(name, vol_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: vol_id
@@ -191,22 +272,63 @@ CONTAINS
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5VLget_connector_id(name) BIND(C,NAME='H5VLget_connector_id')
+       INTEGER(HID_T) FUNCTION H5VLget_connector_id_by_name(name) BIND(C,NAME='H5VLget_connector_id_by_name')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-       END FUNCTION H5VLget_connector_id
+       END FUNCTION H5VLget_connector_id_by_name
     END INTERFACE
-    
-    c_name = TRIM(name)//C_NULL_CHAR
-    vol_id = H5VLget_connector_id(c_name)
 
+    c_name = TRIM(name)//C_NULL_CHAR
+    vol_id = H5VLget_connector_id_by_name(c_name)
+
+    hdferr = 0
     IF(vol_id.LT.0)THEN
        hdferr = -1
        vol_id = H5I_INVALID_HID_F
     ENDIF
 
-  END SUBROUTINE H5VLget_connector_id_f
+  END SUBROUTINE H5VLget_connector_id_by_name_f
+
+!
+!****s* H5VL/H5VLget_connector_id_by_value_f
+!
+! NAME
+!  H5VLget_connector_id_by_value_f
+!
+! PURPOSE
+!  Retrieves the ID for a registered VOL connector.
+!
+! INPUTS
+!  value - Connector value
+! OUTPUTS
+!  vol_id - Connector id
+!  hdferr - Returns 0 if successful and -1 if fails
+! SOURCE
+
+  SUBROUTINE H5VLget_connector_id_by_value_f(value, vol_id, hdferr)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: value
+    INTEGER(HID_T), INTENT(OUT) :: vol_id
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5VLget_connector_id_by_value(value) BIND(C,NAME='H5VLget_connector_id_by_value')
+         IMPORT :: C_INT
+         IMPORT :: HID_T
+         INTEGER(C_INT), VALUE :: value
+       END FUNCTION H5VLget_connector_id_by_value
+    END INTERFACE
+
+    vol_id = H5VLget_connector_id_by_value(INT(value,C_INT))
+
+    hdferr = 0
+    IF(vol_id.LT.0)THEN
+       hdferr = -1
+       vol_id = H5I_INVALID_HID_F
+    ENDIF
+
+  END SUBROUTINE H5VLget_connector_id_by_value_f
 
   SUBROUTINE H5VLget_connector_name_f(obj_id, name, hdferr, name_len)
     IMPLICIT NONE
@@ -245,7 +367,7 @@ CONTAINS
 
   END SUBROUTINE H5VLget_connector_name_f
 
-! 
+!
 !
 !****s* H5VL/H5VLclose_f
 !

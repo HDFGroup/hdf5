@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,10 +34,10 @@ public class H5Ex_T_IntegerAttribute {
     private static final int RANK = 2;
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data = new int[DIM0][DIM1];
 
@@ -64,7 +63,7 @@ public class H5Ex_T_IntegerAttribute {
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = -1;
+                dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
         }
         catch (Exception e) {
@@ -137,10 +136,10 @@ public class H5Ex_T_IntegerAttribute {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         int[][] dset_data;
 

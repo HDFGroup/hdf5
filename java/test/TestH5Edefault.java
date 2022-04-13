@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.rules.TestName;
 
 public class TestH5Edefault {
@@ -55,19 +55,28 @@ public class TestH5Edefault {
         H5.H5Eprint2(-1, null);
     }
 
-    @Test
+    @Ignore
     public void testH5Eprint() {
-        try {
-            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-        }
-        try {
-            H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5.H5Eprint: " + err);
+        /*
+        * If HDF5_VOL_CONNECTOR is set, this might not be the
+        * native connector and the error stack might be different.
+        * Only check for the specific error stack if the native
+        * connector is being used.
+        */
+        String connector = System.getenv("HDF5_VOL_CONNECTOR");
+        if (connector == null) {
+            try {
+                H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+            }
+            try {
+                H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("H5.H5Eprint: " + err);
+            }
         }
     }
 
@@ -366,7 +375,7 @@ public class TestH5Edefault {
         }
         assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == saved_num_msg);
 
-        // Se the current stack to be the default and try that again
+        // Set the current stack to be the default and try that again
         try {
             H5.H5Eset_current_stack(stack_id);
             num_msg = H5.H5Eget_num(HDF5Constants.H5E_DEFAULT);
@@ -427,19 +436,28 @@ public class TestH5Edefault {
         H5.H5Eprint2(-1, null);
     }
 
-    @Test
+    @Ignore
     public void testH5EprintInt() {
-        try {
-            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-        }
-        try {
-            H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
-        }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5.H5EprintInt: " + err);
+        /*
+        * If HDF5_VOL_CONNECTOR is set, this might not be the
+        * native connector and the error stack might be different.
+        * Only check for the specific error stack if the native
+        * connector is being used.
+        */
+        String connector = System.getenv("HDF5_VOL_CONNECTOR");
+        if (connector == null) {
+            try {
+                H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+            }
+            try {
+                H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("H5.H5EprintInt: " + err);
+            }
         }
     }
 

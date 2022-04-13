@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -58,12 +58,6 @@
 ##############################################################################
 ##############################################################################
 
-  if (NOT BUILD_SHARED_LIBS)
-    set (tgt_ext "")
-  else ()
-    set (tgt_ext "-shared")
-  endif ()
-
   # Remove any output file left over from previous test run
   add_test (
     NAME H5REPART-clearall-objects
@@ -82,7 +76,7 @@
   # repartition family member size to 20,000 bytes.
   add_test (
       NAME H5REPART-h5repart_20K
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 family_file%05d.h5 fst_family%05d.h5
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_file_ext}> -m 20000 family_file%05d.h5 fst_family%05d.h5
   )
   set_tests_properties (H5REPART-h5repart_20K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
@@ -91,7 +85,7 @@
   # repartition family member size to 5 KB.
   add_test (
       NAME H5REPART-h5repart_5K
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_ext}> -m 5k family_file%05d.h5 scd_family%05d.h5
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_file_ext}> -m 5k family_file%05d.h5 scd_family%05d.h5
   )
   set_tests_properties (H5REPART-h5repart_5K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
@@ -100,7 +94,7 @@
   # convert family file to sec2 file of 20,000 bytes
   add_test (
       NAME H5REPART-h5repart_single
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_file_ext}> -m 20000 -family_to_single family_file%05d.h5 family_to_single.h5
   )
   set_tests_properties (H5REPART-h5repart_single PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
@@ -109,7 +103,7 @@
   # convert family file to sec2 file of 20,000 bytes (old argument)
   add_test (
       NAME H5REPART-h5repart_sec2
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_ext}> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart${tgt_file_ext}> -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5
   )
   set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES
       FIXTURES_REQUIRED clear_testrepart

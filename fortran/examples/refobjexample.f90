@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -26,7 +26,7 @@
      IMPLICIT NONE
      CHARACTER(LEN=10), PARAMETER :: filename = "FORTRAN.h5"  ! File
      CHARACTER(LEN=8), PARAMETER :: dsetnamei = "INTEGERS"    ! Dataset with the integer data
-     CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES" ! Dataset wtih object
+     CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES" ! Dataset with object
                                                                      ! references
      CHARACTER(LEN=6), PARAMETER :: groupname1 = "GROUP1"            ! Groups in the file
      CHARACTER(LEN=6), PARAMETER :: groupname2 = "GROUP2"            !

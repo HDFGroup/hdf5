@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -72,7 +72,7 @@
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_NULL_CHAR, C_LOC, C_INT
 
   USE H5GLOBAL
 
@@ -211,7 +211,7 @@ CONTAINS
 !
 ! INPUTS
 !  obj_id 	 - identifier of a group, dataset, or named
-!                  datatype atttribute to be attached to
+!                  datatype attribute to be attached to
 !  name 	 - attribute name
 ! OUTPUTS
 !  attr_id 	 - attribute identifier
@@ -344,7 +344,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_space
     END INTERFACE
-    
+
     space_id = H5Aget_space(attr_id)
 
     hdferr = 0
@@ -389,7 +389,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_type
     END INTERFACE
-    
+
     type_id = H5Aget_type(attr_id)
 
     hdferr = 0
@@ -487,7 +487,7 @@ CONTAINS
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
        n, name, hdferr, size, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed *TEST* check NULL
     INTEGER, INTENT(IN) :: idx_type ! Type of index; Possible values are:
@@ -508,7 +508,7 @@ CONTAINS
                                       ! Returns attribute name size,
                                       ! -1 if fail
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters, 
+    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters,
                                                     ! of the attribute
 !*****
     INTEGER(HID_T) :: lapl_id_default
@@ -846,7 +846,7 @@ CONTAINS
 !  identifier and attribute name
 !
 ! INPUTS
-!  obj_id 	 - Identifer for object to which attribute is attached
+!  obj_id 	 - Identifier for object to which attribute is attached
 !  attr_name 	 - Name of attribute to open
 ! OUTPUTS
 !  attr_id 	 - attribute identifier
@@ -934,7 +934,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed
     INTEGER, INTENT(IN) :: idx_type           ! Type of index; Possible values are:
@@ -991,7 +991,7 @@ CONTAINS
 !  Removes an attribute from a specified location
 !
 ! INPUTS
-!  loc_id 	 - Identifer for object to which attribute is attached
+!  loc_id 	 - Identifier for object to which attribute is attached
 !  obj_name 	 - Name of attribute to open
 !  attr_name 	 - Attribute access property list
 !  lapl_id 	 - Link access property list
@@ -1005,7 +1005,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Name of attribute to delete
@@ -1766,7 +1766,7 @@ CONTAINS
 !  up to 7 dimensions.
 !
 ! Fortran2003 Interface:
-!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr) 
+!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
 !!    TYPE(C_PTR)     , INTENT(IN)  :: buf
@@ -1841,7 +1841,7 @@ CONTAINS
 !  dims parameter was added to make code portable;
 !  Aprile 4, 2001
 !
-!  Changed buf intent to INOUT to be consistant
+!  Changed buf intent to INOUT to be consistent
 !  with how the C functions handles it. The pg
 !  compiler will return 0 if a buf value is not set.
 !  February, 2008
@@ -1851,7 +1851,7 @@ CONTAINS
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
 !  up to 7 dimensions.
 ! Fortran2003 Interface:
-!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr) 
+!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr)
 !!    INTEGER(HID_T)  , INTENT(IN)    :: attr_id
 !!    INTEGER(HID_T)  , INTENT(IN)    :: memtype_id
 !!    TYPE(C_PTR)     , INTENT(INOUT) :: buf

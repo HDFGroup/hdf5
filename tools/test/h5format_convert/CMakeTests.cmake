@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -97,12 +97,6 @@
 ##############################################################################
 ##############################################################################
 
-  if (NOT BUILD_SHARED_LIBS)
-    set (tgt_ext "")
-  else ()
-    set (tgt_ext "-shared")
-  endif ()
-
   macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -123,7 +117,7 @@
               NAME H5FC-${testname}-${testfile}
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
                   -D "TEST_ARGS=${ARGN};outtmp.h5"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
@@ -139,7 +133,7 @@
               NAME H5FC-${testname}-NA
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
                   -D "TEST_ARGS=${ARGN}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testname}.out"
@@ -172,7 +166,7 @@
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -204,7 +198,7 @@
           NAME H5FC-${testname}-${testfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};outtmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -237,7 +231,7 @@
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -280,7 +274,7 @@
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=-d;${ARGN};./testfiles/chktmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -317,7 +311,7 @@
           NAME H5FC-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
               -D "TEST_ARGS=${ARGN};./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
@@ -330,7 +324,7 @@
           NAME H5FC_CHECK_DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=-BH;./testfiles/dmptmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}_chk.out"

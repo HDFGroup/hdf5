@@ -1,0 +1,25 @@
+name: clang-format Check
+on: 
+  workflow_dispatch:
+  push:
+jobs:
+  formatting-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clang-format style check for C programs.
+      uses: DoozyX/clang-format-lint-action@v0.11
+      with:
+        source: '.'
+        extensions: 'c,h,cpp,hpp'
+        clangFormatVersion: 10
+        inplace: True
+        style: file
+        exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
+    - uses: EndBug/add-and-commit@v7
+      with:
+          author_name: github-actions
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          message: 'Committing clang-format changes'

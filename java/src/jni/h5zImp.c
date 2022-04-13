@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,8 +33,7 @@ extern "C" {
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister
-    (JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *env, jclass clss, jint filter)
 {
     herr_t retVal = FAIL;
 
@@ -53,8 +52,7 @@ done:
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail
-    (JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *env, jclass clss, jint filter)
 {
     herr_t retVal = FAIL;
 
@@ -74,20 +72,18 @@ done:
  */
 
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
-    (JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *env, jclass clss, jint filter)
 {
     unsigned int flags = 0;
 
     UNUSED(clss);
 
-    if (H5Zget_filter_info((H5Z_filter_t) filter, (unsigned *) &flags) < 0)
+    if (H5Zget_filter_info((H5Z_filter_t)filter, (unsigned *)&flags) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
     return (jint)flags;
 } /* end Java_hdf_hdf5lib_H5_H5Zget_1filter_1info */
-
 
 #ifdef __cplusplus
 } /* end extern "C" */

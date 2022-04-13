@@ -1,14 +1,15 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 require 5.003;
+use warnings;
 
 # Global settings
 # (The max_idx parameter is the only thing that needs to be changed when adding
 #       support for a new major release.  If support for a prior major release
 #       is added (like support for 1.4, etc), the min_sup_idx parameter will
-#       need to be decremented. - QAK)
+#       need to be decremented.)
 
-# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, etc)
-$max_idx = 6;
+# Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, etc)
+$max_idx = 7;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -24,7 +25,7 @@ $indent = 2;
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -51,7 +52,7 @@ sub print_copyright ($) {
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";
     print $fh " * terms governing use, modification, and redistribution, is contained in    *\n";
     print $fh " * the COPYING file, which can be found at the root of the source code       *\n";
-    print $fh " * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *\n";
+    print $fh " * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n";
     print $fh " * If you do not have access to either file, you may request a copy from     *\n";
     print $fh " * help\@hdfgroup.org.                                                        *\n";
     print $fh " * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */\n";
@@ -77,8 +78,8 @@ sub print_startprotect ($$) {
     $file =~ s/(\w*)\.h/$1/;
 
     # Print the ifdef info
-    print $fh "\n#ifndef _${file}_H\n";
-    print $fh "#define _${file}_H\n";
+    print $fh "\n#ifndef ${file}_H\n";
+    print $fh "#define ${file}_H\n";
 }
 
 ##############################################################################
@@ -89,7 +90,8 @@ sub print_checkoptions ($) {
     my $curr_idx;               # Current API version index
 
     # Print the option checking
-    print $fh "\n/* Issue error if contradicting macros have been defined. */\n";
+    print $fh "\n\n/* Issue error if contradicting macros have been defined. */\n";
+    print $fh "/* (Can't use an older (deprecated) API version if deprecated symbols have been disabled) */\n";
 
     # Print the #ifdef
     print $fh "#if (";
@@ -118,7 +120,30 @@ sub print_checkoptions ($) {
 ##############################################################################
 # Print "global" API version macro settings
 #
-sub print_globalapivers ($) {
+sub print_globalapidefvers ($) {
+    my $fh = shift;             # File handle for output file
+    my $curr_idx;               # Current API version index
+
+    # Print the descriptive comment
+    print $fh "\n\n/* If a particular default \"global\" version of the library's interfaces is\n";
+    print $fh " *      chosen, set the corresponding version macro for API symbols.\n";
+    print $fh " *\n";
+    print $fh " */\n";
+
+    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+        # Print API version ifdef
+        print $fh "\n#if defined(H5_USE_1", ($curr_idx * 2), "_API_DEFAULT) && !defined(H5_USE_1", ($curr_idx * 2), "_API)\n";
+        # Print API version definition
+        print $fh " " x $indent, "#define H5_USE_1", ($curr_idx * 2), "_API 1\n";
+        # Print API version endif
+        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API_DEFAULT && !H5_USE_1", ($curr_idx * 2), "_API */\n";
+    }
+}
+
+##############################################################################
+# Print "global" API symbol version macro settings
+#
+sub print_globalapisymbolvers ($) {
     my $fh = shift;             # File handle for output file
     my $curr_idx;               # Current API version index
 
@@ -129,15 +154,6 @@ sub print_globalapivers ($) {
     print $fh " * Note: If an application has already chosen a particular version for an\n";
     print $fh " *      API symbol, the individual API version macro takes priority.\n";
     print $fh " */\n";
-
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
-        # Print API version ifdef
-        print $fh "#if defined(H5_USE_1", ($curr_idx * 2), "_API_DEFAULT) && !defined(H5_USE_1", ($curr_idx * 2), "_API)\n";
-        # Print API version definition
-        print $fh " " x $indent, "#define H5_USE_1", ($curr_idx * 2), "_API 1\n";
-        # Print API version endif
-        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API_DEFAULT && !H5_USE_1", ($curr_idx * 2), "_API */\n\n";
-    }
 
     # Loop over supported older library APIs and define the appropriate macros
     for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
@@ -338,7 +354,18 @@ sub parse_line ($) {
             my $vers_idx;       # Index of version in array
 
             # Do some validation on the input
-            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ )) {
+            # Note:  v111 is allowed because H5O functions were prematurely versioned
+            #        in HDF5 1.10.  Because users were affected by this, the versioning
+            #        was rescinded but the H5O version 2 functions were kept to be 
+            #        called directly.  Now that the version macros are added in 1.12,
+            #        along with a 3rd version of the H5O functions, the H5O function
+            #        version for default api=v110 should be version 1 to work correctly
+            #        with 1.10 applications that were using unversioned H5O functions,
+            #        and the H5O function version should be version 3 for default api=v112 
+            #        (the default api version for 1.12).  Allowing a v111 entry and 
+            #        incrementing its index 13 lines below allows a version 2 that is
+            #        never accessed via the H5O function macros.
+            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ )) {
                 die "bad version information: $name";
             }
             if(exists($sym_versions{$_})) {
@@ -351,6 +378,9 @@ sub parse_line ($) {
 #print "parse_line: _=$_\n";
             # Get the index of the version
             ($vers_idx) = ($_ =~ /v1(\d+)/);
+            if($vers_idx == 11) {
+                $vers_idx++;
+            }
             $vers_idx /= 2;
 #print "parse_line: vers_idx='$vers_idx'\n";
             push(@vers_nums, $vers_idx);
@@ -443,8 +473,9 @@ sub create_public ($) {
     print_copyright(*HEADER);
     print_warning(*HEADER);
     print_startprotect(*HEADER, $file);
+    print_globalapidefvers(*HEADER);
     print_checkoptions(*HEADER);
-    print_globalapivers(*HEADER);
+    print_globalapisymbolvers(*HEADER);
     print_defaultapivers(*HEADER);
     print_endprotect(*HEADER, $file);
 

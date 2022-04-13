@@ -78,7 +78,7 @@ DATASET "fletcher32" {
    }
 }
 DATASET "nbit" {
-   DATATYPE  32-bit little-endian integer
+   DATATYPE  32-bit little-endian integer 3-bit precision
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    DATA {
    (0,0): 0, 1, 2, 3, -4, -3, -2, -1, 0, 1,

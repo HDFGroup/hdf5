@@ -7,18 +7,19 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 # Tests for the h5watch tool
 #
+utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$utils_testdir/swmr_check_compat_vfd
 rc=$?
-if [[ $rc != 0 ]] ; then
+if [ $rc != 0 ] ; then
     echo
     echo "The VFD specified by the HDF5_DRIVER environment variable"
     echo "does not support SWMR."
@@ -66,10 +67,6 @@ fi
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
 test -d ../testfiles || mkdir ../testfiles
 
 # Print a line-line message left justified in a field of 70 characters

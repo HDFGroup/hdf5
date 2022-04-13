@@ -1,0 +1,46 @@
+
+/** \mainpage notitle
+
+This is the documentation set for HDF5.
+It includes specifications and documentation
+of software and tools developed and maintained by
+<a href="https://www.hdfgroup.org/">The HDF Group</a>. It is impractical to document
+the entire HDF5 ecosystem in one place, and you should also consult the documentation
+sets of the many outstanding community projects.
+
+For a first contact with HDF5, the best place is to have a look at the \link
+GettingStarted getting started \endlink page that shows you how to write and
+compile your first program with HDF5.
+
+The \b main \b documentation is organized by documentation flavor. Most
+technical documentation consists to varying degrees of information related to
+<em>tasks</em>, <em>concepts</em>, or <em>reference</em> material. As its title
+suggests, the \link RM Reference Manual \endlink is 100% reference material,
+while the \link Cookbook \endlink is focused on tasks. The different guide-type
+documents cover a mix of tasks, concepts, and reference, to help a specific
+<em>audience</em> succeed.
+
+\par Versions
+     Version-specific documentation (see the version in the title area) can be found
+     here:
+     - HDF5 <code>develop</code> branch (this site)
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_12/index.html">HDF5 1.12.x</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_10/index.html">HDF5 1.10.x</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_8/index.html">HDF5 1.8.x</a>
+
+\par Search
+     If you are looking for a specific function, constant, type, etc., use the
+     search box in the top right-hand corner!\n Otherwise, check out the
+     \link FTS full-text search\endlink.
+
+\par Offline reading
+     You can <a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
+
+\par History
+     A snapshot (~April 2017) of the pre-Doxygen HDF5 documentation can be found
+     <a href="https://docs.hdfgroup.org/archive/support/HDF5/doc/index.html">here</a>.
+
+\par ToDo List
+     There is plenty of <a href="./todo.html">unfinished business</a>.
+
+*/

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,8 +36,8 @@ extern "C" {
  * Signature: (JZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1create_1intermediate_1group
-    (JNIEnv *env, jclass clss, jlong lcpl_id, jboolean crt_intermed_group)
+Java_hdf_hdf5lib_H5_H5Pset_1create_1intermediate_1group(JNIEnv *env, jclass clss, jlong lcpl_id,
+                                                        jboolean crt_intermed_group)
 {
     herr_t retVal = FAIL;
 
@@ -57,8 +56,7 @@ done:
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1create_1intermediate_1group
-    (JNIEnv *env, jclass clss, jlong lcpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1create_1intermediate_1group(JNIEnv *env, jclass clss, jlong lcpl_id)
 {
     unsigned crt_intermed_group = 0;
 
@@ -77,8 +75,7 @@ done:
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1obj_1track_1times
-    (JNIEnv *env, jclass clss, jlong objplid, jboolean track_times)
+Java_hdf_hdf5lib_H5_H5Pset_1obj_1track_1times(JNIEnv *env, jclass clss, jlong objplid, jboolean track_times)
 {
     hbool_t track = FALSE;
 
@@ -99,11 +96,10 @@ done:
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1obj_1track_1times
-    (JNIEnv *env, jclass clss, jlong objplid)
+Java_hdf_hdf5lib_H5_H5Pget_1obj_1track_1times(JNIEnv *env, jclass clss, jlong objplid)
 {
     hbool_t  track_times = FALSE;
-    jboolean retVal = JNI_FALSE;
+    jboolean retVal      = JNI_FALSE;
 
     UNUSED(clss);
 
@@ -122,8 +118,8 @@ done:
  * Signature: (JII)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1attr_1phase_1change
-    (JNIEnv *env, jclass clss, jlong ocpl_id, jint max_compact, jint min_dense)
+Java_hdf_hdf5lib_H5_H5Pset_1attr_1phase_1change(JNIEnv *env, jclass clss, jlong ocpl_id, jint max_compact,
+                                                jint min_dense)
 {
     herr_t retVal = FAIL;
 
@@ -142,12 +138,11 @@ done:
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change
-    (JNIEnv *env, jclass clss, jlong ocpl_id, jintArray attributes)
+Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change(JNIEnv *env, jclass clss, jlong ocpl_id, jintArray attributes)
 {
-    jboolean  isCopy;
-    jint     *theArray = NULL;
-    herr_t    retVal = FAIL;
+    jboolean isCopy;
+    jint *   theArray = NULL;
+    herr_t   retVal   = FAIL;
 
     UNUSED(clss);
 
@@ -156,7 +151,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change
 
     PIN_INT_ARRAY(ENVONLY, attributes, theArray, &isCopy, "H5Pget_attr_phase_change: input not pinned");
 
-    if ((retVal = H5Pget_attr_phase_change((hid_t)ocpl_id, (unsigned *)&(theArray[0]), (unsigned *)&(theArray[1]))) < 0)
+    if ((retVal = H5Pget_attr_phase_change((hid_t)ocpl_id, (unsigned *)&(theArray[0]),
+                                           (unsigned *)&(theArray[1]))) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -172,8 +168,8 @@ done:
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1attr_1creation_1order
-    (JNIEnv *env, jclass clss, jlong ocpl_id, jint crt_order_flags)
+Java_hdf_hdf5lib_H5_H5Pset_1attr_1creation_1order(JNIEnv *env, jclass clss, jlong ocpl_id,
+                                                  jint crt_order_flags)
 {
     herr_t retVal = FAIL;
 
@@ -192,8 +188,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1attr_1creation_1order
-    (JNIEnv *env, jclass clss, jlong ocpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1attr_1creation_1order(JNIEnv *env, jclass clss, jlong ocpl_id)
 {
     unsigned crt_order_flags = 0;
 

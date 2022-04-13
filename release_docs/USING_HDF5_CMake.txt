@@ -29,25 +29,45 @@ Notes: This short instruction is written for users who want to quickly
             of using a ctest script for building and testing. See
             INSTALL_CMake.txt for more information.
 
+         4. See https://cmake.org/cmake/help/latest/command/find_package.html
+            for more information on the CMake "Config Mode Search Procedure".
 
 
 ========================================================================
 I. Preconditions
 ========================================================================
 
-   1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.10.x product requires a minimum CMake version
-      of 3.10.1.
+   1. We suggest you obtain the latest CMake for your platform from the Kitware
+      web site. The HDF5 1.13.x product requires a minimum CMake version
+      of 3.12. If you are using VS2019, the minimum version is 3.15.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows). If you are using a Windows platform, you can obtain a
-      pre-built Windows binary from The HDF Group's website at
-      www.hdfgroup.org.
+      Windows or the *.sh on Linux). You can obtain pre-built binaries
+      from The HDF Group's website at www.hdfgroup.org.
 
-   3. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5. On Windows:
-            HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.10.x/cmake
+   3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+      or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+      to the installed location of HDF5.
+         On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.13.x/
+         On unix:
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.13.x/
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.13.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/1.13.x/lib
+
+      If you are using filter plugin libraries, you will need to set the
+      HDF5_PLUGIN_PATH environment variable.
+         On Windows:
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.13.x/lib/plugin
+         On unix:
+            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/1.13.x/lib/plugin
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
@@ -99,12 +119,13 @@ These steps are described in more detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 12 2013
-            * Visual Studio 12 2013 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
             * Visual Studio 15 2017
             * Visual Studio 15 2017 Win64
+            * Visual Studio 16 2019
+            * ... in addition VS2019 will need to set the "-A" option,
+            * ... [Win32, x64, ARM, ARM64]
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -114,7 +135,7 @@ These steps are described in more detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 12 2013).
+           generator you wish to use (for example on Windows, Visual Studio 14 2015 Win64).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify locations of other programs.
@@ -132,7 +153,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
-           cmake -G "Visual Studio 12 2013" -DBUILD_TESTING:BOOL=ON ..
+           cmake -G "Visual Studio 14 2015 Win64" -DBUILD_TESTING:BOOL=ON ..
 
    3. Build HDF5 Applications
 
@@ -180,7 +201,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5MyApp C CXX)
 
 set (LIB_TYPE STATIC) # or SHARED

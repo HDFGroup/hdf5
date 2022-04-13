@@ -1,0 +1,1275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0072)https://gamma.hdfgroup.org/papers/HISS/030515.FileFormat/FileFormat.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>HDF5 File Format Discussion</title>
+
+  <meta name="author" content="Quincey Koziol">
+</head>
+
+<body text="#000000" bgcolor="#FFFFFF">
+
+<style type="text/css">
+OL.loweralpha { list-style-type: lower-alpha }
+OL.upperroman { list-style-type: upper-roman }
+</style>
+
+<style type="text/css">
+TD CAPTION EM { color: red }
+TD EM { color: blue }
+TABLE CAPTION STRONG { font-size: larger }
+</style>
+
+<center><h1>HDF5 File Format Discussion</h1></center>
+<center><h3>Quincey Koziol<br>
+            koziol@ncsa.uiuc.edu<br>
+            May 15, 2003
+</h3></center>
+
+<ol class="upperroman">
+
+<li><h3><u>Document's Audience:</u></h3>
+
+<ul>
+    <li>Current H5 library designers and knowledgable external developers.</li>
+</ul>
+
+</li><li><h3><u>Background Reading:</u></h3>
+
+<dl>
+    <dt><a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+        </dt><dd>This describes the current HDF5 file format.
+</dd></dl>
+
+</li><li><h3><u>Introduction:</u></h3>
+
+<dl>
+    <dt><strong>What is this document about?</strong></dt>
+        <dd>This document attempts to explain the HDF5 file format
+            specification with a few examples and describes some potential
+            improvements to the format specification.
+        </dd> <br>
+</dl>
+
+</li><li><h3><u>File Format Examples:</u></h3>
+
+<p>This section has several small programs and describes the format of a file
+created with each of them.
+</p>
+
+<p>Example program one - <em>Create an empty file</em>:
+</p><pre> <code>
+#include "hdf5.h"
+#include <assert.h>
+
+int main()
+{
+    hid_t fid;      /* File ID */
+    herr_t ret;     /* Generic return value */
+
+    /* Create the file */
+    fid=H5Fcreate("example1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid&gt;=0);
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    assert(ret&gt;=0);
+
+    return(0);
+}
+</assert.h></code> </pre>
+
+    <center>
+      <table border="" align="center" cellpadding="4" width="80%">
+	<caption align="top">
+	  <strong>Super Block</strong>
+	</caption>
+
+	<tbody><tr align="center">
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align="center">
+	  <td>\211</td>
+	  <td>'H'</td>
+	  <td>'D'</td>
+	  <td>'F'</td>
+	</tr>
+
+	<tr align="center">
+	  <td>\r</td>
+	  <td>\n</td>
+	  <td>\032</td>
+	  <td>\n</td>
+	</tr>
+
+	<tr align="center">
+	  <td>0</td>
+	  <td>0</td>
+	  <td>0</td>
+	  <td>0</td>
+	</tr>
+
+	<tr align="center">
+	  <td>0</td>
+	  <td>8</td>
+	  <td>8</td>
+	  <td>0</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="2">4</td>
+	  <td colspan="2">16</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">0x00000003</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">0</td>
+	</tr>
+
+	<tr align="center">
+          <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">?</td>
+	</tr>
+
+	<tr align="center">
+          <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">
+	      <table border="" width="100%">
+		<tbody><tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4"><br>928<br><br></td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">H5G_CACHED_STAB (1)</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">
+                      <table border="" width="100%">
+                        <tbody><tr align="center">
+                          <td colspan="4"><br>384<br><br></td>
+                        </tr>
+                        <tr align="center">
+                          <td colspan="4"><br>96<br><br></td>
+                        </tr>
+                      </tbody></table>
+                  </td>
+		</tr>
+	      </tbody></table>
+          </td>
+	</tr>
+      </tbody></table>
+    </center>
+<br>
+<pre> <code>
+%h5debug example1.h5
+
+Reading signature at address 0 (rel)
+File Super Block...
+File name:                                         example1.h5
+File access flags                                  0x00000000
+File open reference count:                         1
+Address of super block:                            0 (abs)
+Size of user block:                                0 bytes
+Super block version number:                        0
+Free list version number:                          0
+Root group symbol table entry version number:      0
+Shared header version number:                      0
+Size of file offsets (haddr_t type):               8 bytes
+Size of file lengths (hsize_t type):               8 bytes
+Symbol table leaf node 1/2 rank:                   4
+Symbol table internal node 1/2 rank:               16
+File consistency flags:                            0x00000003
+Base address:                                      0 (abs)
+Free list address:                                 UNDEF (rel)
+Address of driver information block:               UNDEF (rel)
+Root group symbol table entry:
+   Name offset into private heap:                  0
+   Object header address:                          928
+   Dirty:                                          Yes
+   Cache info type:                                Symbol Table
+   Cached information:
+      B-tree address:                              384
+      Heap address:                                96
+</code> </pre>
+
+
+    <center>
+      <table border="" cellpadding="4" width="80%">
+	<caption align="top">
+	  <strong>Root Group Object Header</strong>
+	</caption>
+
+	<tbody><tr align="center">
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="1" width="25%">1</td>
+	  <td colspan="1" width="25%">0</td>
+	  <td colspan="2" width="50%">2</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">1</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">32</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="2">0x0011</td>
+	  <td colspan="2">16</td>
+	</tr>
+	<tr align="center">
+	  <td>0x01</td>
+	  <td colspan="3">0</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">
+              <table border="" width="100%">
+                <tbody><tr align="center">
+                  <td colspan="4"><br>384<br><br></td>
+                </tr>
+                <tr align="center">
+                  <td colspan="4"><br>96<br><br></td>
+                </tr>
+              </tbody></table>
+          </td>
+	</tr>
+	<tr align="center">
+	  <td colspan="2">0</td>
+	  <td colspan="2">0</td>
+	</tr>
+	<tr align="center">
+	  <td>0x00</td>
+	  <td colspan="3">0</td>
+	</tr>
+      </tbody></table>
+    </center>
+<br>
+<pre> <code>
+%h5debug example1.h5 928
+
+New address: 928
+Reading signature at address 928 (rel)
+Object Header...
+Dirty:                                             0
+Version:                                           1
+Header size (in bytes):                            16
+Number of links:                                   1
+Number of messages (allocated):                    2 (32)
+Number of chunks (allocated):                      1 (8)
+Chunk 0...
+   Dirty:                                          0
+   Address:                                        944
+   Size in bytes:                                  32
+Message 0...
+   Message ID (sequence number):                   0x0011 stab(0)
+   Shared message:                                 No
+   Constant:                                       Yes
+   Raw size in obj header:                         16 bytes
+   Chunk number:                                   0
+   Message Information:
+      B-tree address:                              384
+      Name heap address:                           96
+Message 1...
+   Message ID (sequence number):                   0x0000 null(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         0 bytes
+   Chunk number:                                   0
+   Message Information:
+      <no info="" for="" this="" message="">
+</no></code> </pre>
+
+	    <center>
+	      <table border="" cellpadding="4" width="80%">
+		<caption align="top">
+		  <strong>Root Group Local Heap</strong>
+		</caption>
+
+		<tbody><tr align="center">
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		</tr>
+
+		<tr align="center">
+                  <td>'H'</td>
+                  <td>'E'</td>
+                  <td>'A'</td>
+                  <td>'P'</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">256</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">8</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">128</td>
+		</tr>
+	      </tbody></table>
+	    </center>
+<br>
+
+<pre> <code>
+%h5debug example1.h5 96
+
+New address: 96
+Reading signature at address 96 (rel)
+Local Heap...
+Dirty:                                             0
+Header size (in bytes):                            32
+Address of heap data:                              128
+Data bytes allocated on disk:                      256
+Data bytes allocated in core:                      256
+Free Blocks (offset, size):
+   Block #0:                                        8,      248
+Percent of heap used:                              3.12%
+Data follows (`__' indicates free region)...
+     0: 00 00 00 00 00 00 00 00  __ __ __ __ __ __ __ __ ........
+    16: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    32: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    48: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    64: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    80: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    96: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   112: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   128: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   144: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   160: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   176: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   192: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   208: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   224: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+   240: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+
+</code> </pre>
+
+	    <center>
+	      <table border="" cellpadding="4" width="80%">
+		<caption align="top">
+		  <strong>Root Group B-tree</strong>
+		</caption>
+
+		<tbody><tr align="center">
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+
+		</tr><tr align="center">
+                  <td>'T'</td>
+                  <td>'R'</td>
+                  <td>'E'</td>
+                  <td>'E'</td>
+
+		</tr><tr align="center">
+		  <td>0</td>
+		  <td>0</td>
+		  <td colspan="2">0</td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+
+	      </tr></tbody></table>
+	    </center>
+<br>
+<pre> <code>
+%h5debug example1.h5 384 96
+
+New address: 384
+Reading signature at address 384 (rel)
+Tree type ID:                                      H5B_SNODE_ID
+Size of node:                                      544
+Size of raw (disk) key:                            8
+Dirty flag:                                        False
+Number of initial dirty children:                  0
+Level:                                             0
+Address of left sibling:                           UNDEF
+Address of right sibling:                          UNDEF
+Number of children (max):                          0 (32)
+
+</code> </pre>
+
+<p></p>
+
+<p>Example program two - <em>Create a file with a single dataset in it</em>:
+</p><pre> <code>
+#include "hdf5.h"
+#include <assert.h>
+
+int main()
+{
+    hid_t fid;      /* File ID */
+    hid_t sid;      /* Dataspace ID */
+    hid_t did;      /* Dataset ID */
+    herr_t ret;     /* Generic return value */
+
+    /* Create the file */
+    fid=H5Fcreate("example2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid&gt;=0);
+
+    /* Create a scalar dataspace for the dataset */
+    sid=H5Screate(H5S_SCALAR);
+    assert(sid&gt;=0);
+
+    /* Create a trivial dataset */
+    did=H5Dcreate(fid, "Dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    assert(did&gt;=0);
+
+    /* Close the dataset */
+    ret=H5Dclose(did);
+    assert(ret&gt;=0);
+
+    /* Close the dataspace */
+    ret=H5Sclose(sid);
+    assert(ret&gt;=0);
+
+    /* Close the file */
+    ret=H5Fclose(fid);
+    assert(ret&gt;=0);
+
+    return(0);
+}
+</assert.h></code> </pre>
+
+    <center>
+      <table border="" align="center" cellpadding="4" width="80%">
+	<caption align="top">
+	  <strong>Super Block</strong>
+	</caption>
+
+	<tbody><tr align="center">
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align="center">
+	  <td>\211</td>
+	  <td>'H'</td>
+	  <td>'D'</td>
+	  <td>'F'</td>
+	</tr>
+
+	<tr align="center">
+	  <td>\r</td>
+	  <td>\n</td>
+	  <td>\032</td>
+	  <td>\n</td>
+	</tr>
+
+	<tr align="center">
+	  <td>0</td>
+	  <td>0</td>
+	  <td>0</td>
+	  <td>0</td>
+	</tr>
+
+	<tr align="center">
+	  <td>0</td>
+	  <td>8</td>
+	  <td>8</td>
+	  <td>0</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="2">4</td>
+	  <td colspan="2">16</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">0x00000003</td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">0</td>
+	</tr>
+
+	<tr align="center">
+          <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">?</td>
+	</tr>
+
+	<tr align="center">
+          <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="4">
+	      <table border="" width="100%">
+		<tbody><tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4"><br>928<br><br></td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">H5G_CACHED_STAB (1)</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">
+                      <table border="" width="100%">
+                        <tbody><tr align="center">
+                          <td colspan="4"><br>384<br><br></td>
+                        </tr>
+                        <tr align="center">
+                          <td colspan="4"><br>96<br><br></td>
+                        </tr>
+                      </tbody></table>
+                  </td>
+		</tr>
+	      </tbody></table>
+          </td>
+	</tr>
+      </tbody></table>
+    </center>
+<br>
+<pre> <code>
+%h5debug example2.h5
+
+Reading signature at address 0 (rel)
+File Super Block...
+File name:                                         example2.h5
+File access flags                                  0x00000000
+File open reference count:                         1
+Address of super block:                            0 (abs)
+Size of user block:                                0 bytes
+Super block version number:                        0
+Free list version number:                          0
+Root group symbol table entry version number:      0
+Shared header version number:                      0
+Size of file offsets (haddr_t type):               8 bytes
+Size of file lengths (hsize_t type):               8 bytes
+Symbol table leaf node 1/2 rank:                   4
+Symbol table internal node 1/2 rank:               16
+File consistency flags:                            0x00000003
+Base address:                                      0 (abs)
+Free list address:                                 UNDEF (rel)
+Address of driver information block:               UNDEF (rel)
+Root group symbol table entry:
+   Name offset into private heap:                  0
+   Object header address:                          928
+   Dirty:                                          Yes
+   Cache info type:                                Symbol Table
+   Cached entry information:
+      B-tree address:                              384
+      Heap address:                                96
+</code> </pre>
+
+    <center>
+      <table border="" cellpadding="4" width="80%">
+	<caption align="top">
+	  <strong>Root Group Object Header</strong>
+	</caption>
+
+	<tbody><tr align="center">
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="1" width="25%">1</td>
+	  <td colspan="1" width="25%">0</td>
+	  <td colspan="2" width="50%">2</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">1</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">32</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="2">0x0011</td>
+	  <td colspan="2">16</td>
+	</tr>
+	<tr align="center">
+	  <td>0x01</td>
+	  <td colspan="3">0</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4">
+              <table border="" width="100%">
+                <tbody><tr align="center">
+                  <td colspan="4"><br>384<br><br></td>
+                </tr>
+                <tr align="center">
+                  <td colspan="4"><br>96<br><br></td>
+                </tr>
+              </tbody></table>
+          </td>
+	</tr>
+	<tr align="center">
+	  <td colspan="2">0</td>
+	  <td colspan="2">0</td>
+	</tr>
+	<tr align="center">
+	  <td>0x00</td>
+	  <td colspan="3">0</td>
+	</tr>
+      </tbody></table>
+    </center>
+<br>
+<pre> <code>
+%h5debug example2.h5 928
+
+New address: 928
+Reading signature at address 928 (rel)
+Object Header...
+Dirty:                                             0
+Version:                                           1
+Header size (in bytes):                            16
+Number of links:                                   1
+Number of messages (allocated):                    2 (32)
+Number of chunks (allocated):                      1 (8)
+Chunk 0...
+   Dirty:                                          0
+   Address:                                        944
+   Size in bytes:                                  32
+Message 0...
+   Message ID:                                     0x0011 stab(0)
+   Shared message:                                 No
+   Constant:                                       Yes
+   Raw size in obj header:                         16 bytes
+   Chunk number:                                   0
+   Message Information:
+      B-tree address:                              384
+      Name heap address:                           96
+Message 1...
+   Message ID:                                     0x0000 null(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         0 bytes
+   Chunk number:                                   0
+   Message Information:
+      <no info="" for="" this="" message="">
+</no></code> </pre>
+
+	    <center>
+	      <table border="" cellpadding="4" width="80%">
+		<caption align="top">
+		  <strong>Root Group Local Heap</strong>
+		</caption>
+
+		<tbody><tr align="center">
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		</tr>
+
+		<tr align="center">
+                  <td>'H'</td>
+                  <td>'E'</td>
+                  <td>'A'</td>
+                  <td>'P'</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">0</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">256</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">16</td>
+		</tr>
+
+		<tr align="center">
+		  <td colspan="4">128</td>
+		</tr>
+	      </tbody></table>
+	    </center>
+<br>
+
+<pre> <code>
+%h5debug example2.h5 96
+
+New address: 96
+Reading signature at address 96 (rel)
+Local Heap...
+Dirty:                                             0
+Header size (in bytes):                            32
+Address of heap data:                              128
+Data bytes allocated on disk:                      256
+Data bytes allocated in core:                      256
+Free Blocks (offset, size):
+   Block #0:                                       16,      240
+Percent of heap used:                              6.25%
+Data follows (`__' indicates free region)...
+      0: 00 00 00 00 00 00 00 00  44 61 74 61 73 65 74 00 ........Dataset.
+     16: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+     32: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+     48: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+     64: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+     80: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+     96: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    112: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    128: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    144: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    160: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    176: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    192: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    208: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    224: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+    240: __ __ __ __ __ __ __ __  __ __ __ __ __ __ __ __
+</code> </pre>
+
+	    <center>
+	      <table border="" cellpadding="4" width="80%">
+		<caption align="top">
+		  <strong>Root Group B-tree</strong>
+		</caption>
+
+		<tbody><tr align="center">
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+
+		</tr><tr align="center">
+                  <td>'T'</td>
+                  <td>'R'</td>
+                  <td>'E'</td>
+                  <td>'E'</td>
+
+		</tr><tr align="center">
+		  <td>0</td>
+		  <td>0</td>
+		  <td colspan="2">1</td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>0xffffffffffffffff<br><br></td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>0<br><br></td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>1248<br><br></td>
+
+		</tr><tr align="center">
+		  <td colspan="4"><br>8<br><br></td>
+
+	      </tr></tbody></table>
+	    </center>
+<br>
+<pre> <code>
+%h5debug example2.h5 384 96
+
+New address: 384
+Reading signature at address 384 (rel)
+Tree type ID:                                      H5B_SNODE_ID
+Size of node:                                      544
+Size of raw (disk) key:                            8
+Dirty flag:                                        False
+Number of initial dirty children:                  0
+Level:                                             0
+Address of left sibling:                           UNDEF
+Address of right sibling:                          UNDEF
+Number of children (max):                          1 (32)
+Child 0...
+   Address:                                        1248
+   Left Key:
+      Heap offset:                                 0
+      Name :
+   Right Key:
+      Heap offset:                                 8
+      Name :                                       Dataset
+</code> </pre>
+
+	    <center>
+	      <table border="" cellpadding="4" width="80%">
+		<caption align="top">
+		  <strong>Root Group B-tree Symbol Table Node</strong>
+		</caption>
+
+		<tbody><tr align="center">
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+		  <th width="25%">byte</th>
+
+		</tr><tr align="center">
+                  <td>'S'</td>
+                  <td>'N'</td>
+                  <td>'O'</td>
+                  <td>'D'</td>
+
+		</tr><tr align="center">
+		  <td>1</td>
+		  <td>0</td>
+		  <td colspan="2">1</td>
+
+		</tr><tr align="center">
+		  <td colspan="4">
+                      <table border="" width="100%">
+                        <tbody><tr align="center">
+                          <td colspan="4">8</td>
+                        </tr>
+
+                        <tr align="center">
+                          <td colspan="4"><br>976<br><br></td>
+                        </tr>
+
+                        <tr align="center">
+                          <td colspan="4">0</td>
+                        </tr>
+
+                        <tr align="center">
+                          <td colspan="4">0</td>
+                        </tr>
+
+                        <tr align="center">
+                          <td colspan="4"><br><br>0<br><br><br></td>
+                        </tr>
+                      </tbody></table>
+                  </td>
+
+	      </tr></tbody></table>
+	    </center>
+<br>
+<pre> <code>
+%h5debug example2.h5 1248 96
+
+New address: 1248
+Reading signature at address 1248 (rel)
+Symbol Table Node...
+Dirty:                                             No
+Size of Node (in bytes):                           328
+Number of Symbols:                                 1 of 8
+Symbol 0:
+   Name:                                           `Dataset'
+   Name offset into private heap:                  8
+   Object header address:                          976
+   Dirty:                                          No
+   Cache info type:                                Nothing Cached
+</code> </pre>
+
+    <center>
+      <table border="" cellpadding="4" width="90%">
+	<caption align="top">
+	  <strong>'/Dataset' Object Header</strong>
+	</caption>
+
+	<tbody><tr align="center">
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align="center">
+	  <td colspan="1"><em>Version:</em> 1</td>
+	  <td colspan="1"><em>Reserved:</em> 0</td>
+	  <td colspan="2"><em>Number of Header Messages:</em> 6</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4"><em>Object Reference Count:</em> 1</td>
+	</tr>
+	<tr align="center">
+	  <td colspan="4"><em>Total Object Header Size:</em> 256</td>
+	</tr>
+<!-- Fill Value Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top" color="#80FFFF">
+              <em>Fill Value Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+            <!-- Object Header Message Type -->
+              <td colspan="2"><em>Message Type:</em> 0x0005</td>
+            <!-- Object Header Message Length -->
+              <td colspan="2"><em>Message Data Size:</em> 8</td>
+            </tr>
+            <tr align="center">
+            <!-- Object Header Message Flags -->
+              <td colspan="1"><em>Flags:</em> 0x01</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Version -->
+              <td colspan="1"><em>Version:</em> 1</td>
+            <!-- Space Allocation Time -->
+              <td colspan="1"><em>Space Allocation Time:</em> 2 (Late)</td>
+            <!-- Fill Value Writing Time -->
+              <td colspan="1"><em>Fill Value Writing Time:</em> 0 (At allocation)</td>
+            <!-- Fill Value Defined -->
+              <td colspan="1"><em>Fill Value Defined:</em> 0 (Undefined)</td>
+            </tr>
+            <tr align="center">
+            <!-- Fill Value Datatype Size -->
+              <td colspan="4"><em>Fill Value Datatype Size:</em> 0 (Use dataset's datatype for fill-value datatype)</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+<!-- Datatype Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top">
+              <em>Datatype Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+            <!-- Object Header Message Type -->
+              <td colspan="2"><em>Message Type:</em> 0x0003</td>
+            <!-- Object Header Message Length -->
+              <td colspan="2"><em>Message Data Size:</em> 16</td>
+            </tr>
+            <tr align="center">
+            <!-- Object Header Message Flags -->
+              <td colspan="1"><em>Flags:</em> 0x01</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Type Class and Version -->
+              <td colspan="1">
+              <table border="" width="100%">
+                <tbody><tr align="center">
+                  <td width="50%"><em>Version:</em> 0x1</td>
+                  <td><em>Class:</em> 0x0 (Fixed-Point)</td>
+                </tr>
+              </tbody></table>
+              </td>
+            <!-- Class Bit Field -->
+              <td colspan="3"><em>Fixed-Point Bit-Field:</em> 0x08 (Little-endian, No padding, Signed)</td>
+            </tr>
+            <tr align="center">
+            <!-- Type Size (in bytes) -->
+              <td colspan="4"><em>Size:</em> 4</td>
+            </tr>
+            <tr align="center">
+            <!-- Bit Offset -->
+              <td colspan="2"><em>Bit Offset:</em> 0</td>
+            <!-- Bit Precision -->
+              <td colspan="2"><em>Bit Precision:</em> 32</td>
+            </tr>
+            <tr align="center">
+            <!-- Message alignment filler -->
+              <td colspan="4"><em>Message Alignment Filler:</em> -</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+<!-- Dataspace Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top">
+              <em>Dataspace Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+            <!-- Object Header Message Type -->
+              <td colspan="2"><em>Message Type:</em> 0x0001</td>
+            <!-- Object Header Message Length -->
+              <td colspan="2"><em>Message Data Size:</em> 8</td>
+            </tr>
+            <tr align="center">
+            <!-- Object Header Message Flags -->
+              <td colspan="1"><em>Flags:</em> 0x00</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Version -->
+              <td colspan="1"><em>Version:</em> 1</td>
+            <!-- Rank -->
+              <td colspan="1"><em>Rank:</em> 0 (Scalar)</td>
+            <!-- Flags -->
+              <td colspan="1"><em>Flags:</em> 0x00 (No maximum dimensions, no permutation information)</td>
+            <!-- Reserved -->
+              <td colspan="1"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Reserved -->
+              <td colspan="4"><em>Reserved:</em> 0</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+<!-- Layout Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top">
+              <em>Layout Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+            <!-- Object Header Message Type -->
+              <td colspan="2"><em>Message Type:</em> 0x0008</td>
+            <!-- Object Header Message Length -->
+              <td colspan="2"><em>Message Data Size:</em> 24</td>
+            </tr>
+            <tr align="center">
+            <!-- Object Header Message Flags -->
+              <td colspan="1"><em>Flags:</em> 0x00</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Version -->
+              <td colspan="1"><em>Version:</em> 1</td>
+            <!-- Rank -->
+              <td colspan="1"><em>Rank:</em> 1 (Dataspace rank+1)</td>
+            <!-- Class -->
+              <td colspan="1"><em>Class:</em> 1 (Contiguous)</td>
+            <!-- Reserved -->
+              <td colspan="1"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Reserved -->
+              <td colspan="4"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Address -->
+              <td colspan="4"><br><em>Address:</em> 0xffffffffffffffff (Undefined)<br><br></td>
+            </tr>
+            <tr align="center">
+            <!-- Layout Dimensions -->
+              <td colspan="4"><em>Dimension 0 Size:</em> 4 (Datatype size)</td>
+            </tr>
+            <tr align="center">
+            <!-- Message alignment filler -->
+              <td colspan="4"><em>Message Alignment Filler:</em> -</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+<!-- Modification Date & Time Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top">
+              <em>Modification Date &amp; Time Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+            <!-- Object Header Message Type -->
+              <td colspan="2"><em>Message Type:</em> 0x0012</td>
+            <!-- Object Header Message Length -->
+              <td colspan="2"><em>Message Data Size:</em> 8</td>
+            </tr>
+            <tr align="center">
+            <!-- Object Header Message Flags -->
+              <td colspan="1"><em>Flags:</em> 0x00</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Version -->
+              <td colspan="1"><em>Version:</em> 1</td>
+            <!-- Reserved -->
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+            <tr align="center">
+            <!-- Modification time -->
+              <td colspan="4"><em>Seconds Since Epoch:</em> 1052401700 (2003-05-08 08:48:20 CDT)</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+<!-- Null Header Message -->
+        <tr align="center">
+        <td colspan="4">
+        <table border="" width="100%">
+            <caption align="top">
+              <em>Null Header Message</em>
+            </caption>
+            <tbody><tr align="center">
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+              <th width="25%"></th>
+            </tr>
+
+            <tr align="center">
+              <td colspan="2"><em>Message Type:</em> 0x0000</td>
+              <td colspan="2"><em>Message Data Size:</em> 144</td>
+            </tr>
+            <tr align="center">
+              <td colspan="1"><em>Flags:</em> 0x00</td>
+              <td colspan="3"><em>Reserved:</em> 0</td>
+            </tr>
+        </tbody></table>
+        </td>
+        </tr>
+      </tbody></table>
+    </center>
+<br>
+<pre> <code>
+%h5debug example2.h5 976
+
+New address: 976
+Reading signature at address 976 (rel)
+Object Header...
+Dirty:                                             0
+Version:                                           1
+Header size (in bytes):                            16
+Number of links:                                   1
+Number of messages (allocated):                    6 (32)
+Number of chunks (allocated):                      1 (8)
+Chunk 0...
+   Dirty:                                          0
+   Address:                                        992
+   Size in bytes:                                  256
+Message 0...
+   Message ID (sequence number):                   0x0005 `fill_new' (0)
+   Shared:                                         No
+   Constant:                                       Yes
+   Raw size in obj header:                         8 bytes
+   Chunk number:                                   0
+   Message Information:
+      Version:                                     1
+      Space Allocation Time:                       Late
+      Fill Time:                                   On Allocation
+      Fill Value Defined:                          Undefined
+      Size:                                        0
+      Data type:                                   <dataset type="">
+Message 1...
+   Message ID (sequence number):                   0x0003 data_type(0)
+   Shared message:                                 No
+   Constant:                                       Yes
+   Raw size in obj header:                         16 bytes
+   Chunk number:                                   0
+   Message Information:
+      Type class:                                  integer
+      Size:                                        4 bytes
+      Byte order:                                  little endian
+      Precision:                                   32 bits
+      Offset:                                      0 bits
+      Low pad type:                                zero
+      High pad type:                               zero
+      Sign scheme:                                 2's comp
+Message 2...
+   Message ID (sequence number):                   0x0001 simple_dspace(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         8 bytes
+   Chunk number:                                   0
+   Message Information:
+      Rank:                                        0
+Message 3...
+   Message ID (sequence number):                   0x0008 layout(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         24 bytes
+   Chunk number:                                   0
+   Message Information:
+      Data address:                                UNDEF
+      Number of dimensions:                        1
+      Size:                                        {4}
+Message 4...
+   Message ID (sequence number):                   0x0012 mtime_new(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         8 bytes
+   Chunk number:                                   0
+   Message Information:
+      Time:                                        2003-03-05 14:52:00 CST
+Message 5...
+   Message ID (sequence number):                   0x0000 null(0)
+   Shared message:                                 No
+   Constant:                                       No
+   Raw size in obj header:                         144 bytes
+   Chunk number:                                   0
+   Message Information:
+      <no info="" for="" this="" message="">
+</no></dataset></code> </pre>
+
+<p></p>
+
+</li></ol>
+
+
+
+</body></html>

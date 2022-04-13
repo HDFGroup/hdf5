@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -64,16 +64,16 @@ CONTAINS
 !  gcpl_id 	 - Property list for group creation
 !  gapl_id 	 - Property list for group access
 !
-! AUTHOR	
+! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
 !
-! HISTORY 	
+! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
 !  port).  March 5, 2001
 !
-!  Added additional optional paramaters in 1.8
+!  Added additional optional parameters in 1.8
 !  MSB - February 27, 2008
 !
 ! SOURCE
@@ -491,8 +491,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
 
-    INTEGER :: current_namelen ! Lenghth of the current_name string
-    INTEGER :: new_namelen     ! Lenghth of the new_name string
+    INTEGER :: current_namelen ! Length of the current_name string
+    INTEGER :: new_namelen     ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5glink_c(loc_id, link_type, current_name, &
@@ -524,7 +524,7 @@ CONTAINS
 ! PURPOSE
 !  Creates a link of the specified type from new_name
 !  to current_name. current_name and new_name are interpreted
-!  releative to current and new location identifiers.
+!  relative to current and new location identifiers.
 !
 ! INPUTS
 !  cur_loc_id 	 - location identifier
@@ -559,8 +559,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
 !*****
 
-    INTEGER :: cur_namelen ! Lenghth of the current_name string
-    INTEGER :: new_namelen ! Lenghth of the new_name string
+    INTEGER :: cur_namelen ! Length of the current_name string
+    INTEGER :: new_namelen ! Length of the new_name string
 
     INTERFACE
        INTEGER FUNCTION h5glink2_c(cur_loc_id, cur_name, cur_namelen, &
@@ -617,7 +617,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of an object
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the name character string
+    INTEGER :: namelen ! Length of the name character string
 
     INTERFACE
        INTEGER FUNCTION h5gunlink_c(loc_id, name, namelen) BIND(C,NAME='h5gunlink_c')
@@ -666,9 +666,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: new_name ! New name of an object
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
 !*****
-    INTEGER :: namelen         ! Lenghth of the current_name string
-    INTEGER :: new_namelen     ! Lenghth of the new_name string
-    
+    INTEGER :: namelen         ! Length of the current_name string
+    INTEGER :: new_namelen     ! Length of the new_name string
+
     INTERFACE
        INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen) BIND(C,NAME='h5gmove_c')
          IMPORT :: C_CHAR
@@ -680,7 +680,7 @@ CONTAINS
          INTEGER :: new_namelen
        END FUNCTION h5gmove_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     new_namelen = LEN(new_name)
     hdferr = h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
@@ -715,8 +715,8 @@ CONTAINS
     INTEGER, INTENT(OUT)         :: hdferr      ! Error code
 !*****
     INTEGER :: src_namelen         ! Length of the current_name string
-    INTEGER :: dst_namelen         ! Lenghth of the new_name string
-    
+    INTEGER :: dst_namelen         ! Length of the new_name string
+
     INTERFACE
        INTEGER FUNCTION h5gmove2_c(src_loc_id, src_name, src_namelen, &
             dst_loc_id, dst_name, dst_namelen) BIND(C,NAME='h5gmove2_c')
@@ -730,7 +730,7 @@ CONTAINS
          INTEGER :: dst_namelen
        END FUNCTION h5gmove2_c
     END INTERFACE
-    
+
     src_namelen = LEN(src_name)
     dst_namelen = LEN(dst_name)
     hdferr = h5gmove2_c(src_loc_id, src_name, src_namelen, dst_loc_id, dst_name, dst_namelen)
@@ -776,8 +776,8 @@ CONTAINS
                                            ! points to
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
-    
+    INTEGER :: namelen ! Length of the current_name string
+
     INTERFACE
        INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer) BIND(C,NAME='h5gget_linkval_c')
          IMPORT :: C_CHAR, SIZE_T
@@ -789,7 +789,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buffer
        END FUNCTION h5gget_linkval_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     hdferr = h5gget_linkval_c(loc_id, name, namelen, size, buffer)
   END SUBROUTINE h5gget_linkval_f
@@ -827,9 +827,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: comment ! New name of an object
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
-    INTEGER :: commentlen     ! Lenghth of the comment string
-    
+    INTEGER :: namelen ! Length of the current_name string
+    INTEGER :: commentlen     ! Length of the comment string
+
     INTERFACE
        INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
             comment, commentlen) BIND(C,NAME='h5gset_comment_c')
@@ -842,7 +842,7 @@ CONTAINS
          INTEGER :: commentlen
        END FUNCTION h5gset_comment_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     commentlen = LEN(comment)
     hdferr = h5gset_comment_c(loc_id, name, namelen, comment, commentlen)
@@ -1004,7 +1004,7 @@ CONTAINS
 ! INPUTS
 !  group_id 	 - Group identifier
 !
-! OUTPUTS  
+! OUTPUTS
 !  storage_type  - Type of storage for links in group
 !                    H5G_STORAGE_TYPE_COMPACT: Compact storage
 !                    H5G_STORAGE_TYPE_DENSE: Indexed storage
@@ -1024,7 +1024,7 @@ CONTAINS
 !
 ! HISTORY
 !
-!  - Added 'mounted' paramater
+!  - Added 'mounted' parameter
 !    M. Scot Breitenfeld
 !    July 16, 2008
 !
@@ -1104,7 +1104,7 @@ CONTAINS
 !  February 18, 2008
 !
 ! HISTORY
-!  Added 'mounted' paramater
+!  Added 'mounted' parameter
 !  M. Scot Breitenfeld
 !  July 16, 2008
 !
@@ -1206,7 +1206,7 @@ CONTAINS
 !  February 18, 2008
 !
 ! HISTORY
-!  Added 'mounted' paramater
+!  Added 'mounted' parameter
 !  M. Scot Breitenfeld
 !  July 16, 2008
 ! SOURCE

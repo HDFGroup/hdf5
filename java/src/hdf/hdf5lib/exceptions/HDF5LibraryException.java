@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,7 +30,9 @@ import hdf.hdf5lib.HDF5Constants;
 
 @SuppressWarnings("serial")
 public class HDF5LibraryException extends HDF5Exception {
+    /** major error number of the first error on the HDF5 library error stack. */
     private final long majorErrorNumber;
+    /** minor error number of the first error on the HDF5 library error stack. */
     private final long minorErrorNumber;
 
     /**
@@ -112,7 +114,7 @@ public class HDF5LibraryException extends HDF5Exception {
             return "special zero no error";
         }
         else if (err_code == HDF5Constants.H5E_UNINITIALIZED) {
-            return "information is unitialized";
+            return "information is uninitialized";
         }
         else if (err_code == HDF5Constants.H5E_UNSUPPORTED) {
             return "feature is unsupported";
@@ -201,14 +203,14 @@ public class HDF5LibraryException extends HDF5Exception {
         else if (err_code == HDF5Constants.H5E_CANTRELEASE) {
             return "Can't release object";
         }
-        else if (err_code == HDF5Constants.H5E_BADATOM) {
-            return "Can't find atom information";
+        else if (err_code == HDF5Constants.H5E_BADID) {
+            return "Can't find ID information";
         }
         else if (err_code == HDF5Constants.H5E_BADGROUP) {
             return "Can't find group information";
         }
         else if (err_code == HDF5Constants.H5E_CANTREGISTER) {
-            return "Can't register new atom";
+            return "Can't register new ID";
         }
         else if (err_code == HDF5Constants.H5E_CANTINC) {
             return "Can't increment reference count";

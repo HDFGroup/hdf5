@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_JAVA C Java)
 
 set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR};${HDF_RESOURCES_EXT_DIR}")
@@ -9,10 +9,14 @@ find_package (Java)
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_DIR}/UseJava.cmake)
 
-message (STATUS "JAVA: JAVA_HOME=$ENV{JAVA_HOME} JAVA_ROOT=$ENV{JAVA_ROOT}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "JAVA: JAVA_HOME=$ENV{JAVA_HOME} JAVA_ROOT=$ENV{JAVA_ROOT}")
+endif ()
 find_package (JNI)
-message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
-message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "JNI_LIBRARIES=${JNI_LIBRARIES}")
+  message (VERBOSE "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
+endif ()
 
 
 if (WIN32)

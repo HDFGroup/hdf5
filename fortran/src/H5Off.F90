@@ -19,7 +19,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -44,7 +44,43 @@ MODULE H5O
   USE H5GLOBAL
   IMPLICIT NONE
 
-!****t* H5T (F03)/h5o_info_t
+!****t* H5O (F03)/h5o_info_t
+!
+! Fortran2003 Derived Type:
+!
+  TYPE, BIND(C) :: h5o_info_t
+     INTEGER(C_LONG)     :: fileno     ! File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token      ! Token for object in file
+     INTEGER(C_INT)      :: type       ! Basic object type (group, dataset, etc.)
+     INTEGER             :: rc         ! Reference count of object
+
+     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
+     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array
+     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran
+     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+  END TYPE h5o_info_t
+
+! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
+! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
+! Whereas, this derived type does not.
+
+  TYPE, BIND(C) :: c_h5o_info_t
+     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token   ! Token for object in file
+     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
+     INTEGER(C_INT)   :: rc         ! Reference count of object
+
+     INTEGER(KIND=TIME_T) :: atime ! Access time
+     INTEGER(KIND=TIME_T) :: mtime ! Modify time
+     INTEGER(KIND=TIME_T) :: ctime ! Create time
+     INTEGER(KIND=TIME_T) :: btime ! Birth time
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+  END TYPE c_h5o_info_t
+
+!****t* H5O (F03)/h5o_native_info_t
 !
 ! Fortran2003 Derived Type:
 !
@@ -56,16 +92,16 @@ MODULE H5O
   END TYPE space_t
 
   TYPE, BIND(C) :: mesg_t
-     INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header 
+     INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header
      INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
   END TYPE mesg_t
-  
+
   TYPE, BIND(C) :: hdr_t
      INTEGER :: version ! Version number of header format in file
      INTEGER :: nmesgs  ! Number of object header messages
      INTEGER :: nchunks ! Number of object header chunks
      INTEGER :: flags   ! Object header status flags
-     TYPE(space_t)  :: space   
+     TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
@@ -74,7 +110,7 @@ MODULE H5O
      INTEGER(C_INT) :: nmesgs  ! Number of object header messages
      INTEGER(C_INT) :: nchunks ! Number of object header chunks
      INTEGER(C_INT) :: flags   ! Object header status flags
-     TYPE(space_t)  :: space   
+     TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
@@ -88,46 +124,17 @@ MODULE H5O
      TYPE(H5_ih_info_t) :: obj  ! v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
      TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
-  
-  TYPE, BIND(C) :: h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER          :: rc         ! Reference count of object
 
-     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
-     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array    
-     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran 
-     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
-
+  TYPE, BIND(C) :: h5o_native_info_t
      TYPE(hdr_t) :: hdr
-
      TYPE(meta_size_t) :: meta_size
-  END TYPE h5o_info_t
+  END TYPE h5o_native_info_t
 
-! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
-! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
-! Whereas, this derived type does not.
-
-  TYPE, BIND(C) :: c_h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER(C_INT)   :: rc         ! Reference count of object
-
-     INTEGER(KIND=TIME_T) :: atime ! Access time
-     INTEGER(KIND=TIME_T) :: mtime ! modify time
-     INTEGER(KIND=TIME_T) :: ctime ! create time
-     INTEGER(KIND=TIME_T) :: btime ! Access time
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
-
+! C interoperable structure for h5o_native_info_t.
+  TYPE, BIND(C) :: c_h5o_native_info_t
      TYPE(c_hdr_t) :: hdr
-
      TYPE(meta_size_t) :: meta_size
-  END TYPE c_h5o_info_t
+  END TYPE c_h5o_native_info_t
 
 !*****
 
@@ -292,55 +299,55 @@ CONTAINS
   END SUBROUTINE h5oclose_f
 
 !
-!****s* H5O/h5open_by_addr_f
-! NAME		
-!  h5oopen_by_addr_f 
+!****s* H5O/h5oopen_by_token_f
+! NAME
+!  h5oopen_by_token_f
 !
 ! PURPOSE
-!  Opens an object using its address within an HDF5 file. 
+!  Opens an object using its token within an HDF5 file.
 !
-! Inputs:  
+! Inputs:
 !  loc_id - File or group identifier.
-!  addr   - Object’s address in the file.
+!  token  - Object’s token in the file.
 !
 ! Outputs:
 !  obj_id - Object identifier for the opened object.
 !  hdferr - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  September 14, 2009
-! 
+!
 ! Fortran90 Interface:
-  SUBROUTINE h5oopen_by_addr_f(loc_id, addr, obj_id, hdferr)
+  SUBROUTINE h5oopen_by_token_f(loc_id, token, obj_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-    INTEGER(HADDR_T), INTENT(IN)  :: addr
-    INTEGER(HID_T)  , INTENT(OUT) :: obj_id
-    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)        :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN)     :: token
+    INTEGER(HID_T)  , INTENT(OUT)       :: obj_id
+    INTEGER         , INTENT(OUT)       :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_addr_c(loc_id, addr, obj_id) BIND(C,NAME='h5oopen_by_addr_c')
-         IMPORT :: HID_T, HADDR_T
+       INTEGER FUNCTION h5oopen_by_token_c(loc_id, token, obj_id) BIND(C,NAME='h5oopen_by_token_c')
+         IMPORT :: HID_T, H5O_TOKEN_T_F
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         INTEGER(HADDR_T), INTENT(IN) :: addr
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token
          INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5oopen_by_addr_c
+       END FUNCTION h5oopen_by_token_c
     END INTERFACE
 
-    hdferr = h5oopen_by_addr_c(loc_id, addr, obj_id)
+    hdferr = h5oopen_by_token_c(loc_id, token, obj_id)
 
-  END SUBROUTINE h5oopen_by_addr_f
+  END SUBROUTINE h5oopen_by_token_f
 !
 !****s* H5O/h5ocopy_f
-! NAME		
-!  h5ocopy_f 
+! NAME
+!  h5ocopy_f
 !
 ! PURPOSE
 !  Copies an object in an HDF5 file.
 !
-! Inputs:  
+! Inputs:
 !  src_loc_id - Object identifier indicating the location of the source object to be copied.
 !  src_name   - Name of the source object to be copied.
 !  dst_loc_id - Location identifier specifying the destination.
@@ -350,13 +357,13 @@ CONTAINS
 !  ocpypl_id  - Object copy property list.
 !  lcpl_id    - Link creation property list for the new hard link.
 !
-! Outputs: 
+! Outputs:
 !  hdferr     - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  March 14, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
     IMPLICIT NONE
@@ -404,22 +411,22 @@ CONTAINS
   END SUBROUTINE h5ocopy_f
 
 !****s* H5O/h5odecr_refcount_f
-! NAME		
+! NAME
 !  h5odecr_refcount_f
 !
 ! PURPOSE
-!  Decrements an object reference count. 
+!  Decrements an object reference count.
 !
-! Inputs:  
+! Inputs:
 !  object_id - Object identifier.
 !
-! Outputs: 
+! Outputs:
 !  hdferr    - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 11, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5odecr_refcount_f(object_id, hdferr)
     IMPLICIT NONE
@@ -435,33 +442,33 @@ CONTAINS
        END FUNCTION h5odecr_refcount_c
     END INTERFACE
 
-    hdferr = h5odecr_refcount_c(object_id)  
+    hdferr = h5odecr_refcount_c(object_id)
 
   END SUBROUTINE h5odecr_refcount_f
 
 !****s* H5O/h5oexists_by_name_f
-! NAME		
+! NAME
 !  h5oexists_by_name_f
 !
 ! PURPOSE
 !  Determines whether a link resolves to an actual object.
 !
 ! Inputs:
-!  loc_id   - Identifier of the file or group to query. 
-!  name     - The name of the link to check. 
-!    
+!  loc_id   - Identifier of the file or group to query.
+!  name     - The name of the link to check.
+!
 !
 ! Optional parameters:
 !  lapl_id  - Link access property list identifier.
 !
-! Outputs: 
+! Outputs:
 !  link_exists - Existing link resolves to an object.
 !  hdferr      - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 11, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oexists_by_name_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -491,7 +498,7 @@ CONTAINS
     END INTERFACE
 
     namelen = LEN(name)
-    
+
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
@@ -510,11 +517,11 @@ CONTAINS
   END SUBROUTINE h5oexists_by_name_f
 
 !****s* H5O/h5oget_comment_f
-! NAME		
+! NAME
 !  h5oget_comment_f
 !
 ! PURPOSE
-!  Retrieves comment for specified object. 
+!  Retrieves comment for specified object.
 !
 ! Inputs:
 !  obj_id - Identifier for the target object.
@@ -522,21 +529,21 @@ CONTAINS
 ! Optional parameters:
 !  bufsize - Size of the comment buffer.
 !
-! Outputs: 
+! Outputs:
 !  comment - The comment.
 !  hdferr  - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 11, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oget_comment_f(obj_id, comment, hdferr, bufsize)
     IMPLICIT NONE
     INTEGER(HID_T)   , INTENT(IN)            :: obj_id
     CHARACTER(LEN=*) , INTENT(OUT)           :: comment
     INTEGER          , INTENT(OUT)           :: hdferr
-    INTEGER(HSSIZE_T), INTENT(OUT), OPTIONAL :: bufsize 
+    INTEGER(HSSIZE_T), INTENT(OUT), OPTIONAL :: bufsize
 !*****
 
     INTEGER(SIZE_T)   :: commentsize_default
@@ -558,13 +565,13 @@ CONTAINS
     commentsize_default = LEN(comment)
 
     hdferr = h5oget_comment_c(obj_id, comment, commentsize_default, bufsize_default)
-    
+
     IF(PRESENT(bufsize)) bufsize = bufsize_default
 
   END SUBROUTINE h5oget_comment_f
 
 !****s* H5O/h5oget_comment_by_name_f
-! NAME		
+! NAME
 !  h5oget_comment_by_name_f
 !
 ! PURPOSE
@@ -572,20 +579,20 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id   - Identifier of a file, group, dataset, or named datatype.
-!  name     - Name of the object whose comment is to be retrieved, 
-!             specified as a path relative to loc_id. 
+!  name     - Name of the object whose comment is to be retrieved,
+!             specified as a path relative to loc_id.
 !
 ! Optional parameters:
 !  bufsize  - Size of the comment buffer.
 !
-! Outputs: 
+! Outputs:
 !  comment  - The comment.
 !  hdferr   - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  July 6, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oget_comment_by_name_f(loc_id, name, comment, hdferr, bufsize, lapl_id)
     IMPLICIT NONE
@@ -593,8 +600,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN)            :: name
     CHARACTER(LEN=*), INTENT(OUT)           :: comment
     INTEGER         , INTENT(OUT)           :: hdferr
-    INTEGER(SIZE_T) , INTENT(OUT), OPTIONAL :: bufsize 
-    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id 
+    INTEGER(SIZE_T) , INTENT(OUT), OPTIONAL :: bufsize
+    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
 !*****
 
     INTEGER(SIZE_T) :: commentsize_default
@@ -625,28 +632,28 @@ CONTAINS
 
     hdferr = h5oget_comment_by_name_c(loc_id, name, name_size, &
          comment, commentsize_default, bufsize_default, lapl_id_default)
-    
+
     IF(PRESENT(bufsize)) bufsize = bufsize_default
 
   END SUBROUTINE h5oget_comment_by_name_f
 
 !****s* H5O/h5oincr_refcount_f
-! NAME		
+! NAME
 !  h5oincr_refcount_f
 !
 ! PURPOSE
 !  Increments an object reference count.
 !
-! Inputs:  
+! Inputs:
 !  obj_id  - Object identifier.
 !
-! Outputs: 
+! Outputs:
 !  hdferr  - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 15, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oincr_refcount_f(obj_id, hdferr)
     IMPLICIT NONE
@@ -662,7 +669,7 @@ CONTAINS
        END FUNCTION h5oincr_refcount_c
     END INTERFACE
 
-    hdferr = h5oincr_refcount_c(obj_id) 
+    hdferr = h5oincr_refcount_c(obj_id)
 
   END SUBROUTINE h5oincr_refcount_f
 
@@ -672,7 +679,7 @@ CONTAINS
 !  h5oopen_by_idx_f
 !
 ! PURPOSE
-!  Open the nth object in a group. 
+!  Open the nth object in a group.
 !
 ! Inputs:
 !  loc_id      - A file or group identifier.
@@ -707,7 +714,7 @@ CONTAINS
 !*****
     INTEGER(SIZE_T) :: group_namelen
     INTEGER(HID_T)  :: lapl_id_default
-    
+
     INTERFACE
        INTEGER FUNCTION h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default) &
             BIND(C,NAME='h5oopen_by_idx_c')
@@ -736,23 +743,23 @@ CONTAINS
   END SUBROUTINE H5Oopen_by_idx_f
 
 !****s* H5O/h5oset_comment_f
-! NAME		
+! NAME
 !  h5oset_comment_f
 !
 ! PURPOSE
 !  Sets comment for specified object.
 !
-! Inputs:  
+! Inputs:
 !  obj_id    - Identifier of the target object.
 !  comment   - The new comment.
 !
-! Outputs: 
+! Outputs:
 !  hdferr    - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 15, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oset_comment_f(obj_id, comment, hdferr)
     IMPLICIT NONE
@@ -775,34 +782,34 @@ CONTAINS
     END INTERFACE
 
     commentlen = LEN(comment)
-    
+
     hdferr = h5oset_comment_c(obj_id, comment, commentlen)
 
   END SUBROUTINE h5oset_comment_f
 
 !****s* H5O/h5oset_comment_by_name_f
-! NAME		
+! NAME
 !  h5oset_comment_by_name_f
 !
 ! PURPOSE
-!  Sets comment for specified object. 
+!  Sets comment for specified object.
 !
-! Inputs:  
+! Inputs:
 !  loc_id   - Identifier of a file, group, dataset, or named datatype.
-!  name     - Name of the object whose comment is to be set or reset, 
-!              specified as a path relative to loc_id. 
+!  name     - Name of the object whose comment is to be set or reset,
+!              specified as a path relative to loc_id.
 !  comment  - The new comment.
 !
-! Outputs: 
+! Outputs:
 !  hdferr   - Returns 0 if successful and -1 if fails.
 !
 ! Optional parameters:
 !  lapl_id  - Link access property list identifier.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  May 15, 2012
-! 
+!
 ! Fortran90 Interface:
   SUBROUTINE h5oset_comment_by_name_f(loc_id, name, comment, hdferr, lapl_id)
     IMPLICIT NONE
@@ -836,7 +843,7 @@ CONTAINS
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-    
+
     hdferr = h5oset_comment_by_name_c(loc_id, name, namelen, comment, commentlen, lapl_id_default)
 
   END SUBROUTINE h5oset_comment_by_name_f
@@ -862,7 +869,7 @@ CONTAINS
 !  op_data    - User-defined pointer to data required by the application for its processing of the group
 !
 ! Outputs:
-!  return_value - returns the return value of the first operator that returns a positive value, or 
+!  return_value - returns the return value of the first operator that returns a positive value, or
 !                 zero if all members were processed with no operator returning non-zero.
 !  hdferr       - Returns 0 if successful and -1 if fails
 !
@@ -877,14 +884,14 @@ CONTAINS
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id
-    INTEGER, INTENT(IN) :: index_type 
+    INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
 
     TYPE(C_FUNPTR):: op
     TYPE(C_PTR)   :: op_data
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER, INTENT(IN), OPTIONAL  :: fields 
+    INTEGER, INTENT(IN), OPTIONAL  :: fields
 !*****
     INTEGER :: fields_c
 
@@ -925,11 +932,11 @@ CONTAINS
 !  Retrieves the metadata for an object, identifying the object by location and relative name.
 !
 ! Inputs:
-!  loc_id      - File or group identifier specifying location of group 
+!  loc_id      - File or group identifier specifying location of group
 !                in which object is located.
 !  name        - Name of group, relative to loc_id.
 !
-! Outputs:  
+! Outputs:
 !  object_info - Buffer in which to return object information.
 !  hdferr      - Returns 0 if successful and -1 if fails.
 !
@@ -949,13 +956,13 @@ CONTAINS
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
-    INTEGER         , INTENT(IN) , OPTIONAL :: fields 
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields
 !*****
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
     INTEGER :: fields_c
-    
+
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info, fields) &
             BIND(C, NAME='h5oget_info_by_name_c')
@@ -966,7 +973,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR),VALUE             :: object_info
+         TYPE(C_PTR), VALUE            :: object_info
          INTEGER         , INTENT(IN)  :: fields
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
@@ -1010,12 +1017,12 @@ CONTAINS
 ! Fortran2003 Interface:
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: object_id
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
-    INTEGER         , INTENT(IN), OPTIONAL  :: fields 
+    INTEGER         , INTENT(IN), OPTIONAL  :: fields
 !*****
     TYPE(C_PTR) :: ptr
     INTEGER :: fields_c
@@ -1049,14 +1056,14 @@ CONTAINS
 !  Retrieves the metadata for an object, identifying the object by an index position.
 !
 ! Inputs:
-!  loc_id      - File or group identifier specifying location of group 
+!  loc_id      - File or group identifier specifying location of group
 !                in which object is located.
 !  group_name  - Name of group in which object is located.
 !  index_field - Index or field that determines the order.
 !  order       - Order within field or index.
 !  n           - Object for which information is to be returned
 !
-! Outputs:  
+! Outputs:
 !  object_info - Buffer in which to return object information.
 !  hdferr      - Returns 0 if successful and -1 if fails.
 !
@@ -1072,7 +1079,7 @@ CONTAINS
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        object_info, hdferr, lapl_id, fields)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: group_name
@@ -1082,13 +1089,13 @@ CONTAINS
     TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
-    INTEGER         , INTENT(IN) , OPTIONAL :: fields 
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields
 !*****
     INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
     INTEGER         :: fields_c
-    
+
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
             index_field, order, n, lapl_id_default, object_info, fields) BIND(C, NAME='h5oget_info_by_idx_c')
@@ -1130,7 +1137,7 @@ CONTAINS
 !
 ! Inputs:
 !  loc_id      - Identifier of a file or group.
-!  object_name - Name of the object, generally relative to loc_id, that will serve as root of the iteration 
+!  object_name - Name of the object, generally relative to loc_id, that will serve as root of the iteration
 !  index_type  - Type of index; valid values include:
 !                 H5_INDEX_NAME_F
 !                 H5_INDEX_CRT_ORDER_F
@@ -1142,7 +1149,7 @@ CONTAINS
 !  op_data     - User-defined pointer to data required by the application for its processing of the group
 !
 ! Outputs:
-!  return_value - Returns the return value of the first operator that returns a positive value, or 
+!  return_value - Returns the return value of the first operator that returns a positive value, or
 !                 zero if all members were processed with no operator returning non-zero.
 !  hdferr       - Returns 0 if successful and -1 if fails
 !
@@ -1160,7 +1167,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)             :: loc_id
     CHARACTER(LEN=*), INTENT(IN)             :: object_name
-    INTEGER         , INTENT(IN)             :: index_type 
+    INTEGER         , INTENT(IN)             :: index_type
     INTEGER         , INTENT(IN)             :: order
 
     TYPE(C_FUNPTR)                           :: op
@@ -1168,7 +1175,7 @@ CONTAINS
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
-    INTEGER         , INTENT(IN) , OPTIONAL  :: fields 
+    INTEGER         , INTENT(IN) , OPTIONAL  :: fields
 !*****
 
     INTEGER(SIZE_T) :: namelen
@@ -1211,6 +1218,51 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5ovisit_by_name_f
+
+!****s* H5O/h5otoken_cmp_f
+! NAME
+!  h5otoken_cmp_f
+!
+! PURPOSE
+!  Compare two tokens, which must be from the same file / containers.
+!
+! Inputs:
+!  loc_id   - Identifier of an object in the file / container.
+!  token1   - The first token to compare.
+!  token2   - The second token to compare.
+!
+! Outputs:
+!  cmp_value - Returns 0 if tokens are equal, non-zero for unequal tokens.
+!  hdferr    - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  Quincey Koziol
+!  January 10, 2019
+!
+! Fortran90 Interface:
+  SUBROUTINE h5otoken_cmp_f(loc_id, token1, token2, cmp_value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+    INTEGER         , INTENT(OUT) :: cmp_value
+    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5otoken_cmp_c(loc_id, token1, token2, cmp_value) BIND(C,NAME='h5otoken_cmp_c')
+         IMPORT :: HID_T, C_PTR, H5O_TOKEN_T_F
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)     :: loc_id
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+         INTEGER, INTENT(OUT)           :: cmp_value
+
+       END FUNCTION h5otoken_cmp_c
+    END INTERFACE
+
+    hdferr = h5otoken_cmp_c(loc_id, token1, token2, cmp_value)
+
+  END SUBROUTINE h5otoken_cmp_f
 
 END MODULE H5O
 

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,6 +18,7 @@ package examples.groups;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.structs.H5O_token_t;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -57,7 +57,7 @@ public class H5Ex_G_Iterate {
     }
 
     private static void do_iterate() {
-        long file_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
 
         // Open a file using default properties.
         try {
@@ -75,8 +75,8 @@ public class H5Ex_G_Iterate {
                 String[] oname = new String[count];
                 int[] otype = new int[count];
                 int[] ltype = new int[count];
-                long[] orefs = new long[count];
-                H5.H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, orefs, HDF5Constants.H5_INDEX_NAME);
+                H5O_token_t[] otokens = new H5O_token_t[count];
+                H5.H5Gget_obj_info_all(file_id, DATASETNAME, oname, otype, ltype, otokens, HDF5Constants.H5_INDEX_NAME);
 
                 // Get type of the object and display its name and type.
                 for (int indx = 0; indx < otype.length; indx++) {

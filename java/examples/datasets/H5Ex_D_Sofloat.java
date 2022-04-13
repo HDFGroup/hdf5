@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,6 +21,9 @@
  ************************************************************/
 package examples.datasets;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,10 +98,10 @@ public class H5Ex_D_Sofloat {
     }
 
     private static void writeData() {
-        long file_id = -1;
-        long filespace_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long filespace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM_X, DIM_Y };
         long[] chunk_dims = { CHUNK_X, CHUNK_Y };
         double[][] dset_data = new double[DIM_X][DIM_Y];
@@ -124,8 +126,9 @@ public class H5Ex_D_Sofloat {
             }
 
         // Print the maximum value.
-        System.out.println("Maximum value in write buffer is: " + max);
-        System.out.println("Minimum value in write buffer is: " + min);
+        DecimalFormat df = new DecimalFormat("#,##0.000000", new DecimalFormatSymbols(Locale.US));
+        System.out.println("Maximum value in write buffer is: " + df.format(max));
+        System.out.println("Minimum value in write buffer is: " + df.format(min));
 
         // Create a new file using the default properties.
         try {
@@ -213,9 +216,9 @@ public class H5Ex_D_Sofloat {
     }
 
     private static void readData() {
-        long file_id = -1;
-        long dataset_id = -1;
-        long dcpl_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
         double[][] dset_data = new double[DIM_X][DIM_Y];
 
         // Open file using the default properties.
@@ -309,8 +312,9 @@ public class H5Ex_D_Sofloat {
             }
 
         // Print the maximum value.
-        System.out.println("Maximum value in " + DATASETNAME + " is: " + max);
-        System.out.println("Minimum value in " + DATASETNAME + " is: " + min);
+        DecimalFormat df = new DecimalFormat("#,##0.000000", new DecimalFormatSymbols(Locale.US));
+        System.out.println("Maximum value in " + DATASETNAME + " is: " + df.format(max));
+        System.out.println("Minimum value in " + DATASETNAME + " is: " + df.format(min));
 
         // End access to the dataset and release resources used by it.
         try {

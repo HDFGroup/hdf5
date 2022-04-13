@@ -5,11 +5,11 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -49,6 +49,17 @@ if (SITE_BUILDNAME_SUFFIX)
   set (CTEST_BUILD_NAME  "${SITE_BUILDNAME_SUFFIX}-${CTEST_BUILD_NAME}")
 endif ()
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
+
+# Launchers work only with Makefile and Ninja generators.
+if(NOT "${CTEST_CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  set(CTEST_USE_LAUNCHERS 0)
+  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 0)
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=OFF")
+else()
+  set(CTEST_USE_LAUNCHERS 1)
+  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 1)
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON")
+endif()
 
 #-----------------------------------------------------------------------------
 # MAC machines need special option
@@ -195,17 +206,27 @@ if (CMAKE_GENERATOR_TOOLSET)
 else ()
   set (CTEST_CONFIGURE_TOOLSET  "")
 endif()
+if (CMAKE_GENERATOR_ARCHITECTURE)
+  set (CTEST_CONFIGURE_ARCHITECTURE  "-A${CMAKE_GENERATOR_ARCHITECTURE}")
+else ()
+  set (CTEST_CONFIGURE_ARCHITECTURE  "")
+endif()
 if (LOCAL_MEMCHECK_TEST)
-  find_program (CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+  if(LOCAL_USE_VALGRIND)
+    set (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
+    find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+  endif()
   set (CTEST_CONFIGURE_COMMAND
-      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/mccacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
+      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/mccacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_ARCHITECTURE}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
   )
 else ()
   if (LOCAL_COVERAGE_TEST)
-    find_program (CTEST_COVERAGE_COMMAND NAMES gcov)
+    if(LOCAL_USE_GCOV)
+      find_program (CTEST_COVERAGE_COMMAND NAMES gcov)
+    endif ()
   endif ()
   set (CTEST_CONFIGURE_COMMAND
-      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
+      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_ARCHITECTURE}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
   )
 endif ()
 
@@ -232,6 +253,14 @@ endforeach ()
 message (STATUS "Dashboard script configuration:\n${vars}\n")
 
 #-----------------------------------------------------------------------------
+
+###################################################################
+#########       Following is for submission to CDash   ############
+###################################################################
+if (NOT DEFINED MODEL)
+  set (MODEL "Experimental")
+endif ()
+
 #-----------------------------------------------------------------------------
   ## NORMAL process
   ## -- LOCAL_UPDATE updates the source folder from svn

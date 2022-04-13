@@ -13,9 +13,6 @@
 // Turn off warnings about not using the return value from these functions:
 -emacro(534,HDfflush,HDgetrusage,HDgettimeofday,HDputc)
 
-// Turn off warnings about converting an enum to an int
--emacro(641,H5_INC_ENUM,H5_DEC_ENUM)
-
 // Suppress message about "Expression with side effects passed to repeated parameter 1 in macro 'assert'"
 -esym(666,assert)
 

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,11 +20,7 @@
  *  file is closed. Program reopens the file and reads and displays the result.
  */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cout;
 using std::endl;
 
@@ -32,31 +28,31 @@ using std::endl;
 #include "H5Cpp.h"
 using namespace H5;
 
-const H5std_string FILE_NAME( "Select.h5" );
-const H5std_string DATASET_NAME( "Matrix in file" );
-const int   MSPACE1_RANK = 1;   // Rank of the first dataset in memory
-const int   MSPACE1_DIM = 50;   // Dataset size in memory
-const int   MSPACE2_RANK = 1;   // Rank of the second dataset in memory
-const int   MSPACE2_DIM = 4;    // Dataset size in memory
-const int   FSPACE_RANK = 2;    // Dataset rank as it is stored in the file
-const int   FSPACE_DIM1 = 8;    // Dimension sizes of the dataset as it is
-const int   FSPACE_DIM2 = 12;   //      stored in the file
-const int   MSPACE_RANK = 2;    // Rank of the first dataset in memory
-const int   MSPACE_DIM1 = 8;    // We will read dataset back from the file
-const int   MSPACE_DIM2 = 9;    //      to the dataset in memory with these
-                                //      dataspace parameters
-const int   NPOINTS = 4;        // Number of points that will be selected
-                                //      and overwritten
+const H5std_string FILE_NAME("Select.h5");
+const H5std_string DATASET_NAME("Matrix in file");
+const int          MSPACE1_RANK = 1;  // Rank of the first dataset in memory
+const int          MSPACE1_DIM  = 50; // Dataset size in memory
+const int          MSPACE2_RANK = 1;  // Rank of the second dataset in memory
+const int          MSPACE2_DIM  = 4;  // Dataset size in memory
+const int          FSPACE_RANK  = 2;  // Dataset rank as it is stored in the file
+const int          FSPACE_DIM1  = 8;  // Dimension sizes of the dataset as it is
+const int          FSPACE_DIM2  = 12; //      stored in the file
+const int          MSPACE_RANK  = 2;  // Rank of the first dataset in memory
+const int          MSPACE_DIM1  = 8;  // We will read dataset back from the file
+const int          MSPACE_DIM2  = 9;  //      to the dataset in memory with these
+                                      //      dataspace parameters
+const int NPOINTS = 4;                // Number of points that will be selected
+                                      //      and overwritten
 
-int main (void)
+int
+main(void)
 {
-    int   i,j; // loop indices */
+    int i, j; // loop indices */
 
     /*
      * Try block to detect exceptions raised by any of the calls inside it
      */
-    try
-    {
+    try {
         /*
          * Turn off the auto-printing when failure occurs so that we can
          * handle the errors appropriately
@@ -66,47 +62,51 @@ int main (void)
         /*
          * Create a file.
          */
-        H5File* file = new H5File( FILE_NAME, H5F_ACC_TRUNC );
+        H5File *file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
 
         /*
-        * Create property list for a dataset and set up fill values.
-        */
-        int fillvalue = 0;   /* Fill value for the dataset */
+         * Create property list for a dataset and set up fill values.
+         */
+        int               fillvalue = 0; /* Fill value for the dataset */
         DSetCreatPropList plist;
         plist.setFillValue(PredType::NATIVE_INT, &fillvalue);
 
         /*
          * Create dataspace for the dataset in the file.
          */
-        hsize_t fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
-        DataSpace fspace( FSPACE_RANK, fdim );
+        hsize_t   fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
+        DataSpace fspace(FSPACE_RANK, fdim);
 
         /*
          * Create dataset and write it into the file.
          */
-        DataSet* dataset = new DataSet(file->createDataSet(
-                DATASET_NAME, PredType::NATIVE_INT, fspace, plist));
+        DataSet *dataset =
+            new DataSet(file->createDataSet(DATASET_NAME, PredType::NATIVE_INT, fspace, plist));
 
         /*
          * Select hyperslab for the dataset in the file, using 3x2 blocks,
          * (4,3) stride and (2,4) count starting at the position (0,1).
          */
-        hsize_t start[2]; // Start of hyperslab
+        hsize_t start[2];  // Start of hyperslab
         hsize_t stride[2]; // Stride of hyperslab
         hsize_t count[2];  // Block count
         hsize_t block[2];  // Block sizes
-        start[0]  = 0; start[1]  = 1;
-        stride[0] = 4; stride[1] = 3;
-        count[0]  = 2; count[1]  = 4;
-        block[0]  = 3; block[1]  = 2;
-        fspace.selectHyperslab( H5S_SELECT_SET, count, start, stride, block);
+        start[0]  = 0;
+        start[1]  = 1;
+        stride[0] = 4;
+        stride[1] = 3;
+        count[0]  = 2;
+        count[1]  = 4;
+        block[0]  = 3;
+        block[1]  = 2;
+        fspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
 
         /*
          * Create dataspace for the first dataset.
          */
-        hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset
-                                           (in memory) */
-        DataSpace mspace1( MSPACE1_RANK, dim1 );
+        hsize_t dim1[] = {MSPACE1_DIM}; /* Dimension size of the first dataset
+                                          (in memory) */
+        DataSpace mspace1(MSPACE1_RANK, dim1);
 
         /*
          * Select hyperslab.
@@ -117,7 +117,7 @@ int main (void)
         stride[0] = 1;
         count[0]  = 48;
         block[0]  = 1;
-        mspace1.selectHyperslab( H5S_SELECT_SET, count, start, stride, block);
+        mspace1.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
 
         /*
          * Write selection from the vector buffer to the dataset in the file.
@@ -132,7 +132,7 @@ int main (void)
          *                    0 41 42  0 43 44  0 45 46  0 47 48
          *                    0  0  0  0  0  0  0  0  0  0  0  0
          */
-        int    vector[MSPACE1_DIM];     // vector buffer for dset
+        int vector[MSPACE1_DIM]; // vector buffer for dset
 
         /*
          * Buffer initialization.
@@ -141,7 +141,7 @@ int main (void)
         for (i = 1; i < MSPACE1_DIM - 1; i++)
             vector[i] = i;
 
-        dataset->write( vector, PredType::NATIVE_INT, mspace1, fspace );
+        dataset->write(vector, PredType::NATIVE_INT, mspace1, fspace);
 
         /*
          * Reset the selection for the file dataspace fid.
@@ -151,27 +151,31 @@ int main (void)
         /*
          * Create dataspace for the second dataset.
          */
-        hsize_t dim2[] = {MSPACE2_DIM};  /* Dimension size of the second dataset
-                                           (in memory */
-        DataSpace mspace2( MSPACE2_RANK, dim2 );
+        hsize_t dim2[] = {MSPACE2_DIM}; /* Dimension size of the second dataset
+                                          (in memory */
+        DataSpace mspace2(MSPACE2_RANK, dim2);
 
         /*
          * Select sequence of NPOINTS points in the file dataspace.
          */
         hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points
                                                 from the file dataspace */
-        coord[0][0] = 0; coord[0][1] = 0;
-        coord[1][0] = 3; coord[1][1] = 3;
-        coord[2][0] = 3; coord[2][1] = 5;
-        coord[3][0] = 5; coord[3][1] = 6;
+        coord[0][0] = 0;
+        coord[0][1] = 0;
+        coord[1][0] = 3;
+        coord[1][1] = 3;
+        coord[2][0] = 3;
+        coord[2][1] = 5;
+        coord[3][0] = 5;
+        coord[3][1] = 6;
 
-        fspace.selectElements( H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord);
+        fspace.selectElements(H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord);
 
         /*
          * Write new selection of points to the dataset.
          */
-        int    values[] = {53, 59, 61, 67};  /* New values to be written */
-        dataset->write( values, PredType::NATIVE_INT, mspace2, fspace );
+        int values[] = {53, 59, 61, 67}; /* New values to be written */
+        dataset->write(values, PredType::NATIVE_INT, mspace2, fspace);
 
         /*
          * File dataset should look like this:
@@ -195,12 +199,12 @@ int main (void)
         /*
          * Open the file.
          */
-        file = new H5File( FILE_NAME, H5F_ACC_RDONLY );
+        file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
 
         /*
          * Open the dataset.
          */
-        dataset = new DataSet( file->openDataSet( DATASET_NAME ));
+        dataset = new DataSet(file->openDataSet(DATASET_NAME));
 
         /*
          * Get dataspace of the dataset.
@@ -215,10 +219,14 @@ int main (void)
          *                      0 59  0 61
          *
          */
-        start[0] = 1; start[1] = 2;
-        block[0] = 1; block[1] = 1;
-        stride[0] = 1; stride[1] = 1;
-        count[0]  = 3; count[1]  = 4;
+        start[0]  = 1;
+        start[1]  = 2;
+        block[0]  = 1;
+        block[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 1;
+        count[0]  = 3;
+        count[1]  = 4;
         fspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
 
         /*
@@ -234,10 +242,14 @@ int main (void)
          *                                              19 20
          *                                               0 61
          */
-        start[0] = 2; start[1] = 4;
-        block[0] = 1; block[1] = 1;
-        stride[0] = 1; stride[1] = 1;
-        count[0]  = 6; count[1]  = 5;
+        start[0]  = 2;
+        start[1]  = 4;
+        block[0]  = 1;
+        block[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 1;
+        count[0]  = 6;
+        count[1]  = 5;
         fspace.selectHyperslab(H5S_SELECT_OR, count, start, stride, block);
 
         /*
@@ -253,15 +265,23 @@ int main (void)
          * Select two hyperslabs in memory. Hyperslabs has the same
          * size and shape as the selected hyperslabs for the file dataspace.
          */
-        start[0] = 0; start[1] = 0;
-        block[0] = 1; block[1] = 1;
-        stride[0] = 1; stride[1] = 1;
-        count[0]  = 3; count[1]  = 4;
+        start[0]  = 0;
+        start[1]  = 0;
+        block[0]  = 1;
+        block[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 1;
+        count[0]  = 3;
+        count[1]  = 4;
         mspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
-        start[0] = 1; start[1] = 2;
-        block[0] = 1; block[1] = 1;
-        stride[0] = 1; stride[1] = 1;
-        count[0]  = 6; count[1]  = 5;
+        start[0]  = 1;
+        start[1]  = 2;
+        block[0]  = 1;
+        block[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 1;
+        count[0]  = 6;
+        count[1]  = 5;
         mspace.selectHyperslab(H5S_SELECT_OR, count, start, stride, block);
 
         /*
@@ -289,9 +309,8 @@ int main (void)
          *                     0  0  0  0  0  0  0  0  0
          *                     0  0  0  0  0  0  0  0  0
          */
-        for (i=0; i < MSPACE_DIM1; i++)
-        {
-            for(j=0; j < MSPACE_DIM2; j++)
+        for (i = 0; i < MSPACE_DIM1; i++) {
+            for (j = 0; j < MSPACE_DIM2; j++)
                 cout << matrix_out[i][j] << "  ";
             cout << endl;
         }
@@ -301,28 +320,25 @@ int main (void)
          */
         delete dataset;
         delete file;
-   }  // end of try block
+    } // end of try block
 
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
+    // catch failure caused by the H5File operations
+    catch (FileIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
+    // catch failure caused by the DataSet operations
+    catch (DataSetIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
+    // catch failure caused by the DataSpace operations
+    catch (DataSpaceIException error) {
         error.printErrorStack();
         return -1;
-   }
+    }
 
-   return 0;
+    return 0;
 }

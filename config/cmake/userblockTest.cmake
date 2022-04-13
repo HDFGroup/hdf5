@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -54,7 +54,7 @@ if (TEST_CHECKUB STREQUAL "YES")
     # 'tellub' calls H5Fget_user_block to get the size
     #  of the user block
     #s2=`$JAM_BIN/tellub $origfile`
-    EXECUTE_PROCESS (
+    execute_process (
         COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_OFILE}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
@@ -72,7 +72,7 @@ if (TEST_CHECKUB STREQUAL "YES")
 
   if (TEST_O_STRING_LEN)
     #$JAM_BIN/getub -c $s2 $origfile > $cmpfile
-    EXECUTE_PROCESS (
+    execute_process (
         COMMAND ${TEST_EMULATOR} ${TEST_GET_PROGRAM} -c ${TEST_O_STRING_LEN} ${TEST_OFILE}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
@@ -90,7 +90,7 @@ if (TEST_CHECKUB STREQUAL "YES")
   endif ()
 
   #$JAM_BIN/getub -c $size $hfile > $tfile
-  EXECUTE_PROCESS (
+  execute_process (
       COMMAND ${TEST_EMULATOR} ${TEST_GET_PROGRAM} -c ${TEST_STRING_SIZE} ${TEST_HFILE}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
@@ -101,8 +101,8 @@ if (TEST_CHECKUB STREQUAL "YES")
   )
 
   # now compare the outputs
-  EXECUTE_PROCESS (
-      COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_HFILE}-ub.cmp ${TEST_HFILE}.cmp
+  execute_process (
+      COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_HFILE}-ub.cmp ${TEST_HFILE}.cmp
       RESULT_VARIABLE TEST_RESULT
   )
 
@@ -114,7 +114,7 @@ if (TEST_CHECKUB STREQUAL "YES")
 else ()
     # call 'ubsize' to get the size of the user block
     #ubsize=`$JAM_BIN/tellub $hfile`
-    EXECUTE_PROCESS (
+    execute_process (
         COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_HFILE}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_H_STRING_LEN

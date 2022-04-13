@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -74,6 +74,10 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
 
   ret_total_error = 0
+  CALL get_name_test(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Get name test', total_error)
+
+  ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File open/close test', total_error)
 
@@ -81,7 +85,7 @@ PROGRAM fortranlibtest
   CALL file_space("file_space",cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File free space test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing DATASET Interface                '
 !      '========================================='
@@ -97,7 +101,7 @@ PROGRAM fortranlibtest
   CALL test_userblock_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing DATASPACE Interface             '
 !      '========================================='
@@ -106,7 +110,7 @@ PROGRAM fortranlibtest
   CALL dataspace_basic_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Basic dataspace test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing REFERENCE Interface              '
 !      '========================================='
@@ -119,7 +123,7 @@ PROGRAM fortranlibtest
   CALL refregtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to dataset region test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing selection functionalities        '
 !      '========================================='
@@ -148,8 +152,8 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_bounds(ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
-  
-!     
+
+!
 !      '========================================='
 !      'Testing DATATYPE interface               '
 !      '========================================='
@@ -169,7 +173,7 @@ PROGRAM fortranlibtest
   CALL test_derived_flt(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Derived float datatype test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing PROPERTY interface               '
 !      '========================================='
@@ -183,10 +187,14 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 
   ret_total_error = 0
-  CALL test_chunk_cache (cleanup, ret_total_error)
+  CALL test_chunk_cache(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
 
-!     
+  ret_total_error = 0
+  CALL test_misc_properties(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Miscellaneous properties', total_error)
+
+!
 !      '========================================='
 !      'Testing ATTRIBUTE interface              '
 !      '========================================='
@@ -195,7 +203,7 @@ PROGRAM fortranlibtest
   CALL attribute_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Attribute test', total_error)
 
-!     
+!
 !      '========================================='
 !      'Testing IDENTIFIER interface             '
 !      '========================================='
@@ -217,7 +225,7 @@ PROGRAM fortranlibtest
      CALL write_test_status(ret_total_error, ' SZIP filter test', total_error)
   ENDIF
 
-!     
+!
 !      '========================================='
 !      'Testing GROUP interface                  '
 !      '========================================='

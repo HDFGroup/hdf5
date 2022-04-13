@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,6 +19,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5G_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,15 +30,15 @@ import org.junit.rules.TestName;
 public class TestH5Giterate {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "h5ex_g_iterate.hdf";
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     private final long _openGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gopen(fid, name, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
-            gid = -1;
+            gid = HDF5Constants.H5I_INVALID_HID;
             err.printStackTrace();
             fail("H5.H5Gcreate: " + err);
         }
@@ -93,12 +93,12 @@ public class TestH5Giterate {
         String objNames[] = new String[(int) info.nlinks];
         int objTypes[] = new int[(int) info.nlinks];
         int lnkTypes[] = new int[(int) info.nlinks];
-        long objRefs[] = new long[(int) info.nlinks];
+        H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
 
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_all(H5fid, "/", objNames,
-                    objTypes, lnkTypes, objRefs, HDF5Constants.H5_INDEX_NAME);
+                    objTypes, lnkTypes, objTokens, HDF5Constants.H5_INDEX_NAME);
         }
         catch (Throwable err) {
             err.printStackTrace();

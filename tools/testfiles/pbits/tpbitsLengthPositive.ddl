@@ -2,6 +2,10 @@ usage: h5dump [OPTIONS] files
   OPTIONS
      -h,   --help         Print a usage message and exit
      -V,   --version      Print version number and exit
+--------------- Error Options ---------------
+     --enable-error-stack Prints messages from the HDF5 error stack as they occur.
+                          Optional value 2 also prints file open errors.
+                          Default setting disables any error reporting.
 --------------- File Options ---------------
      -n,   --contents     Print a list of the file contents and exit
                           Optional value 1 also prints attributes.
@@ -15,13 +19,25 @@ usage: h5dump [OPTIONS] files
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
                           If absent or <cred> -> "(,,)", no authentication.
-                          Has no effect is filedriver is not `ros3'.
+                          Has no effect if filedriver is not "ros3".
      --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
                           For use with "--filedriver=hdfs"
                           <attrs> :: (<namenode name>,<namenode port>,
                                       <kerberos cache path>,<username>,
                                       <buffer size>)
                           Any absent attribute will use a default value.
+     --vol-value          Value (ID) of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-name           Name of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-info           VOL-specific info to pass to the VOL connector used for
+                          opening the HDF5 file specified
+     --vfd-value          Value (ID) of the VFL driver to use for opening the
+                          HDF5 file specified
+     --vfd-name           Name of the VFL driver to use for opening the
+                          HDF5 file specified
+     --vfd-info           VFD-specific info to pass to the VFL driver used for
+                          opening the HDF5 file specified
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
@@ -54,8 +70,6 @@ usage: h5dump [OPTIONS] files
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
-     --enable-error-stack Prints messages from the HDF5 error stack as they occur.
-                          Optional value 2 also prints file open errors.
      --no-compact-subset  Disable compact form of subsetting and allow the use
                           of "[" in dataset names.
      -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
@@ -67,7 +81,7 @@ usage: h5dump [OPTIONS] files
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
-                          E.g., to dump a file called `-f', use h5dump -- -f
+                          E.g., to dump a file called "-f", use h5dump -- -f
 
 --------------- Subsetting Options ---------------
  Subsetting is available by using the following options with a dataset

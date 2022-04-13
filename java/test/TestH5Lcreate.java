@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +21,8 @@ import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5L_iterate_cb;
 import hdf.hdf5lib.callbacks.H5L_iterate_t;
+import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5L_info_t;
@@ -41,13 +40,13 @@ public class TestH5Lcreate {
     private static final String H5_FILE = "testL.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    long H5fcpl = -1;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did1 = -1;
-    long H5did2 = -1;
-    long H5gcpl = -1;
-    long H5gid = -1;
+    long H5fcpl = HDF5Constants.H5I_INVALID_HID;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did1 = HDF5Constants.H5I_INVALID_HID;
+    long H5did2 = HDF5Constants.H5I_INVALID_HID;
+    long H5gcpl = HDF5Constants.H5I_INVALID_HID;
+    long H5gid = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
 
     private final void _deleteFile(String filename) {
@@ -64,7 +63,7 @@ public class TestH5Lcreate {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name,
                         HDF5Constants.H5T_STD_I32BE, dsid,
@@ -80,7 +79,7 @@ public class TestH5Lcreate {
     }
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5gcpl = HDF5Constants.H5P_DEFAULT;
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
@@ -320,9 +319,9 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info: " + err);
         }
-        assertFalse("H5Lget_info ", link_info==null);
+        assertFalse("H5Lget_info", link_info==null);
         assertTrue("H5Lget_info link type", link_info.type==HDF5Constants.H5L_TYPE_SOFT);
-        assertTrue("Link Address ", link_info.address_val_size>0);
+        assertTrue("Link Value Size", link_info.val_size > 0);
     }
 
     @Test
@@ -383,9 +382,9 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info: " + err);
         }
-        assertFalse("H5Lget_info ", link_info==null);
+        assertFalse("H5Lget_info", link_info==null);
         assertTrue("H5Lget_info link type", link_info.type==HDF5Constants.H5L_TYPE_SOFT);
-        assertTrue("Link Address ", link_info.address_val_size>0);
+        assertTrue("Link Value Size", link_info.val_size > 0);
     }
 
     @Test
@@ -431,9 +430,9 @@ public class TestH5Lcreate {
             err.printStackTrace();
             fail("H5.H5Lget_info: " + err);
         }
-        assertFalse("H5Lget_info ", link_info==null);
+        assertFalse("H5Lget_info", link_info==null);
         assertTrue("H5Lget_info link type", link_info.type==HDF5Constants.H5L_TYPE_EXTERNAL);
-        assertTrue("Link Address ", link_info.address_val_size>0);
+        assertTrue("Link Value Size", link_info.val_size > 0);
     }
 
     @Test
@@ -740,18 +739,18 @@ public class TestH5Lcreate {
                 this.link_type = type;
             }
         }
-        class H5L_iter_data implements H5L_iterate_t {
+        class H5L_iter_data implements H5L_iterate_opdata_t {
             public ArrayList<idata> iterdata = new ArrayList<idata>();
         }
-        H5L_iterate_t iter_data = new H5L_iter_data();
-        class H5L_iter_callback implements H5L_iterate_cb {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_t op_data) {
+        H5L_iterate_opdata_t iter_data = new H5L_iter_data();
+        class H5L_iter_callback implements H5L_iterate_t {
+            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data) {
                 idata id = new idata(name, info.type);
                 ((H5L_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }
-        H5L_iterate_cb iter_cb = new H5L_iter_callback();
+        H5L_iterate_t iter_cb = new H5L_iter_callback();
         try {
             H5.H5Lvisit(H5fid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC, iter_cb, iter_data);
         }
@@ -792,18 +791,18 @@ public class TestH5Lcreate {
                 this.link_type = type;
             }
         }
-        class H5L_iter_data implements H5L_iterate_t {
+        class H5L_iter_data implements H5L_iterate_opdata_t {
             public ArrayList<idata> iterdata = new ArrayList<idata>();
         }
-        H5L_iterate_t iter_data = new H5L_iter_data();
-        class H5L_iter_callback implements H5L_iterate_cb {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_t op_data) {
+        H5L_iterate_opdata_t iter_data = new H5L_iter_data();
+        class H5L_iter_callback implements H5L_iterate_t {
+            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data) {
                 idata id = new idata(name, info.type);
                 ((H5L_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }
-        H5L_iterate_cb iter_cb = new H5L_iter_callback();
+        H5L_iterate_t iter_cb = new H5L_iter_callback();
         try {
             H5.H5Literate(H5fid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC, 0, iter_cb, iter_data);
         }

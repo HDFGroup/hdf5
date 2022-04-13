@@ -87,7 +87,7 @@ Quick overview of the Fortran APIs
    to the file, a C program will read it as a 6x4 two-dimensional dataset into 
    memory.  The HDF5 C utilities h5dump and h5ls display transposed data, if
    data is written from a Fortran program.
- 
+
 *  Fortran indices are 1 based.
 
 ============================
@@ -105,29 +105,29 @@ Procedure to add a new function
 Procedure for passing C variables to Fortran
 ---------------------------------------------
 
-(1) Find the C struct name you are interested in: 
+(1) Find the C struct name you are interested in:
 	(a) src/H5public.h if it is a generic type, i.e. H5_*
             or
-        (b) src/H5*public.h if is a specific type, i.e. H5*_ 
-                            
+        (b) src/H5*public.h if is a specific type, i.e. H5*_
+
 (2) Put that structure into an array that will be passed to fortran in:
         (a) fortran/src/H5_f.c (add to nh5init_flags_c subroutine)
         (b) edit fortran/src/H5f90proto.h and edit nh5init_flags_c interface call
-                         
+
 (3) Edit the function call in fortran/src/H5_ff.F90
-        (a) edit the call:  FUNCTION h5init_flags_c 
+        (a) edit the call:  FUNCTION h5init_flags_c
         (b) edit h5init_flags_c call in h5open_f to match the number of arguments passing
-                             
-(4) add the size of the array and array to fortran/src/H5f90global.F90 
+
+(4) add the size of the array and array to fortran/src/H5f90global.F90
          - must match the size found it H5_f.c
 
-NOTE: To just add a default C value argument, do steps (2a) and (4) 
+NOTE: To just add a default C value argument, do steps (2a) and (4)
 
 
 Procedure for adding a new file to the repository
 --------------------------------------------------
 
-Add the name of the file to the: 
+Add the name of the file to the:
     (1) Makefile.am located in the same directory as the newfile
     (2) CMakeLists.txt located in the same directory as the newfile
     (3) MANIFEST located in the top level directory

@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5E APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -16,7 +16,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -168,10 +168,10 @@ SUBROUTINE test_error(total_error)
 !!$#ifdef H5_USE_16_API
 !!$    if (old_func != (H5E_auto_t)H5Eprint)
 !!$	TEST_ERROR;
-!!$#else  H5_USE_16_API 
+!!$#else  H5_USE_16_API
 !!$    if (old_func != (H5E_auto2_t)H5Eprint2)
 !!$	TEST_ERROR;
-!!$#endif  H5_USE_16_API 
+!!$#endif  H5_USE_16_API
 
 
   ! set the customized error handling routine

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,13 +33,13 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
-#define NUM_THREAD              16
-#define FILENAME                "ttsafe_error.h5"
+#define NUM_THREAD 16
+#define FILENAME   "ttsafe_error.h5"
 
 /* Having a common dataset name is an error */
-#define DATASETNAME             "commonname"
-#define EXPECTED_ERROR_DEPTH    10
-#define WRITE_NUMBER            37
+#define DATASETNAME          "commonname"
+#define EXPECTED_ERROR_DEPTH 11
+#define WRITE_NUMBER         37
 
 /* Typedefs */
 typedef struct err_num_struct {
@@ -48,59 +48,61 @@ typedef struct err_num_struct {
 } err_num_t;
 
 /* Global variables */
-hid_t               error_file_g    = H5I_INVALID_HID;
-int                 error_flag_g    = 0;
-int                 error_count_g   = 0;
+hid_t               error_file_g  = H5I_INVALID_HID;
+int                 error_flag_g  = 0;
+int                 error_count_g = 0;
 err_num_t           expected_g[EXPECTED_ERROR_DEPTH];
 H5TS_mutex_simple_t error_mutex_g;
 
 /* Prototypes */
-static herr_t error_callback(hid_t , void *);
+static herr_t error_callback(hid_t, void *);
 static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
-static void *tts_error_thread(void *);
-
+static void * tts_error_thread(void *);
 
 void
 tts_error(void)
 {
-    hid_t           def_fapl = H5I_INVALID_HID;
-    hid_t           vol_id = H5I_INVALID_HID;
-    hid_t           dataset = H5I_INVALID_HID;
-    H5TS_thread_t   threads[NUM_THREAD];
-    H5TS_attr_t     attribute;
-    int             value, i;
-    herr_t          status;
+    hid_t         def_fapl = H5I_INVALID_HID;
+    hid_t         vol_id   = H5I_INVALID_HID;
+    hid_t         dataset  = H5I_INVALID_HID;
+    H5TS_thread_t threads[NUM_THREAD];
+    H5TS_attr_t   attribute;
+    int           value, i;
+    herr_t        status;
 
     /* Must initialize these at runtime */
     expected_g[0].maj_num = H5E_DATASET;
-    expected_g[0].min_num = H5E_CANTINIT;
+    expected_g[0].min_num = H5E_CANTCREATE;
 
-    expected_g[1].maj_num = H5E_VOL;
+    expected_g[1].maj_num = H5E_DATASET;
     expected_g[1].min_num = H5E_CANTCREATE;
 
     expected_g[2].maj_num = H5E_VOL;
     expected_g[2].min_num = H5E_CANTCREATE;
 
-    expected_g[3].maj_num = H5E_DATASET;
-    expected_g[3].min_num = H5E_CANTINIT;
+    expected_g[3].maj_num = H5E_VOL;
+    expected_g[3].min_num = H5E_CANTCREATE;
 
     expected_g[4].maj_num = H5E_DATASET;
     expected_g[4].min_num = H5E_CANTINIT;
 
-    expected_g[5].maj_num = H5E_LINK;
+    expected_g[5].maj_num = H5E_DATASET;
     expected_g[5].min_num = H5E_CANTINIT;
 
     expected_g[6].maj_num = H5E_LINK;
-    expected_g[6].min_num = H5E_CANTINSERT;
+    expected_g[6].min_num = H5E_CANTINIT;
 
-    expected_g[7].maj_num = H5E_SYM;
-    expected_g[7].min_num = H5E_NOTFOUND;
+    expected_g[7].maj_num = H5E_LINK;
+    expected_g[7].min_num = H5E_CANTINSERT;
 
     expected_g[8].maj_num = H5E_SYM;
-    expected_g[8].min_num = H5E_CALLBACK;
+    expected_g[8].min_num = H5E_NOTFOUND;
 
-    expected_g[9].maj_num = H5E_LINK;
-    expected_g[9].min_num = H5E_EXISTS;
+    expected_g[9].maj_num = H5E_SYM;
+    expected_g[9].min_num = H5E_CALLBACK;
+
+    expected_g[10].maj_num = H5E_LINK;
+    expected_g[10].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex_g);
@@ -119,7 +121,7 @@ tts_error(void)
     status = H5Pget_vol_id(def_fapl, &vol_id);
     CHECK(status, FAIL, "H5Pget_vol_id");
 
-    if(vol_id == H5VL_NATIVE) {
+    if (vol_id == H5VL_NATIVE) {
         /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
          * creation plist and default file access plist
          */
@@ -133,12 +135,14 @@ tts_error(void)
             H5TS_wait_for_thread(threads[i]);
 
         if (error_flag_g) {
-            TestErrPrintf("At least one thread reported a value that was different from the expected value\n");
-            HDprintf("(Update this test if the error stack changed!)\n");
+            TestErrPrintf(
+                "At least one thread reported a value that was different from the expected value\n");
+            HDprintf(
+                "(Update the expected_g[] array in tts_error for this test if the error stack changed!)\n");
         }
 
         if (error_count_g != NUM_THREAD - 1)
-            TestErrPrintf("Error: %d threads failed instead of %d\n", error_count_g, NUM_THREAD-1);
+            TestErrPrintf("Error: %d threads failed instead of %d\n", error_count_g, NUM_THREAD - 1);
 
         dataset = H5Dopen2(error_file_g, DATASETNAME, H5P_DEFAULT);
         CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
@@ -166,14 +170,14 @@ tts_error(void)
 static void *
 tts_error_thread(void H5_ATTR_UNUSED *arg)
 {
-    hid_t   dataspace   = H5I_INVALID_HID;
-    hid_t   datatype    = H5I_INVALID_HID;
-    hid_t   dataset     = H5I_INVALID_HID;
-    hsize_t dimsf[1]; /* dataset dimensions */
+    hid_t       dataspace = H5I_INVALID_HID;
+    hid_t       datatype  = H5I_INVALID_HID;
+    hid_t       dataset   = H5I_INVALID_HID;
+    hsize_t     dimsf[1]; /* dataset dimensions */
     H5E_auto2_t old_error_cb;
-    void *old_error_client_data;
-    int value;
-    herr_t status;
+    void *      old_error_client_data;
+    int         value;
+    herr_t      status;
 
     /* preserve previous error stack handler */
     status = H5Eget_auto2(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
@@ -184,7 +188,7 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
     CHECK(status, FAIL, "H5Eset_auto2");
 
     /* define dataspace for dataset */
-    dimsf[0] = 1;
+    dimsf[0]  = 1;
     dataspace = H5Screate_simple(1, dimsf, NULL);
     CHECK(dataspace, H5I_INVALID_HID, "H5Screate_simple");
 
@@ -195,10 +199,11 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
     CHECK(status, FAIL, "H5Tset_order");
 
     /* create a new dataset within the file */
-    dataset = H5Dcreate2(error_file_g, DATASETNAME, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dataset =
+        H5Dcreate2(error_file_g, DATASETNAME, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     /* Most of these will fail, so don't check the error here */
     if (dataset >= 0) {
-        value = WRITE_NUMBER;
+        value  = WRITE_NUMBER;
         status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
         CHECK(status, FAIL, "H5Dwrite");
         status = H5Dclose(dataset);
@@ -229,8 +234,8 @@ error_callback(hid_t H5_ATTR_UNUSED estack_id, void *client_data)
 static herr_t
 walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSED *client_data)
 {
-    hid_t   maj_num = H5I_INVALID_HID;
-    hid_t   min_num = H5I_INVALID_HID;
+    hid_t maj_num = H5I_INVALID_HID;
+    hid_t min_num = H5I_INVALID_HID;
 
     if (err_desc) {
         maj_num = err_desc->maj_num;
@@ -240,7 +245,18 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
             return SUCCEED;
     }
 
+    /* Unexpected error stack entry, print some info and set flag */
+    HDfprintf(stderr, "Unexpected error stack entry!\n");
+    HDfprintf(stderr, "Stack entry: %d\n", n);
+    HDfprintf(stderr,
+              "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
+              ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
+              err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
+              err_desc->desc);
+    HDfprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
+              expected_g[n].min_num);
     error_flag_g = -1;
+
     return SUCCEED;
 }
 
@@ -251,4 +267,3 @@ cleanup_error(void)
 }
 
 #endif /*H5_HAVE_THREADSAFE*/
-

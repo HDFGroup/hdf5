@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -27,12 +27,6 @@ HDFTEST_COPY_FILE("${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/testfiles/h52giftst.h5" "$
 HDFTEST_COPY_FILE("${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/testfiles/ex_image2.h5" "${PROJECT_BINARY_DIR}/testfiles/ex_image2.h5" "gif2h5_files")
 add_custom_target(gif2h5_files ALL COMMENT "Copying files needed by gif2h5 tests" DEPENDS ${gif2h5_files_list})
 
-if (NOT BUILD_SHARED_LIBS)
-  set (tgt_ext "")
-else ()
-  set (tgt_ext "-shared")
-endif ()
-
 # Remove any output file left over from previous test run
 add_test (
     NAME HL_TOOLS-clear-objects
@@ -45,29 +39,29 @@ add_test (
 )
 set_tests_properties (HL_TOOLS-clear-objects PROPERTIES FIXTURES_SETUP clear_tools_hl)
 
-add_test (NAME HL_TOOLS_gif2h5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:gif2h5${tgt_ext}> testfiles/image1.gif image1.h5)
+add_test (NAME HL_TOOLS_gif2h5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:gif2h5${tgt_file_ext}> testfiles/image1.gif image1.h5)
 set_tests_properties (HL_TOOLS_gif2h5 PROPERTIES
     FIXTURES_REQUIRED clear_tools_hl
 )
 
-add_test (NAME HL_TOOLS_h52gif COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image1.gif -i image)
+add_test (NAME HL_TOOLS_h52gif COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_file_ext}> testfiles/h52giftst.h5 image1.gif -i image)
 set_tests_properties (HL_TOOLS_h52gif PROPERTIES
     FIXTURES_REQUIRED clear_tools_hl
 )
 
-add_test (NAME HL_TOOLS_h52gif_none COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image.gif -i nosuch_image)
+add_test (NAME HL_TOOLS_h52gif_none COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_file_ext}> testfiles/h52giftst.h5 image.gif -i nosuch_image)
 set_tests_properties (HL_TOOLS_h52gif_none PROPERTIES
     WILL_FAIL "true"
     FIXTURES_REQUIRED clear_tools_hl
 )
 
-#add_test (NAME HL_TOOLS_h52gifpal COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/h52giftst.h5 image.gif -i palette)
+#add_test (NAME HL_TOOLS_h52gifpal COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_file_ext}> testfiles/h52giftst.h5 image.gif -i palette)
 #set_tests_properties (HL_TOOLS_h52gifpal PROPERTIES
 #    WILL_FAIL "true"
 #    FIXTURES_REQUIRED clear_tools_hl
 #)
 
-add_test (NAME HL_TOOLS_h52gif24bits COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_ext}> testfiles/ex_image2.h5 image24.gif -i image24bitpixel)
+add_test (NAME HL_TOOLS_h52gif24bits COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h52gif${tgt_file_ext}> testfiles/ex_image2.h5 image24.gif -i image24bitpixel)
 set_tests_properties (HL_TOOLS_h52gif24bits PROPERTIES
     WILL_FAIL "true"
     FIXTURES_REQUIRED clear_tools_hl

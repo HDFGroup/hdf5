@@ -6,7 +6,7 @@
 # This file is part of HDF5. The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -181,8 +181,8 @@ TOOLTEST() {
     # Run test.
     TESTING $H5DUMP $@
     (
-    cd $TESTDIR
-      $ENVCMD $RUNSERIAL $H5DUMP_BIN "$@"
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5DUMP_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -192,24 +192,24 @@ TOOLTEST() {
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
 
-  if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
-     echo "    Expected result (*.ddl) missing"
-     nerrors="`expr $nerrors + 1`"
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ddl) missing"
+        nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual > /dev/null 2>&1 ; then
-     echo " PASSED"
+        echo " PASSED"
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-     nerrors="`expr $nerrors + 1`"
-     test yes = "$verbose" && $DIFF $caseless $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $caseless $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
+        rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
     fi
 
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDFJAVA_EXAMPLES_DATASETS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -39,7 +39,7 @@ set (HDF_JAVA_SZIP_EXAMPLES
     set (${HDF_JAVA_EXAMPLES} ${HDF_JAVA_EXAMPLES} ${HDF_JAVA_SZIP_EXAMPLES})
   endif (H5_HAVE_FILTER_SZIP)
 
-if (WIN32 OR MINGW)
+if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
 else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
@@ -71,7 +71,7 @@ foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${HDFJAVA_JAR}")
 endforeach ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
 
@@ -112,6 +112,8 @@ if (BUILD_TESTING)
             -D "TEST_REFERENCE=datasets/${example}.txt"
             -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
     )
-    set_tests_properties (JAVA_datasets-${example} PROPERTIES DEPENDS JAVA_datasets-${example}-copy-objects)
+    set_tests_properties (JAVA_datasets-${example} PROPERTIES
+        DEPENDS JAVA_datasets-${example}-copy-objects
+    )
   endforeach ()
 endif ()

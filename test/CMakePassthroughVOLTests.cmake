@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -23,9 +23,11 @@ set (VOL_LIST
     vol_pass_through2
 )
 
+# native VOL = 0
+# pass-through VOL = 1
 set (vol_native native)
 set (vol_pass_through1 "pass_through under_vol=0\;under_info={}")
-set (vol_pass_through2 "pass_through under_vol=505\;under_info={under_vol=0\;under_info={}}")
+set (vol_pass_through2 "pass_through under_vol=1\;under_info={under_vol=0\;under_info={}}")
 
 foreach (voltest ${VOL_LIST})
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${voltest}")

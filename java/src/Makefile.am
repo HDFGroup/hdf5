@@ -1,16 +1,15 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -37,7 +36,7 @@ jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
 hdf5_javadir = $(libdir)
 
 pkgpath = hdf/hdf5lib
-CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.25.jar:$$CLASSPATH
+CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.33.jar:$$CLASSPATH
 
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
@@ -51,10 +50,10 @@ hdf5_java_JAVA =  \
 	${pkgpath}/callbacks/H5D_iterate_t.java \
 	${pkgpath}/callbacks/H5E_walk_cb.java \
 	${pkgpath}/callbacks/H5E_walk_t.java \
-	${pkgpath}/callbacks/H5L_iterate_cb.java \
 	${pkgpath}/callbacks/H5L_iterate_t.java \
-	${pkgpath}/callbacks/H5O_iterate_cb.java \
+	${pkgpath}/callbacks/H5L_iterate_opdata_t.java \
 	${pkgpath}/callbacks/H5O_iterate_t.java \
+	${pkgpath}/callbacks/H5O_iterate_opdata_t.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_cb.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_t.java \
     ${pkgpath}/callbacks/H5P_cls_copy_func_cb.java \
@@ -70,7 +69,7 @@ hdf5_java_JAVA =  \
     ${pkgpath}/callbacks/H5P_prp_set_func_cb.java \
  	${pkgpath}/callbacks/H5P_iterate_cb.java \
 	${pkgpath}/callbacks/H5P_iterate_t.java \
-	${pkgpath}/exceptions/HDF5AtomException.java  \
+	${pkgpath}/exceptions/HDF5IdException.java  \
 	${pkgpath}/exceptions/HDF5AttributeException.java  \
 	${pkgpath}/exceptions/HDF5BtreeException.java  \
 	${pkgpath}/exceptions/HDF5DataFiltersException.java  \
@@ -103,6 +102,8 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5G_info_t.java \
 	${pkgpath}/structs/H5L_info_t.java \
 	${pkgpath}/structs/H5O_info_t.java \
+	${pkgpath}/structs/H5O_native_info_t.java \
+	${pkgpath}/structs/H5O_token_t.java \
 	${pkgpath}/structs/H5O_hdr_info_t.java \
 	${pkgpath}/structs/H5AC_cache_config_t.java \
 	${pkgpath}/H5.java  \

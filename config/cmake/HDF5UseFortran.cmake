@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -19,42 +19,10 @@ enable_language (Fortran)
 set (HDF_PREFIX "H5")
 include (CheckFortranFunctionExists)
 
-# The provided CMake Fortran macros don't provide a general compile/run function
-# so this one is used.
-#-----------------------------------------------------------------------------
-macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR)
-    message (STATUS "Detecting Fortran ${FUNCTION_NAME}")
-    file (WRITE
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
-        "${SOURCE_CODE}"
-    )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
-        LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
-    )
-
-    if (${COMPILE_RESULT_VAR})
-      set(${RETURN_VAR} ${RUN_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 0)
-        message (STATUS "Testing Fortran ${FUNCTION_NAME} - OK")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "Determining if the Fortran ${FUNCTION_NAME} exists passed\n"
-        )
-      else ()
-        message (STATUS "Testing Fortran ${FUNCTION_NAME} - Fail")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR}\n"
-        )
-      endif ()
-    else ()
-        message (STATUS "Compiling Fortran ${FUNCTION_NAME} - Fail")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the Fortran ${FUNCTION_NAME} compiles failed: ${COMPILE_RESULT_VAR}\n"
-        )
-        set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
-    endif ()
-endmacro ()
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  include (CheckFortranSourceRuns)
+  include (CheckFortranSourceCompiles)
+endif ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
@@ -63,14 +31,62 @@ macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
   set (RETURN_VAR "${SOURCE_CODE}")
 endmacro ()
 
+set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
+# The provided CMake Fortran macros don't provide a general compile/run function
+# so this one is used.
+#-----------------------------------------------------------------------------
+macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR RETURN_OUTPUT_VAR)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Detecting Fortran ${FUNCTION_NAME}")
+    endif ()
+    file (WRITE
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
+        "${SOURCE_CODE}"
+    )
+    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+        ${CMAKE_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
+        LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
+        RUN_OUTPUT_VARIABLE OUTPUT_VAR
+    )
+    set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
+
+    if (${COMPILE_RESULT_VAR})
+      set(${RETURN_VAR} ${RUN_RESULT_VAR})
+      if (${RUN_RESULT_VAR} MATCHES 0)
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - OK")
+        endif ()
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Determining if the Fortran ${FUNCTION_NAME} exists passed\n"
+        )
+      else ()
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - Fail")
+        endif ()
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR}\n"
+        )
+      endif ()
+    else ()
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "Compiling Fortran ${FUNCTION_NAME} - Fail")
+        endif ()
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if the Fortran ${FUNCTION_NAME} compiles failed: ${COMPILE_RESULT_VAR}\n"
+        )
+        set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
+    endif ()
+endmacro ()
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
 
 READ_SOURCE("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" SOURCE_CODE)
-CHECK_FORTRAN_FEATURE(c_long_double
-  "${SOURCE_CODE}"
-  FORTRAN_HAVE_C_LONG_DOUBLE
-)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_HAVE_C_LONG_DOUBLE SRC_EXT f90)
+else ()
+  CHECK_FORTRAN_FEATURE(c_long_double "${SOURCE_CODE}" FORTRAN_HAVE_C_LONG_DOUBLE)
+endif ()
 
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
   set (${HDF_PREFIX}_FORTRAN_HAVE_C_LONG_DOUBLE 1)
@@ -81,10 +97,11 @@ endif ()
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
 READ_SOURCE("MODULE type_mod" "END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE" SOURCE_CODE)
-CHECK_FORTRAN_FEATURE(c_long_double
-  "${SOURCE_CODE}"
-  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
-)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_C_LONG_DOUBLE_IS_UNIQUE SRC_EXT f90)
+else ()
+  CHECK_FORTRAN_FEATURE(c_long_double "${SOURCE_CODE}" FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
+endif ()
 if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
   set (${HDF_PREFIX}_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1)
 else ()
@@ -113,18 +130,18 @@ FORTRAN_RUN ("REAL and INTEGER KINDs"
     "${SOURCE_CODE}"
     XX
     YY
-    PROG_RESULT
+    FC_AVAIL_KINDS_RESULT
+    PROG_OUTPUT
 )
 # dnl The output from the above program will be:
-# dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
-# dnl    -- LINE 2 --  valid real kinds (comma seperated list)
+# dnl    -- LINE 1 --  valid integer kinds (comma separated list)
+# dnl    -- LINE 2 --  valid real kinds (comma separated list)
 # dnl    -- LINE 3 --  max decimal precision for reals
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
-
-file (READ "${CMAKE_BINARY_DIR}/pac_fconftest.out" PROG_OUTPUT)
+#
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
 list (GET PROG_OUTPUT 0 pac_validIntKinds)
 list (GET PROG_OUTPUT 1 pac_validRealKinds)
@@ -165,26 +182,20 @@ message (STATUS "....MAX DECIMAL PRECISION ${${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECI
 # **********
 string (REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
-foreach (KIND ${VAR} )
-  set (PROG_SRC
-    "
-        PROGRAM main
-        USE ISO_C_BINDING
-        IMPLICIT NONE
-        INTEGER (KIND=${KIND}) a
-        OPEN(8,FILE='pac_validIntKinds.out',FORM='formatted')
-        WRITE(8,'(I0)') ${FC_SIZEOF_A}
-        CLOSE(8)
-        END
-     "
+foreach (KIND ${VAR})
+  set (PROG_SRC_${KIND}
+  "
+       PROGRAM main
+          USE ISO_C_BINDING
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          IMPLICIT NONE
+          INTEGER (KIND=${KIND}) a
+          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
+       END
+   "
   )
-  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC}
-      XX
-      YY
-      PROG_RESULT1
-  )
-  file (READ "${CMAKE_BINARY_DIR}/pac_validIntKinds.out" PROG_OUTPUT1)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
@@ -201,7 +212,9 @@ string (REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
 set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
-message (STATUS "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
+endif ()
 # **********
 # REALS
 # **********
@@ -213,26 +226,20 @@ math (EXPR _LEN "${LEN_VAR}-1")
 list (GET VAR ${_LEN} max_real_fortran_kind)
 
 foreach (KIND ${VAR} )
-  set (PROG_SRC
-    "
-        PROGRAM main
-        USE ISO_C_BINDING
-        IMPLICIT NONE
-        REAL (KIND=${KIND}) a
-        OPEN(8,FILE='pac_validRealKinds.out',FORM='formatted')
-        WRITE(8,'(I0)') ${FC_SIZEOF_A}
-        CLOSE(8)
-        END
-     "
+  set (PROG_SRC2_${KIND}
+  "
+       PROGRAM main
+          USE ISO_C_BINDING
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          IMPLICIT NONE
+          REAL (KIND=${KIND}) a
+          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
+       END
+  "
   )
-  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC}
-      XX
-      YY
-      PROG_RESULT1
-  )
-  file (READ "${CMAKE_BINARY_DIR}/pac_validRealKinds.out" PROG_OUTPUT1)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
+  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
 
 if (pack_real_sizeof STREQUAL "")
@@ -261,29 +268,25 @@ list (GET VAR ${_LEN} max_real_fortran_sizeof)
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------
-FORTRAN_RUN ("SIZEOF NATIVE KINDs"
+set (PROG_SRC3
   "
        PROGRAM main
           USE ISO_C_BINDING
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           INTEGER a
           REAL b
           DOUBLE PRECISION c
-          OPEN(8,FILE='pac_sizeof_native_kinds.out',FORM='formatted')
-          WRITE(8,*) ${FC_SIZEOF_A}
-          WRITE(8,*) kind(a)
-          WRITE(8,*) ${FC_SIZEOF_B}
-          WRITE(8,*) kind(b)
-          WRITE(8,*) ${FC_SIZEOF_C}
-          WRITE(8,*) kind(c)
-          CLOSE(8)
+          WRITE(stderr,*) ${FC_SIZEOF_A}
+          WRITE(stderr,*) kind(a)
+          WRITE(stderr,*) ${FC_SIZEOF_B}
+          WRITE(stderr,*) kind(b)
+          WRITE(stderr,*) ${FC_SIZEOF_C}
+          WRITE(stderr,*) kind(c)
        END
   "
-      XX
-      YY
-      PROG_RESULT
-  )
-  file (READ "${CMAKE_BINARY_DIR}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
+)
+FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT PROG_OUTPUT3)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
 # dnl    -- LINE 2 --  kind of INTEGER
@@ -291,16 +294,16 @@ FORTRAN_RUN ("SIZEOF NATIVE KINDs"
 # dnl    -- LINE 4 --  kind of REAL
 # dnl    -- LINE 5 --  sizeof DOUBLE PRECISION
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
-
+#
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
-list (GET PROG_OUTPUT 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
-list (GET PROG_OUTPUT 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
-list (GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
-list (GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
-list (GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
-list (GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
+list (GET PROG_OUTPUT3 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+list (GET PROG_OUTPUT3 3 PAC_FORTRAN_NATIVE_REAL_KIND)
+list (GET PROG_OUTPUT3 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+list (GET PROG_OUTPUT3 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
 
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
@@ -342,116 +345,13 @@ endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR1 ${PAC_FC_ALL_REAL_KINDS})
+string (REGEX REPLACE "}" "" OUT_VAR1 ${OUT_VAR1})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR1}/)")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR}/)")
-
-ENABLE_LANGUAGE (C)
-
-#-----------------------------------------------------------------------------
-# The provided CMake C macros don't provide a general compile/run function
-# so this one is used.
-#-----------------------------------------------------------------------------
-macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
-    message (STATUS "Detecting C ${FUNCTION_NAME}")
-    if (HDF5_REQUIRED_LIBRARIES)
-      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
-          "-DLINK_LIBRARIES:STRING=${HDF5_REQUIRED_LIBRARIES}")
-    else ()
-      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif ()
-    file (WRITE
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        ${SOURCE_CODE}
-    )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
-        RUN_OUTPUT_VARIABLE OUTPUT_VAR
-    )
-
-    set (${RETURN_VAR} ${OUTPUT_VAR})
-
-    #message (STATUS "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message (STATUS "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
-    #message (STATUS "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message (STATUS "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
-    #message (STATUS "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-
-    if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 1)
-        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        message (STATUS "Testing C ${FUNCTION_NAME} - OK")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
-            "${OUTPUT_VAR}\n\n"
-        )
-      else ()
-        message (STATUS "Testing C ${FUNCTION_NAME} - Fail")
-        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
-            "${OUTPUT_VAR}\n\n")
-      endif ()
-    else ()
-        message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
-    endif ()
-endmacro ()
-
-set (PROG_SRC
-    "
-#include <float.h>
-#include <stdio.h>
-#define CHECK_FLOAT128 ${${HDF_PREFIX}_SIZEOF___FLOAT128}
-#if CHECK_FLOAT128!=0
-# if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
-#include <quadmath.h>
-# endif
-# ifdef FLT128_DIG
-#define C_FLT128_DIG FLT128_DIG
-# else
-#define C_FLT128_DIG 0
-# endif
-#else
-#define C_FLT128_DIG 0
-#endif
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define C_LDBL_DIG DECIMAL_DIG
-#else
-#define C_LDBL_DIG LDBL_DIG
-#endif
-   int main() {
-       printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
-       return 1\\\;
-   }
-     "
-)
-
-C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
-
-# dnl The output from the above program will be:
-# dnl    -- LINE 1 --  long double decimal precision
-# dnl    -- LINE 2 --  __float128 decimal precision
-
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
-
-list (GET PROG_OUTPUT 0 LDBL_DIG)
-list (GET PROG_OUTPUT 1 FLT128_DIG)
-
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
-else ()
-  set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
-endif ()
-
+string (REGEX REPLACE "{" "" OUT_VAR2 ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)

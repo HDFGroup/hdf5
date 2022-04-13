@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,8 +32,8 @@ import org.junit.rules.TestName;
 public class TestH5T {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "testT.h5";
-    long H5fid = -1;
-    long H5strdid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5strdid = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = null;
@@ -129,7 +128,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tarray_create() {
-       long filetype_id = -1;
+       long filetype_id = HDF5Constants.H5I_INVALID_HID;
        long[] adims = { 3, 5 };
 
        try {
@@ -148,7 +147,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tget_array_ndims() {
-       long filetype_id = -1;
+       long filetype_id = HDF5Constants.H5I_INVALID_HID;
        int ndims = 0;
        long[] adims = { 3, 5 };
 
@@ -176,7 +175,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tget_array_dims() {
-       long filetype_id = -1;
+       long filetype_id = HDF5Constants.H5I_INVALID_HID;
        int ndims = 0;
        long[] adims = { 3, 5 };
        long[] rdims = new long[2];
@@ -207,7 +206,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tenum_functions() {
-        long       filetype_id =-1;
+        long       filetype_id = HDF5Constants.H5I_INVALID_HID;
         String    enum_type ="Enum_type";
         byte[]    enum_val = new byte[1];
         String    enum_name = null;
@@ -275,7 +274,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tenum_create_functions() {
-        long      filetype_id = -1;
+        long      filetype_id = HDF5Constants.H5I_INVALID_HID;
         byte[]    enum_val = new byte[1];
 
         // Create a enumerate datatype
@@ -315,7 +314,7 @@ public class TestH5T {
 
     @Test
     public void testH5Topaque_functions() {
-        long       filetype_id = -1;
+        long       filetype_id = HDF5Constants.H5I_INVALID_HID;
         String    opaque_name = null;
 
         // Create a opaque datatype
@@ -345,7 +344,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tvlen_create() {
-        long filetype_id = -1;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
 
        try {
            filetype_id = H5.H5Tvlen_create(HDF5Constants.H5T_C_S1);
@@ -368,7 +367,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tis_variable_str() {
-       long filetype_id = -1;
+       long filetype_id = HDF5Constants.H5I_INVALID_HID;
 
        try {
            filetype_id = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -399,7 +398,7 @@ public class TestH5T {
 
     @Test
     public void testH5Tcompound_functions() {
-        long       filetype_id =-1;
+        long       filetype_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a compound datatype
         try {

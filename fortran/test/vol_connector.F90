@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -61,21 +61,21 @@ CONTAINS
     INTEGER(hid_t) :: file_id
 
     ! The null VOL connector should not be registered at the start of the test
-    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+    CALL H5VLis_connector_registered_by_name_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .FALSE., total_error)
 
     ! Register the connector by name
     CALL H5VLregister_connector_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id, error)
     CALL check("H5VLregister_connector_by_name_f",error,total_error)
-    
-    ! The connector should be registered now
-    CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
 
-    CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
-    CALL check("H5VLget_connector_id_f",error,total_error)
+    ! The connector should be registered now
+    CALL H5VLis_connector_registered_by_name_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .TRUE., total_error)
+
+    CALL H5VLget_connector_id_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_by_name_f",error,total_error)
 
     CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error)
     CALL check("H5F_create_f",error,total_error)
@@ -118,24 +118,24 @@ CONTAINS
 
     INTEGER, INTENT(INOUT) :: total_error
     INTEGER :: error = 0
-    
+
     LOGICAL :: is_registered = .FALSE.
     INTEGER(hid_t) :: vol_id = 0
 
 
     ! The null VOL connector should not be registered at the start of the test
-    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+    CALL H5VLis_connector_registered_by_name_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .FALSE., total_error)
 
     ! Register the connector by value
     CALL H5VLregister_connector_by_value_f(NATIVE_VOL_CONNECTOR_VALUE, vol_id, error)
     CALL check("H5VLregister_connector_by_value_f", error, total_error)
 
     ! The connector should be registered now
-    CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
+    CALL H5VLis_connector_registered_by_name_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .TRUE., total_error)
 
   END SUBROUTINE test_registration_by_value
 
@@ -162,23 +162,23 @@ CONTAINS
     INTEGER(hid_t) :: fapl_id
     TYPE(C_PTR) :: f_ptr
 
-    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL H5VLis_connector_registered_by_name_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
 
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .FALSE., total_error)
 
     ! The null VOL connector should not be registered at the start of the test
-    CALL H5VLis_connector_registered_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .FALSE., total_error)
+    CALL H5VLis_connector_registered_by_name_f( "FAKE_VOL_CONNECTOR_NAME", is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .FALSE., total_error)
 
     CALL H5VLregister_connector_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id, error)
     CALL check("H5VLregister_connector_by_name_f",error,total_error)
-  
+
     ! The connector should be registered now
-    CALL H5VLis_connector_registered_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
-    CALL check("H5VLis_connector_registered_f",error,total_error)
-    CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
+    CALL H5VLis_connector_registered_by_name_f(NATIVE_VOL_CONNECTOR_NAME, is_registered, error)
+    CALL check("H5VLis_connector_registered_by_name_f",error,total_error)
+    CALL VERIFY("H5VLis_connector_registered_by_name_f", is_registered, .TRUE., total_error)
 
     ! Register the connector
     CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
@@ -195,15 +195,15 @@ CONTAINS
        f_ptr = C_NULL_PTR
        CALL H5Pset_vol_f(fapl_id, vol_id, error, f_ptr)
        CALL check("H5Pset_vol_f",error,total_error)
-       
+
        CALL H5Pget_vol_id_f(fapl_id, vol_id_out, error)
        CALL check("H5Pget_vol_id_f",error,total_error)
        CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
     ENDIF
 
-    CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
-    CALL check("H5VLget_connector_id_f",error,total_error)
-    CALL VERIFY("H5VLget_connector_id_f", vol_id_out, vol_id, total_error)
+    CALL H5VLget_connector_id_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_by_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_id_by_name_f", vol_id_out, vol_id, total_error)
     CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
 
     CALL check("H5F_create_f",error,total_error)
@@ -275,7 +275,7 @@ PROGRAM vol_connector
   WRITE(*, fmt = '(I4)', advance='NO') total_error
   WRITE(*, fmt = '(A)' ) ' error(s) ! '
   WRITE(*,'(18X,A)') '============================================'
-  
+
   CALL h5close_f(error)
 
   ! if errors detected, exit with non-zero code.

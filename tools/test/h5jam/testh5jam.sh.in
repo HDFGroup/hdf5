@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -345,7 +345,7 @@ CHECK_NOUB() {
 #  JAMTEST user_block file.h5 [--clobber] [ofile.h5]
 #
 #    Test the 'jam' tool:
-#      1. figure out the input and output, and the comparision
+#      1. figure out the input and output, and the comparison
 #         that will be done.
 #      2. call 'jam' with the appropriate arguments
 #      3. check the user block is correct in the output (Check_UB)
@@ -474,9 +474,9 @@ UNJAMTEST () {
 #
 
 TOOLTEST_OUTPUT() {
-    if [ "$1" == "JAM" ]; then
+    if [ "$1" = "JAM" ]; then
         TOOLCMD=$JAM_BIN/$JAM
-    elif [ "$1" == "UNJAM" ]; then
+    elif [ "$1" = "UNJAM" ]; then
         TOOLCMD=$JAM_BIN/$UNJAM
     fi
     shift

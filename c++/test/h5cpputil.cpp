@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,20 +19,16 @@
 
  ***************************************************************************/
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
 #include "h5test.h"
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5cpputil.h" // C++ utilility header file
 
 /*-------------------------------------------------------------------------
  * Function:    test_report
@@ -49,46 +45,20 @@ using namespace H5;
  *              Friday, February 6, 2001
  *-------------------------------------------------------------------------
  */
-int test_report( int nerrors, const H5std_string& testname )
+int
+test_report(int nerrors, const H5std_string &testname)
 {
-   if (nerrors)
-   {
-      nerrors = MAX(1, nerrors);
+    if (nerrors) {
+        nerrors = MAX(1, nerrors);
         if (1 == nerrors)
-            cerr << "***** " << nerrors << testname
-                 << " TEST FAILED! *****" << endl;
+            cerr << "***** " << nerrors << testname << " TEST FAILED! *****" << endl;
         else
-            cerr << "***** " << nerrors << testname
-                 << " TESTS FAILED! *****" << endl;
-      return 1;
-   }
-   else
-   {
-      cerr << "All" << testname << " tests passed." << endl;
-      return 0;
-   }
-}
-
-/*-------------------------------------------------------------------------
- * Function:    issue_fail_msg
- *
- * Purpose      Displays that a function has failed with its location.
- *
- * Return       None
- *
- * Programmer   Binh-Minh Ribler (copied and modified macro CHECK from C)
- *              Monday, December 20, 2004
- *
- *-------------------------------------------------------------------------
- */
-void issue_fail_msg(const char* where, int line, const char* file_name,
-                    const char* message)
-{
-    if (GetTestVerbosity()>=VERBO_HI)
-    {
-        cerr << endl;
-        cerr << ">>> FAILED in " << where << " at line " << line
-             << " in " << file_name << " - " << message << endl << endl;
+            cerr << "***** " << nerrors << testname << " TESTS FAILED! *****" << endl;
+        return 1;
+    }
+    else {
+        cerr << "All" << testname << " tests passed." << endl;
+        return 0;
     }
 }
 
@@ -104,15 +74,38 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  *
  *-------------------------------------------------------------------------
  */
-void issue_fail_msg(const char* where, int line, const char* file_name,
-                    const char* func_name, const char* message)
+void
+issue_fail_msg(const char *where, int line, const char *file_name, const char *message)
 {
-    if (GetTestVerbosity()>=VERBO_HI)
-    {
+    if (GetTestVerbosity() >= VERBO_HI) {
         cerr << endl;
-        cerr << ">>> FAILED in " << where << ": " << func_name << endl <<
-                "    at line " << line << " in " << file_name << endl <<
-                "    C library detail: " << message << endl << endl;
+        cerr << ">>> FAILED in " << where << " at line " << line << " in " << file_name << " - " << message
+             << endl
+             << endl;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    issue_fail_msg
+ *
+ * Purpose      Displays that a function has failed with its location.
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (copied and modified macro CHECK from C)
+ *              Monday, December 20, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+issue_fail_msg(const char *where, int line, const char *file_name, const char *func_name, const char *message)
+{
+    if (GetTestVerbosity() >= VERBO_HI) {
+        cerr << endl;
+        cerr << ">>> FAILED in " << where << ": " << func_name << endl
+             << "    at line " << line << " in " << file_name << endl
+             << "    C library detail: " << message << endl
+             << endl;
     }
 }
 
@@ -134,13 +127,13 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  *              Friday, February 6, 2001
  *-------------------------------------------------------------------------
  */
-int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
+int
+check_values(hsize_t i, hsize_t j, int apoint, int acheck)
 {
-    if (apoint != acheck)
-    {
+    if (apoint != acheck) {
         cerr << "    Read different values than written.\n" << endl;
-        cerr << "    At index " << static_cast<unsigned long>(i) << "," <<
-           static_cast<unsigned long>(j) << endl;
+        cerr << "    At index " << static_cast<unsigned long>(i) << "," << static_cast<unsigned long>(j)
+             << endl;
         return -1;
     }
     return 0;
@@ -161,10 +154,10 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
  *
  *-------------------------------------------------------------------------
  */
-void check_values(const char *value, const char* msg, int line, const char* file_name)
+void
+check_values(const char *value, const char *msg, int line, const char *file_name)
 {
-    if (value == NULL)
-    {
+    if (value == NULL) {
         cerr << endl;
         cerr << "*** ERROR: " << msg << ", at line " << line << endl;
         IncTestNumErrs();
@@ -187,21 +180,19 @@ void check_values(const char *value, const char* msg, int line, const char* file
  *              May 2, 2010
  *-------------------------------------------------------------------------
  */
-void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name)
+void
+verify_val(const char *x, const char *value, const char *where, int line, const char *file_name)
 {
-    if (GetTestVerbosity()>=VERBO_HI)
-    {
+    if (GetTestVerbosity() >= VERBO_HI) {
         cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line
-             << " in " << file_name <<  " had value " << x << endl;
+        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
+             << x << endl;
     }
-    if (strcmp(x, value) != 0)
-    {
+    if (strcmp(x, value) != 0) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should be "
-             << value << ", but is " << x << " at line " << line
-             << " in " << file_name << endl;
-        //IncTestNumErrs();
+        cerr << "*** UNEXPECTED VALUE from " << where << " should be " << value << ", but is " << x
+             << " at line " << line << " in " << file_name << endl;
+        // IncTestNumErrs();
         throw TestFailedException(where, "");
     }
 }
@@ -209,7 +200,9 @@ void verify_val(const char* x, const char* value, const char* where, int line, c
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException default constructor
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException():Exception(){}
+InvalidActionException::InvalidActionException() : Exception()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException overloaded constructor
@@ -221,17 +214,24 @@ InvalidActionException::InvalidActionException():Exception(){}
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const H5std_string func, const H5std_string message) : Exception(func, message) {}
+InvalidActionException::InvalidActionException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException destructor
 //--------------------------------------------------------------------------
-InvalidActionException::~InvalidActionException() throw() {}
+InvalidActionException::~InvalidActionException() throw()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException default constructor
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException():Exception(){}
+TestFailedException::TestFailedException() : Exception()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException overloaded constructor
@@ -243,10 +243,14 @@ TestFailedException::TestFailedException():Exception(){}
 //              func    - IN: Name of the function where failure should occur
 //              message - IN: Message
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException(const H5std_string func, const H5std_string message) : Exception(func, message) {}
+TestFailedException::TestFailedException(const H5std_string &func, const H5std_string &message)
+    : Exception(func, message)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException destructor
 //--------------------------------------------------------------------------
-TestFailedException::~TestFailedException() throw() {}
-
+TestFailedException::~TestFailedException() throw()
+{
+}

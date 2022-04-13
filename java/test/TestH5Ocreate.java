@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +21,8 @@ import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5O_iterate_cb;
 import hdf.hdf5lib.callbacks.H5O_iterate_t;
+import hdf.hdf5lib.callbacks.H5O_iterate_opdata_t;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -41,13 +40,13 @@ public class TestH5Ocreate {
     private static final String H5_FILE = "testO.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    long H5fcpl = -1;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did1 = -1;
-    long H5did2 = -1;
-    long H5gcpl = -1;
-    long H5gid = -1;
+    long H5fcpl = HDF5Constants.H5I_INVALID_HID;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did1 = HDF5Constants.H5I_INVALID_HID;
+    long H5did2 = HDF5Constants.H5I_INVALID_HID;
+    long H5gcpl = HDF5Constants.H5I_INVALID_HID;
+    long H5gid = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
 
     private final void _deleteFile(String filename) {
@@ -64,7 +63,7 @@ public class TestH5Ocreate {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name,
                         HDF5Constants.H5T_STD_I32BE, dsid,
@@ -80,7 +79,7 @@ public class TestH5Ocreate {
     }
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5gcpl = HDF5Constants.H5P_DEFAULT;
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
@@ -264,9 +263,9 @@ public class TestH5Ocreate {
             err.printStackTrace();
             fail("H5.H5Oget_info: " + err);
         }
-        assertFalse("H5Oget_info ", obj_info==null);
+        assertFalse("H5Oget_info", obj_info==null);
         assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_DATASET);
-        assertTrue("Link Address ", obj_info.addr>0);
+        assertTrue("Link Object Token", obj_info.token != null);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -286,14 +285,14 @@ public class TestH5Ocreate {
             err.printStackTrace();
             fail("H5.H5Oget_info: " + err);
         }
-        assertFalse("H5Oget_info ", obj_info==null);
+        assertFalse("H5Oget_info", obj_info==null);
         assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_NAMED_DATATYPE);
-        assertTrue("Link Address ", obj_info.addr>0);
+        assertTrue("Link Object Token", obj_info.token != null);
     }
 
     @Test
     public void testH5Olink() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         H5O_info_t dst_obj_info = null;
         try {
@@ -351,18 +350,18 @@ public class TestH5Ocreate {
                 this.link_type = type;
             }
         }
-        class H5O_iter_data implements H5O_iterate_t {
+        class H5O_iter_data implements H5O_iterate_opdata_t {
             public ArrayList<idata> iterdata = new ArrayList<idata>();
         }
-        H5O_iterate_t iter_data = new H5O_iter_data();
-        class H5O_iter_callback implements H5O_iterate_cb {
-            public int callback(long group, String name, H5O_info_t info, H5O_iterate_t op_data) {
+        H5O_iterate_opdata_t iter_data = new H5O_iter_data();
+        class H5O_iter_callback implements H5O_iterate_t {
+            public int callback(long group, String name, H5O_info_t info, H5O_iterate_opdata_t op_data) {
                 idata id = new idata(name, info.type);
                 ((H5O_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }
-        H5O_iterate_cb iter_cb = new H5O_iter_callback();
+        H5O_iterate_t iter_cb = new H5O_iter_callback();
         try {
             H5.H5Ovisit(H5fid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC, iter_cb, iter_data);
         }
@@ -380,7 +379,7 @@ public class TestH5Ocreate {
 
     @Test
     public void testH5Ocomment() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         String obj_comment = null;
         try {
             oid = H5.H5Oopen(H5fid, "DS1", HDF5Constants.H5P_DEFAULT);
@@ -405,7 +404,7 @@ public class TestH5Ocreate {
 
     @Test
     public void testH5Ocomment_clear() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         String obj_comment = null;
         try {
             oid = H5.H5Oopen(H5fid, "DS1", HDF5Constants.H5P_DEFAULT);
@@ -506,7 +505,7 @@ public class TestH5Ocreate {
 
     @Test
     public void testH5Oinc_dec_count() {
-        long oid = -1;
+        long oid = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t obj_info = null;
         try {
             try {

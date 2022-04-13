@@ -5,32 +5,33 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 set (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 3000)
 # Allow full output to go to CDash set to 0
-SET(CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 50000)
-SET(CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
+set (CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE 50000)
+set (CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
 # WARNING!  This could be a lot of output and could overwhelm CDash and the
 # MySQL DB so this might not be a good idea!
 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning:[ \t]*passing argument"
-#    "H5detect.c[0-9 \t:]*warning:[ \t]*passing argument"
-#    "note.*expected.*void.*but argument is of type.*volatile"
-#    "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
-#    "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
-#    "SZIP.src.*:[ \t]*warning"
+    "note.*expected.*void.*but argument is of type.*volatile"
+    "plugin-build.*:[ \t]*warning"
+    "CMake Warning*stamp"
+    "src.ZLIB.*:[ \t]*warning"
+    "warning LNK4197:.*ZLIB-prefix"
+    "src.SZIP.*:[ \t]*warning"
 #    "POSIX name for this item is deprecated"
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
-#    "warning.*implicit declaration of function"
+    "warning.*unknown pragma"
+    "warning.*unrecognized .pragma"
 #    "note: expanded from macro"
-#    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
+    # HDDFFV-11074
+    "This directive is not standard"
 )
 
 set (CTEST_CUSTOM_MEMCHECK_IGNORE
@@ -69,26 +70,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     HL_FORTRAN_f90_ex-clear-objects
     ######### tools/h5clear #########
     H5CLEAR-clearall-objects
-    H5CLEAR-copy_h5clear_fsm_persist_equal.h5
-    H5CLEAR-copy_h5clear_fsm_persist_greater.h5
-    H5CLEAR-copy_h5clear_fsm_persist_less.h5
-    H5CLEAR-copy_h5clear_fsm_persist_noclose.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_equal.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_greater.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_less.h5
-    H5CLEAR-copy_h5clear_log_v3.h5
-    H5CLEAR-copy_h5clear_mdc_image.h5
-    H5CLEAR-copy_h5clear_sec2_v0.h5
-    H5CLEAR-copy_h5clear_sec2_v2.h5
-    H5CLEAR-copy_h5clear_sec2_v3.h5
-    H5CLEAR-copy_h5clear_status_noclear.h5
-    H5CLEAR-copy_latest_h5clear_log_v3.h5
-    H5CLEAR-copy_latest_h5clear_sec2_v3.h5
-    H5CLEAR-copy_mod_h5clear_mdc_image.h5
-    H5CLEAR-copy_mod_h5clr_mdc_image2.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v0.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v2.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v3.h5
     H5CLEAR-h5clear_gentest      # does not close ids by design
     ######### tools/h5copy #########
     H5COPY-clearall-objects
@@ -151,13 +132,15 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK-szip_individual-clear-objects
     H5REPACK-szip_remove-clear-objects
     H5REPACK-upgrade_layout-clear-objects
+    H5REPACK_DMP-attrregion-clear-objects
     H5REPACK_DMP-crtorder-clear-objects
+    H5REPACK_DMP-dataregion-clear-objects
     H5REPACK_DMP-deflate_limit-clear-objects
     H5REPACK-bug1814-clear-objects
     H5REPACK-HDFFV-5932-clear-objects
     H5REPACK-HDFFV-7840-clear-objects
-    H5REPACK_META-meta_long_N-clear-objects
-    H5REPACK_META-meta_short_N-clear-objects
+    H5REPACK_META-meta_long-clear-objects
+    H5REPACK_META-meta_short-clear-objects
     H5REPACK_STAT-GS_AGGR-clear-objects
     H5REPACK_STAT-S_AGGR-clear-objects
     H5REPACK_STAT-SP_NONE-clear-objects

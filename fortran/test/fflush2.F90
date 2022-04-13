@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -81,7 +81,7 @@ PROGRAM FFLUSH2EXAMPLE
   data_dims(2) = NY
 
   !
-  !Initialize FORTRAN predifined datatypes
+  !Initialize FORTRAN predefined datatypes
   !
   CALL h5open_f(error)
   CALL check("h5open_f",error,total_error)
@@ -163,7 +163,7 @@ PROGRAM FFLUSH2EXAMPLE
   CALL check("h5fclose_f",error,total_error)
 
   !
-  !Close FORTRAN predifined datatypes
+  !Close FORTRAN predefined datatypes
   !
   CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL h5close_f(error)

@@ -1,18 +1,51 @@
 usage: h5repack [OPTIONS] file1 file2
   file1                    Input HDF5 File
   file2                    Output HDF5 File
+  ERROR
+   --enable-error-stack    Prints messages from the HDF5 error stack as they occur.
+                           Optional value 2 also prints file open errors.
   OPTIONS
    -h, --help              Print a usage message and exit
-   -v, --verbose           Verbose mode, print object information
+   -v N, --verbose=N       Verbose mode, print object information.
+      N - is an integer greater than 1, 2 displays read/write timing
    -V, --version           Print version number and exit
    -n, --native            Use a native HDF5 type when repacking
-   --enable-error-stack    Prints messages from the HDF5 error stack as they occur
+   --src-vol-value         Value (ID) of the VOL connector to use for opening the
+                           input HDF5 file specified
+   --src-vol-name          Name of the VOL connector to use for opening the input
+                           HDF5 file specified
+   --src-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the input HDF5 file specified
+   --dst-vol-value         Value (ID) of the VOL connector to use for opening the
+                           output HDF5 file specified
+   --dst-vol-name          Name of the VOL connector to use for opening the output
+                           HDF5 file specified
+   --dst-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the output HDF5 file specified
+   --src-vfd-value         Value (ID) of the VFL driver to use for opening the
+                           input HDF5 file specified
+   --src-vfd-name          Name of the VFL driver to use for opening the input
+                           HDF5 file specified
+   --src-vfd-info          VFD-specific info to pass to the VFL driver used for
+                           opening the input HDF5 file specified
+   --dst-vfd-value         Value (ID) of the VFL driver to use for opening the
+                           output HDF5 file specified
+   --dst-vfd-name          Name of the VFL driver to use for opening the output
+                           HDF5 file specified
+   --dst-vfd-info          VFD-specific info to pass to the VFL driver used for
+                           opening the output HDF5 file specified
    -L, --latest            Use latest version of file format
-                           This option will take precedence over the -j and -k options
-   --low=BOUND             The low bound for library release versions to use when creating
-                           objects in the file (default is H5F_LIBVER_EARLIEST)
-   --high=BOUND            The high bound for library release versions to use when creating
-                           objects in the file (default is H5F_LIBVER_LATEST)
+                           This option will take precedence over the options
+                           --low and --high
+   --low=BOUND             The low bound for library release versions to use
+                           when creating objects in the file
+                           (default is H5F_LIBVER_EARLIEST)
+   --high=BOUND            The high bound for library release versions to use
+                           when creating objects in the file
+                           (default is H5F_LIBVER_LATEST)
+   --merge                 Follow external soft link recursively and merge data
+   --prune                 Do not follow external soft links and remove link
+   --merge --prune         Follow external link, merge data and remove dangling link
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size
@@ -27,10 +60,14 @@ usage: h5repack [OPTIONS] file1 file2
    -z Z, --sort_order=Z    Sort groups and attributes by order Z
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
-   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for H5Pset_file_space_strategy
-   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-space for H5Pset_file_space_strategy
-   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy
-   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size
+   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for
+                           H5Pset_file_space_strategy
+   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-
+                           space for H5Pset_file_space_strategy
+   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold
+                           for H5Pset_file_space_strategy
+   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for
+                           H5Pset_file_space_page_size
 
     M - is an integer greater than 1, size of dataset in bytes (default is 0)
     E - is a filename.
@@ -38,41 +75,51 @@ usage: h5repack [OPTIONS] file1 file2
     U - is a filename.
     T - is an integer
     A - is an integer greater than zero
-    Q - is the sort index type for the input file. It can be "name" or "creation_order" (default)
-    Z - is the sort order type for the input file. It can be "descending" or "ascending" (default)
+    Q - is the sort index type for the input file. It can be "name" or
+        "creation_order" (default)
+    Z - is the sort order type for the input file. It can be "descending" or
+        "ascending" (default)
     B - is the user block size, any value that is 512 or greater and is
         a power of 2 (1024 default)
     F - is the shared object header message type, any of <dspace|dtype|fill|
         pline|attr>. If F is not specified, S applies to all messages
 
-    BOUND is an integer indicating the library release versions to use when creating
-          objects in the file (see H5Pset_libver_bounds()):
+    BOUND is an integer indicating the library release versions to use when
+          creating objects in the file (see H5Pset_libver_bounds()):
         0: This is H5F_LIBVER_EARLIEST in H5F_libver_t struct
         1: This is H5F_LIBVER_V18 in H5F_libver_t struct
         2: This is H5F_LIBVER_V110 in H5F_libver_t struct
         3: This is H5F_LIBVER_V112 in H5F_libver_t struct
-           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V112 for this release
+        4: This is H5F_LIBVER_V114 in H5F_libver_t struct
+           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release
 
     FS_STRATEGY is a string indicating the file space strategy used:
         FSM_AGGR:
-               The mechanisms used in managing file space are free-space managers, aggregators and virtual file driver.
+               The mechanisms used in managing file space are free-space
+               managers, aggregators and virtual file driver.
         PAGE:
-               The mechanisms used in managing file space are free-space managers with embedded paged aggregation and virtual file driver.
+               The mechanisms used in managing file space are free-space
+               managers with embedded paged aggregation and virtual file driver.
         AGGR:
-               The mechanisms used in managing file space are aggregators and virtual file driver.
+               The mechanisms used in managing file space are aggregators and
+               virtual file driver.
         NONE:
-               The mechanisms used in managing file space are virtual file driver.
-        The default strategy when not set is FSM_AGGR without persisting free-space.
+               The mechanisms used in managing file space are virtual file
+               driver.
+        The default strategy when not set is FSM_AGGR without persisting free-
+        space.
 
     FS_PERSIST is 1 to persisting free-space or 0 to not persisting free-space.
       The default when not set is not persisting free-space.
       The value is ignored for AGGR and NONE strategies.
 
-    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be tracked by the library.
+    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be
+        tracked by the library.
       The default when not set is 1.
       The value is ignored for AGGR and NONE strategies.
 
-    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when the file space strategy PAGE is used.
+    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when
+        the file space strategy PAGE is used.
       The default when not set is 4096.
 
     FILT - is a string with the format:
@@ -100,9 +147,10 @@ usage: h5repack [OPTIONS] file1 file2
         NBIT (no parameter)
         SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type
             is either IN or DS
-        UD=<filter_number,filter_flag,cd_value_count,value_1[,value_2,...,value_N]>
-            required values for filter_number,filter_flag,cd_value_count,value_1
-            optional values for value_2 to value_N
+        UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>
+            Required values: filter_number, filter_flag, cd_value_count, value1
+            Optional values: value2 to valueN
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
         NONE (no parameter)
 
     LAYT - is a string with the format:
@@ -139,12 +187,7 @@ Examples of use:
 4) h5repack -L -c 10 -s 20:dtype file1 file2
 
    Using latest file format with maximum compact group size of 10 and
-   and minimum shared datatype size of 20
-
-5) h5repack --low=0 --high=1 file1 file2
-
-   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via H5Pset_libver_bounds() when
-   creating the repacked file: file2
+   minimum shared datatype size of 20
 
 5) h5repack -f SHUF -f GZIP=1 file1 file2
 
@@ -153,4 +196,9 @@ Examples of use:
 6) h5repack -f UD=307,0,1,9 file1 file2
 
    Add bzip2 filter to all datasets
+
+7) h5repack --low=0 --high=1 file1 file2
+
+   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
+   H5Pset_libver_bounds() when creating the repacked file, file2
 

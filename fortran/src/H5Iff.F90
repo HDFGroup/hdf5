@@ -18,7 +18,7 @@
 !  This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !  terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -38,7 +38,7 @@
 !*****
 
 MODULE H5I
-  
+
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
 
@@ -305,10 +305,10 @@ CONTAINS
 !  Check if an ID is valid without producing an error message
 !
 ! INPUTS
-!  id		- identifier 
-! OUTPUTS       
+!  id		- identifier
+! OUTPUTS
 !  valid        - status of id as a valid identifier
-!  hdferr:	- error code		
+!  hdferr:	- error code
 !		   Success:  0
 !		   Failure: -1
 !
@@ -318,26 +318,26 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)  :: id ! Identifier 
+    INTEGER(HID_T), INTENT(IN)  :: id ! Identifier
     LOGICAL, INTENT(OUT) :: valid     ! Status of id as a valid identifier
     INTEGER, INTENT(OUT) :: hdferr    ! Error code
 !*****
     INTEGER  :: c_valid ! 0 = .false, 1 = .true.
-    
+
     INTERFACE
        INTEGER FUNCTION h5iis_valid_c(id, c_valid) BIND(C, NAME='h5iis_valid_c')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier 
+         INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier
          INTEGER  :: c_valid
        END FUNCTION h5iis_valid_c
     END INTERFACE
-    
+
     hdferr = h5iis_valid_c(id, c_valid)
-    
+
     valid = .FALSE. ! Default
     IF(c_valid.EQ.1) valid = .TRUE.
-    
+
   END SUBROUTINE h5iis_valid_f
 END MODULE H5I
 

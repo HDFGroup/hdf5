@@ -15,20 +15,21 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! CONTAINS SUBROUTINES
-!  mountingtest, reopentest, plisttest, file_close, file_space
+!  mountingtest, reopentest, get_name_test, plisttest, 
+!  file_close, file_space
 !
 !*****
 !
-!  In the mountingtest subroutine we create one file with a group in it, 
+!  In the mountingtest subroutine we create one file with a group in it,
 !  and another file with a dataset. Mounting is used to
-!  access the dataset from the second file as a member of a group 
-!  in the first file. 
+!  access the dataset from the second file as a member of a group
+!  in the first file.
 
 MODULE TH5F
 
@@ -148,7 +149,7 @@ CONTAINS
           CALL check(" h5tcopy_f",error,total_error)
           CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t4, error)
           CALL check(" h5tcopy_f",error,total_error)
-          
+
           CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
           CALL check(" h5fget_obj_count_f",error,total_error)
 
@@ -280,7 +281,7 @@ CONTAINS
 
           IF(obj_count.NE.1)THEN
              total_error = total_error + 1
-          ENDIF  
+          ENDIF
 
           CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
               CALL check("h5fopen_f",error,total_error)
@@ -290,7 +291,7 @@ CONTAINS
 
           IF(obj_count.NE.2)THEN
              total_error = total_error + 1
-          ENDIF  
+          ENDIF
 
           !
           !Check file numbers
@@ -553,7 +554,7 @@ CONTAINS
           do i = 1, NX
               do j = 1, NY
                   IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-                      write(*, *) "reopen test error occured"
+                      write(*, *) "reopen test error occurred"
                   END IF
               end do
           end do
@@ -579,6 +580,157 @@ CONTAINS
           RETURN
 
         END SUBROUTINE reopentest
+
+!    The following subroutine checks that h5fget_name_f produces
+!    correct output for a given obj_id and filename.
+!
+        SUBROUTINE check_get_name(obj_id, fix_filename, len_filename, total_error)
+          USE HDF5  ! This module contains all necessary modules
+          USE TH5_MISC
+          IMPLICIT NONE
+          INTEGER(HID_T) :: obj_id                          ! Object identifier
+          CHARACTER(LEN=80), INTENT(IN) :: fix_filename     ! Expected filename
+          INTEGER, INTENT(IN) :: len_filename               ! The length of the filename
+          INTEGER, INTENT(INOUT) :: total_error             ! Error count
+
+          CHARACTER(LEN=80):: file_name  ! Filename buffer
+          INTEGER:: error                ! HDF5 error code
+          INTEGER(SIZE_T):: name_size    ! Filename length
+
+          INTEGER, PARAMETER :: sm_len = 2
+          CHARACTER(LEN=len_filename) :: filename_exact
+          CHARACTER(LEN=len_filename-sm_len) :: filename_sm
+
+          !
+          !Get file name from the dataset identifier
+          !
+
+          ! Use an uninitialized buffer
+          CALL h5fget_name_f(obj_id, file_name, name_size, error)
+          CALL check("h5fget_name_f",error,total_error)
+          IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+             WRITE(*,*) "  file name size obtained from the object id is incorrect"
+             total_error = total_error + 1
+          ENDIF
+          IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+             WRITE(*,*) "  file name obtained from the object id is incorrect"
+             total_error = total_error + 1
+          END IF
+
+         ! Use a buffer initialized with spaces
+         file_name(:) = " "
+         CALL h5fget_name_f(obj_id, file_name, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer initialized with non-whitespace characters
+         file_name(:) = "a"
+         CALL h5fget_name_f(obj_id, file_name, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer which is the exact size needed to hold the filename
+         CALL h5fget_name_f(obj_id, filename_exact, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. len_filename)THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(filename_exact .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer which is smaller than needed to hold the filename
+         CALL h5fget_name_f(obj_id, filename_sm, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. len_filename)THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(filename_sm(1:len_filename-sm_len) .NE. fix_filename(1:len_filename-sm_len)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+        END SUBROUTINE check_get_name
+
+!    The following subroutine tests h5fget_name_f.
+!    It creates the file which has name "filename.h5" and
+!    tests that h5fget_name_f also returns the name "filename.h5"
+!
+
+        SUBROUTINE get_name_test(cleanup, total_error)
+          USE HDF5  ! This module contains all necessary modules
+          USE TH5_MISC
+          IMPLICIT NONE
+          LOGICAL, INTENT(IN) :: cleanup
+          INTEGER, INTENT(INOUT) :: total_error
+
+          CHARACTER(LEN=*), PARAMETER :: filename = "filename"
+          CHARACTER(LEN=80)  :: fix_filename
+          INTEGER :: len_filename
+
+          INTEGER(HID_T) :: file_id          ! File identifier
+          INTEGER(HID_T) :: g_id             ! Group identifier
+
+          !
+          ! Flag to check operation success
+          !
+          INTEGER :: error
+
+          !
+          ! Create file "filename.h5" using default properties.
+          !
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          IF (error .NE. 0) THEN
+             WRITE(*,*) "Cannot modify filename"
+             STOP
+          ENDIF
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL check("h5fcreate_f",error,total_error)
+
+          !
+          ! Create group.
+          !
+          CALL h5gopen_f(file_id,"/",g_id, error)
+          CALL check("h5gopen_f",error,total_error)
+
+          len_filename = LEN_TRIM(fix_filename)
+          CALL check_get_name(file_id, fix_filename, len_filename, total_error)
+          CALL check_get_name(g_id, fix_filename, len_filename, total_error)
+
+          ! Close the group.
+          !
+          CALL h5gclose_f(g_id, error)
+          CALL check("h5gclose_f",error,total_error)
+
+          !
+          ! Close the file identifiers.
+          !
+          CALL h5fclose_f(file_id, error)
+          CALL check("h5fclose_f",error,total_error)
+
+          IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          RETURN
+
+        END SUBROUTINE get_name_test
+
 
 !
 !    The following example demonstrates how to get creation property list,

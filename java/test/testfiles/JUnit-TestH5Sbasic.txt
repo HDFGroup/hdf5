@@ -5,18 +5,32 @@ JUnit version 4.11
 .testH5Sdecode_null
 .testH5Screate_simple_dims_exceed
 .testH5Screate_simple_unlimted_1d
+.testH5Sselect_intersect_block_rank_start
+.testH5Sget_regular_hyperslab_invalid
+.testH5Sselect_adjust_rank_offset
 .testH5Screate_simple_dims_invalid
 .testH5Screate_scalar
 .testH5Screate_simple
+.testH5Sselect_project_intersection_invalid
 .testH5Screate_simple_rank_invalid
 .testH5Sget_simple_extent_type_invalid
+.testH5Scombine_hyperslab_invalid
+.testH5Scombine_hyperslab_null_count
+.testH5Scombine_hyperslab_null_start
 .testH5Sencode_invalid
 .testH5Screate_null
 .testH5Screate_simple_extent
 .testH5Screate_invalid
+.testH5Sselect_intersect_block_invalid
+.testH5Sselect_adjust_invalid
 .testH5Screate_simple_unlimted
+.testH5Sselect_shape_same_invalid
+.testH5Smodify_select_invalid
+.testH5Scombine_select_invalid
+.testH5Sselect_copy_invalid
+.testH5Sselect_intersect_block_rank_end
 
 Time:  XXXX
 
-OK (16 tests)
+OK (30 tests)
 

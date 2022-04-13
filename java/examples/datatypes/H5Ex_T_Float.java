@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,6 +21,8 @@
 package examples.datatypes;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -34,9 +35,9 @@ public class H5Ex_T_Float {
     private static final int RANK = 2;
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         double[][] dset_data = new double[DIM0][DIM1];
 
@@ -118,9 +119,9 @@ public class H5Ex_T_Float {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0, DIM1 };
         double[][] dset_data;
 
@@ -173,7 +174,7 @@ public class H5Ex_T_Float {
         }
 
         // Output the data to the screen.
-        DecimalFormat df = new DecimalFormat("#,##0.0000");
+        DecimalFormat df = new DecimalFormat("#,##0.0000", new DecimalFormatSymbols(Locale.US));
         System.out.println(DATASETNAME + ":");
         for (int indx = 0; indx < dims[0]; indx++) {
             System.out.print(" [");

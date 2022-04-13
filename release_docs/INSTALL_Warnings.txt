@@ -60,7 +60,6 @@ Autotools UNIX warnings added to H5_CFLAGS
     -Wcast-align
     -Wcast-qual
     -Wconversion
-    -Wdeclaration-after-statement
     -Wdisabled-optimization
     -Wfloat-equal
     -Wformat=2
@@ -88,11 +87,13 @@ Autotools UNIX warnings added to H5_CFLAGS
         -Waggregate-return
         -Wmissing-format-attribute
         -Wmissing-noreturn
+        -Wunsuffixed-float-constants (gcc 4.5+)
    enable-developer-warnings=OFF
         -Wno-inline
         -Wno-aggregate-return
         -Wno-missing-format-attribute
         -Wno-missing-noreturn
+        -Wno-unsuffixed-float-constants (gcc 4.5+)
 
 IF GCC <= 4.3
     -Wno-long-long
@@ -128,7 +129,6 @@ IF GCC <= 4.6
     -Wstrict-aliasing
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
 
 IF GCC <= 4.7
     -Wno-long-long
@@ -141,7 +141,6 @@ IF GCC <= 4.7
     -Wstrict-aliasing
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
     -Wdouble-promotion
     -Wtrampolines
    enable-developer-warnings=ON:
@@ -158,7 +157,6 @@ IF GCC <= 4.8
     -Wpacked-bitfield-compat
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
     -Wdouble-promotion
     -Wtrampolines
     -Wstack-usage=8192
@@ -205,7 +203,6 @@ IF GCC < 5
     -Wpacked-bitfield-compat
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
     -Wdouble-promotion
     -Wtrampolines
     -Wstack-usage=8192
@@ -231,7 +228,6 @@ IF GCC < 6
     -Wpacked-bitfield-compat
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
     -Wdouble-promotion
     -Wtrampolines
     -Wstack-usage=8192
@@ -259,7 +255,6 @@ IF GCC < 7
     -Wpacked-bitfield-compat
     -Wstrict-overflow=5
     -Wjump-misses-init
-    -Wunsuffixed-float-constants
     -Wdouble-promotion
     -Wtrampolines
     -Wstack-usage=8192
@@ -295,7 +290,6 @@ IF GNU GCC
     -Wcast-align
     -Wcast-qual
     -Wconversion
-    -Wdeclaration-after-statement
     -Wdisabled-optimization
     -Wfloat-equal
     -Wformat=2
@@ -322,10 +316,12 @@ IF GNU GCC
    HDF5_ENABLE_DEV_WARNINGS=ON
         -Winline
         -Waggregate-return
+        -Wunsuffixed-float-constants (gcc 4.5+)
    HDF5_ENABLE_DEV_WARNINGS=OFF
         -Wno-unused-parameter
         -Wno-inline
         -Wno-aggregate-return
+        -Wno-unsuffixed-float-constants (gcc 4.5+)
 
 
 ========================================================================
@@ -383,7 +379,6 @@ HDF5_ENABLE_GROUPONE_WARNINGS:BOOL=ON
       IF GCC >= 4.5
         -Wstrict-overflow=5
         -Wjump-misses-init
-        -Wunsuffixed-float-constants
 
 
 ========================================================================

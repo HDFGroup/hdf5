@@ -7,13 +7,13 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 # Tests for the h5mkgrp tool
 #
-# Quincey Koziol (koziol@hdfgroup.org)
+# Quincey Koziol
 # Tuesday, February 13, 2007
 #
 
@@ -150,10 +150,11 @@ TOOLTEST()
 {
     TESTING $H5MKGRP $@
     (
-    cd $TESTDIR
-    $RUNSERIAL $H5MKGRP_BIN $@
+        cd $TESTDIR
+        $RUNSERIAL $H5MKGRP_BIN $@
     ) > output.out
     RET=$?
+
     if [ $RET != 0 ]; then
         echo "*FAILED*"
         echo "failed result is:"
@@ -164,7 +165,7 @@ TOOLTEST()
 
         # Clean up output file
         if test -z "$HDF5_NOCLEANUP"; then
-           rm -f output.out
+            rm -f output.out
         fi
     fi
 }
@@ -181,8 +182,8 @@ H5LSTEST()
     # any unexpected output from that stream too.
     VERIFY_H5LS  $@
     (
-      cd $TESTDIR
-      $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
+        cd $TESTDIR
+        $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
     ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
 
     # save actual in case it is needed later.
@@ -190,25 +191,25 @@ H5LSTEST()
     STDOUT_FILTER $actual
     STDERR_FILTER $actual
 
-   if [ ! -f $expect ]; then
-      # Create the expect file if it doesn't yet exist.
-      echo " CREATED"
-      cp $actual $expect
-      echo "    Expected result (*.ls) missing"
-      nerrors="`expr $nerrors + 1`"
-   elif $CMP $expect $actual; then
-      echo " PASSED"
-   else
-      echo "*FAILED*"
-      echo "    Expected result (*.ls) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-   fi
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.ls) missing"
+        nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result (*.ls) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
 
-   # Clean up output file
-   if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_sav
-   fi
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_sav
+    fi
 }
 
 # Single run of tool
@@ -258,30 +259,30 @@ CMPTEST()
     # any unexpected output from that stream too.
     TESTING $H5MKGRP $@
     (
-    cd $TESTDIR
-    $RUNSERIAL $H5MKGRP_BIN $@
+        cd $TESTDIR
+        $RUNSERIAL $H5MKGRP_BIN $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
-   if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-      echo " CREATED"
-      cp $actual $expect
-      echo "    Expected result (*.txt) missing"
-      nerrors="`expr $nerrors + 1`"
-   elif $CMP $expect $actual; then
-      echo " PASSED"
-   else
-      echo "*FAILED*"
-      echo "    Expected result (*.txt) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-   fi
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.txt) missing"
+        nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result (*.txt) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
 
-   # Clean up output file
-   if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
-   fi
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err
+    fi
 }
 
 ##############################################################################

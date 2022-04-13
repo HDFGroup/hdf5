@@ -28,6 +28,7 @@ JUnit version 4.11
 .testH5Pset_elink_fapl
 .testH5P_hyper_vector_size
 .testH5P_gc_references
+.testH5P_file_locking
 .testH5P_family_offset
 .testH5P_fapl_core
 .testH5P_fapl_muti
@@ -37,5 +38,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (35 tests)
+OK (36 tests)
 

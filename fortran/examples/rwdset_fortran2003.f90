@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -6,15 +6,15 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! The following example shows how to write and read to/from an existing dataset. 
-! It opens the file created in the previous example, obtains the dataset 
-! identifier, writes the data to the dataset in the file, 
+! The following example shows how to write and read to/from an existing dataset.
+! It opens the file created in the previous example, obtains the dataset
+! identifier, writes the data to the dataset in the file,
 ! then reads the dataset to memory. Uses updated Fortran 2003 interface
 ! with different KINDs of integers and reals.
 !
@@ -22,8 +22,8 @@ PROGRAM RWDSET_FORTRAN2003
 
   USE ISO_C_BINDING
 
-  USE HDF5 ! This module contains all necessary modules 
-        
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(2)  !should map to INTEGER*1 on most modern processors
@@ -42,13 +42,13 @@ PROGRAM RWDSET_FORTRAN2003
   CHARACTER(LEN=6), PARAMETER :: dsetnamer4 = "dsetr4"     ! Dataset name
   CHARACTER(LEN=6), PARAMETER :: dsetnamer8 = "dsetr8"     ! Dataset name
 
-  INTEGER(HID_T) :: file_id       ! File identifier 
-  INTEGER(HID_T) :: dset_id1      ! Dataset identifier  
-  INTEGER(HID_T) :: dset_id4      ! Dataset identifier   
-  INTEGER(HID_T) :: dset_id8      ! Dataset identifier  
-  INTEGER(HID_T) :: dset_id16     ! Dataset identifier  
-  INTEGER(HID_T) :: dset_idr4      ! Dataset identifier   
-  INTEGER(HID_T) :: dset_idr8      ! Dataset identifier 
+  INTEGER(HID_T) :: file_id       ! File identifier
+  INTEGER(HID_T) :: dset_id1      ! Dataset identifier
+  INTEGER(HID_T) :: dset_id4      ! Dataset identifier
+  INTEGER(HID_T) :: dset_id8      ! Dataset identifier
+  INTEGER(HID_T) :: dset_id16     ! Dataset identifier
+  INTEGER(HID_T) :: dset_idr4      ! Dataset identifier
+  INTEGER(HID_T) :: dset_idr8      ! Dataset identifier
 
   INTEGER :: error ! Error flag
   INTEGER :: i
@@ -65,15 +65,15 @@ PROGRAM RWDSET_FORTRAN2003
   REAL(real_kind_7), DIMENSION(1:4), TARGET :: dset_data_r7, data_out_r7
   REAL(real_kind_15), DIMENSION(1:4), TARGET :: dset_data_r15, data_out_r15
 
-  INTEGER(HSIZE_T), DIMENSION(1:1) :: data_dims = (/4/) 
+  INTEGER(HSIZE_T), DIMENSION(1:1) :: data_dims = (/4/)
   INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
-  
+
   TYPE(C_PTR) :: f_ptr
 
   !
   ! Initialize FORTRAN interface.
   !
-  CALL h5open_f(error) 
+  CALL h5open_f(error)
   !
   ! Initialize the dset_data array.
   !
@@ -130,7 +130,7 @@ PROGRAM RWDSET_FORTRAN2003
   !
   ! Read the dataset.
   !
-  ! Read data back into an integer size that is larger then the original size used for 
+  ! Read data back into an integer size that is larger then the original size used for
   ! writing the data
   f_ptr = C_LOC(data_out_i8a(1))
   CALL h5dread_f(dset_id1, h5kind_to_type(int_kind_8,H5_INTEGER_KIND), f_ptr,  error)
@@ -172,5 +172,5 @@ PROGRAM RWDSET_FORTRAN2003
 
 END PROGRAM RWDSET_FORTRAN2003
 
-               
+
 

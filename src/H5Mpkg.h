@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,8 +20,8 @@
 #error "Do not include this file outside the H5M package!"
 #endif
 
-#ifndef _H5Mpkg_H
-#define _H5Mpkg_H
+#ifndef H5Mpkg_H
+#define H5Mpkg_H
 
 /* Get package's private header */
 #include "H5Mprivate.h"
@@ -32,20 +32,16 @@
 /* Package Private Macros */
 /**************************/
 
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 
-
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
-#endif /*_H5Dpkg_H*/
-
+#endif /*H5Dpkg_H*/

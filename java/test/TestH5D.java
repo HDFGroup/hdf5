@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,13 +38,13 @@ public class TestH5D {
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     private static final int RANK = 2;
-    long H5fid = -1;
-    long H5faplid = -1;
-    long H5dsid = -1;
-    long H5dtid = -1;
-    long H5did = -1;
-    long H5did0 = -1;
-    long H5dcpl_id = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5faplid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5dtid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long H5did0 = HDF5Constants.H5I_INVALID_HID;
+    long H5dcpl_id = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
 
     // Values for the status of space allocation
@@ -195,10 +194,10 @@ public class TestH5D {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
     }
 
-    private final void _openH5file(String name, long dapl) {
+    private final void _openH5file(String filename, String dsetname, long dapl) {
        try {
-           H5fid = H5.H5Fopen(H5_FILE,
-                   HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+           H5fid = H5.H5Fopen(filename,
+                   HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
        }
        catch (Throwable err) {
            err.printStackTrace();
@@ -206,7 +205,7 @@ public class TestH5D {
        }
        assertTrue("TestH5D._openH5file: H5.H5Fopen: ",H5fid >= 0);
        try {
-           H5did = H5.H5Dopen(H5fid, name, dapl);
+           H5did = H5.H5Dopen(H5fid, dsetname, dapl);
        }
        catch (Throwable err) {
            err.printStackTrace();
@@ -268,7 +267,7 @@ public class TestH5D {
 
     @Test
     public void testH5Dcreate() {
-        long dataset_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         try {
             dataset_id = H5.H5Dcreate(H5fid, "dset",
                 HDF5Constants.H5T_STD_I32BE, H5dsid,
@@ -292,7 +291,7 @@ public class TestH5D {
 
     @Test
     public void testH5Dcreate_anon() {
-        long dataset_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         try {
             dataset_id = H5.H5Dcreate_anon(H5fid, HDF5Constants.H5T_STD_I32BE,
                     H5dsid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -315,12 +314,12 @@ public class TestH5D {
 
     @Test
     public void testH5Dopen() {
-        long dataset_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
 
         try {
             H5.H5Dclose(H5did);
-            H5did = -1;
+            H5did = HDF5Constants.H5I_INVALID_HID;
             dataset_id = H5.H5Dopen(H5fid, "dset", HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception err) {
@@ -388,8 +387,8 @@ public class TestH5D {
 
     @Test
     public void testH5Dget_access_plist() {
-        long dapl_id = -1;
-        long test_dapl_id = -1;
+        long dapl_id = HDF5Constants.H5I_INVALID_HID;
+        long test_dapl_id = HDF5Constants.H5I_INVALID_HID;
         int[] mdc_nelmts1 = {0};
         int[] mdc_nelmts2 = {0};
         long[] rdcc_nelmts1 = {0};
@@ -500,7 +499,7 @@ public class TestH5D {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Dget_space_closed() throws Throwable {
-        long dataset_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         try {
             dataset_id = H5.H5Dcreate(H5fid, "dset",
                         HDF5Constants.H5T_STD_I32BE, H5dsid,
@@ -518,7 +517,7 @@ public class TestH5D {
 
     @Test
     public void testH5Dget_space() {
-        long dataspace_id = -1;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
         _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
 
         try {
@@ -542,7 +541,7 @@ public class TestH5D {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Dget_type_closed() throws Throwable {
-        long dataset_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         try {
             dataset_id = H5.H5Dcreate(H5fid, "dset",
                         HDF5Constants.H5T_STD_I32BE, H5dsid,
@@ -560,7 +559,7 @@ public class TestH5D {
 
     @Test
     public void testH5Dget_type() {
-        long datatype_id = -1;
+        long datatype_id = HDF5Constants.H5I_INVALID_HID;
         _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
 
         try {

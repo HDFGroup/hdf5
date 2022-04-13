@@ -528,166 +528,166 @@ position        opaque3D        opaque3D        difference
 24 differences found
 dataset: </g1/reference> and </g1/reference>
 size:           [2]           [2]
-position                                        difference          
+position        reference       reference       difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference       reference       difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 4 differences found
 dataset: </g1/reference2D> and </g1/reference2D>
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 12 differences found
 dataset: </g1/reference3D> and </g1/reference3D>
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference3D     reference3D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              

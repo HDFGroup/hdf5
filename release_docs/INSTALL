@@ -351,15 +351,18 @@ CONTENTS
         so it can be debugged with gdb, dbx, ddd, etc., or it can be
         compiled with various optimizations. To compile for symbolic
         debugging (the default for snapshots), say
-        `--enable-build-mode=production'; to compile with optimizations
+        `--enable-build-mode=debug'; to compile with optimizations
         (the default for supported public releases),
-        say `--enable-build-mode=production'. On some systems the
+        say `--enable-build-mode=production'. For a 'clean slate' configuration
+        with optimization disabled and nothing turned on,
+        say `--enable-build-mode=clean'. On some systems the
         library can also be compiled for profiling with gprof by saying
-        `--enable-production=profile'.
+        `--enable-profiling'.
 
             $ ./configure --enable-build-mode=debug       #symbolic debugging
             $ ./configure --enable-build-mode=production  #optimized code
-            $ ./configure --enable-production=profile     #for use with gprof
+            $ ./configure --enable-build-mode=clean       #'clean slate'
+            $ ./configure --enable-profiling              #for use with gprof
 
         Regardless of whether support for symbolic debugging is enabled,
         the library can also perform runtime debugging of certain packages
@@ -414,13 +417,17 @@ CONTENTS
 
 
 4.3.11. Backward compatibility
-        The 1.10 version of the HDF5 library can be configured to operate
-        identically to the v1.8 library with the
+        The 1.13 version of the HDF5 library can be configured to operate
+        identically to the v1.12 library with the
+            --with-default-api-version=v112
+        configure flag, or identically to the v1.10 library with the
+            --with-default-api-version=v110
+        configure flag, or identically to the v1.8 library with the
             --with-default-api-version=v18
         configure flag, or identically to the v1.6 library with the
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.10 library without requiring immediate changes to the application
+        v1.13 library without requiring immediate changes to the application
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
@@ -442,6 +449,19 @@ CONTENTS
         of make.
 
             $ make -j -l6
+
+4.4. Building doxygen
+        One can optionally build the doxygen files for the HDF5 C library.
+        By default, this option is disabled. To build the html files, specify
+        '--enable-doxygen'.
+
+            $ ./configure --enable-doxygen
+
+        Configuration will halt if the required applications are not available.
+        To build:
+
+            $ make doxygen
+
 
 4.5. Testing
         HDF5 comes with various test suites, all of which can be run by

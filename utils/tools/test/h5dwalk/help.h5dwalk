@@ -1,0 +1,13 @@
+
+Usage: h5dwalk [options] <path> ...
+
+Options:
+  -i, --input <file>      - read list from file
+  -o, --output <file>     - write output summary to the named file.
+  -E, --error  <file>     - write processed errors to file in text format
+  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an optional named directory.
+  -T, --tool <executable> - name of the HDF5 tool to invoke
+  -h, --help              - print usage
+
+For more information see https://mpifileutils.readthedocs.io. 
+

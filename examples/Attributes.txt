@@ -1,4 +1,4 @@
-Attribute Examples: 
+Attribute Examples:
 
 H5Acreate2 example: Show how to create an attribute for a dataset and a group
 ----------------
@@ -19,7 +19,7 @@ H5Acreate2 example: Show how to create an attribute for a dataset and a group
     rank=2;
     dimsf[0] = H5S_UNLIMITED;
     dimsf[1] = H5S_UNLIMITED;
-    dataspace = H5Screate_simple(rank, dimsf, NULL); 
+    dataspace = H5Screate_simple(rank, dimsf, NULL);
 
     /* Create a dataset */
     dataset = H5Dcreate2(file, "Dataset1", H5T_UINT8, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -122,7 +122,7 @@ H5Alink Example: Shows how to share an attribute between two datasets.
     /* Get the OID of the attribute */
     attr=H5Aopen(dataset1, "Foo", H5P_DEFAULT);
 
-    /* 
+    /*
      * Create an attribute in the second dataset to the attribute in dataset1,
      * changing the name of the attribute information in dataset2.
      */

@@ -1,0 +1,127 @@
+/** \page About About
+
+\section about_history History
+
+The implementation of this documentation set is based on the fantastic work of the
+<a href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen project</a>.
+Please refer to their <a href="https://gitlab.com/libeigen/eigen">GitLab repository</a>
+and the online version of their
+<a href="http://eigen.tuxfamily.org/dox/">Doxygen-based documentation</a>.
+Not only does Eigen set a standard as a piece of software, but also as an example
+of <em>documentation done right</em>.
+
+\section about_documentation Documentation about Documentation
+
+In this section, we describe common documentation maintenance tasks.
+
+\subsection plain_html Including Plain HTML Pages
+
+The most common use case for this is the inclusion of older documentation.
+New documentation should, whenever possible, be created using Doxygen markdown!
+
+Use Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdhtmlinclude"><code>htmlinclude</code></a>
+special command to include existing plain HTML pages.
+
+An example from this documentation set can be seen
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/dox/FileFormatSpec.dox">here</a>.
+
+\subsection new_rm_entry Creating a New Reference Manual Entry
+
+Please refer to the \ref RMT for guidance on how to create a new reference manual entry.
+
+\subsubsection new_example Adding and Referencing API Examples
+
+For each HDF5 module, such as \Code{H5F}, there is an examples source file called
+\Code{H5*_examples.c}. For example, the \Code{H5F} API examples are located in
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/examples/H5F_examples.c">
+<code>H5F_examples.c</code></a>. Examples are code blocks marked as Doxygen
+<a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet">snippets</a>.
+For example, the source code for the H5Fcreate() API sample is located between
+the
+\verbatim
+//! <!-- [create] -->
+...
+//! <!-- [create] -->
+\endverbatim
+comments in
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/examples/H5F_examples.c">
+<code>H5F_examples.c</code></a>.
+
+Add a new API example by adding a new code block enclosed between matching
+snippet tags. The name of the tag is usually the function name stripped of
+the module prefix.
+
+The inclusion of such a block of code can then be triggered via Doxygen's
+<a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet"><code>snippet</code></a>
+special command. For example, the following markup
+\verbatim
+* \snippet H5F_examples.c create
+\endverbatim
+yields
+\snippet H5F_examples.c create
+
+\subsubsection api_macro Adding an API Macro
+
+API macros are handled by the <code>api_vers_2, api_vers_3, api_vers_4</code>
+custom commands. The numbers indicate the number of potential API function
+mappings. For example, H5Acreate() has two potential mappings, H5Acreate1() and
+H5Acreate2(). To trigger the creation of a reference manual entry for H5Acreate()
+use the following markup:
+\verbatim
+\api_vers_2{H5Acreate,H5Acreate1,H5Acreate2}
+\endverbatim
+This yields:
+
+\api_vers_2{H5Acreate,H5Acreate1,H5Acreate2}
+
+\subsection custom_commands Creating Custom Commands
+
+See Doxygen's <a href="https://www.doxygen.nl/manual/custcmd.html">Custom Commands documentation</a>
+as a general reference.
+
+All custom commands for this project are located in the
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+file in the <a href="https://github.com/HDFGroup/hdf5/tree/develop/doxygen"><tt>doxygen</tt></a>
+subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.
+
+The custom commands are grouped in sections. Find a suitable section for your command or
+ask for help if unsure!
+
+\subsection new_rfc Adding a New RFC or Referencing an Existing RFC
+
+For ease of reference, we define custom commands for each RFC in the <tt>RFCs</tt> section
+of the
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+file. For example the custom command \Code{ref_rfc20141210} can be used to insert a
+reference to "RFC: Virtual Object Layer". In other words, the markup
+\verbatim
+\ref_rfc20141210
+\endverbatim
+yields a clickable link:
+
+\ref_rfc20141210
+
+To add a new RFC, add a custom command for the RFC to the
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+file. The naming convention for the custom command is \Code{ref_rfcYYYYMMDD},
+where \Code{YYYYMMDD} is the ID of the RFC. The URL is composed of the prefix
+\verbatim
+https://docs.hdfgroup.org/hdf5/rfc/
+\endverbatim
+and the name of your RFC file, typically, a PDF file, i.e., the full URL would
+be
+\verbatim
+https://docs.hdfgroup.org/hdf5/rfc/my_great_rfc_name.pdf
+\endverbatim
+
+\subsection hosting How Do Updates and Changes Get Published?
+
+Currently, the files underlying this documentation website are stored in an
+bucket on AWS S3. The top-level bucket is <pre>s3://docs.hdfgroup.org/hdf5/</pre>
+There are folders for the <tt>development</tt> branch and all supported release
+version.
+
+Talk to your friendly IT-team if you need write access, or you need someone to
+push an updated version for you!
+
+*/

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_F90 C Fortran)
 
 if (H5_HAVE_PARALLEL)

@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5T APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -16,7 +16,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -43,7 +43,7 @@
 
 MODULE TH5T_F03
 
-  USE HDF5 
+  USE HDF5
   USE TH5_MISC
   USE TH5_MISC_GEN
   USE ISO_C_BINDING
@@ -55,10 +55,10 @@ SUBROUTINE test_array_compound_atomic(total_error)
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
-  ! 1-D dataset WITH fixed dimensions 
+  ! 1-D dataset WITH fixed dimensions
   INTEGER, PARAMETER :: SPACE1_RANK = 1
   INTEGER, PARAMETER :: SPACE1_DIM1 = 4
-  ! 1-D array datatype 
+  ! 1-D array datatype
   INTEGER, PARAMETER :: ARRAY1_RANK= 1
   INTEGER, PARAMETER :: ARRAY1_DIM1= 4
   CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray1.h5"
@@ -68,26 +68,26 @@ SUBROUTINE test_array_compound_atomic(total_error)
      INTEGER :: i
      REAL :: f
   END TYPE s1_t
-  TYPE(s1_t), DIMENSION(:,:), ALLOCATABLE, TARGET :: wdata !  Information to write 
-  TYPE(s1_t), DIMENSION(:,:), ALLOCATABLE, TARGET :: rdata !  Information read in 
-  INTEGER(hid_t) :: fid1       ! HDF5 File IDs		
-  INTEGER(hid_t) :: dataset    ! Dataset ID			
-  INTEGER(hid_t) :: sid1       ! Dataspace ID			
-  INTEGER(hid_t) :: tid1       ! Array Datatype ID			
-  INTEGER(hid_t) :: tid2       ! Compound Datatype ID			
+  TYPE(s1_t), DIMENSION(:,:), ALLOCATABLE, TARGET :: wdata !  Information to write
+  TYPE(s1_t), DIMENSION(:,:), ALLOCATABLE, TARGET :: rdata !  Information read in
+  INTEGER(hid_t) :: fid1       ! HDF5 File IDs
+  INTEGER(hid_t) :: dataset    ! Dataset ID
+  INTEGER(hid_t) :: sid1       ! Dataspace ID
+  INTEGER(hid_t) :: tid1       ! Array Datatype ID
+  INTEGER(hid_t) :: tid2       ! Compound Datatype ID
 
   INTEGER(HSIZE_T), DIMENSION(1) :: sdims1 = (/SPACE1_DIM1/)
   INTEGER(HSIZE_T), DIMENSION(1) :: tdims1=(/ARRAY1_DIM1/)
-  INTEGER :: ndims !  Array rank for reading 
-  INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading 
-  INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims ! Array dimensions for reading 
-  INTEGER :: nmemb ! Number of compound members 
-  CHARACTER(LEN=20) :: mname ! Name of compound field 
-  INTEGER(size_t) :: off   ! Offset of compound field 
-  INTEGER(hid_t) :: mtid   ! Datatype ID for field 
-  INTEGER :: i,j      !  counting variables  
+  INTEGER :: ndims !  Array rank for reading
+  INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading
+  INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims ! Array dimensions for reading
+  INTEGER :: nmemb ! Number of compound members
+  CHARACTER(LEN=20) :: mname ! Name of compound field
+  INTEGER(size_t) :: off   ! Offset of compound field
+  INTEGER(hid_t) :: mtid   ! Datatype ID for field
+  INTEGER :: i,j      !  counting variables
 
-  INTEGER :: error    !  Generic RETURN value 
+  INTEGER :: error    !  Generic RETURN value
   INTEGER :: namelen
   LOGICAL :: flag
 
@@ -96,7 +96,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   ALLOCATE( wdata(1:SPACE1_DIM1,1:ARRAY1_DIM1) )
   ALLOCATE( rdata(1:SPACE1_DIM1,1:ARRAY1_DIM1) )
 
-  ! Initialize array data to write 
+  ! Initialize array data to write
   DO i = 1, SPACE1_DIM1
      DO j = 1, ARRAY1_DIM1
         wdata(i,j)%i = i * 10 + j
@@ -104,153 +104,153 @@ SUBROUTINE test_array_compound_atomic(total_error)
      ENDDO
   ENDDO
 
-  ! Create file 
+  ! Create file
   CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid1,error)
   CALL check("h5fcreate_f", error, total_error)
 
-  ! Create dataspace for datasets 
+  ! Create dataspace for datasets
   CALL h5screate_simple_f(SPACE1_RANK, sdims1, sid1, error)
   CALL check("h5screate_simple_f", error, total_error)
 
   CALL h5tcreate_f(H5T_COMPOUND_F, H5OFFSETOF(C_LOC(wdata(1,1)), C_LOC(wdata(2,1))), tid2, error)
   CALL check("h5tcreate_f", error, total_error)
 
-  ! Insert integer field 
+  ! Insert integer field
   CALL h5tinsert_f(tid2, "i", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%i)), H5T_NATIVE_INTEGER, error)
   CALL check("h5tinsert_f", error, total_error)
 
-  ! Insert float field 
+  ! Insert float field
 
   CALL h5tinsert_f(tid2, "f", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f)), H5T_NATIVE_REAL, error)
   CALL check("h5tinsert_f", error, total_error)
 
-  !  Create an array datatype to refer to 
+  !  Create an array datatype to refer to
   CALL h5tarray_create_f(tid2, ARRAY1_RANK, tdims1, tid1, error)
   CALL check("h5tarray_create_f", error, total_error)
 
-  ! Close compound datatype 
+  ! Close compound datatype
   CALL h5tclose_f(tid2,error)
   CALL check("h5tclose_f", error, total_error)
 
 
-  ! Create a dataset 
+  ! Create a dataset
   CALL h5dcreate_f(fid1,"Dataset1",tid1, sid1, dataset,error)
   CALL check("h5dcreate_f", error, total_error)
 
-  ! Write dataset to disk 
+  ! Write dataset to disk
 
   ALLOCATE(rdims(1:2)) ! dummy not needed
 
   f_ptr = C_LOC(wdata(1,1))
   CALL h5dwrite_f(dataset, tid1, f_ptr, error )
   CALL check("h5dwrite_f", error, total_error)
-  ! Close Dataset  
+  ! Close Dataset
   CALL h5dclose_f(dataset, error)
   CALL check("h5dclose_f", error, total_error)
 
-  ! Close datatype 
+  ! Close datatype
   CALL h5tclose_f(tid1,error)
   CALL check("h5tclose_f", error, total_error)
 
-  ! Close disk dataspace 
+  ! Close disk dataspace
   CALL h5sclose_f(sid1,error)
   CALL check("h5sclose_f", error, total_error)
 
-  ! Close file 
+  ! Close file
   CALL h5fclose_f(fid1,error)
   CALL check("h5fclose_f", error, total_error)
 
-  ! Re-open file 
+  ! Re-open file
   CALL h5fopen_f (FILENAME, H5F_ACC_RDONLY_F, fid1, error)
   CALL check("h5fopen_f", error, total_error)
 
-  ! Open the dataset  
+  ! Open the dataset
   CALL h5dopen_f(fid1, "Dataset1", dataset, error)
   CALL check("h5dopen_f", error, total_error)
 
-  ! Get the datatype     
+  ! Get the datatype
   CALL h5dget_type_f(dataset, tid1, error)
   CALL check("h5dget_type_f", error, total_error)
 
-  ! Check the array rank 
+  ! Check the array rank
   CALL h5tget_array_ndims_f(tid1, ndims, error)
   CALL check("h5tget_array_ndims_f", error, total_error)
   CALL VERIFY("h5tget_array_ndims_f",ndims, ARRAY1_RANK, total_error)
 
-  ! Get the array dimensions 
+  ! Get the array dimensions
   ALLOCATE(rdims1(1:ndims))
   CALL h5tget_array_dims_f(tid1, rdims1, error)
   CALL check("h5tget_array_dims_f", error, total_error)
 
 
-  ! Check the array dimensions 
+  ! Check the array dimensions
   DO i = 1, ndims
      CALL VERIFY("h5tget_array_dims_f", INT(rdims1(i)), INT(tdims1(i)), total_error)
   ENDDO
 
-  ! Get the compound datatype 
+  ! Get the compound datatype
   CALL h5tget_super_f(tid1, tid2, error)
   CALL check("h5tget_super_f", error, total_error)
 
-  ! Check the number of members 
+  ! Check the number of members
   CALL h5tget_nmembers_f(tid2, nmemb, error)
   CALL check("h5tget_nmembers_f", error, total_error)
   CALL VERIFY("h5tget_nmembers_f", nmemb, 2, total_error)
 
-  ! Check the 1st field's name 
+  ! Check the 1st field's name
   CALL H5Tget_member_name_f(tid2, 0, mname, namelen,error)
   CALL check("H5Tget_member_name_f", error, total_error)
   CALL verify("H5Tget_member_name_f",mname(1:namelen),"i", total_error)
 
-  !  Check the 1st field's offset 
+  !  Check the 1st field's offset
   CALL H5Tget_member_offset_f(tid2, 0, off, error)
   CALL check("H5Tget_member_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error) 
+  CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error)
 
 
-  ! Check the 1st field's datatype 
+  ! Check the 1st field's datatype
   CALL H5Tget_member_type_f(tid2, 0, mtid, error)
   CALL check("H5Tget_member_type_f", error, total_error)
 
   CALL H5Tequal_f(mtid, H5T_NATIVE_INTEGER, flag, error)
-  CALL check("H5Tequal_f", error, total_error) 
+  CALL check("H5Tequal_f", error, total_error)
   CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
   CALL h5tclose_f(mtid,error)
   CALL check("h5tclose_f", error, total_error)
 
-  ! Check the 2nd field's name 
+  ! Check the 2nd field's name
   CALL H5Tget_member_name_f(tid2, 1, mname, namelen,error)
   CALL check("H5Tget_member_name_f", error, total_error)
   CALL verify("H5Tget_member_name_f",mname(1:namelen),"f", total_error)
 
-  !  Check the 2nd field's offset 
+  !  Check the 2nd field's offset
   CALL H5Tget_member_offset_f(tid2, 1, off, error)
   CALL check("H5Tget_member_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error)    
+  CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error)
 
-  ! Check the 2nd field's datatype 
+  ! Check the 2nd field's datatype
   CALL H5Tget_member_type_f(tid2, 1, mtid, error)
   CALL check("H5Tget_member_type_f", error, total_error)
 
   CALL H5Tequal_f(mtid, H5T_NATIVE_REAL, flag, error)
-  CALL check("H5Tequal_f", error, total_error) 
+  CALL check("H5Tequal_f", error, total_error)
   CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
   CALL h5tclose_f(mtid,error)
   CALL check("h5tclose_f", error, total_error)
 
-  !  Close Compound Datatype 
+  !  Close Compound Datatype
   CALL h5tclose_f(tid2, error)
   CALL check("h5tclose_f", error, total_error)
 
-  ! Read dataset from disk 
+  ! Read dataset from disk
 
   f_ptr = C_LOC(rdata(1,1))
   CALL H5Dread_f(dataset, tid1, f_ptr, error, H5S_ALL_F, H5S_ALL_F, H5P_DEFAULT_F)
   CALL check("H5Dread_f", error, total_error)
 
-  ! Compare data read in 
+  ! Compare data read in
   DO i = 1, SPACE1_DIM1
      DO j = 1, ARRAY1_DIM1
         IF(wdata(i,j)%i.NE.rdata(i,j)%i)THEN
@@ -261,15 +261,15 @@ SUBROUTINE test_array_compound_atomic(total_error)
      ENDDO
   ENDDO
 
-  ! Close Datatype 
+  ! Close Datatype
   CALL h5tclose_f(tid1,error)
   CALL check("h5tclose_f", error, total_error)
 
-  ! Close Dataset 
+  ! Close Dataset
   CALL h5dclose_f(dataset, error)
   CALL check("h5dclose_f", error, total_error)
 
-  ! Close file 
+  ! Close file
   CALL h5fclose_f(fid1,error)
   CALL check("h5fclose_f", error, total_error)
 
@@ -283,12 +283,12 @@ END SUBROUTINE test_array_compound_atomic
 !!$!***************************************************************
 !!$
   SUBROUTINE test_array_compound_array(total_error)
-    
+
     IMPLICIT NONE
-    
+
     INTEGER, INTENT(INOUT) :: total_error
 
-    !  1-D array datatype 
+    !  1-D array datatype
     INTEGER, PARAMETER :: ARRAY1_RANK= 1
     INTEGER, PARAMETER :: ARRAY1_DIM1= 3
     INTEGER, PARAMETER :: ARRAY2_DIM1= 5
@@ -303,47 +303,47 @@ END SUBROUTINE test_array_compound_atomic
        REAL, DIMENSION(1:ARRAY2_DIM1) :: f
        CHARACTER(LEN=2), DIMENSION(1:ARRAY2_DIM1) :: c
     END TYPE st_t_struct
-    !  Information to write 
+    !  Information to write
     TYPE(st_t_struct), DIMENSION(1:SPACE1_DIM1,1:ARRAY1_DIM1), TARGET :: wdata
-    !  Information read in 
+    !  Information read in
     TYPE(st_t_struct), DIMENSION(1:SPACE1_DIM1,1:ARRAY1_DIM1), TARGET :: rdata
 
 
-    INTEGER(hid_t) :: fid1      !  HDF5 File IDs		
-    INTEGER(hid_t) :: dataset   !  Dataset ID			
-    integer(hid_t) :: sid1      !  Dataspace ID			
-    integer(hid_t) :: tid1      !  Array Datatype ID	
-    integer(hid_t) :: tid2      !  Compound Datatype ID	
-    integer(hid_t) :: tid3      !  Nested Array Datatype ID	
-    integer(hid_t) :: tid4      !  Nested Array Datatype ID	
+    INTEGER(hid_t) :: fid1      !  HDF5 File IDs
+    INTEGER(hid_t) :: dataset   !  Dataset ID
+    integer(hid_t) :: sid1      !  Dataspace ID
+    integer(hid_t) :: tid1      !  Array Datatype ID
+    integer(hid_t) :: tid2      !  Compound Datatype ID
+    integer(hid_t) :: tid3      !  Nested Array Datatype ID
+    integer(hid_t) :: tid4      !  Nested Array Datatype ID
 
     INTEGER(HSIZE_T), DIMENSION(1) :: sdims1 = (/SPACE1_DIM1/)
     INTEGER(HSIZE_T), DIMENSION(1) :: tdims1=(/ARRAY1_DIM1/)
     INTEGER(HSIZE_T), DIMENSION(1) :: tdims2=(/ARRAY2_DIM1/)
 
-    INTEGER  ndims      ! Array rank for reading 
+    INTEGER  ndims      ! Array rank for reading
 
-    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading 
+    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading
 
-    INTEGER :: nmemb ! Number of compound members 
-    CHARACTER(LEN=20) :: mname ! Name of compound field 
-    INTEGER(size_t) :: off   ! Offset of compound field 
-    INTEGER(hid_t) :: mtid   ! Datatype ID for field  
-    INTEGER(hid_t) :: mtid2   ! Datatype ID for field  
+    INTEGER :: nmemb ! Number of compound members
+    CHARACTER(LEN=20) :: mname ! Name of compound field
+    INTEGER(size_t) :: off   ! Offset of compound field
+    INTEGER(hid_t) :: mtid   ! Datatype ID for field
+    INTEGER(hid_t) :: mtid2   ! Datatype ID for field
 
-    INTEGER :: mclass     !  Datatype class for field 
-    INTEGER :: i,j,k      ! counting variables 
+    INTEGER :: mclass     !  Datatype class for field
+    INTEGER :: i,j,k      ! counting variables
 
     INTEGER :: error
     CHARACTER(LEN=2) :: ichr2
     INTEGER :: namelen
-    LOGICAL :: flag 
+    LOGICAL :: flag
     INTEGER(HID_T) :: atype_id       !String Attribute Datatype identifier
-    INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string 
+    INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string
 
     TYPE(c_ptr) :: f_ptr
 
-    !  Initialize array data to write 
+    !  Initialize array data to write
     DO i = 1, SPACE1_DIM1
        DO j = 1, array1_DIM1
           wdata(i,j)%i = i*10+j
@@ -355,28 +355,28 @@ END SUBROUTINE test_array_compound_atomic
        ENDDO
     ENDDO
 
-    !  Create file 
+    !  Create file
     CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid1,error)
-    CALL check("h5fcreate_f", error, total_error)   
+    CALL check("h5fcreate_f", error, total_error)
 
 
-    !  Create dataspace for datasets 
+    !  Create dataspace for datasets
     CALL h5screate_simple_f(SPACE1_RANK, sdims1, sid1, error)
     CALL check("h5screate_simple_f", error, total_error)
 
-    !  Create a compound datatype to refer to 
+    !  Create a compound datatype to refer to
     !
     CALL h5tcreate_f(H5T_COMPOUND_F,  H5OFFSETOF(C_LOC(wdata(1,1)), C_LOC(wdata(2,1))), tid2, error)
     CALL check("h5tcreate_f", error, total_error)
 
-    ! Insert integer field 
+    ! Insert integer field
     CALL h5tinsert_f(tid2, "i", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%i)), H5T_NATIVE_INTEGER, error)
     CALL check("h5tinsert_f", error, total_error)
 
-    ! Create an array of floats datatype 
+    ! Create an array of floats datatype
     CALL h5tarray_create_f(H5T_NATIVE_REAL, ARRAY1_RANK, tdims2, tid3, error)
     CALL check("h5tarray_create_f", error, total_error)
-    ! Insert float array field 
+    ! Insert float array field
 
     CALL h5tinsert_f(tid2, "f", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f)), tid3, error)
     CALL check("h5tinsert_f", error, total_error)
@@ -386,227 +386,227 @@ END SUBROUTINE test_array_compound_atomic
     !
     CALL h5tcopy_f(H5T_NATIVE_CHARACTER, atype_id, error)
     CALL check("h5tcopy_f",error,total_error)
- 
-    attrlen = LEN(wdata(1,1)%c(1)) 
-    CALL h5tset_size_f(atype_id, attrlen, error)
-    CALL check("h5tset_size_f",error,total_error)    
 
-    ! Create an array of character datatype 
+    attrlen = LEN(wdata(1,1)%c(1))
+    CALL h5tset_size_f(atype_id, attrlen, error)
+    CALL check("h5tset_size_f",error,total_error)
+
+    ! Create an array of character datatype
     CALL h5tarray_create_f(atype_id, ARRAY1_RANK, tdims2, tid4, error)
     CALL check("h5tarray_create_f", error, total_error)
 
-    ! Insert character array field 
+    ! Insert character array field
     CALL h5tinsert_f(tid2, "c", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)(1:1))), tid4, error)
     CALL check("h5tinsert2_f", error, total_error)
 
-    !  Close array of floats field datatype 
+    !  Close array of floats field datatype
     CALL h5tclose_f(tid3,error)
     CALL check("h5tclose_f", error, total_error)
 
     CALL h5tclose_f(tid4,error)
     CALL check("h5tclose_f", error, total_error)
 
-    ! Create an array datatype to refer to 
+    ! Create an array datatype to refer to
     CALL h5tarray_create_f(tid2, ARRAY1_RANK, tdims1, tid1, error)
     CALL check("h5tarray_create_f", error, total_error)
 
-    ! Close compound datatype 
+    ! Close compound datatype
     CALL h5tclose_f(tid2,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Create a dataset 
+    !  Create a dataset
     CALL h5dcreate_f(fid1,"Dataset1",tid1, sid1, dataset,error)
     CALL check("h5dcreate_f", error, total_error)
 
 
-    ! Write dataset to disk 
+    ! Write dataset to disk
     f_ptr = C_LOC(wdata(1,1))
     CALL h5dwrite_f(dataset, tid1, f_ptr, error )
     CALL check("h5dwrite_f", error, total_error)
 
-    ! Close Dataset 
+    ! Close Dataset
     CALL h5dclose_f(dataset, error)
     CALL check("h5dclose_f", error, total_error)
 
-    !  Close datatype 
+    !  Close datatype
     CALL h5tclose_f(tid1,error)
     CALL check("h5tclose_f", error, total_error)
 
-    ! Close disk dataspace 
+    ! Close disk dataspace
     CALL h5sclose_f(sid1,error)
     CALL check("h5sclose_f", error, total_error)
 
-    ! Close file 
+    ! Close file
     CALL h5fclose_f(fid1,error)
     CALL check("h5fclose_f", error, total_error)
 
-    !  Re-open file 
+    !  Re-open file
     CALL h5fopen_f (FILENAME, H5F_ACC_RDONLY_F, fid1, error)
     CALL check("h5fopen_f", error, total_error)
 
-    ! Open the dataset 
+    ! Open the dataset
 
     CALL h5dopen_f(fid1, "Dataset1", dataset, error)
     CALL check("h5dopen_f", error, total_error)
-    
-    !  Get the datatype 
+
+    !  Get the datatype
     CALL h5dget_type_f(dataset, tid1, error)
     CALL check("h5dget_type_f", error, total_error)
 
-    !  Check the array rank 
+    !  Check the array rank
     CALL h5tget_array_ndims_f(tid1, ndims, error)
     CALL check("h5tget_array_ndims_f", error, total_error)
     CALL VERIFY("h5tget_array_ndims_f",ndims, ARRAY1_RANK, total_error)
 
 
-    ! Get the array dimensions 
+    ! Get the array dimensions
     ALLOCATE(rdims1(1:ndims))
     CALL h5tget_array_dims_f(tid1, rdims1, error)
     CALL check("h5tget_array_dims_f", error, total_error)
 
-    !  Check the array dimensions 
+    !  Check the array dimensions
     DO i = 1, ndims
        CALL VERIFY("h5tget_array_dims_f", INT(rdims1(i)), INT(tdims1(i)), total_error)
     ENDDO
 
-    !  Get the compound datatype 
+    !  Get the compound datatype
     CALL h5tget_super_f(tid1, tid2, error)
     CALL check("h5tget_super_f", error, total_error)
 
-    !  Check the number of members 
+    !  Check the number of members
     CALL h5tget_nmembers_f(tid2, nmemb, error)
     CALL check("h5tget_nmembers_f", error, total_error)
     CALL VERIFY("h5tget_nmembers_f", nmemb, 3, total_error)
 
-    !  Check the 1st field's name 
+    !  Check the 1st field's name
     CALL H5Tget_member_name_f(tid2, 0, mname, namelen,error)
     CALL check("H5Tget_member_name_f", error, total_error)
     CALL verify("H5Tget_member_name_f",mname(1:namelen),"i", total_error)
 
-    !  Check the 1st field's offset 
+    !  Check the 1st field's offset
 
     CALL H5Tget_member_offset_f(tid2, 0, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
-    CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error) 
+    CALL VERIFY("H5Tget_member_offset_f",INT(off),0, total_error)
 
-    !  Check the 1st field's datatype 
+    !  Check the 1st field's datatype
     CALL H5Tget_member_type_f(tid2, 0, mtid, error)
     CALL check("H5Tget_member_type_f", error, total_error)
 
     CALL H5Tequal_f(mtid, H5T_NATIVE_INTEGER, flag, error)
-    CALL check("H5Tequal_f", error, total_error) 
+    CALL check("H5Tequal_f", error, total_error)
     CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
     CALL h5tclose_f(mtid,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Check the 2nd field's name 
+    !  Check the 2nd field's name
     CALL H5Tget_member_name_f(tid2, 1, mname, namelen,error)
     CALL check("H5Tget_member_name_f", error, total_error)
     CALL verify("H5Tget_member_name_f",mname(1:namelen),"f", total_error)
 
-    !  Check the 2nd field's offset 
+    !  Check the 2nd field's offset
     CALL H5Tget_member_offset_f(tid2, 1, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
-    CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error) 
+    CALL VERIFY("H5Tget_member_offset_f",INT(off),INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%f))), total_error)
 
-    !  Check the 2nd field's datatype 
+    !  Check the 2nd field's datatype
     CALL H5Tget_member_type_f(tid2, 1, mtid, error)
     CALL check("H5Tget_member_type_f", error, total_error)
 
-    !  Get the 2nd field's class 
+    !  Get the 2nd field's class
     CALL H5Tget_class_f(mtid, mclass, error)
     CALL check("H5Tget_class_f", error, total_error)
     CALL VERIFY("H5Tget_class_f",mclass, H5T_ARRAY_F, total_error)
 
-    !  Check the array rank 
+    !  Check the array rank
     CALL h5tget_array_ndims_f(mtid, ndims, error)
     CALL check("h5tget_array_ndims_f", error, total_error)
     CALL VERIFY("h5tget_array_ndims_f",ndims, ARRAY1_RANK, total_error)
 
-    !  Get the array dimensions 
+    !  Get the array dimensions
     CALL h5tget_array_dims_f(mtid, rdims1, error)
     CALL check("h5tget_array_dims_f", error, total_error)
 
-    !  Check the array dimensions 
+    !  Check the array dimensions
     DO i = 1, ndims
        CALL VERIFY("h5tget_array_dims_f", INT(rdims1(i)), INT(tdims2(i)), total_error)
     ENDDO
 
-    !  Check the 3rd field's name 
+    !  Check the 3rd field's name
     CALL H5Tget_member_name_f(tid2, 2, mname, namelen,error)
     CALL check("H5Tget_member_name_f", error, total_error)
     CALL verify("H5Tget_member_name_f",mname(1:namelen),"c", total_error)
 
-    !  Check the 3rd field's offset 
+    !  Check the 3rd field's offset
     CALL H5Tget_member_offset_f(tid2, 2, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
     CALL VERIFY("H5Tget_member_offset_f",INT(off),&
-         INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)(1:1)))), total_error) 
+         INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)(1:1)))), total_error)
 
-    !  Check the 3rd field's datatype 
+    !  Check the 3rd field's datatype
     CALL H5Tget_member_type_f(tid2, 2, mtid2, error)
     CALL check("H5Tget_member_type_f", error, total_error)
 
-    !  Get the 3rd field's class 
+    !  Get the 3rd field's class
     CALL H5Tget_class_f(mtid2, mclass, error)
     CALL check("H5Tget_class_f", error, total_error)
     CALL VERIFY("H5Tget_class_f",mclass, H5T_ARRAY_F, total_error)
 
-    !  Check the array rank 
+    !  Check the array rank
     CALL h5tget_array_ndims_f(mtid2, ndims, error)
     CALL check("h5tget_array_ndims_f", error, total_error)
     CALL VERIFY("h5tget_array_ndims_f",ndims, ARRAY1_RANK, total_error)
 
-    !  Get the array dimensions 
+    !  Get the array dimensions
     CALL h5tget_array_dims_f(mtid2, rdims1, error)
     CALL check("h5tget_array_dims_f", error, total_error)
 
-    !  Check the array dimensions 
+    !  Check the array dimensions
     DO i = 1, ndims
        CALL VERIFY("h5tget_array_dims_f", INT(rdims1(i)), INT(tdims2(i)), total_error)
     ENDDO
 
-    !  Check the nested array's datatype 
+    !  Check the nested array's datatype
     CALL H5Tget_super_f(mtid, tid3, error)
     CALL check("H5Tget_super_f", error, total_error)
 
     CALL H5Tequal_f(tid3, H5T_NATIVE_REAL, flag, error)
-    CALL check("H5Tequal_f", error, total_error) 
+    CALL check("H5Tequal_f", error, total_error)
     CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
-    !  Check the nested array's datatype 
+    !  Check the nested array's datatype
     CALL H5Tget_super_f(mtid2, tid3, error)
     CALL check("H5Tget_super_f", error, total_error)
 
     CALL H5Tequal_f(tid3, atype_id, flag, error)
-    CALL check("H5Tequal_f", error, total_error) 
+    CALL check("H5Tequal_f", error, total_error)
     CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
-    !  Close the array's base type datatype 
+    !  Close the array's base type datatype
     CALL h5tclose_f(tid3, error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Close the member datatype 
+    !  Close the member datatype
     CALL h5tclose_f(mtid,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Close the member datatype 
+    !  Close the member datatype
     CALL h5tclose_f(mtid2,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Close Compound Datatype 
+    !  Close Compound Datatype
     CALL h5tclose_f(tid2,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  READ dataset from disk 
-    
+    !  READ dataset from disk
+
     f_ptr = c_null_ptr
     f_ptr = C_LOC(rdata(1,1))
     CALL H5Dread_f(dataset, tid1, f_ptr, error)
     CALL check("H5Dread_f", error, total_error)
 
-    !  Compare data read in 
+    !  Compare data read in
     DO i = 1, SPACE1_DIM1
        DO j = 1, ARRAY1_DIM1
           IF(wdata(i,j)%i.NE.rdata(i,j)%i)THEN
@@ -616,21 +616,21 @@ END SUBROUTINE test_array_compound_atomic
           DO k = 1, ARRAY2_DIM1
              CALL VERIFY("h5dread_f",wdata(i,j)%f(k),rdata(i,j)%f(k),total_error)
              IF(total_error.NE.0) PRINT*,'ERROR: Wrong real array data is read back by H5Dread_f'
-             CALL VERIFY("h5dread_f",wdata(i,j)%c(k),rdata(i,j)%c(k),total_error) 
+             CALL VERIFY("h5dread_f",wdata(i,j)%c(k),rdata(i,j)%c(k),total_error)
              IF(total_error.NE.0) PRINT*,'ERROR: Wrong character array data is read back by H5Dread_f'
           ENDDO
        ENDDO
     ENDDO
 
-    !  Close Datatype 
+    !  Close Datatype
     CALL h5tclose_f(tid1,error)
     CALL check("h5tclose_f", error, total_error)
 
-    !  Close Dataset 
+    !  Close Dataset
     CALL h5dclose_f(dataset, error)
     CALL check("h5dclose_f", error, total_error)
 
-    !  Close file 
+    !  Close file
     CALL h5fclose_f(fid1,error)
     CALL check("h5fclose_f", error, total_error)
   END SUBROUTINE test_array_compound_array
@@ -644,7 +644,7 @@ END SUBROUTINE test_array_compound_atomic
 !!$!***************************************************************
 !!$
   SUBROUTINE test_array_bkg(total_error)
-    
+
     IMPLICIT NONE
 
     INTEGER, INTENT(INOUT) :: total_error
@@ -674,7 +674,7 @@ END SUBROUTINE test_array_compound_atomic
 
     TYPE(CmpField_struct), DIMENSION(1:LENGTH), TARGET :: cf
     TYPE(CmpField_struct), DIMENSION(1:LENGTH), TARGET :: cfr
-    
+
     TYPE CmpDTSinfo_struct
        INTEGER :: nsubfields
        CHARACTER(LEN=5), DIMENSION(1:nmax) :: name
@@ -687,9 +687,9 @@ END SUBROUTINE test_array_compound_atomic
     TYPE fld_t_struct
        REAL(KIND=sp), DIMENSION(1:ALEN) :: b
     END TYPE fld_t_struct
- 
-    INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype 
-    INTEGER(SIZE_T) :: type_sizer  ! Size of the real datatype 
+
+    INTEGER(SIZE_T) :: type_sizei  ! Size of the integer datatype
+    INTEGER(SIZE_T) :: type_sizer  ! Size of the real datatype
     INTEGER(SIZE_T) :: type_sized  ! Size of the double datatype
     INTEGER(SIZE_T) :: sizeof_compound ! total size of compound
 
@@ -698,14 +698,14 @@ END SUBROUTINE test_array_compound_atomic
 
     CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray3.h5"
 
-    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading 
-    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims ! Array dimensions for reading 
+    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims1 ! Array dimensions for reading
+    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: rdims ! Array dimensions for reading
 
     INTEGER :: error
     TYPE(c_ptr) :: f_ptr
-    
-!     Initialize the data 
-!     ------------------- 
+
+!     Initialize the data
+!     -------------------
 
     DO i = 1, LENGTH
        DO j = 1, ALEN
@@ -715,13 +715,13 @@ END SUBROUTINE test_array_compound_atomic
        ENDDO
     ENDDO
 
-    ! Set the number of data members 
-    ! ------------------------------ 
+    ! Set the number of data members
+    ! ------------------------------
 
     dtsinfo%nsubfields = 3
 
-    ! Initialize the offsets  
-    ! ----------------------- 
+    ! Initialize the offsets
+    ! -----------------------
     CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, error)
     CALL check("h5tget_size_f", error, total_error)
     IF(h5_sizeof(cf(1)%b(1)).EQ.4_size_t)THEN
@@ -736,44 +736,44 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5tget_size_f", error, total_error)
 
     dtsinfo%offset(1)   = H5OFFSETOF(C_LOC(cf(1)),C_LOC(cf(1)%a(1)))
-    dtsinfo%offset(2)   = H5OFFSETOF(C_LOC(cf(1)),C_LOC(cf(1)%b(1))) 
+    dtsinfo%offset(2)   = H5OFFSETOF(C_LOC(cf(1)),C_LOC(cf(1)%b(1)))
     dtsinfo%offset(3)   = H5OFFSETOF(C_LOC(cf(1)),C_LOC(cf(1)%c(1)))
 
 
-    ! Initialize the data type IDs 
-    ! ---------------------------- 
+    ! Initialize the data type IDs
+    ! ----------------------------
     dtsinfo%datatype(1) = H5T_NATIVE_INTEGER;
     dtsinfo%datatype(2) = H5T_NATIVE_REAL_C_FLOAT;
     dtsinfo%datatype(3) = H5T_NATIVE_REAL_C_DOUBLE;
 
 
-    ! Initialize the names of data members 
-    ! ------------------------------------ 
-     
+    ! Initialize the names of data members
+    ! ------------------------------------
+
     dtsinfo%name(1) = "One  "
     dtsinfo%name(2) = "Two  "
     dtsinfo%name(3) = "Three"
-       
-    ! Create file 
-    ! ----------- 
+
+    ! Create file
+    ! -----------
     CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid,error)
-    CALL check("h5fcreate_f", error, total_error)   
+    CALL check("h5fcreate_f", error, total_error)
 
 
-    ! Create data space 
-    ! ----------------- 
+    ! Create data space
+    ! -----------------
     CALL h5screate_simple_f(RANK, dim, space, error)
     CALL check("h5screate_simple_f", error, total_error)
 
 
-    ! Create the memory data type 
-    ! --------------------------- 
+    ! Create the memory data type
+    ! ---------------------------
 
     CALL h5tcreate_f(H5T_COMPOUND_F, H5OFFSETOF(C_LOC(cf(1)), C_LOC(cf(2))), type, error)
     CALL check("h5tcreate_f", error, total_error)
 
-    ! Add  members to the compound data type 
-    ! -------------------------------------- 
+    ! Add  members to the compound data type
+    ! --------------------------------------
 
     DO i = 1, dtsinfo%nsubfields
        CALL h5tarray_create_f(dtsinfo%datatype(i), ndims(i), dima, array_dt, error)
@@ -785,13 +785,13 @@ END SUBROUTINE test_array_compound_atomic
        CALL check("h5tclose_f", error, total_error)
     ENDDO
 
-    ! Create the dataset 
+    ! Create the dataset
     ! ------------------ /
     CALL h5dcreate_f(fid,FIELDNAME,type, space, dataset,error)
     CALL check("h5dcreate_f", error, total_error)
 
-    ! Write data to the dataset 
-    ! ------------------------- 
+    ! Write data to the dataset
+    ! -------------------------
 
     ALLOCATE(rdims(1:2)) ! dummy not needed
 
@@ -806,8 +806,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL H5Dread_f(dataset, type, f_ptr, error)
     CALL check("H5Dread_f", error, total_error)
 
-    ! Verify correct data 
-    ! ------------------- 
+    ! Verify correct data
+    ! -------------------
     DO i = 1, LENGTH
        DO j = 1, ALEN
            IF( cf(i)%a(j) .NE. cfr(i)%a(j) )THEN
@@ -820,8 +820,8 @@ END SUBROUTINE test_array_compound_atomic
     ENDDO
 
 
-    ! Release IDs 
-    ! ----------- 
+    ! Release IDs
+    ! -----------
     CALL h5tclose_f(type,error)
     CALL check("h5tclose_f", error, total_error)
     CALL h5sclose_f(space,error)
@@ -832,7 +832,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5fclose_f", error, total_error)
 
     !****************************
-    ! Reopen the file and update 
+    ! Reopen the file and update
     !****************************
 
     CALL h5fopen_f (FILENAME, H5F_ACC_RDWR_F, fid, error)
@@ -852,8 +852,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL h5tinsert_f(TYPE, "Two", 0_size_t, array_dt, error)
     CALL check("h5tinsert_f", error, total_error)
 
-    ! Initialize the data to overwrite 
-    ! -------------------------------- 
+    ! Initialize the data to overwrite
+    ! --------------------------------
     DO i = 1, LENGTH
        DO j = 1, ALEN
           fld(i)%b(j) = 1.313
@@ -867,8 +867,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5dwrite_f", error, total_error)
 
 
-    !  Read just the field changed 
-    
+    !  Read just the field changed
+
     f_ptr = C_LOC(fldr(1))
     CALL H5Dread_f(dataset, TYPE, f_ptr, error)
     CALL check("H5Dread_f", error, total_error)
@@ -887,15 +887,15 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5dget_type_f", error, total_error)
 
 
-    !  Read the entire dataset again 
+    !  Read the entire dataset again
 
     f_ptr = C_LOC(cfr(1))
     CALL H5Dread_f(dataset, TYPE, f_ptr, error)
     CALL check("H5Dread_f", error, total_error)
 
 
-    ! Verify correct data 
-    ! ------------------- 
+    ! Verify correct data
+    ! -------------------
 
     DO i = 1, LENGTH
        DO j = 1, ALEN
@@ -915,7 +915,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5fclose_f", error, total_error)
 
 !**************************************************
-! Reopen the file and print out all the data again 
+! Reopen the file and print out all the data again
 !**************************************************
 
     CALL h5fopen_f (FILENAME, H5F_ACC_RDWR_F, fid, error)
@@ -930,8 +930,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5dget_type_f", error, total_error)
 
 
-    ! Reset the data to read in 
-    ! ------------------------- 
+    ! Reset the data to read in
+    ! -------------------------
 
     DO i = 1, LENGTH
        cfr(i)%a(:) = 0
@@ -943,8 +943,8 @@ END SUBROUTINE test_array_compound_atomic
     CALL H5Dread_f(dataset, TYPE, f_ptr, error)
     CALL check("H5Dread_f", error, total_error)
 
-    ! Verify correct data 
-    ! ------------------- 
+    ! Verify correct data
+    ! -------------------
 
     DO i = 1, LENGTH
        DO j = 1, ALEN
@@ -968,22 +968,22 @@ END SUBROUTINE test_array_compound_atomic
   SUBROUTINE test_h5kind_to_type(total_error)
 
     IMPLICIT NONE
-    
+
     INTEGER, INTENT(INOUT) :: total_error
-    
+
     INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(2) !should map to INTEGER*1 on most modern processors
     INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(4) !should map to INTEGER*2 on most modern processors
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9) !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0 
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
-    INTEGER(int_kind_32), DIMENSION(1:4), TARGET :: dset_data_i32, data_out_i32  
-    INTEGER(HID_T) :: dset_id32     ! Dataset identifier 
-    CHARACTER(LEN=6), PARAMETER :: dsetname16 = "dset16"     ! Dataset name 
+    INTEGER(int_kind_32), DIMENSION(1:4), TARGET :: dset_data_i32, data_out_i32
+    INTEGER(HID_T) :: dset_id32     ! Dataset identifier
+    CHARACTER(LEN=6), PARAMETER :: dsetname16 = "dset16"     ! Dataset name
 #endif
     INTEGER, PARAMETER :: real_kind_7  = C_FLOAT   !should map to REAL*4 on most modern processors
     INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
-    
+
 ! Check if C has quad precision extension
 #if H5_HAVE_FLOAT128!=0
 ! Check if Fortran supports quad precision
@@ -1004,8 +1004,8 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(15,307)
 # endif
 #endif
-    REAL(real_kind_31), DIMENSION(1:4), TARGET :: dset_data_r31, data_out_r31   
-    INTEGER(HID_T) :: dset_idr16      ! Dataset identifier 
+    REAL(real_kind_31), DIMENSION(1:4), TARGET :: dset_data_r31, data_out_r31
+    INTEGER(HID_T) :: dset_idr16      ! Dataset identifier
     CHARACTER(LEN=7), PARAMETER :: dsetnamer16 = "dsetr16"     ! Dataset name
 
     CHARACTER(LEN=12), PARAMETER :: filename = "dsetf_F03.h5" ! File name
@@ -1016,19 +1016,19 @@ END SUBROUTINE test_array_compound_atomic
     CHARACTER(LEN=6), PARAMETER :: dsetnamer = "dsetr"     ! Dataset name
     CHARACTER(LEN=6), PARAMETER :: dsetnamer4 = "dsetr4"     ! Dataset name
     CHARACTER(LEN=6), PARAMETER :: dsetnamer8 = "dsetr8"     ! Dataset name
-    
-    INTEGER(HID_T) :: file_id       ! File identifier 
-    INTEGER(HID_T) :: dset_id1      ! Dataset identifier  
-    INTEGER(HID_T) :: dset_id4      ! Dataset identifier   
-    INTEGER(HID_T) :: dset_id8      ! Dataset identifier  
-    INTEGER(HID_T) :: dset_id16     ! Dataset identifier     
-    INTEGER(HID_T) :: dset_idr       ! Dataset identifier 
-    INTEGER(HID_T) :: dset_idr4      ! Dataset identifier   
-    INTEGER(HID_T) :: dset_idr8      ! Dataset identifier 
-    
+
+    INTEGER(HID_T) :: file_id       ! File identifier
+    INTEGER(HID_T) :: dset_id1      ! Dataset identifier
+    INTEGER(HID_T) :: dset_id4      ! Dataset identifier
+    INTEGER(HID_T) :: dset_id8      ! Dataset identifier
+    INTEGER(HID_T) :: dset_id16     ! Dataset identifier
+    INTEGER(HID_T) :: dset_idr       ! Dataset identifier
+    INTEGER(HID_T) :: dset_idr4      ! Dataset identifier
+    INTEGER(HID_T) :: dset_idr8      ! Dataset identifier
+
     INTEGER :: error ! Error flag
     INTEGER :: i
-    
+
 ! Data buffers:
 
     INTEGER(int_kind_1), DIMENSION(1:4), TARGET :: dset_data_i1, data_out_i1
@@ -1039,10 +1039,10 @@ END SUBROUTINE test_array_compound_atomic
     REAL, DIMENSION(1:4), TARGET :: dset_data_r, data_out_r
     REAL(real_kind_7), DIMENSION(1:4), TARGET :: dset_data_r7, data_out_r7
     REAL(real_kind_15), DIMENSION(1:4), TARGET :: dset_data_r15, data_out_r15
-    
-    INTEGER(HSIZE_T), DIMENSION(1:1) :: data_dims = (/4/) 
+
+    INTEGER(HSIZE_T), DIMENSION(1:1) :: data_dims = (/4/)
     INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
-    
+
     TYPE(C_PTR) :: f_ptr
 
     !
@@ -1060,7 +1060,7 @@ END SUBROUTINE test_array_compound_atomic
        dset_data_r7(i) = 4.0_real_kind_7*ATAN(1.0_real_kind_7)-REAL(i-1,real_kind_7)
        dset_data_r15(i) = 4.0_real_kind_15*ATAN(1.0_real_kind_15)-REAL(i-1,real_kind_15)
        dset_data_r31(i) = 4.0_real_kind_31*ATAN(1.0_real_kind_31)-REAL(i-1,real_kind_31)
-       
+
     END DO
 
     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
@@ -1142,7 +1142,7 @@ END SUBROUTINE test_array_compound_atomic
   !
   ! Read the dataset.
   !
-  ! Read data back into an integer size that is larger then the original size used for 
+  ! Read data back into an integer size that is larger then the original size used for
   ! writing the data
     f_ptr = C_LOC(data_out_i1(1))
     CALL h5dread_f(dset_id1, h5kind_to_type(int_kind_1,H5_INTEGER_KIND), f_ptr,  error)
@@ -1174,12 +1174,12 @@ END SUBROUTINE test_array_compound_atomic
     CALL h5dread_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
     DO i = 1, 4
-       
+
        CALL verify("h5kind_to_type",dset_data_i1(i),data_out_i1(i),total_error)
        CALL verify("h5kind_to_type",dset_data_i4(i),data_out_i4(i),total_error)
        CALL verify("h5kind_to_type",dset_data_i8(i),data_out_i8(i),total_error)
        CALL verify("h5kind_to_type",dset_data_i16(i),data_out_i16(i),total_error)
-       
+
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
        CALL verify("h5kind_to_type",dset_data_i32(i),data_out_i32(i),total_error)
 #endif
@@ -1188,7 +1188,7 @@ END SUBROUTINE test_array_compound_atomic
        CALL verify("h5kind_to_type",dset_data_r15(i),data_out_r15(i),total_error)
        CALL verify("h5kind_to_type",dset_data_r31(i),data_out_r31(i),total_error)
     END DO
-    
+
   !
   ! Close the dataset.
   !
@@ -1224,7 +1224,7 @@ END SUBROUTINE test_h5kind_to_type
 SUBROUTINE t_array(total_error)
 
   IMPLICIT NONE
-    
+
   INTEGER, INTENT(INOUT) :: total_error
 
   CHARACTER(LEN=19), PARAMETER :: filename  = "t_array_F03.h5"
@@ -1236,7 +1236,7 @@ SUBROUTINE t_array(total_error)
   INTEGER(HSIZE_T), DIMENSION(1:1)   :: dims = (/dim0/)
   INTEGER(HSIZE_T), DIMENSION(1:2)   :: adims = (/adim0, adim1/)
   INTEGER(HSIZE_T), DIMENSION(1:2)   :: maxdims
-  INTEGER, DIMENSION(1:dim0, 1:adim0, 1:adim1), TARGET :: wdata ! Write buffer 
+  INTEGER, DIMENSION(1:dim0, 1:adim0, 1:adim1), TARGET :: wdata ! Write buffer
   INTEGER, DIMENSION(:,:,:), ALLOCATABLE, TARGET :: rdata    ! Read buffer
   INTEGER :: i, j, k
   TYPE(C_PTR) :: f_ptr
@@ -1292,7 +1292,7 @@ SUBROUTINE t_array(total_error)
   CALL H5Fclose_f(file, error)
   CALL check("h5fclose_f",error, total_error)
   !
-  ! Now we begin the read section of this example. 
+  ! Now we begin the read section of this example.
   !
   ! Open file, dataset, and attribute.
   !
@@ -1322,7 +1322,7 @@ SUBROUTINE t_array(total_error)
   ALLOCATE(rdata(1:dims(1),1:adims(1),1:adims(2)))
   !
   ! Create the memory datatype.
-  ! 
+  !
   CALL H5Tarray_create_f(H5T_NATIVE_INTEGER, 2, adims, memtype, error)
   CALL check("H5Tarray_create_f",error, total_error)
   !
@@ -1397,7 +1397,7 @@ SUBROUTINE t_enum(total_error)
   F_BASET   = H5T_STD_I16BE      ! File base type
   M_BASET   = H5T_NATIVE_INTEGER ! Memory base type
   DO i = 1, dim0
-     DO j = 1, dim1 
+     DO j = 1, dim1
         wdata(i,j) = MOD( (j-1)*(i-1), PLASMA+1)
      ENDDO
   ENDDO
@@ -1413,7 +1413,7 @@ SUBROUTINE t_enum(total_error)
   !
   CALL h5tenum_create_f(F_BASET, filetype, error)
   CALL check("h5tenum_create_f",error, total_error)
-  
+
   CALL h5tenum_create_f(M_BASET, memtype, error)
   CALL check("h5tenum_create_f",error, total_error)
 
@@ -1446,7 +1446,7 @@ SUBROUTINE t_enum(total_error)
   CALL check("h5screate_simple_f",error, total_error)
   !
   ! Create the dataset and write the enumerated data to it.
-  ! 
+  !
   CALL h5dcreate_f(file, dataset, filetype, space, dset, error)
   CALL check("h5dcreate_f",error, total_error)
   f_ptr = C_LOC(wdata(1,1))
@@ -1521,7 +1521,7 @@ SUBROUTINE t_enum(total_error)
   CALL check("h5tclose_f",error, total_error)
   CALL h5fclose_f(file , error)
   CALL check("h5fclose_f",error, total_error)
-  
+
 END SUBROUTINE t_enum
 
 SUBROUTINE t_bit(total_error)
@@ -1538,7 +1538,7 @@ SUBROUTINE t_bit(total_error)
   INTEGER(HID_T)  :: file, space, dset ! Handles
   INTEGER(HSIZE_T), DIMENSION(1:2)   :: dims = (/dim0, dim1/)
   INTEGER(HSIZE_T), DIMENSION(1:2)   :: maxdims
-  INTEGER(C_SIGNED_CHAR), DIMENSION(1:dim0, 1:dim1), TARGET :: wdata              ! Write buffer 
+  INTEGER(C_SIGNED_CHAR), DIMENSION(1:dim0, 1:dim1), TARGET :: wdata              ! Write buffer
   INTEGER(C_SIGNED_CHAR), DIMENSION(:,:), ALLOCATABLE, TARGET :: rdata    ! Read buffer
   INTEGER :: A, B, C, D
   INTEGER :: Aw, Bw, Cw, Dw
@@ -1587,7 +1587,7 @@ SUBROUTINE t_bit(total_error)
   CALL H5Fclose_f(file, error)
   CALL check("h5fclose_f",error, total_error)
   !
-  ! Now we begin the read section of this example. 
+  ! Now we begin the read section of this example.
   !
   ! Open file, dataset.
   !
@@ -1620,8 +1620,8 @@ SUBROUTINE t_bit(total_error)
                B = IAND(ISHFT(rdata(i,j),-2), INT(hex,C_SIGNED_CHAR)) ! Retrieve field "B"
                C = IAND(ISHFT(rdata(i,j),-4), INT(hex,C_SIGNED_CHAR)) ! Retrieve field "C"
                D = IAND(ISHFT(rdata(i,j),-6), INT(hex,C_SIGNED_CHAR)) ! Retrieve field "D"
-               
-               Aw = IAND(wdata(i,j), INT(hex,C_SIGNED_CHAR)) 
+
+               Aw = IAND(wdata(i,j), INT(hex,C_SIGNED_CHAR))
                Bw = IAND(ISHFT(wdata(i,j),-2), INT(hex,C_SIGNED_CHAR))
                Cw = IAND(ISHFT(wdata(i,j),-4), INT(hex,C_SIGNED_CHAR))
                Dw = IAND(ISHFT(wdata(i,j),-6), INT(hex,C_SIGNED_CHAR))
@@ -1662,8 +1662,8 @@ SUBROUTINE t_opaque(total_error)
   CHARACTER(LEN=size), DIMENSION(1:dim0), TARGET :: wdata ! Write buffer
   CHARACTER(LEN=size), DIMENSION(:), ALLOCATABLE, TARGET :: rdata ! Read buffer
   CHARACTER(LEN=size-1) :: str = "OPAQUE"
-  
-  CHARACTER(LEN=14) :: tag_sm    ! Test reading obaque tag into 
+
+  CHARACTER(LEN=14) :: tag_sm    ! Test reading obaque tag into
   CHARACTER(LEN=15) :: tag_exact ! buffers that are: to small, exact
   CHARACTER(LEN=17) :: tag_big   ! and to big.
 
@@ -1677,7 +1677,7 @@ SUBROUTINE t_opaque(total_error)
   ! Initialize data.
   !
   DO i = 1, dim0
-     WRITE(ichr,'(I1)') i-1 
+     WRITE(ichr,'(I1)') i-1
      wdata(i) = str//ichr
   ENDDO
   !
@@ -1735,15 +1735,15 @@ SUBROUTINE t_opaque(total_error)
   CALL h5tget_size_f(dtype, len, error)
   CALL check("h5tget_size_f",error, total_error)
 
-  ! Next tests should return 
+  ! Next tests should return
   ! opaque_tag = tag = "Character array" and the actual length = 15
-  
+
   ! Test reading into a string that is to small
   CALL h5tget_tag_f(dtype, tag_sm, taglen, error)
   CALL check("h5tget_tag_f",error, total_error)
   CALL VERIFY("h5tget_tag_f", taglen, 15, total_error)
   CALL verify("h5tget_tag_f",tag_sm,"Character arra", total_error)
-  
+
   ! Test reading into a string that is exact
   CALL h5tget_tag_f(dtype, tag_exact, taglen, error)
   CALL check("h5tget_tag_f",error, total_error)
@@ -1755,7 +1755,7 @@ SUBROUTINE t_opaque(total_error)
   CALL check("h5tget_tag_f",error, total_error)
   CALL VERIFY("h5tget_tag_f", taglen, 15, total_error)
   CALL verify("h5tget_tag_f",tag_big,"Character array  ", total_error)
-  
+
   !
   ! Get dataspace and allocate memory for read buffer.
   !
@@ -1787,7 +1787,7 @@ SUBROUTINE t_opaque(total_error)
   CALL check("h5tclose_f",error, total_error)
   CALL H5Fclose_f(file, error)
   CALL check("h5fclose_f",error, total_error)
-  
+
 END SUBROUTINE t_opaque
 
 SUBROUTINE t_objref(total_error)
@@ -1855,7 +1855,7 @@ SUBROUTINE t_objref(total_error)
   !
   CALL h5dcreate_f(file, dataset, H5T_STD_REF_OBJ, space, dset, error)
   CALL check("h5dcreate_f",error, total_error)
-  
+
   f_ptr = C_LOC(wdata(1))
   CALL h5dwrite_f(dset, H5T_STD_REF_OBJ, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
@@ -1955,11 +1955,11 @@ SUBROUTINE t_regref(total_error)
   INTEGER :: error
 
   INTEGER(HSIZE_T), DIMENSION(1:1)   :: dims = (/dim0/)
-  INTEGER(HSIZE_T), DIMENSION(1:1)   :: dims3 
+  INTEGER(HSIZE_T), DIMENSION(1:1)   :: dims3
   INTEGER(HSIZE_T), DIMENSION(1:2)   :: dims2 = (/ds2dim0,ds2dim1/)
 
   INTEGER(HSIZE_T), DIMENSION(1:2,1:4) :: coords = RESHAPE((/2,1,12,3,1,2,5,3/),(/2,4/))
-  
+
   INTEGER(HSIZE_T), DIMENSION(1:2) :: start=(/0,0/),stride=(/11,2/),count=(/2,2/), BLOCK=(/3,1/)
 
   INTEGER(HSIZE_T), DIMENSION(1:1) :: maxdims
@@ -2077,7 +2077,7 @@ SUBROUTINE t_regref(total_error)
   ! Output the data to the screen.
   !
   DO i = 1, dims(1)
-     
+
      !
      ! Open the referenced object, retrieve its region as a
      ! dataspace selection.
@@ -2085,10 +2085,10 @@ SUBROUTINE t_regref(total_error)
      f_ptr = C_LOC(rdata(i))
      CALL H5Rdereference_f(dset, H5R_DATASET_REGION_F, f_ptr, dset2, error)
      CALL check("H5Rdereference_f",error, total_error)
- 
+
      CALL H5Rget_region_f(dset, f_ptr, space, error)
      CALL check("H5Rget_region_f",error, total_error)
-  
+
      !
      ! Get the object's name
      !
@@ -2103,7 +2103,7 @@ SUBROUTINE t_regref(total_error)
      CALL H5Sget_select_npoints_f(space, npoints, error)
      CALL check("H5Sget_select_npoints_f",error, total_error)
      CALL VERIFY("H5Sget_select_npoints_f", INT(npoints), LEN_TRIM(chrref_correct(i)), total_error)
-     
+
      dims3(1) = npoints
      !
      ! Read the dataset region.
@@ -2162,9 +2162,9 @@ SUBROUTINE t_vlen(total_error)
   TYPE(hvl_t), DIMENSION(1:2), TARGET :: rdata ! Pointer to vlen structures
 
   INTEGER(hsize_t), DIMENSION(1:1) :: dims = (/2/)
-  INTEGER, DIMENSION(:), POINTER :: ptr_r 
+  INTEGER, DIMENSION(:), POINTER :: ptr_r
   TYPE(C_PTR) :: f_ptr
-  
+
   !
   ! Initialize variable-length data.  wdata(1) is a countdown of
   ! length LEN0, wdata(2) is a Fibonacci sequence of length LEN1.
@@ -2209,7 +2209,7 @@ SUBROUTINE t_vlen(total_error)
   !
   CALL H5Dcreate_f(file, dataset, filetype, space, dset, error)
   CALL check("h5dcreate_f",error, total_error)
- 
+
   f_ptr = C_LOC(wdata(1))
   CALL h5dwrite_f(dset, memtype, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
@@ -2249,14 +2249,14 @@ SUBROUTINE t_vlen(total_error)
   CALL H5Dget_space_f(dset, space, error)
   CALL check("H5Dget_space_f",error, total_error)
   dim0 = dims(1)
-  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
+  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
   CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), INT(dim0), total_error)
 
   !
   ! Create the memory datatype.
   !
-  CALL H5Tvlen_create_f(H5T_NATIVE_INTEGER, memtype, error) 
+  CALL H5Tvlen_create_f(H5T_NATIVE_INTEGER, memtype, error)
   CALL check("H5Tvlen_create_f",error, total_error)
 
   !
@@ -2304,7 +2304,7 @@ SUBROUTINE t_vlstring(total_error)
   INTEGER :: error
   INTEGER(HSIZE_T), DIMENSION(1:1) :: dims = (/dim0/)
   INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims
-  
+
   CHARACTER(LEN=sdim), DIMENSION(1:dim0), TARGET :: &
        wdata = (/"Parting", "is such", "sweet  ", "sorrow."/) ! Write buffer
   CHARACTER(LEN=sdim), DIMENSION(:), ALLOCATABLE :: rdata ! Read buffer
@@ -2373,7 +2373,7 @@ SUBROUTINE t_vlstring(total_error)
   !
   CALL H5Dget_space_f(dset, space, error)
   CALL check("H5Dget_space_f",error, total_error)
-  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
+  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
   CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), INT(dim0), total_error)
 
@@ -2422,7 +2422,7 @@ SUBROUTINE t_vlstring_readwrite(total_error)
   INTEGER(HSIZE_T), DIMENSION(1:1) :: dims = (/dim0/)
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dims2D = (/dim1,dim0/)
   INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims
-  
+
   TYPE(C_PTR), DIMENSION(1:dim0), TARGET :: wdata
   CHARACTER(len=7, KIND=c_char), DIMENSION(1:1), TARGET :: A = "123456"//C_NULL_CHAR
   CHARACTER(len=5, KIND=c_char), DIMENSION(1:1), TARGET :: B = "7890"//C_NULL_CHAR
@@ -2430,7 +2430,7 @@ SUBROUTINE t_vlstring_readwrite(total_error)
   CHARACTER(len=3, KIND=c_char), DIMENSION(1:1), TARGET :: D = "df"//C_NULL_CHAR
 
   TYPE(C_PTR), DIMENSION(1:dim1,1:dim0), TARGET :: wdata2D
-  
+
   CHARACTER(len=7, KIND=c_char), DIMENSION(1:1), TARGET :: A11 = "A(1,1)"//C_NULL_CHAR
   CHARACTER(len=4, KIND=c_char), DIMENSION(1:1), TARGET :: A12 = "A12"//C_NULL_CHAR
   CHARACTER(len=5, KIND=c_char), DIMENSION(1:1), TARGET :: A13 = "A_13"//C_NULL_CHAR
@@ -2566,13 +2566,13 @@ SUBROUTINE t_vlstring_readwrite(total_error)
   CALL H5Dget_space_f(dset, space, error)
   CALL check("H5Dget_space_f",error, total_error)
 
-  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
+  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
   ALLOCATE(rdata(1:dims(1)))
   !
   ! Read the data.
   !
-  
+
   f_ptr = C_LOC(rdata(1))
   CALL h5dread_f(dset, H5T_STRING, f_ptr, error)
   CALL check("H5Dread_f",error, total_error)
@@ -2612,14 +2612,14 @@ SUBROUTINE t_vlstring_readwrite(total_error)
   CALL check("H5Dget_space_f",error, total_error)
 
 
-  CALL H5Sget_simple_extent_dims_f(space, dims2D, maxdims, error) 
+  CALL H5Sget_simple_extent_dims_f(space, dims2D, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
   ALLOCATE(rdata2D(1:dims2D(1),1:dims2D(2)))
 
   !
   ! Read the data.
   !
-  
+
   f_ptr = C_LOC(rdata2D(1,1))
   CALL h5dread_f(dset, H5T_STRING, f_ptr, error)
   CALL check("H5Dread_f",error, total_error)
@@ -2736,7 +2736,7 @@ SUBROUTINE t_string(total_error)
   !
   CALL H5Dget_space_f(dset, space, error)
   CALL check("H5Dget_space_f",error, total_error)
-  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
+  CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
   CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
 
@@ -2744,9 +2744,9 @@ SUBROUTINE t_string(total_error)
   !
   ! Create the memory datatype.
   !
-  CALL H5Tcopy_f(H5T_FORTRAN_S1, memtype, error) 
+  CALL H5Tcopy_f(H5T_FORTRAN_S1, memtype, error)
   CALL check("H5Tcopy_f",error, total_error)
-  CALL H5Tset_size_f(memtype, sdim, error) 
+  CALL H5Tset_size_f(memtype, sdim, error)
   CALL check("H5Tset_size_f",error, total_error)
   !
   ! Read the data.
@@ -2777,9 +2777,9 @@ SUBROUTINE t_string(total_error)
 END SUBROUTINE t_string
 
 SUBROUTINE vl_test_special_char(total_error)
-  
+
   IMPLICIT NONE
-  
+
 !  INTERFACE
 !     SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
 !       USE HDF5
@@ -2790,9 +2790,9 @@ SUBROUTINE vl_test_special_char(total_error)
 !       CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
 !     END SUBROUTINE setup_buffer
 !  END INTERFACE
-  
+
   INTEGER, INTENT(OUT) :: total_error
-  
+
   CHARACTER(LEN=16), PARAMETER :: filename  = "t_controlchar.h5"
   INTEGER, PARAMETER :: line_length = 10
   INTEGER(hid_t) :: file
@@ -2815,7 +2815,7 @@ SUBROUTINE vl_test_special_char(total_error)
   !
   CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file, error)
   CALL check("h5fcreate_f",error, total_error)
- 
+
   max_dims = (/H5S_UNLIMITED_F/)
 
   !
@@ -2835,7 +2835,7 @@ SUBROUTINE vl_test_special_char(total_error)
   CALL check("h5pcreate_f", error, total_error)
   CALL h5pset_chunk_f(dcpl, 1, chunk, error)
   CALL check("h5pset_chunk_f", error, total_error)
-  
+
   data_dims(1) = line_length
   data_dims(2) = n
   !
@@ -2855,7 +2855,7 @@ SUBROUTINE vl_test_special_char(total_error)
      !
      CALL h5dread_vl_f(dataset0, string_id, data_out(1:n), data_dims, line_lengths(1:n), error, space)
      CALL check("h5dread_vl_f", error, total_error)
-  
+
      DO j = 1, n
         IF(data_in(j).NE.data_out(j))THEN
            total_error = total_error + 1
@@ -2873,17 +2873,17 @@ SUBROUTINE vl_test_special_char(total_error)
   CALL check("h5sclose_f", error, total_error)
   CALL h5fclose_f(file, error)
   CALL check("h5fclose_f", error, total_error)
-  
+
 END SUBROUTINE vl_test_special_char
 
 
 SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
-  
+
   IMPLICIT NONE
-  
+
   ! Creates a simple "Data_in" consisting of the letters of the alphabet,
   ! one per line, with a control character.
-  
+
   CHARACTER(len=10), DIMENSION(:) :: data_in
   INTEGER(size_t), DIMENSION(:) :: line_lengths
   CHARACTER(LEN=3) :: lets = 'abc'
@@ -2904,7 +2904,7 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
   END DO
   data_in(n:n) =  char_type(1:1)
   line_lengths(n) = 1
-  
+
 END SUBROUTINE setup_buffer
 
 !-------------------------------------------------------------------------
@@ -2919,9 +2919,9 @@ END SUBROUTINE setup_buffer
 !              Decemeber 7, 2010
 !
 ! Modifications: Moved this subroutine from the 1.8 test file and
-! modified it to use F2003 features. 
-! This routine requires 4 byte reals, so we use F2003 features to 
-! ensure the requirement is satisfied in a portable way. 
+! modified it to use F2003 features.
+! This routine requires 4 byte reals, so we use F2003 features to
+! ensure the requirement is satisfied in a portable way.
 ! The need for this arises when a user specifies the default real is 8 bytes.
 ! MSB 7/31/12
 !
@@ -2934,7 +2934,7 @@ SUBROUTINE test_nbit(total_error )
   INTEGER, PARAMETER :: wp = C_FLOAT !should map to REAL*4 on most modern processors
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) :: file
-  
+
   INTEGER(hid_t) :: dataset, datatype, space, dc, mem_type_id
   INTEGER(hsize_t), DIMENSION(1:2) :: dims = (/2,5/)
   INTEGER(hsize_t), DIMENSION(1:2) :: chunk_dim = (/2,5/)
@@ -2972,14 +2972,14 @@ SUBROUTINE test_nbit(total_error )
   PRECISION = 20
   CALL H5Tset_precision_f(datatype,PRECISION, error)
   CALL CHECK(" H5Tset_precision_f", error, total_error)
-  
+
   CALL H5Tset_size_f(datatype, 4_size_t, error)
   CALL CHECK(" H5Tset_size_f", error, total_error)
-  
+
   CALL H5Tset_ebias_f(datatype, 31_size_t, error)
   CALL CHECK(" H5Tset_ebias_f", error, total_error)
- 
-  ! Create the data space 
+
+  ! Create the data space
   CALL H5Screate_simple_f(2, dims, space, error)
   CALL CHECK(" H5Screate_simple_f", error, total_error)
 
@@ -3011,7 +3011,7 @@ SUBROUTINE test_nbit(total_error )
   !----------------------------------------------------------------------
   ! STEP 2: Try to read the data we just wrote.
   !----------------------------------------------------------------------
-  !  
+  !
   f_ptr = C_LOC(new_data(1,1))
   CALL H5Dread_f(dataset, mem_type_id, f_ptr, error)
   CALL CHECK(" H5Dread_f", error, total_error)
@@ -3021,7 +3021,7 @@ SUBROUTINE test_nbit(total_error )
   !
   i_loop: DO i = 1, dims(1)
      j_loop: DO j = 1, dims(2)
-        
+
         IF(.NOT.(orig_data(i,j).EQ.orig_data(i,j))) CYCLE  ! skip IF value is NaN
 
         IF( .NOT.check_real_eq( new_data(i,j), orig_data(i,j)) ) THEN
@@ -3079,7 +3079,7 @@ SUBROUTINE t_enum_conv(total_error)
 
   INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
   INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
-  
+
   INTEGER, PARAMETER :: real_kind_7 = C_FLOAT  !should map to REAL*4 on most modern processors
 
   INTEGER(hid_t) :: cwg=-1, dtype=-1, space=-1, dset=-1 ! Handles
@@ -3092,7 +3092,7 @@ SUBROUTINE t_enum_conv(total_error)
 
   INTEGER(KIND(E1_RED)), TARGET :: val
 
-  ! Enumerated data array 
+  ! Enumerated data array
   ! Some values are out of range for testing. The library should accept them
   INTEGER(KIND(E1_RED)), DIMENSION(1:20), TARGET :: data1 = (/INT(E1_RED,KIND(E1_RED)), &
        INT(E1_GREEN,KIND(E1_RED)), INT(E1_BLUE,KIND(E1_RED)),  &
@@ -3140,7 +3140,7 @@ SUBROUTINE t_enum_conv(total_error)
   !
   ! Initialize enum data.
   !
-  
+
   val = E1_RED
   CALL H5Tenum_insert_f(dtype, "RED", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
@@ -3208,7 +3208,7 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to (KIND=C_double) number. 
+  ! Test converting the data to (KIND=C_double) number.
   ! Read enum data back as (KIND=C_double) number
 
   m_baset = h5kind_to_type(KIND(data_double(1)), H5_REAL_KIND) ! Memory base type
@@ -3225,7 +3225,7 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to (SELECTED_INT_KIND(9)) number. 
+  ! Test converting the data to (SELECTED_INT_KIND(9)) number.
   ! Read enum data back as (SELECTED_INT_KIND(9)) number
 
   m_baset = h5kind_to_type(int_kind_8, H5_INTEGER_KIND) ! Memory base type
@@ -3242,7 +3242,7 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to (SELECTED_INT_KIND(18)) number. 
+  ! Test converting the data to (SELECTED_INT_KIND(18)) number.
   ! Read enum data back as (SELECTED_INT_KIND(18)) number
 
   m_baset = h5kind_to_type(int_kind_16, H5_INTEGER_KIND) ! Memory base type
@@ -3259,7 +3259,7 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to C_FLOAT number. 
+  ! Test converting the data to C_FLOAT number.
   ! Read enum data back as C_FLOAT number
 
   m_baset = h5kind_to_type(KIND(data_r7(1)), H5_REAL_KIND) ! Memory base type
@@ -3287,13 +3287,13 @@ SUBROUTINE t_enum_conv(total_error)
   m_baset = h5kind_to_type(KIND(data_int(1)), H5_INTEGER_KIND) ! Memory base type
   CALL h5dcreate_f(cwg, "color_table2", m_baset, space, dset, error)
   CALL check("h5dcreate_f", error, total_error)
-  
+
   ! Write the enum data
   f_ptr = C_LOC(data1(1))
   CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
   CALL check("h5dwrite_f", error, total_error)
 
-  ! Test reading back the data with no conversion 
+  ! Test reading back the data with no conversion
   f_ptr = C_LOC(data_int(1))
   CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
   CALL check("h5dread_f", error, total_error)
@@ -3321,7 +3321,7 @@ SUBROUTINE t_enum_conv(total_error)
   CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
   CALL check("h5dwrite_f", error, total_error)
 
-  ! Test reading back the data with no conversion 
+  ! Test reading back the data with no conversion
   f_ptr = C_LOC(data_double(1))
   CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
   CALL check("h5dread_f", error, total_error)
@@ -3349,7 +3349,7 @@ SUBROUTINE t_enum_conv(total_error)
   CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
   CALL check("h5dwrite_f", error, total_error)
 
-  ! Test reading back the data with no conversion 
+  ! Test reading back the data with no conversion
   f_ptr = C_LOC(data_r7(1))
   CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
   CALL check("h5dread_f", error, total_error)
@@ -3372,13 +3372,13 @@ SUBROUTINE t_enum_conv(total_error)
   m_baset = h5kind_to_type(KIND(data_i16(1)), H5_INTEGER_KIND) ! Memory base type
   CALL h5dcreate_f(cwg, "color_table5", m_baset, space, dset, error)
   CALL check("h5dcreate_f", error, total_error)
-  
+
   ! Write the enum data
   f_ptr = C_LOC(data1(1))
   CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
   CALL check("h5dwrite_f", error, total_error)
 
-  ! Test reading back the data with no conversion 
+  ! Test reading back the data with no conversion
   f_ptr = C_LOC(data_i16(1))
   CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
   CALL check("h5dread_f", error, total_error)

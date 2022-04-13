@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,6 +91,31 @@ public class TestH5Oparams {
     @Test(expected = NullPointerException.class)
     public void testH5Oget_info_by_idx_null() throws Throwable {
         H5.H5Oget_info_by_idx(-1, null, 0, 0, 0L, 0, 0);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_invalid() throws Throwable {
+        H5.H5Oget_native_info(-1, 0);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_name_null() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, null, 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_name_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, "/testH5Gcreate", 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_idx_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, "Bogus", -1, -1, -1L, 0, -1);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_idx_null() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, null, 0, 0, 0L, 0, 0);
     }
 
     @Test(expected = HDF5LibraryException.class)

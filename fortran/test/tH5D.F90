@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -44,31 +44,31 @@ CONTAINS
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error
-    
+
     CHARACTER(LEN=5), PARAMETER :: filename = "dsetf" ! File name
     CHARACTER(LEN=80) :: fix_filename
     CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
     CHARACTER(LEN=9), PARAMETER :: null_dsetname = "null_dset"     ! Dataset name
-    
+
     INTEGER(HID_T) :: file_id       ! File identifier
     INTEGER(HID_T) :: dset_id       ! Dataset identifier
     INTEGER(HID_T) :: null_dset     ! Null dataset identifier
     INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
     INTEGER(HID_T) :: null_dspace   ! Null dataspace identifier
     INTEGER(HID_T) :: dtype_id      ! Datatype identifier
-    
+
     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/4,6/) ! Dataset dimensions
     INTEGER     ::   rank = 2                        ! Dataset rank
-    
+
     INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
     INTEGER     ::   error ! Error flag
-    
+
     INTEGER     :: i, j    !general purpose integers
     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
     INTEGER(HSIZE_T), DIMENSION(1) :: null_data_dim
     INTEGER     ::   null_dset_data = 1              ! null data
     INTEGER :: flag ! Space allocation status
-    
+
     !
     ! Initialize the dset_data array.
     !
@@ -157,10 +157,10 @@ CONTAINS
     CALL h5dget_space_status_f(dset_id, flag, error)
     CALL check("h5dget_space_status_f",error, total_error)
     CALL VERIFY("h5dget_space_status_f", flag, H5D_SPACE_STS_ALLOCATED_F, total_error)
-    
+
     CALL h5dget_space_status_f(null_dset, flag, error)
     CALL check("h5dget_space_status_f",error, total_error)
-    CALL VERIFY("h5dget_space_status_f", flag, H5D_SPACE_STS_NOT_ALLOCATED_F, total_error)    
+    CALL VERIFY("h5dget_space_status_f", flag, H5D_SPACE_STS_NOT_ALLOCATED_F, total_error)
     !
     ! Get the dataset type.
     !
@@ -187,7 +187,7 @@ CONTAINS
     DO i = 1, 4
        DO j = 1, 6
           IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-             WRITE(*, *) "dataset test error occured"
+             WRITE(*, *) "dataset test error occurred"
              WRITE(*,*) "data read is not the same as the data written"
           END IF
        END DO
@@ -196,7 +196,7 @@ CONTAINS
     ! Check if no change to null_dset_data
     !
     IF (null_dset_data .NE. 1) THEN
-       WRITE(*, *) "null dataset test error occured"
+       WRITE(*, *) "null dataset test error occurred"
     END IF
     !
     ! End access to the dataset and release resources used by it.
@@ -210,7 +210,7 @@ CONTAINS
     !
     CALL h5sclose_f(dspace_id, error)
     CALL check("h5sclose_f", error, total_error)
-    
+
     !
     ! Terminate access to the data type.
     !
@@ -223,86 +223,86 @@ CONTAINS
     CALL check("h5fclose_f", error, total_error)
     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
     CALL check("h5_cleanup_f", error, total_error)
-    
+
     RETURN
   END SUBROUTINE datasettest
-  
+
 !
 !the following subroutine tests h5dextend_f functionality
 !
 
   SUBROUTINE extenddsettest(cleanup, total_error)
-    
+
     IMPLICIT NONE
-    
+
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(OUT) :: total_error
-    
+
     !
     !the dataset is stored in file "extf.h5"
     !
     CHARACTER(LEN=4), PARAMETER :: filename = "extf"
     CHARACTER(LEN=80) :: fix_filename
-    
+
     !
     !dataset name is "ExtendibleArray"
     !
     CHARACTER(LEN=15), PARAMETER :: dsetname = "ExtendibleArray"
-    
+
     !
     !dataset rank is 2
     !
     INTEGER :: RANK = 2
-    
+
     INTEGER(HID_T) :: file_id       ! File identifier
     INTEGER(HID_T) :: dset_id       ! Dataset identifier
     INTEGER(HID_T) :: dataspace     ! Dataspace identifier
     INTEGER(HID_T) :: memspace      ! memory Dataspace identifier
-    INTEGER(HID_T) :: crp_list        ! dataset creatation property identifier
-    
+    INTEGER(HID_T) :: crp_list        ! dataset creation property identifier
+
     !
     !dataset dimensions at creation time
     !
     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/3,3/)
-    
+
     !
     !data dimensions
     !
     INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/10,3/)
-    
+
     !
     !Maximum dimensions
     !
     INTEGER(HSIZE_T), DIMENSION(2) :: maxdims
-    
+
     !
     !data arrays for reading and writing
     !
     INTEGER, DIMENSION(10,3) :: data_in, data_out
-    
+
     !
     !Size of data in the file
     !
     INTEGER(HSIZE_T), DIMENSION(2) :: size
-    
+
     !
     !general purpose integer
     !
     INTEGER :: i, j
     INTEGER(HSIZE_T) :: ih, jh
-    
+
     !
     !flag to check operation success
     !
     INTEGER :: error
-    
+
     !
     !Variables used in reading data back
     !
     INTEGER(HSIZE_T), DIMENSION(2) :: dimsr, maxdimsr
     INTEGER :: rankr
     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
-    
+
     !
     !data initialization
     !
@@ -311,9 +311,9 @@ CONTAINS
           data_in(i,j) = 2
        END DO
     END DO
-    
+
     !
-    !Initialize FORTRAN predifined datatypes
+    !Initialize FORTRAN predefined datatypes
     !
 !          CALL h5init_types_f(error)
 !               CALL check("h5init_types_f",error,total_error)
@@ -328,26 +328,26 @@ CONTAINS
     ENDIF
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f",error,total_error)
-    
+
     !
     !Create the data space with unlimited dimensions.
     !
     maxdims = (/H5S_UNLIMITED_F, H5S_UNLIMITED_F/)
-    
+
     CALL h5screate_simple_f(RANK, dims, dataspace, error, maxdims)
     CALL check("h5screate_simple_f",error,total_error)
-    
+
     !
     !Modify dataset creation properties, i.e. enable chunking
     !
     CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
     CALL check("h5pcreate_f",error,total_error)
-    
+
     CALL h5pset_chunk_f(crp_list, RANK, dims1, error)
     CALL check("h5pset_chunk_f",error,total_error)
-    
+
     !
-    !Create a dataset with 3X3 dimensions using cparms creation propertie .
+    !Create a dataset with 3X3 dimensions using cparms creation properties.
     !
     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, dset_id, error, crp_list )
     CALL check("h5dcreate_f",error,total_error)
@@ -359,8 +359,8 @@ CONTAINS
     SIZE(2) = 3
     CALL h5dextend_f(dset_id, size, error)
     CALL check("h5dextend_f",error,total_error)
-    
-    
+
+
     !
     !Extend the dataset. Dataset becomes 10 x 3.
     !
@@ -368,7 +368,7 @@ CONTAINS
     SIZE(2)   = 3;
     CALL h5dextend_f(dset_id, size, error)
     CALL check("h5dextend_f",error,total_error)
-    
+
     !
     !Write the data of size 10X3 to the extended dataset.
     !
@@ -376,13 +376,13 @@ CONTAINS
     data_dims(2) = 3
     CALL H5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
     CALL check("h5dwrite_f",error,total_error)
-    
+
     !
     !Close the dataspace for the dataset.
     !
     CALL h5sclose_f(dataspace, error)
     CALL check("h5sclose_f",error,total_error)
-    
+
     !
     !Close the property list.
     !
@@ -393,13 +393,13 @@ CONTAINS
     !
     CALL h5dclose_f(dset_id, error)
     CALL check("h5dclose_f",error,total_error)
-    
+
     !
     !Close the file.
     !
     CALL h5fclose_f(file_id, error)
     CALL check("h5fclose_f",error,total_error)
-    
+
     !
     !read the data back
     !
@@ -407,95 +407,95 @@ CONTAINS
     !
     CALL h5fopen_f (fix_filename, H5F_ACC_RDONLY_F, file_id, error)
     CALL check("hfopen_f",error,total_error)
-    
+
     !
     !Open the  dataset.
     !
     CALL h5dopen_f(file_id, dsetname, dset_id, error)
     CALL check("h5dopen_f",error,total_error)
-    
+
     !
     !Get dataset's dataspace handle.
     !
     CALL h5dget_space_f(dset_id, dataspace, error)
     CALL check("h5dget_space_f",error,total_error)
-    
+
     !
     !Get dataspace's rank.
     !
     CALL h5sget_simple_extent_ndims_f(dataspace, rankr, error)
     CALL check("h5sget_simple_extent_ndims_f",error,total_error)
     IF (rankr .NE. RANK) THEN
-       WRITE(*,*) "dataset rank error occured"
+       WRITE(*,*) "dataset rank error occurred"
        STOP
     END IF
-    
+
     !
     !Get dataspace's dimensinons.
     !
     CALL h5sget_simple_extent_dims_f(dataspace, dimsr, maxdimsr, error)
     CALL check("h5sget_simple_extent_dims_f",error,total_error)
     IF ((dimsr(1) .NE. dims1(1)) .OR. (dimsr(2) .NE. dims1(2))) THEN
-       WRITE(*,*) "dataset dimensions error occured"
+       WRITE(*,*) "dataset dimensions error occurred"
        STOP
     END IF
-    
+
     !
     !Get creation property list.
     !
     CALL h5dget_create_plist_f(dset_id, crp_list, error)
     CALL check("h5dget_create_plist_f",error,total_error)
 
-    
+
     !
     !create memory dataspace.
     !
     CALL h5screate_simple_f(rankr, dimsr, memspace, error)
     CALL check("h5screate_simple_f",error,total_error)
-    
+
     !
     !Read data
     !
     CALL H5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, memspace, dataspace)
     CALL check("h5dread_f",error,total_error)
 
-    
+
     !
     !Compare the data.
     !
     DO ih = 1, dims1(1)
        DO jh = 1, dims1(2)
           IF (data_out(ih,jh) .NE. data_in(ih, jh)) THEN
-             WRITE(*, *) "extend dataset test error occured"
+             WRITE(*, *) "extend dataset test error occurred"
              WRITE(*, *) "read value is not the same as the written values"
           END IF
        END DO
     END DO
-    
+
     !
     !Close the dataspace for the dataset.
     !
     CALL h5sclose_f(dataspace, error)
     CALL check("h5sclose_f",error,total_error)
-    
+
     !
     !Close the memspace for the dataset.
     !
     CALL h5sclose_f(memspace, error)
     CALL check("h5sclose_f",error,total_error)
-    
+
     !
     !Close the property list.
     !
     CALL h5pclose_f(crp_list, error)
     CALL check("h5pclose_f",error,total_error)
-    
+
     !
     !Close the dataset.
     !
     CALL h5dclose_f(dset_id, error)
     CALL check("h5dclose_f",error,total_error)
-    
+
     !
     !Close the file.
     !
@@ -503,7 +503,7 @@ CONTAINS
     CALL check("h5fclose_f",error,total_error)
     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
     CALL check("h5_cleanup_f", error, total_error)
-    
+
     RETURN
   END SUBROUTINE extenddsettest
 
@@ -549,7 +549,7 @@ CONTAINS
     DO i = 1, dset_dim1
        DO j = 1, dset_dim2
           n = n + 1
-          data_in(i,j) = n 
+          data_in(i,j) = n
        END DO
     END DO
     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file, error, fcpl)
@@ -557,7 +557,7 @@ CONTAINS
 
     ! Create the data space
     dims(1:2) = (/dset_dim1,dset_dim2/)
-    
+
     CALL h5screate_simple_f(2, dims, space, error)
     CALL check("h5screate_simple_f",error,total_error)
 
@@ -596,7 +596,7 @@ CONTAINS
        total_error = total_error + 1
        RETURN
     ENDIF
-    ! The pos= specifier illustrates that positions are in bytes, 
+    ! The pos= specifier illustrates that positions are in bytes,
     ! starting from byte 1 (as opposed to C, where they start from byte 0)
     READ(10, POS=offset+1, IOSTAT=ios) rdata
     IF(ios.NE.0)THEN
@@ -625,7 +625,7 @@ CONTAINS
     CALL check("h5_cleanup_f", error, total_error)
     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
     CALL check("h5_cleanup_f", error, total_error)
-    
+
   END SUBROUTINE test_userblock_offset
 
 END MODULE TH5D

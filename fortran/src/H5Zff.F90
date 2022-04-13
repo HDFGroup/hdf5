@@ -15,7 +15,7 @@
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -56,7 +56,7 @@ CONTAINS
 !            H5Z_FILTER_SCALEOFFSET_F
 !            H5Z_FILTER_SHUFFLE_F
 !            H5Z_FILTER_FLETCHER32_F
-!            
+!
 ! OUTPUTS
 !  hdferr - Error code
 !            Success:  0
@@ -147,7 +147,7 @@ CONTAINS
 !                   H5Z_FILTER_SHUFFLE_F
 !                   H5Z_FILTER_FLETCHER32_Ffilter
 ! OUTPUTS
-!  config_flags  - Flag, indicates if filter has its encoder 
+!  config_flags  - Flag, indicates if filter has its encoder
 !                  and/or decoder available, possibly containing the
 !                  following values:
 !                     H5Z_FILTER_ENCODE_ENABLED_F

@@ -6,7 +6,7 @@
 ! * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 ! * terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -18,7 +18,7 @@ PROGRAM example_ds
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: RANK      = 2 ! rank of DATA dataset 
+  INTEGER, PARAMETER :: RANK      = 2 ! rank of DATA dataset
   INTEGER, PARAMETER :: DIM_DATA  = 12
   INTEGER, PARAMETER :: DIM1_SIZE = 3
   INTEGER, PARAMETER :: DIM2_SIZE = 4
@@ -33,13 +33,13 @@ PROGRAM example_ds
   INTEGER(hid_t) :: fid    ! file ID
   INTEGER(hid_t) :: did    ! dataset ID
   INTEGER(hid_t) :: dsid   ! DS dataset ID
-  INTEGER :: rankds = 1    ! rank of DS dataset 
-  INTEGER(hsize_t), DIMENSION(1:rank) ::  dims  = (/DIM2_SIZE,DIM1_SIZE/) ! size of data dataset 
-  INTEGER, DIMENSION(1:DIM_DATA) :: buf = (/1,2,3,4,5,6,7,8,9,10,11,12/)  ! data of data dataset 
-  INTEGER(hsize_t), DIMENSION(1:1) ::  s1_dim  = (/DIM1_SIZE/)  ! size of DS 1 dataset 
-  INTEGER(hsize_t), DIMENSION(1:1) ::  s2_dim  = (/DIM2_SIZE/)  ! size of DS 2 dataset 
-  REAL, DIMENSION(1:DIM1_SIZE) :: s1_wbuf = (/10,20,30/)     ! data of DS 1 dataset 
-  REAL, DIMENSION(1:DIM2_SIZE) :: s2_wbuf = (/10,20,50,100/) ! data of DS 2 dataset 
+  INTEGER :: rankds = 1    ! rank of DS dataset
+  INTEGER(hsize_t), DIMENSION(1:rank) ::  dims  = (/DIM2_SIZE,DIM1_SIZE/) ! size of data dataset
+  INTEGER, DIMENSION(1:DIM_DATA) :: buf = (/1,2,3,4,5,6,7,8,9,10,11,12/)  ! data of data dataset
+  INTEGER(hsize_t), DIMENSION(1:1) ::  s1_dim  = (/DIM1_SIZE/)  ! size of DS 1 dataset
+  INTEGER(hsize_t), DIMENSION(1:1) ::  s2_dim  = (/DIM2_SIZE/)  ! size of DS 2 dataset
+  REAL, DIMENSION(1:DIM1_SIZE) :: s1_wbuf = (/10,20,30/)     ! data of DS 1 dataset
+  REAL, DIMENSION(1:DIM2_SIZE) :: s2_wbuf = (/10,20,50,100/) ! data of DS 2 dataset
   INTEGER :: err
   INTEGER :: num_scales
   INTEGER(size_t) :: name_len
@@ -56,7 +56,7 @@ PROGRAM example_ds
   ! create a file using default properties
   CALL H5Fcreate_f("ex_ds1.h5",H5F_ACC_TRUNC_F, fid, err)
 
-  ! make a dataset 
+  ! make a dataset
   CALL H5LTmake_dataset_int_f(fid, DSET_NAME, rank,dims,buf, err)
 
   ! make a DS dataset for the first dimension
@@ -69,7 +69,7 @@ PROGRAM example_ds
   ! attach the DS_1_NAME dimension scale to DSET_NAME at dimension 1
   ! and then detach it.
   !-------------------------------------------------------------------------
- 
+
   ! get the dataset id for DSET_NAME
   CALL H5Dopen_f(fid, DSET_NAME, did, err)
 
@@ -82,11 +82,11 @@ PROGRAM example_ds
   ! attach the DS_1_NAME dimension scale to DSET_NAME at dimension index 1
   CALL H5DSattach_scale_f(did, dsid, DIM1, err)
 
-  ! Test if dimension Scale Attached 
+  ! Test if dimension Scale Attached
   CALL H5DSis_attached_f(did, dsid, DIM1, is_attached, err)
   WRITE(*,'(/,5X,3(A,1X),I0,A,L1)') 'Is',TRIM(DS_1_NAME),&
        'attached to dimension',DIM1,' ... ',is_attached
-  
+
 
   ! Check to see how many Dimension Scales are attached
 
@@ -103,11 +103,11 @@ PROGRAM example_ds
   CALL H5DSis_attached_f(did, dsid, DIM1, is_attached, err)
   WRITE(*,'(/,5X,3(A,1X),I0,A,L1)') 'Is',TRIM(DS_1_NAME),&
        'attached to dimension',DIM1,' ... ',is_attached
-  
+
   !-------------------------------------------------------------------------
   ! set the DS_1_NAME dimension scale to DSET_NAME at dimension 1
   !-------------------------------------------------------------------------
- 
+
   WRITE(*,'(/,5A,I0)') &
        'Set Dimension Scale "', TRIM(DS_1_NAME), '" to "', TRIM(DSET_NAME), '" at dimension ', DIM1
 
@@ -123,11 +123,11 @@ PROGRAM example_ds
   name = ''
   CALL H5DSget_scale_name_f(dsid, name, name_len, err)
 
-  WRITE(*,'(/,5X,A,A)') 'The Dimension Scale name is ... ', name(1:name_len) 
+  WRITE(*,'(/,5X,A,A)') 'The Dimension Scale name is ... ', name(1:name_len)
 
   ! Setting Dimension Scale Label
 
-  WRITE(*,'(/,A,I0)') "Setting Dimension Scale label ""X"" for dimension ", DIM1 
+  WRITE(*,'(/,A,I0)') "Setting Dimension Scale label ""X"" for dimension ", DIM1
 
   CALL H5DSset_label_f(did, DIM1, "X", err)
 
@@ -139,11 +139,11 @@ PROGRAM example_ds
 
   ! close DS id
   CALL H5Dclose_f(dsid, err)
-  
+
   !-------------------------------------------------------------------------
   ! attach the DS_2_NAME dimension scale to DSET_NAME
   !-------------------------------------------------------------------------
- 
+
   ! get the DS dataset id
   CALL H5Dopen_f(fid, DS_2_NAME, dsid, err)
 
@@ -163,7 +163,7 @@ PROGRAM example_ds
   name = ''
   CALL H5DSget_scale_name_f(dsid, name(1:name_len), name_len, err)
 
-  WRITE(*,'(/,5X,A,A)') 'The Dimension Scale name is ... ', name(1:name_len) 
+  WRITE(*,'(/,5X,A,A)') 'The Dimension Scale name is ... ', name(1:name_len)
 
 
   ! Setting Dimension Scale Label
@@ -177,13 +177,14 @@ PROGRAM example_ds
   label_len = 25
   label = ''
   CALL H5DSget_label_f(did, DIM2, label, label_len, err)
-  
+
   WRITE(*,'(/,5X,A,I0,2A,/)') 'Dimension Scale Label for dimension ', DIM2, ' is ... ', label(1:label_len)
 
- ! close DS id
+ ! close DS ids
   CALL H5Dclose_f(dsid, err)
+  CALL H5Dclose_f(did, err)
 
- ! close file 
+ ! close file
   CALL H5Fclose_f(fid, err)
 
 END PROGRAM example_ds
