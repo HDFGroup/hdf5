@@ -85,7 +85,7 @@ while [ $status -gt 0 ]; do
 
       while fuser -s $i; do
           if [[ $(($t_elapsed % 5)) -eq 0 ]]; then
-              echo -e "$GRN waiting for process to finish accesing file \"$i\" ... [${t_elapsed}s/${t_max}s] $NC"
+              echo -e "$GRN waiting for process to finish accessing file \"$i\" ... [${t_elapsed}s/${t_max}s] $NC"
           fi
           sleep $t_sleep
           t_elapsed=$(($t_elapsed+$t_sleep))
