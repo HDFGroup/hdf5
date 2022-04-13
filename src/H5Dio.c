@@ -1138,7 +1138,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             int comm_size = 0;
 
             /* Retrieve size of MPI communicator used for file */
-            if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+            if ((comm_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
 
             /* Check if there are any filters in the pipeline. If there are,
