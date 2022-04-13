@@ -146,8 +146,7 @@ H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t
     /* Set the return value */
     ret_value = fspace;
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: fspace = %p, fspace->addr = %" PRIuHADDR "\n", FUNC, (void *)fspace,
-              fspace->addr);
+    HDfprintf(stderr, "%s: fspace = %p, fspace->addr = %" PRIuHADDR "\n", FUNC, (void *)fspace, fspace->addr);
 #endif /* H5FS_DEBUG */
 
 done:
@@ -408,8 +407,8 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
     HDassert(f);
     HDassert(fspace);
 #ifdef H5FS_DEBUG
-    HDfprintf(stderr, "%s: Entering, fspace = %p, fspace->addr = %" PRIuHADDR ", fspace->sinfo = %p\n",
-              FUNC, (void *)fspace, fspace->addr, (void *)fspace->sinfo);
+    HDfprintf(stderr, "%s: Entering, fspace = %p, fspace->addr = %" PRIuHADDR ", fspace->sinfo = %p\n", FUNC,
+              (void *)fspace, fspace->addr, (void *)fspace->sinfo);
 #endif /* H5FS_DEBUG */
 
     /* Check if section info is valid */
@@ -421,8 +420,8 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                   ", fspace->sect_addr = %" PRIuHADDR ", fspace->rc = %u\n",
                   FUNC, fspace->tot_sect_count, fspace->serial_sect_count, fspace->sect_addr, fspace->rc);
         HDfprintf(stderr,
-                  "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n",
-                  FUNC, fspace->alloc_sect_size, fspace->sect_size);
+                  "%s: fspace->alloc_sect_size = %" PRIuHSIZE ", fspace->sect_size = %" PRIuHSIZE "\n", FUNC,
+                  fspace->alloc_sect_size, fspace->sect_size);
 #endif /* H5FS_DEBUG */
         /* If there are sections to serialize, update them */
         /* (if the free space manager is persistent) */

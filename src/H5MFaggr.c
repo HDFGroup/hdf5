@@ -184,8 +184,8 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
         H5FD_mem_t alloc_type, other_alloc_type; /* Current aggregator & 'other' aggregator types */
 
 #ifdef H5MF_AGGR_DEBUG
-            HDfprintf(stderr, "%s: aggr = {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", FUNC,
-                      aggr->addr, aggr->tot_size, aggr->size);
+        HDfprintf(stderr, "%s: aggr = {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", FUNC, aggr->addr,
+                  aggr->tot_size, aggr->size);
 #endif /* H5MF_AGGR_DEBUG */
 
         /* Turn off alignment if allocation < threshold */
@@ -518,11 +518,11 @@ H5MF__aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr, const H5MF_fre
         if (H5F_addr_eq((sect->sect_info.addr + sect->sect_info.size), aggr->addr) ||
             H5F_addr_eq((aggr->addr + aggr->size), sect->sect_info.addr)) {
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins aggr = {%" PRIuHADDR
-                  ", %" PRIuHSIZE "}\n",
-                  "H5MF__aggr_can_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr,
-                  aggr->size);
+            HDfprintf(stderr,
+                      "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins aggr = {%" PRIuHADDR
+                      ", %" PRIuHSIZE "}\n",
+                      "H5MF__aggr_can_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr,
+                      aggr->size);
 #endif /* H5MF_AGGR_DEBUG */
             /* Check if aggregator would get too large and should be absorbed into section */
             if ((aggr->size + sect->sect_info.size) >= aggr->alloc_size)
@@ -572,11 +572,11 @@ H5MF__aggr_absorb(const H5F_t H5_ATTR_UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free
         /* Check if the section adjoins the beginning or end of the aggregator */
         if (H5F_addr_eq((sect->sect_info.addr + sect->sect_info.size), aggr->addr)) {
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr,
-                  "%s: aggr {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins front of section = {%" PRIuHADDR
-                  ", %" PRIuHSIZE "}\n",
-                  "H5MF__aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr,
-                  sect->sect_info.size);
+            HDfprintf(stderr,
+                      "%s: aggr {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins front of section = {%" PRIuHADDR
+                      ", %" PRIuHSIZE "}\n",
+                      "H5MF__aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr,
+                      sect->sect_info.size);
 #endif /* H5MF_AGGR_DEBUG */
             /* Absorb aggregator onto end of section */
             sect->sect_info.size += aggr->size;
@@ -586,11 +586,11 @@ H5MF__aggr_absorb(const H5F_t H5_ATTR_UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free
             HDassert(H5F_addr_eq((aggr->addr + aggr->size), sect->sect_info.addr));
 
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr,
-                  "%s: aggr {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins end of section = {%" PRIuHADDR
-                  ", %" PRIuHSIZE "}\n",
-                  "H5MF__aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr,
-                  sect->sect_info.size);
+            HDfprintf(stderr,
+                      "%s: aggr {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins end of section = {%" PRIuHADDR
+                      ", %" PRIuHSIZE "}\n",
+                      "H5MF__aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr,
+                      sect->sect_info.size);
 #endif /* H5MF_AGGR_DEBUG */
             /* Absorb aggregator onto beginning of section */
             sect->sect_info.addr -= aggr->size;
@@ -606,11 +606,11 @@ H5MF__aggr_absorb(const H5F_t H5_ATTR_UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free
         /* Check if the section adjoins the beginning or end of the aggregator */
         if (H5F_addr_eq((sect->sect_info.addr + sect->sect_info.size), aggr->addr)) {
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins front of aggr = {%" PRIuHADDR
-                  ", %" PRIuHSIZE "}\n",
-                  "H5MF__aggr_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr,
-                  aggr->size);
+            HDfprintf(stderr,
+                      "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "} adjoins front of aggr = {%" PRIuHADDR
+                      ", %" PRIuHSIZE "}\n",
+                      "H5MF__aggr_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr,
+                      aggr->size);
 #endif /* H5MF_AGGR_DEBUG */
             /* Absorb section onto front of aggregator */
             aggr->addr -= sect->sect_info.size;
@@ -718,8 +718,8 @@ H5MF__aggr_reset(H5F_t *f, H5F_blk_aggr_t *aggr)
         tmp_addr = aggr->addr;
         tmp_size = aggr->size;
 #ifdef H5MF_AGGR_DEBUG
-            HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", FUNC,
-                      tmp_addr, tmp_size);
+        HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", FUNC, tmp_addr,
+                  tmp_size);
 #endif /* H5MF_AGGR_DEBUG */
 
         /* Reset aggregator block information */

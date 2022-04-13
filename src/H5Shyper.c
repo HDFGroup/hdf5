@@ -294,8 +294,8 @@ H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned de
     FUNC_ENTER_STATIC_NOERR
 
     while (span) {
-        HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", FUNC,
-                  depth * 2, "", depth, (void *)span, span->low, span->high, (void *)span->next);
+        HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", FUNC, depth * 2,
+                  "", depth, (void *)span, span->low, span->high, (void *)span->next);
         if (span->down) {
             HDfprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
                       FUNC, (depth + 1) * 2, "", (void *)span->down, span->down->count,
@@ -314,9 +314,9 @@ H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
     FUNC_ENTER_STATIC_NOERR
 
     if (span_lst != NULL) {
-        HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
-                  FUNC, (void *)span_lst, span_lst->count, span_lst->low_bounds[0],
-                  span_lst->high_bounds[0], (void *)span_lst->head);
+        HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n", FUNC,
+                  (void *)span_lst, span_lst->count, span_lst->low_bounds[0], span_lst->high_bounds[0],
+                  (void *)span_lst->head);
         H5S__hyper_print_spans_helper(f, span_lst->head, 0);
     } /* end if */
 
