@@ -20,13 +20,15 @@ RED='\033[0;31m'
 PUR='\033[0;35m'
 NC='\033[0m' # No Color
 
+ERR=1
+
 ## CONFIG FILE CHECKS ##
 
 if [ $# -eq 0 ]; then
     nfiles=$(find . -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
     if [[ "$nfiles" != "1" ]]; then
        echo -e "$RED More than one .config file found in current directory. $NC"
-       exit 1
+       exit $ERR
     fi
     file_config=$(find . -maxdepth 1 -type f -iname "*.config")
 else
@@ -35,13 +37,13 @@ fi
 
 if [ ! -f "$file_config" ]; then
     echo -e "$RED $file_config does not exist. $NC"
-    exit 1
+    exit $ERR
 fi
 
 stripe_size=$(grep "stripe_size=" $file_config  | cut -d "=" -f2)
 if test -z "$stripe_size"; then
     echo -e "$RED failed to find stripe_size in $file_config $NC"
-    exit 1
+    exit $ERR
 fi
 
 subfiles=( $( sed -e '1,/hdf5_file=/d' $file_config ) )
@@ -50,13 +52,13 @@ subfiles=( $( sed -e '1,/hdf5_file=/d' $file_config ) )
 #done
 if test -z "$subfiles"; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
-    exit 1
+    exit $ERR
 fi
 
 hdf5_file=$(grep "hdf5_file=" $file_config  | cut -d "=" -f2)
 if test -z "$hdf5_file"; then
     echo -e "$RED failed to find hdf5 output file in $file_config $NC"
-    exit 1
+    exit $ERR
 fi
 
 rm -f $hdf5_file
@@ -69,6 +71,30 @@ START="$(date +%s%N)"
 while [ $status -gt 0 ]; do
   icnt=0
   for i in "${subfiles[@]}"; do
+
+      # Verify the file exists
+      if [ ! -f "$i" ]; then
+          echo -e "$RED ERROR: file \"$i\" does not exist. $NC"
+          exit $ERR
+      fi
+
+      # Verify the file is not being accessed by a process
+      t_max=60
+      t_sleep=1
+      t_elapsed=0
+
+      while fuser -s $i; do
+          if [[ $(($t_elapsed % 5)) -eq 0 ]]; then
+              echo -e "$GRN waiting for process to finish accesing file \"$i\" ... [${t_elapsed}s/${t_max}s] $NC"
+          fi
+          sleep $t_sleep
+          t_elapsed=$(($t_elapsed+$t_sleep))
+          if [[ $t_elapsed -ge $t_max ]]; then
+              echo -e "$RED ERROR: file \"$i\" still has process accessing it after ${t_elapsed}s $NC"
+              exit $ERR
+          fi
+      done
+
       fsize=$(wc -c $i | awk '{print $1}')
       if [ $(($skip*$stripe_size)) -le $fsize ]; then
           EXEC="dd count=1 bs=$stripe_size if=$i of=$hdf5_file skip=$skip oflag=append conv=notrunc"
