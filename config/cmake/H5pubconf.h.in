@@ -190,9 +190,6 @@
 /* Define to 1 if you have the `curl' library (-lcurl). */
 #cmakedefine H5_HAVE_LIBCURL @H5_HAVE_LIBCURL@
 
-/* Define to 1 if you have the `dl' library (-ldl). */
-#cmakedefine H5_HAVE_LIBDL @H5_HAVE_LIBDL@
-
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
 
@@ -202,20 +199,11 @@
 /* Define to 1 if you have the `jvm' library (-ljvm). */
 #cmakedefine H5_HAVE_LIBJVM @H5_HAVE_LIBJVM@
 
-/* Define to 1 if you have the `m' library (-lm). */
-#cmakedefine H5_HAVE_LIBM @H5_HAVE_LIBM@
-
-/* Define to 1 if you have the `mpe' library (-lmpe). */
-#cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine H5_HAVE_LIBPTHREAD @H5_HAVE_LIBPTHREAD@
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #cmakedefine H5_HAVE_LIBSZ @H5_HAVE_LIBSZ@
-
-/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
-#cmakedefine H5_HAVE_LIBWS2_32 @H5_HAVE_LIBWS2_32@
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
@@ -223,14 +211,8 @@
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
 
-/* Define to 1 if you have the `lstat' function. */
-#cmakedefine H5_HAVE_LSTAT @H5_HAVE_LSTAT@
-
 /* Define if the map API (H5M) should be compiled */
 #cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
-
-/* Define to 1 if you have the <memory.h> header file. */
-#cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
 
 /* Define whether the Mirror virtual file driver (VFD) will be compiled */
 #cmakedefine H5_HAVE_MIRROR_VFD @H5_HAVE_MIRROR_VFD@
@@ -302,26 +284,14 @@
 /* Define to 1 if you have the `sigsetjmp' function. */
 #cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
 
-/* Define to 1 if you have the `srandom' function. */
-#cmakedefine H5_HAVE_SRANDOM @H5_HAVE_SRANDOM@
-
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
-/* Define to 1 if you have the <stdlib.h> header file. */
-#cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
-
 /* Define to 1 if you have the `strdup' function. */
 #cmakedefine H5_HAVE_STRDUP @H5_HAVE_STRDUP@
-
-/* Define to 1 if you have the <strings.h> header file. */
-#cmakedefine H5_HAVE_STRINGS_H @H5_HAVE_STRINGS_H@
-
-/* Define to 1 if you have the <string.h> header file. */
-#cmakedefine H5_HAVE_STRING_H @H5_HAVE_STRING_H@
 
 /* Define if struct text_info is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
