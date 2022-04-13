@@ -291,10 +291,6 @@ H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned 
  * \details H5Oopen_by_token() opens an object specified by the object
  *          identifier, \p loc_id and object token, \p token.
  *
- * \par Example
- *      An example snippet from examples/h5_extlink.c:
- *      \snippet h5_extlink.c H5Open_by_token_snip
- *
  * \since 1.12.0
  *
  */
