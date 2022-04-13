@@ -257,9 +257,8 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
                 dt->id_out  = H5I_INVALID_HID;
 
                 /* Check if this type is the one requested */
-                if (oinfo.addr == dt->addr_in) {
+                if (oinfo.addr == dt->addr_in)
                     dt_ret = dt;
-                }
             } /* end if named datatype */
         }     /* end for each object in traversal table */
     }         /* end else (create the stack) */
@@ -465,6 +464,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             } /* end for each member */
         }     /* end if type_class is H5T_COMPOUND */
 
+        read_time  = 0;
+        write_time = 0;
+
         if (!is_ref) {
             /*-----------------------------------------------------------------
              * read to memory
@@ -475,8 +477,17 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (buf == NULL) {
                 H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
             } /* end if */
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Aread(attr_id, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
+            if (options->verbose == 2) {
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                read_time += times.elapsed;
+            }
 
             /*-----------------------------------------------------------------
              * copy
@@ -485,8 +496,18 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
 
             if ((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Acreate2 failed on ,%s>", name);
+
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Awrite(attr_out, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Awrite failed");
+            if (options->verbose == 2) {
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                write_time += times.elapsed;
+            }
 
             /*close*/
             if (H5Aclose(attr_out) < 0)
@@ -500,7 +521,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             buf = NULL;
         } /*H5T_REFERENCE*/
 
-        if (options->verbose)
+        if (options->verbose == 2)
+            HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
+        else
             HDprintf(FORMAT_OBJ_ATTR, "attr", name);
 
         /*---------------------------------------------------------------------
@@ -566,7 +589,7 @@ check_options(pack_opt_t *options)
      * Objects to layout
      *-------------------------------------------------------------------------
      */
-    if (options->verbose && have_request(options)) {
+    if (options->verbose > 0 && have_request(options)) {
         if (options->all_layout == 1) {
             HDprintf("All objects to modify layout are...\n");
             switch (options->layout_g) {
@@ -607,7 +630,7 @@ check_options(pack_opt_t *options)
         char *name = options->op_tbl->objs[i].path;
 
         if (options->op_tbl->objs[i].chunk.rank > 0) {
-            if (options->verbose) {
+            if (options->verbose > 0) {
                 HDprintf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
                     HDprintf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
@@ -616,7 +639,7 @@ check_options(pack_opt_t *options)
             has_ck = 1;
         }
         else if (options->op_tbl->objs[i].chunk.rank == -2) { /* TODO: replace 'magic number' */
-            if (options->verbose)
+            if (options->verbose > 0)
                 HDprintf(" <%s> %s\n", name, "NONE (contiguous)");
             has_ck = 1;
         }
@@ -630,7 +653,7 @@ check_options(pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose && have_request(options)) {
+    if (options->verbose > 0 && have_request(options)) {
         if (options->all_filter == 1) {
             HDprintf("All objects to apply filter are...\n");
             for (k = 0; k < options->n_filter_g; k++) {
@@ -667,7 +690,7 @@ check_options(pack_opt_t *options)
         char *      name = pack.path;
 
         for (j = 0; j < pack.nfilters; j++) {
-            if (options->verbose) {
+            if (options->verbose > 0) {
                 if (pack.filter[j].filtn >= 0) {
                     if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
                         HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
@@ -705,7 +728,7 @@ check_options(pack_opt_t *options)
      *------------------------------------------------------------------------
      */
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
-        if (options->verbose) {
+        if (options->verbose > 0) {
             HDprintf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
                      options->ublock_filename);
             options->ublock_size = 1024;
@@ -778,21 +801,21 @@ check_objects(const char *fname, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose)
+    if (options->verbose > 0)
         HDprintf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         pack_info_t obj  = options->op_tbl->objs[i];
         char *      name = obj.path;
 
-        if (options->verbose)
+        if (options->verbose > 0)
             HDprintf(" <%s>", name);
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
             H5TOOLS_GOTO_ERROR((-1), "%s Could not find <%s> in file <%s>. Exiting...\n",
-                               (options->verbose ? "\n" : ""), name, fname);
-        if (options->verbose)
+                               (options->verbose > 0 ? "\n" : ""), name, fname);
+        if (options->verbose > 0)
             HDprintf("...Found\n");
 
         for (ifil = 0; ifil < obj.nfilters; ifil++) {
