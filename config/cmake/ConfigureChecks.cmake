@@ -212,7 +212,7 @@ endif()
 #-----------------------------------------------------------------------------
 
 HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-if (${_SIZEOF___FLOAT128})
+if (_SIZEOF___FLOAT128)
   set (${HDF_PREFIX}_HAVE_FLOAT128 1)
   set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
 else ()
@@ -221,7 +221,7 @@ else ()
 endif ()
 
 HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-if (NOT ${_SIZEOF__QUAD})
+if (NOT _SIZEOF__QUAD)
   set (${HDF_PREFIX}_SIZEOF__QUAD 0)
 else ()
   set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
