@@ -333,7 +333,7 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         /* Encode (or not, if the 'encode' flag is off) the property's name */
         prop_name_len = HDstrlen(prop->name) + 1;
         if (udata->encode) {
-            HDstrncpy((char *)*(udata->pp), prop->name, prop_name_len);
+            HDstrcpy((char *)*(udata->pp), prop->name);
             *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
