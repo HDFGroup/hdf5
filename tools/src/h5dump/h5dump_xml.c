@@ -588,6 +588,8 @@ xml_name_to_XID(const char *str, char *outstr, int outlen, int gen)
     if (outlen < 22)
         return 1;
 
+    H5_CHECK_OVERFLOW(outlen, int, size_t);
+
     objno = ref_path_table_lookup(str);
     if (objno == HADDR_UNDEF) {
         if (HDstrlen(str) == 0) {
@@ -595,7 +597,7 @@ xml_name_to_XID(const char *str, char *outstr, int outlen, int gen)
             if (objno == HADDR_UNDEF) {
                 if (gen) {
                     objno = ref_path_table_gen_fake(str);
-                    HDsprintf(outstr, "xid_" H5_PRINTF_HADDR_FMT, objno);
+                    HDsnprintf(outstr, (size_t)outlen, "xid_" H5_PRINTF_HADDR_FMT, objno);
                     return 0;
                 }
                 else {
@@ -606,7 +608,7 @@ xml_name_to_XID(const char *str, char *outstr, int outlen, int gen)
         else {
             if (gen) {
                 objno = ref_path_table_gen_fake(str);
-                HDsprintf(outstr, "xid_" H5_PRINTF_HADDR_FMT, objno);
+                HDsnprintf(outstr, (size_t)outlen, "xid_" H5_PRINTF_HADDR_FMT, objno);
                 return 0;
             }
             else {
@@ -615,7 +617,7 @@ xml_name_to_XID(const char *str, char *outstr, int outlen, int gen)
         }
     }
 
-    HDsprintf(outstr, "xid_" H5_PRINTF_HADDR_FMT, objno);
+    HDsnprintf(outstr, (size_t)outlen, "xid_" H5_PRINTF_HADDR_FMT, objno);
 
     return 0;
 }
@@ -3557,7 +3559,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "\"");
                 for (i = 0; i < sz; i++) {
-                    h5tools_str_append(&buffer, "%x ", *(unsigned int *)buf + (i * sizeof(unsigned int)));
+                    unsigned long val = *(unsigned int *)buf + (i * sizeof(unsigned int));
+
+                    H5_CHECK_OVERFLOW(val, unsigned long, unsigned);
+                    h5tools_str_append(&buffer, "%x ", (unsigned)val);
                 }
                 h5tools_str_append(&buffer, "\"");
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,

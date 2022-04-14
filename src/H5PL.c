@@ -356,7 +356,7 @@ H5PLget(unsigned int idx, char *path_buf, size_t buf_size)
 
     /* If the path buffer is not NULL, copy the path to the buffer */
     if (path_buf) {
-        HDstrncpy(path_buf, path, MIN((size_t)(path_len + 1), buf_size));
+        HDstrncpy(path_buf, path, buf_size);
         if ((size_t)path_len >= buf_size)
             path_buf[buf_size - 1] = '\0';
     } /* end if */

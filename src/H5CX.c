@@ -1122,9 +1122,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
 
         /* If parallel is enabled and the file driver used is the MPI-IO
          * VFD, issue an MPI barrier for easier debugging if the API function
-         * calling this is supposed to be called collectively. Note that this
-         * happens only when the environment variable H5_COLL_BARRIER is set
-         * to non 0.
+         * calling this is supposed to be called collectively.
          */
         if (H5_coll_api_sanity_check_g) {
             MPI_Comm mpi_comm; /* File communicator */
@@ -1181,9 +1179,7 @@ H5CX_set_loc(hid_t
 
     /* If parallel is enabled and the file driver used is the MPI-IO
      * VFD, issue an MPI barrier for easier debugging if the API function
-     * calling this is supposed to be called collectively. Note that this
-     * happens only when the environment variable H5_COLL_BARRIER is set
-     * to non 0.
+     * calling this is supposed to be called collectively.
      */
     if (H5_coll_api_sanity_check_g) {
         MPI_Comm mpi_comm; /* File communicator */
