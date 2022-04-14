@@ -3,7 +3,6 @@ HDF5 version 1.13.2-1 currently under development
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
 [![Build](https://img.shields.io/github/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI/develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![Total Lines](https://tokei.rs/b1/github/HDFGroup/hdf5)](https://github.com/HDFGroup/hdf5)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
