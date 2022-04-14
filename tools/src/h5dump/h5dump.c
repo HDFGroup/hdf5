@@ -57,9 +57,9 @@ static H5FD_onion_fapl_info_t onion_fa_g = {
     32,                            /* page_size                      */
     H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
     H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-    0,                             /* force_write_open               */
-    0,                             /* creation_flags                 */
-    "input file",                  /* comment                        */
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
 };
 
 /* module-scoped variables for XML option */
