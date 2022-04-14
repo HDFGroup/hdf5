@@ -397,7 +397,7 @@ h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t
         H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 
     /*-------------------------------------------------------------------------
-     * traverse the suppplied object list
+     * traverse the supplied object list
      *-------------------------------------------------------------------------
      */
     for (i = 0; i < trav->nobjs; i++) {
