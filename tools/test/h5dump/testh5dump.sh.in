@@ -1496,9 +1496,9 @@ TOOLTEST_FAIL tCVE_2018_11206_fill_old.h5
 TOOLTEST_FAIL tCVE_2018_11206_fill_new.h5
 
 # test Onion VFD
-TOOLTEST tst_onion_objs.ddl --enable-error-stack -f onion -F 3 tst_onion_objs.h5 
-TOOLTEST tst_onion_dset_ext.ddl --enable-error-stack -f onion -F 1 tst_onion_dset_ext.h5
-TOOLTEST tst_onion_dset_1d.ddl --enable-error-stack -f onion -F 1 tst_onion_dset_1d.h5
+TOOLTEST tst_onion_objs.ddl --enable-error-stack --vfd-name onion --vfd-info 3 tst_onion_objs.h5
+TOOLTEST tst_onion_dset_ext.ddl --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_ext.h5
+TOOLTEST tst_onion_dset_1d.ddl --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_1d.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

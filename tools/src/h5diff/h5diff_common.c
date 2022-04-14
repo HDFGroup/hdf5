@@ -56,6 +56,28 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"vfd-info-2", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
 
+static H5FD_onion_fapl_info_t onion_fa_g_1 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                             /* force_write_open               */
+    0,                             /* creation_flags                 */
+    "first input file",            /* comment                        */
+};
+
+static H5FD_onion_fapl_info_t onion_fa_g_2 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                             /* force_write_open               */
+    0,                             /* creation_flags                 */
+    "second input file",           /* comment                        */
+};
+
 /*-------------------------------------------------------------------------
  * Function: check_options
  *
@@ -445,36 +467,59 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '7':
                 opts->vfd_info[0].type    = VFD_BY_VALUE;
                 opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vfd[0]       = TRUE;
                 break;
 
             case '8':
                 opts->vfd_info[0].type   = VFD_BY_NAME;
                 opts->vfd_info[0].u.name = H5_optarg;
-                opts->custom_vol[0]      = TRUE;
                 break;
 
             case '9':
-                opts->vfd_info[0].info = (const void *)H5_optarg;
+                opts->vfd_info[0].info = H5_optarg;
                 break;
 
             case '0':
                 opts->vfd_info[1].type    = VFD_BY_VALUE;
                 opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vfd[1]       = TRUE;
                 break;
 
             case 'Y':
                 opts->vfd_info[1].type   = VFD_BY_NAME;
                 opts->vfd_info[1].u.name = H5_optarg;
-                opts->custom_vfd[1]      = TRUE;
                 break;
 
             case 'Z':
-                opts->vfd_info[1].info = (const void *)H5_optarg;
+                opts->vfd_info[1].info = H5_optarg;
                 break;
         }
     }
+
+    /* Copy the VFD driver info for both the files if it's the onion file */
+    if (opts->vfd_info[0].u.name) {
+        if (!HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
+            if (opts->vfd_info[0].info)
+                onion_fa_g_1.revision_id = HDatoi((char *)(opts->vfd_info[0].info));
+            else
+                onion_fa_g_1.revision_id = 0;
+
+            /* Need to free this memory */
+            opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            HDmemcpy(opts->vfd_info[0].info, &onion_fa_g_1, sizeof(H5FD_onion_fapl_info_t));
+        }
+    } /* driver name defined */
+
+    if (opts->vfd_info[1].u.name) {
+        if (!HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
+            if (opts->vfd_info[1].info)
+                onion_fa_g_2.revision_id = HDatoi((char *)(opts->vfd_info[1].info));
+            else
+                onion_fa_g_2.revision_id = 0;
+
+            /* Need to free this memory */
+            opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            HDmemcpy(opts->vfd_info[1].info, &onion_fa_g_2, sizeof(H5FD_onion_fapl_info_t));
+        }
+    } /* driver name defined */
 
     /* check options */
     check_options(opts);

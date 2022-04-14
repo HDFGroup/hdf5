@@ -57,11 +57,10 @@ static H5FD_onion_fapl_info_t onion_fa_g = {
     32,                            /* page_size                      */
     H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
     H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-    0,                        /* force_write_open               */
-    0,                        /* creation_flags                 */
-    "indoor speaking voices", /* comment                        */
+    0,                             /* force_write_open               */
+    0,                             /* creation_flags                 */
+    "input file",                  /* comment                        */
 };
-static uint64_t onion_revision_g = UINT64_MAX;
 
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
@@ -1230,11 +1229,6 @@ end_collect:
                 else
                     enable_error_stack = 1;
                 break;
-            case 'F':
-                /* TODO: Convert to strtoumax */
-                onion_revision_g = (uint64_t)HDatol(H5_optarg);
-                HDprintf("Using revision %" PRIu64 "\n", onion_revision_g);
-                break;
             case 'C':
                 dump_opts.disable_compact_subset = TRUE;
                 break;
@@ -1317,6 +1311,22 @@ end_collect:
                 goto error;
         }
     }
+
+    /* Copy the VFD driver info for the input file if it's the onion file */
+    if (vfd_info_g.u.name) {
+        if (!HDstrcmp(vfd_info_g.u.name, "onion")) {
+            if (vfd_info_g.info)
+                onion_fa_g.revision_id = HDatoi((char *)(vfd_info_g.info));
+            else
+                onion_fa_g.revision_id = 0;
+
+            HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_id);
+
+            /* Need to free this memory */
+            vfd_info_g.info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
+            HDmemcpy(vfd_info_g.info, &onion_fa_g, sizeof(H5FD_onion_fapl_info_t));
+        }
+    } /* driver name defined */
 
 parse_end:
     /* check for file name to be processed */
@@ -1624,6 +1634,10 @@ main(int argc, char *argv[])
 done:
     /* Free tables for objects */
     table_list_free();
+
+    /* Free the VFD info */
+    if (vfd_info_g.info)
+        HDfree(vfd_info_g.info);
 
     if (fapl_id != H5P_DEFAULT && 0 < H5Pclose(fapl_id)) {
         error_msg("Can't close fapl entry\n");
