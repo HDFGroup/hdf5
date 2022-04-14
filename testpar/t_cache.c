@@ -565,7 +565,7 @@ set_up_file_communicator(void)
     int       mpi_result;
     int       num_excluded_ranks;
     int       excluded_ranks[1];
-    MPI_Group file_group = MPI_GROUP_NULL;
+    MPI_Group file_group  = MPI_GROUP_NULL;
     MPI_Group world_group = MPI_GROUP_NULL;
 
     if (success) {
