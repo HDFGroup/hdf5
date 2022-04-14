@@ -159,7 +159,7 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 static herr_t
 H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image_len);
@@ -190,7 +190,7 @@ H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED i
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -233,7 +233,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     htri_t          ret_value = TRUE;                     /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -293,7 +293,7 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     void *          ret_value = NULL;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -372,7 +372,7 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
 {
     const H5O_t *oh = (const H5O_t *)_thing; /* Object header to query */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(oh);
@@ -407,7 +407,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     uint8_t *chunk_image;          /* Pointer to object header prefix buffer */
     herr_t   ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -547,7 +547,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
     H5O_t *oh        = (H5O_t *)_thing;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -631,7 +631,7 @@ H5O__cache_free_icr(void *_thing)
     H5O_t *oh        = (H5O_t *)_thing; /* Object header to destroy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(oh);
@@ -666,7 +666,7 @@ H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
 {
     const H5O_chk_cache_ud_t *udata = (const H5O_chk_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -700,7 +700,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     htri_t              ret_value = TRUE;                         /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -742,7 +742,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     void *              ret_value = NULL;                         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -819,7 +819,7 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
 {
     const H5O_chunk_proxy_t *chk_proxy = (const H5O_chunk_proxy_t *)_thing; /* Chunk proxy to query */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(chk_proxy);
@@ -855,7 +855,7 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing; /* Object header chunk to serialize */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -897,7 +897,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1028,7 +1028,7 @@ H5O__cache_chk_free_icr(void *_thing)
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing; /* Object header chunk proxy to release */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(chk_proxy);
@@ -1063,7 +1063,7 @@ H5O__add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
     size_t contno;              /* Continuation message index */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cont_msg_info);
@@ -1110,7 +1110,7 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     H5O_t *        oh        = NULL;                    /* Object header read in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -1289,7 +1289,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         FALSE; /* Whether any messages were modified when the object header was deserialized */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(oh);
@@ -1629,7 +1629,7 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
     unsigned    u;                   /* Local index variable */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);

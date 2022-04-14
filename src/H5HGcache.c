@@ -114,7 +114,7 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, const H5F_t *f)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(heap);
@@ -161,7 +161,7 @@ done:
 static herr_t
 H5HG__cache_heap_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(image_len);
@@ -193,7 +193,7 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UN
     H5HG_heap_t heap;                /* Global heap */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(image);
@@ -238,7 +238,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     size_t       nalloc;                 /* Number of objects allocated */
     void *       ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(_image);
@@ -382,7 +382,7 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
 {
     const H5HG_heap_t *heap = (const H5HG_heap_t *)_thing;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(heap);
@@ -417,7 +417,7 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
 {
     H5HG_heap_t *heap = (H5HG_heap_t *)_thing;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f);
     HDassert(image);
@@ -456,7 +456,7 @@ H5HG__cache_heap_free_icr(void *_thing)
     H5HG_heap_t *heap      = (H5HG_heap_t *)_thing;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(heap);

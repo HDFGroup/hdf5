@@ -2178,7 +2178,7 @@ H5AC__check_if_write_permitted(const H5F_t
 #endif /* H5_HAVE_PARALLEL */
     hbool_t write_permitted = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_PARALLEL
     /* Sanity checks */
@@ -2225,7 +2225,7 @@ H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr, H5C_auto_
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if ((ext_conf_ptr == NULL) || (ext_conf_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION) ||
         (int_conf_ptr == NULL))
@@ -2562,7 +2562,7 @@ H5AC__verify_tag(const H5AC_class_t *type)
     haddr_t tag;                 /* Entry tag to validate */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the current tag */
     tag = H5CX_get_tag();

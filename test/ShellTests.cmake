@@ -17,21 +17,21 @@
 
 find_program (PWSH NAMES pwsh powershell)
 if (PWSH)
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/use_cases_test")
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
     set (H5_UTILS_TEST_BUILDDIR ${CMAKE_TEST_OUTPUT_DIRECTORY})
     set (H5_TEST_BUILDDIR ${HDF5_TEST_BINARY_DIR}/H5TEST)
-    configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1 @ONLY)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/test_swmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.ps1 @ONLY)
     # test commented out as currently the programs are not allowing another access to the data file
     #add_test (H5SHELL-testswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1)
     #set_tests_properties (H5SHELL-testswmr PROPERTIES
     #        ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     #        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     #)
-    configure_file(${HDF5_TEST_SOURCE_DIR}/testvdsswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1 @ONLY)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/test_vds_swmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.ps1 @ONLY)
     # test commented out as currently the programs are not allowing another access to the data file
     #add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1)
     #set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
@@ -48,11 +48,11 @@ elseif (UNIX)
     #  configure scripts to test dir
     ##############################################################################
     if (H5_PERL_FOUND)
-      configure_file(${HDF5_TEST_SOURCE_DIR}/testflushrefresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh @ONLY)
+      configure_file(${HDF5_TEST_SOURCE_DIR}/test_flush_refresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh @ONLY)
     endif ()
-    configure_file(${HDF5_TEST_SOURCE_DIR}/test_usecases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh @ONLY)
-    configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.sh @ONLY)
-    configure_file(${HDF5_TEST_SOURCE_DIR}/testvdsswmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh @ONLY)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/test_use_cases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_use_cases.sh @ONLY)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/test_swmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.sh @ONLY)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/test_vds_swmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.sh @ONLY)
 
     ##############################################################################
     #  copy test programs to test dir
@@ -78,44 +78,44 @@ elseif (UNIX)
     #    flushrefresh
     ##############################################################################
     # autotools script tests
-    # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
-    # NOT CONVERTED accum_swmr_reader is used by accum.c.
-    # NOT CONVERTED atomic_writer and atomic_reader are standalone programs.
-    # links_env is used by testlinks_env.sh
-    # filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
-    # NOT CONVERTED flushrefresh is used by testflushrefresh.sh.
-    # NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
-    # NOT CONVERTED swmr_* files (besides swmr.c) are used by testswmr.sh.
-    # NOT CONVERTED vds_swmr_* files are used by testvdsswmr.sh
+    # error_test and err_compat are built at the same time as the other tests, but executed by test_error.sh
+    # NOT CONVERTED accum_swmr_reader is used by accum.c
+    # NOT CONVERTED atomic_writer and atomic_reader are stand-alone programs
+    # links_env is used by test_links_env.sh
+    # filenotclosed and del_many_dense_attrs are used by test_abort_fail.sh
+    # NOT CONVERTED flushrefresh is used by test_flush_refresh.sh.
+    # NOT CONVERTED use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_use_cases.sh
+    # NOT CONVERTED swmr_* files (besides swmr.c) are used by test_swmr.sh.
+    # NOT CONVERTED vds_swmr_* files are used by test_vds_swmr.sh
     # NOT CONVERTED 'make check' doesn't run them directly, so they are not included in TEST_PROG.
-    # NOT CONVERTED Also build testmeta, which is used for timings test.  It builds quickly,
+    # NOT CONVERTED Also build testmeta, which is used for timing test. It builds quickly
     # NOT CONVERTED and this lets automake keep all its test programs in one place.
     ##############################################################################
 
     ##############################################################################
     ###    S W M R  T E S T S
     ##############################################################################
-    #       testflushrefresh.sh: flushrefresh
-    #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-    #       testswmr.sh: swmr*
-    #       testvdsswmr.sh: vds_swmr*
-    add_test (H5SHELL-testflushrefresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh)
-    set_tests_properties (H5SHELL-testflushrefresh PROPERTIES
+    #       test_flush_refresh.sh: flushrefresh
+    #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+    #       test_swmr.sh: swmr*
+    #       test_vds_swmr.sh: vds_swmr*
+    add_test (H5SHELL-test_flush_refresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh)
+    set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-    add_test (H5SHELL-test_usecases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh)
-    set_tests_properties (H5SHELL-test_usecases PROPERTIES
+    add_test (H5SHELL-test_use_cases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_use_cases.sh)
+    set_tests_properties (H5SHELL-test_use_cases PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-    add_test (H5SHELL-testswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.sh)
-    set_tests_properties (H5SHELL-testswmr PROPERTIES
+    add_test (H5SHELL-test_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.sh)
+    set_tests_properties (H5SHELL-test_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-    add_test (H5SHELL-testvdsswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
-    set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+    add_test (H5SHELL-test_vds_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.sh)
+    set_tests_properties (H5SHELL-test_vds_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )

@@ -162,7 +162,7 @@ H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_U
     H5A_t *         attr      = (H5A_t *)mesg->native;    /* Pointer to attribute to insert */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -402,7 +402,7 @@ H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     H5O_iter_opn_t *udata     = (H5O_iter_opn_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -545,7 +545,7 @@ H5O__attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr)
     H5A_t **ret_attr  = (H5A_t **)_ret_attr; /* 'User data' passed in */
     herr_t  ret_value = H5_ITER_STOP;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(attr);
@@ -652,7 +652,7 @@ H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_
     size_t        num_open_attr;       /* Number of opened attributes */
     htri_t        ret_value = FALSE;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get file serial number for the location of attribute */
     if (H5F_get_fileno(loc->file, &loc_fnum) < 0)
@@ -803,7 +803,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
     hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -959,7 +959,7 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
     H5O_iter_ren_t *udata     = (H5O_iter_ren_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(oh);
@@ -1005,7 +1005,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
     hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -1344,7 +1344,7 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5A_attr_table_t atable    = {0, NULL}; /* Table of attributes */
     herr_t           ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
@@ -1464,7 +1464,7 @@ H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNU
     H5O_iter_rm_t *udata     = (H5O_iter_rm_t *)_udata; /* Operator user data */
     herr_t         ret_value = H5_ITER_CONT;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(oh);
@@ -1735,7 +1735,7 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
     H5O_iter_xst_t *udata     = (H5O_iter_xst_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(mesg);

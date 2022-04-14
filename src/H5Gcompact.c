@@ -83,7 +83,7 @@ H5G__compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void
     H5G_iter_bt_t *   udata     = (H5G_iter_bt_t *)_udata;   /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);
@@ -121,7 +121,7 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc);
@@ -266,7 +266,7 @@ H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, vo
     H5G_iter_rm_t *   udata     = (H5G_iter_rm_t *)_udata;   /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);
@@ -435,7 +435,7 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
     H5G_iter_lkp_t *  udata     = (H5G_iter_lkp_t *)_udata;  /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(lnk);

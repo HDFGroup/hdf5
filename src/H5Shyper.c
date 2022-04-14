@@ -293,7 +293,7 @@ static uint64_t H5S_hyper_op_gen_g = 1;
 static herr_t
 H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned depth)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     while (span) {
         HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", __func__,
@@ -313,7 +313,7 @@ H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned de
 static herr_t
 H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (span_lst != NULL) {
         HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
@@ -328,7 +328,7 @@ H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
 static herr_t
 H5S__space_print_spans(FILE *f, const H5S_t *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5S__hyper_print_spans(f, space->select.sel_info.hslab->span_lst);
 
@@ -340,7 +340,7 @@ H5S__hyper_print_diminfo_helper(FILE *f, const char *field, unsigned ndims, cons
 {
     unsigned u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (dinfo != NULL) {
         HDfprintf(f, "%s: %s: start=[", __func__, field);
@@ -365,7 +365,7 @@ H5S__hyper_print_diminfo_helper(FILE *f, const char *field, unsigned ndims, cons
 static herr_t
 H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5S__hyper_print_diminfo_helper(f, "diminfo.opt", space->extent.rank,
                                     space->select.sel_info.hslab->diminfo.opt);
@@ -400,7 +400,7 @@ H5S__hyper_print_spans_dfs(FILE *f, const H5S_hyper_span_info_t *span_lst, unsig
     unsigned          num_elems = 0;
     unsigned          u, elem_idx;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* get the actual tail from head */
     cur_elem = span_lst->head;
@@ -469,7 +469,7 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
     const unsigned         dims  = space->extent.rank;
     unsigned               u;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(hslab);
 
@@ -570,7 +570,7 @@ H5S__hyper_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
     int      i;                   /* Index variable */
     herr_t   ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(space));
@@ -799,7 +799,7 @@ done:
 static herr_t
 H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -889,7 +889,7 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     unsigned u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -932,7 +932,7 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 static hsize_t
 H5S__hyper_iter_nelmts(const H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -963,7 +963,7 @@ H5S__hyper_iter_has_next_block(const H5S_sel_iter_t *iter)
     unsigned u;                 /* Local index variable */
     htri_t   ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1016,7 +1016,7 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     int      fast_dim; /* Rank of the fastest changing dimension for the dataspace */
     unsigned u;        /* Counters */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     /* (i.e. a regular hyperslab selection */
@@ -1225,7 +1225,7 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     int      fast_dim; /* Rank of the fastest changing dimension for the dataspace */
     unsigned u;        /* Counters */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     /* (i.e. a regular hyperslab selection) */
@@ -1433,7 +1433,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     int                curr_dim;          /* Current dimension being operated on */
     unsigned           u;                 /* Index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1904,7 +1904,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     size_t   elem_size;        /* Size of each element iterating over */
     unsigned u;                /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -2343,7 +2343,7 @@ H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t 
     unsigned               skip_dim; /* Rank of the dimension to skip along */
     unsigned               u;        /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -2606,7 +2606,7 @@ H5S__hyper_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
 {
     herr_t ret_value = FAIL; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -2757,7 +2757,7 @@ H5S__hyper_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
 static herr_t
 H5S__hyper_iter_release(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -2795,7 +2795,7 @@ H5S__hyper_new_span(hsize_t low, hsize_t high, H5S_hyper_span_info_t *down, H5S_
 {
     H5S_hyper_span_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate a new span node */
     if (NULL == (ret_value = H5FL_MALLOC(H5S_hyper_span_t)))
@@ -2839,7 +2839,7 @@ H5S__hyper_new_span_info(unsigned rank)
 {
     H5S_hyper_span_info_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(rank > 0);
@@ -2886,7 +2886,7 @@ H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank, unsigne
     H5S_hyper_span_info_t *new_down;         /* New down span tree */
     H5S_hyper_span_info_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(spans);
@@ -2977,7 +2977,7 @@ H5S__hyper_copy_span(H5S_hyper_span_info_t *spans, unsigned rank)
     uint64_t               op_gen;           /* Operation generation value */
     H5S_hyper_span_info_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(spans);
@@ -3019,7 +3019,7 @@ H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1, const H5S_hyper_sp
 {
     hbool_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for redundant comparison (or both spans being NULL) */
     if (span_info1 != span_info2) {
@@ -3111,7 +3111,7 @@ done:
 static void
 H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(span_info);
@@ -3167,7 +3167,7 @@ H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
 static void
 H5S__hyper_free_span(H5S_hyper_span_t *span)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(span);
@@ -3214,7 +3214,7 @@ H5S__hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     const H5S_hyper_sel_t *src_hslab;           /* Pointer to source hyperslab info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(src);
@@ -3284,7 +3284,7 @@ H5S__hyper_is_valid(const H5S_t *space)
     unsigned       u;                        /* Counter */
     htri_t         ret_value = TRUE;         /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -3339,7 +3339,7 @@ H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, unsigned op_info_i,
 {
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(spans);
@@ -3403,7 +3403,7 @@ H5S__hyper_span_nblocks(H5S_hyper_span_info_t *spans)
 {
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Count the number of elements in the span tree */
     if (spans != NULL) {
@@ -3444,7 +3444,7 @@ H5S__get_select_hyper_nblocks(const H5S_t *space, hbool_t app_ref)
 {
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(space->select.sel_info.hslab->unlim_dim < 0);
@@ -3529,7 +3529,7 @@ H5S__hyper_get_enc_size_real(hsize_t max_size)
 {
     uint8_t ret_value = H5S_SELECT_INFO_ENC_SIZE_2;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (max_size > H5S_UINT32_MAX)
         ret_value = H5S_SELECT_INFO_ENC_SIZE_8;
@@ -3589,7 +3589,7 @@ H5S__hyper_get_version_enc_size(H5S_t *space, hsize_t block_count, uint32_t *ver
     unsigned     u;                          /* Local index variable */
     herr_t       ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get bounding box for the selection */
     HDmemset(bounds_end, 0, sizeof(bounds_end));
@@ -3736,7 +3736,7 @@ H5S__hyper_serial_size(H5S_t *space)
     uint8_t  enc_size;        /* Encoded size of hyperslab selection info */
     hssize_t ret_value = -1;  /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space);
 
@@ -3832,7 +3832,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans, hsize_t *start, 
     H5S_hyper_span_t *curr;      /* Pointer to current hyperslab span */
     uint8_t *         pp = (*p); /* Local pointer for decoding */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(spans);
@@ -3965,7 +3965,7 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
     uint8_t                enc_size;            /* Encoded size */
     herr_t                 ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(space);
@@ -4237,7 +4237,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
     unsigned       u;                   /* Local counting variable */
     herr_t         ret_value = FAIL;    /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(p);
@@ -4498,7 +4498,7 @@ H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[], h
     const H5S_hyper_span_t *curr;                /* Pointer to current hyperslab span */
     herr_t                  ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(spans);
@@ -4596,7 +4596,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(buf);
@@ -4834,7 +4834,7 @@ H5S__hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     const hsize_t *low_bounds, *high_bounds; /* Pointers to the correct pair of low & high bounds */
     herr_t         ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(space);
@@ -4912,7 +4912,7 @@ H5S__hyper_offset(const H5S_t *space, hsize_t *offset)
     int             i;                   /* index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space && space->extent.rank > 0);
     HDassert(offset);
@@ -5014,7 +5014,7 @@ done:
 static int
 H5S__hyper_unlim_dim(const H5S_t *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim);
 } /* end H5S__hyper_unlim_dim() */
@@ -5044,7 +5044,7 @@ H5S__hyper_num_elem_non_unlim(const H5S_t *space, hsize_t *num_elem_non_unlim)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(space);
@@ -5086,7 +5086,7 @@ H5S__hyper_is_contiguous(const H5S_t *space)
     unsigned u;                 /* index variable */
     htri_t   ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -5271,7 +5271,7 @@ H5S__hyper_is_single(const H5S_t *space)
 {
     htri_t ret_value = TRUE; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -5344,7 +5344,7 @@ H5S__hyper_is_regular(H5S_t *space)
 {
     htri_t ret_value = FAIL; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -5396,7 +5396,7 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
 {
     hbool_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(span_info1);
@@ -5506,7 +5506,7 @@ H5S__hyper_spans_shape_same(const H5S_hyper_span_info_t *span_info1, const H5S_h
     unsigned u;                        /* Local index variable */
     hbool_t  ret_value = TRUE;         /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(span_info1);
@@ -5601,7 +5601,7 @@ H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
     unsigned space2_rank;      /* Number of dimensions of second dataspace */
     htri_t   ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space1);
@@ -5737,7 +5737,7 @@ done:
 static herr_t
 H5S__hyper_release(H5S_t *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(space));
@@ -5782,7 +5782,7 @@ H5S__hyper_coord_to_span(unsigned rank, const hsize_t *coords)
     H5S_hyper_span_info_t *down      = NULL; /* Pointer to new span tree for next level down */
     H5S_hyper_span_t *     ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(rank > 0);
     HDassert(coords);
@@ -5847,7 +5847,7 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ra
     H5S_hyper_span_t *tail_span;           /* Pointer to the tail span of one dimension */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(span_tree);
@@ -6188,7 +6188,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans, unsigned rank, c
 {
     hbool_t ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(spans);
@@ -6275,7 +6275,7 @@ H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(space);
@@ -6406,7 +6406,7 @@ static void
 H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank, const hsize_t *offset,
                            unsigned op_info_i, uint64_t op_gen)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(spans);
@@ -6471,7 +6471,7 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
     hbool_t  non_zero_offset = FALSE; /* Whether any offset is non-zero */
     unsigned u;                       /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(space);
@@ -6536,7 +6536,7 @@ H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset)
 {
     hsize_t block[H5S_MAX_RANK]; /* Block selected in base dataspace */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(space));
@@ -6613,7 +6613,7 @@ H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
     H5S_hyper_span_info_t *down;     /* Pointer to list of spans */
     unsigned               curr_dim; /* Current dimension being operated on */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(base_space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(base_space));
@@ -6662,7 +6662,7 @@ H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
     unsigned          u;                   /* Local index variable */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(base_space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(base_space));
@@ -6760,7 +6760,7 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(base_space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(base_space));
@@ -6948,7 +6948,7 @@ static void
 H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank, const hssize_t *offset,
                            unsigned op_info_i, uint64_t op_gen)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(spans);
@@ -7013,7 +7013,7 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
     hbool_t  non_zero_offset = FALSE; /* Whether any offset is non-zero */
     unsigned u;                       /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(space);
@@ -7191,7 +7191,7 @@ H5S__hyper_append_span(H5S_hyper_span_info_t **span_tree, unsigned ndims, hsize_
     H5S_hyper_span_t *new_span  = NULL;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(span_tree);
@@ -7350,7 +7350,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
     hbool_t need_b_not_a;        /* Whether to generate b_not_a list */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(a_spans);
@@ -7982,7 +7982,7 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     H5S_hyper_span_info_t *merged_spans = NULL; /* Pointer to the merged span tree */
     H5S_hyper_span_info_t *ret_value    = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make certain both 'a' & 'b' spans have down span trees or neither does */
     HDassert((a_spans != NULL && b_spans != NULL) || (a_spans == NULL && b_spans == NULL));
@@ -8310,7 +8310,7 @@ H5S__hyper_merge_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(space);
@@ -8364,7 +8364,7 @@ H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, unsigned op_info_i, 
 {
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(spans);
@@ -8434,7 +8434,7 @@ H5S__hyper_spans_nelem(H5S_hyper_span_info_t *spans)
     uint64_t op_gen;        /* Operation generation value */
     hsize_t  ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(spans);
@@ -8478,7 +8478,7 @@ H5S__hyper_add_disjoint_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -8533,7 +8533,7 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
     int                    i;                /* Counters */
     H5S_hyper_span_info_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(rank > 0);
@@ -8681,7 +8681,7 @@ H5S__hyper_update_diminfo(H5S_t *space, H5S_seloper_t op, const H5S_hyper_dim_t 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -8898,7 +8898,7 @@ H5S__hyper_rebuild_helper(const H5S_hyper_span_info_t *spans, H5S_hyper_dim_t sp
     size_t                  spancount;        /* Number of spans encountered in this dimension */
     hbool_t                 ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(spans);
@@ -9051,7 +9051,7 @@ H5S__hyper_generate_spans(H5S_t *space)
     unsigned u;                        /* Local index variable */
     herr_t   ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space);
     HDassert(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS);
@@ -9104,7 +9104,7 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
 {
     hbool_t ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(spans1);
@@ -9202,7 +9202,7 @@ H5S__fill_in_new_space(H5S_t *space1, H5S_seloper_t op, H5S_hyper_span_info_t *s
     hbool_t is_result_new = FALSE;
     herr_t  ret_value     = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space1);
     HDassert(space2_span_lst);
@@ -9481,7 +9481,7 @@ H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], c
     H5S_hyper_span_info_t *new_spans = NULL;    /* Span tree for new hyperslab */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -9571,7 +9571,7 @@ H5S__set_regular_hyperslab(H5S_t *space, const hsize_t start[], const hsize_t *a
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -9672,7 +9672,7 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
     unsigned u;                     /* Local index variable */
     herr_t   ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -10494,7 +10494,7 @@ H5S__fill_in_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2, H5S_t **resu
     hbool_t updated_spans;
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(space1);
@@ -10608,7 +10608,7 @@ H5S__combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     H5S_t *new_space = NULL; /* New dataspace generated */
     H5S_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space1);
@@ -10900,7 +10900,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
     H5S_hyper_span_info_t *copied_span_info = NULL;    /* Temporary span info pointer */
     herr_t                 ret_value        = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(udata->nelem > 0);
 
@@ -11348,7 +11348,7 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
     unsigned                u;                   /* Local index variable */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for non-overlapping bounds */
     check_intersect = TRUE;
@@ -11783,7 +11783,7 @@ done:
 static void
 H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count, hsize_t *block, hsize_t clip_size)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for selection outside clip size */
     if (start >= clip_size) {
@@ -11970,7 +11970,7 @@ H5S__hyper_get_clip_extent_real(const H5S_t *clip_space, hsize_t num_slices, hbo
     hsize_t                rem_slices;
     hsize_t                ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check parameters */
     HDassert(clip_space);

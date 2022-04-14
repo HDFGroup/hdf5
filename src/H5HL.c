@@ -195,7 +195,7 @@ H5HL__minimize_heap_space(H5F_t *f, H5HL_t *heap)
     size_t new_heap_size = heap->dblk_size; /* New size of heap */
     herr_t ret_value     = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(f);
@@ -468,7 +468,7 @@ H5HL__remove_free(H5HL_t *heap, H5HL_free_t *fl)
 {
     H5HL_free_t *ret_value = NULL;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (fl->prev)
         fl->prev->next = fl->next;
@@ -501,7 +501,7 @@ H5HL__dirty(H5HL_t *heap)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(heap);

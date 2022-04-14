@@ -776,7 +776,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -1422,7 +1422,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER :: u     !  Local index variable
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -2263,7 +2263,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
   INTEGER :: error
 
   INTEGER :: crt_order_flags
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   !  Output message about test being performed
 !  WRITE(*,*) "     - Testing Basic Code for Attributes with Creation Order Info"

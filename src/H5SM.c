@@ -257,7 +257,7 @@ H5SM__type_to_flag(unsigned type_id, unsigned *type_flag)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Translate the H5O type_id into an H5SM type flag */
     switch (type_id) {
@@ -451,7 +451,7 @@ H5SM__create_index(H5F_t *f, H5SM_index_header_t *header)
     H5B2_t *      bt2       = NULL; /* v2 B-tree handle for index */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(header);
@@ -554,7 +554,7 @@ H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, hbool_t delete_heap)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Determine whether index is a list or a B-tree. */
     if (header->index_type == H5SM_LIST) {
@@ -626,7 +626,7 @@ H5SM__create_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t      addr      = HADDR_UNDEF; /* Address of the list on disk */
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(header);
@@ -706,7 +706,7 @@ H5SM__convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header, H5SM_list_t *
     void *          encoding_buf = NULL;
     herr_t          ret_value    = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(_list && *_list);
     HDassert(header);
@@ -808,7 +808,7 @@ H5SM__bt2_convert_to_list_op(const void *record, void *op_data)
     const H5SM_list_t *list    = (const H5SM_list_t *)op_data;
     size_t             mesg_idx; /* Index of message to modify */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(record);
@@ -848,7 +848,7 @@ H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t              btree_addr;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Remember the address of the old B-tree, but change the header over to be
      * a list..
@@ -908,7 +908,7 @@ H5SM__can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
@@ -1186,7 +1186,7 @@ H5SM__incr_ref(void *record, void *_op_data, hbool_t *changed)
     H5SM_incr_ref_opdata *op_data   = (H5SM_incr_ref_opdata *)_op_data;
     herr_t                ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(record);
     HDassert(op_data);
@@ -1271,7 +1271,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
     size_t               empty_pos    = SIZE_MAX; /* Empty entry in list */
     herr_t               ret_value    = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(header);
@@ -1664,7 +1664,7 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
     size_t x;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(list);
     /* Both key and empty_pos can be NULL, but not both! */
@@ -1729,7 +1729,7 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *)record;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(record);
     HDassert(op_data);
@@ -1782,7 +1782,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
     unsigned        type_id;             /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -2124,7 +2124,7 @@ H5SM__get_refcount_bt2_cb(const void *_record, void *_op_data)
     const H5SM_sohm_t *record  = (const H5SM_sohm_t *)_record; /* v2 B-tree record for message */
     H5SM_sohm_t *      op_data = (H5SM_sohm_t *)_op_data;      /* "op data" from v2 B-tree find */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.
@@ -2292,7 +2292,7 @@ H5SM__read_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     H5SM_read_udata_t *udata     = (H5SM_read_udata_t *)_udata;
     herr_t             ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -2348,7 +2348,7 @@ H5SM__read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata)
     H5SM_read_udata_t *udata     = (H5SM_read_udata_t *)_udata;
     herr_t             ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate a buffer to hold the message */
     if (NULL == (udata->encoding_buf = H5MM_malloc(obj_len)))
@@ -2384,7 +2384,7 @@ H5SM__read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap, H5O_t *open_oh
     H5O_t *           oh        = NULL; /* Object header for message in object header */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(mesg);

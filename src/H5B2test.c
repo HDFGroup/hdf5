@@ -134,7 +134,7 @@ H5B2__test_crt_context(void *_f)
     H5B2_test_ctx_t *ctx;              /* Callback context structure */
     void *           ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -171,7 +171,7 @@ H5B2__test_dst_context(void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -198,7 +198,7 @@ H5B2__test_dst_context(void *_ctx)
 static herr_t
 H5B2__test_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(hsize_t *)nrecord = *(const hsize_t *)udata;
 
@@ -222,7 +222,7 @@ H5B2__test_store(void *nrecord, const void *udata)
 static herr_t
 H5B2__test_compare(const void *rec1, const void *rec2, int *result)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *result = (int)(*(const hssize_t *)rec1 - *(const hssize_t *)rec2);
 
@@ -247,7 +247,7 @@ H5B2__test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -275,7 +275,7 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -301,7 +301,7 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 static herr_t
 H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(record);
 
@@ -326,7 +326,7 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const
 static herr_t
 H5B2__test2_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5B2_test_rec_t *)nrecord = *(const H5B2_test_rec_t *)udata;
 
@@ -350,7 +350,7 @@ H5B2__test2_store(void *nrecord, const void *udata)
 static herr_t
 H5B2__test2_compare(const void *rec1, const void *rec2, int *result)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *result = (int)(((const H5B2_test_rec_t *)rec1)->key - ((const H5B2_test_rec_t *)rec2)->key);
 
@@ -375,7 +375,7 @@ H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -404,7 +404,7 @@ H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -431,7 +431,7 @@ H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 static herr_t
 H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(record);
 

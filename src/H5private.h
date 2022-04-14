@@ -1154,57 +1154,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDprintf
 #define HDprintf printf /*varargs*/
 #endif
-#ifndef HDpthread_attr_destroy
-#define HDpthread_attr_destroy(A) pthread_attr_destroy(A)
-#endif
-#ifndef HDpthread_attr_init
-#define HDpthread_attr_init(A) pthread_attr_init(A)
-#endif
-#ifndef HDpthread_attr_setscope
-#define HDpthread_attr_setscope(A, S) pthread_attr_setscope(A, S)
-#endif
-#ifndef HDpthread_cond_init
-#define HDpthread_cond_init(C, A) pthread_cond_init(C, A)
-#endif
-#ifndef HDpthread_cond_signal
-#define HDpthread_cond_signal(C) pthread_cond_signal(C)
-#endif
-#ifndef HDpthread_cond_wait
-#define HDpthread_cond_wait(C, M) pthread_cond_wait(C, M)
-#endif
-#ifndef HDpthread_create
-#define HDpthread_create(R, A, F, U) pthread_create(R, A, F, U)
-#endif
-#ifndef HDpthread_equal
-#define HDpthread_equal(T1, T2) pthread_equal(T1, T2)
-#endif
-#ifndef HDpthread_getspecific
-#define HDpthread_getspecific(K) pthread_getspecific(K)
-#endif
-#ifndef HDpthread_join
-#define HDpthread_join(T, V) pthread_join(T, V)
-#endif
-#ifndef HDpthread_key_create
-#define HDpthread_key_create(K, D) pthread_key_create(K, D)
-#endif
-#ifndef HDpthread_mutex_init
-#define HDpthread_mutex_init(M, A) pthread_mutex_init(M, A)
-#endif
-#ifndef HDpthread_mutex_lock
-#define HDpthread_mutex_lock(M) pthread_mutex_lock(M)
-#endif
-#ifndef HDpthread_mutex_unlock
-#define HDpthread_mutex_unlock(M) pthread_mutex_unlock(M)
-#endif
-#ifndef HDpthread_self
-#define HDpthread_self() pthread_self()
-#endif
-#ifndef HDpthread_setcancelstate
-#define HDpthread_setcancelstate(N, O) pthread_setcancelstate(N, O)
-#endif
-#ifndef HDpthread_setspecific
-#define HDpthread_setspecific(K, V) pthread_setspecific(K, V)
-#endif
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
 #endif
@@ -1790,6 +1739,15 @@ typedef struct H5_debug_t {
 } H5_debug_t;
 
 #ifdef H5_HAVE_PARALLEL
+
+/*
+ * Check that the MPI library version is at least version
+ * `mpi_version` and subversion `mpi_subversion`
+ */
+#define H5_CHECK_MPI_VERSION(mpi_version, mpi_subversion)                                                    \
+    ((MPI_VERSION > (mpi_version)) ||                                                                        \
+     ((MPI_VERSION == (mpi_version)) && (MPI_SUBVERSION >= (mpi_subversion))))
+
 extern hbool_t H5_coll_api_sanity_check_g;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2029,6 +1987,14 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
 #endif /* H5_HAVE_THREADSAFE */
+
+/* Extern global to determine if we should use selection I/O if available (this
+ * variable should be removed once selection I/O performs as well as the
+ * previous scalar I/O implementation
+ *
+ * NOTE: Must be exposed via H5_DLLVAR so parallel tests pass on Windows.
+ */
+H5_DLLVAR hbool_t H5_use_selection_io_g;
 
 #ifdef H5_HAVE_CODESTACK
 
@@ -2336,23 +2302,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         H5_PUSH_FUNC                                                                                         \
         {
 
-/* Use this macro for all "normal" staticly-scoped functions */
-#define FUNC_ENTER_STATIC                                                                                    \
-    {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
-        H5_PUSH_FUNC                                                                                         \
-        {
-
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
-#define FUNC_ENTER_STATIC_NOERR                                                                              \
-    {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
-        H5_PUSH_FUNC                                                                                         \
-        {
-
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
-#define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
+#define FUNC_ENTER_PACKAGE_NOERR_NOFS                                                                        \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         {
@@ -2364,20 +2316,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  *    API name itself.  Examples are static routines in the H5TS package.
  *
  */
-#define FUNC_ENTER_STATIC_NAMECHECK_ONLY                                                                     \
+#define FUNC_ENTER_PACKAGE_NAMECHECK_ONLY                                                                    \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));
-
-/* Use the following macro as replacement for the FUNC_ENTER_STATIC
- * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_STATIC_TAG(tag)                                                                           \
-    {                                                                                                        \
-        haddr_t prev_tag = HADDR_UNDEF;                                                                      \
-                                                                                                             \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
-        H5AC_tag(tag, &prev_tag);                                                                            \
-        H5_PUSH_FUNC                                                                                         \
-        {
 
 /*-------------------------------------------------------------------------
  * Purpose:  Register function exit for code profiling.  This should be
@@ -2523,6 +2464,16 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
+
+/* Private typedefs */
+
+/* Union for const/non-const pointer for use by functions that manipulate
+ * pointers but do not write to their targets or return pointers to const
+ * specified locations.  This helps us avoid compiler warnings. */
+typedef union {
+    void *      vp;
+    const void *cvp;
+} H5_flexible_const_ptr_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

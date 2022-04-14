@@ -343,7 +343,7 @@ static void       H5Z__xform_reduce_tree(H5Z_node *tree);
 static void
 H5Z__unget_token(H5Z_token *current)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(current);
@@ -378,7 +378,7 @@ H5Z__get_token(H5Z_token *current)
 {
     H5Z_token *ret_value = current;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(current);
@@ -516,7 +516,7 @@ done:
 static void
 H5Z__xform_destroy_parse_tree(H5Z_node *tree)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (tree) {
         H5Z__xform_destroy_parse_tree(tree->lchild);
@@ -547,7 +547,7 @@ H5Z__xform_parse(const char *expression, H5Z_datval_ptrs *dat_val_pointers)
     H5Z_token tok;
     void *    ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!expression)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "No expression provided?")
@@ -584,7 +584,7 @@ H5Z__parse_expression(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
     H5Z_node *expr;
     H5Z_node *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     expr = H5Z__parse_term(current, dat_val_pointers);
 
@@ -676,7 +676,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
     H5Z_node *term      = NULL;
     H5Z_node *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     term = H5Z__parse_factor(current, dat_val_pointers);
 
@@ -776,7 +776,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
     H5Z_node *new_node;
     H5Z_node *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     current = H5Z__get_token(current);
 
@@ -919,7 +919,7 @@ H5Z__new_node(H5Z_token_type type)
 {
     H5Z_node *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (ret_value = (H5Z_node *)H5MM_calloc(sizeof(H5Z_node))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -1068,7 +1068,7 @@ H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_
     H5Z_result resl, resr;
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(tree);
@@ -1162,7 +1162,7 @@ H5Z__xform_find_type(const H5T_t *type)
     H5T_t *tmp;                 /* Temporary datatype */
     hid_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(type);
 
@@ -1233,7 +1233,7 @@ H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers, H5Z_datv
 {
     H5Z_node *ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(tree);
 
@@ -1302,7 +1302,7 @@ H5Z__op_is_numbs(H5Z_node *_tree)
 {
     hbool_t ret_value = FALSE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(_tree);
 
@@ -1333,7 +1333,7 @@ H5Z__op_is_numbs2(H5Z_node *_tree)
 {
     hbool_t ret_value = FALSE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(_tree);
 
@@ -1364,7 +1364,7 @@ H5Z__op_is_numbs2(H5Z_node *_tree)
 static void
 H5Z__xform_reduce_tree(H5Z_node *tree)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (tree) {
         if ((tree->type == H5Z_XFORM_DIVIDE) || (tree->type == H5Z_XFORM_MULT)) {
@@ -1419,7 +1419,7 @@ H5Z__xform_reduce_tree(H5Z_node *tree)
 static void
 H5Z__do_op(H5Z_node *tree)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (tree->type == H5Z_XFORM_DIVIDE)
         H5Z_XFORM_DO_OP3(/)

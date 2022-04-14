@@ -130,7 +130,7 @@ typedef enum {
 typedef int H5G_own_loc_t;
 
 /* Structure to store information about the name an object was opened with */
-typedef struct {
+typedef struct H5G_name_t {
     H5RS_str_t *full_path_r; /* Path to object, as seen from root of current file mounting hierarchy */
     H5RS_str_t *user_path_r; /* Path to object, as opened by user */
     unsigned    obj_hidden;  /* Whether the object is visible in group hier. */

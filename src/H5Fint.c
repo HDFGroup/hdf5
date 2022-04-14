@@ -207,7 +207,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file_vol_obj);
@@ -273,7 +273,7 @@ H5F__set_vol_conn(H5F_t *file)
     void *                new_connector_info = NULL;    /* Copy of connector info */
     herr_t                ret_value          = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -525,7 +525,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
     H5F_olist_t olist;               /* Structure to hold search results */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj_id_count_ptr);
@@ -627,7 +627,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     hbool_t      add_obj   = FALSE;
     int          ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(obj_ptr);
     HDassert(olist);
@@ -739,7 +739,7 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name /*ou
     size_t fname_len;           /* Length of external link file name */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     prefix_len = HDstrlen(prefix);
     fname_len  = HDstrlen(file_name);
@@ -775,7 +775,7 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
     char *strret;           /* Pointer to next separator */
     char *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value now */
     ret_value = *env_prefix;
@@ -1086,7 +1086,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
     H5F_t *f         = NULL;
     H5F_t *ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (f = H5FL_CALLOC(H5F_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
@@ -1354,7 +1354,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -1649,7 +1649,7 @@ H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make sure the out parameter has a value */
     *use_file_locking = TRUE;
@@ -2130,7 +2130,7 @@ H5F__flush_phase1(H5F_t *f)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
     HDassert(f);
@@ -2167,7 +2167,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
     HDassert(f);
@@ -2659,7 +2659,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
 #endif                          /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);

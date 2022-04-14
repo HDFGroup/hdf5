@@ -105,7 +105,7 @@ H5PL__insert_at(const char *path, unsigned int idx)
     char * path_copy = NULL;    /* copy of path string (for storing) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
     HDassert(path);
@@ -155,7 +155,7 @@ H5PL__make_space_at(unsigned int idx)
     unsigned u;                   /* iterator */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args - Just assert on package functions */
     HDassert(idx < H5PL_path_capacity_g);
@@ -186,7 +186,7 @@ H5PL__replace_at(const char *path, unsigned int idx)
     char * path_copy = NULL;    /* copy of path string (for storing) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
     HDassert(path);
@@ -348,7 +348,7 @@ H5PL__expand_path_table(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Update the capacity */
     H5PL_path_capacity_g += H5PL_PATH_CAPACITY_ADD;
@@ -610,7 +610,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     struct dirent *dp        = NULL; /* Directory entry */
     herr_t         ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(plugin_path);
     HDassert(iter_op);
@@ -701,7 +701,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     char             service[2048];
     herr_t           ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
     HDassert(plugin_path);
@@ -841,7 +841,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     struct dirent *dp        = NULL; /* Directory entry */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
     HDassert(search_params);
@@ -922,7 +922,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     char             service[2048];
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
     HDassert(search_params);

@@ -97,7 +97,7 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     H5O_mdci_t *mesg;             /* Native message        */
     void *      ret_value = NULL; /* Return value          */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -140,7 +140,7 @@ H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 {
     const H5O_mdci_t *mesg = (const H5O_mdci_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -176,7 +176,7 @@ H5O__mdci_copy(const void *_mesg, void *_dest)
     H5O_mdci_t *      dest      = (H5O_mdci_t *)_dest;
     void *            ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -214,7 +214,7 @@ H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = (size_t)(1 +                  /* Version number           */
@@ -241,7 +241,7 @@ H5O__mdci_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
 static herr_t
 H5O__mdci_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -269,7 +269,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     haddr_t     final_eoa;           /* For sanity check */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -317,7 +317,7 @@ H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
 {
     const H5O_mdci_t *mdci = (const H5O_mdci_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

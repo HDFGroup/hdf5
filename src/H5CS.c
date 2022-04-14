@@ -82,7 +82,7 @@ H5CS__get_stack(void)
 {
     H5CS_t *fstack;
 
-    FUNC_ENTER_STATIC_NOERR_NOFS
+    FUNC_ENTER_PACKAGE_NOERR_NOFS
 
     fstack = H5TS_get_thread_local_value(H5TS_funcstk_key_g);
     if (!fstack) {
