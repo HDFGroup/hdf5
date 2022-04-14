@@ -30,23 +30,23 @@
 #include "stdlib.h"
 #include "testpar.h"
 
+#define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
+
 /* Used to load other filters than GZIP */
 /* #define DYNAMIC_FILTER */ /* Uncomment and define the fields below to use a dynamically loaded filter */
+
+#ifdef DYNAMIC_FILTER
 #define FILTER_NUM_CDVALUES 1
 const unsigned int cd_values[FILTER_NUM_CDVALUES] = {0};
-H5Z_filter_t       filter_id;
-unsigned int       flags     = 0;
-size_t             cd_nelmts = FILTER_NUM_CDVALUES;
-
-/* Utility Macros */
-#define STRINGIFY(type) #type
+unsigned int       flags                          = 0;
+size_t             cd_nelmts                      = FILTER_NUM_CDVALUES;
+#endif
 
 /* Common defines for all tests */
-#define C_DATATYPE           long
-#define C_DATATYPE_MPI       MPI_LONG
-#define COMPOUND_C_DATATYPE  cmpd_filtered_t
-#define C_DATATYPE_STR(type) STRINGIFY(type)
-#define HDF5_DATATYPE_NAME   H5T_NATIVE_LONG
+#define C_DATATYPE          long
+#define C_DATATYPE_MPI      MPI_LONG
+#define COMPOUND_C_DATATYPE cmpd_filtered_t
+#define HDF5_DATATYPE_NAME  H5T_NATIVE_LONG
 
 /* Macro used to generate data for datasets for later verification */
 #define GEN_DATA(i) INCREMENTAL_DATA(i)
@@ -59,7 +59,7 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define RANK_DATA(i)                                                                                         \
     (mpi_rank) /* Generates test data to visibly show which rank wrote to which parts of the dataset */
 
-#define DEFAULT_DEFLATE_LEVEL 6
+#define DEFAULT_DEFLATE_LEVEL 9
 
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
@@ -89,6 +89,14 @@ typedef struct {
 #define WRITE_UNSHARED_FILTERED_CHUNKS_CH_NROWS     (WRITE_UNSHARED_FILTERED_CHUNKS_NROWS / mpi_size)
 #define WRITE_UNSHARED_FILTERED_CHUNKS_CH_NCOLS     (WRITE_UNSHARED_FILTERED_CHUNKS_NCOLS / mpi_size)
 
+/* Defines for the unshared filtered chunks partial write test */
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME "unshared_filtered_chunks_partial_write"
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS 2
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS     (DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS     (DIM1_SCALE_FACTOR)
+
 /* Defines for the shared filtered chunks write test */
 #define WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME "shared_filtered_chunks_write"
 #define WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS 2
@@ -96,6 +104,42 @@ typedef struct {
 #define WRITE_SHARED_FILTERED_CHUNKS_CH_NCOLS     (mpi_size)
 #define WRITE_SHARED_FILTERED_CHUNKS_NROWS        (WRITE_SHARED_FILTERED_CHUNKS_CH_NROWS * DIM0_SCALE_FACTOR)
 #define WRITE_SHARED_FILTERED_CHUNKS_NCOLS        (WRITE_SHARED_FILTERED_CHUNKS_CH_NCOLS * DIM1_SCALE_FACTOR)
+
+/* Defines for the unshared filtered chunks w/ single unlim. dimension write test */
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME "unshared_filtered_chunks_single_unlim_dim_write"
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NROWS     (WRITE_UNSHARED_ONE_UNLIM_DIM_NROWS / mpi_size)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_CH_NCOLS     (WRITE_UNSHARED_ONE_UNLIM_DIM_NCOLS / mpi_size)
+#define WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the shared filtered chunks w/ single unlim. dimension write test */
+#define WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME "shared_filtered_chunks_single_unlim_dim_write"
+#define WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_SHARED_ONE_UNLIM_DIM_CH_NROWS     (mpi_size)
+#define WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS     (mpi_size)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NROWS        (WRITE_SHARED_ONE_UNLIM_DIM_CH_NROWS * DIM0_SCALE_FACTOR)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NCOLS        (WRITE_SHARED_ONE_UNLIM_DIM_CH_NCOLS * DIM1_SCALE_FACTOR)
+#define WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the unshared filtered chunks w/ two unlim. dimension write test */
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME "unshared_filtered_chunks_two_unlim_dim_write"
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NCOLS        (DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NROWS     (DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NCOLS     (DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS       5
+
+/* Defines for the shared filtered chunks w/ two unlim. dimension write test */
+#define WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME "shared_filtered_chunks_two_unlim_dim_write"
+#define WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS 2
+#define WRITE_SHARED_TWO_UNLIM_DIM_CH_NROWS     (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS     (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NROWS        (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NCOLS        (mpi_size)
+#define WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS       5
 
 /* Defines for the filtered chunks write test where a process has no selection */
 #define WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME "single_no_selection_filtered_chunks_write"
@@ -402,5 +446,54 @@ typedef struct {
 #define SHRINKING_GROWING_CHUNKS_CH_NROWS     (SHRINKING_GROWING_CHUNKS_NROWS / mpi_size)
 #define SHRINKING_GROWING_CHUNKS_CH_NCOLS     (SHRINKING_GROWING_CHUNKS_NCOLS / mpi_size)
 #define SHRINKING_GROWING_CHUNKS_NLOOPS       20
+
+/* Defines for the unshared filtered edge chunks write test */
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME  "unshared_filtered_edge_chunks_write"
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2 "unshared_filtered_edge_chunks_no_filter_write"
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS  2
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NROWS      (DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS      (DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NROWS         (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS                                                            \
+    (mpi_size * DIM1_SCALE_FACTOR) + (WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS - 1)
+
+/* Defines for the shared filtered edge chunks write test */
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME  "shared_filtered_edge_chunks_write"
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2 "shared_filtered_edge_chunks_no_filter_write"
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS  2
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS      (mpi_size)
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS      (mpi_size)
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_NROWS                                                              \
+    (WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NROWS * DIM0_SCALE_FACTOR)
+#define WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS                                                              \
+    ((WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS * DIM1_SCALE_FACTOR) +                                      \
+     (WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS - 1))
+
+/* Defines for the fill values test */
+#define FILL_VALUES_TEST_DATASET_NAME  "fill_value_test"
+#define FILL_VALUES_TEST_DATASET_NAME2 "fill_value_alloc_test"
+#define FILL_VALUES_TEST_DATASET_DIMS  2
+#define FILL_VALUES_TEST_FILL_VAL      (-1)
+#define FILL_VALUES_TEST_CH_NROWS      (mpi_size)
+#define FILL_VALUES_TEST_CH_NCOLS      (mpi_size + 1)
+#define FILL_VALUES_TEST_NROWS         (FILL_VALUES_TEST_CH_NROWS * DIM0_SCALE_FACTOR)
+#define FILL_VALUES_TEST_NCOLS         (FILL_VALUES_TEST_CH_NCOLS * DIM1_SCALE_FACTOR)
+
+/* Defines for the undefined fill value test */
+#define FILL_VALUE_UNDEFINED_TEST_DATASET_NAME "fill_value_undefined_test"
+#define FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS 2
+#define FILL_VALUE_UNDEFINED_TEST_CH_NROWS     (mpi_size)
+#define FILL_VALUE_UNDEFINED_TEST_CH_NCOLS     (mpi_size + 1)
+#define FILL_VALUE_UNDEFINED_TEST_NROWS        (FILL_VALUE_UNDEFINED_TEST_CH_NROWS * DIM0_SCALE_FACTOR)
+#define FILL_VALUE_UNDEFINED_TEST_NCOLS        (FILL_VALUE_UNDEFINED_TEST_CH_NCOLS * DIM1_SCALE_FACTOR)
+
+/* Defines for the fill time of 'never' test */
+#define FILL_TIME_NEVER_TEST_DATASET_NAME "fill_time_never_test"
+#define FILL_TIME_NEVER_TEST_DATASET_DIMS 2
+#define FILL_TIME_NEVER_TEST_FILL_VAL     (-1)
+#define FILL_TIME_NEVER_TEST_CH_NROWS     (mpi_size)
+#define FILL_TIME_NEVER_TEST_CH_NCOLS     (mpi_size + 1)
+#define FILL_TIME_NEVER_TEST_NROWS        (FILL_TIME_NEVER_TEST_CH_NROWS * DIM0_SCALE_FACTOR)
+#define FILL_TIME_NEVER_TEST_NCOLS        (FILL_TIME_NEVER_TEST_CH_NCOLS * DIM1_SCALE_FACTOR)
 
 #endif /* TEST_PARALLEL_FILTERS_H_ */
