@@ -1,5 +1,8 @@
 Usage: h5stat [OPTIONS] file
 
+      ERROR
+     --enable-error-stack  Prints messages from the HDF5 error stack as they occur
+                           Optional value 2 also prints file open errors
       OPTIONS
      -h, --help            Print a usage message and exit
      -V, --version         Print version number and exit
@@ -21,7 +24,6 @@ Usage: h5stat [OPTIONS] file
                            information for small # of attributes.  N is an integer greater
                            than 0.  The default threshold is 10.
      -S, --summary         Print summary of file space information
-     --enable-error-stack  Prints messages from the HDF5 error stack as they occur
      --s3-cred=<cred>      Access file on S3, using provided credential
                            <cred> :: (region,id,key)
                            If <cred> == "(,,)", no authentication is used.
