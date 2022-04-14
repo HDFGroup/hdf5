@@ -1,0 +1,22 @@
+# .tokeignore file for HDF5
+# * Used to generate the lines of code for README.md
+# * Uses .gitignore syntax
+# * Tokei automatically ignores anything in the .gitignore file
+
+# HDF5 files
+**/*.h5
+
+# Testfile directories
+**/testfiles
+**/errfiles
+
+# Text files (note that this excludes CMakeLists.txt)
+**/*.txt
+**/*.md
+
+# Tool output files
+**/*.ddl
+**/*.err
+**/*.exp
+**/*.ls
+**/*.xml
