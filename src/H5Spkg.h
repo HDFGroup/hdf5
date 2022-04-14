@@ -274,7 +274,7 @@ typedef herr_t (*H5S_sel_project_scalar)(const H5S_t *space, hsize_t *offset);
 /* Method to construct selection projection onto/into simple dataspace */
 typedef herr_t (*H5S_sel_project_simple)(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 /* Method to initialize iterator for current selection */
-typedef herr_t (*H5S_sel_iter_init_func_t)(H5S_t *space, H5S_sel_iter_t *sel_iter);
+typedef herr_t (*H5S_sel_iter_init_func_t)(const H5S_t *space, H5S_sel_iter_t *sel_iter);
 
 /* Selection class information */
 typedef struct {
@@ -402,7 +402,7 @@ H5_DLL herr_t H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, 
 
 /* Operations on hyperslab selections */
 H5_DLL uint64_t H5S__hyper_get_op_gen(void);
-H5_DLL void     H5S__hyper_rebuild(H5S_t *space);
+H5_DLL void     H5S__hyper_rebuild(const H5S_t *space);
 H5_DLL herr_t   H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 H5_DLL herr_t H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
                                               H5S_t *proj_space, hbool_t share_space);

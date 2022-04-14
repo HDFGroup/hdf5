@@ -289,7 +289,8 @@ H5_DLL H5S_t * H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index
 H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *partial);
 
 /* Operations on selection iterators */
-H5_DLL herr_t  H5S_select_iter_init(H5S_sel_iter_t *iter, H5S_t *space, size_t elmt_size, unsigned flags);
+H5_DLL herr_t  H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size,
+                                    unsigned flags);
 H5_DLL herr_t  H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords);
 H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t  H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);

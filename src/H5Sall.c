@@ -64,7 +64,7 @@ static herr_t   H5S__all_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__all_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__all_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__all_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__all_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__all_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t  H5S__all_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -144,7 +144,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__all_iter_init(H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
+H5S__all_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 {
     FUNC_ENTER_PACKAGE_NOERR
 

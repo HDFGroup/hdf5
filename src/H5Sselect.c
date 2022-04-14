@@ -1105,7 +1105,7 @@ H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset)
  USAGE
     herr_t H5S_select_iter_init(sel_iter, space, elmt_size, flags)
         H5S_sel_iter_t *sel_iter; OUT: Selection iterator to initialize.
-        H5S_t *space;           IN: Dataspace object containing selection to
+        const H5S_t *space;     IN: Dataspace object containing selection to
                                     iterate over
         size_t elmt_size;       IN: Size of elements in the selection
         unsigned flags;         IN: Flags to control iteration behavior
@@ -1116,7 +1116,7 @@ H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset)
     in the dataspace's selection.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iter_init(H5S_sel_iter_t *sel_iter, H5S_t *space, size_t elmt_size, unsigned flags)
+H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_size, unsigned flags)
 {
     herr_t ret_value = FAIL; /* Return value */
 

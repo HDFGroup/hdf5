@@ -74,7 +74,7 @@ static herr_t   H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__point_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 static herr_t   H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size);
 
 /* Selection iteration callbacks */
@@ -170,7 +170,7 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
+H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
