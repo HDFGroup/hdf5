@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5D_MODULE
-#define H5_MY_PKG      H5D
-#define H5_MY_PKG_ERR  H5E_DATASET
-#define H5_MY_PKG_INIT YES
+#define H5_MY_PKG     H5D
+#define H5_MY_PKG_ERR H5E_DATASET
 
 /**\defgroup H5D H5D
  *
