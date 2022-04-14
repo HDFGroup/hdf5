@@ -19,7 +19,7 @@
 #define PROGRAMNAME "h5copy"
 
 /* command-line options: short and long-named parameters */
-static const char *        s_opts    = "d:f:hi:o:ps:vVE";
+static const char *        s_opts    = "d:f:hi:o:ps:vVE*";
 static struct long_options l_opts[]  = {{"destination", require_arg, 'd'},
                                        {"flag", require_arg, 'f'},
                                        {"help", no_arg, 'h'},
@@ -29,7 +29,7 @@ static struct long_options l_opts[]  = {{"destination", require_arg, 'd'},
                                        {"source", require_arg, 's'},
                                        {"verbose", no_arg, 'v'},
                                        {"version", no_arg, 'V'},
-                                       {"enable-error-stack", no_arg, 'E'},
+                                       {"enable-error-stack", optional_arg, 'E'},
                                        {NULL, 0, '\0'}};
 char *                     fname_src = NULL;
 char *                     fname_dst = NULL;
@@ -93,15 +93,17 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "      -o, --output       output file name\n");
     PRINTVALSTREAM(rawoutstream, "      -s, --source       source object name\n");
     PRINTVALSTREAM(rawoutstream, "      -d, --destination  destination object name\n");
+    PRINTVALSTREAM(rawoutstream, "   ERROR\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "   OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "      -h, --help         Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream,
                    "      -p, --parents      No error if existing, make parent groups as needed\n");
     PRINTVALSTREAM(rawoutstream, "      -v, --verbose      Print information about OBJECTS and OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "      -V, --version      Print version number and exit\n");
-    PRINTVALSTREAM(rawoutstream, "      --enable-error-stack\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                  Prints messages from the HDF5 error stack as they occur.\n");
     PRINTVALSTREAM(rawoutstream, "      -f, --flag         Flag type\n\n");
     PRINTVALSTREAM(rawoutstream, "      Flag type is one of the following strings:\n\n");
     PRINTVALSTREAM(rawoutstream, "      shallow     Copy only immediate members for groups\n\n");
@@ -288,7 +290,10 @@ main(int argc, char *argv[])
                 break;
 
             case 'E':
-                enable_error_stack = 1;
+                if (opt_arg != NULL)
+                    enable_error_stack = HDatoi(opt_arg);
+                else
+                    enable_error_stack = 1;
                 break;
 
             default:

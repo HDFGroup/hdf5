@@ -4826,8 +4826,7 @@ H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
     /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-        TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* set property to either TRUE if > 0, or FALSE otherwise */
@@ -4877,8 +4876,7 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
     /* (Dataset, group, attribute, and named datatype access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-        TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* Get value */
