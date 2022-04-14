@@ -1398,7 +1398,7 @@ H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 void
-H5D__chunk_mem_free(void *chk, const void *_pline)
+H5D__chunk_mem_free(void *chk, const H5O_pline_t *_pline)
 {
     (void)H5D__chunk_mem_xfree(chk, _pline);
 }

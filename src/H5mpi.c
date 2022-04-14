@@ -773,7 +773,7 @@ H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_t
     if (H5_mpio_gatherv_alloc(send_buf, send_count, send_type, recv_counts_disps_array,
                               &recv_counts_disps_array[mpi_size], recv_type, allgather, root, comm, mpi_rank,
                               mpi_size, out_buf, out_buf_num_entries) < 0)
-        HGOTO_ERROR(H5E_LIB, H5E_CANTGATHER, FAIL, "can't gather data")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGATHER, FAIL, "can't gather data")
 
 done:
     if (recv_counts_disps_array)
