@@ -2,6 +2,10 @@ usage: h5dump [OPTIONS] files
   OPTIONS
      -h,   --help         Print a usage message and exit
      -V,   --version      Print version number and exit
+--------------- Error Options ---------------
+     --enable-error-stack Prints messages from the HDF5 error stack as they occur.
+                          Optional value 2 also prints file open errors.
+                          Default setting disables any error reporting.
 --------------- File Options ---------------
      -n,   --contents     Print a list of the file contents and exit
                           Optional value 1 also prints attributes.
@@ -54,8 +58,6 @@ usage: h5dump [OPTIONS] files
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
-     --enable-error-stack Prints messages from the HDF5 error stack as they occur.
-                          Optional value 2 also prints file open errors.
      --no-compact-subset  Disable compact form of subsetting and allow the use
                           of "[" in dataset names.
      -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
