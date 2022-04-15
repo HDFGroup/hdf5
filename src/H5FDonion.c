@@ -2369,8 +2369,7 @@ done:
  *
  * Purpose:     Set end-of-address marker of the logical file.
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
+ * Return:      SUCCEED/FAIL
  *
  *-----------------------------------------------------------------------------
  */
