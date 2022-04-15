@@ -231,7 +231,7 @@ aux_assign_obj(const char * name,        /* object name from traverse list */
  *  do extra checking in the case of SZIP; delete all filters in the case
  *  of H5Z_FILTER_NONE present in the PACK_INFO_T filter array
  *
- * Return: 0 success, -1 an error occured
+ * Return: 0 success, -1 an error occurred
  *-------------------------------------------------------------------------
  */
 
@@ -258,7 +258,7 @@ apply_filters(const char *   name,    /* object name from traverse list */
         H5TOOLS_GOTO_DONE(0);
 
     /*-------------------------------------------------------------------------
-     * initialize the assigment object
+     * initialize the assignment object
      *-------------------------------------------------------------------------
      */
     init_packobject(&obj);

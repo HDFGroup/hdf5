@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:E*G:LM:P:S:T:VXW";
+static const char *        s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:v*z:E*G:LM:P:S:T:VXW";
 static struct long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                        {"block", require_arg, 'b'},
                                        {"compact", require_arg, 'c'},
@@ -39,18 +39,18 @@ static struct long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                        {"file", require_arg, 'e'},
                                        {"filter", require_arg, 'f'},
                                        {"help", no_arg, 'h'},
-                                       {"infile", require_arg, 'i'}, /* for backward compability */
+                                       {"infile", require_arg, 'i'}, /* for backward compatibility */
                                        {"low", require_arg, 'j'},
                                        {"high", require_arg, 'k'},
                                        {"layout", require_arg, 'l'},
                                        {"minimum", require_arg, 'm'},
                                        {"native", no_arg, 'n'},
-                                       {"outfile", require_arg, 'o'}, /* for backward compability */
+                                       {"outfile", require_arg, 'o'}, /* for backward compatibility */
                                        {"sort_by", require_arg, 'q'},
                                        {"ssize", require_arg, 's'},
                                        {"threshold", require_arg, 't'},
                                        {"ublock", require_arg, 'u'},
-                                       {"verbose", no_arg, 'v'},
+                                       {"verbose", optional_arg, 'v'},
                                        {"sort_order", require_arg, 'z'},
                                        {"enable-error-stack", optional_arg, 'E'},
                                        {"fs_pagesize", require_arg, 'G'},
@@ -87,7 +87,8 @@ usage(const char *prog)
                    "                           Optional value 2 also prints file open errors.\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help              Print a usage message and exit\n");
-    PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
+    PRINTVALSTREAM(rawoutstream, "   -v N, --verbose=N       Verbose mode, print object information.\n");
+    PRINTVALSTREAM(rawoutstream, "      N - is an integer greater than 1, 2 displays read/write timing\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
@@ -492,7 +493,12 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 goto done;
 
             case 'v':
-                options->verbose = 1;
+                if (opt_arg != NULL) {
+                    if (2 == HDatoi(opt_arg))
+                        options->verbose = 2;
+                }
+                else
+                    options->verbose = 1;
                 break;
 
             case 'f':
