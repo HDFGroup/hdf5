@@ -2385,29 +2385,29 @@ test_several_revisions_with_logical_gaps(void)
     about[0].comment      = "first";
     about[0].n_writes     = 0;
 
-    about[1].truncate          = FALSE;
-    about[1].revision_num      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    about[1].comment           = "second";
-    about[1].n_writes          = 1;
-    about[1].writes[0].offset  = a_off;
-    about[1].writes[0].size    = a_list_size_s;
-    about[1].writes[0].buf     = a_list_s;
+    about[1].truncate         = FALSE;
+    about[1].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    about[1].comment          = "second";
+    about[1].n_writes         = 1;
+    about[1].writes[0].offset = a_off;
+    about[1].writes[0].size   = a_list_size_s;
+    about[1].writes[0].buf    = a_list_s;
 
-    about[2].truncate          = FALSE;
-    about[2].revision_num      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    about[2].comment           = "third";
-    about[2].n_writes          = 1; /* TODO: several writes */
-    about[2].writes[0].offset  = b_off;
-    about[2].writes[0].size    = b_list_size_s;
-    about[2].writes[0].buf     = b_list_s;
+    about[2].truncate         = FALSE;
+    about[2].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    about[2].comment          = "third";
+    about[2].n_writes         = 1; /* TODO: several writes */
+    about[2].writes[0].offset = b_off;
+    about[2].writes[0].size   = b_list_size_s;
+    about[2].writes[0].buf    = b_list_s;
 
-    about[3].truncate          = FALSE;
-    about[3].revision_num      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    about[3].comment           = "fourth";
-    about[3].n_writes          = 1;
-    about[3].writes[0].offset  = 0;
-    about[3].writes[0].size    = a_list_size_s;
-    about[3].writes[0].buf     = a_list_s;
+    about[3].truncate         = FALSE;
+    about[3].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    about[3].comment          = "fourth";
+    about[3].n_writes         = 1;
+    about[3].writes[0].offset = 0;
+    about[3].writes[0].size   = a_list_size_s;
+    about[3].writes[0].buf    = a_list_s;
 
     if (do_onion_open_and_writes(paths->canon, &onion_info, 4, about) < 0)
         TEST_ERROR;
@@ -2851,21 +2851,21 @@ test_page_aligned_history_create(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    about[0].truncate          = TRUE;
-    about[0].revision_num      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    about[0].comment           = "initial_commit";
-    about[0].n_writes          = 1;
-    about[0].writes[0].offset  = 0;
-    about[0].writes[0].size    = b_list_size_s;
-    about[0].writes[0].buf     = b_list_s;
+    about[0].truncate         = TRUE;
+    about[0].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    about[0].comment          = "initial_commit";
+    about[0].n_writes         = 1;
+    about[0].writes[0].offset = 0;
+    about[0].writes[0].size   = b_list_size_s;
+    about[0].writes[0].buf    = b_list_s;
 
-    about[1].truncate          = FALSE;
-    about[1].revision_num      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    about[1].comment           = "second";
-    about[1].n_writes          = 1;
-    about[1].writes[0].offset  = a_off;
-    about[1].writes[0].size    = a_list_size_s;
-    about[1].writes[0].buf     = a_list_s;
+    about[1].truncate         = FALSE;
+    about[1].revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    about[1].comment          = "second";
+    about[1].n_writes         = 1;
+    about[1].writes[0].offset = a_off;
+    about[1].writes[0].size   = a_list_size_s;
+    about[1].writes[0].buf    = a_list_s;
 
     if (do_onion_open_and_writes(paths->canon, &onion_info, 2, about) < 0)
         TEST_ERROR;
@@ -3192,7 +3192,7 @@ test_integration_create(void)
      *----------------------------------------------------------------------
      */
     onion_info.revision_num = 0;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -3239,7 +3239,7 @@ test_integration_create(void)
      *----------------------------------------------------------------------
      */
     onion_info.revision_num = 1;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
