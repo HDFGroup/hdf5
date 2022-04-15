@@ -1226,9 +1226,9 @@ TOOLTEST h5diff_v3.txt -c 1_vds.h5 2_vds.h5
 # ##############################################################################
 # Onion VFD tests
 # ##############################################################################
-TOOLTEST h5diff_900.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5
-TOOLTEST h5diff_901.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5
-TOOLTEST h5diff_902.txt -r -v --vfd-name-1 onion --vfd-value-1 0 --vfd-name-2 onion --vfd-value-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5
+TOOLTEST h5diff_900.txt -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5
+TOOLTEST h5diff_901.txt -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5
+TOOLTEST h5diff_902.txt -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5
 
 # ##############################################################################
 # # END
