@@ -498,9 +498,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[0].u.name) {
         if (!HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
             if (opts->vfd_info[0].info)
-                onion_fa_g_1.revision_id = HDatoi((char *)(opts->vfd_info[0].info));
+                onion_fa_g_1.revision_num = HDatoi((char *)(opts->vfd_info[0].info));
             else
-                onion_fa_g_1.revision_id = 0;
+                onion_fa_g_1.revision_num = 0;
 
             /* Need to free this memory */
             opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
@@ -511,9 +511,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[1].u.name) {
         if (!HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
             if (opts->vfd_info[1].info)
-                onion_fa_g_2.revision_id = HDatoi((char *)(opts->vfd_info[1].info));
+                onion_fa_g_2.revision_num = HDatoi((char *)(opts->vfd_info[1].info));
             else
-                onion_fa_g_2.revision_id = 0;
+                onion_fa_g_2.revision_num = 0;
 
             /* Need to free this memory */
             opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));

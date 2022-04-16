@@ -1316,11 +1316,11 @@ end_collect:
     if (vfd_info_g.u.name) {
         if (!HDstrcmp(vfd_info_g.u.name, "onion")) {
             if (vfd_info_g.info)
-                onion_fa_g.revision_id = HDatoi((char *)(vfd_info_g.info));
+                onion_fa_g.revision_num = HDatoi((char *)(vfd_info_g.info));
             else
-                onion_fa_g.revision_id = 0;
+                onion_fa_g.revision_num = 0;
 
-            HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_id);
+            HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
 
             /* Need to free this memory */
             vfd_info_g.info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
