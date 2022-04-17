@@ -1377,8 +1377,7 @@ test_revision_record_encode_decode(void)
         TEST_ERROR;
 
     HDmemcpy(record.time_of_creation, "19411207T190643Z", 16);
-    record.archival_index.list = HDcalloc(record.archival_index.n_entries,
-                                                                      sizeof(H5FD_onion_index_entry_t));
+    record.archival_index.list = HDcalloc(record.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == record.archival_index.list)
         TEST_ERROR;
     /* convert logi_page and should match address in expected buffer */
@@ -1492,8 +1491,7 @@ test_revision_record_encode_decode(void)
     r_out.comment = HDcalloc(r_out.comment_size, sizeof(char));
     if (NULL == r_out.comment)
         TEST_ERROR;
-    r_out.archival_index.list = HDcalloc(r_out.archival_index.n_entries,
-                                                                     sizeof(H5FD_onion_index_entry_t));
+    r_out.archival_index.list = HDcalloc(r_out.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == r_out.archival_index.list)
         TEST_ERROR;
 
@@ -1786,8 +1784,8 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         /* Final read, get variable-length data */
         if (NULL == (rev_out.comment = HDmalloc((size_t)rev_out.comment_size)))
             TEST_ERROR;
-        rev_out.archival_index.list = HDcalloc(rev_out.archival_index.n_entries,
-                                                                           sizeof(H5FD_onion_index_entry_t));
+        rev_out.archival_index.list =
+            HDcalloc(rev_out.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
         if (NULL == rev_out.archival_index.list)
             TEST_ERROR;
         if (NULL == (rev_out.username = HDmalloc((size_t)rev_out.username_size)))
@@ -3019,9 +3017,9 @@ test_integration_create(void)
      *----------------------------------------------------------------------
      */
     hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {128, 256};
+    hsize_t dims[2]    = {128, 256};
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t chunk[2] = {4, 4};
+    hsize_t chunk[2]   = {4, 4};
     int     wdata[128][256]; /* Write buffer */
     int     fillval, i, j;
 
