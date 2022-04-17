@@ -2585,11 +2585,11 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
             HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
             /* check if we have the _FILL attribute */
-            if ((has_fill = H5LT_find_attribute(did_1, attr_name)) < 0)
+            if ((has_fill = H5Aexists(did_1, attr_name)) < 0)
                 goto out;
 
             /* get it */
-            if (has_fill)
+            if (has_fill > 0)
                 if (H5LT_get_attribute_disk(did_1, attr_name, tmp_fill_buf + curr_offset) < 0)
                     goto out;
 
@@ -2747,7 +2747,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
      * attach the fill attributes from previous table
      *-------------------------------------------------------------------------
      */
-    if (has_fill) {
+    if (has_fill > 0) {
         if ((sid_1 = H5Screate(H5S_SCALAR)) < 0)
             goto out;
 
@@ -2918,15 +2918,15 @@ H5TBAget_fill(hid_t loc_id, const char *dset_name, hid_t dset_id, unsigned char 
     for (i = 0; i < nfields; i++) {
         HDsnprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
-        /* check if we have the _FILL attribute */
-        if ((has_fill = H5LT_find_attribute(dset_id, attr_name)) < 0)
+        /* Check if we have the _FILL attribute */
+        if ((has_fill = H5Aexists(dset_id, attr_name)) < 0)
             goto out;
 
         /* get it */
-        if (has_fill)
+        if (has_fill > 0)
             if (H5LT_get_attribute_disk(dset_id, attr_name, dst_buf + src_offset[i]) < 0)
                 goto out;
-    } /* end for */
+    }
 
     ret_val = has_fill;
 
