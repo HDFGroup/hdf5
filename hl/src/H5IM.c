@@ -729,7 +729,6 @@ H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         /* Close the attribute. */
         if (H5Aclose(aid) < 0)
             goto out;
-
     }
 
     /* Close the image dataset. */
