@@ -17,9 +17,29 @@
 #ifndef H5_SUBFILING_COMMON_H
 #define H5_SUBFILING_COMMON_H
 
-#define K(n)                      ((n)*1024)
-#define M(n)                      ((n) * (1024 * 1024))
-#define H5FD_DEFAULT_STRIPE_DEPTH M(32)
+#include <stdatomic.h>
+
+#include "H5private.h"
+#include "H5Iprivate.h"
+
+/* TODO: needed for ioc_selection_t, which also needs to be public */
+#include "H5FDioc.h"
+
+/* The following is our basic template for a subfile filename.
+ * Note that eventually we shouldn't use 0_of_N since we
+ * intend to use the user defined HDF5 filename for a
+ * zeroth subfile as well as for all metadata.
+ */
+#define SF_FILENAME_TEMPLATE ".subfile_%ld_%0*d_of_%d"
+
+/*
+ * Environment variables interpreted by the HDF5 subfiling feature
+ */
+#define H5_IOC_COUNT_PER_NODE "H5_IOC_COUNT_PER_NODE"
+#define H5_IOC_STRIPE_SIZE    "H5_IOC_STRIPE_SIZE"
+#define H5_IOC_SUBFILE_PREFIX "H5_IOC_SUBFILE_PREFIX"
+
+#define H5FD_DEFAULT_STRIPE_DEPTH (32 * 1024 * 1024)
 
 /* THE following definitions are used between H5FDsubfile_mpi.c
  * and H5FDioc_threads.c
@@ -55,23 +75,10 @@
 /* Bit 3 SET indicates collectives */
 #define COLL_FUNC (0x1 << 3)
 
-#if 0 /* JRM */ /* original version */
-
-#define ACK_PART  (0x0acc << 8)
-#define DATA_PART (0xd8da << 8)
-#define READY     (0xfeed << 8)
-#define COMPLETED (0xfed1 << 8)
-
-#else /* JRM */ /* reduce size to make space for counters to disambiguate multiple concurrent requests from  \
-                   same rank */
-
 #define ACK_PART  (0x01 << 8)
 #define DATA_PART (0x02 << 8)
 #define READY     (0x04 << 8)
 #define COMPLETED (0x08 << 8)
-
-#endif /* JRM */ /* reduce size to make space for counters to disambiguate multiple concurrent requests from \
-                    same rank */
 
 #define INT32_MASK 0x07FFFFFFFFFFFFFFF
 
@@ -89,16 +96,23 @@
 
 #define SET_LOGGING (LOGGING_OP)
 
+/*
+ * Object type definitions for subfiling objects.
+ * Used when generating a new subfiling object ID
+ * or accessing the cache of stored subfiling
+ * objects.
+ */
+typedef enum {
+    SF_BADID    = (-1),
+    SF_TOPOLOGY = 1,
+    SF_CONTEXT  = 2,
+    SF_NTYPES /* number of subfiling object types, MUST BE LAST */
+} sf_obj_type_t;
+
 /* The following are the basic 'op codes' used when
  * constructing a RPC message for IO Concentrators.
  * These are defined in the low 8 bits of the
  * message.
- *
- * We currently ONLY use READ_OP and WRITE_OP
- *
- * Added TRUNC_OP 12/15/21 -- JRM
- *
- * Added GET_EOF_OP 12/28/21 -- JRM
  */
 typedef enum io_ops {
     READ_OP    = 1,
@@ -145,13 +159,13 @@ typedef struct topology {
     bool            rank_is_ioc;        /* Indicates that we host an IOC  */
     int             subfile_rank;       /* Valid only if rank_is_ioc      */
     int             n_io_concentrators; /* Number of IO concentrators  */
-    int *           io_concentrator;    /* Vector of ranks which are IOCs */
+    int *           io_concentrators;   /* Vector of ranks which are IOCs */
     int *           subfile_fd;         /* file descriptor (if IOC)       */
     ioc_selection_t selection_type;     /* Cache our IOC selection criteria */
 } sf_topology_t;
 
 typedef struct {
-    hid_t          sf_context_id;           /* Generated context ID which embeds the cache index */
+    int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value) */
     int            sf_fid;                  /* value returned by open(file,..)  */
     size_t         sf_write_count;          /* Statistics: write_count  */
@@ -183,7 +197,7 @@ typedef struct {
     int     tag;              /* the supplied OPCODE tag        */
     int     source;           /* Rank of who sent the message   */
     int     subfile_rank;     /* The IOC rank                   */
-    hid_t   context_id;       /* context to be used to complete */
+    int64_t context_id;       /* context to be used to complete */
     double  start_time;       /* the request, + time of receipt */
                               /* from which we calc Time(queued) */
     void *buffer;             /* for writes, we keep the buffer */
@@ -198,20 +212,25 @@ extern FILE *sf_logfile;
 
 extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;
-extern atomic_int sf_ioc_ready;
 extern atomic_int sf_shutdown_flag;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL int H5FD__open_subfiles(const char *base_filename, void *_config_info, uint64_t inode_id, int flags);
-H5_DLL int H5FD__close_subfiles(int64_t context_id);
+H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t h5_file_id,
+                               ioc_selection_t ioc_selection_type, int file_acc_flags, MPI_Comm file_comm,
+                               int64_t *context_id_out);
+H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
 
-H5_DLL void *get__subfiling_object(int64_t object_id);
-H5_DLL hid_t fid_map_to_context(uint64_t h5_fid);
+H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
+H5_DLL void *  H5_get_subfiling_object(int64_t object_id);
+H5_DLL int64_t H5_subfile_fid_to_context(uint64_t h5_fid);
+H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 
 H5_DLL void H5FD_ioc_take_down_thread_pool(void);
+
+void set_verbose_flag(int subfile_rank, int new_value);
 
 #ifdef __cplusplus
 }

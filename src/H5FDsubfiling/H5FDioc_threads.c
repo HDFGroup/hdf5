@@ -18,6 +18,12 @@
 #include "mercury_thread_mutex.h"
 #include "mercury_thread_pool.h"
 
+#ifndef HG_TEST_NUM_THREADS_DEFAULT
+#define HG_TEST_NUM_THREADS_DEFAULT 4
+#endif
+
+#define MIN_READ_RETRIES 10
+
 /*
  * NOTES:
  * Rather than re-create the code for creating and managing a thread pool,
@@ -34,14 +40,29 @@ static hg_thread_mutex_t ioc_serialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 static hg_thread_pool_t *ioc_thread_pool     = NULL;
 static hg_thread_t       ioc_thread;
 
-#ifndef HG_TEST_NUM_THREADS_DEFAULT
-#define HG_TEST_NUM_THREADS_DEFAULT 4
+#ifdef H5FD_IOC_DEBUG
+static int    sf_write_ops        = 0;
+static int    sf_read_ops         = 0;
+static double sf_pwrite_time      = 0.0;
+static double sf_pread_time       = 0.0;
+static double sf_write_wait_time  = 0.0;
+static double sf_read_wait_time   = 0.0;
+static double sf_queue_delay_time = 0.0;
 #endif
 
 static int                    pool_concurrent_max = 0;
 static struct hg_thread_work *pool_request        = NULL;
 
-H5FD_ioc_io_queue_t io_queue_g = {
+atomic_int sf_ioc_ready    = 0;
+atomic_int sf_work_pending = 0;
+
+/* sf_io_ops_pending is use to track the number of I/O operations pending so that we can wait
+ * until all I/O operations have been serviced before shutting down the worker thread pool.
+ * The value of this variable must always be non-negative.
+ */
+atomic_int sf_io_ops_pending = 0;
+
+static ioc_io_queue_t io_queue_g = {
     /* magic               = */ H5FD_IOC__IO_Q_MAGIC,
     /* q_head              = */ NULL,
     /* q_tail              = */ NULL,
@@ -66,12 +87,220 @@ H5FD_ioc_io_queue_t io_queue_g = {
 };
 
 /* Prototypes */
+static HG_THREAD_RETURN_TYPE ioc_thread_main(void *arg);
+static int                   ioc_main(int64_t context_id);
+
+static int ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
+                                      uint32_t counter);
+static int ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+
+static int ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
+                               int subfile_rank);
+static int ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
+                              int subfile_rank);
+static int ioc_file_truncate(int fd, int64_t length, int subfile_rank);
+static int ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+
+static ioc_io_queue_entry_t *H5FD_ioc__alloc_io_q_entry(void);
+static void                  H5FD_ioc__complete_io_q_entry(ioc_io_queue_entry_t *entry_ptr);
+static void                  H5FD_ioc__dispatch_elegible_io_q_entries(void);
+static void                  H5FD_ioc__free_io_q_entry(ioc_io_queue_entry_t *q_entry_ptr);
+static void                  H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr);
+
 void __attribute__((destructor)) finalize_ioc_threads(void);
-int  wait_for_thread_main(void);
 bool tpool_is_empty(void);
 
 /*-------------------------------------------------------------------------
- * Function:    local ioc_thread_main
+ * Function:    initialize_ioc_threads
+ *
+ * Purpose:     The principal entry point to initialize the execution
+ *              context for an I/O Concentrator (IOC). The main thread
+ *              is responsible for receiving I/O requests from each
+ *              HDF5 "client" and distributing those to helper threads
+ *              for actual processing. We initialize a fixed number
+ *              of helper threads by creating a thread pool.
+ *
+ * Return:      SUCCESS (0) or FAIL (-1) if any errors are detected
+ *              for the multi-threaded initialization.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+initialize_ioc_threads(void *_sf_context)
+{
+    subfiling_context_t *sf_context        = _sf_context;
+    unsigned             thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
+    int64_t *            context_id        = NULL;
+    size_t               pool_req_alloc_size;
+    char *               env_value;
+    int                  world_size;
+    int                  file_open_count;
+    int                  status;
+    int                  ret_value = 0;
+#ifndef NDEBUG
+    double t_start = 0.0, t_end = 0.0;
+#endif
+
+    HDassert(sf_context);
+
+    if (NULL == (context_id = HDmalloc(sizeof(*context_id)))) {
+        HDputs("failed to allocate context ID");
+        ret_value = -1;
+        goto done;
+    }
+
+    file_open_count = atomic_load(&sf_file_open_count);
+    atomic_fetch_add(&sf_file_open_count, 1);
+
+    /*
+     * TODO: since IOC main thread is only initialized for first
+     * open file, hangs are caused with multiple files open. The
+     * main thread will only send out MPI communications on the
+     * MPI communicator for the first opened file's context ID,
+     * whereas the IOC VFD rank will communicate across different
+     * file's communicators.
+     */
+    if (file_open_count > 0) {
+        ret_value = 0;
+        goto done;
+    }
+
+#ifndef NDEBUG
+    t_start = MPI_Wtime();
+#endif
+
+    /* Initialize the main IOC thread input argument.
+     * Each IOC request will utilize this context_id which is
+     * consistent across all MPI ranks, to ensure that requests
+     * involving reference counting are correctly using the
+     * correct file contexts.
+     */
+    *context_id = sf_context->sf_context_id;
+
+    /* Allocate and initialize space for worker threads in thread pool */
+    world_size          = sf_context->topology->app_layout->world_size;
+    pool_req_alloc_size = ((size_t)world_size * sizeof(struct hg_thread_work));
+
+    if (!pool_request) {
+        if (NULL == (pool_request = HDmalloc(pool_req_alloc_size))) {
+            HDputs("couldn't allocate space for worker threads");
+            ret_value = -1;
+            goto done;
+        }
+
+        pool_concurrent_max = world_size;
+    }
+
+    HDmemset(pool_request, 0, pool_req_alloc_size);
+
+    /* Initialize a couple of mutex variables that are used
+     * during IO concentrator operations to serialize
+     * access to key objects, e.g. reference counting.
+     */
+    status = hg_thread_mutex_init(&ioc_mutex);
+    if (status) {
+        HDputs("hg_thread_mutex_init failed");
+        ret_value = -1;
+        goto done;
+    }
+    status = hg_thread_mutex_init(&ioc_thread_mutex);
+    if (status) {
+        HDputs("hg_thread_mutex_init failed");
+        ret_value = -1;
+        goto done;
+    }
+
+#if 1 /* JRM */ /* needed for new dispatch code */
+
+    status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
+    if (status) {
+        HDputs("hg_thread_mutex_init failed for io_queue_g.q_mutex");
+        ret_value = -1;
+        goto done;
+    }
+
+#endif /* JRM */
+
+    /* Allow experimentation with the number of helper threads */
+    if ((env_value = HDgetenv(H5_IOC_THREAD_POOL_COUNT)) != NULL) {
+        int value_check = HDatoi(env_value);
+        if (value_check > 0) {
+            thread_pool_count = (unsigned int)value_check;
+        }
+    }
+
+    /* Initialize a thread pool for the I/O Concentrator to use */
+    status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
+    if (status) {
+        HDputs("hg_thread_pool_init failed");
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Arguments to hg_thread_create are:
+     * 1. A pointer to reference the created thread.
+     * 2. User function pointer for the new thread to execute.
+     * 3. Pointer to the input argument that gets passed along to the user
+     * function.
+     */
+    atomic_init(&sf_ioc_ready, 0);
+    status = hg_thread_create(&ioc_thread, ioc_thread_main, (void *)context_id);
+    if (status) {
+        HDputs("hg_thread_create failed");
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Wait until ioc_main() reports that it is ready */
+    while (atomic_load(&sf_ioc_ready) != 1) {
+        usleep(20);
+    }
+
+#ifndef NDEBUG
+    t_end = MPI_Wtime();
+    if (sf_verbose_flag) {
+        if (sf_context->topology->subfile_rank == 0) {
+            HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
+            HDfflush(stdout);
+        }
+    }
+#endif
+
+done:
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    finalize_ioc_threads
+ *
+ * Purpose:     Normally we shouldn't have any IOC threads running by the
+ *              program exits. If we do, this destructor function gets
+ *              called to cleanup
+ *
+ * Return:      None
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+void __attribute__((destructor)) finalize_ioc_threads(void)
+{
+    if (ioc_thread_pool != NULL) {
+        hg_thread_pool_destroy(ioc_thread_pool);
+        ioc_thread_pool = NULL;
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ioc_thread_main
  *
  * Purpose:     An IO Concentrator instance is initialized with the
  *              specified subfiling context.
@@ -102,173 +331,216 @@ ioc_thread_main(void *arg)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    initialize_ioc_threads
+ * Function:    ioc_main
  *
- * Purpose:     The principal entry point to initialize the execution
- *              context for an IO Concentrator (IOC). The main thread
- *              is responsible for receiving IO requests from each
- *              HDF5 "client" and distributing those to helper threads
- *              for actual processing.  We initialize a fixed number
- *              of helper threads by creating a thread_pool.
+ * Purpose:     This is the principal function run by the I/O Concentrator
+ *              main thread.  It remains within a loop until allowed to
+ *              exit by means of setting the 'sf_shutdown_flag'. This is
+ *              usually accomplished as part of the file close operation.
  *
- * Return:      SUCCESS (0) or FAIL (-1) if any errors are detected
- *              for the multi-threaded initialization.
+ *              The function implements an asynchronous polling approach
+ *              for incoming messages. These messages can be thought of
+ *              as a primitive RPC which utilizes MPI tags to code and
+ *              implement the desired subfiling functionality.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
+ *              As each incoming message is received, it gets added to
+ *              a queue for processing by a thread_pool thread. The
+ *              message handlers are dispatched via the
+ *              "handle_work_request" routine.
+
+ *              Subfiling is effectively a software RAID-0 implementation
+ *              where having multiple I/O Concentrators and independent
+ *              subfiles is equated to the multiple disks and a true
+ *              hardware base RAID implementation.
  *
- * Changes:     Initial Version/None.
+ *              I/O Concentrators are ordered according to their MPI rank.
+ *              In the simplest interpretation, IOC(0) will always contain
+ *              the initial bytes of the logical disk image.  Byte 0 of
+ *              IOC(1) will contain the byte written to the logical disk
+ *              offset "stripe_size" X IOC(number).
  *
- *-------------------------------------------------------------------------
- */
-int
-initialize_ioc_threads(void *_sf_context)
-{
-    int                  status;
-    int                  file_open_count;
-    subfiling_context_t *sf_context        = _sf_context;
-    unsigned int         thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
-    int64_t *            context_id        = (int64_t *)HDmalloc(sizeof(int64_t));
-    int                  world_size        = sf_context->topology->app_layout->world_size;
-    size_t               alloc_size        = ((size_t)world_size * sizeof(struct hg_thread_work));
-    char *               envValue;
-    double               t_start = 0.0, t_end = 0.0;
-
-#if 0 /* JRM */ /* delete this evenutually */
-    HDprintf("\nworld_size = %d\n", world_size);
-#endif          /* JRM */
-
-#if 1 /* JRM */ /* try doubling the size of the pool_request array */
-    world_size *= 4;
-    alloc_size *= 4;
-#endif /* JRM */
-
-    assert(context_id != NULL);
-
-    file_open_count = atomic_load(&sf_file_open_count);
-    atomic_fetch_add(&sf_file_open_count, 1);
-
-    if (file_open_count > 0)
-        return 0;
-
-    t_start = MPI_Wtime();
-
-    /* Initialize the main IOC thread input argument.
-     * Each IOC request will utilize this context_id which is
-     * consistent across all MPI ranks, to ensure that requests
-     * involving reference counting are correctly using the
-     * correct file contexts.
-     */
-    context_id[0] = sf_context->sf_context_id;
-
-    if (pool_request == NULL) {
-        if ((pool_request = (struct hg_thread_work *)malloc(alloc_size)) == NULL) {
-            perror("malloc error");
-            return -1;
-        }
-        else
-            pool_concurrent_max = world_size;
-    }
-
-    memset(pool_request, 0, alloc_size);
-
-    /* Initialize a couple of mutex variables that are used
-     * during IO concentrator operations to serialize
-     * access to key objects, e.g. reference counting.
-     */
-    status = hg_thread_mutex_init(&ioc_mutex);
-    if (status) {
-        puts("hg_thread_mutex_init failed");
-        goto err_exit;
-    }
-    status = hg_thread_mutex_init(&ioc_thread_mutex);
-    if (status) {
-        puts("hg_thread_mutex_init failed");
-        goto err_exit;
-    }
-
-#if 1 /* JRM */ /* needed for new dispatch code */
-
-    status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
-    if (status) {
-        puts("hg_thread_mutex_init failed for io_queue_g.q_mutex");
-        goto err_exit;
-    }
-
-#endif /* JRM */
-
-    /* Allow experimentation with the number of helper threads */
-    if ((envValue = getenv("IOC_THREAD_POOL_COUNT")) != NULL) {
-        int value_check = atoi(envValue);
-        if (value_check > 0) {
-            thread_pool_count = (unsigned int)value_check;
-        }
-    }
-
-    /* Initialize a thread pool for the IO Concentrator to use */
-    status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
-    if (status) {
-        puts("hg_thread_pool_init failed");
-        goto err_exit;
-    }
-
-    /* Arguments to hg_thread_create are:
-     * 1. A pointer to reference the created thread.
-     * 2. User function pointer for the new thread to execute.
-     * 3. Pointer to the input argument that gets passed along to the user
-     * function.
-     */
-    atomic_init(&sf_ioc_ready, 0);
-    status = hg_thread_create(&ioc_thread, ioc_thread_main, (void *)context_id);
-    if (status) {
-        puts("hg_thread_create failed");
-        goto err_exit;
-    }
-    else { /* wait until ioc_main() reports that it is ready */
-        while (atomic_load(&sf_ioc_ready) != 1) {
-
-            usleep(20);
-        }
-    }
-
-#ifndef NDEBUG
-    t_end = MPI_Wtime();
-    if (sf_verbose_flag) {
-        if (sf_context->topology->subfile_rank == 0) {
-            HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
-            HDfflush(stdout);
-        }
-    }
-#endif
-    return 0;
-
-err_exit:
-    return -1;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    finalize_ioc_threads
- *
- * Purpose:     Normally we shouldn't have any IOC threads running by the
- *              program exits. If we do, this destructor function gets
- *              called to cleanup
+ *              Example: If the stripe size is defined to be 256K, then
+ *              byte 0 of subfile(1) is at logical offset 262144 of the
+ *              file.   Similarly, byte 0 of subfile(2) represents the
+ *              logical file offset = 524288.   For logical files larger
+ *              than 'N' X stripe_size, we simply "wrap around" back to
+ *              subfile(0).  The following shows the mapping of 30
+ *              logical blocks of data over 3 subfiles:
+ *              +--------+--------+--------+--------+--------+--------+
+ *              | blk(0 )| blk(1) | blk(2 )| blk(3 )| blk(4 )| blk(5 )|
+ *              | IOC(0) | IOC(1) | IOC(2) | IOC(0) | IOC(1) | IOC(2) |
+ *              +--------+--------+--------+--------+--------+--------+
+ *              | blk(6 )| blk(7) | blk(8 )| blk(9 )| blk(10)| blk(11)|
+ *              | IOC(0) | IOC(1) | IOC(2) | IOC(0) | IOC(1) | IOC(2) |
+ *              +--------+--------+--------+--------+--------+--------+
+ *              | blk(12)| blk(13)| blk(14)| blk(15)| blk(16)| blk(17)|
+ *              | IOC(0) | IOC(1) | IOC(2) | IOC(0) | IOC(1) | IOC(2) |
+ *              +--------+--------+--------+--------+--------+--------+
+ *              | blk(18)| blk(19)| blk(20)| blk(21)| blk(22)| blk(23)|
+ *              | IOC(0) | IOC(1) | IOC(2) | IOC(0) | IOC(1) | IOC(2) |
+ *              +--------+--------+--------+--------+--------+--------+
+ *              | blk(24)| blk(25)| blk(26)| blk(27)| blk(28)| blk(29)|
+ *              | IOC(0) | IOC(1) | IOC(2) | IOC(0) | IOC(1) | IOC(2) |
+ *              +--------+--------+--------+--------+--------+--------+
  *
  * Return:      None
+ * Errors:      None
  *
  * Programmer:  Richard Warren
  *              7/17/2020
  *
  * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
-void __attribute__((destructor)) finalize_ioc_threads(void)
+static int
+ioc_main(int64_t context_id)
 {
-    if (ioc_thread_pool != NULL) {
-        hg_thread_pool_destroy(ioc_thread_pool);
-        ioc_thread_pool = NULL;
+    subfiling_context_t *context = NULL;
+    sf_work_request_t    wk_req;
+    MPI_Status           msg_status;
+    int                  subfile_rank;
+    int                  shutdown_requested;
+
+    context = H5_get_subfiling_object(context_id);
+    HDassert(context);
+
+    /* We can't have opened any files at this point..
+     * The file open approach has changed so that the normal
+     * application rank (hosting this thread) does the file open.
+     * We can simply utilize the file descriptor (which should now
+     * represent an open file).
+     */
+
+    subfile_rank = context->sf_group_rank;
+
+    /* Initialize atomic vars */
+#if 1 /* JRM */
+    atomic_init(&sf_work_pending, 0);
+#endif /* JRM */
+    atomic_init(&sf_shutdown_flag, 0);
+#if 1 /* JRM */
+    /* this variable is incremented by H5FD_ioc__queue_io_q_entry() when work
+     * is added to the I/O request queue, and decremented by H5FD_ioc__complete_io_q_entry()
+     * when an I/O request is completed and removed from the queue..
+     *
+     * On shutdown, we must wait until this field is decremented to zero before
+     * taking down the thread pool.
+     *
+     * Note that this is a convenience variable -- we could use io_queue_g.q_len instead.
+     * However, accessing this field requires locking io_queue_g.q_mutex.
+     */
+    atomic_init(&sf_io_ops_pending, 0);
+#endif /* JRM */
+    /* tell initialize_ioc_threads() that ioc_main() is ready to enter its main loop */
+    atomic_init(&sf_ioc_ready, 1);
+
+    shutdown_requested = 0;
+
+    while ((!shutdown_requested) || (0 < atomic_load(&sf_io_ops_pending))
+#if 1 /* JRM */
+           || (0 < atomic_load(&sf_work_pending))
+#endif /* JRM */
+    ) {
+        MPI_Message mpi_msg;
+        MPI_Status  status;
+        useconds_t  delay = 20;
+        int         flag  = 0;
+        int         mpi_code;
+
+        /* Probe for incoming work requests */
+        if (MPI_SUCCESS != (mpi_code = (MPI_Improbe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag,
+                                                    &mpi_msg, &status)))) {
+            /* TODO: error handling */
+            HDprintf("MPI_Improbe failed with rc %d\n", mpi_code);
+            return -1;
+        }
+
+        if (flag) {
+            double queue_start_time;
+            int    count;
+            int    source = status.MPI_SOURCE;
+            int    tag    = status.MPI_TAG;
+
+#ifdef VERBOSE
+            if ((tag != READ_INDEP) && (tag != WRITE_INDEP) && (tag != TRUNC_OP) && (tag != GET_EOF_OP)) {
+                HDprintf("\n\nioc_main: received non READ_INDEP / WRITE_INDEP / TRUNC_OP / GET_EOF_OP mssg. "
+                         "tag = %d.\n\n",
+                         tag);
+                HDfflush(stdout);
+            }
+#endif
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&status, MPI_BYTE, &count))) {
+                HDprintf("MPI_Get_count failed with rc %d\n", mpi_code);
+                return -1;
+            }
+
+            if (count < 0) {
+                HDprintf("invalid RPC message size\n");
+                return -1;
+            }
+
+            if ((size_t)count > sizeof(sf_work_request_t)) {
+                /* TODO: possibly handle overly large messages? */
+                HDprintf("work request message is too large\n");
+                return -1;
+            }
+
+            /*
+             * Zero out work request, since the received message should
+             * be smaller than sizeof(sf_work_request_t)
+             */
+            HDmemset(&wk_req, 0, sizeof(sf_work_request_t));
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Mrecv(&wk_req, count, MPI_BYTE, &mpi_msg, &msg_status))) {
+                HDprintf("MPI_Mrecv failed with rc %d\n", mpi_code);
+                return -1;
+            }
+
+#ifndef VERBOSE
+            {
+                int received_count;
+
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&msg_status, MPI_BYTE, &received_count))) {
+                    HDprintf("MPI_Get_count failed with rc %d\n", mpi_code);
+                    return -1;
+                }
+
+                if (received_count != count) {
+                    HDprintf("%s: MPI_Mrecv only received %d bytes of %d\n", __func__, received_count, count);
+                    HDfflush(stdout);
+                }
+            }
+#endif
+
+            /* Dispatch work request to worker threads in thread pool */
+
+            queue_start_time = MPI_Wtime();
+
+            wk_req.tag          = tag;
+            wk_req.source       = source;
+            wk_req.subfile_rank = subfile_rank;
+            wk_req.start_time   = queue_start_time;
+            wk_req.buffer       = NULL;
+
+            H5FD_ioc__queue_io_q_entry(&wk_req);
+
+            HDassert(atomic_load(&sf_io_ops_pending) >= 0);
+
+            H5FD_ioc__dispatch_elegible_io_q_entries();
+        }
+        else {
+            usleep(delay);
+        }
+
+        shutdown_requested = atomic_load(&sf_shutdown_flag);
     }
-}
+
+    /* Reset the shutdown flag */
+    atomic_init(&sf_shutdown_flag, 0);
+
+    return 0;
+} /* ioc_main() */
 
 static const char *
 translate_opcode(io_op_t op)
@@ -302,7 +574,7 @@ translate_opcode(io_op_t op)
     return "unknown";
 }
 /*-------------------------------------------------------------------------
- * Function:    local: handle_work_request
+ * Function:    handle_work_request
  *
  * Purpose:     Handle a work request from the thread pool work queue.
  *              We dispatch the specific function as indicated by the
@@ -323,121 +595,51 @@ translate_opcode(io_op_t op)
  *
  *-------------------------------------------------------------------------
  */
-#if 0 /* JRM */ /* Original version -- expects sf_work_request_t * as its argument */
 static HG_THREAD_RETURN_TYPE
 handle_work_request(void *arg)
 {
-#if 1           /* JRM */
-    int                  curr_io_ops_pending;
-#endif          /* JRM */
-    int                  status          = 0;
-    hg_thread_ret_t      ret             = 0;
-    sf_work_request_t *  msg             = (sf_work_request_t *)arg;
-    int64_t              file_context_id = msg->header[2];
-    subfiling_context_t *sf_context      = NULL;
-
-    sf_context = get__subfiling_object(file_context_id);
-    assert(sf_context != NULL);
-
-#if 0  /* JRM */
-    HDfprintf(stdout, "\nhandle_work_request: context_id = %lld, msg->tag = %d\n", (long long)(file_context_id), (int)(msg->tag));
-    HDfflush(stdout);
+#if 1 /* JRM */
+    int curr_io_ops_pending;
 #endif /* JRM */
-
-    atomic_fetch_add(&sf_work_pending, 1); // atomic
-    msg->in_progress = 1;
-    switch (msg->tag) {
-        case WRITE_INDEP:
-            status = queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
-            break;
-
-        case READ_INDEP:
-            if (msg->serialize)
-                ioc__wait_for_serialize(arg); // wait for dependency
-            status = queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
-            break;
-
-        default:
-            HDprintf("[ioc(%d)] received message tag(%x)from rank %d\n", msg->subfile_rank, msg->tag,
-                     msg->source);
-            status = -1;
-            break;
-    }
-    fflush(stdout);
-
-#if 1  /* JRM */ 
-    curr_io_ops_pending = atomic_fetch_sub(&sf_io_ops_pending, 1);
-    HDassert(curr_io_ops_pending > 0);
-#endif /* JRM */
-
-    atomic_fetch_sub(&sf_work_pending, 1); // atomic
-    msg->in_progress = 0;
-    if (msg->dependents) {
-        ioc__release_dependency(msg->depend_id);
-        msg->dependents = 0;
-    }
-    if (status < 0) {
-        HDprintf("[ioc(%d) %s]: request(%s) filename=%s from "
-                 "rank(%d), size=%ld, offset=%ld FAILED\n",
-                 msg->subfile_rank, __func__, translate_opcode((io_op_t)msg->tag), sf_context->sf_filename,
-                 msg->source, msg->header[0], msg->header[1]);
-
-        fflush(stdout);
-    }
-    return ret;
-}
-
-#else /* JRM */ /* Modified version -- expects H5FD_ioc_io_queue_entry_t * as its argument */
-
-static HG_THREAD_RETURN_TYPE
-handle_work_request(void *arg)
-{
-#if 1           /* JRM */
-    int                        curr_io_ops_pending;
-#endif          /* JRM */
-    int                        status          = 0;
-    hg_thread_ret_t            ret             = 0;
-    H5FD_ioc_io_queue_entry_t *q_entry_ptr     = (H5FD_ioc_io_queue_entry_t *)arg;
-    sf_work_request_t *        msg             = &(q_entry_ptr->wk_req);
-    int64_t                    file_context_id = msg->header[2];
-    subfiling_context_t *      sf_context      = NULL;
+    int                   status          = 0;
+    hg_thread_ret_t       ret             = 0;
+    ioc_io_queue_entry_t *q_entry_ptr     = (ioc_io_queue_entry_t *)arg;
+    sf_work_request_t *   msg             = &(q_entry_ptr->wk_req);
+    int64_t               file_context_id = msg->header[2];
+    subfiling_context_t * sf_context      = NULL;
 
     HDassert(q_entry_ptr);
     HDassert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
     HDassert(q_entry_ptr->in_progress);
 
-    sf_context = get__subfiling_object(file_context_id);
+    sf_context = H5_get_subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
-#if 1  /* JRM */
+#if 1                                      /* JRM */
     atomic_fetch_add(&sf_work_pending, 1); // atomic
-#endif /* JRM */
+#endif                                     /* JRM */
     msg->in_progress = 1;
-#if 0  /* JRM */
-    HDfprintf(stdout, "\n\nhandle_work_request: beginning execution of request %d. op = %d, offset/len = %lld/%lld.\n",
-              q_entry_ptr->counter, (msg->tag), (long long)(msg->header[1]), (long long)(msg->header[0]));
-    HDfflush(stdout);
-#endif /* JRM */
+
     switch (msg->tag) {
         case WRITE_INDEP:
-            status = queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm,
-                                       q_entry_ptr->counter);
+            status = ioc_file_queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm,
+                                                q_entry_ptr->counter);
             break;
 
         case READ_INDEP:
-            status = queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            status = ioc_file_queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
             break;
 
         case TRUNC_OP:
-            status = sf_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0],
-                                 sf_context->topology->subfile_rank);
+            status = ioc_file_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0],
+                                       sf_context->topology->subfile_rank);
             break;
 
         case GET_EOF_OP:
             /* Use of data comm to return EOF to the requesting rank seems a bit odd, but follow existing
              * convention for now.
              */
-            status = report_sf_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            status = ioc_file_report_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
             break;
 
         default:
@@ -459,7 +661,7 @@ handle_work_request(void *arg)
         fflush(stdout);
     }
 
-#if 1  /* JRM */
+#if 1 /* JRM */
     curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
     if (curr_io_ops_pending <= 0) {
 
@@ -482,8 +684,6 @@ handle_work_request(void *arg)
     return ret;
 }
 
-#endif /* JRM */ /* Modified version -- expects H5FD_ioc_io_queue_entry_t * as its argument */
-
 void
 ioc__wait_for_serialize(void *_work)
 {
@@ -504,136 +704,6 @@ ioc__release_dependency(int qid)
     hg_thread_mutex_lock(&ioc_serialize_mutex);
     work->serialize = 0;
     hg_thread_mutex_unlock(&ioc_serialize_mutex);
-}
-
-static int
-check__overlap(void *_work, int current_index, int *conflict_id)
-{
-    sf_work_request_t *work = (sf_work_request_t *)_work;
-    sf_work_request_t *next = NULL;
-    int                index, count = 0;
-    /* Search backward thru the queue of work requests */
-
-    for (index = current_index; count < pool_concurrent_max; count++, index--) {
-        if (index == 0) {
-            index = pool_concurrent_max - 1;
-        }
-        if (index == current_index)
-            return 0;
-        if ((next = (sf_work_request_t *)(pool_request[index].args)) == NULL)
-            continue;
-        /* The queued operation need NOT be running at present... */
-        else /* if (next->in_progress) */ {
-            if (work->tag == WRITE_INDEP) {
-                /* a WRITE should not overlap with anything else */
-                int64_t n_data_size  = next->header[0];
-                int64_t n_offset     = next->header[1];
-                int64_t n_max_offset = (n_offset + n_data_size) - 1;
-                int64_t w_data_size  = work->header[0];
-                int64_t w_offset     = work->header[1];
-                int64_t w_max_offset = (w_offset + w_data_size) - 1;
-                if ((w_max_offset >= n_offset) && (w_max_offset < n_max_offset)) {
-                    next->dependents = 1;
-                    next->depend_id  = current_index;
-                    work->serialize  = true;
-                    *conflict_id     = index;
-                    return 1;
-                }
-                else if ((w_offset <= n_max_offset) && (w_offset > n_offset)) {
-                    next->dependents = 1;
-                    next->depend_id  = current_index;
-                    work->serialize  = true;
-                    *conflict_id     = index;
-                    return 1;
-                }
-            }
-            /* The work->tag indicates READ, so only check for a conflicting WRITE */
-            else if (next->tag == WRITE_INDEP) {
-                int64_t n_data_size  = next->header[0];
-                int64_t n_offset     = next->header[1];
-                int64_t n_max_offset = (n_offset + n_data_size) - 1;
-                int64_t w_data_size  = work->header[0];
-                int64_t w_offset     = work->header[1];
-                int64_t w_max_offset = (w_offset + w_data_size) - 1;
-                if ((w_max_offset >= n_offset) && (w_max_offset < n_max_offset)) {
-                    next->dependents = 1;
-                    next->depend_id  = current_index;
-                    work->serialize  = true;
-                    *conflict_id     = index;
-                    return 1;
-                }
-                else if ((w_offset <= n_max_offset) && (w_offset > n_offset)) {
-                    next->dependents = 1;
-                    next->depend_id  = current_index;
-                    work->serialize  = true;
-                    *conflict_id     = index;
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    tpool_add_work
- *
- * Purpose:     Initiate the handoff of client request processing to a
- *              thread in the thread pool.  A work request is created and
- *              added to the thread pool work queue.  Once
- *
- * Return:      result of: (hostid1 > hostid2)
- *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
- * Changes:     Initial Version/None.
- *
- *-------------------------------------------------------------------------
- */
-int
-tpool_add_work(void *_work)
-{
-#if 1 /* JRM */
-    int curr_io_ops_pending;
-#endif /* JRM */
-    static int         work_index  = 0;
-    int                conflict_id = -1;
-    sf_work_request_t *work        = (sf_work_request_t *)_work;
-    /* We have yet to start processing this new request... */
-    work->in_progress = 0;
-    hg_thread_mutex_lock(&ioc_mutex);
-    if (check__overlap(_work, work_index, &conflict_id) > 0) {
-#ifdef H5FD_IOC_DEBUG
-        const char *       type = (work->tag == WRITE_INDEP ? "WRITE" : "READ");
-        sf_work_request_t *next = (sf_work_request_t *)(pool_request[conflict_id].args);
-        HDprintf("%s - (%d) Found conflict: index=%d: work(offset=%ld,length=%ld) conflict(offset=%ld, "
-               "length=%ld)\n",
-               type, work_index, conflict_id, work->header[1], work->header[0], next->header[1],
-               next->header[0]);
-        HDfflush(stdout);
-#endif
-    }
-
-    if (work_index == pool_concurrent_max)
-        work_index = 0;
-
-    pool_request[work_index].func = handle_work_request;
-    pool_request[work_index].args = work;
-#if 1 /* JRM */
-    curr_io_ops_pending = atomic_fetch_add(&sf_io_ops_pending, 1);
-
-    HDassert(curr_io_ops_pending >= 0);
-
-    if (curr_io_ops_pending >= pool_concurrent_max) {
-
-        HDfprintf(stderr, "\n\n*** curr_io_ops_pending = %d >= pool_concurrent_max = %d ***\n\n",
-                  curr_io_ops_pending, pool_concurrent_max);
-    }
-#endif /* JRM */
-    hg_thread_pool_post(ioc_thread_pool, &pool_request[work_index++]);
-    hg_thread_mutex_unlock(&ioc_mutex);
-    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -722,6 +792,615 @@ wait_for_thread_main(void)
     return 0;
 }
 
+static herr_t
+send_ack_to_client(int ack_val, int dest_rank, int source_rank, int msg_tag, MPI_Comm comm)
+{
+    int    mpi_code;
+    herr_t ret_value = SUCCEED;
+
+    HDassert(ack_val > 0);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(&ack_val, 1, MPI_INT, dest_rank, msg_tag, comm))) {
+        HDprintf("[ioc(%d) %s]: MPI_Send failed with rc %d\n", source_rank, __func__, mpi_code);
+        ret_value = FAIL;
+        goto done;
+    }
+
+#ifdef H5FD_IOC_DEBUG
+    if (sf_verbose_flag) {
+        if (sf_logfile) {
+            HDfprintf(sf_logfile, "[ioc(%d) %s]: Sent ACK(%d) to MPI rank %d\n", source_rank, __func__,
+                      ack_val, dest_rank);
+        }
+    }
+#endif
+
+done:
+    return ret_value;
+}
+
+static herr_t
+send_nack_to_client(int dest_rank, int source_rank, int msg_tag, MPI_Comm comm)
+{
+    int    nack = 0;
+    int    mpi_code;
+    herr_t ret_value = SUCCEED;
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(&nack, 1, MPI_INT, dest_rank, msg_tag, comm))) {
+        HDprintf("[ioc(%d) %s]: MPI_Send failed with rc %d\n", source_rank, __func__, mpi_code);
+        ret_value = FAIL;
+        goto done;
+    }
+
+#ifdef H5FD_IOC_DEBUG
+    if (sf_verbose_flag) {
+        if (sf_logfile) {
+            HDfprintf(sf_logfile, "[ioc(%d) %s]: Sent NACK(%d) to MPI rank %d\n", source_rank, __func__, nack,
+                      dest_rank);
+        }
+    }
+#endif
+
+done:
+    return ret_value;
+}
+
+/*
+=========================================
+queue_xxx functions that should be run
+from the thread pool threads...
+=========================================
+*/
+
+/*-------------------------------------------------------------------------
+ * Function:    ioc_file_queue_write_indep
+ *
+ * Purpose:     Implement the IOC independent write function.  The
+ *              function is invoked as a result of the IOC receiving the
+ *              "header"/RPC.  What remains is to allocate memory for the
+ *              data sent by the client and then write the data to our
+ *              subfile.  We utilize pwrite for the actual file writing.
+ *              File flushing is done at file close.
+ *
+ * Return:      The integer status returned by the Internal read_independent
+ *              function.  Successful operations will return 0.
+ * Errors:      An MPI related error value.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
+                           uint32_t counter)
+{
+    subfiling_context_t *sf_context = NULL;
+    MPI_Status           msg_status;
+    uint32_t             rcv_tag;
+    hbool_t              send_nack = FALSE;
+    int64_t              data_size;
+    int64_t              file_offset;
+    int64_t              file_context_id;
+    int64_t              stripe_id;
+    haddr_t              sf_eof;
+#ifdef H5FD_IOC_DEBUG
+    double t_start;
+    double t_end;
+    double t_write;
+    double t_wait;
+    double t_queue_delay;
+#endif
+    char *recv_buf = NULL;
+    int   sf_fid;
+    int   data_bytes_received;
+    int   write_ret;
+    int   mpi_code;
+    int   ret_value = 0;
+
+    HDassert(msg);
+
+    /* Retrieve the fields of the RPC message for the write operation */
+    data_size       = msg->header[0];
+    file_offset     = msg->header[1];
+    file_context_id = msg->header[2];
+
+    if (data_size < 0) {
+        send_nack = TRUE;
+
+        HDprintf("[ioc(%d) %s]: invalid data size for write\n", subfile_rank, __func__);
+        ret_value = -1;
+        goto done;
+    }
+
+    sf_context = H5_get_subfiling_object(file_context_id);
+    HDassert(sf_context);
+
+    stripe_id = file_offset + data_size;
+    sf_eof    = (haddr_t)(stripe_id % sf_context->sf_stripe_size);
+
+    stripe_id /= sf_context->sf_stripe_size;
+    sf_eof += (haddr_t)((stripe_id * sf_context->sf_blocksize_per_stripe) + sf_context->sf_base_addr);
+
+    /* Flag that we've attempted to write data to the file */
+    sf_context->sf_write_count++;
+
+#ifdef H5FD_IOC_DEBUG
+    /* For debugging performance */
+    sf_write_ops++;
+
+    t_start       = MPI_Wtime();
+    t_queue_delay = t_start - msg->start_time;
+    if (sf_verbose_flag) {
+        if (sf_logfile) {
+            HDfprintf(sf_logfile,
+                      "[ioc(%d) %s]: msg from %d: datasize=%ld\toffset=%ld, "
+                      "queue_delay = %lf seconds\n",
+                      subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
+        }
+    }
+#endif
+
+    /* Allocate space to receive data sent from the client */
+    if (NULL == (recv_buf = HDmalloc((size_t)data_size))) {
+        send_nack = TRUE;
+
+        HDprintf("[ioc(%d) %s]: failed to allocate receive buffer for data\n", subfile_rank, __func__);
+        ret_value = -1;
+        goto done;
+    }
+
+    /*
+     * Calculate message tag for the client to use for sending
+     * data, then send an ACK message to the client with the
+     * calculated message tag. This calculated message tag
+     * allows us to distinguish between multiple concurrent
+     * writes from a single rank.
+     */
+    rcv_tag = ((counter & 0xFFFF) << 12) | WRITE_INDEP_DATA;
+
+    H5_CHECK_OVERFLOW(rcv_tag, uint32_t, int);
+    if (send_ack_to_client((int)rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0) {
+        HDprintf("[ioc(%d) %s]: failed to send ACK to client\n", subfile_rank, __func__);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Receive data from client */
+    H5_CHECK_OVERFLOW(data_size, int64_t, int);
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Recv(recv_buf, (int)data_size, MPI_BYTE, source, (int)rcv_tag, comm, &msg_status))) {
+        HDprintf("[ioc(%d) %s]: MPI_Recv failed with rc %d\n", subfile_rank, __func__, mpi_code);
+        ret_value = -1;
+        goto done;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&msg_status, MPI_BYTE, &data_bytes_received))) {
+        HDprintf("[ioc(%d) %s]: MPI_Get_count failed with rc %d\n", subfile_rank, __func__, mpi_code);
+        ret_value = -1;
+        goto done;
+    }
+
+    if (data_bytes_received != data_size) {
+        HDprintf("[ioc(%d) %s]: message size mismatch -- expected = %ld, actual = %d\n", subfile_rank,
+                 __func__, data_size, data_bytes_received);
+        ret_value = -1;
+        goto done;
+    }
+
+#ifdef H5FD_IOC_DEBUG
+    t_end  = MPI_Wtime();
+    t_wait = t_end - t_start;
+    sf_write_wait_time += t_wait;
+
+    t_start = t_end;
+
+    if (sf_verbose_flag) {
+        if (sf_logfile) {
+            HDfprintf(sf_logfile, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n", subfile_rank,
+                      __func__, data_size, source, ret);
+        }
+    }
+#endif
+
+    sf_fid = sf_context->sf_fid;
+
+    if (sf_fid >= 0) {
+        /* Actually write data received from client into subfile */
+        if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, subfile_rank)) < 0) {
+            HDprintf("[ioc(%d) %s]: ioc_file_write_data returned an error (%d)\n", subfile_rank, __func__,
+                     write_ret);
+            ret_value = -1;
+            goto done;
+        }
+
+#ifdef H5FD_IOC_DEBUG
+        t_end   = MPI_Wtime();
+        t_write = t_end - t_start;
+        sf_pwrite_time += t_write;
+#endif
+    }
+    else {
+        HDprintf("[ioc(%d) %s]: WARNING: attempt to write data to closed subfile FID %d\n", subfile_rank,
+                 __func__, sf_fid);
+    }
+
+#ifdef H5FD_IOC_DEBUG
+    sf_queue_delay_time += t_queue_delay;
+#endif
+
+    /* Adjust EOF if necessary */
+    if (sf_eof > sf_context->sf_eof)
+        sf_context->sf_eof = sf_eof;
+
+done:
+    if (send_nack) {
+        /* Send NACK back to client so client can handle failure gracefully */
+        if (send_nack_to_client(source, subfile_rank, WRITE_INDEP_ACK, comm) < 0) {
+            HDprintf("[ioc(%d) %s]: failed to send NACK to client\n", subfile_rank, __func__);
+            ret_value = -1;
+        }
+    }
+
+    HDfree(recv_buf);
+
+    return ret_value;
+} /* ioc_file_queue_write_indep() */
+
+/*-------------------------------------------------------------------------
+ * Function:    ioc_file_queue_read_indep
+ *
+ * Purpose:     Implement the IOC independent read function.  The
+ *              function is invoked as a result of the IOC receiving the
+ *              "header"/RPC.  What remains is to allocate memory for
+ *              reading the data and then to send this to the client.
+ *              We utilize pread for the actual file reading.
+ *
+ * Return:      The integer status returned by the Internal read_independent
+ *              function.  Successful operations will return 0.
+ * Errors:      An MPI related error value.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
+{
+    subfiling_context_t *sf_context     = NULL;
+    hbool_t              send_empty_buf = FALSE;
+    int64_t              data_size;
+    int64_t              file_offset;
+    int64_t              file_context_id;
+#ifdef H5FD_IOC_DEBUG
+    double t_start;
+    double t_end;
+    double t_read;
+    double t_queue_delay;
+#endif
+    char *send_buf = NULL;
+    int   sf_fid;
+    int   read_ret;
+    int   mpi_code;
+    int   ret_value = 0;
+
+    HDassert(msg);
+
+    /* Retrieve the fields of the RPC message for the read operation */
+    data_size       = msg->header[0];
+    file_offset     = msg->header[1];
+    file_context_id = msg->header[2];
+
+    if (data_size < 0) {
+        send_empty_buf = TRUE;
+
+        HDprintf("[ioc(%d) %s]: invalid data size for read\n", subfile_rank, __func__);
+        ret_value = -1;
+        goto done;
+    }
+
+    sf_context = H5_get_subfiling_object(file_context_id);
+    HDassert(sf_context);
+
+    /* Flag that we've attempted to read data from the file */
+    sf_context->sf_read_count++;
+
+#ifdef H5FD_IOC_DEBUG
+    /* For debugging performance */
+    sf_read_ops++;
+
+    t_start       = MPI_Wtime();
+    t_queue_delay = t_start - msg->start_time;
+    if (sf_verbose_flag && (sf_logfile != NULL)) {
+        HDfprintf(sf_logfile,
+                  "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld "
+                  "queue_delay=%lf seconds\n",
+                  subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
+    }
+#endif
+
+    /* Allocate space to send data read from file to client */
+    if (NULL == (send_buf = HDmalloc((size_t)data_size))) {
+        send_empty_buf = TRUE;
+
+        HDprintf("[ioc(%d) %s]: failed to allocate send buffer for data\n", subfile_rank, __func__);
+        ret_value = -1;
+        goto done;
+    }
+
+    sf_fid = sf_context->sf_fid;
+    if (sf_fid < 0) {
+        send_empty_buf = TRUE;
+
+        HDprintf("[ioc(%d) %s]: subfile file descriptor %d is invalid\n", subfile_rank, __func__, sf_fid);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Read data from the subfile */
+    if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, subfile_rank)) < 0) {
+        send_empty_buf = TRUE;
+
+        HDprintf("[ioc(%d) %s]: ioc_file_read_data(FID=%d, Source=%d) returned an error (%d)\n", subfile_rank,
+                 __func__, sf_fid, source, read_ret);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Send read data to the client */
+    H5_CHECK_OVERFLOW(data_size, int64_t, int);
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Send(send_buf, (int)data_size, MPI_BYTE, source, READ_INDEP_DATA, comm))) {
+        HDprintf("[ioc(%d) %s]: MPI_Send failed with rc %d\n", subfile_rank, __func__, mpi_code);
+        ret_value = -1;
+        goto done;
+    }
+
+#ifdef H5FD_IOC_DEBUG
+    t_end  = MPI_Wtime();
+    t_read = t_end - t_start;
+    sf_pread_time += t_read;
+    sf_queue_delay_time += t_queue_delay;
+
+    if (sf_verbose_flag && (sf_logfile != NULL)) {
+        HDfprintf(sf_logfile, "[ioc(%d)] MPI_Send to source(%d) completed\n", subfile_rank, source);
+    }
+#endif
+
+done:
+    if (send_empty_buf) {
+        /*
+         * Send an empty message back to client on failure. The client will
+         * likely get a message truncation error, but at least shouldn't hang.
+         */
+        if (MPI_SUCCESS != (mpi_code = MPI_Send(NULL, 0, MPI_BYTE, source, READ_INDEP_DATA, comm))) {
+            HDprintf("[ioc(%d) %s]: MPI_Send failed with rc %d\n", subfile_rank, __func__, mpi_code);
+            ret_value = -1;
+        }
+    }
+
+    HDfree(send_buf);
+
+    return ret_value;
+} /* end ioc_file_queue_read_indep() */
+
+/*
+======================================================
+File functions
+
+The pread and pwrite posix functions are described as
+being thread safe.
+======================================================
+*/
+
+static int
+ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+{
+    ssize_t bytes_remaining = (ssize_t)data_size;
+    ssize_t bytes_written   = 0;
+    char *  this_data       = (char *)data_buffer;
+    int     ret_value       = 0;
+
+    HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
+
+    while (bytes_remaining) {
+        errno = 0;
+
+        bytes_written = HDpwrite(fd, this_data, (size_t)bytes_remaining, file_offset);
+
+        if (bytes_written >= 0) {
+            bytes_remaining -= bytes_written;
+
+#ifdef H5FD_IOC_DEBUG
+            HDprintf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", subfile_rank,
+                     __func__, bytes_written, bytes_remaining, file_offset);
+#endif
+
+            this_data += bytes_written;
+            file_offset += bytes_written;
+        }
+        else {
+            int saved_errno = errno;
+
+            HDperror("ioc_file_write_data - HDpwrite failed");
+            HDprintf("[ioc(%d) %s]: HDpwrite(fd=%d, buf=%p, count=%zu, offset=%" PRId64 ") = %d\n",
+                     subfile_rank, __func__, fd, (void *)this_data, (size_t)bytes_remaining, file_offset,
+                     saved_errno);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
+    /* We don't usually use this for each file write.  We usually do the file
+     * flush as part of file close operation.
+     */
+#ifdef H5FD_IOC_REQUIRE_FLUSH
+    fdatasync(fd);
+#endif
+
+done:
+    return ret_value;
+} /* end ioc_file_write_data() */
+
+static int
+ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+{
+    useconds_t delay           = 100;
+    ssize_t    bytes_remaining = (ssize_t)data_size;
+    ssize_t    bytes_read      = 0;
+    char *     this_buffer     = (char *)data_buffer;
+    int        retries         = MIN_READ_RETRIES;
+    int        ret_value       = 0;
+
+    HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
+
+    while (bytes_remaining) {
+        errno = 0;
+
+        bytes_read = HDpread(fd, this_buffer, (size_t)bytes_remaining, file_offset);
+
+        if (bytes_read > 0) {
+            /* Reset retry params */
+            retries = MIN_READ_RETRIES;
+            delay   = 100;
+
+            bytes_remaining -= bytes_read;
+
+#ifdef H5FD_IOC_DEBUG
+            HDprintf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", subfile_rank,
+                     __func__, bytes_read, bytes_remaining, file_offset);
+#endif
+
+            this_buffer += bytes_read;
+            file_offset += bytes_read;
+        }
+        else if (bytes_read == 0) {
+            if (retries == 0) {
+#ifdef H5FD_IOC_DEBUG
+                HDprintf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", subfile_rank,
+                         __func__, file_offset, data_size);
+                HDprintf("[ioc(%d) %s]: ERROR! read of 0 bytes == eof!\n", subfile_rank, __func__);
+#endif
+
+                ret_value = -2;
+                goto done;
+            }
+
+            retries--;
+            usleep(delay);
+            delay *= 2;
+        }
+        else {
+            int saved_errno = errno;
+
+            HDperror("ioc_file_read_data - HDpread failed");
+            HDprintf("[ioc(%d) %s]: HDpread(fd=%d, buf=%p, count=%zu, offset=%" PRId64 ") = %d\n",
+                     subfile_rank, __func__, fd, (void *)this_buffer, (size_t)bytes_remaining, file_offset,
+                     saved_errno);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
+done:
+    return ret_value;
+} /* end ioc_file_read_data() */
+
+static int
+ioc_file_truncate(int fd, int64_t length, int subfile_rank)
+{
+    int ret = 0;
+
+    if (HDftruncate(fd, (off_t)length) != 0) {
+
+        HDfprintf(stdout, "ftruncate failed on subfile rank %d.  errno = %d (%s)\n", subfile_rank, errno,
+                  strerror(errno));
+        fflush(stdout);
+        ret = -1;
+    }
+
+#ifdef VERBOSE
+    HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", subfile_rank, __func__,
+             (long long)length, ret);
+    HDfflush(stdout);
+#endif
+
+    return ret;
+} /* end ioc_file_truncate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    ioc_file_report_eof
+ *
+ * Purpose:     Determine the target sub-file's eof and report this value
+ *              to the requesting rank.
+ *
+ *              Notes: This function will have to be reworked once we solve
+ *                     the IOC error reporting problem.
+ *
+ *                     This function mixes functionality that should be
+ *                     in two different VFDs.
+ *
+ * Return:      0 if successful, 1 or an MPI error code on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int
+ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
+{
+    int                  fd;
+    int                  mpi_ret;
+    int64_t              eof_req_reply[3];
+    int64_t              file_context_id;
+    subfiling_context_t *sf_context = NULL;
+    h5_stat_t            sb;
+
+    HDassert(msg);
+
+    /* first get the EOF of the target file. */
+
+    file_context_id = msg->header[2];
+
+    if (NULL == (sf_context = H5_get_subfiling_object(file_context_id))) {
+
+        HDfprintf(stdout, "ioc_file_report_eof: H5_get_subfiling_object() failed.\n");
+        HDfflush(stdout);
+        return (1);
+    }
+
+    fd = sf_context->sf_fid;
+
+    if (HDfstat(fd, &sb) < 0) {
+
+        HDfprintf(stdout, "ioc_file_report_eof: HDfstat() failed.\n");
+        HDfflush(stdout);
+        return (1);
+    }
+
+    eof_req_reply[0] = (int64_t)subfile_rank;
+    eof_req_reply[1] = (int64_t)(sb.st_size);
+    eof_req_reply[2] = 0; /* not used */
+
+    /* return the subfile EOF to the querying rank */
+    if (MPI_SUCCESS != (mpi_ret = MPI_Send(eof_req_reply, 3, MPI_INT64_T, source, GET_EOF_COMPLETED, comm))) {
+        HDfprintf(stdout, "ioc_file_report_eof: MPI_Send failed -- return code = %d.\n", mpi_ret);
+        HDfflush(stdout);
+        return (mpi_ret);
+    }
+
+    return 0;
+} /* ioc_file_report_eof() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ioc_take_down_thread_pool
  *
@@ -758,10 +1437,10 @@ H5FD_ioc_take_down_thread_pool(void)
  * Function:    H5FD_ioc__alloc_io_q_entry
  *
  * Purpose:     Allocate and initialize an instance of
- *              H5FD_ioc_io_queue_entry_t.  Return pointer to the new
+ *              ioc_io_queue_entry_t.  Return pointer to the new
  *              instance on success, and NULL on failure.
  *
- * Return:      Pointer to new instance of H5FD_ioc_io_queue_entry_t
+ * Return:      Pointer to new instance of ioc_io_queue_entry_t
  *              on success, and NULL on failure.
  *
  * Programmer:  JRM -- 11/6/21
@@ -771,12 +1450,12 @@ H5FD_ioc_take_down_thread_pool(void)
  *-------------------------------------------------------------------------
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
-H5FD_ioc_io_queue_entry_t *
+static ioc_io_queue_entry_t *
 H5FD_ioc__alloc_io_q_entry(void)
 {
-    H5FD_ioc_io_queue_entry_t *q_entry_ptr = NULL;
+    ioc_io_queue_entry_t *q_entry_ptr = NULL;
 
-    q_entry_ptr = (H5FD_ioc_io_queue_entry_t *)HDmalloc(sizeof(H5FD_ioc_io_queue_entry_t));
+    q_entry_ptr = (ioc_io_queue_entry_t *)HDmalloc(sizeof(ioc_io_queue_entry_t));
 
     if (q_entry_ptr) {
 
@@ -811,7 +1490,7 @@ H5FD_ioc__alloc_io_q_entry(void)
  *
  *              2) If so configured, update statistics
  *
- *              3) Discard the instance of H5FD_ioc_io_queue_entry_t.
+ *              3) Discard the instance of ioc_io_queue_entry_t.
  *
  * Return:      void.
  *
@@ -823,8 +1502,8 @@ H5FD_ioc__alloc_io_q_entry(void)
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
 /* TODO: Update for per file I/O Queue */
-void
-H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
+static void
+H5FD_ioc__complete_io_q_entry(ioc_io_queue_entry_t *entry_ptr)
 {
 #if 0  /* H5FD_IOC__COLLECT_STATS */
     uint64_t queued_time;
@@ -930,16 +1609,16 @@ H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
  *       where N is the number of elements in the I/O Queue if there are are no-overlaps, it
  *       can become O(N**2) in the worst case.
  */
-void
+static void
 H5FD_ioc__dispatch_elegible_io_q_entries(void)
 {
-    hbool_t                    conflict_detected;
-    int64_t                    entry_offset;
-    int64_t                    entry_len;
-    int64_t                    scan_offset;
-    int64_t                    scan_len;
-    H5FD_ioc_io_queue_entry_t *entry_ptr = NULL;
-    H5FD_ioc_io_queue_entry_t *scan_ptr  = NULL;
+    hbool_t               conflict_detected;
+    int64_t               entry_offset;
+    int64_t               entry_len;
+    int64_t               scan_offset;
+    int64_t               scan_len;
+    ioc_io_queue_entry_t *entry_ptr = NULL;
+    ioc_io_queue_entry_t *scan_ptr  = NULL;
 
     hg_thread_mutex_lock(&(io_queue_g.q_mutex));
 
@@ -1068,7 +1747,7 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ioc__free_io_q_entry
  *
- * Purpose:     Free the supplied instance of H5FD_ioc_io_queue_entry_t.
+ * Purpose:     Free the supplied instance of ioc_io_queue_entry_t.
  *
  *              Verify that magic field is set to
  *              H5FD_IOC__IO_Q_ENTRY_MAGIC, and that the next and prev
@@ -1083,8 +1762,8 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
  *-------------------------------------------------------------------------
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
-void
-H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr)
+static void
+H5FD_ioc__free_io_q_entry(ioc_io_queue_entry_t *q_entry_ptr)
 {
     /* use assertions for error checking, since the following should never fail. */
 
@@ -1111,7 +1790,7 @@ H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr)
  *
  *              To do this, we must:
  *
- *              1) allocate a new instance of H5FD_ioc_io_queue_entry_t
+ *              1) allocate a new instance of ioc_io_queue_entry_t
  *
  *              2) Initialize the new instance and copy the supplied
  *                 instance of sf_work_request_t into it.
@@ -1132,10 +1811,10 @@ H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr)
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
 /* TODO: Update for per file I/O Queue */
-void
+static void
 H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
 {
-    H5FD_ioc_io_queue_entry_t *entry_ptr = NULL;
+    ioc_io_queue_entry_t *entry_ptr = NULL;
 
     HDassert(wk_req_ptr);
     HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);

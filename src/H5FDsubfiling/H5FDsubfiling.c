@@ -397,7 +397,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     herr_t                   ret_value      = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", fapl_id, fa);
+    H5TRACE2("e", "i*!", fapl_id, vfd_config);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -761,8 +761,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_subfiling_config_t        default_config;
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
-    H5FD_driver_prop_t             driver_prop;              /* Property for driver ID & info */
-    int                            mpi_code;                 /* MPI return code */
+    H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
+    int                            mpi_code;    /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
     FUNC_ENTER_STATIC
@@ -856,14 +856,17 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
-        uint64_t inode_id  = (uint64_t)-1;
-        int      ioc_flags = O_RDWR;
+        uint64_t inode_id = (uint64_t)-1;
+        int      ioc_flags;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
-        if (flags & H5F_ACC_TRUNC)
+        ioc_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
+        if (H5F_ACC_TRUNC & flags)
             ioc_flags |= O_TRUNC;
-        if (flags & H5F_ACC_CREAT)
+        if (H5F_ACC_CREAT & flags)
             ioc_flags |= O_CREAT;
+        if (H5F_ACC_EXCL & flags)
+            ioc_flags |= O_EXCL;
 
         /* Let MPI rank 0 to the file stat operation and broadcast a result */
         if (file_ptr->mpi_rank == 0) {
@@ -895,9 +898,13 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         if (inode_id == (uint64_t)-1)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
 
-        /* See: H5FDsubfile_int.c:
-         * Note that the user defined HDF5 file is also considered subfile(0) */
-        if (H5FD__open_subfiles(file_ptr->fa.file_path, (void *)&file_ptr->fa, inode_id, ioc_flags) < 0)
+        /*
+         * Open the subfiles for this HDF5 file. A subfiling
+         * context ID will be returned, which is used for
+         * further interactions with this file's subfiles.
+         */
+        if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+                             file_ptr->comm, &file_ptr->fa.context_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
 
@@ -942,7 +949,7 @@ H5FD__subfiling_close(H5FD_t *_file)
     /* Sanity check */
     HDassert(file_ptr);
 
-    sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.context_id);
+    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     if (sf_context->topology->rank_is_ioc)
@@ -955,19 +962,9 @@ H5FD__subfiling_close(H5FD_t *_file)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
     }
 
-    if (sf_context != NULL) {
-        if (sf_context->subfile_prefix) {
-            HDfree(sf_context->subfile_prefix);
-            sf_context->subfile_prefix = NULL;
-        }
-        if (sf_context->sf_filename) {
-            HDfree(sf_context->sf_filename);
-            sf_context->sf_filename = NULL;
-        }
-        if (sf_context->h5_filename) {
-            HDfree(sf_context->h5_filename);
-            sf_context->h5_filename = NULL;
-        }
+    if (!file_ptr->fa.require_ioc) {
+        if (H5_free_subfiling_object(file_ptr->fa.context_id) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object")
     }
 
     /* if set, close the copy of the plist for the underlying VFD. */
@@ -1291,7 +1288,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
      * to size the vectors that will be used to invoke the
      * underlying I/O operations.
      */
-    sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.context_id);
+    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
@@ -1537,7 +1534,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
      * to size the vectors that will be used to invoke the
      * underlying I/O operations.
      */
-    sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.context_id);
+    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
