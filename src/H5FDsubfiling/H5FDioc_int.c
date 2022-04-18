@@ -356,39 +356,64 @@ done:
 static int
 async_completion(void *arg)
 {
+    useconds_t delay = 5;
+    int        n_reqs;
+    int        n_waiting;
+    int *      indices = NULL;
+    int        ret_value = 0;
     struct async_arg {
         int          n_reqs;
         MPI_Request *sf_reqs;
     } *in_progress = (struct async_arg *)arg;
 
-    assert(arg);
-    int        status, errors = 0;
-    int        count     = in_progress->n_reqs;
-    int        n_waiting = count;
-    int        indices[count];
-    MPI_Status stats[count];
-    useconds_t delay = 5;
+    HDassert(arg);
+
+    n_reqs    = in_progress->n_reqs;
+    n_waiting = n_reqs;
+
+    if (n_reqs < 0) {
+#ifdef H5FD_IOC_DEBUG
+        HDprintf("%s: invalid number of in progress I/O requests\n", __func__);
+#endif
+
+        ret_value = -1;
+        goto done;
+    }
+
+    if (NULL == (indices = HDmalloc((size_t)n_reqs * sizeof(*indices)))) {
+#ifdef H5FD_IOC_DEBUG
+        HDprintf("%s: couldn't allocate MPI request array\n", __func__);
+#endif
+
+        ret_value = -1;
+        goto done;
+    }
 
     while (n_waiting) {
-        int i, ready = 0;
-        status = MPI_Testsome(count, in_progress->sf_reqs, &ready, indices, stats);
-        if (status != MPI_SUCCESS) {
-            int  len;
-            char estring[MPI_MAX_ERROR_STRING];
-            MPI_Error_string(status, estring, &len);
-            printf("[%s] MPI_ERROR! MPI_Testsome returned an error(%s)\n", __func__, estring);
-            fflush(stdout);
-            errors++;
-            return -1;
+        int ready = 0;
+        int mpi_code;
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Testsome(n_reqs, in_progress->sf_reqs, &ready,
+                                                    indices, MPI_STATUSES_IGNORE))) {
+#ifdef H5FD_IOC_DEBUG
+        HDprintf("%s: MPI_Testsome failed with rc %d\n", __func__, mpi_code);
+#endif
+
+            ret_value = -1;
+            goto done;
         }
 
         if (ready == 0) {
             usleep(delay);
         }
 
-        for (i = 0; i < ready; i++) {
+        for (int i = 0; i < ready; i++) {
             n_waiting--;
         }
     }
-    return errors;
+
+done:
+    HDfree(indices);
+
+    return ret_value;
 }
