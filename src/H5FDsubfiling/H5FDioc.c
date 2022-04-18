@@ -367,8 +367,6 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
     H5P_genplist_t *   plist_ptr = NULL;
     herr_t             ret_value = SUCCEED;
 
-    H5TRACE2("e", "i*!", fapl_id, vfd_config);
-
     H5FD_IOC_LOG_CALL(__func__);
 
     if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -415,8 +413,6 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     H5P_genplist_t *         plist_ptr          = NULL;
     hbool_t                  use_default_config = FALSE;
     herr_t                   ret_value          = SUCCEED;
-
-    H5TRACE2("e", "i*!", fapl_id, config_out);
 
     H5FD_IOC_LOG_CALL(__func__);
 
