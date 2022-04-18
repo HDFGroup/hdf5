@@ -1385,7 +1385,6 @@ H5_GCC_CLANG_DIAG_ON("cast-qual")
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5LTset_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_name, const char *attr_data)
 {
@@ -1393,7 +1392,7 @@ H5LTset_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
     hid_t  attr_space_id;
     hid_t  attr_id;
     hid_t  obj_id;
-    int    has_attr;
+    htri_t has_attr;
     size_t attr_size;
 
     /* check the arguments */
@@ -1423,11 +1422,10 @@ H5LTset_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
     if ((attr_space_id = H5Screate(H5S_SCALAR)) < 0)
         goto out;
 
-    /* Verify if the attribute already exists */
-    has_attr = H5LT_find_attribute(obj_id, attr_name);
-
-    /* The attribute already exists, delete it */
-    if (has_attr == 1)
+    /* Delete the attribute if it already exists */
+    if ((has_attr = H5Aexists(obj_id, attr_name)) < 0)
+        goto out;
+    if (has_attr > 0)
         if (H5Adelete(obj_id, attr_name) < 0)
             goto out;
 
@@ -1483,7 +1481,7 @@ H5LT_set_attribute_numerical(hid_t loc_id, const char *obj_name, const char *att
 
     hid_t   obj_id, sid, attr_id;
     hsize_t dim_size = size;
-    int     has_attr;
+    htri_t  has_attr;
 
     /* check the arguments */
     if (obj_name == NULL)
@@ -1499,11 +1497,10 @@ H5LT_set_attribute_numerical(hid_t loc_id, const char *obj_name, const char *att
     if ((sid = H5Screate_simple(1, &dim_size, NULL)) < 0)
         goto out;
 
-    /* Verify if the attribute already exists */
-    has_attr = H5LT_find_attribute(obj_id, attr_name);
-
-    /* The attribute already exists, delete it */
-    if (has_attr == 1)
+    /* Delete the attribute if it already exists */
+    if ((has_attr = H5Aexists(obj_id, attr_name)) < 0)
+        goto out;
+    if (has_attr > 0)
         if (H5Adelete(obj_id, attr_name) < 0)
             goto out;
 
@@ -1858,49 +1855,24 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
 /*-------------------------------------------------------------------------
  * Function: H5LTfind_attribute
  *
- * Purpose: Inquires if an attribute named attr_name exists attached to
- *          the object loc_id.
+ * Purpose:  Checks if an attribute named attr_name exists attached to
+ *           the object loc_id
  *
- * Programmer: Pedro Vicente
+ * TODO:     Overloading herr_t is not a great idea. This function either
+ *           needs to be rewritten to take a Boolean out parameter in
+ *           HDF5 2.0 or possibly even eliminated entirely as it simply
+ *           wraps H5Aexists.
  *
- * Date: May 17, 2006
- *
- * Comments:
- *  Calls the private version of the function
- *
+ * Return:   An htri_t value cast to herr_t
+ *              Exists:         Positive
+ *              Does not exist: 0
+ *              Error:          Negative
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5LTfind_attribute(hid_t loc_id, const char *attr_name)
 {
-    return H5LT_find_attribute(loc_id, attr_name);
-}
-
-/*-------------------------------------------------------------------------
- * Function: H5LT_find_attribute
- *
- * Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
- *
- * Programmer: Pedro Vicente
- *
- * Date: June 21, 2001
- *
- * Return:
- *  Success: Positive if the attribute exists attached to the
- *              object loc_id. Zero if the attribute does not
- *              exist attached to the object loc_id.
- *
- *  Failure: Negative if something goes wrong within the
- *              library.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5LT_find_attribute(hid_t loc_id, const char *attr_name)
-{
-    htri_t attr_exists = H5Aexists(loc_id, attr_name);
-    return (attr_exists < 0) ? (herr_t)-1 : (attr_exists) ? (herr_t)1 : (herr_t)0;
+    return (herr_t)H5Aexists(loc_id, attr_name);
 }
 
 /*-------------------------------------------------------------------------
@@ -3539,14 +3511,13 @@ H5LT_set_attribute_string(hid_t dset_id, const char *name, const char *buf)
     hid_t  tid;
     hid_t  sid = -1;
     hid_t  aid = -1;
-    int    has_attr;
+    htri_t has_attr;
     size_t size;
 
-    /* verify if the attribute already exists */
-    has_attr = H5LT_find_attribute(dset_id, name);
-
-    /* the attribute already exists, delete it */
-    if (has_attr == 1)
+    /* Delete the attribute if it already exists */
+    if ((has_attr = H5Aexists(dset_id, name)) < 0)
+        return FAIL;
+    if (has_attr > 0)
         if (H5Adelete(dset_id, name) < 0)
             return FAIL;
 

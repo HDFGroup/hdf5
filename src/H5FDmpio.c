@@ -839,6 +839,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     H5P_genplist_t *plist;                /* Property list pointer */
     MPI_Comm        comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
     MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
+    MPI_Info        info_used;            /* MPI Info returned from MPI_File_open */
     MPI_File        fh;                   /* MPI file handle */
     hbool_t         file_opened = FALSE;  /* Flag to indicate that the file was successfully opened */
     int             mpi_amode;            /* MPI file access flags */
@@ -905,6 +906,54 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (MPI_SUCCESS != (mpi_code = MPI_File_open(comm, name, mpi_amode, info, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
     file_opened = TRUE;
+
+    /* Get the MPI-IO hints that actually used by MPI-IO underneath. */
+    if (MPI_SUCCESS != (mpi_code = MPI_File_get_info(fh, &info_used)))
+        HMPI_GOTO_ERROR(NULL, "MPI_File_get_info failed", mpi_code)
+
+    /* Copy hints in info_used into info. Note hints in info_used supersede
+     * info. There may be some hints set and used by HDF5 only, but not
+     * recognizable by MPI-IO. We need to keep them, as MPI_File_get_info()
+     * will remove any hints unrecognized by MPI-IO library underneath.
+     */
+    if (info_used != MPI_INFO_NULL) {
+        int i, nkeys;
+
+        if (info == MPI_INFO_NULL) /* reuse info created from MPI_File_get_info() */
+            info = info_used;
+        else {
+            /* retrieve the number of hints */
+            if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nkeys(info_used, &nkeys)))
+                HMPI_GOTO_ERROR(NULL, "MPI_Info_get_nkeys failed", mpi_code)
+
+            /* copy over each hint */
+            for (i = 0; i < nkeys; i++) {
+                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL];
+                int  valuelen, flag;
+
+                /* retrieve the nth hint */
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get_nthkey(info_used, i, key)))
+                    HMPI_GOTO_ERROR(NULL, "MPI_Info_get_nkeys failed", mpi_code)
+                /* retrieve the key of nth hint */
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get_valuelen(info_used, key, &valuelen, &flag)))
+                    HMPI_GOTO_ERROR(NULL, "MPI_Info_get_valuelen failed", mpi_code)
+                /* retrieve the value of nth hint */
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen + 1, value, &flag)))
+                    HMPI_GOTO_ERROR(NULL, "MPI_Info_get failed", mpi_code)
+
+                /* copy the hint into info */
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_set(info, key, value)))
+                    HMPI_GOTO_ERROR(NULL, "MPI_Info_set failed", mpi_code)
+            }
+
+            /* Free info_used allocated in the call to MPI_File_get_info() */
+            if (MPI_SUCCESS != (mpi_code = MPI_Info_free(&info_used)))
+                HMPI_GOTO_ERROR(NULL, "MPI_Info_free failed", mpi_code)
+        }
+        /* Add info to the file access property list */
+        if (H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't set MPI info object")
+    }
 
     /* Build the return value and initialize it */
     if (NULL == (file = (H5FD_mpio_t *)H5MM_calloc(sizeof(H5FD_mpio_t))))
