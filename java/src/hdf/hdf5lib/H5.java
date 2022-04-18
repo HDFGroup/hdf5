@@ -119,11 +119,11 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * rule is that all HDF functions that return SUCCEED/FAIL are declared <i>boolean</i> in the Java version,
  * rather than <i>int</i> as in the C. Functions that return a value or else FAIL are declared the
  * equivalent to the C function.
- * However, in most cases the Java method will raise an exception instead of returning an error code. 
+ * However, in most cases the Java method will raise an exception instead of returning an error code.
  * See <a href="#ERRORS">Errors and Exceptions</a> below.
  * <p>
  * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b>
- * parameters must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in 
+ * parameters must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in
  * arrays.
  * <p>
  * For instance, a function that returns two integers is declared:
@@ -187,8 +187,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * <p>
  * The HDF-5 API defines a set of constants and enumerated values. Most of these values are available to Java
  * programs via the class <a href="./hdf.hdf5lib.HDF5Constants.html"> <b>HDF5Constants</b></a>. For example,
- * the parameters for the h5open() call include two numeric values, <b><i>HDFConstants.H5F_ACC_RDWR</i></b> and
- * <b><i>HDF5Constants.H5P_DEFAULT</i></b>.
+ * the parameters for the h5open() call include two numeric values, <b><i>HDFConstants.H5F_ACC_RDWR</i></b>
+ * and <b><i>HDF5Constants.H5P_DEFAULT</i></b>.
  * As would be expected, these numbers correspond to the C constants
  * <b><i>H5F_ACC_RDWR</i></b> and <b><i>H5P_DEFAULT</i></b>.
  * <p>
@@ -220,8 +220,8 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * represent errors in the JHI5 wrapper and support code.
  * <p>
  * The super-class <b><i>HDF5LibraryException</i></b> implements the method '<b><i>printStackTrace()</i></b>',
- * which prints out the HDF-5 error stack, as described in the HDF-5 C API <i><b>H5Eprint()</b>.</i> This may be
- * used by Java exception handlers to print out the HDF-5 error stack.
+ * which prints out the HDF-5 error stack, as described in the HDF-5 C API <i><b>H5Eprint()</b>.</i> This may
+ * be used by Java exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
  * @version HDF5 1.13.2 <BR>
@@ -262,7 +262,7 @@ public class H5 implements java.io.Serializable {
     private static String s_libraryName;
     private static boolean isLibraryLoaded = false;
 
-    private final static boolean IS_CRITICAL_PINNING = true;
+    private final static boolean IS_CRITICAL_PINNING  = true;
     private final static LinkedHashSet<Long> OPEN_IDS = new LinkedHashSet<Long>();
 
     static { loadH5Lib(); }
@@ -2187,7 +2187,7 @@ public class H5 implements java.io.Serializable {
      *                      H5_INDEX_CRT_ORDER        An index by creation order.
      * @param order
      *            IN: The order in which the index is to be traversed, as specified by order, can be one of
-     *                the following: 
+     *                the following:
      *                H5_ITER_INC     Iteration is from beginning to end, i.e., a top-down
      *                iteration incrementing the index position at each step.
      *                H5_ITER_DEC     Iteration starts at the end of the index, i.e., a bottom-up iteration
@@ -3880,8 +3880,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Drefresh causes all buffers associated with a dataset to be cleared and immediately re-loaded with
-     * updated contents from disk. This function essentially closes the dataset, evicts all metadata associated
-     * with it from the cache, and then re-opens the dataset. The reopened dataset is automatically
+     * updated contents from disk. This function essentially closes the dataset, evicts all metadata
+     * associated with it from the cache, and then re-opens the dataset. The reopened dataset is automatically
      * re-registered with the same ID.
      *
      * @param dset_id
@@ -7005,8 +7005,8 @@ public class H5 implements java.io.Serializable {
      * H5Orefresh causes all buffers associated with an object to be cleared and immediately re-loaded with
      * updated contents from disk. This function essentially closes the object, evicts all metadata associated
      * with it from the cache, and then re-opens the object. The reopened object is automatically
-     * re-registered with the same ID. object_id can be any named object associated with an HDF5 file including
-     * a dataset, a group, or a committed datatype.
+     * re-registered with the same ID. object_id can be any named object associated with an HDF5 file
+     * including a dataset, a group, or a committed datatype.
      *
      * @param object_id
      *            IN: Identifier of the object to be refreshed.
@@ -7751,14 +7751,14 @@ public class H5 implements java.io.Serializable {
      * H5Pget_filter_by_id returns information about the filter specified in filter_id, a filter identifier.
      * plist_id must be a dataset or group creation property list and filter_id must be in the associated
      * filter pipeline. The filter_id and flags parameters are used in the same manner as described in the
-     * discussion of H5Pset_filter. Aside from the fact that they are used for output, the parameters cd_nelmts
-     * and cd_values[] are used in the same manner as described in the discussion of H5Pset_filter. On input,
-     * the cd_nelmts parameter indicates the number of entries in the cd_values[] array allocated by the
-     * calling program; on exit it contains the number of values defined by the filter. On input, the namelen
-     * parameter indicates the number of characters allocated for the filter name by the calling program in the
-     * array name[]. On exit name[] contains the name of the filter with one character of the name in each
-     * element of the array. If the filter specified in filter_id is not set for the property list, an error
-     * will be returned and H5Pget_filter_by_id1 will fail.
+     * discussion of H5Pset_filter. Aside from the fact that they are used for output, the parameters
+     * cd_nelmts and cd_values[] are used in the same manner as described in the discussion of H5Pset_filter.
+     * On input, the cd_nelmts parameter indicates the number of entries in the cd_values[] array allocated by
+     * the calling program; on exit it contains the number of values defined by the filter. On input, the
+     * namelen parameter indicates the number of characters allocated for the filter name by the calling
+     * program in the array name[]. On exit name[] contains the name of the filter with one character of the
+     * name in each element of the array. If the filter specified in filter_id is not set for the property
+     * list, an error will be returned and H5Pget_filter_by_id1 will fail.
      *
      * @param plist_id
      *            IN: Property list identifier.
@@ -9082,8 +9082,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Pget_virtual_srcspace takes the dataset creation property list for the virtual dataset, dcpl_id, and
-     * the mapping index, index, and returns a dataspace identifier for the selection within the source dataset
-     * used in the mapping.
+     * the mapping index, index, and returns a dataspace identifier for the selection within the source
+     * dataset used in the mapping.
      *
      * @param dcpl_id
      *            IN: The identifier of the virtual dataset creation property list.
@@ -9102,8 +9102,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Pget_virtual_filename takes the dataset creation property list for the virtual dataset, dcpl_id, the
-     * mapping index, index, the size of the filename for a source dataset, size, and retrieves the name of the
-     * file for a source dataset used in the mapping.
+     * mapping index, index, the size of the filename for a source dataset, size, and retrieves the name of
+     * the file for a source dataset used in the mapping.
      *
      * @param dcpl_id
      *            IN: The identifier of the virtual dataset creation property list.
@@ -9122,8 +9122,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Pget_virtual_dsetname takes the dataset creation property list for the virtual dataset, dcpl_id, the
-     * mapping index, index, the size of the dataset name for a source dataset, size, and retrieves the name of
-     * the source dataset used in the mapping.
+     * mapping index, index, the size of the dataset name for a source dataset, size, and retrieves the name
+     * of the source dataset used in the mapping.
      *
      * @param dcpl_id
      *            IN: The identifier of the virtual dataset creation property list.
@@ -9635,8 +9635,8 @@ public class H5 implements java.io.Serializable {
     /**
      * H5Pset_virtual_printf_gap sets the access property list for the virtual dataset, dapl_id, to instruct
      * the library to stop looking for the mapped data stored in the files and/or datasets with the
-     * printf-style names after not finding gap_size files and/or datasets. The found source files and datasets
-     * will determine the extent of the unlimited virtual dataset with the printf-style mappings.
+     * printf-style names after not finding gap_size files and/or datasets. The found source files and
+     * datasets will determine the extent of the unlimited virtual dataset with the printf-style mappings.
      *
      * @param dapl_id
      *            IN: Dataset access property list identifier for the virtual dataset
@@ -9830,10 +9830,10 @@ public class H5 implements java.io.Serializable {
      *
      * Note that there are minimum size requirements for the buffer. Strip mining can only break the data up
      * along the first dimension, so the buffer must be large enough to accommodate a complete slice that
-     * encompasses all of the remaining dimensions. For example, when strip mining a 100x200x300 hyperslab of a
-     * simple data space, the buffer must be large enough to hold 1x200x300 data elements. When strip mining a
-     * 100x200x300x150 hyperslab of a simple data space, the buffer must be large enough to hold 1x200x300x150
-     * data elements.
+     * encompasses all of the remaining dimensions. For example, when strip mining a 100x200x300 hyperslab of
+     * a simple data space, the buffer must be large enough to hold 1x200x300 data elements. When strip mining
+     * a 100x200x300x150 hyperslab of a simple data space, the buffer must be large enough to hold
+     * 1x200x300x150 data elements.
      *
      * @param plist
      *            Identifier for the dataset transfer property list.
@@ -10591,9 +10591,9 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Pset_fapl_log Sets up the logging virtual file driver (H5FD_LOG) for use. H5Pset_fapl_log modifies
-     * the file access property list to use the logging driver, H5FD_LOG. The logging virtual file driver (VFD)
-     * is a clone of the standard SEC2 (H5FD_SEC2) driver with additional facilities for logging VFD metrics
-     * and activity to a file.
+     * the file access property list to use the logging driver, H5FD_LOG. The logging virtual file driver
+     * (VFD) is a clone of the standard SEC2 (H5FD_SEC2) driver with additional facilities for logging VFD
+     * metrics and activity to a file.
      *
      * @param fapl_id
      *            IN: File access property list identifier.
@@ -11811,7 +11811,7 @@ public class H5 implements java.io.Serializable {
     /**
      * H5Sselect_copy copies all the selection information (including offset) from the source
      * dataspace to the destination dataspace.
-     * 
+     *
      * @param dst_id
      *            ID of the destination dataspace
      * @param src_id
@@ -12036,7 +12036,7 @@ public class H5 implements java.io.Serializable {
                                                       long[][] coord2D)
         throws HDF5Exception, HDF5LibraryException, NullPointerException
     {
-        if (coord2D == null) 
+        if (coord2D == null)
             return -1;
 
         HDFArray theArray = new HDFArray(coord2D);
@@ -13198,8 +13198,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * If any internal bits of a floating point type are unused (that is, those significant bits which are not
-     * part of the sign, exponent, or mantissa), then H5Tset_inpad will be filled according to the value of the
-     * padding value property inpad.
+     * part of the sign, exponent, or mantissa), then H5Tset_inpad will be filled according to the value of
+     * the padding value property inpad.
      *
      * @param type_id
      *            IN: Identifier of datatype to modify.
