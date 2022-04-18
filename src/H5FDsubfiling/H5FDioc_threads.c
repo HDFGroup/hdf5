@@ -149,7 +149,8 @@ initialize_ioc_threads(void *_sf_context)
     HDassert(sf_context);
 
     if (NULL == (context_id = HDmalloc(sizeof(*context_id))))
-        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate subfiling context ID for IOC main thread");
+        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate subfiling context ID for IOC main thread");
 
     file_open_count = atomic_load(&sf_file_open_count);
     atomic_fetch_add(&sf_file_open_count, 1);
@@ -183,7 +184,8 @@ initialize_ioc_threads(void *_sf_context)
 
     if (!pool_request) {
         if (NULL == (pool_request = HDmalloc(pool_req_alloc_size)))
-            H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for worker threads");
+            H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for worker threads");
 
         pool_concurrent_max = world_size;
     }
@@ -443,10 +445,12 @@ ioc_main(int64_t context_id)
                 H5FD_IOC_MPI_GOTO_ERROR(-1, "MPI_Get_count failed", mpi_code);
 
             if (count < 0)
-                H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid work request message size (%d)", count);
+                H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid work request message size (%d)",
+                                    count);
 
             if ((size_t)count > sizeof(sf_work_request_t))
-                H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "work request message is too large (%d)", count);
+                H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "work request message is too large (%d)",
+                                    count);
 
             /*
              * Zero out work request, since the received message should
@@ -466,7 +470,7 @@ ioc_main(int64_t context_id)
 
                 if (received_count != count)
                     H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "MPI_Mrecv only received %d bytes of %d",
-                            received_count, count);
+                                        received_count, count);
             }
 #endif
 
@@ -622,7 +626,7 @@ handle_work_request(void *arg)
 #endif
 
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
-                translate_opcode((io_op_t)msg->tag), msg->subfile_rank);
+                            translate_opcode((io_op_t)msg->tag), msg->subfile_rank);
     }
 
 #if 1 /* JRM */
@@ -932,8 +936,9 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
         H5FD_IOC_MPI_GOTO_ERROR(-1, "MPI_Get_count failed", mpi_code);
 
     if (data_bytes_received != data_size)
-        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "message size mismatch -- expected = %ld, actual = %d",
-                            data_size, data_bytes_received);
+        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
+                            "message size mismatch -- expected = %ld, actual = %d", data_size,
+                            data_bytes_received);
 
 #ifdef H5FD_IOC_DEBUG
     t_end  = MPI_Wtime();
@@ -955,8 +960,9 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     if (sf_fid >= 0) {
         /* Actually write data received from client into subfile */
         if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, subfile_rank)) < 0)
-            H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "write function(FID=%d, Source=%d) returned an error (%d)",
-                                sf_fid, source, write_ret);
+            H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
+                                "write function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
+                                write_ret);
 
 #ifdef H5FD_IOC_DEBUG
         t_end   = MPI_Wtime();
@@ -1076,8 +1082,9 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     /* Read data from the subfile */
     if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, subfile_rank)) < 0) {
         send_empty_buf = TRUE;
-        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "read function(FID=%d, Source=%d) returned an error (%d)",
-                            sf_fid, source, read_ret);
+        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_READERROR, -1,
+                            "read function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
+                            read_ret);
     }
 
     /* Send read data to the client */

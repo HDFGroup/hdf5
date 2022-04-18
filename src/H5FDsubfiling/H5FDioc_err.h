@@ -228,8 +228,7 @@ extern hid_t H5FDioc_err_class_g;
 #define H5FD_IOC_SYS_GOTO_ERROR(err_major, err_minor, ret_val, str)                                          \
     do {                                                                                                     \
         int myerrno = errno;                                                                                 \
-        H5FD_IOC_GOTO_ERROR(err_major, err_minor, ret_val,                                                   \
-                            "%s, errno = %d, error message = '%s'", str,                                     \
+        H5FD_IOC_GOTO_ERROR(err_major, err_minor, ret_val, "%s, errno = %d, error message = '%s'", str,      \
                             myerrno, strerror(myerrno));                                                     \
     } while (0)
 
