@@ -72,7 +72,7 @@
 herr_t
 H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm)
 {
-    int                  mpi_code;                   /* MPI return code */
+    int                  mpi_code; /* MPI return code */
     subfiling_context_t *sf_context = NULL;
     int64_t              msg[3]     = {
         0,

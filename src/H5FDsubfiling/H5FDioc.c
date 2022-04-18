@@ -247,8 +247,10 @@ H5FD_ioc_init(void)
         /* Initialize error reporting */
         if ((H5FDioc_err_stack_g = H5Ecreate_stack()) < 0)
             H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't create HDF5 error stack");
-        if ((H5FDioc_err_class_g = H5Eregister_class(H5FD_IOC_ERR_CLS_NAME, H5FD_IOC_ERR_LIB_NAME, H5FD_IOC_ERR_VER)) < 0)
-            H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't register error class with HDF5 error API");
+        if ((H5FDioc_err_class_g =
+                 H5Eregister_class(H5FD_IOC_ERR_CLS_NAME, H5FD_IOC_ERR_LIB_NAME, H5FD_IOC_ERR_VER)) < 0)
+            H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                                "can't register error class with HDF5 error API");
 
         /* Check if IOC VFD has been loaded dynamically */
         env_var = HDgetenv(HDF5_DRIVER);
@@ -265,8 +267,9 @@ H5FD_ioc_init(void)
                 if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                     H5FD_IOC_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
                 if (provided != MPI_THREAD_MULTIPLE)
-                    H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                        "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                    H5FD_IOC_GOTO_ERROR(
+                        H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                        "IOC VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
             }
             else {
                 int required = MPI_THREAD_MULTIPLE;
@@ -324,7 +327,8 @@ H5FD__ioc_term(void)
         /* Unregister from HDF5 error API */
         if (H5FDioc_err_class_g >= 0) {
             if (H5Eunregister_class(H5FDioc_err_class_g) < 0)
-                H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CLOSEERROR, FAIL, "can't unregister error class from HDF5 error API");
+                H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CLOSEERROR, FAIL,
+                                    "can't unregister error class from HDF5 error API");
 
             /* Print the current error stack before destroying it */
             PRINT_ERROR_STACK;
@@ -856,7 +860,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     if (driver->value != H5_VFD_SEC2) {
         H5FD_IOC_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                    "unable to open file '%s' - only Sec2 VFD is currently supported", name);
+                            "unable to open file '%s' - only Sec2 VFD is currently supported", name);
     }
     else {
         subfiling_context_t *sf_context = NULL;
@@ -917,13 +921,15 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          */
         if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
                              file_ptr->comm, &file_ptr->fa.context_id) < 0)
-            H5FD_IOC_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'", name);
+            H5FD_IOC_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
+                                name);
 
         /* Initialize I/O concentrator threads if this MPI rank is an I/O concentrator */
         sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (initialize_ioc_threads(sf_context) < 0)
-                H5FD_IOC_GOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to initialize I/O concentrator threads");
+                H5FD_IOC_GOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
+                                    "unable to initialize I/O concentrator threads");
         }
     }
 
@@ -1373,16 +1379,20 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
         H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide
      * one */
@@ -1414,16 +1424,20 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
         H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
+        H5FD_IOC_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide
      * one */

@@ -79,8 +79,8 @@ static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
 static herr_t init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
                              int64_t *context_id_out);
-static herr_t init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str,
-                                MPI_Comm comm, sf_topology_t **app_topology_out);
+static herr_t init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
+                                sf_topology_t **app_topology_out);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
                                      MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
@@ -471,8 +471,8 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
     if (sf_world_size > 1) {
         int mpi_code;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2,
-                                                     MPI_LONG, comm))) {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2, MPI_LONG, comm))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: MPI_Allgather failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -1021,7 +1021,7 @@ init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_
     sf_topology_t *      app_topology = NULL;
     int64_t              context_id   = -1;
     int                  file_index   = -1;
-    herr_t               ret_value = SUCCEED;
+    herr_t               ret_value    = SUCCEED;
 
     HDassert(context_id_out);
 
@@ -1131,8 +1131,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str,
-                  MPI_Comm comm, sf_topology_t **app_topology_out)
+init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
+                  sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
     app_layout_t * app_layout       = sf_app_layout;
@@ -2546,7 +2546,7 @@ done:
          * consensus on whether any IOC ranks failed.
          */
         if (MPI_SUCCESS !=
-                (mpi_code = MPI_Allreduce(&errors, &global_errors, 1, MPI_INT, MPI_SUM, file_comm))) {
+            (mpi_code = MPI_Allreduce(&errors, &global_errors, 1, MPI_INT, MPI_SUM, file_comm))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: MPI_Allreduce failed with rc %d\n", __func__, mpi_code);
 #endif

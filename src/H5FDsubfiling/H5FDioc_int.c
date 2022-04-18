@@ -355,7 +355,7 @@ async_completion(void *arg)
     useconds_t delay = 5;
     int        n_reqs;
     int        n_waiting;
-    int *      indices = NULL;
+    int *      indices   = NULL;
     int        ret_value = 0;
     struct async_arg {
         int          n_reqs;
@@ -389,10 +389,10 @@ async_completion(void *arg)
         int ready = 0;
         int mpi_code;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Testsome(n_reqs, in_progress->sf_reqs, &ready,
-                                                    indices, MPI_STATUSES_IGNORE))) {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Testsome(n_reqs, in_progress->sf_reqs, &ready, indices, MPI_STATUSES_IGNORE))) {
 #ifdef H5FD_IOC_DEBUG
-        HDprintf("%s: MPI_Testsome failed with rc %d\n", __func__, mpi_code);
+            HDprintf("%s: MPI_Testsome failed with rc %d\n", __func__, mpi_code);
 #endif
 
             ret_value = -1;

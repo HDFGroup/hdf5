@@ -211,9 +211,9 @@ static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_c
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
-static int init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset, int64_t elements,
-                         int dtype_extent, int64_t *sf_source_data_offset, int64_t *sf_datasize, int64_t *sf_offset,
-                         int *first_index, int *n_containers);
+static int  init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset, int64_t elements,
+                          int dtype_extent, int64_t *sf_source_data_offset, int64_t *sf_datasize,
+                          int64_t *sf_offset, int *first_index, int *n_containers);
 static void H5FD__create_first_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
                                         int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
                                         int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io);
@@ -221,8 +221,9 @@ static void H5FD__create_final_mpi_type(subfiling_context_t *context, int ioc_de
                                         int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
                                         int64_t *io_datasize, int64_t *io_f_offset, int64_t last_io);
 static void H5FD__create_f_l_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
-                                      int64_t target_datasize, int64_t f_offset, int64_t *io_offset, int64_t *io_datasize,
-                                      int64_t *io_f_offset, int64_t first_io, int64_t last_io);
+                                      int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                      int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io,
+                                      int64_t last_io);
 static void H5FD__create_mpi_uniform_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
                                           int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
                                           int64_t *io_datasize, int64_t *io_f_offset);
@@ -1370,16 +1371,16 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
          * For now, assume we're dealing with contiguous datasets. Vector
          * I/O will probably handle the non-contiguous case.
          */
-        max_io_req_per_ioc = init_indep_io(sf_context,         /* IN: Context used to look up config info */
-                                           max_depth,          /* IN: Maximum stripe depth */
-                                           file_offset,        /* IN: Starting file offset */
-                                           io_size,            /* IN: I/O size */
-                                           1,                  /* IN: Data extent of the 'type' assumes byte */
+        max_io_req_per_ioc = init_indep_io(sf_context,  /* IN: Context used to look up config info */
+                                           max_depth,   /* IN: Maximum stripe depth */
+                                           file_offset, /* IN: Starting file offset */
+                                           io_size,     /* IN: I/O size */
+                                           1,           /* IN: Data extent of the 'type' assumes byte */
                                            source_data_offset, /* OUT: Memory offset */
                                            sf_data_size,       /* OUT: Length of this contiguous block */
                                            sf_offset,          /* OUT: File offset */
-                                           &ioc_start,         /* OUT: IOC index corresponding to starting offset */
-                                           &ioc_count);        /* OUT: Number of actual IOCs used */
+                                           &ioc_start,  /* OUT: IOC index corresponding to starting offset */
+                                           &ioc_count); /* OUT: Number of actual IOCs used */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -1615,16 +1616,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
          * For now, assume we're dealing with contiguous datasets. Vector
          * I/O will probably handle the non-contiguous case.
          */
-        max_io_req_per_ioc = init_indep_io(sf_context,         /* IN: Context used to look up config info */
-                                           max_depth,          /* IN: Maximum stripe depth */
-                                           file_offset,        /* IN: Starting file offset */
-                                           io_size,            /* IN: I/O size */
-                                           1,                  /* IN: Data extent of the 'type' assumes byte */
+        max_io_req_per_ioc = init_indep_io(sf_context,  /* IN: Context used to look up config info */
+                                           max_depth,   /* IN: Maximum stripe depth */
+                                           file_offset, /* IN: Starting file offset */
+                                           io_size,     /* IN: I/O size */
+                                           1,           /* IN: Data extent of the 'type' assumes byte */
                                            source_data_offset, /* OUT: Memory offset */
                                            sf_data_size,       /* OUT: Length of this contiguous block */
                                            sf_offset,          /* OUT: File offset */
-                                           &ioc_start,         /* OUT: IOC index corresponding to starting offset */
-                                           &ioc_count);        /* OUT: Number of actual IOCs used */
+                                           &ioc_start,  /* OUT: IOC index corresponding to starting offset */
+                                           &ioc_count); /* OUT: Number of actual IOCs used */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -2267,7 +2268,7 @@ init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset,
     int64_t final_id;
     int64_t final_length;
     int64_t ioc_final;
-    int64_t total_bytes = 0;
+    int64_t total_bytes   = 0;
     int64_t source_offset = 0;
     int64_t row_offset;
     int     container_count = 0;
@@ -2341,7 +2342,7 @@ init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset,
          */
 
         depth_size    = max_depth * sizeof(int64_t);
-        output_offset = (size_t)(k) * max_depth;
+        output_offset = (size_t)(k)*max_depth;
 
         container_depth = depth;
 
