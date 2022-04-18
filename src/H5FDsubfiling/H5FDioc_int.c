@@ -106,12 +106,10 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
-
     HDassert(io_req);
 
     if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't get subfiling context from ID")
+        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't get subfiling context from ID");
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->io_concentrators);
 
@@ -132,7 +130,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     msg[2] = context_id;
     if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrator[ioc_start], WRITE_INDEP,
                                             sf_context->sf_msg_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
     active_sends++;
 
@@ -148,7 +146,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      */
     if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&data_tag, 1, MPI_INT, io_concentrator[ioc_start],
                                              WRITE_INDEP_ACK, sf_context->sf_data_comm, &ack_request)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code)
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
     n_waiting = active_sends;
 
@@ -156,7 +154,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
         int flag = 0;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Test(&ack_request, &flag, MPI_STATUS_IGNORE)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code)
+            H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
 
         if (flag) {
             n_waiting--;
@@ -178,7 +176,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      * we need to accomplish that.
      */
     if (NULL == (sf_io_request = HDmalloc(sizeof(io_req_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "couldn't allocate I/O request")
+        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
     sf_io_request->completion_func.io_args.ioc        = (int)ioc_start;
@@ -200,7 +198,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Isend(data, (int)elements, MPI_BYTE, io_concentrator[ioc_start], data_tag,
                               sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code)
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code);
 
     /*
      * NOTE: When we actually have the async I/O support,
@@ -221,7 +219,7 @@ done:
         *io_req = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    H5FD_IOC_FUNC_LEAVE;
 } /* end ioc__write_independent_async() */
 
 /*-------------------------------------------------------------------------
@@ -267,12 +265,10 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
-
     HDassert(io_req);
 
     if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't get subfiling context from ID")
+        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't get subfiling context from ID");
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->io_concentrators);
 
@@ -293,7 +289,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     msg[2] = context_id;
     if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrator[ioc_start], READ_INDEP,
                                             sf_context->sf_msg_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
     /* At this point in the new implementation, we should queue
      * the async recv so that when the top level VFD tells us
@@ -301,7 +297,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
      * we need to accomplish that.
      */
     if (NULL == (sf_io_request = HDmalloc(sizeof(io_req_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_READERROR, FAIL, "couldn't allocate I/O request")
+        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_READERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
     sf_io_request->completion_func.io_args.ioc        = (int)ioc_start;
@@ -320,7 +316,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Irecv(data, (int)elements, MPI_BYTE, io_concentrator[ioc_start], READ_INDEP_DATA,
                               sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code)
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
     sf_io_request->completion_func.pending = 1;
     *io_req                                = sf_io_request;
@@ -331,7 +327,7 @@ done:
         *io_req = NULL;
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    H5FD_IOC_FUNC_LEAVE;
 } /* end ioc__read_independent_async() */
 
 /*-------------------------------------------------------------------------
@@ -415,5 +411,5 @@ async_completion(void *arg)
 done:
     HDfree(indices);
 
-    return ret_value;
+    H5FD_IOC_FUNC_LEAVE;
 }
