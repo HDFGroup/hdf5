@@ -2251,12 +2251,11 @@ static int
 test_vanishing_datasets(void)
 {
     struct mirrortest_filenames names;
-    hid_t                       file_id        = H5I_INVALID_HID;
-    hid_t                       fapl_id        = H5I_INVALID_HID;
-    hid_t                       dset_id        = H5I_INVALID_HID;
-    hid_t                       dspace_id      = H5I_INVALID_HID;
-    hid_t                       mirror_fapl_id = H5I_INVALID_HID;
-    hsize_t                     dims[2]        = {DATABUFFER_SIZE, DATABUFFER_SIZE};
+    hid_t                       file_id   = H5I_INVALID_HID;
+    hid_t                       fapl_id   = H5I_INVALID_HID;
+    hid_t                       dset_id   = H5I_INVALID_HID;
+    hid_t                       dspace_id = H5I_INVALID_HID;
+    hsize_t                     dims[2]   = {DATABUFFER_SIZE, DATABUFFER_SIZE};
     uint32_t                    buf[DATABUFFER_SIZE][DATABUFFER_SIZE]; /* consider malloc? */
     H5G_info_t                  group_info;
     unsigned int                i, j, k;
@@ -2334,7 +2333,7 @@ test_vanishing_datasets(void)
     file_id = H5I_INVALID_HID;
 
     /* verify there are no datasets in file */
-    file_id = H5Fopen(names.rw, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen(names.rw, H5F_ACC_RDONLY, fapl_id);
     if (file_id < 0) {
         TEST_ERROR;
     }
@@ -2349,7 +2348,7 @@ test_vanishing_datasets(void)
     if (H5Fclose(file_id) < 0) {
         TEST_ERROR;
     }
-    file_id = H5Fopen(names.wo, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen(names.wo, H5F_ACC_RDONLY, fapl_id);
     if (file_id < 0) {
         TEST_ERROR;
     }
@@ -2385,9 +2384,6 @@ test_vanishing_datasets(void)
 error:
     H5E_BEGIN_TRY
     {
-        if (mirror_fapl_id != H5I_INVALID_HID) {
-            H5Pclose(mirror_fapl_id);
-        }
         if (fapl_id != H5I_INVALID_HID) {
             H5Pclose(fapl_id);
         }
