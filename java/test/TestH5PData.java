@@ -104,7 +104,7 @@ public class TestH5PData {
 
         try {
             H5fid    = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                    HDF5Constants.H5P_DEFAULT);
+                                 HDF5Constants.H5P_DEFAULT);
             H5dsid   = H5.H5Screate_simple(2, H5dims, null);
             H5did    = _createFloatDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
             plist_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);

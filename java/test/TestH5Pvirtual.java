@@ -107,11 +107,11 @@ public class TestH5Pvirtual {
 
             try {
                 file_id  = H5.H5Fcreate(SRC_FILE[i], HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT);
                 space_id = H5.H5Screate_simple(1, H5dims, null);
                 dset_id  = H5.H5Dcreate(file_id, SRC_DATASET[i], HDF5Constants.H5T_NATIVE_INT, space_id,
-                                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                                        HDF5Constants.H5P_DEFAULT);
+                                       HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                       HDF5Constants.H5P_DEFAULT);
                 H5.H5Dwrite(dset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
                             HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
             }
@@ -144,7 +144,7 @@ public class TestH5Pvirtual {
         try {
             int[] fill_value = {-1};
             H5fid            = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                            HDF5Constants.H5P_DEFAULT);
+                                 HDF5Constants.H5P_DEFAULT);
             H5dsid           = H5.H5Screate_simple(2, VDSH5dims, null);
             H5dcplid         = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
             H5.H5Pset_fill_value(H5dcplid, HDF5Constants.H5T_NATIVE_INT, fill_value);

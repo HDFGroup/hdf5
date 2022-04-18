@@ -131,8 +131,8 @@ class H5L_iter_callbackT implements H5L_iterate_t {
                     nextod.obj_token       = infobuf.token;
                     H5L_iterate_t iter_cb2 = new H5L_iter_callbackT();
                     return_val             = H5.H5Literate_by_name(group, name, HDF5Constants.H5_INDEX_NAME,
-                                                                   HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod,
-                                                                   HDF5Constants.H5P_DEFAULT);
+                                                       HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod,
+                                                       HDF5Constants.H5P_DEFAULT);
                 }
                 for (int i = 0; i < spaces; i++)
                     System.out.print(" ");

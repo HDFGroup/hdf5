@@ -247,7 +247,7 @@ public class TestH5Pfapl {
     {
         try {
             H5fid  = H5.H5Fcreate(H5_FAMILY_FILE + ".h5", HDF5Constants.H5F_ACC_TRUNC,
-                                  HDF5Constants.H5P_DEFAULT, fapl);
+                                 HDF5Constants.H5P_DEFAULT, fapl);
             H5dsid = H5.H5Screate_simple(2, H5dims, null);
             H5did  = _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
         }

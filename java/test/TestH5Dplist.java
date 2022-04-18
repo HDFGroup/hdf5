@@ -125,7 +125,7 @@ public class TestH5Dplist {
         System.out.print(testname.getMethodName());
         try {
             H5fid  = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                  HDF5Constants.H5P_DEFAULT);
+                                 HDF5Constants.H5P_DEFAULT);
             H5dsid = H5.H5Screate_simple(RANK, H5dims, H5maxdims);
         }
         catch (Throwable err) {
