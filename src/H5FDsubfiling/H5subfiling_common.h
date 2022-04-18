@@ -25,19 +25,27 @@
 /* TODO: needed for ioc_selection_t, which also needs to be public */
 #include "H5FDioc.h"
 
-/* The following is our basic template for a subfile filename.
+/*
+ * The following is our basic template for a subfile filename.
  * Note that eventually we shouldn't use 0_of_N since we
  * intend to use the user defined HDF5 filename for a
  * zeroth subfile as well as for all metadata.
  */
-#define SF_FILENAME_TEMPLATE ".subfile_%ld_%0*d_of_%d"
+#define SF_FILENAME_TEMPLATE ".subfile_%" PRIu64 "_%0*d_of_%d"
+
+/*
+ * The following is our basic template for a subfiling
+ * configuration filename.
+ */
+#define SF_CONFIG_FILENAME_TEMPLATE ".subfile_%" PRIu64 ".config"
 
 /*
  * Environment variables interpreted by the HDF5 subfiling feature
  */
-#define H5_IOC_COUNT_PER_NODE "H5_IOC_COUNT_PER_NODE"
-#define H5_IOC_STRIPE_SIZE    "H5_IOC_STRIPE_SIZE"
-#define H5_IOC_SUBFILE_PREFIX "H5_IOC_SUBFILE_PREFIX"
+#define H5_IOC_SELECTION_CRITERIA "H5_IOC_SELECTION_CRITERIA"
+#define H5_IOC_COUNT_PER_NODE     "H5_IOC_COUNT_PER_NODE"
+#define H5_IOC_STRIPE_SIZE        "H5_IOC_STRIPE_SIZE"
+#define H5_IOC_SUBFILE_PREFIX     "H5_IOC_SUBFILE_PREFIX"
 
 #define H5FD_DEFAULT_STRIPE_DEPTH (32 * 1024 * 1024)
 

@@ -69,7 +69,9 @@ static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
 
 int sf_verbose_flag = 0;
 
+#ifdef H5_SUBFILING_DEBUG
 static int sf_open_file_count = 0;
+#endif
 
 FILE *sf_logfile = NULL;
 FILE *client_log = NULL;
@@ -77,10 +79,8 @@ FILE *client_log = NULL;
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
-static herr_t init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
-                             int64_t *context_id_out);
-static herr_t init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
-                                sf_topology_t **app_topology_out);
+static herr_t init_subfiling(ioc_selection_t ioc_selection_type, MPI_Comm comm, int64_t *context_id_out);
+static herr_t init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology_t **app_topology_out);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
                                      MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
@@ -89,14 +89,21 @@ static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
 static herr_t generate_subfile_name(subfiling_context_t *sf_context, char *filename_out,
                                     size_t filename_out_len, char **filename_basename_out,
                                     char **subfile_dir_out);
+static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
+                                 const char *subfile_dir, hbool_t truncate_if_exists);
+static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *subfile_dir,
+                               const char *mode, FILE **config_file_out);
 
 static void        initialize_statistics(void);
+#if 0 /* TODO */
 static void        manage_client_logfile(int client_rank, int flag_value);
+#endif
 static int         numDigits(int n);
 static int         active_file_map_entries(void);
 static void        clear_fid_map_entry(uint64_t sf_fid);
 static int         compare_hostid(const void *h1, const void *h2);
-static char *      get_ioc_selection_criteria(ioc_selection_t *selection);
+static herr_t      get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
+                                                       char **ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
@@ -108,6 +115,7 @@ initialize_statistics(void)
     HDmemset(subfiling_stats, 0, sizeof(subfiling_stats));
 }
 
+#if 0 /* TODO */
 static void
 manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_value)
 {
@@ -124,6 +132,7 @@ manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_va
 #endif
     return;
 }
+#endif
 
 static int
 numDigits(int n)
@@ -309,35 +318,57 @@ compare_hostid(const void *h1, const void *h2)
   Revision History -- Initial implementation
 -------------------------------------------------------------------------
 */
-/* TODO: rewrite */
-static char *
-get_ioc_selection_criteria(ioc_selection_t *selection)
+static herr_t
+get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
+                                    char **ioc_sel_info_str)
 {
-    char *optValue = NULL;
-    char *envValue = HDgetenv("H5_IOC_SELECTION_CRITERIA");
+    char *opt_value = NULL;
+    char *env_value = HDgetenv(H5_IOC_SELECTION_CRITERIA);
 
-    /* For non-default options, the environment variable
-     * should have the following form:  integer:[integer|string]
-     * In particular, EveryNthRank == 1:64 or every 64 ranks assign an IOC
-     * or WithConfig == 2:/<full_path_to_config_file>
-     */
-    if (envValue && (optValue = HDstrchr(envValue, ':'))) {
-        *optValue++ = 0;
-    }
-    if (envValue) {
-        int checkValue = HDatoi(envValue);
-        if ((checkValue < 0) || (checkValue >= ioc_selection_options)) {
-            *selection = SELECT_IOC_ONE_PER_NODE;
-            return NULL;
+    HDassert(ioc_selection_type);
+    HDassert(ioc_sel_info_str);
+
+    *ioc_sel_info_str = NULL;
+
+    if (env_value) {
+        long check_value;
+
+        /*
+         * For non-default options, the environment variable
+         * should have the following form:  integer:[integer|string]
+         * In particular, EveryNthRank == 1:64 or every 64 ranks assign an IOC
+         * or WithConfig == 2:/<full_path_to_config_file>
+         */
+        if ((opt_value = HDstrchr(env_value, ':')))
+            *opt_value++ = '\0';
+
+        errno = 0;
+        check_value = HDstrtol(env_value, NULL, 0);
+
+        if (errno == ERANGE) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't parse value from " H5_IOC_SELECTION_CRITERIA " environment variable\n",
+                     __func__);
+#endif
+
+            return FAIL;
         }
-        else {
-            *selection = (ioc_selection_t)checkValue;
-            return optValue;
+
+        if ((check_value < 0) || (check_value >= ioc_selection_options)) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: invalid IOC selection type value %ld from " H5_IOC_SELECTION_CRITERIA " environment variable\n",
+                     __func__, check_value);
+#endif
+
+            return FAIL;
         }
+
+        *ioc_selection_type = (ioc_selection_t)check_value;
+        *ioc_sel_info_str   = opt_value;
     }
-    *selection = SELECT_IOC_ONE_PER_NODE;
-    return NULL;
-} /* end get_ioc_selection_criteria() */
+
+    return SUCCEED;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    count_nodes
@@ -881,7 +912,6 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              context_id = -1;
-    char *               ioc_selection_str;
     herr_t               ret_value = SUCCEED;
 
     if (!base_filename) {
@@ -919,12 +949,8 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
     }
 #endif
 
-    /* Check if an IOC selection type was specified by environment variable */
-    /* TODO: respect passed in setting if env var isn't set */
-    ioc_selection_str = get_ioc_selection_criteria(&ioc_selection_type);
-
     /* Initialize new subfiling context ID based on configuration information */
-    if (init_subfiling(ioc_selection_type, ioc_selection_str, file_comm, &context_id) < 0) {
+    if (init_subfiling(ioc_selection_type, file_comm, &context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize subfiling context\n", __func__);
 #endif
@@ -1014,8 +1040,7 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
-               int64_t *context_id_out)
+init_subfiling(ioc_selection_t ioc_selection_type, MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context  = NULL;
     sf_topology_t *      app_topology = NULL;
@@ -1052,7 +1077,7 @@ init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(ioc_selection_type, ioc_selection_str, comm, &app_topology) < 0) {
+    if (init_app_topology(ioc_selection_type, comm, &app_topology) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize application topology\n", __func__);
 #endif
@@ -1131,12 +1156,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
-                  sf_topology_t **app_topology_out)
+init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
     app_layout_t * app_layout       = sf_app_layout;
     char *         env_value        = NULL;
+    char *         ioc_sel_str      = NULL;
     int *          io_concentrators = NULL;
     long           ioc_select_val   = -1;
     long           iocs_per_node    = 1;
@@ -1168,18 +1193,28 @@ init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, M
         goto done;
     }
 
+    /* Check if an IOC selection type was specified by environment variable */
+    if (get_ioc_selection_criteria_from_env(&ioc_selection_type, &ioc_sel_str) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get IOC selection type from environment\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
     /* Sanity checking on different IOC selection strategies */
     switch (ioc_selection_type) {
         case SELECT_IOC_EVERY_NTH_RANK: {
             errno = 0;
 
             ioc_select_val = 1;
-            if (ioc_selection_str) {
-                ioc_select_val = HDstrtol(ioc_selection_str, NULL, 0);
+            if (ioc_sel_str) {
+                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     HDprintf("invalid IOC selection strategy string '%s' for strategy "
                              "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_selection_str);
+                             ioc_sel_str);
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
                 }
@@ -1198,12 +1233,12 @@ init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, M
             errno = 0;
 
             ioc_select_val = 1;
-            if (ioc_selection_str) {
-                ioc_select_val = HDstrtol(ioc_selection_str, NULL, 0);
+            if (ioc_sel_str) {
+                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0) || (ioc_select_val >= comm_size)) {
                     HDprintf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
                              "defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_selection_str);
+                             ioc_sel_str);
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
                 }
@@ -1301,28 +1336,16 @@ init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str, M
             /* TODO: should this env. var. be interpreted for other selection types? */
             if ((env_value = HDgetenv(H5_IOC_COUNT_PER_NODE))) {
                 errno = 0;
-
-                ioc_select_val = 1;
-                if (ioc_selection_str) {
-                    ioc_select_val = HDstrtol(ioc_selection_str, NULL, 0);
-                    if ((ERANGE == errno)) {
-                        HDprintf("invalid value '%s' for " H5_IOC_COUNT_PER_NODE "\n", ioc_selection_str);
-                        ioc_select_val = 1;
-                    }
+                ioc_select_val = HDstrtol(env_value, NULL, 0);
+                if ((ERANGE == errno)) {
+                    HDprintf("invalid value '%s' for " H5_IOC_COUNT_PER_NODE "\n", env_value);
+                    ioc_select_val = 1;
                 }
 
                 if (ioc_select_val > 0)
                     iocs_per_node = ioc_select_val;
             }
 
-            /* TODO: If using single rank to open subfiles that were generated with
-             *       > 1 I/O concentrators, below won't be able to set ioc_count
-             *       properly. Later, we'll try to open file 0 of 1, whereas file
-             *       name is maybe 0 of 2, 0 of 3, etc.
-             *
-             *       Generation of subfile names needs to pull from config file and
-             *       not be generated on the fly for post-create opens.
-             */
             H5_CHECK_OVERFLOW(iocs_per_node, long, int);
             ioc_count = identify_ioc_ranks(app_topology, node_count, (int)iocs_per_node);
 
@@ -1846,15 +1869,14 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              file_context_id;
-    int64_t              h5_file_id;
 #ifdef H5_SUBFILING_DEBUG
     double t_start = 0.0;
     double t_end   = 0.0;
 #endif
     mode_t mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    char * filepath    = NULL;
     char * subfile_dir = NULL;
     char * base        = NULL;
-    char   filepath[PATH_MAX];
     int    retries   = 2;
     herr_t ret_value = SUCCEED;
 
@@ -1864,8 +1886,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     t_start = MPI_Wtime();
 #endif
 
-    /* Retrieve contents of RPC message */
-    h5_file_id      = msg->header[1];
+    /* Retrieve subfiling context ID from RPC message */
     file_context_id = msg->header[2];
 
     if (NULL == (sf_context = H5_get_subfiling_object(file_context_id))) {
@@ -1881,11 +1902,17 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->subfile_rank >= 0);
 
-    HDmemset(filepath, 0, PATH_MAX);
+    if (NULL == (filepath = HDcalloc(1, PATH_MAX))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't allocate space for subfile filename\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Generate the name of the subfile that this IOC rank will open */
-    /* TODO: doesn't pick up correct subfile name from config file */
-    if (generate_subfile_name(sf_context, filepath, sizeof(filepath), &base, &subfile_dir) < 0) {
+    if (generate_subfile_name(sf_context, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't generate name for subfile\n", __func__);
 #endif
@@ -1924,7 +1951,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
 
 #ifdef H5_SUBFILING_DEBUG
         if (sf_verbose_flag) {
-            HDprintf("[%d %s] file open(%s) failed!\n", subfile_rank, __func__, filepath);
+            HDprintf("[%d %s] file open(%s) failed!\n", sf_context->topology->subfile_rank,
+                     __func__, filepath);
         }
 #endif
 
@@ -1935,7 +1963,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
 #ifdef H5_SUBFILING_DEBUG
     if (sf_verbose_flag) {
         if (sf_logfile) {
-            HDfprintf(sf_logfile, "[ioc:%d] Opened subfile %s\n", subfile_rank, filepath);
+            HDfprintf(sf_logfile, "[ioc:%d] Opened subfile %s\n", sf_context->topology->subfile_rank,
+                      filepath);
         }
     }
 #endif
@@ -1944,130 +1973,17 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
      * If subfiles were created (rather than simply opened),
      * check if we also need to create a config file.
      */
-    /* TODO: move below to subroutine */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->subfile_rank == 0)) {
-        hbool_t config_file_exists;
-        int     n_io_concentrators = sf_context->topology->n_io_concentrators;
-        int     ret;
-
-        HDsnprintf(filepath, sizeof(filepath), "%s/%s.subfile_%ld.config", subfile_dir, base, h5_file_id);
-
-        /* Determine whether a subfiling configuration file exists */
-        errno = 0;
-        ret   = HDaccess(filepath, F_OK);
-
-        config_file_exists = (ret == 0) || ((ret < 0) && (ENOENT != errno));
-
-        if (config_file_exists && (ret != 0)) {
+        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0) {
             end_thread_exclusive(); /* TODO: try to only unlock in one place? */
 
-            HDperror("ioc_open_file - couldn't check existence of configuration file");
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("[%d %s]: couldn't create subfiling configuration file\n",
+                     sf_context->topology->subfile_rank, __func__);
+#endif
 
             ret_value = FAIL;
             goto done;
-        }
-
-        /*
-         * If a config file doesn't exist, create one. If a
-         * config file does exist, don't touch it unless the
-         * O_TRUNC flag was specified. In this case, truncate
-         * the existing config file and create a new one.
-         */
-        if (!config_file_exists || (file_acc_flags & O_TRUNC)) {
-            FILE *config_file = NULL;
-            char  linebuf[PATH_MAX];
-            int   num_digits;
-
-            if (NULL == (config_file = HDfopen(filepath, "w+"))) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-                HDperror("ioc_open_file - couldn't open subfiling configuration file");
-
-                ret_value = FAIL;
-                goto done;
-            }
-
-            HDsnprintf(linebuf, sizeof(linebuf), "stripe_size=%ld\n", sf_context->sf_stripe_size);
-            if (HDfwrite(linebuf, strlen(linebuf), 1, config_file) != 1) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("[%d %s]: fwrite failed to write to subfiling configuration file\n", subfile_rank,
-                         __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
-
-            HDsnprintf(linebuf, sizeof(linebuf), "aggregator_count=%d\n", n_io_concentrators);
-            if (HDfwrite(linebuf, strlen(linebuf), 1, config_file) != 1) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("[%d %s]: fwrite failed to write to subfiling configuration file\n", subfile_rank,
-                         __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
-
-            HDsnprintf(linebuf, sizeof(linebuf), "hdf5_file=%s\n", sf_context->h5_filename);
-            if (HDfwrite(linebuf, strlen(linebuf), 1, config_file) != 1) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("[%d %s]: fwrite failed to write to subfiling configuration file\n", subfile_rank,
-                         __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
-
-            HDsnprintf(linebuf, sizeof(linebuf), "subfile_dir=%s\n", subfile_dir);
-            if (HDfwrite(linebuf, strlen(linebuf), 1, config_file) != 1) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("[%d %s]: fwrite failed to write to subfiling configuration file\n", subfile_rank,
-                         __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
-
-            num_digits = numDigits(n_io_concentrators);
-            for (int k = 0; k < n_io_concentrators; k++) {
-                HDsnprintf(linebuf, sizeof(linebuf), "%s" SF_FILENAME_TEMPLATE "\n", base, h5_file_id,
-                           num_digits, k, n_io_concentrators);
-
-                if (HDfwrite(linebuf, strlen(linebuf), 1, config_file) != 1) {
-                    end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                    HDprintf("[%d %s]: fwrite failed to write to subfiling configuration file\n",
-                             subfile_rank, __func__);
-#endif
-
-                    ret_value = FAIL;
-                    goto done;
-                }
-            }
-
-            if (EOF == HDfclose(config_file)) {
-                end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("[%d %s]: fclose failed to close subfiling configuration file\n", subfile_rank,
-                         __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
         }
     }
 
@@ -2088,6 +2004,7 @@ done:
 
     HDfree(base);
     HDfree(subfile_dir);
+    HDfree(filepath);
 
 #ifdef H5_SUBFILING_DEBUG
     t_end = MPI_Wtime();
@@ -2116,6 +2033,8 @@ static herr_t
 generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_t filename_out_len,
                       char **filename_basename_out, char **subfile_dir_out)
 {
+    FILE * config_file = NULL;
+    char * config_buf  = NULL;
     char * subfile_dir = NULL;
     char * prefix      = NULL;
     char * base        = NULL;
@@ -2132,6 +2051,17 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
     *filename_basename_out = NULL;
     *subfile_dir_out       = NULL;
 
+    /*
+     * Initially use the number of I/O concentrators specified in the
+     * subfiling context. However, if there's an existing subfiling
+     * configuration file we will use the number specified there
+     * instead, as that should be the actual number that the subfile
+     * names were originally generated with. The current subfiling
+     * context may have a different number of I/O concentrators
+     * specified; e.g. a simple serial file open for reading purposes
+     * (think h5dump) might only be using 1 I/O concentrator, whereas
+     * the file was created with several I/O concentrators.
+     */
     n_io_concentrators = sf_context->topology->n_io_concentrators;
 
     if (NULL == (prefix = HDmalloc(PATH_MAX))) {
@@ -2189,11 +2119,112 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
         }
     }
 
-    /* The subfile naming should produce files of the following form:
-     * If we assume the HDF5 file is named ABC.h5, then subfiles
-     * will have names:
+    /* Open the file's subfiling configuration file, if it exists */
+    if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /*
+     * If a subfiling configuration file exists, read the number of I/O
+     * concentrators used in order to generate the correct subfile names.
+     */
+    if (config_file) {
+        char *ioc_substr      = NULL;
+        long  config_file_len = 0;
+
+        if (HDfseek(config_file, 0, SEEK_END) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n",
+                     __func__, errno);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if ((config_file_len = HDftell(config_file)) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't get size of subfiling configuration file; errno = %d\n",
+                     __func__, errno);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (HDfseek(config_file, 0, SEEK_SET) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n",
+                     __func__, errno);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't allocate space for reading subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't read from subfiling configuration file; errno = %d\n",
+                     __func__, errno);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        config_buf[config_file_len] = '\0';
+
+        if (NULL == (ioc_substr = HDstrstr(config_buf, "aggregator_count"))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: malformed subfiling configuration file - no aggregator_count entry\n",
+                     __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (EOF == HDsscanf(ioc_substr, "aggregator_count=%d", &n_io_concentrators)) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't get number of I/O concentrators from subfiling configuration file\n",
+                     __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (n_io_concentrators <= 0) {
+            HDprintf("%s: invalid number of I/O concentrators (%d) read from subfiling configuration file\n",
+                     __func__, n_io_concentrators);
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+
+    /*
+     * Generate the name of the subfile. The subfile naming should
+     * produce files of the following form:
+     * If we assume the HDF5 file is named ABC.h5, and 20 I/O
+     * concentrators are used, then the subfiles will have names:
      *   ABC.h5.subfile_<file-number>_00_of_20,
-     *   ABC.h5.subfile_<file-number>_01_of_20, and
+     *   ABC.h5.subfile_<file-number>_01_of_20, etc.
+     *
+     * and the configuration file will be named:
      *   ABC.h5.subfile_<file-number>.config
      */
     num_digits = numDigits(n_io_concentrators);
@@ -2201,6 +2232,14 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
                sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank, n_io_concentrators);
 
 done:
+    if (config_file && (EOF == HDfclose(config_file))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
+#endif
+
+        ret_value = FAIL;
+    }
+
     if (ret_value < 0) {
         if (*filename_basename_out) {
             HDfree(*filename_basename_out);
@@ -2212,7 +2251,299 @@ done:
         }
     }
 
+    HDfree(config_buf);
     HDfree(prefix);
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    create_config_file
+ *
+ * Purpose:     Creates a configuration file that contains
+ *              subfiling-related information for a file. This file
+ *              includes information such as:
+ *
+ *              - the stripe size for the file's subfiles
+ *              - the number of I/O concentrators used for I/O to the file's subfiles
+ *              - the base HDF5 filename
+ *              - the optional directory prefix where the file's subfiles are placed
+ *              - the names of each of the file's subfiles
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+create_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *subfile_dir,
+                   hbool_t truncate_if_exists)
+{
+    hbool_t config_file_exists = FALSE;
+    FILE *  config_file        = NULL;
+    char *  config_filename    = NULL;
+    char *  line_buf           = NULL;
+    int     ret                = 0;
+    herr_t  ret_value          = SUCCEED;
+
+    HDassert(sf_context);
+    HDassert(base_filename);
+    HDassert(subfile_dir);
+
+    if (sf_context->h5_file_id == UINT64_MAX) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: invalid HDF5 file ID %" PRIu64 "\n", __func__, sf_context->h5_file_id);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+    if (*base_filename == '\0') {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: invalid base HDF5 filename %s\n", __func__, base_filename);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+    if (*subfile_dir == '\0')
+        subfile_dir = ".";
+
+    if (NULL == (config_filename = HDmalloc(PATH_MAX))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't allocate space for subfiling configuration file filename\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE,
+               subfile_dir, base_filename, sf_context->h5_file_id);
+
+    /* Determine whether a subfiling configuration file exists */
+    errno = 0;
+    ret   = HDaccess(config_filename, F_OK);
+
+    config_file_exists = (ret == 0) || ((ret < 0) && (ENOENT != errno));
+
+    if (config_file_exists && (ret != 0)) {
+#ifdef H5_SUBFILING_DEBUG
+        HDperror("%s: couldn't check existence of configuration file", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /*
+     * If a config file doesn't exist, create one. If a
+     * config file does exist, don't touch it unless the
+     * O_TRUNC flag was specified. In this case, truncate
+     * the existing config file and create a new one.
+     */
+    if (!config_file_exists || truncate_if_exists) {
+        int n_io_concentrators = sf_context->topology->n_io_concentrators;
+        int num_digits;
+
+        if (NULL == (config_file = HDfopen(config_filename, "w+"))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDperror("%s: couldn't open subfiling configuration file", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (NULL == (line_buf = HDmalloc(PATH_MAX))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't allocate buffer for writing to subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Write the subfiling stripe size to the configuration file */
+        HDsnprintf(line_buf, PATH_MAX, "stripe_size=%" PRId64 "\n", sf_context->sf_stripe_size);
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Write the number of I/O concentrators to the configuration file */
+        HDsnprintf(line_buf, PATH_MAX, "aggregator_count=%d\n", n_io_concentrators);
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Write the base HDF5 filename to the configuration file */
+        HDsnprintf(line_buf, PATH_MAX, "hdf5_file=%s\n", sf_context->h5_filename);
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Write the optional subfile directory prefix to the configuration file */
+        HDsnprintf(line_buf, PATH_MAX, "subfile_dir=%s\n", subfile_dir);
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        /* Write out each subfile name to the configuration file */
+        num_digits = numDigits(n_io_concentrators);
+        for (int k = 0; k < n_io_concentrators; k++) {
+            HDsnprintf(line_buf, PATH_MAX, "%s" SF_FILENAME_TEMPLATE "\n",
+                       base_filename, sf_context->h5_file_id, num_digits, k, n_io_concentrators);
+
+            if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+                HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
+#endif
+
+                ret_value = FAIL;
+                goto done;
+            }
+        }
+    }
+
+done:
+    if (config_file) {
+        if (EOF == HDfclose(config_file)) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+        }
+    }
+
+    HDfree(line_buf);
+    HDfree(config_filename);
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    open_config_file
+ *
+ * Purpose:     Opens the subfiling configuration file for a given HDF5
+ *              file and sets `config_file_out`, if a configuration file
+ *              exists. Otheriwse, `config_file_out` is set to NULL.
+ *
+ *              It is the caller's responsibility to check
+ *              `config_file_out` on success and close an opened file as
+ *              necessary.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+open_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *subfile_dir,
+                 const char *mode, FILE **config_file_out)
+{
+    hbool_t config_file_exists = FALSE;
+    FILE *  config_file        = NULL;
+    char *  config_filename    = NULL;
+    int     ret                = 0;
+    herr_t  ret_value          = SUCCEED;
+
+    HDassert(sf_context);
+    HDassert(base_filename);
+    HDassert(subfile_dir);
+    HDassert(mode);
+    HDassert(config_file_out);
+
+    *config_file_out = NULL;
+
+    if (sf_context->h5_file_id == UINT64_MAX) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: invalid HDF5 file ID %" PRIu64 "\n", __func__, sf_context->h5_file_id);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+    if (*base_filename == '\0') {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: invalid base HDF5 filename %s\n", __func__, base_filename);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+    if (*subfile_dir == '\0')
+        subfile_dir = ".";
+
+    if (NULL == (config_filename = HDmalloc(PATH_MAX))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't allocate space for subfiling configuration file filename\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE,
+               subfile_dir, base_filename, sf_context->h5_file_id);
+
+    /* Determine whether a subfiling configuration file exists */
+    errno = 0;
+    ret   = HDaccess(config_filename, F_OK);
+
+    config_file_exists = (ret == 0) || ((ret < 0) && (ENOENT != errno));
+
+    if (!config_file_exists)
+        goto done;
+
+    if (config_file_exists && (ret != 0)) {
+#ifdef H5_SUBFILING_DEBUG
+        HDperror("%s: couldn't check existence of configuration file", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (NULL == (config_file = HDfopen(config_filename, mode))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDperror("%s: couldn't open subfiling configuration file", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    *config_file_out = config_file;
+
+done:
+    if (ret_value < 0) {
+        if (config_file && (EOF == HDfclose(config_file))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
+#endif
+
+            ret_value = FAIL;
+        }
+    }
+
+    HDfree(config_filename);
 
     return ret_value;
 }
