@@ -71,15 +71,18 @@ int sf_verbose_flag = 0;
 
 static int sf_open_file_count = 0;
 
+FILE *sf_logfile = NULL;
+FILE *client_log = NULL;
+
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
 static herr_t init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_Comm comm,
                              int64_t *context_id_out);
-static herr_t init_app_topology(int comm_rank, int comm_size, ioc_selection_t ioc_selection_type,
-                                char *ioc_selection_str, sf_topology_t **app_topology_out);
+static herr_t init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str,
+                                MPI_Comm comm, sf_topology_t **app_topology_out);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
-                                     int world_rank);
+                                     MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
@@ -94,8 +97,8 @@ static int         active_file_map_entries(void);
 static void        clear_fid_map_entry(uint64_t sf_fid);
 static int         compare_hostid(const void *h1, const void *h2);
 static char *      get_ioc_selection_criteria(ioc_selection_t *selection);
-static int         count_nodes(sf_topology_t *info, int my_rank);
-static herr_t      gather_topology_info(sf_topology_t *info);
+static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
+static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
 static inline void assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple);
 
@@ -357,23 +360,34 @@ get_ioc_selection_criteria(ioc_selection_t *selection)
  *-------------------------------------------------------------------------
  */
 static int
-count_nodes(sf_topology_t *info, int my_rank)
+count_nodes(sf_topology_t *info, MPI_Comm comm)
 {
     app_layout_t *app_layout = NULL;
     long          nextid;
     int           node_count;
     int           hostid_index = -1;
+    int           my_rank;
+    int           mpi_code;
 
     HDassert(info);
     HDassert(info->app_layout);
     HDassert(info->app_layout->layout);
     HDassert(info->app_layout->node_ranks);
+    HDassert(MPI_COMM_NULL != comm);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &my_rank))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
+#endif
+
+        return -1;
+    }
 
     app_layout = info->app_layout;
     node_count = app_layout->node_count;
 
     if (node_count == 0)
-        gather_topology_info(info);
+        gather_topology_info(info, comm);
 
     nextid = app_layout->layout[0].hostid;
     /* Possibly record my hostid_index */
@@ -423,7 +437,7 @@ count_nodes(sf_topology_t *info, int my_rank)
  *-------------------------------------------------------------------------
  */
 static herr_t
-gather_topology_info(sf_topology_t *info)
+gather_topology_info(sf_topology_t *info, MPI_Comm comm)
 {
     app_layout_t *app_layout = NULL;
     layout_t      my_hostinfo;
@@ -434,6 +448,7 @@ gather_topology_info(sf_topology_t *info)
     HDassert(info);
     HDassert(info->app_layout);
     HDassert(info->app_layout->layout);
+    HDassert(MPI_COMM_NULL != comm);
 
     app_layout    = info->app_layout;
     sf_world_size = app_layout->world_size;
@@ -456,9 +471,8 @@ gather_topology_info(sf_topology_t *info)
     if (sf_world_size > 1) {
         int mpi_code;
 
-        /* TODO: use supplied file comm */
         if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2,
-                                                     MPI_LONG, MPI_COMM_WORLD))) {
+                                                     MPI_LONG, comm))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: MPI_Allgather failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -761,6 +775,12 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     sf_context->sf_blocksize_per_stripe = -1;
     sf_context->sf_base_addr            = -1;
 
+    /*
+     * NOTE: assumes context's file communicator is not
+     * duplicated, but simply used directly
+     */
+    sf_context->sf_file_comm = MPI_COMM_NULL;
+
     if (sf_context->sf_msg_comm != MPI_COMM_NULL) {
         if (H5_mpi_comm_free(&sf_context->sf_msg_comm) < 0)
             return FAIL;
@@ -855,7 +875,6 @@ H5_free_subfiling_topology(sf_topology_t *topology)
  *-------------------------------------------------------------------------
  */
 /* TODO: revise description */
-/* TODO: consider storing direct reference to file Comm in context for later use */
 herr_t
 H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t ioc_selection_type,
                  int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
@@ -1002,9 +1021,6 @@ init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_
     sf_topology_t *      app_topology = NULL;
     int64_t              context_id   = -1;
     int                  file_index   = -1;
-    int                  comm_rank;
-    int                  comm_size;
-    int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
     HDassert(context_id_out);
@@ -1032,29 +1048,11 @@ init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_
         goto done;
     }
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &comm_size))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator size; rc = %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
     /*
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(comm_rank, comm_size, ioc_selection_type, ioc_selection_str, &app_topology) < 0) {
+    if (init_app_topology(ioc_selection_type, ioc_selection_str, comm, &app_topology) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize application topology\n", __func__);
 #endif
@@ -1065,7 +1063,7 @@ init_subfiling(ioc_selection_t ioc_selection_type, char *ioc_selection_str, MPI_
 
     new_context->sf_context_id = context_id;
 
-    if (init_subfiling_context(new_context, app_topology, comm_rank) < 0) {
+    if (init_subfiling_context(new_context, app_topology, comm) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize subfiling topology object\n", __func__);
 #endif
@@ -1133,8 +1131,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(int comm_rank, int comm_size, ioc_selection_t ioc_selection_type, char *ioc_selection_str,
-                  sf_topology_t **app_topology_out)
+init_app_topology(ioc_selection_t ioc_selection_type, char *ioc_selection_str,
+                  MPI_Comm comm, sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
     app_layout_t * app_layout       = sf_app_layout;
@@ -1143,12 +1141,32 @@ init_app_topology(int comm_rank, int comm_size, ioc_selection_t ioc_selection_ty
     long           ioc_select_val   = -1;
     long           iocs_per_node    = 1;
     int            ioc_count        = 0;
-    herr_t         ret_value        = SUCCEED;
+    int            comm_rank;
+    int            comm_size;
+    int            mpi_code;
+    herr_t         ret_value = SUCCEED;
 
-    HDassert(comm_rank >= 0);
-    HDassert(comm_size >= 0);
+    HDassert(MPI_COMM_NULL != comm);
     HDassert(app_topology_out);
     HDassert(!*app_topology_out);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &comm_size))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get MPI communicator size; rc = %d\n", __func__, mpi_code);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
 
     /* Sanity checking on different IOC selection strategies */
     switch (ioc_selection_type) {
@@ -1270,7 +1288,7 @@ init_app_topology(int comm_rank, int comm_size, ioc_selection_t ioc_selection_ty
 
             app_topology->selection_type = SELECT_IOC_ONE_PER_NODE;
 
-            if ((node_count = count_nodes(app_topology, comm_rank)) < 0) {
+            if ((node_count = count_nodes(app_topology, comm)) < 0) {
 #ifdef H5_SUBFILING_DEBUG
                 HDprintf("%s: couldn't determine number of nodes used\n", __func__);
 #endif
@@ -1406,11 +1424,11 @@ done:
  *-------------------------------------------------------------------------
  */
 /* TODO: revise description */
-/* TODO: need to pass in actual file MPI communicator */
 static herr_t
-init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology, int world_rank)
+init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology, MPI_Comm file_comm)
 {
     char * env_value = NULL;
+    int    comm_rank;
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
@@ -1418,8 +1436,10 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     HDassert(sf_context->topology == NULL);
     HDassert(app_topology);
     HDassert(app_topology->n_io_concentrators > 0);
+    HDassert(MPI_COMM_NULL != file_comm);
 
     sf_context->topology       = app_topology;
+    sf_context->sf_file_comm   = file_comm;
     sf_context->sf_msg_comm    = MPI_COMM_NULL;
     sf_context->sf_data_comm   = MPI_COMM_NULL;
     sf_context->sf_group_comm  = MPI_COMM_NULL;
@@ -1480,7 +1500,16 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
      * to/from IOC ranks
      */
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(MPI_COMM_WORLD, &sf_context->sf_msg_comm))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &comm_rank))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_msg_comm))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't create sub-communicator for IOC messages; rc = %d\n", __func__, mpi_code);
 #endif
@@ -1499,7 +1528,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
         goto done;
     }
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(MPI_COMM_WORLD, &sf_context->sf_data_comm))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_data_comm))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't create sub-communicator for IOC data; rc = %d\n", __func__, mpi_code);
 #endif
@@ -1520,7 +1549,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
 
     /* Create an MPI sub-communicator for IOC ranks */
     if (app_topology->n_io_concentrators > 1) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(MPI_COMM_WORLD, app_topology->rank_is_ioc, world_rank,
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(file_comm, app_topology->rank_is_ioc, comm_rank,
                                                       &sf_context->sf_group_comm))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't create sub-communicator for IOC ranks; rc = %d\n", __func__, mpi_code);
@@ -1601,7 +1630,6 @@ done:
  *-------------------------------------------------------------------------
  */
 /* TODO: revise description */
-/* TODO: need to use a comm other than MPI_COMM_WORLD */
 static herr_t
 open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
@@ -1667,7 +1695,7 @@ done:
      * successful across the IOC ranks
      */
     if (MPI_SUCCESS !=
-        (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD))) {
+        (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, sf_context->sf_file_comm))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("[%s %d]: MPI_Allreduce failed with rc %d\n", __func__,
                  sf_context->topology->app_layout->world_rank, mpi_code);
@@ -2231,12 +2259,12 @@ done:
  *-------------------------------------------------------------------------
  */
 /* TODO: revise description */
-/* TODO: need MPI communicator from somewhere */
 herr_t
 H5_close_subfiles(int64_t subfiling_context_id)
 {
     subfiling_context_t *sf_context  = NULL;
     MPI_Request          barrier_req = MPI_REQUEST_NULL;
+    MPI_Comm             file_comm   = MPI_COMM_NULL;
 #ifdef H5_SUBFILING_DEBUG
     double t_finalize_threads = 0.0;
     double t_main_exit        = 0.0;
@@ -2262,6 +2290,16 @@ H5_close_subfiles(int64_t subfiling_context_id)
         goto done;
     }
 
+    /*
+     * Store a reference to the subfiling context's file communicator
+     * for later use, as we will still need it after freeing the
+     * underlying subfiling context. Note that this assumes the
+     * subfiling context is holding a direct reference to the file's
+     * communicator, rather than a duplicated one. This logic will
+     * need to be refactored if that changes.
+     */
+    file_comm = sf_context->sf_file_comm;
+
     /* We make the subfile close operation collective.
      * Otherwise, there may be a race condition between
      * our closing the subfiles and the user application
@@ -2276,12 +2314,11 @@ H5_close_subfiles(int64_t subfiling_context_id)
      * extremely busy servicing I/O requests from all
      * HDF5 application ranks.
      */
-    /* TODO: can't use comm world here -- must use communicator set in the file open */
 #if MPI_VERSION > 3 || (MPI_VERSION == 3 && MPI_SUBVERSION >= 1)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(MPI_COMM_WORLD, &barrier_req))) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_file_comm, &barrier_req))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: MPI_Ibarrier failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -2305,7 +2342,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(MPI_COMM_WORLD))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_file_comm))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: MPI_Barrier failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -2439,12 +2476,11 @@ H5_close_subfiles(int64_t subfiling_context_id)
      * and opening another file before this file is completely closed
      * down.
      */
-    /* TODO: can't use comm world here -- must use communicator set in the file open */
 #if MPI_VERSION > 3 || (MPI_VERSION == 3 && MPI_SUBVERSION >= 1)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(MPI_COMM_WORLD, &barrier_req))) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_file_comm, &barrier_req))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: MPI_Ibarrier failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -2468,7 +2504,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(MPI_COMM_WORLD))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_file_comm))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: MPI_Barrier failed with rc %d\n", __func__, mpi_code);
 #endif
@@ -2500,25 +2536,31 @@ done:
         errors = 1;
     }
 
-    /*
-     * Form consensus on whether closing subfiles was
-     * successful across the IOC ranks
-     */
-    if (MPI_SUCCESS !=
-        (mpi_code = MPI_Allreduce(&errors, &global_errors, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD))) {
+    if (file_comm != MPI_COMM_NULL) {
+        /*
+         * Form consensus on whether closing subfiles was
+         * successful across the IOC ranks. Note the use
+         * of the previously-stored file_comm communicator,
+         * since we have already freed the subfiling context
+         * but still need a valid communicator to form a
+         * consensus on whether any IOC ranks failed.
+         */
+        if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allreduce(&errors, &global_errors, 1, MPI_INT, MPI_SUM, file_comm))) {
 #ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: MPI_Allreduce failed with rc %d\n", __func__, mpi_code);
+            HDprintf("%s: MPI_Allreduce failed with rc %d\n", __func__, mpi_code);
 #endif
 
-        ret_value = FAIL;
-    }
+            ret_value = FAIL;
+        }
 
-    if (global_errors > 0) {
+        if (global_errors > 0) {
 #ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: one or more IOC ranks couldn't close subfiles\n", __func__);
+            HDprintf("%s: one or more IOC ranks couldn't close subfiles\n", __func__);
 #endif
 
-        ret_value = FAIL;
+            ret_value = FAIL;
+        }
     }
 
     return ret_value;

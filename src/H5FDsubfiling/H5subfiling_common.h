@@ -173,18 +173,19 @@ typedef struct {
     haddr_t        sf_eof;                  /* File eof */
     int64_t        sf_stripe_size;          /* Stripe-depth */
     int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs  */
-    int64_t        sf_base_addr;            /* For an IOC, our base address   */
-    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg  */
-    MPI_Comm       sf_data_comm;            /* MPI comm used to move data     */
-    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives  */
-    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC  */
-    int            sf_group_size;           /* IOC count (in sf_group_comm)   */
-    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)   */
-    int            sf_intercomm_root;       /* Not used: for IOC comms        */
-    char *         subfile_prefix;          /* If subfiles are node-local     */
-    char *         sf_filename;             /* A generated subfile name       */
-    char *         h5_filename;             /* The user supplied file name    */
-    sf_topology_t *topology;                /* pointer to our topology        */
+    int64_t        sf_base_addr;            /* For an IOC, our base address      */
+    MPI_Comm       sf_file_comm;            /* MPI comm the file was opened with */
+    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg     */
+    MPI_Comm       sf_data_comm;            /* MPI comm used to move data        */
+    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives     */
+    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC     */
+    int            sf_group_size;           /* IOC count (in sf_group_comm)      */
+    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)      */
+    int            sf_intercomm_root;       /* Not used: for IOC comms           */
+    char *         subfile_prefix;          /* If subfiles are node-local        */
+    char *         sf_filename;             /* A generated subfile name          */
+    char *         h5_filename;             /* The user supplied file name       */
+    sf_topology_t *topology;                /* pointer to our topology           */
 } subfiling_context_t;
 
 /* The following is a somewhat augmented input (by the IOC) which captures
@@ -209,6 +210,7 @@ typedef struct {
 } sf_work_request_t;
 
 extern FILE *sf_logfile;
+extern FILE *client_log;
 
 extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;

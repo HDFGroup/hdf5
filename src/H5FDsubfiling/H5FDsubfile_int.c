@@ -70,10 +70,9 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
+H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm)
 {
     int                  mpi_code;                   /* MPI return code */
-    MPI_Comm             comm       = MPI_COMM_NULL; /* MPI Communicator, from plist */
     subfiling_context_t *sf_context = NULL;
     int64_t              msg[3]     = {
         0,
@@ -81,11 +80,6 @@ H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* for now, set comm to MPI_COMM_WORLD.  This is incorrect -- should use
-     * the communicator supplied with the file open, or a copy thereof.
-     */
-    comm = MPI_COMM_WORLD;
 
     /* Barrier on entry */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))

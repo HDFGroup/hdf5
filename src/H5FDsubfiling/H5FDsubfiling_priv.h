@@ -53,13 +53,11 @@ typedef struct _info_header { /* Header for a driver info message */
     char    vfd_key[8];  /* 's' 'u' 'b' 'f' 'i' 'l' 'i' 'n'  */
 } info_header_t;
 
-extern FILE *client_log;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL herr_t H5FD__subfiling__truncate_sub_files(int64_t logical_file_eof, hid_t context_id);
+H5_DLL herr_t H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm);
 H5_DLL herr_t H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr);
 
 H5_DLL int init__indep_io(void *_sf_context, size_t depth, int ioc_total, int64_t *sf_source_data_offset,

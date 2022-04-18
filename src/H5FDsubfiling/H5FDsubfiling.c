@@ -41,11 +41,6 @@ static hid_t H5FD_SUBFILING_g = H5I_INVALID_HID;
 /* Whether the driver initialized MPI on its own */
 static hbool_t H5FD_mpi_self_initialized = FALSE;
 
-#ifndef NDEBUG
-FILE *sf_logfile = NULL;
-FILE *client_log = NULL;
-#endif
-
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
  * of the file (the current size of the underlying filesystem file). The
@@ -940,24 +935,29 @@ done:
 static herr_t
 H5FD__subfiling_close(H5FD_t *_file)
 {
-    H5FD_subfiling_t *   file_ptr   = (H5FD_subfiling_t *)_file;
-    herr_t               ret_value  = SUCCEED; /* Return value */
-    subfiling_context_t *sf_context = NULL;
+    H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(file_ptr);
 
-    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
-
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
-    if (sf_context->topology->rank_is_ioc)
-        printf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-    else
-        printf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-    fflush(stdout);
+    {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+
+        HDassert(sf_context);
+        HDassert(sf_context->topology);
+
+        if (sf_context->topology->rank_is_ioc)
+            HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+        else
+            HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
+        HDfflush(stdout);
+    }
 #endif
+
     if (H5FD_close(file_ptr->sf_file) != SUCCEED) {
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
     }
@@ -2046,7 +2046,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      *                                                 JRM -- 12/18/21
      */
 #if 1 /* JRM */
-    if (H5FD__subfiling__truncate_sub_files(file->eof, file->fa.context_id) < 0)
+    if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eof, file->comm) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
 #endif /* JRM */
 
