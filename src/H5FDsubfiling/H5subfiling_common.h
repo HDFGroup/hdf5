@@ -41,9 +41,7 @@
 
 #define H5FD_DEFAULT_STRIPE_DEPTH (32 * 1024 * 1024)
 
-/* THE following definitions are used between H5FDsubfile_mpi.c
- * and H5FDioc_threads.c
- *
+/*
  * MPI Tags are 32 bits, we treat them as unsigned
  * to allow the use of the available bits for RPC
  * selections, i.e. a message from the VFD read or write functions

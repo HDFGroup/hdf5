@@ -211,6 +211,22 @@ static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_c
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
+static int init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset, int64_t elements,
+                         int dtype_extent, int64_t *sf_source_data_offset, int64_t *sf_datasize, int64_t *sf_offset,
+                         int *first_index, int *n_containers);
+static void H5FD__create_first_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                                        int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                        int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io);
+static void H5FD__create_final_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                                        int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                        int64_t *io_datasize, int64_t *io_f_offset, int64_t last_io);
+static void H5FD__create_f_l_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                                      int64_t target_datasize, int64_t f_offset, int64_t *io_offset, int64_t *io_datasize,
+                                      int64_t *io_f_offset, int64_t first_io, int64_t last_io);
+static void H5FD__create_mpi_uniform_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                                          int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                          int64_t *io_datasize, int64_t *io_f_offset);
+
 static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_CLASS_VERSION,              /* VFD interface version */
     H5_VFD_SUBFILING,                /* value                 */
@@ -1354,17 +1370,16 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
          * For now, assume we're dealing with contiguous datasets. Vector
          * I/O will probably handle the non-contiguous case.
          */
-        max_io_req_per_ioc = init__indep_io(sf_context,         /* IN: Context used to look up config info */
-                                            max_depth,          /* IN: Maximum stripe depth */
-                                            ioc_total,          /* IN: Total number of IOCs */
-                                            source_data_offset, /* OUT: Memory offset */
-                                            sf_data_size,       /* OUT: Length of this contiguous block */
-                                            sf_offset,          /* OUT: File offset */
-                                            &ioc_start,  /* OUT: IOC index corresponding to starting offset */
-                                            &ioc_count,  /* OUT: Number of actual IOCs used */
-                                            file_offset, /* IN: Starting file offset */
-                                            io_size,     /* IN: I/O size */
-                                            1);          /* IN: Data extent of the 'type' assumes byte */
+        max_io_req_per_ioc = init_indep_io(sf_context,         /* IN: Context used to look up config info */
+                                           max_depth,          /* IN: Maximum stripe depth */
+                                           file_offset,        /* IN: Starting file offset */
+                                           io_size,            /* IN: I/O size */
+                                           1,                  /* IN: Data extent of the 'type' assumes byte */
+                                           source_data_offset, /* OUT: Memory offset */
+                                           sf_data_size,       /* OUT: Length of this contiguous block */
+                                           sf_offset,          /* OUT: File offset */
+                                           &ioc_start,         /* OUT: IOC index corresponding to starting offset */
+                                           &ioc_count);        /* OUT: Number of actual IOCs used */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -1600,17 +1615,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
          * For now, assume we're dealing with contiguous datasets. Vector
          * I/O will probably handle the non-contiguous case.
          */
-        max_io_req_per_ioc = init__indep_io(sf_context,         /* IN: Context used to look up config info */
-                                            max_depth,          /* IN: Maximum stripe depth */
-                                            ioc_total,          /* IN: Total number of IOCs */
-                                            source_data_offset, /* OUT: Memory offset */
-                                            sf_data_size,       /* OUT: Length of this contiguous block */
-                                            sf_offset,          /* OUT: File offset */
-                                            &ioc_start,  /* OUT: IOC index corresponding to starting offset */
-                                            &ioc_count,  /* OUT: Number of actual IOCs used */
-                                            file_offset, /* IN: Starting file offset */
-                                            io_size,     /* IN: I/O size */
-                                            1);          /* IN: Data extent of the 'type' assumes byte */
+        max_io_req_per_ioc = init_indep_io(sf_context,         /* IN: Context used to look up config info */
+                                           max_depth,          /* IN: Maximum stripe depth */
+                                           file_offset,        /* IN: Starting file offset */
+                                           io_size,            /* IN: I/O size */
+                                           1,                  /* IN: Data extent of the 'type' assumes byte */
+                                           source_data_offset, /* OUT: Memory offset */
+                                           sf_data_size,       /* OUT: Length of this contiguous block */
+                                           sf_offset,          /* OUT: File offset */
+                                           &ioc_start,         /* OUT: IOC index corresponding to starting offset */
+                                           &ioc_count);        /* OUT: Number of actual IOCs used */
 
         if (max_io_req_per_ioc > 0) {
             uint32_t vector_len;
@@ -2194,3 +2208,562 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_ctl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    init_indep_io
+ *
+ * Purpose:     Utility function to initialize the set of I/O transactions
+ *              used to communicate with I/O concentrators for read and
+ *              write I/O operations.
+ *
+ * Return:      A filled set of vectors.  As a consequence of not allowing
+ *              use of MPI derived datatypes in the VFD layer, we need to
+ *              accommodate the possibility that large I/O transactions
+ *              will be required to use multiple I/Os per IOC.
+ *
+ *              Example: Using 4 IOCs, each with 1M stripe-depth; when
+ *              presented an I/O request for 8MB then at a minimum each IOC
+ *              will require 2 I/Os of 1MB each.  Depending on the starting
+ *              file offset, the 2 I/Os can instead be 3...
+ *
+ *              To fully describe the I/O transactions for reads and writes
+ *              we thus use a return type where each IOC vector element is
+ *              instead a vector itself and has a vector length of which
+ *              corresponds to the max number of I/O transactions per IOC.
+ *              In the example above, these vector lengths can be 2 or 3.
+ *              The actual length is determined by the 'container_depth'
+ *              variable.
+ *
+ *              For I/O operations which involve a subset of I/O
+ *              concentrators, the vector entries for the unused IOCs will
+ *              have lengths of zero and MPI NULL datatypes.  The
+ *              'container_depth' in this case will always be 1.
+ *
+ * Return value: The vector "depth" or max number of I/Os per IOC.
+ *
+ * Errors:      Cannot fail.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset, int64_t elements,
+              int dtype_extent, int64_t *sf_source_data_offset, int64_t *sf_datasize, int64_t *sf_offset,
+              int *first_index, int *n_containers)
+{
+    int64_t stripe_size;
+    int64_t data_size;
+    int64_t start_id;
+    int64_t offset_in_stripe;
+    int64_t container_offset;
+    int64_t start_length;
+    int64_t start_row;
+    int64_t ioc_start;
+    int64_t final_offset;
+    int64_t final_id;
+    int64_t final_length;
+    int64_t ioc_final;
+    int64_t total_bytes = 0;
+    int64_t source_offset = 0;
+    int64_t row_offset;
+    int     container_count = 0;
+    int     row_id_start;
+    int     row_id_final;
+    int     container_id;
+    int     depth = 0;
+
+    HDassert(sf_context);
+    HDassert(sf_context->topology);
+    HDassert(sf_context->topology->n_io_concentrators > 0);
+    HDassert(sf_context->sf_stripe_size > 0);
+    HDassert(sf_context->sf_blocksize_per_stripe > 0);
+    HDassert(sf_source_data_offset);
+    HDassert(sf_datasize);
+    HDassert(sf_offset);
+    HDassert(first_index);
+    HDassert(n_containers);
+
+    container_count = sf_context->topology->n_io_concentrators;
+    stripe_size     = sf_context->sf_stripe_size;
+
+    data_size = elements * dtype_extent;
+
+    start_id         = offset / stripe_size;
+    offset_in_stripe = offset % sf_context->sf_blocksize_per_stripe;
+    container_offset = offset % stripe_size;
+
+    start_length = MIN(data_size, (stripe_size - container_offset));
+
+    start_row = start_id / container_count;
+    ioc_start = start_id % container_count;
+
+    final_offset = offset + data_size;
+    final_id     = final_offset / stripe_size;
+    final_length = (start_length == data_size ? 0 : final_offset % stripe_size);
+    ioc_final    = final_id % container_count;
+
+    row_id_start = (int)(start_id - ioc_start);
+    row_id_final = (int)(final_id - ioc_final);
+    depth        = ((row_id_final - row_id_start) / container_count) + 1;
+
+    container_id = (int)start_id;
+
+    row_offset = (int64_t)(start_row * stripe_size);
+
+    *first_index = (int)ioc_start;
+
+    /*
+     * Given the I/O parameters, we loop through the set of
+     * IOCs to determine the various vector components for each.
+     * Those IOCs whose datasize is zero (0), will not have
+     * I/O requests passed to them.
+     */
+    for (int i = 0, k = (int)ioc_start; i < container_count; i++) {
+        int64_t *_sf_source_data_offset;
+        int64_t *_sf_datasize;
+        int64_t *_sf_offset;
+        int64_t  container_bytes = 0;
+        size_t   depth_size;
+        size_t   output_offset;
+        hbool_t  is_first = FALSE;
+        hbool_t  is_last  = FALSE;
+        int      container_depth;
+
+        /* We use 'output_offset' as an index into a linear
+         * version of a 2D array. In 'C' the last subscript
+         * is the one that varies most rapidly.
+         * In our case, the 2D array is represented as
+         * array[ container_count ][ maxdepth ]
+         */
+
+        depth_size    = max_depth * sizeof(int64_t);
+        output_offset = (size_t)(k) * max_depth;
+
+        container_depth = depth;
+
+        _sf_source_data_offset = sf_source_data_offset + output_offset;
+        _sf_datasize           = sf_datasize + output_offset;
+        _sf_offset             = sf_offset + output_offset;
+
+        HDmemset(_sf_source_data_offset, 0, depth_size);
+        HDmemset(_sf_datasize, 0, depth_size);
+        HDmemset(_sf_offset, 0, depth_size);
+
+        if (total_bytes == data_size) {
+            *n_containers = i;
+            goto done;
+        }
+
+        if (total_bytes < data_size) {
+            if (k == ioc_start) {
+                is_first        = TRUE;
+                container_bytes = start_length;
+                container_depth--; /* Account for the start_length */
+                if (ioc_final < ioc_start) {
+                    container_depth--;
+                    depth--;
+                }
+            }
+            if (k == ioc_final) {
+                is_last = TRUE;
+                container_bytes += final_length;
+                if (container_depth)
+                    container_depth--; /* Account for the final_length */
+                if (depth)
+                    depth--;
+            }
+            container_bytes += container_depth * stripe_size;
+            total_bytes += container_bytes;
+        }
+
+        _sf_source_data_offset[0] = source_offset;
+        _sf_datasize[0]           = container_bytes;
+        _sf_offset[0]             = row_offset + offset_in_stripe;
+
+        if (container_count == 1) {
+            /* TODO */
+        }
+        else {
+            /* Fill the I/O datatypes */
+            if (is_first) {
+                if (is_last) { /* First + Last */
+                    H5FD__create_f_l_mpi_type(sf_context, container_depth + 1, source_offset, container_bytes,
+                                              row_offset + offset_in_stripe, _sf_source_data_offset,
+                                              _sf_datasize, _sf_offset, start_length, final_length);
+                }
+                else { /* First ONLY */
+                    H5FD__create_first_mpi_type(sf_context, container_depth, source_offset, container_bytes,
+                                                row_offset + offset_in_stripe, _sf_source_data_offset,
+                                                _sf_datasize, _sf_offset, start_length);
+                }
+                /* Move the memory pointer to the starting location
+                 * for next IOC request.
+                 */
+                source_offset += start_length;
+            }
+            else if (is_last) { /* Last ONLY */
+                H5FD__create_final_mpi_type(sf_context, container_depth, source_offset, container_bytes,
+                                            row_offset + offset_in_stripe, _sf_source_data_offset,
+                                            _sf_datasize, _sf_offset, final_length);
+                /* Probably not needed... */
+                source_offset += stripe_size;
+            }
+            else { /* Everything else (uniform) */
+                H5FD__create_mpi_uniform_type(sf_context, container_depth, source_offset, container_bytes,
+                                              row_offset + offset_in_stripe, _sf_source_data_offset,
+                                              _sf_datasize, _sf_offset);
+                source_offset += stripe_size;
+            }
+        }
+
+        k++;
+        offset_in_stripe += _sf_datasize[0];
+        container_id++;
+
+        if (k == container_count) {
+            k                = 0;
+            offset_in_stripe = 0;
+            depth            = ((row_id_final - container_id) / container_count) + 1;
+            row_offset += sf_context->sf_blocksize_per_stripe;
+        }
+    }
+
+    if (total_bytes != data_size) {
+#ifdef VERBOSE
+        HDprintf("%s: error - total_bytes != data_size\n", __func__);
+#endif
+    }
+
+    *n_containers = container_count;
+
+done:
+    return depth + 1;
+}
+
+/* ===================================================================== */
+/* MPI_Datatype Creation functions.
+ * These are categorized by usage patterns, i.e. when data is sent to or
+ * received from and IOC, the initial data offset provided by the user
+ * may or may NOT start on a stripe boundary.  Because this, the initial
+ * data segment to the selected IOC will often be less than 'stripe_size'
+ * in length.  The purpose of these Datatype creation functions is to
+ * enable the gathering of all data from this client to the IOC target
+ * into a single MPI message.  The MPI datatype will the be utilized by
+ * the sending function to pack data into a contiguous block of memory
+ * which enables the IOC to write to disk in an effective manner.
+ * ===================================================================== */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__create_first_mpi_type
+ *
+ * Purpose:     Return an appropriate MPI datatype to represent the initial
+ *              IO operation when reading or writing data to or from an IO
+ *              Concentrator (IOC).
+ *
+ *              If the 'first_io' is sufficient to complete the IO to the
+ *              IOC, then the returned MPI datatype will simply be MPI_BYTE.
+ *              For all other non-zero length IO operations, we create a
+ *              derived MPI datatype using MPI_Type_indexed. The 'ioc_depth'
+ *              input will define the number of blocks/disps pairs that are
+ *              required to represent the desired IO operation.
+ *
+ * Return:      The MPI_Datatype that will be used to send or receive data.
+ * Errors:      MPI_Type_NULL if for any reason, the MPI_Datatype creation
+ *              fails.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* Fill the output vectors 'io_offset', 'io_datasize' and 'io_f_offset'
+ * All calculations are in terms of bytes.
+ */
+static void
+H5FD__create_first_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                            int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                            int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io)
+{
+    int64_t stripe_size          = context->sf_stripe_size;
+    int64_t blocksize_per_stripe = context->sf_blocksize_per_stripe;
+    int64_t offset_in_stripe     = f_offset % stripe_size;
+    int64_t next_offset          = blocksize_per_stripe - offset_in_stripe;
+    int64_t total_bytes          = first_io;
+
+    io_offset[0]   = src_offset;
+    io_datasize[0] = first_io;
+    io_f_offset[0] = f_offset;
+#ifdef VERBOSE
+    printf("[%s] 0: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, src_offset, first_io, f_offset);
+    fflush(stdout);
+#endif
+    if (first_io == target_datasize) {
+        return;
+    }
+    if (first_io) {
+        int k;
+        f_offset += (blocksize_per_stripe - offset_in_stripe);
+        for (k = 1; k <= ioc_depth; k++) {
+            io_offset[k]   = next_offset;
+            io_datasize[k] = stripe_size;
+            io_f_offset[k] = f_offset;
+            total_bytes += stripe_size;
+#ifdef VERBOSE
+            printf("[%s] %d: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, k, next_offset,
+                   stripe_size, f_offset);
+            fflush(stdout);
+#endif
+            f_offset += context->sf_blocksize_per_stripe;
+            next_offset += context->sf_blocksize_per_stripe;
+        }
+        if (total_bytes != target_datasize) {
+            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
+                   target_datasize);
+        }
+    }
+    return;
+} /* end H5FD__create_first_mpi_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__create_final_mpi_type
+ *
+ * Purpose:     Return an appropriate MPI datatype to represent the final
+ *              IO operation when reading or writing data to or from an IO
+ *              Concentrator (IOC).
+ *
+ *              The data that we're sending to an IO concentrator (IOC)
+ *              contains the final collection of bytes. Other than that detail,
+ *              this is pretty much like the typical' IO case, i.e. all block
+ *              sizes are identical (execpt for the very last block).
+ *Furthermore, they all start at relative stripe offset of 0, in other words on
+ *a 'stripe_size' boundary.
+ *
+ * Return:      The MPI_Datatype that will be used to send or receive data.
+ * Errors:      MPI_Type_NULL if for any reason, the MPI_Datatype creation
+ *              fails.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* Fill the output vectors 'io_offset', 'io_datasize' and 'io_f_offset'
+ * All calculations are in terms of bytes.
+ */
+static void
+H5FD__create_final_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                            int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                            int64_t *io_datasize, int64_t *io_f_offset, int64_t last_io)
+{
+    int64_t stripe_size          = context->sf_stripe_size;
+    int64_t blocksize_per_stripe = context->sf_blocksize_per_stripe;
+    int64_t next_offset          = src_offset;
+    int64_t total_bytes          = 0;
+
+    if (last_io == target_datasize) {
+        io_offset[0]   = src_offset;
+        io_f_offset[0] = f_offset;
+        io_datasize[0] = last_io;
+#ifdef VERBOSE
+        printf("[%s] 0: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, src_offset, last_io,
+               f_offset);
+        fflush(stdout);
+#endif
+        return;
+    }
+
+    if (last_io) {
+        int i, k;
+        for (k = 0, i = 1; i < ioc_depth; i++) {
+            io_offset[k]   = next_offset;
+            io_datasize[k] = stripe_size;
+            io_f_offset[k] = f_offset;
+#ifdef VERBOSE
+            printf("[%s] %d: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, k, next_offset,
+                   stripe_size, f_offset);
+            fflush(stdout);
+#endif
+            k++;
+            total_bytes += stripe_size;
+            f_offset += blocksize_per_stripe;
+            next_offset += context->sf_blocksize_per_stripe;
+        }
+
+        io_datasize[k] = last_io;
+        io_offset[k]   = next_offset;
+        io_f_offset[k] = f_offset;
+        total_bytes += last_io;
+
+        if (total_bytes != target_datasize) {
+            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
+                   target_datasize);
+        }
+    }
+    return;
+} /* end H5FD__create_final_mpi_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__create_f_l_mpi_type
+ *
+ * Purpose:     Return an appropriate MPI datatype which includes both the
+ *              first and final IO data segments.
+ *
+ *              A special case where the current IOC has both the first and
+ *              final write blocks. This function is basically a merge of
+ *              the first_mpi_type and final_mpi_type functions.
+ *
+ * Return:      The MPI_Datatype that will be used to send or receive data.
+ * Errors:      MPI_Type_NULL if for any reason, the MPI_Datatype creation
+ *              fails.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+H5FD__create_f_l_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                          int64_t target_datasize, int64_t f_offset, int64_t *io_offset, int64_t *io_datasize,
+                          int64_t *io_f_offset, int64_t first_io, int64_t last_io)
+{
+    int64_t stripe_size          = context->sf_stripe_size;
+    int64_t blocksize_per_stripe = context->sf_blocksize_per_stripe;
+    int64_t offset_in_stripe     = f_offset % stripe_size;
+    int64_t next_offset          = blocksize_per_stripe - offset_in_stripe;
+    int64_t total_bytes          = first_io;
+
+    io_offset[0]   = src_offset;
+    io_datasize[0] = first_io;
+    io_f_offset[0] = f_offset;
+
+#ifdef VERBOSE
+    printf("[%s] 0: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, src_offset, first_io, f_offset);
+    fflush(stdout);
+#endif
+    if (total_bytes == target_datasize) {
+        return;
+    }
+
+    if (total_bytes) {
+        int k;
+        f_offset += (blocksize_per_stripe - offset_in_stripe);
+        for (k = 1; k < ioc_depth; k++) {
+            io_offset[k]   = next_offset;
+            io_datasize[k] = stripe_size;
+            io_f_offset[k] = f_offset;
+            total_bytes += stripe_size;
+#ifdef VERBOSE
+            printf("[%s] %d: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, k, next_offset,
+                   stripe_size, f_offset);
+            fflush(stdout);
+#endif
+            f_offset += blocksize_per_stripe;
+            next_offset += blocksize_per_stripe;
+        }
+        io_datasize[ioc_depth] = last_io;
+        io_f_offset[ioc_depth] = f_offset;
+        io_offset[ioc_depth]   = next_offset;
+#ifdef VERBOSE
+        printf("[%s] %d: mem_offset=%ld, datasize=%ld, f_offset=%ld\n", __func__, k, next_offset, last_io,
+               f_offset);
+        fflush(stdout);
+#endif
+        total_bytes += last_io;
+
+        if (total_bytes != target_datasize) {
+            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
+                   target_datasize);
+        }
+    }
+    return;
+} /* end H5FD__create_f_l_mpi_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__create_mpi_uniform_type
+ *
+ * Purpose:     Return an appropriate MPI datatype to represent the typical
+ *              IO operation when reading or writing data to or from an IO
+ *              Concentrator (IOC).
+ *
+ *              Each data segment is of 'stripe_size' length and will be
+ *              separated from a previous or following segment by
+ *              'sf_blocksize_per_stripe' bytes of data.
+ *
+ * Return:      The MPI_Datatype that will be used to send or receive data.
+ * Errors:      MPI_Type_NULL if for any reason, the MPI_Datatype creation
+ *              fails.
+ *
+ * Programmer:  Richard Warren
+ *              7/17/2020
+ *
+ * Changes:     Initial Version/None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5FD__create_mpi_uniform_type(subfiling_context_t *context, int ioc_depth, int64_t src_offset,
+                              int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                              int64_t *io_datasize, int64_t *io_f_offset)
+{
+    int64_t stripe_size          = context->sf_stripe_size;
+    int64_t blocksize_per_stripe = context->sf_blocksize_per_stripe;
+    int64_t next_offset          = src_offset + blocksize_per_stripe;
+    int64_t total_bytes          = 0;
+
+    io_offset[0]   = src_offset;
+    io_datasize[0] = stripe_size;
+    io_f_offset[0] = f_offset;
+    if (target_datasize == 0) {
+#if 0
+    printf("[%s] 0: datasize=0\n", __func__);
+    fflush(stdout);
+#endif
+        io_datasize[0] = 0;
+        return;
+    }
+
+#if 0
+  printf("[%s] 0: mem_offset=%ld, datasize=%ld, f_offset=%ld\n",
+         __func__, src_offset, stripe_size, f_offset);
+  fflush(stdout);
+#endif
+
+    f_offset += blocksize_per_stripe;
+    total_bytes = stripe_size;
+
+    if (target_datasize > stripe_size) {
+        int k;
+        for (k = 1; k < ioc_depth; k++) {
+            io_offset[k]   = next_offset;
+            io_datasize[k] = stripe_size;
+            io_f_offset[k] = f_offset;
+#if 0
+      printf("[%s] %d: mem_offset=%ld, datasize=%ld, f_offset=%ld\n",
+             __func__, k, next_offset, stripe_size, f_offset);
+      fflush(stdout);
+#endif
+            total_bytes += stripe_size;
+            f_offset += blocksize_per_stripe;
+            next_offset += blocksize_per_stripe;
+        }
+
+        if (total_bytes != target_datasize) {
+            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
+                   target_datasize);
+        }
+    }
+    return;
+} /* end H5FD__create_mpi_uniform_type() */

@@ -298,7 +298,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
       ${H5FD_SUBFILING_DIR}/H5FDioc_threads.c
       ${H5FD_SUBFILING_DIR}/H5FDsubfiling.c
       ${H5FD_SUBFILING_DIR}/H5FDsubfile_int.c
-      ${H5FD_SUBFILING_DIR}/H5FDsubfile_mpi.c
       ${H5FD_SUBFILING_DIR}/H5subfiling_common.c
       ${MERCURY_UTIL_SOURCES}
   )

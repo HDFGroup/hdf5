@@ -122,7 +122,6 @@ endif
 if SUBFILING_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDsubfiling/H5FDsubfiling.c \
                           H5FDsubfiling/H5FDsubfile_int.c \
-                          H5FDsubfiling/H5FDsubfile_mpi.c \
                           H5FDsubfiling/H5FDioc.c \
                           H5FDsubfiling/H5FDioc_int.c \
                           H5FDsubfiling/H5FDioc_threads.c \

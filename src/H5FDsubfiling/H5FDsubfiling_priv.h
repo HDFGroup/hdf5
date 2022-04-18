@@ -60,10 +60,6 @@ extern "C" {
 H5_DLL herr_t H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm);
 H5_DLL herr_t H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr);
 
-H5_DLL int init__indep_io(void *_sf_context, size_t depth, int ioc_total, int64_t *sf_source_data_offset,
-                          int64_t *sf_datasize, int64_t *f_offset, int *first_index, int *n_containers,
-                          int64_t offset, int64_t elements, int dtype_extent);
-
 #ifdef __cplusplus
 }
 #endif
