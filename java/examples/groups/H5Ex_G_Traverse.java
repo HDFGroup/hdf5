@@ -24,10 +24,11 @@ package examples.groups;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5L_iterate_t;
 import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
+import hdf.hdf5lib.callbacks.H5L_iterate_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
+
 import examples.groups.H5Ex_G_Iterate.H5O_type;
 
 class opdata implements H5L_iterate_opdata_t {
@@ -38,10 +39,11 @@ class opdata implements H5L_iterate_opdata_t {
 
 public class H5Ex_G_Traverse {
 
-    private static String FILE = "h5ex_g_traverse.h5";
+    private static String FILE          = "h5ex_g_traverse.h5";
     public static H5L_iterate_t iter_cb = new H5L_iter_callbackT();
 
-    private static void OpenGroup() {
+    private static void OpenGroup()
+    {
         long file_id = HDF5Constants.H5I_INVALID_HID;
         H5O_info_t infobuf;
         opdata od = new opdata();
@@ -50,9 +52,9 @@ public class H5Ex_G_Traverse {
         try {
             file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
             if (file_id >= 0) {
-                infobuf = H5.H5Oget_info(file_id);
-                od.recurs = 0;
-                od.prev = null;
+                infobuf      = H5.H5Oget_info(file_id);
+                od.recurs    = 0;
+                od.prev      = null;
                 od.obj_token = infobuf.token;
             }
         }
@@ -64,7 +66,8 @@ public class H5Ex_G_Traverse {
         try {
             System.out.println("/ {");
             // H5L_iterate_t iter_cb = new H5L_iter_callbackT();
-            H5.H5Literate(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb, od);
+            H5.H5Literate(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb,
+                          od);
             System.out.println("}");
         }
         catch (Exception e) {
@@ -81,18 +84,17 @@ public class H5Ex_G_Traverse {
         }
     }
 
-    public static void main(String[] args) {
-        H5Ex_G_Traverse.OpenGroup();
-    }
+    public static void main(String[] args) { H5Ex_G_Traverse.OpenGroup(); }
 }
 
 class H5L_iter_callbackT implements H5L_iterate_t {
-    public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data) {
+    public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
+    {
 
         H5O_info_t infobuf;
         int return_val = 0;
-        opdata od = (opdata) op_data; // Type conversion
-        int spaces = 2 * (od.recurs + 1); // Number of white spaces to prepend to output.
+        opdata od      = (opdata)op_data;     // Type conversion
+        int spaces     = 2 * (od.recurs + 1); // Number of white spaces to prepend to output.
 
         // Get type of the object and display its name and type.
         // The name of the object is passed to this function by the Library.
@@ -123,13 +125,14 @@ class H5L_iter_callbackT implements H5L_iterate_t {
                     // recursive iteration on the discovered
                     // group. The new opdata is given a pointer to the
                     // current one.
-                    opdata nextod = new opdata();
-                    nextod.recurs = od.recurs + 1;
-                    nextod.prev = od;
-                    nextod.obj_token = infobuf.token;
+                    opdata nextod          = new opdata();
+                    nextod.recurs          = od.recurs + 1;
+                    nextod.prev            = od;
+                    nextod.obj_token       = infobuf.token;
                     H5L_iterate_t iter_cb2 = new H5L_iter_callbackT();
-                    return_val = H5.H5Literate_by_name(group, name, HDF5Constants.H5_INDEX_NAME,
-                            HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod, HDF5Constants.H5P_DEFAULT);
+                    return_val             = H5.H5Literate_by_name(group, name, HDF5Constants.H5_INDEX_NAME,
+                                                                   HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod,
+                                                                   HDF5Constants.H5P_DEFAULT);
                 }
                 for (int i = 0; i < spaces; i++)
                     System.out.print(" ");
@@ -152,7 +155,8 @@ class H5L_iter_callbackT implements H5L_iterate_t {
         return return_val;
     }
 
-    public boolean group_check(opdata od, H5O_token_t target_token) {
+    public boolean group_check(opdata od, H5O_token_t target_token)
+    {
         if (od.obj_token.equals(target_token))
             return true; // Object tokens match
         else if (od.recurs == 0)
@@ -160,5 +164,4 @@ class H5L_iter_callbackT implements H5L_iterate_t {
         else
             return group_check(od.prev, target_token); // Recursively examine the next node
     }
-
 }

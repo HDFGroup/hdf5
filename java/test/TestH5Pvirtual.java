@@ -32,48 +32,47 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Pvirtual {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname = new TestName();
 
-    private static final String H5_FILE = "vds.h5";
-    private static final String SRC_FILE[] = {
-            "v-0.h5",
-            "v-1.h5",
-            "v-2.h5"
-        };
-    private static final String SRC_DATASET[] = {
-            "A",
-            "B",
-            "C"
-        };
-    private static final int DIM_Y = 6;
-    private static final int VDSDIM_X = 4;
-    private static final int VDSDIM_Y = 6;
-    private static final int fill_value = -1;
-    long[] H5dims = { DIM_Y };
-    long[] VDSH5dims = { VDSDIM_X, VDSDIM_Y };
-    long H5fid = HDF5Constants.H5I_INVALID_HID;
-    long H5dsid = HDF5Constants.H5I_INVALID_HID;
-    long H5dssid = HDF5Constants.H5I_INVALID_HID;
-    long H5dvsid = HDF5Constants.H5I_INVALID_HID;
-    long H5did = HDF5Constants.H5I_INVALID_HID;
-    long H5dcplid = HDF5Constants.H5I_INVALID_HID;
-    long H5dapl_id = HDF5Constants.H5I_INVALID_HID;
+    private static final String H5_FILE       = "vds.h5";
+    private static final String SRC_FILE[]    = {"v-0.h5", "v-1.h5", "v-2.h5"};
+    private static final String SRC_DATASET[] = {"A", "B", "C"};
+    private static final int DIM_Y            = 6;
+    private static final int VDSDIM_X         = 4;
+    private static final int VDSDIM_Y         = 6;
+    private static final int fill_value       = -1;
+    long[] H5dims                             = {DIM_Y};
+    long[] VDSH5dims                          = {VDSDIM_X, VDSDIM_Y};
+    long H5fid                                = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid                               = HDF5Constants.H5I_INVALID_HID;
+    long H5dssid                              = HDF5Constants.H5I_INVALID_HID;
+    long H5dvsid                              = HDF5Constants.H5I_INVALID_HID;
+    long H5did                                = HDF5Constants.H5I_INVALID_HID;
+    long H5dcplid                             = HDF5Constants.H5I_INVALID_HID;
+    long H5dapl_id                            = HDF5Constants.H5I_INVALID_HID;
 
-    private final void _deleteFile(String filename) {
+    private final void _deleteFile(String filename)
+    {
         File file = new File(filename);
 
         if (file.exists()) {
-            try {file.delete();} catch (SecurityException e) {}
+            try {
+                file.delete();
+            }
+            catch (SecurityException e) {
+            }
         }
     }
 
-    private final long _createDataset(long fid, long dsid, String name, long dcpl, long dapl) {
-        long did = HDF5Constants.H5I_INVALID_HID;
+    private final long _createDataset(long fid, long dsid, String name, long dcpl, long dapl)
+    {
+        long did      = HDF5Constants.H5I_INVALID_HID;
         long space_id = HDF5Constants.H5I_INVALID_HID;
-        long[] start = {0, 0};
+        long[] start  = {0, 0};
         long[] stride = null;
-        long[] count = {1, 1};
-        long[] block = {1, VDSDIM_Y};
+        long[] count  = {1, 1};
+        long[] block  = {1, VDSDIM_Y};
 
         try {
             H5dssid = H5.H5Screate_simple(1, H5dims, null);
@@ -83,8 +82,8 @@ public class TestH5Pvirtual {
                 H5.H5Sselect_hyperslab(dsid, HDF5Constants.H5S_SELECT_SET, start, stride, count, block);
                 H5.H5Pset_virtual(dcpl, dsid, SRC_FILE[i], SRC_DATASET[i], H5dssid);
             }
-            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_NATIVE_INT, dsid,
-                    HDF5Constants.H5P_DEFAULT, dcpl, dapl);
+            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_NATIVE_INT, dsid, HDF5Constants.H5P_DEFAULT, dcpl,
+                               dapl);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -95,23 +94,26 @@ public class TestH5Pvirtual {
         return did;
     }
 
-    private final void _createH5File(long fcpl, long fapl) {
+    private final void _createH5File(long fcpl, long fapl)
+    {
         int[] dset_data = new int[DIM_Y];
         // Create source files and datasets
-        for (int i=0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             long space_id = HDF5Constants.H5I_INVALID_HID;
-            long dset_id = HDF5Constants.H5I_INVALID_HID;
-            long file_id = HDF5Constants.H5I_INVALID_HID;
-            for (int j = 0; j < DIM_Y; j++) dset_data[j] = i+1;
+            long dset_id  = HDF5Constants.H5I_INVALID_HID;
+            long file_id  = HDF5Constants.H5I_INVALID_HID;
+            for (int j = 0; j < DIM_Y; j++)
+                dset_data[j] = i + 1;
 
             try {
-                file_id = H5.H5Fcreate(SRC_FILE[i], HDF5Constants.H5F_ACC_TRUNC,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                file_id  = H5.H5Fcreate(SRC_FILE[i], HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                        HDF5Constants.H5P_DEFAULT);
                 space_id = H5.H5Screate_simple(1, H5dims, null);
-                dset_id = H5.H5Dcreate(file_id, SRC_DATASET[i], HDF5Constants.H5T_NATIVE_INT, space_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                H5.H5Dwrite (dset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT,
-                        dset_data);
+                dset_id  = H5.H5Dcreate(file_id, SRC_DATASET[i], HDF5Constants.H5T_NATIVE_INT, space_id,
+                                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                        HDF5Constants.H5P_DEFAULT);
+                H5.H5Dwrite(dset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -119,19 +121,32 @@ public class TestH5Pvirtual {
             }
             finally {
                 if (dset_id > 0)
-                    try {H5.H5Dclose(dset_id);} catch (Exception ex) {}
+                    try {
+                        H5.H5Dclose(dset_id);
+                    }
+                    catch (Exception ex) {
+                    }
                 if (space_id > 0)
-                    try {H5.H5Sclose(space_id);} catch (Exception ex) {}
+                    try {
+                        H5.H5Sclose(space_id);
+                    }
+                    catch (Exception ex) {
+                    }
                 if (file_id > 0)
-                    try {H5.H5Fclose(file_id);} catch (Exception ex) {}
+                    try {
+                        H5.H5Fclose(file_id);
+                    }
+                    catch (Exception ex) {
+                    }
             }
         }
 
         try {
             int[] fill_value = {-1};
-            H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            H5dsid = H5.H5Screate_simple(2, VDSH5dims, null);
-            H5dcplid = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            H5fid            = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                            HDF5Constants.H5P_DEFAULT);
+            H5dsid           = H5.H5Screate_simple(2, VDSH5dims, null);
+            H5dcplid         = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
             H5.H5Pset_fill_value(H5dcplid, HDF5Constants.H5T_NATIVE_INT, fill_value);
         }
         catch (Throwable err) {
@@ -151,25 +166,42 @@ public class TestH5Pvirtual {
     }
 
     @Before
-    public void createH5file()
-            throws NullPointerException, HDF5Exception {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void createH5file() throws NullPointerException, HDF5Exception
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
         _createH5File(HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         H5dapl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
         assertTrue("TestH5Pvirtual.createH5file: H5.H5Pcreate: ", H5dapl_id > 0);
-  }
+    }
 
     @After
-    public void deleteH5file() throws HDF5LibraryException {
+    public void deleteH5file() throws HDF5LibraryException
+    {
         if (H5dapl_id > 0)
-            try {H5.H5Pclose(H5dapl_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(H5dapl_id);
+            }
+            catch (Exception ex) {
+            }
         if (H5dcplid > 0)
-            try {H5.H5Pclose(H5dcplid);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(H5dcplid);
+            }
+            catch (Exception ex) {
+            }
         if (H5dsid > 0)
-            try {H5.H5Sclose(H5dsid);} catch (Exception ex) {}
+            try {
+                H5.H5Sclose(H5dsid);
+            }
+            catch (Exception ex) {
+            }
         if (H5fid > 0)
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(H5fid);
+            }
+            catch (Exception ex) {
+            }
         for (int i = 0; i < 3; i++) {
             _deleteFile(SRC_FILE[i]);
         }
@@ -178,12 +210,13 @@ public class TestH5Pvirtual {
     }
 
     @Test
-    public void testH5Pvirtual_storage() {
+    public void testH5Pvirtual_storage()
+    {
         int layout = -1;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
-            layout = H5.H5Pget_layout (H5dcplid);
+            layout = H5.H5Pget_layout(H5dcplid);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -191,15 +224,24 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
         assertTrue("testH5Pvirtual_storage", HDF5Constants.H5D_VIRTUAL == layout);
     }
 
     @Test
-    public void testH5Pget_virtual_count() {
+    public void testH5Pget_virtual_count()
+    {
         long num_map = -1;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
@@ -212,21 +254,30 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
-        assertTrue("testH5Pget_virtual_count: "+num_map, num_map >= 0);
+        assertTrue("testH5Pget_virtual_count: " + num_map, num_map >= 0);
         assertEquals(3, num_map);
     }
 
     @Test
-    public void testH5Pget_source_filename() throws Throwable {
+    public void testH5Pget_source_filename() throws Throwable
+    {
         String filename = null;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
-            filename = (H5.H5Pget_virtual_filename (H5dcplid, 2));
+            filename = (H5.H5Pget_virtual_filename(H5dcplid, 2));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -234,20 +285,29 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
-        assertTrue("testH5Pget_source_filename: "+filename, filename.compareTo("v-2.h5") == 0);
+        assertTrue("testH5Pget_source_filename: " + filename, filename.compareTo("v-2.h5") == 0);
     }
 
     @Test
-    public void testH5Pget_source_datasetname() throws Throwable {
+    public void testH5Pget_source_datasetname() throws Throwable
+    {
         String datasetname = null;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
-            datasetname = H5.H5Pget_virtual_dsetname (H5dcplid, 1);
+            datasetname = H5.H5Pget_virtual_dsetname(H5dcplid, 1);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -255,21 +315,30 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
-        assertTrue("testH5Pget_source_datasetname: "+datasetname, datasetname.compareTo("B") == 0);
+        assertTrue("testH5Pget_source_datasetname: " + datasetname, datasetname.compareTo("B") == 0);
     }
 
     @Test
-    public void testH5Pget_selection_source_dataset() throws Throwable {
-        long src_space = HDF5Constants.H5I_INVALID_HID;
+    public void testH5Pget_selection_source_dataset() throws Throwable
+    {
+        long src_space     = HDF5Constants.H5I_INVALID_HID;
         long src_selection = -1;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
-            src_space = H5.H5Pget_virtual_srcspace (H5dcplid, 0);
+            src_space     = H5.H5Pget_virtual_srcspace(H5dcplid, 0);
             src_selection = H5.H5Sget_select_type(src_space);
         }
         catch (Throwable err) {
@@ -278,17 +347,30 @@ public class TestH5Pvirtual {
         }
         finally {
             if (src_space > 0)
-                try {H5.H5Sclose(src_space);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(src_space);
+                }
+                catch (Exception ex) {
+                }
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
         assertTrue("testH5Pget_selection_source_dataset", src_selection == HDF5Constants.H5S_SEL_ALL);
     }
 
     @Test
-    public void testH5Pget_mapping_parameters() {
+    public void testH5Pget_mapping_parameters()
+    {
         long num_map = -1;
 
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
@@ -302,22 +384,22 @@ public class TestH5Pvirtual {
             }
             for (int i = 0; i < num_map; i++) {
                 int vselection = -1;
-                long vspace = -1;
-                long nblocks;   // Number of hyperslab blocks
-                long blocks[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};    // List of blocks
-                long[] start = {i, 0};
-                long[] stride = {1, 1};
-                long[] count = {1, 1};
-                long[] block = {1, VDSDIM_Y};
-                long q_start[] = new long[2];
-                long q_stride[] = new long[2];
-                long q_count[] = new long[2];
-                long q_block[] = new long[2];
+                long vspace    = -1;
+                long nblocks; // Number of hyperslab blocks
+                long blocks[]      = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; // List of blocks
+                long[] start       = {i, 0};
+                long[] stride      = {1, 1};
+                long[] count       = {1, 1};
+                long[] block       = {1, VDSDIM_Y};
+                long q_start[]     = new long[2];
+                long q_stride[]    = new long[2];
+                long q_count[]     = new long[2];
+                long q_block[]     = new long[2];
                 boolean is_regular = false;
 
                 try {
                     try {
-                        vspace = H5.H5Pget_virtual_vspace (H5dcplid, i);
+                        vspace = H5.H5Pget_virtual_vspace(H5dcplid, i);
                     }
                     catch (Throwable err) {
                         err.printStackTrace();
@@ -330,7 +412,8 @@ public class TestH5Pvirtual {
                         err.printStackTrace();
                         fail("H5.H5Sget_select_type: " + err);
                     }
-                    assertTrue("testH5Pget_mapping_parameters["+i+"]", vselection == HDF5Constants.H5S_SEL_HYPERSLABS);
+                    assertTrue("testH5Pget_mapping_parameters[" + i + "]",
+                               vselection == HDF5Constants.H5S_SEL_HYPERSLABS);
 
                     // Verify that there is only one block
                     nblocks = H5.H5Sget_select_hyper_nblocks(vspace);
@@ -340,30 +423,38 @@ public class TestH5Pvirtual {
                     H5.H5Sget_select_hyper_blocklist(vspace, 0, nblocks, blocks);
 
                     // Verify that the correct block is defined
-                    assertTrue("H5.H5Sget_select_hyper_blocklist["+i+"] [0]: "+blocks[0], start[0] == blocks[0]);
-                    assertTrue("H5.H5Sget_select_hyper_blocklist["+i+"] [1]: "+blocks[1], start[1] == blocks[1]);
-                    assertTrue("H5.H5Sget_select_hyper_blocklist["+i+"] [2]: "+blocks[2], (block[0]-1+i) == blocks[2]);
-                    assertTrue("H5.H5Sget_select_hyper_blocklist["+i+"] [3]: "+blocks[3], (block[1]-1) == blocks[3]);
+                    assertTrue("H5.H5Sget_select_hyper_blocklist[" + i + "] [0]: " + blocks[0],
+                               start[0] == blocks[0]);
+                    assertTrue("H5.H5Sget_select_hyper_blocklist[" + i + "] [1]: " + blocks[1],
+                               start[1] == blocks[1]);
+                    assertTrue("H5.H5Sget_select_hyper_blocklist[" + i + "] [2]: " + blocks[2],
+                               (block[0] - 1 + i) == blocks[2]);
+                    assertTrue("H5.H5Sget_select_hyper_blocklist[" + i + "] [3]: " + blocks[3],
+                               (block[1] - 1) == blocks[3]);
                     // We also can use new APIs to get start, stride, count and block
                     is_regular = H5.H5Sis_regular_hyperslab(vspace);
                     assertTrue("H5.H5Sis_regular_hyperslab", is_regular);
-                    H5.H5Sget_regular_hyperslab (vspace, q_start, q_stride, q_count, q_block);
+                    H5.H5Sget_regular_hyperslab(vspace, q_start, q_stride, q_count, q_block);
 
                     // Verify the hyperslab parameters
-                    for(int u = 0; u < 2; u++) {
+                    for (int u = 0; u < 2; u++) {
                         assertTrue("H5Sget_regular_hyperslab, start", start[u] == q_start[u]);
                         assertTrue("H5Sget_regular_hyperslab, stride", stride[u] == q_stride[u]);
                         assertTrue("H5Sget_regular_hyperslab, count", count[u] == q_count[u]);
                         assertTrue("H5Sget_regular_hyperslab, block", block[u] == q_block[u]);
                     }
-               }
+                }
                 catch (Throwable err) {
                     err.printStackTrace();
                     fail("H5.testH5Pget_mapping_parameters: " + err);
                 }
                 finally {
                     if (vspace > 0)
-                        try {H5.H5Sclose(vspace);} catch (Exception ex) {}
+                        try {
+                            H5.H5Sclose(vspace);
+                        }
+                        catch (Exception ex) {
+                        }
                 }
             }
         }
@@ -373,16 +464,25 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void testH5Pset_get_virtual_view() {
+    public void testH5Pset_get_virtual_view()
+    {
         int ret_val = -1;
-        H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
+        H5did       = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
             ret_val = H5.H5Pget_virtual_view(H5dapl_id);
             assertTrue("H5Pget_virtual_view", ret_val >= 0);
@@ -398,16 +498,25 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void  testH5Pset_get_virtual_printf_gap() {
+    public void testH5Pset_get_virtual_printf_gap()
+    {
         long ret_val = -1;
-        H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
+        H5did        = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
         try {
             ret_val = H5.H5Pget_virtual_printf_gap(H5dapl_id);
             assertTrue("H5Pget_virtual_printf_gap", ret_val >= 0);
@@ -423,14 +532,23 @@ public class TestH5Pvirtual {
         }
         finally {
             if (H5dssid > 0)
-                try {H5.H5Sclose(H5dssid);} catch (Exception ex) {}
+                try {
+                    H5.H5Sclose(H5dssid);
+                }
+                catch (Exception ex) {
+                }
             if (H5did > 0)
-                try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+                try {
+                    H5.H5Dclose(H5did);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void testH5Pset_virtual_prefix() {
+    public void testH5Pset_virtual_prefix()
+    {
         String prefix = "tmp";
         try {
             H5.H5Pset_virtual_prefix(H5dapl_id, prefix);
@@ -442,14 +560,16 @@ public class TestH5Pvirtual {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pset_virtual_prefix_null() throws Throwable{
+    public void testH5Pset_virtual_prefix_null() throws Throwable
+    {
         H5.H5Pset_virtual_prefix(H5dapl_id, null);
     }
 
     @Test
-    public void testH5Pget_virtual_prefix() {
+    public void testH5Pget_virtual_prefix()
+    {
         String prefix = "tmp";
-        String pre = "";
+        String pre    = "";
 
         try {
             H5.H5Pset_virtual_prefix(H5dapl_id, prefix);
