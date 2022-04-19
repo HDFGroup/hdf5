@@ -494,8 +494,10 @@ done:
 static herr_t
 H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
-    char * h5_require_ioc;
-    herr_t ret_value = SUCCEED;
+    MPI_Comm comm = MPI_COMM_NULL;
+    MPI_Info info = MPI_INFO_NULL;
+    char *   h5_require_ioc;
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -521,20 +523,22 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
             config_out->require_ioc = FALSE;
     }
 
+    /* Check if any MPI parameters were set on the FAPL */
+    if (H5Pget_mpi_params(fapl_id, &comm, &info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI Comm/Info")
+    if (comm == MPI_COMM_NULL) {
+        comm = MPI_COMM_WORLD;
+
+        /* Set MPI_COMM_WORLD on FAPL if no MPI parameters were set */
+        if (H5Pset_mpi_params(fapl_id, comm, info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI Comm/Info")
+    }
+
     /* Create a default FAPL and choose an appropriate underlying driver */
     if ((config_out->ioc_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create default FAPL")
 
     if (config_out->require_ioc) {
-        MPI_Comm comm = MPI_COMM_NULL;
-        MPI_Info info = MPI_INFO_NULL;
-
-        /* Propagate MPI Info down to IOC FAPL if any is available */
-        if (H5Pget_mpi_params(fapl_id, &comm, &info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI Comm/Info")
-        if (comm == MPI_COMM_NULL)
-            comm = MPI_COMM_WORLD;
-
         if (H5Pset_mpi_params(config_out->ioc_fapl_id, comm, info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get MPI Comm/Info on IOC FAPL")
 
