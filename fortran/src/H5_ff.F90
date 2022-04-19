@@ -250,7 +250,7 @@ CONTAINS
 
     END INTERFACE
 
-    ! Check if H5open_f has already been called, if so, don't bother calling it again.
+    ! Check if H5open_f has already been called. If so, skip doing it again.
     IF(H5OPEN_NUM_OBJ .NE. 0) RETURN
 
     error = h5init_types_c(predef_types, floating_types, integer_types)
@@ -690,7 +690,7 @@ CONTAINS
        END FUNCTION h5close_types_c
     END INTERFACE
 
-    ! Check if h5close_f has already been called, skip if true.
+    ! Check if h5close_f has already been called. Skip doing it again.
     IF(H5OPEN_NUM_OBJ .EQ. 0) RETURN
 
     error = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
