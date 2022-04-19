@@ -22,7 +22,7 @@
 !
 ! CONTAINS SUBROUTINES
 !  mountingtest, reopentest, get_name_test, plisttest, 
-!  file_close, file_space
+!  file_close, file_space, h5openclose
 !
 !*****
 !
@@ -34,6 +34,103 @@
 MODULE TH5F
 
 CONTAINS
+
+  SUBROUTINE h5openclose(total_error)
+    USE HDF5  ! This module contains all necessary modules
+    USE TH5_MISC
+    IMPLICIT NONE
+    INTEGER, INTENT(INOUT) :: total_error
+
+    !
+    ! flag to check operation success
+    !
+    INTEGER :: error
+    INTEGER(SIZE_T) :: obj_count ! open object count
+    INTEGER, DIMENSION(1:5) :: obj_type ! open object type to check
+    INTEGER :: i, j
+
+    DO j = 1, 2
+       CALL h5open_f(error)
+       CALL check("h5open_f",error,total_error)
+
+       obj_type(1) = H5F_OBJ_ALL_F
+       obj_type(2) = H5F_OBJ_FILE_F
+       obj_type(3) = H5F_OBJ_GROUP_F
+       obj_type(4) = H5F_OBJ_DATASET_F
+       obj_type(5) = H5F_OBJ_DATATYPE_F
+
+       CALL h5close_f(error)
+       CALL check("h5close_f",error,total_error)
+       ! Check all the datatypes created during h5open_f are closed in h5close_f
+       DO i = 1, 5
+          CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+          CALL check("h5fget_obj_count_f",error,total_error)
+          IF(obj_count.NE.0)THEN
+             total_error = total_error + 1
+          ENDIF
+       ENDDO
+    ENDDO
+
+    ! Test calling h5open_f multiple times without calling h5close_f
+    DO j = 1, 4
+       CALL h5open_f(error)
+       CALL check("h5open_f",error,total_error)
+    ENDDO
+
+    CALL h5close_f(error)
+    CALL check("h5close_f",error,total_error)
+    ! Check all the datatypes created during h5open_f are closed in h5close_f
+    DO i = 1, 5
+       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+       CALL check("h5fget_obj_count_f",error,total_error)
+       IF(obj_count.NE.0)THEN
+          total_error = total_error + 1
+       ENDIF
+    ENDDO
+
+    ! Test calling h5open_f multiple times with a h5close_f in the series of h5open_f
+    DO j = 1, 5
+       CALL h5open_f(error)
+       CALL check("h5open_f",error,total_error)
+       IF(j.EQ.3)THEN
+          CALL h5close_f(error)
+          CALL check("h5close_f",error,total_error)
+          ! Check all the datatypes created during h5open_f are closed in h5close_f
+          DO i = 1, 5
+             CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+             CALL check("h5fget_obj_count_f",error,total_error)
+             IF(obj_count.NE.0)THEN
+                total_error = total_error + 1
+             ENDIF
+          ENDDO
+       ENDIF
+    ENDDO
+
+    CALL h5close_f(error)
+    CALL check("h5close_f",error,total_error)
+    ! Check all the datatypes created during h5open_f are closed in h5close_f
+    DO i = 1, 5
+       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+       CALL check("h5fget_obj_count_f",error,total_error)
+       IF(obj_count.NE.0)THEN
+          total_error = total_error + 1
+       ENDIF
+    ENDDO
+
+    ! Check calling h5close_f after already calling h5close_f
+    CALL h5close_f(error)
+    CALL check("h5close_f",error,total_error)
+    ! Check all the datatypes created during h5open_f are closed in h5close_f
+    DO i = 1, 5
+       CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), obj_type(i), obj_count, error)
+       CALL check("h5fget_obj_count_f",error,total_error)
+       IF(obj_count.NE.0)THEN
+          total_error = total_error + 1
+       ENDIF
+    ENDDO
+
+    RETURN
+  END SUBROUTINE h5openclose
 
         SUBROUTINE mountingtest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
