@@ -250,6 +250,9 @@ CONTAINS
 
     END INTERFACE
 
+    ! Check if H5open_f has already been called. If so, skip doing it again.
+    IF(H5OPEN_NUM_OBJ .NE. 0) RETURN
+
     error = h5init_types_c(predef_types, floating_types, integer_types)
 
     H5T_NATIVE_INTEGER_KIND(1:5)  = predef_types(1:5)
@@ -668,6 +671,7 @@ CONTAINS
 !          October 13, 2011
 ! Fortran90 Interface:
   SUBROUTINE h5close_f(error)
+    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
 !*****
@@ -685,9 +689,16 @@ CONTAINS
          INTEGER(HID_T), DIMENSION(1:I_TYPES_LEN) :: i_types
        END FUNCTION h5close_types_c
     END INTERFACE
+
+    ! Check if h5close_f has already been called. Skip doing it again.
+    IF(H5OPEN_NUM_OBJ .EQ. 0) RETURN
+
     error = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
          floating_types, FLOATING_TYPES_LEN, &
          integer_types, INTEGER_TYPES_LEN )
+
+    ! Reset the number of open objects from h5open_f to zero
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, H5OPEN_NUM_OBJ,  error)
 
   END SUBROUTINE h5close_f
 

@@ -317,7 +317,7 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
   CALL check("h5pclose_f",error,total_error)
 
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   CALL h5dopen_f(fid, DSET1_NAME, dset1, error)
   CALL check("h5dopen_f",error,total_error)
@@ -432,7 +432,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
   !  Create dataspace for dataset attributes
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
   CALL check("h5screate_f",error,total_error)
@@ -1163,7 +1163,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
      IF(test_shared.EQ.2) THEN
@@ -1827,7 +1827,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
 
@@ -2048,7 +2048,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Create dataspace for dataset
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
@@ -2325,7 +2325,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Open dataset created
   CALL h5dopen_f(fid, DSET1_NAME, dataset, error, H5P_DEFAULT_F )
