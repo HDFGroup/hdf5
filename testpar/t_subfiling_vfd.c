@@ -135,6 +135,9 @@ create_subfiling_ioc_fapl(const char *base_filename)
     if ((ret_value = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
+    if (H5Pset_mpi_params(ret_value, comm, info) < 0)
+        TEST_ERROR
+
     /* Get defaults for Subfiling configuration */
     if (H5Pget_fapl_subfiling(ret_value, subfiling_conf) < 0)
         TEST_ERROR;
@@ -146,6 +149,9 @@ create_subfiling_ioc_fapl(const char *base_filename)
         /* Get IOC VFD defaults */
         if (H5Pget_fapl_ioc(ioc_fapl, ioc_conf) < 0)
             TEST_ERROR;
+
+        if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0)
+            TEST_ERROR
 
         if (H5Pset_fapl_ioc(ioc_fapl, ioc_conf) < 0)
             TEST_ERROR;
@@ -165,9 +171,6 @@ create_subfiling_ioc_fapl(const char *base_filename)
 
     if (H5Pset_fapl_subfiling(ret_value, subfiling_conf) < 0)
         TEST_ERROR;
-
-    if (H5Pset_mpi_params(ret_value, comm, info) < 0)
-        TEST_ERROR
 
     HDfree(ioc_conf);
     HDfree(subfiling_conf);

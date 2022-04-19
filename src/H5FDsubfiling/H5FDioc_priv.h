@@ -21,18 +21,8 @@
 /* Standard Headers */
 /********************/
 
-/* TODO: review needed headers */
-#include <assert.h>
-#include <libgen.h>
 #include <stdatomic.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include "mpi.h"
+#include <libgen.h>
 
 /**************/
 /* H5 Headers */
@@ -43,20 +33,25 @@
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FDioc.h"     /* IOC VFD                                  */
+#include "H5FDioc_err.h" /* IOC VFD error handling                   */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 
-#include "subfiling_common.h"
+#include "H5subfiling_common.h"
 
-#if 1 /* JRM */ /* For now, H5FDioc_priv.h needs mercury.  Since the code that needs it will                 \
-                 * move to its own header, just hack it for now.                                             \
-                 */
 #include "mercury_thread.h"
 #include "mercury_thread_mutex.h"
 #include "mercury_thread_pool.h"
-#endif /* JRM */
 
+/*
+ * Some definitions for debugging the IOC VFD
+ */
+
+/* #define H5FD_IOC_DEBUG */
+/* #define H5FD_IOC_REQUIRE_FLUSH */
+
+/* TODO: conditional compile out stats vars based on this define */
 #define H5FD_IOC__COLLECT_STATS TRUE
 
 /****************************************************************************
@@ -65,7 +60,7 @@
  *
  * The following macros perform the necessary operations on the IOC I/O
  * Queue, which is implemented as a doubly linked list of instances of
- * H5FD_ioc_io_queue_entry_t.
+ * ioc_io_queue_entry_t.
  *
  * WARNING: q_ptr->q_mutex must be held when these macros are executed..
  *
@@ -154,11 +149,11 @@ do {                                                                            
 
 /****************************************************************************
  *
- * structure H5FD_ioc_io_queue_entry
+ * structure ioc_io_queue_entry
  *
  * magic:  Unsigned 32 bit integer always set to H5FD_IOC__IO_Q_ENTRY_MAGIC.
  *         This field is used to validate pointers to instances of
- *         H5FD_ioc_io_queue_entry_t.
+ *         ioc_io_queue_entry_t.
  *
  * next:   Next pointer in the doubly linked list used to implement
  *         the IOC I/O Queue.  This field points to the next entry
@@ -212,13 +207,13 @@ do {                                                                            
  *
  ****************************************************************************/
 
-typedef struct H5FD_ioc_io_queue_entry {
+typedef struct ioc_io_queue_entry {
 
-    uint32_t                        magic;
-    struct H5FD_ioc_io_queue_entry *next;
-    struct H5FD_ioc_io_queue_entry *prev;
-    hbool_t                         in_progress;
-    uint32_t                        counter;
+    uint32_t                   magic;
+    struct ioc_io_queue_entry *next;
+    struct ioc_io_queue_entry *prev;
+    hbool_t                    in_progress;
+    uint32_t                   counter;
 
     /* rework these fields */ /* JRM */
     sf_work_request_t     wk_req;
@@ -232,37 +227,11 @@ typedef struct H5FD_ioc_io_queue_entry {
 
 #endif /* H5FD_IOC__COLLECT_STATS */
 
-} H5FD_ioc_io_queue_entry_t;
-
-#if 0 /* JRM */ /* keep this copy for convenience for now */
-typedef struct {
-    /* {Datasize, Offset, FileID} */
-    int64_t header[3];        /* The basic RPC input plus       */
-    int     tag;              /* the supplied OPCODE tag        */
-    int     source;           /* Rank of who sent the message   */
-    int     subfile_rank;     /* The IOC rank                   */
-    hid_t   context_id;       /* context to be used to complete */
-    double  start_time;       /* the request, + time of receipt */
-                              /* from which we calc Time(queued) */
-    void *buffer;             /* for writes, we keep the buffer */
-                              /* around for awhile...           */
-    volatile int in_progress; /* Not used!               */
-    volatile int serialize;   /* worker thread needs to wait while true */
-    volatile int dependents;  //* If current work item has dependents */
-    int          depend_id;   /* work queue index of the dependent */
-} sf_work_request_t;
-
-struct hg_thread_work {
-    hg_thread_func_t func;
-    void *           args;
-    HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
-};
-
-#endif /* JRM */
+} ioc_io_queue_entry_t;
 
 /****************************************************************************
  *
- * structure H5FD_ioc_io_queue
+ * structure ioc_io_queue
  *
  * This is a temporary structure -- its fields should be moved to an I/O
  * concentrator Catchall structure eventually.
@@ -394,16 +363,16 @@ struct hg_thread_work {
 
 #define H5FD_IOC__IO_Q_MAGIC 0x2468
 
-typedef struct H5FD_ioc_io_queue {
+typedef struct ioc_io_queue {
 
-    uint32_t                   magic;
-    H5FD_ioc_io_queue_entry_t *q_head;
-    H5FD_ioc_io_queue_entry_t *q_tail;
-    int32_t                    num_pending;
-    int32_t                    num_in_progress;
-    int32_t                    q_len;
-    uint32_t                   req_counter;
-    hg_thread_mutex_t          q_mutex;
+    uint32_t              magic;
+    ioc_io_queue_entry_t *q_head;
+    ioc_io_queue_entry_t *q_tail;
+    int32_t               num_pending;
+    int32_t               num_in_progress;
+    int32_t               q_len;
+    uint32_t              req_counter;
+    hg_thread_mutex_t     q_mutex;
 
     /* statistics */
 #if H5FD_IOC__COLLECT_STATS
@@ -419,7 +388,7 @@ typedef struct H5FD_ioc_io_queue {
     int64_t requests_completed;
 #endif /* H5FD_IOC__COLLECT_STATS */
 
-} H5FD_ioc_io_queue_t;
+} ioc_io_queue_t;
 
 /*
  * Structure definitions to enable async io completions
@@ -429,7 +398,7 @@ typedef struct H5FD_ioc_io_queue {
  */
 typedef struct _client_io_args {
     int         ioc;        /* ID of the IO Concentrator handling this IO.   */
-    hid_t       context_id; /* The context id provided for the read or write */
+    int64_t     context_id; /* The context id provided for the read or write */
     int64_t     offset;     /* The file offset for the IO operation          */
     int64_t     elements;   /* How many bytes                                */
     void *      data;       /* A pointer to the (contiguous) data segment    */
@@ -449,77 +418,18 @@ typedef struct _io_req {
     io_func_t       completion_func; /* are completed */
 } io_req_t;
 
-extern H5FD_ioc_io_queue_t io_queue_g;
-extern atomic_int          sf_work_pending;
-extern atomic_int          sf_io_ops_pending;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL int ioc_main(int64_t context_id);
+H5_DLL int initialize_ioc_threads(void *_sf_context);
 
-H5_DLL char * H5FD__get_file_directory(void *h5file);
-H5_DLL herr_t H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
-                                             int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
-                                             hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
-                                             const void *buf);
-H5_DLL herr_t H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
-                                            int mpi_rank, int mpi_size, void *_dset, hid_t mem_type_id,
-                                            hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
-                                            void *buf);
+H5_DLL herr_t ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t offset,
+                                           int64_t elements, const void *data, io_req_t **io_req);
+H5_DLL herr_t ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t offset,
+                                          int64_t elements, void *data, io_req_t **io_req);
 
-/* return arguments are vector of vectors - function return is the length
- * (depth) of the sub vectors. Note that we don't need to include the
- * MPI_Datatype return argument!
- */
-H5_DLL int    H5FD__read_independent(hid_t H5FD__fid, int64_t offset, int64_t elements, int dtype_extent,
-                                     void *data);
-H5_DLL int    H5FD__write_independent(hid_t H5FD__fid, int64_t offset, int64_t elements, int dtype_extent,
-                                      const void *data);
-H5_DLL herr_t H5FD__read_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, hsize_t sizes[],
-                                void *bufs[] /* in */);
-H5_DLL herr_t H5FD__write_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, hsize_t sizes[],
-                                 void *bufs[] /* in */);
-H5_DLL int    H5FD__truncate(hid_t h5_fid, haddr_t addr);
-H5_DLL int    H5FD__shutdown_local_ioc(hid_t fid);
-#if 0  /* JRM */
-H5_DLL int    initialize_ioc_threads(void *sf_context);
-#endif /* JRM */
-H5_DLL herr_t H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                          const void *bufs[] /* data_in */);
-
-H5_DLL herr_t H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
-                                         void *bufs[] /* data_out */);
-#if 0  /* JRM */
-H5_DLL int queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-#else  /* JRM */
-H5_DLL int queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
-                             uint32_t counter);
-#endif /* JRM */
-
-H5_DLL int queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-
-H5_DLL int sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
-
-H5_DLL int sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank);
-
-H5_DLL int sf_truncate(int fd, int64_t length, int subfile_rank);
-
-H5_DLL int report_sf_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
-
-H5_DLL int write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset,
-                                    int64_t elements, int dtype_extent, const void *data, io_req_t **io_req);
-H5_DLL int read__independent_async(int n_io_concentrators, hid_t context_id, int64_t offset, int64_t elements,
-                                   int dtype_extent, void *data, io_req_t **io_req);
-
-H5_DLL H5FD_ioc_io_queue_entry_t *H5FD_ioc__alloc_io_q_entry(void);
-H5_DLL void                       H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr);
-H5_DLL void                       H5FD_ioc__dispatch_elegible_io_q_entries(void);
-H5_DLL void                       H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr);
-H5_DLL void                       H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr);
-
-H5_DLL void manage_client_logfile(int client_rank, int flag_value);
+H5_DLL int wait_for_thread_main(void);
 
 #ifdef __cplusplus
 }

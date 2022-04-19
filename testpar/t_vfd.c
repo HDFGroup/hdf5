@@ -423,6 +423,13 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 pass         = FALSE;
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
+
+            /* set the MPI communicator and info in the FAPL */
+            if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0) {
+
+                pass         = FALSE;
+                failure_mssg = "Can't set MPI communicator and info in IOC fapl.";
+            }
         }
 #endif
         else {

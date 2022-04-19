@@ -40,6 +40,11 @@
 #define H5FD_IOC_THREAD_POOL_SIZE 4
 
 /*
+ * Environment variables interpreted by the IOC VFD
+ */
+#define H5_IOC_THREAD_POOL_COUNT "H5_IOC_THREAD_POOL_COUNT"
+
+/*
  * Define the various constants to allow different allocations
  * of subfile ranks.  The choices are self explanatory, starting
  * with the default of one IO Concentrator (IOC) per node and
@@ -87,8 +92,6 @@ H5_DLL herr_t H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_ptr);
 H5_DLL void   H5FD_ioc_set_shutdown_flag(int flag);
 H5_DLL void   H5FD_ioc_wait_thread_main(void);
 H5_DLL void   H5FD_ioc_finalize_threads(void);
-H5_DLL int    initialize_ioc_threads(void *_sf_context);
-H5_DLL int    tpool_add_work(void *work);
 H5_DLL void   begin_thread_exclusive(void);
 H5_DLL void   end_thread_exclusive(void);
 H5_DLL void   ioc__wait_for_serialize(void *msg);
