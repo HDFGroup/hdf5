@@ -23,39 +23,37 @@ import hdf.hdf5lib.HDF5Constants;
 public class H5L_info_t implements Serializable {
     private static final long serialVersionUID = -4754320605310155033L;
     /** Type of link */
-    public int         type;
+    public int type;
     /** Indicate if creation order is valid */
-    public boolean     corder_valid;
+    public boolean corder_valid;
     /** Creation order */
-    public long        corder;
+    public long corder;
     /** Character set of link name */
-    public int         cset;
+    public int cset;
     /** Character set of link name */
     public H5O_token_t token;
     /** Size of a soft link or user-defined link value */
-    public long        val_size;
+    public long val_size;
 
     /** Constructor for using object token portion of C union */
-    H5L_info_t (int type, boolean corder_valid, long corder,
-        int cset, H5O_token_t token)
+    H5L_info_t(int type, boolean corder_valid, long corder, int cset, H5O_token_t token)
     {
-        this.type = type;
+        this.type         = type;
         this.corder_valid = corder_valid;
-        this.corder = corder;
-        this.cset = cset;
-        this.token = token;
-        this.val_size = -1;
+        this.corder       = corder;
+        this.cset         = cset;
+        this.token        = token;
+        this.val_size     = -1;
     }
 
     /** Constructor for using val_size portion of C union */
-    H5L_info_t (int type, boolean corder_valid, long corder,
-        int cset, long val_size)
+    H5L_info_t(int type, boolean corder_valid, long corder, int cset, long val_size)
     {
-        this.type = type;
+        this.type         = type;
         this.corder_valid = corder_valid;
-        this.corder = corder;
-        this.cset = cset;
-        this.token = HDF5Constants.H5O_TOKEN_UNDEF;
-        this.val_size = val_size;
+        this.corder       = corder;
+        this.cset         = cset;
+        this.token        = HDF5Constants.H5O_TOKEN_UNDEF;
+        this.val_size     = val_size;
     }
 }

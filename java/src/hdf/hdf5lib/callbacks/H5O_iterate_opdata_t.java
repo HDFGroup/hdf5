@@ -17,5 +17,4 @@ package hdf.hdf5lib.callbacks;
  *
  */
 public interface H5O_iterate_opdata_t {
-
 }
