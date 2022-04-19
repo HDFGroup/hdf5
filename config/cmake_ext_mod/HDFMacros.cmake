@@ -34,7 +34,7 @@ macro (SET_HDF_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-      "MinSizeRel" "RelWithDebInfo")
+      "MinSizeRel" "RelWithDebInfo" "Developer")
   endif()
 endmacro ()
 
@@ -158,7 +158,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   if (${importtype} MATCHES "IMPORT")
     set (importprefix "${CMAKE_STATIC_LIBRARY_PREFIX}")
   endif ()
-  if (${HDF_CFG_NAME} MATCHES "Debug")
+  if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     set (IMPORT_LIB_NAME ${LIB_DEBUG_NAME})
   else ()
     set (IMPORT_LIB_NAME ${LIB_RELEASE_NAME})

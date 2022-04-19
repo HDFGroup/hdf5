@@ -1,0 +1,2 @@
+# Enable GCC's static analyzer for GCC 12+
+-fanalyzer
