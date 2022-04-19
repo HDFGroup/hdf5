@@ -941,11 +941,13 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__cmp_offset() */
 
+#define TAG_ALIGNMENT(tag) \
+    (offsetof(alignments_t, tag.x) - offsetof(alignments_t, tag))
+
 /* clang-format off */
 #define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign) {  \
   .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g                         \
-, .alignment = offsetof(alignments_t, tag.x) -                      \
-               offsetof(alignments_t, tag)                          \
+, .alignment = TAG_ALIGNMENT(tag)                                   \
 , .hidp = &H5T_NATIVE_##tag##_g                                     \
 , .size = sizeof(type)                                              \
 , .atomic = {                                                       \
