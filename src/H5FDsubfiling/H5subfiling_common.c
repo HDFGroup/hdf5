@@ -486,13 +486,7 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
     sf_world_size = app_layout->world_size;
     sf_world_rank = app_layout->world_rank;
 
-    if ((hostid = gethostid()) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get host ID of machine\n", __func__);
-#endif
-
-        return FAIL;
-    }
+    hostid = gethostid();
 
     my_hostinfo.hostid = hostid;
     my_hostinfo.rank   = sf_world_rank;
