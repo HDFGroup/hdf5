@@ -86,9 +86,8 @@ static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topolog
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
-static herr_t generate_subfile_name(subfiling_context_t *sf_context, char *filename_out,
-                                    size_t filename_out_len, char **filename_basename_out,
-                                    char **subfile_dir_out);
+static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
+                                    size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                  const char *subfile_dir, hbool_t truncate_if_exists);
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
@@ -1848,7 +1847,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     char * filepath    = NULL;
     char * subfile_dir = NULL;
     char * base        = NULL;
-    int    retries     = 2;
+    int    fd          = -1;
     herr_t ret_value   = SUCCEED;
 
     HDassert(msg);
@@ -1883,7 +1882,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     }
 
     /* Generate the name of the subfile that this IOC rank will open */
-    if (generate_subfile_name(sf_context, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
+    if (generate_subfile_name(sf_context, file_acc_flags, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't generate name for subfile\n", __func__);
 #endif
@@ -1904,18 +1903,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     begin_thread_exclusive();
 
     /* Attempt to create/open the subfile for this IOC rank */
-    for (int k = 0; k < retries; k++) {
-        int fd;
-
-        if ((fd = HDopen(filepath, file_acc_flags, mode)) > 0) {
-            sf_context->sf_fid = fd;
-            if (file_acc_flags & O_CREAT)
-                sf_context->sf_eof = 0;
-            break;
-        }
-    }
-
-    if (sf_context->sf_fid < 0) {
+    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
         end_thread_exclusive(); /* TODO: try to only unlock in one place? */
 
         HDperror("ioc_open_file - file open failed");
@@ -1930,6 +1918,10 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
         ret_value = FAIL;
         goto done;
     }
+
+    sf_context->sf_fid = fd;
+    if (file_acc_flags & O_CREAT)
+        sf_context->sf_eof = 0;
 
 #ifdef H5_SUBFILING_DEBUG
     if (sf_verbose_flag) {
@@ -2001,8 +1993,8 @@ done:
  * - an optional filename prefix specified by the user
  */
 static herr_t
-generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_t filename_out_len,
-                      char **filename_basename_out, char **subfile_dir_out)
+generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
+                      size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out)
 {
     FILE * config_file = NULL;
     char * config_buf  = NULL;
@@ -2025,13 +2017,14 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
     /*
      * Initially use the number of I/O concentrators specified in the
      * subfiling context. However, if there's an existing subfiling
-     * configuration file we will use the number specified there
-     * instead, as that should be the actual number that the subfile
-     * names were originally generated with. The current subfiling
-     * context may have a different number of I/O concentrators
-     * specified; e.g. a simple serial file open for reading purposes
-     * (think h5dump) might only be using 1 I/O concentrator, whereas
-     * the file was created with several I/O concentrators.
+     * configuration file (and we aren't truncating it) we will use
+     * the number specified there instead, as that should be the actual
+     * number that the subfile names were originally generated with.
+     * The current subfiling context may have a different number of I/O
+     * concentrators specified; e.g. a simple serial file open for
+     * reading purposes (think h5dump) might only be using 1 I/O
+     * concentrator, whereas the file was created with several I/O
+     * concentrators.
      */
     n_io_concentrators = sf_context->topology->n_io_concentrators;
 
@@ -2090,19 +2083,25 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
         }
     }
 
-    /* Open the file's subfiling configuration file, if it exists */
-    if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
+    /*
+     * Open the file's subfiling configuration file, if it exists and
+     * we aren't truncating the file.
+     */
+    if (0 == (file_acc_flags & O_TRUNC)) {
+        if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
 #ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
+            HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
 #endif
 
-        ret_value = FAIL;
-        goto done;
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
     /*
-     * If a subfiling configuration file exists, read the number of I/O
-     * concentrators used in order to generate the correct subfile names.
+     * If a subfiling configuration file exists and we aren't truncating
+     * it, read the number of I/O concentrators used at file creation time
+     * in order to generate the correct subfile names.
      */
     if (config_file) {
         char *ioc_substr      = NULL;
@@ -2308,6 +2307,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
      * O_TRUNC flag was specified. In this case, truncate
      * the existing config file and create a new one.
      */
+    /* TODO: if truncating, consider removing old stale config files. */
     if (!config_file_exists || truncate_if_exists) {
         int n_io_concentrators = sf_context->topology->n_io_concentrators;
         int num_digits;
