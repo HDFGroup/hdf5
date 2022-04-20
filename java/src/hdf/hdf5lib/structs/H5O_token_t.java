@@ -30,28 +30,25 @@ public class H5O_token_t implements Serializable {
      */
     public byte[] data;
 
-    H5O_token_t (byte[] data) {
-        this.data = data;
-    }
+    H5O_token_t(byte[] data) { this.data = data; }
 
     /**
      * Check if token data is undefined
      *
      * @return true if token data is undefined
      */
-    public boolean isUndefined() {
-        return this.equals(HDF5Constants.H5O_TOKEN_UNDEF);
-    }
+    public boolean isUndefined() { return this.equals(HDF5Constants.H5O_TOKEN_UNDEF); }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o)
             return true;
 
         if (!(o instanceof H5O_token_t))
             return false;
 
-        H5O_token_t token = (H5O_token_t) o;
+        H5O_token_t token = (H5O_token_t)o;
 
         return Arrays.equals(this.data, token.data);
     }

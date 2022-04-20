@@ -27,20 +27,21 @@ import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Transform {
 
-    private static String FILE = "H5Ex_D_Transform.h5";
-    private static String DATASET = "DS1";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static String TRANSFORM = "x+1";
+    private static String FILE       = "H5Ex_D_Transform.h5";
+    private static String DATASET    = "DS1";
+    private static final int DIM_X   = 4;
+    private static final int DIM_Y   = 7;
+    private static String TRANSFORM  = "x+1";
     private static String RTRANSFORM = "x-1";
 
-    private static void writeData() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void writeData()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dxpl_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dxpl_id      = HDF5Constants.H5I_INVALID_HID;
 
-        long[] dims = { DIM_X, DIM_Y };
+        long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Initialize data.
@@ -60,7 +61,7 @@ public class H5Ex_D_Transform {
         // Create a new file using the default properties.
         try {
             file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +91,8 @@ public class H5Ex_D_Transform {
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASET, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -99,8 +101,8 @@ public class H5Ex_D_Transform {
         // Write the data to the dataset using the dataset transfer property list.
         try {
             if ((dataset_id >= 0) && (dxpl_id >= 0))
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        dxpl_id, dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, dxpl_id, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -141,11 +143,12 @@ public class H5Ex_D_Transform {
         }
     }
 
-    private static void readData() {
+    private static void readData()
+    {
 
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dxpl_id = HDF5Constants.H5I_INVALID_HID;
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dxpl_id      = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file using the default properties.
@@ -168,8 +171,8 @@ public class H5Ex_D_Transform {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -197,8 +200,8 @@ public class H5Ex_D_Transform {
         // Read the data using the dataset transfer property list.
         try {
             if ((dataset_id >= 0) && (dxpl_id >= 0))
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        dxpl_id, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, dxpl_id, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -206,8 +209,8 @@ public class H5Ex_D_Transform {
 
         // Output the data to the screen.
 
-        System.out.println("Data as written with transform  '" + TRANSFORM + "' and read with transform  '"
-                + RTRANSFORM + "'");
+        System.out.println("Data as written with transform  '" + TRANSFORM + "' and read with transform  '" +
+                           RTRANSFORM + "'");
         for (int i = 0; i < DIM_X; i++) {
             System.out.print(" [");
             for (int j = 0; j < DIM_Y; j++)
@@ -239,9 +242,9 @@ public class H5Ex_D_Transform {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_D_Transform.writeData();
         H5Ex_D_Transform.readData();
     }
-
 }

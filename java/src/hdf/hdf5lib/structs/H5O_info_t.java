@@ -21,25 +21,26 @@ import java.io.Serializable;
 public class H5O_info_t implements Serializable {
     private static final long serialVersionUID = 4691681163544054518L;
     /** File number that object is located in */
-    public long        fileno;
+    public long fileno;
     /** Object token in file */
     public H5O_token_t token;
     /** Basic object type (group, dataset, etc.) */
-    public int         type;
+    public int type;
     /** Reference count of object */
-    public int         rc;
+    public int rc;
     /** Access time */
-    public long        atime;
+    public long atime;
     /** Modification time */
-    public long        mtime;
+    public long mtime;
     /** Change time */
-    public long        ctime;
+    public long ctime;
     /** Birth time */
-    public long        btime;
+    public long btime;
     /** Number of attributes attached to object */
-    public long        num_attrs;
+    public long num_attrs;
 
-    /** Constructor for data model information struct for objects
+    /**
+     * Constructor for data model information struct for objects
      *
      * @param fileno: File number that object is located in
      * @param token: Object token in file
@@ -51,17 +52,17 @@ public class H5O_info_t implements Serializable {
      * @param btime: Birth time
      * @param num_attrs: Number of attributes attached to object
      */
-    public H5O_info_t (long fileno, H5O_token_t token, int type,
-        int rc, long atime, long mtime, long ctime, long btime, long num_attrs)
+    public H5O_info_t(long fileno, H5O_token_t token, int type, int rc, long atime, long mtime, long ctime,
+                      long btime, long num_attrs)
     {
-        this.fileno = fileno;
-        this.token = token;
-        this.type = type;
-        this.rc = rc;
-        this.atime = atime;
-        this.mtime = mtime;
-        this.ctime = ctime;
-        this.btime = btime;
+        this.fileno    = fileno;
+        this.token     = token;
+        this.type      = type;
+        this.rc        = rc;
+        this.atime     = atime;
+        this.mtime     = mtime;
+        this.ctime     = ctime;
+        this.btime     = btime;
         this.num_attrs = num_attrs;
     }
 }
