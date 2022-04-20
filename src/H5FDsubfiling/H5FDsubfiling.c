@@ -2064,10 +2064,8 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      * thus the following hack.
      *                                                 JRM -- 12/18/21
      */
-#if 1 /* JRM */
     if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eof, file->comm) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
-#endif /* JRM */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2305,6 +2303,7 @@ init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset,
 
     start_row = start_id / container_count;
     ioc_start = start_id % container_count;
+    H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
 
     final_offset = offset + data_size;
     final_id     = final_offset / stripe_size;

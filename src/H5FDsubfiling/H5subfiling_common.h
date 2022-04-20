@@ -26,6 +26,11 @@
 #include "H5FDioc.h"
 
 /*
+ * Some definitions for debugging the Subfiling feature
+ */
+/* #define H5_SUBFILING_DEBUG */
+
+/*
  * The following is our basic template for a subfile filename.
  * Note that eventually we shouldn't use 0_of_N since we
  * intend to use the user defined HDF5 filename for a

@@ -1252,7 +1252,7 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     sf_context = H5_get_subfiling_object(file->fa.context_id);
     if (sf_context) {
-        ret_value = (haddr_t)sf_context->sf_eof;
+        ret_value = sf_context->sf_eof;
         goto done;
     }
 
@@ -1595,6 +1595,8 @@ H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], s
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
+    HDassert(sf_context->topology);
+    HDassert(sf_context->topology->n_io_concentrators);
 
     if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate active I/O requests array");
@@ -1683,6 +1685,8 @@ H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], si
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
+    HDassert(sf_context->topology);
+    HDassert(sf_context->topology->n_io_concentrators);
 
     if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate active I/O requests array");

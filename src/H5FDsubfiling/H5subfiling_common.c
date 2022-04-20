@@ -1465,7 +1465,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_stripe_size = H5FD_DEFAULT_STRIPE_DEPTH;
     sf_context->sf_write_count = 0;
     sf_context->sf_read_count  = 0;
-    sf_context->sf_eof         = 0;
+    sf_context->sf_eof         = HADDR_UNDEF;
     sf_context->sf_fid         = -1;
     sf_context->sf_group_size  = 1;
     sf_context->sf_group_rank  = 0;
@@ -2004,8 +2004,8 @@ done:
 #ifdef H5_SUBFILING_DEBUG
     t_end = MPI_Wtime();
     if (sf_verbose_flag) {
-        HDprintf("[%s %d] open completed in %lf seconds with %d errors\n", __func__, subfile_rank,
-                 (t_end - t_start), errors);
+        HDprintf("[%s %d] open completed in %lf seconds\n", __func__,
+                 sf_context->topology->subfile_rank, (t_end - t_start));
     }
 #endif
 
@@ -2319,7 +2319,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
     if (config_file_exists && (ret != 0)) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't check existence of configuration file", __func__);
+        HDperror("couldn't check existence of configuration file");
 #endif
 
         ret_value = FAIL;
@@ -2338,7 +2338,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
         if (NULL == (config_file = HDfopen(config_filename, "w+"))) {
 #ifdef H5_SUBFILING_DEBUG
-            HDperror("%s: couldn't open subfiling configuration file", __func__);
+            HDperror("couldn't open subfiling configuration file");
 #endif
 
             ret_value = FAIL;
@@ -2506,7 +2506,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
 
     if (config_file_exists && (ret != 0)) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't check existence of configuration file", __func__);
+        HDperror("couldn't check existence of configuration file");
 #endif
 
         ret_value = FAIL;
@@ -2515,7 +2515,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
 
     if (NULL == (config_file = HDfopen(config_filename, mode))) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't open subfiling configuration file", __func__);
+        HDperror("couldn't open subfiling configuration file");
 #endif
 
         ret_value = FAIL;

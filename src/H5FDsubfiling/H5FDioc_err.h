@@ -17,10 +17,6 @@
 #ifndef H5FDioc_err_h
 #define H5FDioc_err_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <errno.h>
 
 #include "H5Epublic.h"
@@ -282,9 +278,5 @@ extern int  H5FD_ioc_mpi_error_str_len;
     do {                                                                                                     \
         return ret_value;                                                                                    \
     } while (0)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* H5FDioc_err_h */
