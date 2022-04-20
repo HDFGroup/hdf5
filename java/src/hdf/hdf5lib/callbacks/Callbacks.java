@@ -12,7 +12,8 @@
 
 package hdf.hdf5lib.callbacks;
 
-/** All callback definitions must derive from this interface.  Any
+/**
+ * All callback definitions must derive from this interface.  Any
  * derived interfaces must define a single public method  named "callback".
  * You are responsible for deregistering your callback (if necessary)
  * in its {@link Object#finalize} method.  If native code attempts to call
@@ -26,5 +27,4 @@ package hdf.hdf5lib.callbacks;
  * handler.
  */
 public interface Callbacks {
-
 }

@@ -37,19 +37,27 @@ PROGRAM fortranlibtest
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
 
+  WRITE(*,*) '                       ==========================                            '
+  WRITE(*,*) '                              FORTRAN tests '
+  WRITE(*,*) '                       ==========================                            '
+
+  ret_total_error = 0
+  CALL h5openclose(ret_total_error)
+  CALL write_test_status(ret_total_error, ' h5open/h5close test', total_error)
+
   CALL h5open_f(error)
+  CALL check("h5open_f",error,total_error)
 
   cleanup = .TRUE.
   CALL h5_env_nocleanup_f(status)
   IF(status) cleanup=.FALSE.
 
-  WRITE(*,*) '                       ==========================                            '
-  WRITE(*,*) '                              FORTRAN tests '
-  WRITE(*,*) '                       ==========================                            '
-  CALL h5get_libversion_f(majnum, minnum, relnum, total_error)
-  IF(total_error .EQ. 0) THEN
 
-     WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
+  ret_total_error = 0
+  CALL h5get_libversion_f(majnum, minnum, relnum, ret_total_error)
+  IF(ret_total_error .EQ. 0) THEN
+
+     WRITE(*, '(/," FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
      WRITE(*, '(I0)', advance="NO") majnum
      WRITE(*, '(".")', advance="NO")
      WRITE(*, '(I0)', advance="NO") minnum

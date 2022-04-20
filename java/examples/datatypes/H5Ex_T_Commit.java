@@ -21,77 +21,74 @@
 
 package examples.datatypes;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+
 public class H5Ex_T_Commit {
-    private static String FILENAME = "H5Ex_T_Commit.h5";
-    private static String DATATYPENAME = "Sensor_Type";
-    protected static final int INTEGERSIZE = 4;
-    protected static final int DOUBLESIZE = 8;
+    private static String FILENAME           = "H5Ex_T_Commit.h5";
+    private static String DATATYPENAME       = "Sensor_Type";
+    protected static final int INTEGERSIZE   = 4;
+    protected static final int DOUBLESIZE    = 8;
     protected final static int MAXSTRINGSIZE = 80;
 
     // Values for the various classes of datatypes
     enum H5T_class {
-        H5T_NO_CLASS(HDF5Constants.H5T_NO_CLASS), // error
-        H5T_INTEGER(HDF5Constants.H5T_INTEGER), // integer types
-        H5T_FLOAT(HDF5Constants.H5T_FLOAT), // floating-point types
-        H5T_TIME(HDF5Constants.H5T_TIME), // date and time types
-        H5T_STRING(HDF5Constants.H5T_STRING), // character string types
-        H5T_BITFIELD(HDF5Constants.H5T_BITFIELD), // bit field types
-        H5T_OPAQUE(HDF5Constants.H5T_OPAQUE), // opaque types
-        H5T_COMPOUND(HDF5Constants.H5T_COMPOUND), // compound types
+        H5T_NO_CLASS(HDF5Constants.H5T_NO_CLASS),   // error
+        H5T_INTEGER(HDF5Constants.H5T_INTEGER),     // integer types
+        H5T_FLOAT(HDF5Constants.H5T_FLOAT),         // floating-point types
+        H5T_TIME(HDF5Constants.H5T_TIME),           // date and time types
+        H5T_STRING(HDF5Constants.H5T_STRING),       // character string types
+        H5T_BITFIELD(HDF5Constants.H5T_BITFIELD),   // bit field types
+        H5T_OPAQUE(HDF5Constants.H5T_OPAQUE),       // opaque types
+        H5T_COMPOUND(HDF5Constants.H5T_COMPOUND),   // compound types
         H5T_REFERENCE(HDF5Constants.H5T_REFERENCE), // reference types
-        H5T_ENUM(HDF5Constants.H5T_ENUM), // enumeration types
-        H5T_VLEN(HDF5Constants.H5T_VLEN), // Variable-Length types
-        H5T_ARRAY(HDF5Constants.H5T_ARRAY), // Array types
-        H5T_NCLASSES(11); // this must be last
+        H5T_ENUM(HDF5Constants.H5T_ENUM),           // enumeration types
+        H5T_VLEN(HDF5Constants.H5T_VLEN),           // Variable-Length types
+        H5T_ARRAY(HDF5Constants.H5T_ARRAY),         // Array types
+        H5T_NCLASSES(11);                           // this must be last
 
         private static final Map<Long, H5T_class> lookup = new HashMap<Long, H5T_class>();
 
-        static {
+        static
+        {
             for (H5T_class s : EnumSet.allOf(H5T_class.class))
                 lookup.put(s.getCode(), s);
         }
 
         private long code;
 
-        H5T_class(long layout_type) {
-            this.code = layout_type;
-        }
+        H5T_class(long layout_type) { this.code = layout_type; }
 
-        public long getCode() {
-            return this.code;
-        }
+        public long getCode() { return this.code; }
 
-        public static H5T_class get(long typeclass_id) {
-            return lookup.get(typeclass_id);
-        }
+        public static H5T_class get(long typeclass_id) { return lookup.get(typeclass_id); }
     }
 
     // The supporting Sensor_Datatype class.
     private static class Sensor_Datatype {
         static int numberMembers = 4;
-        static int[] memberDims = { 1, 1, 1, 1 };
+        static int[] memberDims  = {1, 1, 1, 1};
 
-        String[] memberNames = { "Serial number", "Location", "Temperature (F)", "Pressure (inHg)" };
-        long[] memberFileTypes = { HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1, HDF5Constants.H5T_IEEE_F64BE,
-                HDF5Constants.H5T_IEEE_F64BE };
-        static int[] memberStorage = { INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE };
+        String[] memberNames       = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
+        long[] memberFileTypes     = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
+                                  HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+        static int[] memberStorage = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.
-        static long getDataSize() {
+        static long getDataSize()
+        {
             long data_size = 0;
             for (int indx = 0; indx < numberMembers; indx++)
                 data_size += memberStorage[indx] * memberDims[indx];
             return data_size;
         }
 
-        static int getOffset(int memberItem) {
+        static int getOffset(int memberItem)
+        {
             int data_offset = 0;
             for (int indx = 0; indx < memberItem; indx++)
                 data_offset += memberStorage[indx];
@@ -99,15 +96,16 @@ public class H5Ex_T_Commit {
         }
     }
 
-    private static void CreateDataType() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateDataType()
+    {
+        long file_id              = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id           = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id          = HDF5Constants.H5I_INVALID_HID;
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -134,7 +132,8 @@ public class H5Ex_T_Commit {
                     long type_id = datatypes.memberFileTypes[indx];
                     if (type_id == HDF5Constants.H5T_C_S1)
                         type_id = strtype_id;
-                    H5.H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx), type_id);
+                    H5.H5Tinsert(filetype_id, datatypes.memberNames[indx], Sensor_Datatype.getOffset(indx),
+                                 type_id);
                 }
             }
         }
@@ -145,8 +144,8 @@ public class H5Ex_T_Commit {
         // Commit the compound datatype to the file, creating a named datatype.
         try {
             if ((file_id >= 0) && (filetype_id >= 0))
-                H5.H5Tcommit(file_id, DATATYPENAME, filetype_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                H5.H5Tcommit(file_id, DATATYPENAME, filetype_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -178,13 +177,13 @@ public class H5Ex_T_Commit {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataType() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void ReadDataType()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long typeclass_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
 
         // Open an existing file.
         try {
@@ -247,10 +246,10 @@ public class H5Ex_T_Commit {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_T_Commit.CreateDataType();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -258,5 +257,4 @@ public class H5Ex_T_Commit {
         // data using malloc().
         H5Ex_T_Commit.ReadDataType();
     }
-
 }
