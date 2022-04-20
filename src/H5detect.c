@@ -351,7 +351,7 @@ H5T__init_native(void)\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->shared->type = H5T_FLOAT;\n\
     dt->shared->size = %d;\n",
-                d[i].size);                       /*size            */
+                d[i].size); /*size            */
 
         if (byte_order == -1)
             fprintf(rawoutstream, "\

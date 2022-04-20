@@ -941,8 +941,7 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__cmp_offset() */
 
-#define TAG_ALIGNMENT(tag) \
-    (offsetof(alignments_t, tag.x) - offsetof(alignments_t, tag))
+#define TAG_ALIGNMENT(tag) (offsetof(alignments_t, tag.x) - offsetof(alignments_t, tag))
 
 /* clang-format off */
 #define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign) {  \
@@ -1126,23 +1125,23 @@ H5T__init_native_internal(void)
             uint_fast64_t x;
         } UINT_FAST64;
         struct {
-            char          c;
+            char  c;
             void *x;
         } pointer;
         struct {
-            char          c;
+            char  c;
             hvl_t x;
         } hvl;
         struct {
-            char          c;
+            char       c;
             hobj_ref_t x;
         } hobjref;
         struct {
-            char          c;
+            char            c;
             hdset_reg_ref_t x;
         } hdsetregref;
         struct {
-            char          c;
+            char      c;
             H5R_ref_t x;
         } ref;
     } alignments_t;
@@ -1254,11 +1253,11 @@ H5T__init_native_internal(void)
         }
     }
 
-    H5T_POINTER_ALIGN_g = TAG_ALIGNMENT(pointer);
-    H5T_HVL_ALIGN_g = TAG_ALIGNMENT(hvl);
-    H5T_HOBJREF_ALIGN_g = TAG_ALIGNMENT(hobjref);
+    H5T_POINTER_ALIGN_g     = TAG_ALIGNMENT(pointer);
+    H5T_HVL_ALIGN_g         = TAG_ALIGNMENT(hvl);
+    H5T_HOBJREF_ALIGN_g     = TAG_ALIGNMENT(hobjref);
     H5T_HDSETREGREF_ALIGN_g = TAG_ALIGNMENT(hdsetregref);
-    H5T_REF_ALIGN_g = TAG_ALIGNMENT(ref);
+    H5T_REF_ALIGN_g         = TAG_ALIGNMENT(ref);
 
     return SUCCEED;
 }
