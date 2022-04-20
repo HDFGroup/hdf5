@@ -2188,15 +2188,15 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * produce files of the following form:
      * If we assume the HDF5 file is named ABC.h5, and 20 I/O
      * concentrators are used, then the subfiles will have names:
-     *   ABC.h5.subfile_<file-number>_00_of_20,
-     *   ABC.h5.subfile_<file-number>_01_of_20, etc.
+     *   ABC.h5.subfile_<file-number>_01_of_20,
+     *   ABC.h5.subfile_<file-number>_02_of_20, etc.
      *
      * and the configuration file will be named:
      *   ABC.h5.subfile_<file-number>.config
      */
     num_digits = numDigits(n_io_concentrators);
     HDsnprintf(filename_out, filename_out_len, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base,
-               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank, n_io_concentrators);
+               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1, n_io_concentrators);
 
 done:
     if (config_file && (EOF == HDfclose(config_file))) {
@@ -2378,7 +2378,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         num_digits = numDigits(n_io_concentrators);
         for (int k = 0; k < n_io_concentrators; k++) {
             HDsnprintf(line_buf, PATH_MAX, "%s" SF_FILENAME_TEMPLATE "\n", base_filename,
-                       sf_context->h5_file_id, num_digits, k, n_io_concentrators);
+                       sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
 
             if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
 #ifdef H5_SUBFILING_DEBUG
