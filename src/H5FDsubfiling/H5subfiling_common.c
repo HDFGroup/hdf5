@@ -74,7 +74,6 @@ static int sf_open_file_count = 0;
 #endif
 
 FILE *sf_logfile = NULL;
-FILE *client_log = NULL;
 
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
@@ -95,10 +94,7 @@ static herr_t create_config_file(subfiling_context_t *sf_context, const char *ba
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                const char *subfile_dir, const char *mode, FILE **config_file_out);
 
-static void initialize_statistics(void);
-#if 0 /* TODO */
-static void        manage_client_logfile(int client_rank, int flag_value);
-#endif
+static void        initialize_statistics(void);
 static int         numDigits(int n);
 static int         active_file_map_entries(void);
 static void        clear_fid_map_entry(uint64_t sf_fid);
@@ -115,25 +111,6 @@ initialize_statistics(void)
 {
     HDmemset(subfiling_stats, 0, sizeof(subfiling_stats));
 }
-
-#if 0 /* TODO */
-static void
-manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_value)
-{
-#ifndef NDEBUG
-    if (flag_value) {
-        char logname[64];
-        HDsnprintf(logname, sizeof(logname), "sf_client_%d.log", client_rank);
-        client_log = fopen(logname, "a+");
-    }
-    else if (client_log) {
-        fclose(client_log);
-        client_log = 0;
-    }
-#endif
-    return;
-}
-#endif
 
 static int
 numDigits(int n)
@@ -936,11 +913,6 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
         int check_value = atoi(envValue);
         if (check_value > 0)
             sf_verbose_flag = 1;
-    }
-
-    /* Maybe open client-side log files */
-    if (sf_verbose_flag) {
-        manage_client_logfile(world_rank, sf_verbose_flag);
     }
 #endif
 
@@ -2845,15 +2817,6 @@ done:
 
         ret_value = FAIL;
     }
-
-#ifdef H5_SUBFILING_DEBUG
-    if (sf_verbose_flag) {
-        if (client_log != NULL) {
-            HDfclose(client_log);
-            client_log = NULL;
-        }
-    }
-#endif
 
     if (ret_value < 0) {
         errors = 1;

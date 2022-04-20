@@ -221,7 +221,6 @@ typedef struct {
 } sf_work_request_t;
 
 extern FILE *sf_logfile;
-extern FILE *client_log;
 
 extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;
