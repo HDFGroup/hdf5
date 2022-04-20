@@ -637,8 +637,9 @@ public class TestH5A {
             attr_info = H5.H5Aget_info_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER,
                                               HDF5Constants.H5_ITER_INC, 0, lapl_id);
             assertNotNull(attr_info);
-            assertTrue("Corder ", attr_info.corder ==
-                                      0); // should equal 0 as this is the order of 1st attribute created.
+            assertTrue("Corder ",
+                       attr_info.corder ==
+                           0); // should equal 0 as this is the order of 1st attribute created.
             assertEquals(attr_info.data_size, H5.H5Aget_storage_size(attr_id));
 
             // Verify info for 2nd attribute, in increasing creation order
@@ -652,29 +653,33 @@ public class TestH5A {
             attr_info = H5.H5Aget_info_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER,
                                               HDF5Constants.H5_ITER_DEC, 0, lapl_id);
             assertNotNull(attr_info);
-            assertTrue("Corder", attr_info.corder ==
-                                     1); // should equal 1 as this is the order of 2nd attribute created.
+            assertTrue("Corder",
+                       attr_info.corder ==
+                           1); // should equal 1 as this is the order of 2nd attribute created.
 
             // verify info for 1st attribute, in decreasing creation order
             attr_info = H5.H5Aget_info_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER,
                                               HDF5Constants.H5_ITER_DEC, 1, lapl_id);
             assertNotNull(attr_info);
-            assertTrue("Corder", attr_info.corder ==
-                                     0); // should equal 0 as this is the order of 1st attribute created.
+            assertTrue("Corder",
+                       attr_info.corder ==
+                           0); // should equal 0 as this is the order of 1st attribute created.
 
             // verify info for 1st attribute, in increasing name order
             attr_info = H5.H5Aget_info_by_idx(H5did, ".", HDF5Constants.H5_INDEX_NAME,
                                               HDF5Constants.H5_ITER_INC, 1, lapl_id);
             assertNotNull(attr_info);
-            assertTrue("Corder", attr_info.corder ==
-                                     0); // should equal 0 as this is the order of 1st attribute created.
+            assertTrue("Corder",
+                       attr_info.corder ==
+                           0); // should equal 0 as this is the order of 1st attribute created.
 
             // verify info for 2nd attribute, in decreasing name order
             attr_info = H5.H5Aget_info_by_idx(H5did, ".", HDF5Constants.H5_INDEX_NAME,
                                               HDF5Constants.H5_ITER_DEC, 1, lapl_id);
             assertNotNull(attr_info);
-            assertTrue("Corder", attr_info.corder ==
-                                     1); // should equal 1 as this is the order of 2nd attribute created.
+            assertTrue("Corder",
+                       attr_info.corder ==
+                           1); // should equal 1 as this is the order of 2nd attribute created.
         }
         catch (Throwable err) {
             err.printStackTrace();

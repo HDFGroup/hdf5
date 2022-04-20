@@ -73,10 +73,9 @@ public class HDFArray {
      * Allocate a one-dimensional array of bytes sufficient to store the array.
      *
      * @return A one-D array of bytes, filled with zeroes. The bytes are sufficient to hold the data of the
-     *     Array passed
-     *         to the constructor.
+     *        Array passed to the constructor.
      * @exception hdf.hdf5lib.exceptions.HDF5JavaException
-     *                Allocation failed.
+     *        Allocation failed.
      */
 
     public byte[] emptyBytes() throws HDF5JavaException

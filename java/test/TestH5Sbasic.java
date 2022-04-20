@@ -137,11 +137,11 @@ public class TestH5Sbasic {
     }
 
     // H5Screate_simple was changed to allow a dim of 0
-    //    @Ignore(expected = HDF5LibraryException.class)
-    //    public void testH5Screate_simple_dims_zero() {
-    //        long dims[] = {0, 0};
-    //        H5.H5Screate_simple(2, dims, null);
-    //    }
+    //     @Ignore(expected = HDF5LibraryException.class)
+    //     public void testH5Screate_simple_dims_zero() {
+    //         long dims[] = {0, 0};
+    //         H5.H5Screate_simple(2, dims, null);
+    //     }
 
     @Test
     public void testH5Screate_simple()

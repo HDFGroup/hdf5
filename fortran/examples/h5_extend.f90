@@ -110,7 +110,7 @@ PROGRAM H5_EXTEND
   CALL h5pset_chunk_f(crp_list, RANK, dimsc, error)
 
   !
-  !Create a dataset with 3X3 dimensions using cparms creation properties .
+  !Create a dataset with 3X3 dimensions using cparms creation properties.
   !
   CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, &
        dset_id, error, crp_list )

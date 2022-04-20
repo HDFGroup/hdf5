@@ -283,7 +283,9 @@ if BUILD_PARALLEL_CONDITIONAL
   # VFD_LIST += mpio
 endif
 if MIRROR_VFD_CONDITIONAL
-  VFD_LIST += mirror
+  # Mirror VFD needs network configuration, etc. and isn't easy to set
+  # reasonable defaults for that info.
+  # VFD_LIST += mirror
 endif
 if ROS3_VFD_CONDITIONAL
   VFD_LIST += ros3
