@@ -976,7 +976,7 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
 done:
     if (ret_value < 0) {
-        if (context_id > 0 && H5_free_subfiling_object(context_id) < 0) {
+        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't free subfiling object\n", __func__);
 #endif
@@ -1702,6 +1702,10 @@ done:
 #endif
 
         ret_value = FAIL;
+    }
+
+    if (ret_value < 0) {
+        clear_fid_map_entry(sf_context->h5_file_id);
     }
 
     return ret_value;
