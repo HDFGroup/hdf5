@@ -973,9 +973,12 @@ get_host_byte_order(void)
 
 /* Establish `H5T_t`s for C99 integer types including fixed- and
  * minimum-width types (uint16_t, uint_least16_t, uint_fast16_t, ...).
+ *
+ * Also establish alignment for some miscellaneous types: pointers,
+ * HDF5 references, and so on.
  */
 herr_t
-H5T__init_native_int(void)
+H5T__init_native_internal(void)
 {
     /* Here we construct a type that lets us find alignment constraints
      * without using the alignof operator, which is not available in C99.
@@ -1122,6 +1125,26 @@ H5T__init_native_int(void)
             char          c;
             uint_fast64_t x;
         } UINT_FAST64;
+        struct {
+            char          c;
+            void *x;
+        } pointer;
+        struct {
+            char          c;
+            hvl_t x;
+        } hvl;
+        struct {
+            char          c;
+            hobj_ref_t x;
+        } hobjref;
+        struct {
+            char          c;
+            hdset_reg_ref_t x;
+        } hdsetregref;
+        struct {
+            char          c;
+            H5R_ref_t x;
+        } ref;
     } alignments_t;
 
     /* Describe a C99 type, `type`, and tell where to write its
@@ -1230,6 +1253,12 @@ H5T__init_native_int(void)
                 return FAIL;
         }
     }
+
+    H5T_POINTER_ALIGN_g = TAG_ALIGNMENT(pointer);
+    H5T_HVL_ALIGN_g = TAG_ALIGNMENT(hvl);
+    H5T_HOBJREF_ALIGN_g = TAG_ALIGNMENT(hobjref);
+    H5T_HDSETREGREF_ALIGN_g = TAG_ALIGNMENT(hdsetregref);
+    H5T_REF_ALIGN_g = TAG_ALIGNMENT(ref);
 
     return SUCCEED;
 }

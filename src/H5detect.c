@@ -80,23 +80,15 @@ typedef struct detected_t {
     unsigned int  comp_align;       /* alignment for structure          */
 } detected_t;
 
-/* This structure holds structure alignment for pointers, vlen and reference
- * types. */
-typedef struct malign_t {
-    const char * name;
-    unsigned int comp_align; /* alignment for structure          */
-} malign_t;
-
 FILE *rawoutstream = NULL;
 
 /* global variables types detection code */
 H5_GCC_DIAG_OFF("larger-than=")
 static detected_t d_g[MAXDETECT];
 H5_GCC_DIAG_ON("larger-than=")
-static malign_t     m_g[MAXDETECT];
-static volatile int nd_g = 0, na_g = 0;
+static volatile int nd_g = 0;
 
-static void         print_results(int nd, detected_t *d, int na, malign_t *m);
+static void         print_results(int nd, detected_t *d);
 static void         iprint(detected_t *);
 static int          byte_cmp(int, const void *, const void *, const unsigned char *);
 static unsigned int bit_cmp(unsigned int, int *, void *, void *, const unsigned char *);
@@ -107,7 +99,6 @@ static void         precision(detected_t *);
 static void         print_header(void);
 static void         detect_C89_floats(void);
 static void         detect_C99_floats(void);
-static void         detect_alignments(void);
 
 /*-------------------------------------------------------------------------
  * Function:    precision
@@ -257,21 +248,6 @@ precision(detected_t *d)
         }                                                                                                    \
     }
 
-/*-------------------------------------------------------------------------
- * Function:    DETECT_M
- *
- * Purpose:     This macro takes only miscellaneous structures or pointer.
- *              It constructs the names and decides the alignment in structure.
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-#define DETECT_M(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
-        INFO.name = #VAR;                                                                                    \
-        COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
-    }
-
 /* Detect alignment for C structure */
 #define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \
     {                                                                                                        \
@@ -292,7 +268,7 @@ precision(detected_t *d)
  *-------------------------------------------------------------------------
  */
 static void
-print_results(int nd, detected_t *d, int na, malign_t *misc_align)
+print_results(int nd, detected_t *d)
 {
     int byte_order = 0; /*byte order of data types*/
     int i, j;
@@ -489,12 +465,6 @@ H5T__init_native(void)\n\
     H5T_native_order_g = H5T_ORDER_%s;\n",
                 "BE");
     }
-
-    /* Structure alignment for pointers, vlen and reference types */
-    fprintf(rawoutstream, "\n    /* Structure alignment for pointers, vlen and reference types */\n");
-    for (j = 0; j < na; j++)
-        fprintf(rawoutstream, "    H5T_%s_ALIGN_g = %lu;\n", misc_align[j].name,
-                (unsigned long)(misc_align[j].comp_align));
 
     fprintf(rawoutstream, "\
 \n\
@@ -992,30 +962,6 @@ detect_C99_floats(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    detect_alignments
- *
- * Purpose:     Detect structure alignments
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-static void HDF_NO_UBSAN
-detect_alignments(void)
-{
-    /* Detect structure alignment for pointers, vlen and reference types */
-    DETECT_M(void *, POINTER, m_g[na_g]);
-    na_g++;
-    DETECT_M(hvl_t, HVL, m_g[na_g]);
-    na_g++;
-    DETECT_M(hobj_ref_t, HOBJREF, m_g[na_g]);
-    na_g++;
-    DETECT_M(hdset_reg_ref_t, HDSETREGREF, m_g[na_g]);
-    na_g++;
-    DETECT_M(H5R_ref_t, REF, m_g[na_g]);
-    na_g++;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Main entry point.
@@ -1051,10 +997,7 @@ main(int argc, char *argv[])
     /* C99 floating point types */
     detect_C99_floats();
 
-    /* Detect structure alignment */
-    detect_alignments();
-
-    print_results(nd_g, d_g, na_g, m_g);
+    print_results(nd_g, d_g);
 
     if (rawoutstream && rawoutstream != stdout) {
         if (HDfclose(rawoutstream))

@@ -763,7 +763,7 @@ H5T_init(void)
     if (H5T__init_native() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    if (H5T__init_native_int() < 0)
+    if (H5T__init_native_internal() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize integers")
 
     /* Get the atomic datatype structures needed by the initialization code below */
