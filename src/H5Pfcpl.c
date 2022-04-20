@@ -212,7 +212,7 @@ H5P__fcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register the user block size */
     if (H5P__register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE,
@@ -698,7 +698,7 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
     const unsigned *btree_k = (const unsigned *)value; /* Create local alias for values */
     uint8_t **      pp      = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(btree_k);
@@ -747,7 +747,7 @@ H5P__fcrt_btree_rank_dec(const void **_pp, void *_value)
     unsigned        u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -985,7 +985,7 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
     const unsigned *type_flags = (const unsigned *)value; /* Create local alias for values */
     uint8_t **      pp         = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(type_flags);
@@ -1035,7 +1035,7 @@ H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *_value)
     unsigned        u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -1076,7 +1076,7 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
     const unsigned *minsizes = (const unsigned *)value; /* Create local alias for values */
     uint8_t **      pp       = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(minsizes);
@@ -1126,7 +1126,7 @@ H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *_value)
     unsigned        u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -1354,7 +1354,7 @@ H5P__fcrt_fspace_strategy_enc(const void *value, void **_pp, size_t *size)
         (const H5F_fspace_strategy_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(strategy);
@@ -1391,7 +1391,7 @@ H5P__fcrt_fspace_strategy_dec(const void **_pp, void *_value)
     H5F_fspace_strategy_t *strategy = (H5F_fspace_strategy_t *)_value; /* Free-space strategy */
     const uint8_t **       pp       = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);

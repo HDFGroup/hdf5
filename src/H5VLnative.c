@@ -210,7 +210,7 @@ done:
 static herr_t
 H5VL__native_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VOL ID */
     H5VL_NATIVE_ID_g = H5I_INVALID_HID;

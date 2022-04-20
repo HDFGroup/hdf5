@@ -282,7 +282,7 @@ H5T__reopen_member_type(const H5T_t *dt, unsigned membno)
 {
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dt);
@@ -521,7 +521,7 @@ H5T__pack(const H5T_t *dt)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(dt);
 
@@ -596,7 +596,7 @@ H5T__is_packed(const H5T_t *dt)
 {
     htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
 

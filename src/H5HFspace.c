@@ -241,7 +241,7 @@ H5HF__space_revert_root_cb(H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_uda
     H5HF_free_section_t *sect      = (H5HF_free_section_t *)_sect; /* Section to dump info */
     herr_t               ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -323,7 +323,7 @@ H5HF__space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
     H5HF_indirect_t *    root_iblock = (H5HF_indirect_t *)_udata;    /* User data for callback */
     herr_t               ret_value   = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

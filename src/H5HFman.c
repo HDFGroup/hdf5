@@ -306,7 +306,7 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     uint8_t *p;                         /* Temporary pointer to obj info in block */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

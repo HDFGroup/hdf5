@@ -742,7 +742,7 @@ H5B2__shadow_internal(H5B2_internal_t *internal, H5B2_node_ptr_t *curr_node_ptr)
     H5B2_hdr_t *hdr;                 /* B-tree header */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

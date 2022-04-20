@@ -489,7 +489,7 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
     H5FD_class_t *        cls       = (H5FD_class_t *)obj;
     int                   ret_value = H5_ITER_CONT; /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (H5FD_GET_DRIVER_BY_NAME == op_data->key.kind) {
         if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {

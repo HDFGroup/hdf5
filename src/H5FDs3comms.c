@@ -1935,7 +1935,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     int      found_setting = 0;
     char *   line_buffer   = &(buffer[0]);
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if S3COMMS_DEBUG
     HDfprintf(stdout, "called load_aws_creds_from_file.\n");

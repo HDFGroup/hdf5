@@ -1318,7 +1318,7 @@ H5F__vfd_swmr_insert_eot_entry(eot_queue_entry_t *entry_ptr)
 {
     eot_queue_entry_t *prec_ptr; /* The predecessor entry on the EOT end of tick queue */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Find the insertion point for the entry on the EOT queue */
     TAILQ_FOREACH_REVERSE(prec_ptr, &eot_queue_g, eot_queue, link)
@@ -1476,7 +1476,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_shared_t *shared, hbool_t incr
     int64_t         new_end_nsecs;       /* new end_of_tick in nanoseconds */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get current time in struct timespec */
 #ifdef H5_HAVE_WIN32_API
@@ -1549,7 +1549,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_shared_t *shared, uint32_t num_entries,
     ssize_t      nwritten;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Encode metadata file header */
     p = image;
@@ -1616,7 +1616,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_shared_t *shared, uint32_t num_entries,
     unsigned     i;                   /* Local index variable */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(num_entries == 0 || index != NULL);
 
@@ -1687,7 +1687,7 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(entry1);
@@ -1718,7 +1718,7 @@ H5F__vfd_swmr_create_index(H5F_shared_t *shared)
     H5FD_vfd_swmr_idx_entry_t *index;
     herr_t                     ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(shared->vfd_swmr);
     HDassert(shared->mdf_idx == NULL);
@@ -1845,7 +1845,7 @@ H5F__vfd_swmr_writer_wait_a_tick(H5F_t *f)
     H5F_shared_t *shared;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     shared = f->shared;
@@ -1977,7 +1977,7 @@ H5F__vfd_swmr_construct_ud_hdr(H5F_vfd_swmr_updater_t *updater)
     uint32_t metadata_chksum;     /* Computed metadata checksum value */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Encode metadata file header */
     p = image;
@@ -2029,7 +2029,7 @@ H5F__vfd_swmr_construct_ud_cl(H5F_vfd_swmr_updater_t *updater)
     unsigned i;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Encode ud cl */
     p = image;
@@ -2117,7 +2117,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     int                    sz;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Updater file header fields */
     updater.version               = H5F_UD_VERSION;

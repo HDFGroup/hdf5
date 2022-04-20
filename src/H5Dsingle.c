@@ -117,7 +117,7 @@ static herr_t
 H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUSED *space,
                      haddr_t H5_ATTR_UNUSED dset_ohdr_addr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(idx_info);
@@ -155,7 +155,7 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
 static herr_t
 H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(idx_info);
@@ -189,7 +189,7 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
 static hbool_t
 H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -213,7 +213,7 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -259,7 +259,7 @@ done:
 static herr_t
 H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -303,7 +303,7 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     H5D_chunk_rec_t chunk_rec;      /* generic chunk record  */
     int             ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -352,7 +352,7 @@ H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     hsize_t nbytes;              /* Size of all chunks */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -393,7 +393,7 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -427,7 +427,7 @@ H5D__single_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_i
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(idx_info_src);
@@ -472,7 +472,7 @@ done:
 static herr_t
 H5D__single_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *index_size)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(index_size);
@@ -496,7 +496,7 @@ H5D__single_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t 
 static herr_t
 H5D__single_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -522,7 +522,7 @@ H5D__single_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 static herr_t
 H5D__single_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(storage);

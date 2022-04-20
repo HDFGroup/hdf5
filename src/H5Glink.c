@@ -95,7 +95,7 @@ static int H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2);
 static int
 H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
 } /* end H5G__link_cmp_name_inc() */
@@ -120,7 +120,7 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 static int
 H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
 } /* end H5G__link_cmp_name_dec() */
@@ -146,7 +146,7 @@ H5G__link_cmp_corder_inc(const void *lnk1, const void *lnk2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = -1;
@@ -179,7 +179,7 @@ H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (((const H5O_link_t *)lnk1)->corder < ((const H5O_link_t *)lnk2)->corder)
         ret_value = 1;

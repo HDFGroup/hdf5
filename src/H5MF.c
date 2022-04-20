@@ -133,7 +133,7 @@ H5MF__defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr, hsiz
     lower_defree_t *df        = NULL;
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if ((df = H5MM_malloc(sizeof(*df))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate buffer")
@@ -445,7 +445,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
     H5AC_ring_t                 fsm_ring;                  /* Ring of FSM */
     herr_t                      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -571,7 +571,7 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     haddr_t     tmp_fs_addr;               /* Temporary holder for free space manager address */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -639,7 +639,7 @@ H5MF__close_fstype(H5F_t *f, H5F_mem_page_t type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -953,7 +953,7 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     H5MF_free_section_t *node      = NULL;        /* Free space section pointer */
     haddr_t              ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5MF_ALLOC_DEBUG
     HDfprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
@@ -1183,7 +1183,7 @@ H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t si
     H5AC_ring_t          fsm_ring;                  /* Ring of FSM */
     herr_t               ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
@@ -1339,7 +1339,7 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
+    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
 
     ret_value = H5MF__xfree_inner_impl(f, alloc_type, addr, size);
 
@@ -1720,7 +1720,7 @@ H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
     HDfprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1891,7 +1891,7 @@ H5MF__close_aggrfs(H5F_t *f)
     H5FD_mem_t  type;                        /* Memory type for iteration */
     herr_t      ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
     HDfprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -2057,7 +2057,7 @@ H5MF__close_pagefs(H5F_t *f)
     H5O_fsinfo_t   fsinfo;                      /* File space info message */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
     HDfprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -2236,7 +2236,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
     H5MF_sect_ud_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -2603,7 +2603,7 @@ H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata)
     H5MF_free_section_t *sect  = (H5MF_free_section_t *)_sect;
     H5MF_sect_iter_ud_t *udata = (H5MF_sect_iter_ud_t *)_udata;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (udata->sect_idx < udata->sect_count) {
         udata->sects[udata->sect_idx].addr = sect->sect_info.addr;
@@ -2632,7 +2632,7 @@ H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, 
     hsize_t hnums     = 0;       /* # of sections */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -3477,7 +3477,7 @@ static herr_t
 H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
                          H5FS_t *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(f_sh);
@@ -3529,7 +3529,7 @@ H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
     H5F_mem_page_t lg_fssinfo_fsm;
     hbool_t        result = FALSE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f_sh);
@@ -3582,7 +3582,7 @@ H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace)
     H5F_mem_page_t sm_fssinfo_fsm;
     hbool_t        result = FALSE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f_sh);
