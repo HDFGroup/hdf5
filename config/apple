@@ -74,8 +74,6 @@ case "$host_os" in
 	;;
 esac
 
-. $srcdir/config/intel-flags
-
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*)
