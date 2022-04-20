@@ -1008,5 +1008,3 @@ main(int argc, char *argv[])
 
     return EXIT_SUCCESS;
 }
-
-H5_GCC_CLANG_DIAG_ON("cast-align")
