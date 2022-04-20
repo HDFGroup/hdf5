@@ -76,7 +76,6 @@ typedef struct detected_t {
     unsigned int  mpos, msize, imp; /* information about mantissa       */
     unsigned int  epos, esize;      /* information about exponent       */
     unsigned long bias;             /* exponent bias for floating pt    */
-    unsigned int  align;            /* required byte alignment          */
     unsigned int  comp_align;       /* alignment for structure          */
 } detected_t;
 
@@ -111,45 +110,9 @@ static void         detect_C99_floats(void);
 static void
 precision(detected_t *d)
 {
-    unsigned int n;
-
-    if (0 == d->msize) {
-        /*
-         * An integer.    The permutation can have negative values at the
-         * beginning or end which represent padding of bytes.  We must adjust
-         * the precision and offset accordingly.
-         */
-        if (d->perm[0] < 0) {
-            /*
-             * Lower addresses are padded.
-             */
-            for (n = 0; n < d->size && d->perm[n] < 0; n++)
-                /*void*/;
-            d->precision = 8 * (d->size - n);
-            d->offset    = 0;
-        }
-        else if (d->perm[d->size - 1] < 0) {
-            /*
-             * Higher addresses are padded.
-             */
-            for (n = 0; n < d->size && d->perm[d->size - (n + 1)]; n++)
-                /*void*/;
-            d->precision = 8 * (d->size - n);
-            d->offset    = 8 * n;
-        }
-        else {
-            /*
-             * No padding.
-             */
-            d->precision = 8 * d->size;
-            d->offset    = 0;
-        }
-    }
-    else {
-        /* A floating point */
-        d->offset    = MIN3(d->mpos, d->epos, d->sign);
-        d->precision = d->msize + d->esize + 1;
-    }
+    /* A floating point */
+    d->offset    = MIN3(d->mpos, d->epos, d->sign);
+    d->precision = d->msize + d->esize + 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -386,9 +349,8 @@ H5T__init_native(void)\n\
     if(NULL == (dt = H5T__alloc()))\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\")\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
-    dt->shared->type = H5T_%s;\n\
+    dt->shared->type = H5T_FLOAT;\n\
     dt->shared->size = %d;\n",
-                d[i].msize ? "FLOAT" : "INTEGER", /*class            */
                 d[i].size);                       /*size            */
 
         if (byte_order == -1)
@@ -410,31 +372,23 @@ H5T__init_native(void)\n\
                 d[i].precision);                        /*precision        */
         /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
 
-        if (0 == d[i].msize) {
-            /* The part unique to fixed point types */
-            fprintf(rawoutstream, "\
-    dt->shared->u.atomic.u.i.sign = H5T_SGN_%s;\n",
-                    d[i].sign ? "2" : "NONE");
-        }
-        else {
-            /* The part unique to floating point types */
-            fprintf(rawoutstream, "\
-    dt->shared->u.atomic.u.f.sign = %d;\n\
-    dt->shared->u.atomic.u.f.epos = %d;\n\
-    dt->shared->u.atomic.u.f.esize = %d;\n\
-    dt->shared->u.atomic.u.f.ebias = 0x%08lx;\n\
-    dt->shared->u.atomic.u.f.mpos = %d;\n\
-    dt->shared->u.atomic.u.f.msize = %d;\n\
-    dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
-    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
-                    d[i].sign,                      /*sign location */
-                    d[i].epos,                      /*exponent loc    */
-                    d[i].esize,                     /*exponent size */
-                    (unsigned long)(d[i].bias),     /*exponent bias */
-                    d[i].mpos,                      /*mantissa loc    */
-                    d[i].msize,                     /*mantissa size */
-                    d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
-        }
+        /* The part unique to floating point types */
+        fprintf(rawoutstream, "\
+dt->shared->u.atomic.u.f.sign = %d;\n\
+dt->shared->u.atomic.u.f.epos = %d;\n\
+dt->shared->u.atomic.u.f.esize = %d;\n\
+dt->shared->u.atomic.u.f.ebias = 0x%08lx;\n\
+dt->shared->u.atomic.u.f.mpos = %d;\n\
+dt->shared->u.atomic.u.f.msize = %d;\n\
+dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
+dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
+                d[i].sign,                      /*sign location */
+                d[i].epos,                      /*exponent loc    */
+                d[i].esize,                     /*exponent size */
+                (unsigned long)(d[i].bias),     /*exponent bias */
+                d[i].mpos,                      /*mantissa loc    */
+                d[i].msize,                     /*mantissa size */
+                d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
 
         /* Register the type */
         fprintf(rawoutstream, "\
@@ -517,7 +471,7 @@ iprint(detected_t *d)
             unsigned int j;
 
             for (j = 8; j > 0; --j) {
-                if (k == d->sign && d->msize) {
+                if (k == d->sign) {
                     HDfputc('S', rawoutstream);
                 }
                 else if (k >= d->epos && k < d->epos + d->esize) {
@@ -526,14 +480,8 @@ iprint(detected_t *d)
                 else if (k >= d->mpos && k < d->mpos + d->msize) {
                     HDfputc('M', rawoutstream);
                 }
-                else if (d->msize) {
-                    HDfputc('?', rawoutstream); /*unknown floating point bit */
-                }
-                else if (d->sign) {
-                    HDfputc('I', rawoutstream);
-                }
                 else {
-                    HDfputc('U', rawoutstream);
+                    HDfputc('?', rawoutstream); /*unknown floating point bit */
                 }
                 --k;
             }
@@ -550,22 +498,7 @@ iprint(detected_t *d)
     /*
      * Is there an implicit bit in the mantissa.
      */
-    if (d->msize) {
-        fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
-    }
-
-    /*
-     * Alignment
-     */
-    if (0 == d->align) {
-        fprintf(rawoutstream, "    * Alignment: NOT CALCULATED\n");
-    }
-    else if (1 == d->align) {
-        fprintf(rawoutstream, "    * Alignment: none\n");
-    }
-    else {
-        fprintf(rawoutstream, "    * Alignment: %lu\n", (unsigned long)(d->align));
-    }
+    fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
 }
 
 /*-------------------------------------------------------------------------
