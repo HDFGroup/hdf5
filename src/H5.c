@@ -83,6 +83,8 @@ hbool_t H5_libinit_g = FALSE; /* Library hasn't been initialized */
 hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
+hbool_t H5_use_selection_io_g = FALSE;
+
 #ifdef H5_HAVE_MPE
 hbool_t H5_MPEinit_g = FALSE; /* MPE Library hasn't been initialized */
 #endif
@@ -144,7 +146,8 @@ herr_t
 H5_init_library(void)
 {
     size_t i;
-    herr_t ret_value = SUCCEED;
+    char * env_use_select_io = NULL;
+    herr_t ret_value         = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -226,7 +229,7 @@ H5_init_library(void)
      * Install atexit() library cleanup routines unless the H5dont_atexit()
      * has been called.  Once we add something to the atexit() list it stays
      * there permanently, so we set H5_dont_atexit_g after we add it to prevent
-     * adding it again later if the library is cosed and reopened.
+     * adding it again later if the library is closed and reopened.
      */
     if (!H5_dont_atexit_g) {
 
@@ -287,6 +290,14 @@ H5_init_library(void)
         }
     }
     /* clang-format on */
+
+    /* Check for HDF5_USE_SELECTION_IO env variable */
+    env_use_select_io = HDgetenv("HDF5_USE_SELECTION_IO");
+    if (NULL != env_use_select_io && HDstrcmp(env_use_select_io, "") && HDstrcmp(env_use_select_io, "0") &&
+        HDstrcmp(env_use_select_io, "no") && HDstrcmp(env_use_select_io, "No") &&
+        HDstrcmp(env_use_select_io, "NO") && HDstrcmp(env_use_select_io, "false") &&
+        HDstrcmp(env_use_select_io, "False") && HDstrcmp(env_use_select_io, "FALSE"))
+        H5_use_selection_io_g = TRUE;
 
     /* Debugging? */
     H5__debug_mask("-all");

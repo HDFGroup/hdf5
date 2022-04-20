@@ -27,10 +27,6 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 enum H5C_cache_incr_mode {
     H5C_incr__off,
     /**<Automatic cache size increase is disabled, and the remaining increment fields are ignored.*/
@@ -61,7 +57,4 @@ enum H5C_cache_decr_mode {
     /**<Automatic cache size decrease is enabled using the ageout with hit rate threshold algorithm.*/
 };
 
-#ifdef __cplusplus
-}
-#endif
 #endif

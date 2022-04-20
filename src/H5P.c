@@ -1122,7 +1122,7 @@ H5P__iterate_cb(H5P_genprop_t *prop, void *_udata)
     H5P_iter_ud_t *udata     = (H5P_iter_ud_t *)_udata; /* Pointer to user data */
     int            ret_value = 0;                       /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(prop);

@@ -17,7 +17,7 @@
 #include "H5TBprivate.h"
 
 /* Local routines */
-static herr_t H5DS_is_reserved(hid_t did);
+static herr_t H5DS_is_reserved(hid_t did, hbool_t *is_reserved);
 
 /*-------------------------------------------------------------------------
  * Function: H5DSwith_new_ref
@@ -73,7 +73,7 @@ H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
 herr_t
 H5DSset_scale(hid_t dsid, const char *dimname)
 {
-    int        has_dimlist;
+    htri_t     has_dimlist;
     H5I_type_t it;
 
     /*-------------------------------------------------------------------------
@@ -92,11 +92,10 @@ H5DSset_scale(hid_t dsid, const char *dimname)
      *-------------------------------------------------------------------------
      */
 
-    /* try to find the attribute "DIMENSION_LIST"  */
-    if ((has_dimlist = H5LT_find_attribute(dsid, DIMENSION_LIST)) < 0)
+    /* Try to find the attribute "DIMENSION_LIST"  */
+    if ((has_dimlist = H5Aexists(dsid, DIMENSION_LIST)) < 0)
         return FAIL;
-
-    if (has_dimlist == 1)
+    if (has_dimlist > 0)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -139,8 +138,8 @@ H5DSset_scale(hid_t dsid, const char *dimname)
 herr_t
 H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
-    int      has_dimlist;
-    int      has_reflist;
+    htri_t   has_dimlist;
+    htri_t   has_reflist;
     int      is_ds;
     hssize_t nelmts;
     hid_t    sid, sid_w;             /* space ID */
@@ -173,6 +172,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     size_t      len;
     int         found_ds = 0;
     htri_t      is_scale;
+    hbool_t     is_reserved;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -221,12 +221,14 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     if (H5I_DATASET != it1 || H5I_DATASET != it2)
         return FAIL;
 
-    /* the DS dataset cannot have dimension scales */
-    if (H5LT_find_attribute(dsid, DIMENSION_LIST) == 1)
+    /* The DS dataset cannot have dimension scales */
+    if (H5Aexists(dsid, DIMENSION_LIST) > 0)
         return FAIL;
 
-    /* check if the dataset is a "reserved" dataset (image, table) */
-    if (H5DS_is_reserved(did) == 1)
+    /* Check if the dataset is a "reserved" dataset (image, table) */
+    if (H5DS_is_reserved(did, &is_reserved) < 0)
+        return FAIL;
+    if (is_reserved == TRUE)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -279,8 +281,8 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
         if (H5Rcreate(&dsl.ref, did, ".", H5R_OBJECT, (hid_t)-1) < 0)
             return FAIL;
     }
-    /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
+    /* Try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+    if ((has_dimlist = H5Aexists(did, DIMENSION_LIST)) < 0)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -354,7 +356,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
      *  and insert the new reference
      *-------------------------------------------------------------------------
      */
-    else if (has_dimlist == 1) {
+    else if (has_dimlist > 0) {
         if ((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
             goto out;
 
@@ -469,7 +471,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
      */
 
     /* try to find the attribute "REFERENCE_LIST" on the >>DS<< dataset */
-    if ((has_reflist = H5LT_find_attribute(dsid, REFERENCE_LIST)) < 0)
+    if ((has_reflist = H5Aexists(dsid, REFERENCE_LIST)) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -530,7 +532,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
      * the "REFERENCE_LIST" array already exists, open it and extend it
      *-------------------------------------------------------------------------
      */
-    else if (has_reflist == 1) {
+    else if (has_reflist > 0) {
         hid_t tmp_id; /* Temporary DS dataset ID to recreate reference */
         int   j;
 
@@ -727,8 +729,8 @@ out:
 herr_t
 H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
 {
-    int          has_dimlist;
-    int          has_reflist;
+    htri_t       has_dimlist;
+    htri_t       has_reflist;
     hssize_t     nelmts;
     hid_t        dsid_j;                  /* DS dataset ID in DIMENSION_LIST */
     hid_t        did_i;                   /* dataset ID in REFERENCE_LIST */
@@ -804,10 +806,9 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
      *-------------------------------------------------------------------------
      */
 
-    /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
+    /* Try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+    if ((has_dimlist = H5Aexists(did, DIMENSION_LIST)) < 0)
         return FAIL;
-
     if (has_dimlist == 0)
         return FAIL;
 
@@ -833,9 +834,8 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
      */
 
     /* try to find the attribute "REFERENCE_LIST" on the >>DS<< dataset */
-    if ((has_reflist = H5LT_find_attribute(dsid, REFERENCE_LIST)) < 0)
+    if ((has_reflist = H5Aexists(dsid, REFERENCE_LIST)) < 0)
         return FAIL;
-
     if (has_reflist == 0)
         return FAIL;
 
@@ -1228,8 +1228,8 @@ out:
 htri_t
 H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
 {
-    int         has_dimlist;
-    int         has_reflist;
+    htri_t      has_dimlist;
+    htri_t      has_reflist;
     hssize_t    nelmts;
     hid_t       sid;                    /* space ID */
     hid_t       tid  = H5I_INVALID_HID; /* attribute type ID */
@@ -1319,7 +1319,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
         return FAIL;
 
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
+    if ((has_dimlist = H5Aexists(did, DIMENSION_LIST)) < 0)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1327,7 +1327,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
      *-------------------------------------------------------------------------
      */
 
-    if (has_dimlist == 1) {
+    if (has_dimlist > 0) {
         if ((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
             goto out;
 
@@ -1407,7 +1407,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
      */
 
     /* try to find the attribute "REFERENCE_LIST" on the >>DS<< dataset */
-    if ((has_reflist = H5LT_find_attribute(dsid, REFERENCE_LIST)) < 0)
+    if ((has_reflist = H5Aexists(dsid, REFERENCE_LIST)) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -1415,7 +1415,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
      *-------------------------------------------------------------------------
      */
 
-    if (has_reflist == 1) {
+    if (has_reflist > 0) {
         if ((aid = H5Aopen(dsid, REFERENCE_LIST, H5P_DEFAULT)) < 0)
             goto out;
 
@@ -1610,7 +1610,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     herr_t     ret_value = 0;
     int        j_idx;
     int        nscales;
-    int        has_dimlist;
+    htri_t     has_dimlist;
     int        i;
     hbool_t    is_new_ref;
 
@@ -1658,14 +1658,13 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     if (dim >= (unsigned)rank)
         return FAIL;
 
-    /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
+    /* Try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+    if ((has_dimlist = H5Aexists(did, DIMENSION_LIST)) < 0)
         return FAIL;
-
     if (has_dimlist == 0)
         return SUCCEED;
 
-    else if (has_dimlist == 1) {
+    else if (has_dimlist > 0) {
         if ((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
             goto out;
         if ((tid = H5Aget_type(aid)) < 0)
@@ -1788,7 +1787,7 @@ out:
 herr_t
 H5DSset_label(hid_t did, unsigned int idx, const char *label)
 {
-    int          has_labels;
+    htri_t       has_labels;
     hid_t        sid = H5I_INVALID_HID; /* space ID */
     hid_t        tid = H5I_INVALID_HID; /* attribute type ID */
     hid_t        aid = H5I_INVALID_HID; /* attribute ID */
@@ -1838,7 +1837,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
      */
 
     /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
-    if ((has_labels = H5LT_find_attribute(did, DIMENSION_LABELS)) < 0)
+    if ((has_labels = H5Aexists(did, DIMENSION_LABELS)) < 0)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1991,7 +1990,7 @@ out:
 ssize_t
 H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
 {
-    int        has_labels;
+    htri_t     has_labels;
     hid_t      sid = H5I_INVALID_HID; /* space ID */
     hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
     hid_t      aid = H5I_INVALID_HID; /* attribute ID */
@@ -2033,11 +2032,11 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
      *-------------------------------------------------------------------------
      */
 
-    /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
-    if ((has_labels = H5LT_find_attribute(did, DIMENSION_LABELS)) < 0)
+    /* Try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
+    if ((has_labels = H5Aexists(did, DIMENSION_LABELS)) < 0)
         return FAIL;
 
-    /* return 0 and NULL for label if no label found */
+    /* Return 0 and NULL for label if no label found */
     if (has_labels == 0) {
         if (label)
             label[0] = 0;
@@ -2049,7 +2048,6 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
      *-------------------------------------------------------------------------
      */
 
-    assert(has_labels == 1);
     if ((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
         goto out;
 
@@ -2146,7 +2144,7 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
     H5I_type_t it;                    /* ID type */
     size_t     nbytes;
     size_t     copy_len;
-    int        has_name;
+    htri_t     has_name;
     char *     buf = NULL;
 
     /*-------------------------------------------------------------------------
@@ -2169,9 +2167,8 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
      */
 
     /* try to find the attribute "NAME" on the >>DS<< dataset */
-    if ((has_name = H5LT_find_attribute(did, "NAME")) < 0)
+    if ((has_name = H5Aexists(did, "NAME")) < 0)
         return FAIL;
-
     if (has_name == 0)
         return 0;
 
@@ -2259,7 +2256,7 @@ H5DSis_scale(hid_t did)
 {
     hid_t       tid = H5I_INVALID_HID; /* attribute type ID */
     hid_t       aid = H5I_INVALID_HID; /* attribute ID */
-    herr_t      attr_class;            /* has the "CLASS" attribute */
+    htri_t      attr_class;            /* has the "CLASS" attribute */
     htri_t      is_ds = -1;            /* set to "not a dimension scale" */
     H5I_type_t  it;                    /* type of identifier */
     char *      buf = NULL;            /* buffer to read name of attribute */
@@ -2279,7 +2276,7 @@ H5DSis_scale(hid_t did)
         goto out;
 
     /* try to find the attribute "CLASS" on the dataset */
-    if ((attr_class = H5LT_find_attribute(did, "CLASS")) < 0)
+    if ((attr_class = H5Aexists(did, "CLASS")) < 0)
         goto out;
 
     if (attr_class == 0) {
@@ -2370,7 +2367,7 @@ out:
 int
 H5DSget_num_scales(hid_t did, unsigned int idx)
 {
-    int        has_dimlist;
+    htri_t     has_dimlist;
     hid_t      sid;                   /* space ID */
     hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
     hid_t      aid = H5I_INVALID_HID; /* attribute ID */
@@ -2410,11 +2407,11 @@ H5DSget_num_scales(hid_t did, unsigned int idx)
     if (idx >= (unsigned int)rank)
         return FAIL;
 
-    /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
+    /* Try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
+    if ((has_dimlist = H5Aexists(did, DIMENSION_LIST)) < 0)
         return FAIL;
 
-    /* it does not exist */
+    /* No scales */
     if (has_dimlist == 0)
         return 0;
 
@@ -2475,86 +2472,77 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DS_is_reserved
  *
- * Purpose: Verify that a dataset's CLASS is either an image, palette or table
+ * Purpose:  Verify that a dataset's CLASS is either an image, palette or
+ *           table
  *
- * Return: true, false, fail
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 19, 2005
- *
+ * Return:   SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5DS_is_reserved(hid_t did)
+H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
 {
-    int    has_class;
+    htri_t has_class;
     hid_t  tid = H5I_INVALID_HID;
     hid_t  aid = H5I_INVALID_HID;
     char * buf = NULL;  /* Name of attribute */
     size_t string_size; /* Size of storage for attribute */
-    herr_t ret;
 
-    /* try to find the attribute "CLASS" on the dataset */
-    if ((has_class = H5LT_find_attribute(did, "CLASS")) < 0)
-        return -1;
+    /* Try to find the attribute "CLASS" on the dataset */
+    if ((has_class = H5Aexists(did, "CLASS")) < 0)
+        return FAIL;
+    if (has_class == 0) {
+        *is_reserved = FALSE;
+        return SUCCEED;
+    }
 
-    if (has_class == 0)
-        return 0;
-
-    assert(has_class == 1);
     if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
-        goto out;
-
+        goto error;
     if ((tid = H5Aget_type(aid)) < 0)
-        goto out;
+        goto error;
 
-    /* check to make sure attribute is a string */
+    /* Check to make sure attribute is a string */
     if (H5T_STRING != H5Tget_class(tid))
-        goto out;
+        goto error;
 
-    /* check to make sure string is null-terminated */
+    /* Check to make sure string is null-terminated */
     if (H5T_STR_NULLTERM != H5Tget_strpad(tid))
-        goto out;
+        goto error;
 
-    /* allocate buffer large enough to hold string */
+    /* Allocate buffer large enough to hold string */
     if ((string_size = H5Tget_size(tid)) == 0)
-        goto out;
-
-    buf = (char *)HDmalloc((size_t)string_size * sizeof(char));
-    if (buf == NULL)
-        goto out;
+        goto error;
+    if (NULL == (buf = HDmalloc(string_size * sizeof(char))))
+        goto error;
 
     /* Read the attribute */
     if (H5Aread(aid, tid, buf) < 0)
-        goto out;
+        goto error;
 
     if (HDstrncmp(buf, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS), HDstrlen(buf))) == 0 ||
         HDstrncmp(buf, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS), HDstrlen(buf))) == 0 ||
         HDstrncmp(buf, TABLE_CLASS, MIN(HDstrlen(TABLE_CLASS), HDstrlen(buf))) == 0)
-        ret = 1;
+        *is_reserved = TRUE;
     else
-        ret = 0;
+        *is_reserved = FALSE;
 
     HDfree(buf);
 
     if (H5Tclose(tid) < 0)
-        goto out;
-
+        goto error;
     if (H5Aclose(aid) < 0)
-        goto out;
+        goto error;
 
-    return ret;
+    return SUCCEED;
 
-    /* error zone */
-out:
+error:
     H5E_BEGIN_TRY
     {
-        if (buf)
-            HDfree(buf);
         H5Tclose(tid);
         H5Aclose(aid);
     }
     H5E_END_TRY;
+
+    HDfree(buf);
+
     return FAIL;
 }

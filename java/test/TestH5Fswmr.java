@@ -29,25 +29,31 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Fswmr {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname            = new TestName();
     private static final String H5_FILE = "testswmr.h5";
 
-    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5fid  = HDF5Constants.H5I_INVALID_HID;
     long H5fapl = HDF5Constants.H5I_INVALID_HID;
     long H5fcpl = HDF5Constants.H5I_INVALID_HID;
 
-    private final void _deleteFile(String filename) {
+    private final void _deleteFile(String filename)
+    {
         File file = new File(filename);
 
         if (file.exists()) {
-            try {file.delete();} catch (SecurityException e) {}
+            try {
+                file.delete();
+            }
+            catch (SecurityException e) {
+            }
         }
     }
 
     @Before
-    public void createH5file()
-            throws HDF5LibraryException, NullPointerException {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void createH5file() throws HDF5LibraryException, NullPointerException
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
 
         H5fapl = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
@@ -59,17 +65,30 @@ public class TestH5Fswmr {
     }
 
     @After
-    public void deleteH5file() throws HDF5LibraryException {
+    public void deleteH5file() throws HDF5LibraryException
+    {
         if (H5fapl > 0) {
-            try {H5.H5Pclose(H5fapl);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(H5fapl);
+            }
+            catch (Exception ex) {
+            }
             H5fapl = HDF5Constants.H5I_INVALID_HID;
         }
         if (H5fcpl > 0) {
-            try {H5.H5Pclose(H5fcpl);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(H5fcpl);
+            }
+            catch (Exception ex) {
+            }
             H5fcpl = HDF5Constants.H5I_INVALID_HID;
         }
-       if (H5fid > 0) {
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+        if (H5fid > 0) {
+            try {
+                H5.H5Fclose(H5fid);
+            }
+            catch (Exception ex) {
+            }
             H5fid = HDF5Constants.H5I_INVALID_HID;
         }
         _deleteFile(H5_FILE);
@@ -77,7 +96,8 @@ public class TestH5Fswmr {
     }
 
     @Test
-    public void testH5Fstart_swmr_write() {
+    public void testH5Fstart_swmr_write()
+    {
         try {
             H5.H5Fstart_swmr_write(H5fid);
         }
@@ -87,7 +107,8 @@ public class TestH5Fswmr {
     }
 
     @Test
-    public void testH5Fswmr_read_attempts() {
+    public void testH5Fswmr_read_attempts()
+    {
         long read_attempts = 0;
 
         try {

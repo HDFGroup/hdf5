@@ -474,7 +474,7 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -1249,7 +1249,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(attr_vol_obj);
@@ -1478,7 +1478,7 @@ H5A__compact_build_table_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*
     H5A_compact_bt_ud_t *udata     = (H5A_compact_bt_ud_t *)_udata; /* Operator user data */
     herr_t               ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -1594,7 +1594,7 @@ H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
     H5A_dense_bt_ud_t *udata     = (H5A_dense_bt_ud_t *)_udata; /* 'User data' passed in */
     herr_t             ret_value = H5_ITER_CONT;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(attr);
@@ -1720,7 +1720,7 @@ done:
 static int
 H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
         HDstrcmp((*(const H5A_t *const *)attr1)->shared->name, (*(const H5A_t *const *)attr2)->shared->name))
@@ -1746,7 +1746,7 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
         HDstrcmp((*(const H5A_t *const *)attr2)->shared->name, (*(const H5A_t *const *)attr1)->shared->name))
@@ -1773,7 +1773,7 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if ((*(const H5A_t *const *)attr1)->shared->crt_idx < (*(const H5A_t *const *)attr2)->shared->crt_idx)
         ret_value = -1;
@@ -1807,7 +1807,7 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if ((*(const H5A_t *const *)attr1)->shared->crt_idx < (*(const H5A_t *const *)attr2)->shared->crt_idx)
         ret_value = 1;
@@ -1835,7 +1835,7 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 static herr_t
 H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_order_t order)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(atable);
@@ -2503,7 +2503,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
     H5A_t *                 attr_dst  = NULL;
     herr_t                  ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(attr_src);
@@ -2653,7 +2653,7 @@ H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hs
     hsize_t last_attr;           /* Index of last attribute examined */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Call attribute iteration routine */
     last_attr = start_idx = (idx ? *idx : 0);

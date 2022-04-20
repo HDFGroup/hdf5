@@ -23,9 +23,7 @@ public class HDF5BtreeException extends HDF5LibraryException {
      * Constructs an <code>HDF5BtreeException</code> with no specified detail
      * message.
      */
-    public HDF5BtreeException() {
-        super();
-    }
+    public HDF5BtreeException() { super(); }
 
     /**
      * Constructs an <code>HDF5BtreeException</code> with the specified detail
@@ -34,7 +32,5 @@ public class HDF5BtreeException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5BtreeException(String s) {
-        super(s);
-    }
+    public HDF5BtreeException(String s) { super(s); }
 }

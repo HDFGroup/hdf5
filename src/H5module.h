@@ -11,9 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	This file contains declarations which define macros for the
- *		H5 package.  Including this header means that the source file
- *		is part of the H5 package.
+ * Purpose:    This file contains declarations which define macros for the
+ *        H5 package.  Including this header means that the source file
+ *        is part of the H5 package.
  */
 #ifndef H5module_H
 #define H5module_H
@@ -22,9 +22,8 @@
  *      reporting macros.
  */
 #define H5_MODULE
-#define H5_MY_PKG      H5
-#define H5_MY_PKG_ERR  H5E_LIB
-#define H5_MY_PKG_INIT YES
+#define H5_MY_PKG     H5
+#define H5_MY_PKG_ERR H5E_LIB
 
 /**\defgroup H5 H5
  *

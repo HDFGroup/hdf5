@@ -535,10 +535,10 @@ external_links(void)
 
     for (i = 0; i < 2; i++) {
 
-        if (i == 0) {
+        comm = MPI_COMM_WORLD;
+
+        if (i == 0)
             doIO = 1;
-            comm = MPI_COMM_WORLD;
-        }
         else {
             doIO = mpi_rank % 2;
             mrc  = MPI_Comm_split(MPI_COMM_WORLD, doIO, mpi_rank, &comm);
@@ -614,11 +614,11 @@ external_links(void)
 
             ret = H5Fclose(fid);
             VRFY((ret >= 0), "H5Fclose succeeded");
+        }
 
-            if (i == 1) {
-                mrc = MPI_Comm_free(&comm);
-                VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
-            }
+        if (comm != MPI_COMM_WORLD) {
+            mrc = MPI_Comm_free(&comm);
+            VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
         }
     }
 

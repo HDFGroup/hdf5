@@ -229,8 +229,10 @@ check_file(char *filename)
 #endif
 
     /* Open the file. */
-    if ((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+        nerrors++;
         FAIL_STACK_ERROR;
+    }
 
     TESTING("regular dataset of LE DOUBLE");
     nerrors += check_data_f(DATASETNAME, fid);
@@ -356,6 +358,14 @@ main(void)
     int  nerrors = 0;
 
     h5_reset();
+
+    /*
+     * Skip tests for VFDs that need modified filenames.
+     */
+    if (h5_driver_uses_modified_filename()) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
 
     HDputs("\n");
     HDputs("Testing reading data created on Linux");

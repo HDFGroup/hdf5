@@ -288,7 +288,7 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset_vol_obj);
@@ -423,7 +423,7 @@ H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type)
     H5P_genplist_t *plist;            /* Property list created */
     H5D_shared_t *  ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate new shared dataset structure */
     if (NULL == (new_dset = H5FL_MALLOC(H5D_shared_t)))
@@ -495,7 +495,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     hbool_t use_at_least_v18;    /* Flag indicating to use at least v18 format versions */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(file);
@@ -567,7 +567,7 @@ H5D__cache_dataspace_info(const H5D_t *dset)
     unsigned u;                   /* Local index value */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(dset);
@@ -606,7 +606,7 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(file);
@@ -652,7 +652,7 @@ H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
     HDassert(minimize);
@@ -693,7 +693,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     size_t      get_value        = 0;
     size_t      ret_value        = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
     HDassert(dset);
@@ -811,7 +811,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
     size_t ohdr_size = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
     HDassert(dset);
@@ -858,7 +858,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     hbool_t          use_minimized_header = FALSE;   /* Flag to use minimized dataset object headers */
     herr_t           ret_value            = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(file);
@@ -1060,7 +1060,7 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
     size_t      file_prefix_len;     /* length of expanded prefix                      */
     herr_t      ret_value = SUCCEED; /* Return value                                   */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dset);
@@ -1598,7 +1598,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
 {
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dset);
@@ -1677,7 +1677,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     hbool_t         layout_init = FALSE;   /* Flag to indicate that chunk information was initialized */
     herr_t          ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(dataset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dataset->oloc.addr)
 
     /* check args */
     HDassert(dataset);
@@ -2388,7 +2388,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
     const H5D_t *dset      = io_info->dset; /* dataset pointer */
     herr_t       ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(dset);
 
@@ -2565,7 +2565,7 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
     H5D_vlen_bufsize_common_t *vlen_bufsize_com = (H5D_vlen_bufsize_common_t *)info;
     void *                     ret_value        = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for increasing the size of the temporary space for VL data */
     if (size > vlen_bufsize_com->vl_tbuf_size) {
@@ -2601,7 +2601,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
     herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
@@ -2747,7 +2747,7 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
     H5T_t *                     dt;                  /* Datatype for operation */
     herr_t                      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(point);
@@ -2908,7 +2908,7 @@ H5D__check_filters(H5D_t *dataset)
     H5O_fill_t *fill;                /* Dataset's fill value */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dataset);
@@ -3466,7 +3466,7 @@ H5D__flush_all_cb(void *_dataset, hid_t H5_ATTR_UNUSED id, void *_udata)
     H5F_t *f         = (H5F_t *)_udata;   /* User data for callback */
     int    ret_value = H5_ITER_CONT;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dataset);

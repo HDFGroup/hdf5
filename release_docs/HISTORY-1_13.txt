@@ -948,6 +948,14 @@ New Features
 
     Tools:
     ------
+    - h5repack added an optional verbose value for reporting R/W timing.
+
+      In addition to adding timing capture around the read/write calls in
+      h5repack, added help text to indicate how to show timing for read/write;
+           -v N, --verbose=N       Verbose mode, print object information.
+              N - is an integer greater than 1, 2 displays read/write timing
+      (ADB - 2021/11/08)
+
     - Added a new (unix ONLY) parallel meta tool 'h5dwalk', which utilizes the
       mpifileutils (https://hpc.github.io/mpifileutils) open source utility
       library to enable parallel execution of other HDF5 tools.
@@ -1810,6 +1818,17 @@ New Features
 
     Configuration:
     -------------
+    - Reworked corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However setting the HDF5_ROOT variable failed to locate
+      the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
+      set to the <INSTALL_DIR>/cmake folder. The location of the configuration 
+      files can still be specified by the "HDF5_DIR" variable.
+
+      (ADB - 2022/02/02)
+
     - CPack will now generate RPM/DEB packages.
 
       Enabled the RPM and DEB CPack generators on linux. In addition to

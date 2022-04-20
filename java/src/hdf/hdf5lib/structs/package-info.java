@@ -11,7 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/** All structure definitions define java equivalents of the C structures needed
+/**
+ * All structure definitions define java equivalents of the C structures needed
  * by the C API calls. See the C API for information about the structures.
  */
 package hdf.hdf5lib.structs;

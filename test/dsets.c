@@ -8845,7 +8845,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same as on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)
@@ -8869,7 +8869,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Oopen(fid, "dset", dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on dapl1 */
+    /* Retrieve dapl from dataset, verify cache values are the same as on dapl1 */
     /* Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
      * values directly from the dataset structure, and not from a copy of the
      * dapl used to open the dataset (which is not preserved).
@@ -8889,7 +8889,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)

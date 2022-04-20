@@ -228,7 +228,6 @@ H5IM_find_palette(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t *height, hsize_t *planes,
                    char *interlace, hssize_t *npals)
@@ -241,7 +240,7 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
     hid_t       atid = -1;
     H5T_class_t aclass;
     int         has_pal;
-    int         has_attr;
+    hid_t       has_attr;
 
     /* check the arguments */
     if (dset_name == NULL)
@@ -257,11 +256,11 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
         return -1;
 
     /* Try to find the attribute "INTERLACE_MODE" on the >>image<< dataset */
-    if ((has_attr = H5LT_find_attribute(did, "INTERLACE_MODE")) < 0)
+    if ((has_attr = H5Aexists(did, "INTERLACE_MODE")) < 0)
         goto out;
 
     /* It exists, get it */
-    if (has_attr == 1) {
+    if (has_attr > 0) {
 
         if ((aid = H5Aopen(did, "INTERLACE_MODE", H5P_DEFAULT)) < 0)
             goto out;
@@ -289,9 +288,8 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
 
     /* Initialize the image dimensions */
 
-    if (has_attr == 1)
-    /* This is a 24 bit image */
-    {
+    if (has_attr > 0) {
+        /* This is a 24 bit image */
 
         if (HDstrncmp(interlace, "INTERLACE_PIXEL", 15) == 0) {
             /* Number of color planes is defined as the third dimension */
@@ -308,9 +306,8 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
         else
             return -1;
     }
-    else
-    /* This is a 8 bit image */
-    {
+    else {
+        /* This is a 8 bit image */
         *height = dims[0];
         *width  = dims[1];
         *planes = 1;
@@ -512,7 +509,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
     hobj_ref_t *refbuf; /* buffer to read references */
     hssize_t    n_refs;
     hsize_t     dim_ref;
-    int         ok_pal;
+    htri_t      ok_pal;
 
     /* check the arguments */
     if (image_name == NULL)
@@ -531,7 +528,8 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         return -1;
 
     /* Try to find the attribute "PALETTE" on the >>image<< dataset */
-    ok_pal = H5LT_find_attribute(did, "PALETTE");
+    if ((ok_pal = H5Aexists(did, "PALETTE")) < 0)
+        goto out;
 
     /*-------------------------------------------------------------------------
      * It does not exist. We create the attribute and one reference
@@ -570,7 +568,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
      * The attribute already exists, open it
      *-------------------------------------------------------------------------
      */
-    else if (ok_pal == 1) {
+    else if (ok_pal > 0) {
         if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
             goto out;
 
@@ -631,7 +629,7 @@ H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
 
         HDfree(refbuf);
 
-    } /* ok_pal ==  1 */
+    } /* ok_pal > 0 */
 
     /* Close the image dataset. */
     if (H5Dclose(did) < 0)
@@ -673,7 +671,8 @@ H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
     hid_t       atid;
     hid_t       aid;
     H5T_class_t aclass;
-    int         ok_pal, has_pal;
+    htri_t      ok_pal;
+    int         has_pal;
 
     /* check the arguments */
     if (image_name == NULL)
@@ -699,14 +698,14 @@ H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         return -1;
 
     /* Try to find the attribute "PALETTE" on the >>image<< dataset */
-    ok_pal = H5LT_find_attribute(did, "PALETTE");
+    if ((ok_pal = H5Aexists(did, "PALETTE")) < 0)
+        goto out;
 
     /* It does not exist. Nothing to do */
     if (ok_pal == 0)
-        return -1;
-
-    /* The attribute exists, open it */
-    else if (ok_pal == 1) {
+        goto out;
+    else if (ok_pal > 0) {
+        /* The attribute exists, open it */
         if ((aid = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
             goto out;
 
@@ -730,8 +729,7 @@ H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name)
         /* Close the attribute. */
         if (H5Aclose(aid) < 0)
             goto out;
-
-    } /* ok_pal */
+    }
 
     /* Close the image dataset. */
     if (H5Dclose(did) < 0)
@@ -1063,7 +1061,7 @@ herr_t
 H5IMis_image(hid_t loc_id, const char *dset_name)
 {
     hid_t   did;
-    int     has_class;
+    htri_t  has_class;
     hid_t   atid;
     hid_t   aid = -1;
     char *  attr_data;    /* Name of attribute */
@@ -1082,13 +1080,14 @@ H5IMis_image(hid_t loc_id, const char *dset_name)
         return -1;
 
     /* Try to find the attribute "CLASS" on the dataset */
-    has_class = H5LT_find_attribute(did, "CLASS");
+    if ((has_class = H5Aexists(did, "CLASS")) < 0)
+        goto out;
 
     if (has_class == 0) {
         H5Dclose(did);
         return 0;
     }
-    else if (has_class == 1) {
+    else {
 
         if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
             goto out;
@@ -1163,7 +1162,7 @@ herr_t
 H5IMis_palette(hid_t loc_id, const char *dset_name)
 {
     hid_t   did;
-    int     has_class;
+    htri_t  has_class;
     hid_t   atid;
     hid_t   aid = -1;
     char *  attr_data;    /* Name of attribute */
@@ -1182,13 +1181,14 @@ H5IMis_palette(hid_t loc_id, const char *dset_name)
         return -1;
 
     /* Try to find the attribute "CLASS" on the dataset */
-    has_class = H5LT_find_attribute(did, "CLASS");
+    if ((has_class = H5Aexists(did, "CLASS")) < 0)
+        goto out;
 
     if (has_class == 0) {
         H5Dclose(did);
         return 0;
     }
-    else if (has_class == 1) {
+    else {
 
         if ((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
             goto out;

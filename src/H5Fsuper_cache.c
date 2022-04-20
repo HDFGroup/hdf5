@@ -152,7 +152,7 @@ H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref,
     const uint8_t *image     = (const uint8_t *)*image_ref; /* Pointer into raw data buffer */
     htri_t         ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(sblock);
@@ -231,7 +231,7 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
     unsigned       drv_vers;                            /* Version of driver info block */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(drvrinfo);
@@ -298,7 +298,7 @@ done:
 static herr_t
 H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image_len);
@@ -331,7 +331,7 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t H5_ATTR_NDE
     H5F_super_t                sblock;                                      /* Temporary file superblock */
     htri_t                     ret_value = SUCCEED;                         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -377,7 +377,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     uint32_t                   computed_chksum;  /* Computed metadata checksum value */
     htri_t                     ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -418,7 +418,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
     const uint8_t *            image     = _image; /* Pointer into raw data buffer */
     H5F_super_t *              ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -606,7 +606,7 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5F_super_t *sblock = (const H5F_super_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(sblock);
@@ -640,7 +640,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     haddr_t      rel_eof;                        /* Relative EOF for file */
     herr_t       ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -779,7 +779,7 @@ H5F__cache_superblock_free_icr(void *_thing)
     H5F_super_t *sblock    = (H5F_super_t *)_thing; /* Pointer to the object */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(sblock);
@@ -809,7 +809,7 @@ done:
 static herr_t
 H5F__cache_drvrinfo_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image_len);
@@ -841,7 +841,7 @@ H5F__cache_drvrinfo_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBU
     H5O_drvinfo_t            drvrinfo;                                  /* Driver info */
     herr_t                   ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -884,7 +884,7 @@ H5F__cache_drvrinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED
     char                     drv_name[9];                                 /* Name of driver */
     H5O_drvinfo_t *          ret_value = NULL;                            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(image);
@@ -938,7 +938,7 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
 {
     const H5O_drvinfo_t *drvinfo = (const H5O_drvinfo_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(drvinfo);
@@ -973,7 +973,7 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBU
     uint8_t *      dbuf;                              /* Pointer to beginning of driver info */
     herr_t         ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(f);
@@ -1031,7 +1031,7 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
 {
     H5O_drvinfo_t *drvinfo = (H5O_drvinfo_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(drvinfo);

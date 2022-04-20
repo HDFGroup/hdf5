@@ -389,7 +389,7 @@ H5G__loc_find_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name,
     H5G_loc_fnd_t *udata     = (H5G_loc_fnd_t *)_udata; /* User data passed in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
@@ -467,7 +467,7 @@ H5G__loc_find_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     hbool_t        obj_exists    = FALSE;           /* Whether the object exists (unused) */
     herr_t         ret_value     = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -613,7 +613,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
     hbool_t *exists    = (hbool_t *)_udata; /* User data passed in */
     herr_t   ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
@@ -685,7 +685,7 @@ H5G__loc_addr_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
     haddr_t *udata     = (haddr_t *)_udata; /* User data passed in */
     herr_t   ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -755,7 +755,7 @@ H5G__loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
     H5G_loc_info_t *udata     = (H5G_loc_info_t *)_udata; /* User data passed in */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -831,7 +831,7 @@ H5G__loc_native_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     H5G_loc_native_info_t *udata     = (H5G_loc_native_info_t *)_udata; /* User data passed in */
     herr_t                 ret_value = SUCCEED;                         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -909,7 +909,7 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     htri_t        exists;                         /* Whether a "comment" message already exists */
     herr_t        ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
@@ -998,7 +998,7 @@ H5G__loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     H5O_name_t    comment;                        /* Object header "comment" message */
     herr_t        ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)

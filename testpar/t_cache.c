@@ -325,7 +325,7 @@ struct mssg_t {
     unsigned magic;
 };
 
-MPI_Datatype mpi_mssg_t; /* for MPI derived type created from mssg */
+MPI_Datatype mpi_mssg_t = MPI_DATATYPE_NULL; /* for MPI derived type created from mssg */
 
 /*****************************************************************************/
 /************************** function declarations ****************************/
@@ -565,8 +565,8 @@ set_up_file_communicator(void)
     int       mpi_result;
     int       num_excluded_ranks;
     int       excluded_ranks[1];
-    MPI_Group file_group;
-    MPI_Group world_group;
+    MPI_Group file_group  = MPI_GROUP_NULL;
+    MPI_Group world_group = MPI_GROUP_NULL;
 
     if (success) {
 
@@ -673,6 +673,12 @@ set_up_file_communicator(void)
             }
         }
     }
+
+    if (file_group != MPI_GROUP_NULL)
+        MPI_Group_free(&file_group);
+
+    if (world_group != MPI_GROUP_NULL)
+        MPI_Group_free(&world_group);
 
     return (success);
 
@@ -1194,6 +1200,9 @@ takedown_derived_types(void)
 {
     hbool_t success = TRUE;
     int     result;
+
+    if (mpi_mssg_t == MPI_DATATYPE_NULL)
+        return (success);
 
     result = MPI_Type_free(&mpi_mssg_t);
 
@@ -6724,7 +6733,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, __func__);
                 }
             }
@@ -6780,7 +6789,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, __func__);
                 }
             }
@@ -7047,6 +7056,10 @@ finish:
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
+
+    if (file_mpi_comm != MPI_COMM_NULL)
+        MPI_Comm_free(&file_mpi_comm);
+
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
         HDprintf("===================================\n");

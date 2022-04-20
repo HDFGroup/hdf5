@@ -171,7 +171,7 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          composing the entire current extent). If either \p stride or
  *          \p block is NULL, then it will be set to \p 1.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
@@ -194,7 +194,7 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  *          from \p space1_id is copied for the dataspace extent of the
  *          newly created dataspace.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
@@ -795,7 +795,7 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  *          \p space2_id. The first selection is modified to contain the
  *          result of \p space1_id operated on by \p space2_id.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
@@ -940,7 +940,7 @@ H5_DLL herr_t H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id);
  *
  * \note This can be useful for VOL developers to implement chunked datasets.
  *
- * \since 1.12.0
+ * \since 1.10.6
  */
 H5_DLL herr_t H5Sselect_adjust(hid_t spaceid, const hssize_t *offset);
 /**
@@ -977,7 +977,7 @@ H5_DLL herr_t H5Sselect_all(hid_t spaceid);
  *          offset) from the source dataspace \p src_id to the destination
  *          dataspace \p dst_id.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
@@ -1205,7 +1205,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  * \note Assumes that \p start & \p end block bounds are inclusive, so
  *       \p start == \p end value is OK.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *end);
@@ -1244,7 +1244,7 @@ H5_DLL herr_t H5Sselect_none(hid_t spaceid);
  *          into a third selection.This can be useful for VOL developers to
  *          implement chunked or virtual datasets.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id,
@@ -1265,7 +1265,7 @@ H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_
  *          This is primarily used for reading the entire selection in
  *          one swoop.
  *
- * \since 1.12.0
+ * \since 1.10.6
  *
  */
 H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);

@@ -106,7 +106,7 @@ const H5AC_class_t H5AC_EPOCH_MARKER[1] = {
 static herr_t
 H5C__epoch_marker_get_initial_load_size(void H5_ATTR_UNUSED *udata_ptr, size_t H5_ATTR_UNUSED *image_len_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -117,7 +117,7 @@ static herr_t
 H5C__epoch_marker_get_final_load_size(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED image_len,
                                       void H5_ATTR_UNUSED *udata_ptr, size_t H5_ATTR_UNUSED *actual_len)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -128,7 +128,7 @@ static htri_t
 H5C__epoch_marker_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len,
                                 void H5_ATTR_UNUSED *udata_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -139,7 +139,7 @@ static void *
 H5C__epoch_marker_deserialize(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len,
                               void H5_ATTR_UNUSED *udata, hbool_t H5_ATTR_UNUSED *dirty_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -149,7 +149,7 @@ H5C__epoch_marker_deserialize(const void H5_ATTR_UNUSED *image_ptr, size_t H5_AT
 static herr_t
 H5C__epoch_marker_image_len(const void H5_ATTR_UNUSED *thing, size_t H5_ATTR_UNUSED *image_len_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -162,7 +162,7 @@ H5C__epoch_marker_pre_serialize(H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *th
                                 haddr_t H5_ATTR_UNUSED *new_addr_ptr, size_t H5_ATTR_UNUSED *new_len_ptr,
                                 unsigned H5_ATTR_UNUSED *flags_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -173,7 +173,7 @@ static herr_t
 H5C__epoch_marker_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *image_ptr,
                             size_t H5_ATTR_UNUSED len, void H5_ATTR_UNUSED *thing)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -183,7 +183,7 @@ H5C__epoch_marker_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
 static herr_t
 H5C__epoch_marker_notify(H5C_notify_action_t H5_ATTR_UNUSED action, void H5_ATTR_UNUSED *thing)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -193,7 +193,7 @@ H5C__epoch_marker_notify(H5C_notify_action_t H5_ATTR_UNUSED action, void H5_ATTR
 static herr_t
 H5C__epoch_marker_free_icr(void H5_ATTR_UNUSED *thing)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
@@ -203,7 +203,7 @@ H5C__epoch_marker_free_icr(void H5_ATTR_UNUSED *thing)
 static herr_t
 H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED *thing, hsize_t H5_ATTR_UNUSED *fsf_size_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 

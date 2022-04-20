@@ -3202,7 +3202,7 @@ test_actual_io_mode(int selection_mode)
         /* Set the threshold number of processes per chunk to twice mpi_size.
          * This will prevent the threshold from ever being met, thus forcing
          * multi chunk io instead of link chunk io.
-         * This is via deault.
+         * This is via default.
          */
         if (multi_chunk_io) {
             /* force multi-chunk-io by threshold */
@@ -3351,32 +3351,38 @@ actual_io_mode_tests(void)
     int mpi_size = -1;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
+    /* Only run these tests if selection I/O is not being used - selection I/O
+     * bypasses this IO mode decision - it's effectively always multi chunk
+     * currently */
+    if (!H5_use_selection_io_g) {
+        test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
-    /*
-     * Test multi-chunk-io via proc_num threshold
-     */
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
+        /*
+         * Test multi-chunk-io via proc_num threshold
+         */
+        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
+        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
 
-    /* The Multi Chunk Mixed test requires at least three processes. */
-    if (mpi_size > 2)
-        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
-    else
-        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
+        /* The Multi Chunk Mixed test requires at least three processes. */
+        if (mpi_size > 2)
+            test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
+        else
+            HDfprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
 
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
+        test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
-    /*
-     * Test multi-chunk-io via setting direct property
-     */
-    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
-    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
+        /*
+         * Test multi-chunk-io via setting direct property
+         */
+        test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
+        test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
 
-    test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
-    test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
+        test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
+        test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
 
-    test_actual_io_mode(TEST_ACTUAL_IO_RESET);
+        test_actual_io_mode(TEST_ACTUAL_IO_RESET);
+    }
+
     return;
 }
 

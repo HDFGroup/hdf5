@@ -159,7 +159,7 @@ H5__checksum_crc_make_table(void)
     uint32_t c;    /* Checksum for each byte value */
     unsigned n, k; /* Local index variables */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Compute the checksum for each possible byte value */
     for (n = 0; n < 256; n++) {
@@ -196,7 +196,7 @@ H5__checksum_crc_update(uint32_t crc, const uint8_t *buf, size_t len)
 {
     size_t n; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Initialize the CRC table if necessary */
     if (!H5_crc_table_computed)

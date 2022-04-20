@@ -579,7 +579,7 @@ H5O__msg_reset_real(const H5O_msg_class_t *type, void *native)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(type);
@@ -1020,7 +1020,7 @@ H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, un
     htri_t         try_remove = FALSE;                   /* Whether to try removing a message */
     herr_t         ret_value  = H5_ITER_CONT;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -1882,7 +1882,7 @@ H5O__copy_mesg(H5F_t *f, H5O_t *oh, size_t idx, const H5O_msg_class_t *type, con
     hbool_t            chk_dirtied = FALSE;          /* Flag for unprotecting chunk */
     herr_t             ret_value   = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);

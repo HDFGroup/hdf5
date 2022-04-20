@@ -29,13 +29,14 @@
  * Function:    H5FDperform_init
  *
  * Purpose:     Ensure that the library is initialized and then call
- *              the provided VFD initializer.
+ *              the provided VFD initializer
  *
- * Return:      Success:        identifier for the VFD just initialized
+ * Return:      Success:        Identifier for the VFD just initialized
  *              Failure:        H5I_INVALID_HID
  *-------------------------------------------------------------------------
  */
-hid_t H5FDperform_init(hid_t (*init)(void))
+hid_t
+H5FDperform_init(H5FD_init_t op)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -43,16 +44,16 @@ hid_t H5FDperform_init(hid_t (*init)(void))
     /*NO TRACE*/
 
     /* It is possible that an application will evaluate an
-     * `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
-     * cetera) before the library has had an opportunity to initialize.
-     * Call H5_init_library() to make sure that the library has been
-     * initialized before `init` is run.
+     * `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, etc.
+     * before the library has had an opportunity to initialize. Call
+     * H5_init_library() to make sure that the library has been initialized
+     * before `init` is run.
      */
-    if (H5_init_library() < 0) {
+    if (H5_init_library() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed")
-    }
 
-    ret_value = init();
+    ret_value = op();
+
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 }
