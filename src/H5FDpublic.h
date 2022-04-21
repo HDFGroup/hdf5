@@ -179,6 +179,12 @@
  * operations when appropriate.
  */
 #define H5FD_FEAT_MEMMANAGE 0x00010000
+/*
+ * Defining H5FD_FEAT_SUPPORTS_VFD_SWMR for a VFL driver means that the
+ * driver supports the SWMR feature that is implemented in a more modular
+ * fashion and simplies maintenance.
+ */
+#define H5FD_FEAT_SUPPORTS_VFD_SWMR 0x00020000
 
 /* ctl function definitions: */
 #define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */

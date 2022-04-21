@@ -15,9 +15,10 @@
  */
 
 #include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
+#define H5F_FRIEND           /* Suppress error about including H5Fpkg            */
 
 #include "H5Eprivate.h"      /* Error handling           */
-#include "H5Fprivate.h"      /* File access              */
+#include "H5Fpkg.h"          /* Files                    */
 #include "H5FDprivate.h"     /* File drivers             */
 #include "H5FDvfd_swmr.h"    /* VFD SWMR file driver     */
 #include "H5FLprivate.h"     /* Free Lists               */
@@ -40,7 +41,7 @@ typedef struct H5FD_vfd_swmr_t {
     /* Metadata file */
     int                     md_fd;             /* File descriptor for the metadata file */
     uint32_t                md_pages_reserved; /* # of pages reserved at the head of the metadata file */
-    char                    md_file_path[H5FD_MAX_FILENAME_LEN]; /* Name of the metadate file */
+    char                    md_file_path_name[H5FD_MAX_FILENAME_LEN+1]; /* Name of the metadate file */
     H5FD_vfd_swmr_md_header md_header;                           /* Metadata file header */
     H5FD_vfd_swmr_md_index  md_index;                            /* Metadata file index */
 
@@ -60,10 +61,15 @@ typedef struct H5FD_vfd_swmr_t {
      * to the lower VFD instance.
      */
     hbool_t writer;
+    /*
+     * Indicate whether we are in make_believe state or not
+     */
+    hbool_t make_believe;
 
 } H5FD_vfd_swmr_t;
 
 #define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define VFD_SWMR_MD_SUFFIX  ".md"
 
 /* Prototypes */
 static herr_t  H5FD__vfd_swmr_term(void);
@@ -217,6 +223,10 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
+ * Modifications:
+ *  Vailin Choi: 2/18/2022
+ *  VDS changes: Try opening metadata file and loading header/index if make_believe is FALSE.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -235,28 +245,115 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
     if (file->api_elapsed_ticks == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "could not allocate API elapsed ticks")
 
-    /* Retry on opening the metadata file */
-    for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
-                                H5_RETRY_DEFAULT_MAXIVAL);
-         do_try; do_try = H5_retry_next(&retry)) {
-        if ((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
-            break;
+    if(!file->make_believe) {
+        /* Retry on opening the metadata file */
+        for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
+                                    H5_RETRY_DEFAULT_MAXIVAL);
+             do_try; do_try = H5_retry_next(&retry)) {
+            if ((file->md_fd = HDopen(file->md_file_path_name, O_RDONLY)) >= 0)
+                break;
+        }
+
+        /* Exhaust all retries for opening the md file */
+        if (!do_try)
+            HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, FAIL,
+                        "unable to open the metadata file after all retry attempts");
+
+        /* Retry on loading and decoding the header and index in the
+         *  metadata file
+         */
+        if (H5FD__vfd_swmr_load_hdr_and_idx(file, TRUE) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to load/decode the md file header/index");
     }
-
-    /* Exhaust all retries for opening the md file */
-    if (!do_try)
-        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, FAIL,
-                    "unable to open the metadata file after all retry attempts");
-
-    /* Retry on loading and decoding the header and index in the
-     *  metadata file
-     */
-    if (H5FD__vfd_swmr_load_hdr_and_idx(file, TRUE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to load/decode the md file header/index");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__swmr_reader_open() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5FD_vfd_swmr_build_md_path_name
+ *
+ * Purpose:     To construct the metadata file's full name based on config's 
+ *              md_file_path and md_file_name.  See RFC for details.
+ *              
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi -- 1/13/2022
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5FD_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename, char *name /*out*/)
+{
+    size_t          tot_len = 0;
+    size_t          tmp_len = 0;
+    herr_t          ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if((tot_len = HDstrlen(config->md_file_path)) != 0) {
+
+        /* md_file_path + '/' */
+        if(++tot_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name exceeds maximum");
+        HDstrcat(name, config->md_file_path);
+        HDstrcat(name, "/");
+    }
+
+    if((tmp_len = HDstrlen(config->md_file_name)) != 0) {
+        if((tot_len += tmp_len) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name exceeds maxiumum");
+        HDstrcat(name, config->md_file_name);
+    } else {
+        /* Automatic generation of metadata file name based on hdf5_filename + '.md' */
+        if((tot_len += (HDstrlen(hdf5_filename) + 3)) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name maxiumum");
+
+        HDstrcat(name, hdf5_filename);
+        HDstrcat(name, VFD_SWMR_MD_SUFFIX);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FD_vfd_swmr_build_md_path_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_create_make_believe_data
+ *
+ * Purpose:     Set up pretend data when make_believe is true
+ *
+ * Return:      VOID
+ *
+ * Programmer:  Vailin Choi -- 1/13/2022
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5FD_vfd_swmr_create_make_believe_data(H5FD_vfd_swmr_t *_file)
+{
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    HDassert(file->make_believe);
+
+    /* Create make_believe data: empty header and index */
+    file->md_header.fs_page_size = 0;
+    file->md_header.tick_num = 0;
+    file->md_header.index_offset =  H5FD_MD_HEADER_SIZE;
+    file->md_header.index_length = H5FD_MD_INDEX_SIZE(0);
+
+    file->md_index.tick_num = 0;
+    file->md_index.num_entries = 0;
+
+    FUNC_LEAVE_NOAPI_VOID
+
+}  /* H5FD_vfd_swmr_create_make_believe_data() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_open
@@ -268,6 +365,11 @@ done:
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
  *
+ * Modifications:
+ *  Vailin Choi: 2/18/2022
+ *  VDS changes: --Build metadata file name
+ *               --Determine make_believe or not
+ *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -278,6 +380,7 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     H5P_genplist_t *       plist;
     H5F_vfd_swmr_config_t *vfd_swmr_config;
     H5FD_t *               ret_value = NULL; /* Return value     */
+    htri_t is_hdf5;
 
     FUNC_ENTER_PACKAGE
 
@@ -314,16 +417,33 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     file->hdf5_filename[sizeof(file->hdf5_filename) - 1] = '\0';
 
     /* Retain a copy of the metadata file name */
-    HDstrncpy(file->md_file_path, vfd_swmr_config->md_file_path, sizeof(file->md_file_path));
-    file->md_file_path[sizeof(file->md_file_path) - 1] = '\0';
+    if(H5FD_vfd_swmr_build_md_path_name(vfd_swmr_config, name, file->md_file_path_name) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, "building md_file_path and md_file_name failed")
+    
+    file->md_file_path_name[sizeof(file->md_file_path_name) - 1] = '\0';
 
     file->writer = vfd_swmr_config->writer;
 
-    /* Ensure that this is the reader */
-    if (!vfd_swmr_config->writer && H5FD__swmr_reader_open(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, "perform reader-specific opening steps failed")
+    /* Make sure the hdf5 file exists and is valid */
+    is_hdf5 = H5F__is_hdf5(name, H5P_FILE_ACCESS_DEFAULT);
+
+    /* Ensure reader */
+    if(!vfd_swmr_config->writer) {
+        /* Metadata file does not exist, presume_posix is true, HDF5 file exist */
+        if (HDaccess(file->md_file_path_name, F_OK) < 0 &&
+            vfd_swmr_config->presume_posix_semantics &&
+            is_hdf5 == TRUE) {
+
+            file->make_believe = TRUE;
+            H5FD_vfd_swmr_create_make_believe_data(file);
+        }
+        if (H5FD__swmr_reader_open(file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, "perform reader-specific opening steps failed")
+    }
 
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
+    /* H5FD_SEC2 is the default driver for H5P_FILE_ACCESS_DEFAULT except when 
+       the environment variable HDF5_DRIVER is set to otherwise */
     if ((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, maxaddr)) == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info");
 
@@ -456,7 +576,7 @@ H5FD__vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 } /* end H5FD_vfd__swmr_cmp() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_vfd_swmr_dedup
+ * Function:    H5FD_vfd_swmr_dedup (original description with H5P_FILE_ACCESS_ANY_VFD)
  *
  * Purpose:     Compare the already-opened VFD instance `_self` with the
  *              VFD instance `_other` newly-opened with file-access properties
@@ -497,6 +617,42 @@ H5FD__vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_dedup (modified version without H5P_FILE_ACCESS_ANY_VFD)
+ *
+ * Purpose:     Compare the already-opened VFD instance `_self` with the
+ *              VFD instance `_other` newly-opened with file-access properties
+ *              `fapl_id` and indicate whether the instances duplicate each
+ *              other, if they conflict with each other, or if they are
+ *              dissimilar.
+ *
+ *              If `_self` duplicates `_other`, return `_self`.
+ *
+ *              Return NULL on error, or if `_other` and `_self` refer to the
+ *              same file but the file-access properties, `fapl_id`, conflict
+ *              with the properties of `_self`.
+ *
+ *              If `_other` neither duplicates nor conflicts with `_self`,
+ *              then return `_other`.
+ *
+ * NOTE:        Judging duplicate/conflicting/dissimilar VFD instances
+ *
+ *              `_self` DUPLICATES `_other` if `_other` is also an instance
+ *              of SWMR class, the instances' lower files are equal under
+ *              `H5FD_cmp()`, and the file-access properties of `_self` match
+ *              `fapl_id`. 
+ *
+ *              `_self` and `_other` CONFLICT if both are SWMR instances
+ *              referring to the same lower file, and their file-access
+ *              properties differ.
+ *
+ *              `_self` and `_other` CONFLICT if `_other` is not a SWMR
+ *              instance, it equals the lower file of `_self`.
+ *
+ * Return:      Success:    `_self' or `_other', as described above
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
 H5FD_t *
 H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
 {
@@ -523,11 +679,6 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
         if (H5FD_cmp(self->hdf5_file_lf, other->hdf5_file_lf) != 0)
             HGOTO_DONE(_other)
 
-        /* If fapl_id == _ANY_VFD, then the match between lower files is
-         * sufficient.
-         */
-        if (fapl_id == H5P_FILE_ACCESS_ANY_VFD)
-            HGOTO_DONE(_self)
 
         /* If fapl_id != _ANY_VFD, then we have either a duplicate or
          * a conflict.  If the VFD SWMR parameters match, then
@@ -552,7 +703,7 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "inconsistent VFD SWMR config")
     }
     else if (H5FD_cmp(self->hdf5_file_lf, _other) == 0)
-        ret_value = (fapl_id == H5P_FILE_ACCESS_ANY_VFD) ? _self : NULL;
+        ret_value = NULL;
     else
         ret_value = _other;
 
@@ -752,6 +903,11 @@ done:
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
+ * Modifications:
+ *  Vailin Choi: 2/18/2022
+ *  VDS changes: If fs_page_size is 0, i.e. in make_believe state,
+ *               read from the underlying HDF5 file
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -780,10 +936,16 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
     num_entries  = file->md_index.num_entries;
     fs_page_size = file->md_header.fs_page_size;
 
-    /* Try finding the addr from the index */
-    target_page = addr / fs_page_size;
+    if(!fs_page_size) {
+        HDassert(!num_entries);
+        HDassert(file->make_believe);
+        entry = NULL;
+    } else {
+        /* Try finding the addr from the index */
+        target_page = addr / fs_page_size;
 
-    entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
+        entry = H5FD_vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page, FALSE);
+    }
 
     if (entry == NULL) {
         /* Cannot find addr in index, read from the underlying hdf5 file */
@@ -791,7 +953,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
 
         HGOTO_DONE(SUCCEED);
-    }
+    } 
 
     /* Found in index, read from the metadata file */
     HDassert(addr >= target_page * fs_page_size);
@@ -1007,6 +1169,10 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
+ *  
+ * Modifications:
+ *  Vailin Choi: 2/18/2022
+ *  VDS changes: Update the header's fs_page size if it is still 0
  *
  *-------------------------------------------------------------------------
  */
@@ -1113,6 +1279,14 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
     md_index.entries = NULL;
 
 done:
+    /* Need to update the header's fs_page_size if it is still 0
+       because it is possible that md_header.tick_num == file->md_header.tick_num 
+       and the loading is not done */
+    if(ret_value == SUCCEED && !file->md_header.fs_page_size) {
+        HDassert(md_header.fs_page_size);
+        HDassert(file->make_believe);
+        file->md_header.fs_page_size = md_header.fs_page_size;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -1501,3 +1675,139 @@ H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD_vfd_swmr_record_elapsed_ticks() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_get_md_name
+ *
+ * Purpose:     To retrieve the metadata file's full name
+ *
+ * Return:      VOID
+ *
+ * Programmer:  Vailin Choi; 02/18/2022
+ *
+ *-------------------------------------------------------------------------
+ *
+ */
+void
+H5FD_vfd_swmr_get_md_path_name(H5FD_t *_file, char **name)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
+
+    *name = H5MM_xstrdup(file->md_file_path_name);
+
+    FUNC_LEAVE_NOAPI_VOID
+
+}  /* H5FD_vfd_swmr_get_md_path_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_get_make_believe
+ *
+ * Purpose:     To retrieve the value of make_believe 
+ *
+ * Return:      TRUE/FALSE
+ *
+ * Programmer:  Vailin Choi; 02/18/2022
+ *
+ *-------------------------------------------------------------------------
+ *
+ */
+hbool_t
+H5FD_vfd_swmr_get_make_believe(H5FD_t *_file)
+{
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    FUNC_LEAVE_NOAPI(file->make_believe)
+
+}  /* H5FD_vfd_swmr_get_make_believe() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_set_make_believe
+ *
+ * Purpose:     To set the VFD's make believe to the
+ *              parameter "make_believe"
+ *
+ * Return:      VOID
+ *
+ * Programmer:  Vailin Choi; 02/18/2022
+ *
+ *-------------------------------------------------------------------------
+ *
+ */
+void
+H5FD_vfd_swmr_set_make_believe(H5FD_t *_file, hbool_t make_believe)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
+
+    HDassert(file);
+
+    /* Set return value */
+    file->make_believe = make_believe;
+
+    FUNC_LEAVE_NOAPI_VOID
+
+}  /* H5FD_vfd_swmr_make_believe() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_vfd_swmr_assess_make_believe
+ *
+ * Purpose:     To determine whether continuing with make_believe or not.
+ *              Return TRUE:
+ *              --if metadata file does not exist, continue with make_believe
+ *              Return FALSE:
+ *              --if metadata file exists and can be opened successfully,
+ *                discontinue with make_believe 
+ *              Return FAIL:
+ *              --error in opening the metadata file
+ *              
+ *
+ * Return:      TRUE/FALSE/FAIL
+ *
+ * Programmer:  Vailin Choi; 02/18/2022
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FD_vfd_swmr_assess_make_believe(H5FD_t *_file)
+{
+    H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
+    h5_retry_t retry;
+    hbool_t    do_try;                      /* more tries remain */
+    htri_t     ret_value = TRUE;     /* Return value  */
+
+    FUNC_ENTER_NOAPI(FALSE)
+
+    HDassert(file->make_believe);
+
+    if (HDaccess(file->md_file_path_name, F_OK) >= 0) {
+        /* MD file exists now, proceed to open it */
+        HDassert(file->md_fd < 0);
+            
+        /* Retry on opening the metadata file */
+        for (do_try = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX, H5_RETRY_DEFAULT_MINIVAL,
+                      H5_RETRY_DEFAULT_MAXIVAL);
+             do_try; do_try = H5_retry_next(&retry)) {
+            if ((file->md_fd = HDopen(file->md_file_path_name, O_RDONLY)) >= 0)
+                break;
+        }
+
+       /* Exhaust all retries for opening the md file */
+       if (!do_try)
+            HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, FAIL,
+                        "unable to open the metadata file after all retry attempts");
+
+       /* Succeed in opening the MD file, discontinue make_believe */
+       ret_value = FALSE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_vfd_swmr_assess_make_believe() */

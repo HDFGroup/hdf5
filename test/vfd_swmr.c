@@ -16,8 +16,12 @@
  *
  * Tests the VFD SWMR Feature.
  *
+ * Note: Relevant tests in this file are modified to reflect the
+ *       changes to the fapl for VDS.  See latest RFC.
+ *
  *************************************************************/
 
+#include "H5queue.h"
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -103,11 +107,8 @@ static unsigned test_updater_generate_md_checksums(hbool_t file_create);
  *                 --tick_len: should be >= 0
  *                 --max_lag: should be >= 3
  *                 --md_pages_reserved: should be >= 2
- *                 --md_file_path: should contain the metadata file path (POSIX)
  *                 --at least one of maintain_metadata_file and generate_updater_files
  *                   must be true
- *                 --if both the writer and maintain_metadata_file fields are true,
- *                   then md_file_path field shouldn't be empty
  *                 --if both the writer and generate_updater_files fields are true,
  *                   then updater_file_path field shouldn't be empty
  *              B) Verify that info set in the fapl is retrieved correctly.
@@ -182,16 +183,8 @@ test_fapl(void)
 
     /* Set valid md_pages_reserved */
     my_config->md_pages_reserved = 2;
-    /* Should fail: empty md_file_path */
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_vfd_swmr_config(fapl, my_config);
-    }
-    H5E_END_TRY;
-    if (ret >= 0)
-        TEST_ERROR;
-
     my_config->writer = TRUE;
+
     /* Should fail: at least one of maintain_metadata_file and generate_updater_files must be true */
     H5E_BEGIN_TRY
     {
@@ -203,16 +196,8 @@ test_fapl(void)
 
     my_config->writer                 = TRUE;
     my_config->maintain_metadata_file = TRUE;
-    /* Should fail: empty md_file_path */
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_vfd_swmr_config(fapl, my_config);
-    }
-    H5E_END_TRY;
-    if (ret >= 0)
-        TEST_ERROR;
-
     my_config->generate_updater_files = TRUE;
+
     /* Should fail: empty updater_file_path */
     H5E_BEGIN_TRY
     {
@@ -222,8 +207,8 @@ test_fapl(void)
     if (ret >= 0)
         TEST_ERROR;
 
-    /* Set md_file_path */
-    HDstrcpy(my_config->md_file_path, MD_FILENAME);
+    /* Set md_file_name */
+    HDstrcpy(my_config->md_file_name, MD_FILENAME);
     my_config->generate_updater_files = FALSE;
 
     /* Should succeed in setting the configuration info */
@@ -244,7 +229,9 @@ test_fapl(void)
         TEST_ERROR;
     if (my_config->generate_updater_files)
         TEST_ERROR;
-    if (HDstrcmp(my_config->md_file_path, MD_FILENAME) != 0)
+
+    /* Check md_file_name instead of md_file_path */
+    if (HDstrcmp(my_config->md_file_name, MD_FILENAME) != 0)
         TEST_ERROR;
 
     my_config->generate_updater_files = TRUE;
@@ -269,7 +256,9 @@ test_fapl(void)
         TEST_ERROR;
     if (!my_config->maintain_metadata_file)
         TEST_ERROR;
-    if (HDstrcmp(my_config->md_file_path, MD_FILENAME) != 0)
+
+    /* Check md_file_name instead of md_file_path */
+    if (HDstrcmp(my_config->md_file_name, MD_FILENAME) != 0)
         TEST_ERROR;
 
     /* Close the file access property list */
@@ -348,9 +337,10 @@ test_file_fapl(void)
      * Configured as VFD SWMR reader + no page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 7, FALSE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 7, FALSE, FALSE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 0, config1);
@@ -373,9 +363,10 @@ test_file_fapl(void)
      * Configured as VFD SWMR writer + no page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 7, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 7, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILENAME, UD_FILENAME);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 0, config1);
@@ -413,9 +404,10 @@ test_file_fapl(void)
      * Configured as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 7, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 7, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -485,9 +477,10 @@ test_file_fapl(void)
      * Set up different VFD SWMR configuration + page_buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config2);
@@ -525,9 +518,10 @@ test_file_fapl(void)
      * Set up as VFD SWMR writer in config1 but different from config2
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 3, 8, TRUE, TRUE, FALSE, TRUE, 3, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 3, 8, FALSE, TRUE, TRUE, FALSE, TRUE, 3, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -553,7 +547,10 @@ test_file_fapl(void)
      * Set up as VFD SWMR reader in config1 which is same as config2
      */
 
-    init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -691,9 +688,10 @@ test_file_end_tick(void)
      * Configured file 1 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 10, 15, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 10, 15, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -705,9 +703,10 @@ test_file_end_tick(void)
      * Configured file 2 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 5, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 5, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME2, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config2);
@@ -719,9 +718,10 @@ test_file_end_tick(void)
      * Configured file 3 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config3, 3, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME3, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config3, 3, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME3, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl3 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config3);
@@ -896,9 +896,10 @@ test_writer_create_open_flush(void)
      * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(my_config, 1, 3, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(my_config, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, my_config);
@@ -1017,9 +1018,10 @@ test_writer_md(void)
     if ((my_config = HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(my_config, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(my_config, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, my_config);
@@ -1327,9 +1329,10 @@ test_reader_md_concur(void)
      * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config_writer, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl_writer = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_writer);
@@ -1403,9 +1406,10 @@ test_reader_md_concur(void)
          * Set up the VFD SWMR configuration as reader + page buffering
          */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-        init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+        /* config, tick_len, max_lag, presume_posix_semantics, writer,
+         * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+         * md_file_path, md_file_name, updater_file_path */
+        init_vfd_swmr_config(config_reader, 1, 3, FALSE, FALSE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         fapl_reader = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_reader);
@@ -2010,9 +2014,10 @@ test_multiple_file_opens_concur(void)
 
         /* Set the VFD SWMR configuration in fapl_writer + page buffering */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-        init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME2, NULL);
+        /* config, tick_len, max_lag, presume_posix_semantics, writer,
+         * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+         * md_file_path, md_file_name, updater_file_path */
+        init_vfd_swmr_config(config_writer, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME2, NULL);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         fapl_writer = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_writer);
@@ -2077,9 +2082,10 @@ test_multiple_file_opens_concur(void)
     if ((config1 = HDmalloc(sizeof(*config1))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 7, 10, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 7, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config1);
@@ -2120,9 +2126,10 @@ test_multiple_file_opens_concur(void)
     if ((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME2, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 1, 3, FALSE, FALSE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME2, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config2);
@@ -2259,9 +2266,10 @@ test_disable_enable_eot_concur(void)
      * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config_writer, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl_writer = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_writer);
@@ -2339,9 +2347,10 @@ test_disable_enable_eot_concur(void)
          * Set up the VFD SWMR configuration as reader + page buffering
          */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-           flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-        init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+        /* config, tick_len, max_lag, presume_posix_semantics, writer,
+         * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+         * md_file_path, md_file_name, updater_file_path */
+        init_vfd_swmr_config(config_reader, 1, 3, FALSE, FALSE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         fapl_reader = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_reader);
@@ -2549,9 +2558,10 @@ test_file_end_tick_concur(void)
      * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config_writer, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl_writer = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_writer);
@@ -2625,9 +2635,10 @@ test_file_end_tick_concur(void)
         if ((config_reader = HDmalloc(sizeof(*config_reader))) == NULL)
             HDexit(EXIT_FAILURE);
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-           flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-        init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
+        /* config, tick_len, max_lag, presume_posix_semantics, writer,
+         * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+         * md_file_path, md_file_name, updater_file_path */
+        init_vfd_swmr_config(config_reader, 1, 3, FALSE, FALSE, TRUE, FALSE, TRUE, 256, NULL, MD_FILENAME, NULL);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
         fapl_reader = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, FS_PAGE_SIZE, config_reader);
@@ -2822,18 +2833,20 @@ test_multiple_file_opens(void)
      * Configured as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
     if (fapl1 == H5I_INVALID_HID)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 4, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME2, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config2);
@@ -3033,9 +3046,10 @@ test_same_file_opens(void)
      * Set the VFD SWMR configuration in fapl1 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -3061,9 +3075,10 @@ test_same_file_opens(void)
      * Set the VFD SWMR configuration in fapl2 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 3, 8, FALSE, TRUE, FALSE, TRUE, 3, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 3, 8, FALSE, FALSE, TRUE, FALSE, TRUE, 3, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config2);
@@ -3116,9 +3131,10 @@ test_same_file_opens(void)
      * Set up as VFD SWMR reader + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, FALSE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -3153,9 +3169,10 @@ test_same_file_opens(void)
      * Set up as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -3209,9 +3226,10 @@ test_same_file_opens(void)
      * Set up as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -3418,9 +3436,10 @@ test_enable_disable_eot(void)
      * Configured first file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -3432,9 +3451,10 @@ test_enable_disable_eot(void)
      * Configured second file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config2, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config2, 4, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME2, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl2 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config2);
@@ -3446,9 +3466,10 @@ test_enable_disable_eot(void)
      * Configured third file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config3, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME3, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config3, 4, 6, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME3, NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl3 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config3);
@@ -3700,6 +3721,7 @@ error:
 static unsigned
 test_updater_flags(void)
 {
+    char           filename[FILE_NAME_LEN];      /* Filename to use */
     hid_t fid       = H5I_INVALID_HID;         /* File ID */
     hid_t fcpl      = H5I_INVALID_HID;         /* File creation property list ID */
     hid_t fapl      = H5I_INVALID_HID;         /* File access property list ID */
@@ -3731,9 +3753,10 @@ test_updater_flags(void)
      * Configured as VFD SWMR writer + page buffering + generate updater files
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-       flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config, 4, 7, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config, 4, 7, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILENAME, UD_FILENAME);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config);
@@ -3741,12 +3764,16 @@ test_updater_flags(void)
     if (fapl == H5I_INVALID_HID)
         TEST_ERROR;
 
+    /* FILENAME */
+    h5_fixname("vfd_swmr_file", fapl, filename, sizeof(filename));
+    
     if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
         FAIL_STACK_ERROR;
     }
 
-    if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         TEST_ERROR;
 
     /* Get the file's file access property list */
@@ -3769,7 +3796,7 @@ test_updater_flags(void)
         TEST_ERROR;
 
     /* Check updater file size */
-    if (HDstat(namebuf, &sb) == 0 && sb.st_size != H5F_UD_HEADER_SIZE)
+    if (HDstat(namebuf, &sb) == 0 && sb.st_size < H5F_UD_HEADER_SIZE)
         TEST_ERROR;
 
     /* Closing */
@@ -3880,9 +3907,10 @@ test_updater_flags_same_file_opens(void)
      * Set the VFD SWMR configuration in fapl1 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-    flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILENAME, UD_FILENAME);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl1 = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config1);
@@ -4253,6 +4281,8 @@ test_updater_generate_md_checksums(hbool_t file_create)
     hid_t                   fapl = H5I_INVALID_HID; /* File access property list ID */
     H5F_vfd_swmr_config_t   config;                 /* Configuration for VFD SWMR */
     H5F_generate_md_ck_cb_t cb_info;                /* Callback */
+    H5F_t * f        = NULL;        /* Internal file object pointer */
+    char *md_file_path_name;
 
     if (file_create) {
         TESTING("VFD SWMR updater generate checksums for metadata file with H5Fcreate");
@@ -4261,9 +4291,10 @@ test_updater_generate_md_checksums(hbool_t file_create)
         TESTING("VFD SWMR updater generate checksums for metadata file with H5Fopen");
     }
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(&config, 4, 7, TRUE, TRUE, TRUE, TRUE, 2, MD_FILE, UD_FILE);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(&config, 4, 7, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILE, UD_FILE);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, 4096, &config);
@@ -4298,6 +4329,14 @@ test_updater_generate_md_checksums(hbool_t file_create)
             FAIL_STACK_ERROR;
     }
 
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5VL_object(fid)))
+        TEST_ERROR
+
+    /* Get the full metadata file pathname */
+    md_file_path_name = HDstrdup(f->shared->md_file_path_name);
+
+
     /* Close the file  */
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
@@ -4308,11 +4347,11 @@ test_updater_generate_md_checksums(hbool_t file_create)
         FAIL_STACK_ERROR;
 
     /* Verify contents of checksum file and updater files */
-    if (verify_ud_chk(config.md_file_path, config.updater_file_path) < 0)
+    if (verify_ud_chk(md_file_path_name, config.updater_file_path) < 0)
         TEST_ERROR;
 
     /*  It's important to clean up the checksum and updater files. */
-    clean_chk_ud_files(config.md_file_path, config.updater_file_path);
+    clean_chk_ud_files(md_file_path_name, config.updater_file_path);
 
     PASSED();
 
@@ -4328,7 +4367,7 @@ error:
     H5E_END_TRY;
 
     /*  It's important to clean up the chechsum and updater files. */
-    clean_chk_ud_files(config.md_file_path, config.updater_file_path);
+    clean_chk_ud_files(md_file_path_name, config.updater_file_path);
 
     return 1;
 

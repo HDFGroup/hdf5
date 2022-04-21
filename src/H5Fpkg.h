@@ -528,6 +528,8 @@ struct H5F_shared_t {
                          * --if vfd_swmr_config.writer is TRUE, this field
                          * is not used and is set to -1.
                          */
+    char *md_file_path_name;  /* Name composed of md_file_path and md_file_name from vfd_swmr_config */
+
     H5F_generate_md_ck_t generate_md_ck_cb;
     /* For testing only:
      * Invoke the user-defined callback if exists to

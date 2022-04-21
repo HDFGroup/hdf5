@@ -130,40 +130,40 @@ typedef struct {
         .fd_reader_to_writer = -1, .notify = 0, .verify = 0                                                  \
     }
 
-static herr_t state_init(state_t *s, int argc, const char *const *argv);
+static hbool_t state_init(state_t *s, int argc, const char *const *argv);
 
-static herr_t np_init(np_state_t *np, hbool_t writer);
-static herr_t np_close(np_state_t *np, hbool_t writer);
-static herr_t np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np,
+static hbool_t np_init(np_state_t *np, hbool_t writer);
+static hbool_t np_close(np_state_t *np, hbool_t writer);
+static hbool_t np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np,
                         H5F_vfd_swmr_config_t *config);
-static herr_t np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np);
-static herr_t np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np);
-static herr_t np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config);
+static hbool_t np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np);
+static hbool_t np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np);
+static hbool_t np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config);
 
-static herr_t create_dsets(const state_t *s, dsets_state_t *ds);
-static herr_t open_dsets(const state_t *s, dsets_state_t *ds);
-static herr_t open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact,
+static hbool_t create_dsets(const state_t *s, dsets_state_t *ds);
+static hbool_t open_dsets(const state_t *s, dsets_state_t *ds);
+static hbool_t open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact,
                              unsigned *min_dense);
-static herr_t close_dsets(const dsets_state_t *ds);
+static hbool_t close_dsets(const dsets_state_t *ds);
 
-static herr_t perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+static hbool_t perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
                                        np_state_t *np);
-static herr_t attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
-static herr_t attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
-static herr_t add_attr(const state_t *s, hid_t did, unsigned int which);
-static herr_t modify_attr(const state_t *s, hid_t did, unsigned int which);
-static herr_t delete_attr(hid_t did, unsigned int which);
+static hbool_t attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
+static hbool_t attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
+static hbool_t add_attr(const state_t *s, hid_t did, unsigned int which);
+static hbool_t modify_attr(const state_t *s, hid_t did, unsigned int which);
+static hbool_t delete_attr(hid_t did, unsigned int which);
 
-static herr_t verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+static hbool_t verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
                                       np_state_t *np);
-static herr_t verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
+static hbool_t verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
                                        unsigned which);
-static herr_t verify_attr_action(unsigned action, hid_t did, unsigned which);
-static herr_t verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which);
-static herr_t verify_delete_attr(hid_t did, char *attr_name);
-static herr_t verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact,
+static hbool_t verify_attr_action(unsigned action, hid_t did, unsigned which);
+static hbool_t verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which);
+static hbool_t verify_delete_attr(hid_t did, char *attr_name);
+static hbool_t verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact,
                                   unsigned min_dense, unsigned asteps);
-static herr_t verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point);
+static hbool_t verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point);
 
 /* Names for datasets */
 #define DSET_COMPACT_NAME  "compact_dset"
@@ -215,7 +215,7 @@ usage(const char *progname)
 /*
  * Initialize option info in state_t
  */
-static herr_t
+static hbool_t
 state_init(state_t *s, int argc, const char *const *argv)
 {
     unsigned long          tmp;
@@ -347,20 +347,20 @@ state_init(state_t *s, int argc, const char *const *argv)
     /* The test file name */
     esnprintf(s->filename, sizeof(s->filename), "vfd_swmr_attrdset.h5");
 
-    return SUCCEED;
+    return true;
 
 error:
     if (tfile)
         HDfree(tfile);
 
-    return FAIL;
+    return false;
 
 } /* state_init() */
 
 /*
  *  Create the datasets as specified on the command line.
  */
-static herr_t
+static hbool_t
 create_dsets(const state_t *s, dsets_state_t *ds)
 {
     hid_t dcpl      = H5I_INVALID_HID;
@@ -719,7 +719,7 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -741,14 +741,14 @@ error:
     }
     H5E_END_TRY;
 
-    return FAIL;
+    return false;
 
 } /* create_dsets() */
 
 /*
  * Open the datasets as specified.
  */
-static herr_t
+static hbool_t
 open_dsets(const state_t *s, dsets_state_t *ds)
 {
     *ds = DSETS_INITIALIZER;
@@ -796,10 +796,10 @@ open_dsets(const state_t *s, dsets_state_t *ds)
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* open_dsets() */
 
@@ -807,7 +807,7 @@ error:
  * Do the real work of opening the dataset.
  * Retrieve the max_compact and min_dense values for the dataset.
  */
-static herr_t
+static hbool_t
 open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact, unsigned *min_dense)
 {
     hid_t dcpl = H5I_INVALID_HID;
@@ -832,7 +832,7 @@ open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact, u
         TEST_ERROR;
     }
 
-    return SUCCEED;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -842,13 +842,13 @@ error:
     }
     H5E_END_TRY;
 
-    return FAIL;
+    return false;
 } /* open_dset_real() */
 
 /*
  * Close all the datasets as specified.
  */
-static herr_t
+static hbool_t
 close_dsets(const dsets_state_t *ds)
 {
     if (ds->compact_did != H5I_INVALID_HID && H5Dclose(ds->compact_did) < 0) {
@@ -886,7 +886,7 @@ close_dsets(const dsets_state_t *ds)
         TEST_ERROR;
     }
 
-    return SUCCEED;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -901,7 +901,7 @@ error:
     }
     H5E_END_TRY;
 
-    return FAIL;
+    return false;
 } /* close_dsets() */
 
 /*
@@ -914,7 +914,7 @@ error:
  *      MODIFY_ATTR : -m option
  *      DELETE_ATTR : -d <dattrs> option
  */
-static herr_t
+static hbool_t
 perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
     unsigned step;
@@ -974,10 +974,10 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* perform_dsets_operations() */
 
@@ -987,7 +987,7 @@ error:
  *      -g: contiguous dataset
  *      -k: 5 chunked datasets with 5 indexing types
  */
-static herr_t
+static hbool_t
 attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
     int     nerrors = 0;
@@ -1035,7 +1035,7 @@ attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, un
     }
 
     if (nerrors)
-        ret = FALSE;
+        ret = false;
 
     return (ret);
 
@@ -1047,7 +1047,7 @@ attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, un
  *      MODIFY_ATTR : modify `which` attribute
  *      DELETE_ATTR : delete `which` attribute
  */
-static herr_t
+static hbool_t
 attr_action(unsigned action, const state_t *s, hid_t did, unsigned which)
 {
     hbool_t ret;
@@ -1080,7 +1080,7 @@ attr_action(unsigned action, const state_t *s, hid_t did, unsigned which)
  *      H5T_NATIVE_UINT32 (-b) or
  *      H5T_NATIVE_UINT32 (default)
  */
-static herr_t
+static hbool_t
 add_attr(const state_t *s, hid_t did, unsigned int which)
 {
     hid_t aid    = H5I_INVALID_HID;
@@ -1140,7 +1140,7 @@ add_attr(const state_t *s, hid_t did, unsigned int which)
     if (val)
         HDfree(val);
 
-    return SUCCEED;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -1153,14 +1153,14 @@ error:
     if (val)
         HDfree(val);
 
-    return FAIL;
+    return false;
 
 } /* add_attr() */
 
 /*
  * Modify the attribute data.
  */
-static herr_t
+static hbool_t
 modify_attr(const state_t *s, hid_t did, unsigned int which)
 {
     hid_t    aid    = H5I_INVALID_HID;
@@ -1224,7 +1224,7 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
     if (val)
         HDfree(val);
 
-    return SUCCEED;
+    return true;
 error:
     H5E_BEGIN_TRY
     {
@@ -1236,13 +1236,13 @@ error:
     if (val)
         HDfree(val);
 
-    return FAIL;
+    return false;
 } /* modify_attr() */
 
 /*
  * Delete the attribute
  */
-static herr_t
+static hbool_t
 delete_attr(hid_t did, unsigned int which)
 {
     char name[sizeof("attr-9999999999")];
@@ -1255,10 +1255,10 @@ delete_attr(hid_t did, unsigned int which)
         TEST_ERROR;
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* delete_attr() */
 
@@ -1276,7 +1276,7 @@ error:
  *      --[-c <csteps>] is 1
  *      --not applicable for -m option
  */
-static herr_t
+static hbool_t
 verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
     unsigned step;
@@ -1360,11 +1360,11 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
 
-    return FAIL;
+    return false;
 } /* verify_dsets_operations() */
 
 /*
@@ -1373,7 +1373,7 @@ error:
  *      -g: contiguous dataset
  *      -k: 5 chunked datasets with 5 indexing types
  */
-static herr_t
+static hbool_t
 verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
     int     nerrors = 0;
@@ -1465,7 +1465,7 @@ verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t 
 /*
  * Verify the attribute action on the specified dataset.
  */
-static herr_t
+static hbool_t
 verify_attr_action(unsigned action, hid_t did, unsigned which)
 {
     char    name[sizeof("attr-9999999999")];
@@ -1496,7 +1496,7 @@ verify_attr_action(unsigned action, hid_t did, unsigned which)
 /*
  * Verify the attribute is added or modified
  */
-static herr_t
+static hbool_t
 verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which)
 {
     unsigned int read_which;
@@ -1575,14 +1575,14 @@ error:
     if (is_vl)
         H5free_memory(read_vl_which);
 
-    return FAIL;
+    return false;
 
 } /* verify_add_or_modify_attr() */
 
 /*
  * Verify the attribute does not exist.
  */
-static herr_t
+static hbool_t
 verify_delete_attr(hid_t did, char *attr_name)
 {
     int ret;
@@ -1592,14 +1592,14 @@ verify_delete_attr(hid_t did, char *attr_name)
         TEST_ERROR;
     }
     else if (!ret) /* attribute does not exist */
-        ret = TRUE;
+        ret = true;
     else /* attribute exist */
-        ret = FALSE;
+        ret = false;
 
     return ret;
 
 error:
-    return FAIL;
+    return false;
 
 } /* verify_delete_attr() */
 
@@ -1617,11 +1617,11 @@ error:
  *          --`which` is at min_dense: dense storage, no continuation block
  *          --`which` is at (min_dense - 1): compact storage, continuation block exists
  */
-static herr_t
+static hbool_t
 verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact, unsigned min_dense,
                     unsigned asteps)
 {
-    hbool_t ret = TRUE;
+    hbool_t ret = true;
 
     HDassert(action == ADD_ATTR || action == DELETE_ATTR);
 
@@ -1660,7 +1660,7 @@ verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max
 /*
  * Verify the storage condition at the specific checkpoint
  */
-static herr_t
+static hbool_t
 verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point)
 {
     H5O_native_info_t ninfo;
@@ -1687,7 +1687,7 @@ verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point)
     }
 
 error:
-    return FAIL;
+    return false;
 
 } /* verify_storage_cont_real() */
 
@@ -1698,7 +1698,7 @@ error:
 /*
  * Initialize the named pipes for test synchronization.
  */
-static herr_t
+static hbool_t
 np_init(np_state_t *np, hbool_t writer)
 {
     *np = NP_INITIALIZER;
@@ -1746,17 +1746,17 @@ np_init(np_state_t *np, hbool_t writer)
         TEST_ERROR;
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* np_init() */
 
 /*
  * Close the named pipes.
  */
-static herr_t
+static hbool_t
 np_close(np_state_t *np, hbool_t writer)
 {
     /* Both the writer and reader close the named pipes */
@@ -1782,16 +1782,16 @@ np_close(np_state_t *np, hbool_t writer)
             TEST_ERROR;
         }
     }
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 } /* np_close() */
 
 /*
  *  Writer synchronization depending on the result from the attribute action performed.
  */
-static herr_t
+static hbool_t
 np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config)
 {
     unsigned int i;
@@ -1841,10 +1841,10 @@ np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np, H5F_v
             }
         }
     }
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* np_writer() */
 
@@ -1852,7 +1852,7 @@ error:
  *
  *  Reader synchronization depending on the result from the verification.
  */
-static herr_t
+static hbool_t
 np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np)
 {
     /* The verification fails */
@@ -1882,10 +1882,10 @@ np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np)
             }
         }
     }
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* np_reader() */
 
@@ -1893,7 +1893,7 @@ error:
  *  Handshake between writer and reader:
  *      Confirm `verify` is same as `notify`.
  */
-static herr_t
+static hbool_t
 np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np)
 {
     if (step % s->csteps == 0) {
@@ -1914,17 +1914,17 @@ np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 } /* confirm_verify_notify() */
 
 /*
  * Synchronization done by the reader before moving onto the
  * next verification phase.
  */
-static herr_t
+static hbool_t
 np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config)
 {
     if (s->use_np) {
@@ -1946,10 +1946,10 @@ np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_
         }
     }
 
-    return SUCCEED;
+    return true;
 
 error:
-    return FAIL;
+    return false;
 
 } /* np_reader_no_verification() */
 
@@ -1981,10 +1981,10 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path
-     */
-    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, FALSE, TRUE, 128, "./attrdset-shadow", NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(&config, 4, 7, FALSE, writer, TRUE, FALSE, TRUE, 128, "./", "attrdset-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(TRUE, s.use_vfd_swmr, TRUE, 4096, &config)) < 0) {
