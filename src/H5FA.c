@@ -109,7 +109,7 @@ H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
     H5FA_t *    ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);

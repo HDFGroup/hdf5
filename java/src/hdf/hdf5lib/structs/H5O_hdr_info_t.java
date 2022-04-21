@@ -41,31 +41,31 @@ public class H5O_hdr_info_t implements Serializable {
     /** Flags to indicate message type is shared in header */
     public long mesg_shared;
 
-    H5O_hdr_info_t (int version, int nmesgs, int nchunks, int flags,
-        long space_total, long space_meta, long space_mesg, long space_free,
-        long mesg_present, long mesg_shared)
+    H5O_hdr_info_t(int version, int nmesgs, int nchunks, int flags, long space_total, long space_meta,
+                   long space_mesg, long space_free, long mesg_present, long mesg_shared)
     {
-        this.version = version;
-        this.nmesgs = nmesgs;
-        this.nchunks = nchunks;
-        this.flags = flags;
-        this.space_total = space_total;
-        this.space_meta = space_meta;
-        this.space_mesg = space_mesg;
-        this.space_free = space_free;
+        this.version      = version;
+        this.nmesgs       = nmesgs;
+        this.nchunks      = nchunks;
+        this.flags        = flags;
+        this.space_total  = space_total;
+        this.space_meta   = space_meta;
+        this.space_mesg   = space_mesg;
+        this.space_free   = space_free;
         this.mesg_present = mesg_present;
-        this.mesg_shared = mesg_shared;
+        this.mesg_shared  = mesg_shared;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o)
             return true;
 
         if (!(o instanceof H5O_hdr_info_t))
             return false;
 
-        H5O_hdr_info_t info = (H5O_hdr_info_t) o;
+        H5O_hdr_info_t info = (H5O_hdr_info_t)o;
 
         if (this.version != info.version)
             return false;

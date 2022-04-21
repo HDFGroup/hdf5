@@ -2714,7 +2714,7 @@ H5PB__allocate_page(H5PB_t *page_buf, size_t size, hbool_t clean_image)
     void *        image_ptr = NULL;
     H5PB_entry_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(page_buf);
@@ -2922,7 +2922,7 @@ done:
 static void
 H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* sanity checks */
     HDassert(entry_ptr);
@@ -2989,7 +2989,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force, 
     H5PB_t *page_buf  = shared->page_buf;
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3108,7 +3108,7 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *const en
     haddr_t eoa;                 /* Current EOA for the file */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(shared);
@@ -3215,7 +3215,7 @@ H5PB__load_page(H5F_shared_t *shared, H5PB_t *page_buf, haddr_t addr, H5FD_mem_t
     void *        image_ptr = NULL;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(shared);
@@ -3372,7 +3372,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *page_buf, H5FD_mem_t inserted_typ
     H5PB_entry_t *evict_ptr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3486,7 +3486,7 @@ H5PB__mark_entry_clean(H5PB_t *page_buf, H5PB_entry_t *entry_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3546,7 +3546,7 @@ H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *page_buf, H5PB_entry_t *ent
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(page_buf);
@@ -3762,7 +3762,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        clipped_size;        /* possibley clipped size */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(shared);
@@ -4070,7 +4070,7 @@ H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(shared);
@@ -4363,7 +4363,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t siz
     size_t        offset;              /* offset of write in page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(shared);
@@ -4580,7 +4580,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     size_t        offset;              /* offset of write in a page */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(shared);

@@ -96,7 +96,7 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     unsigned char flags;            /* Flags for encoding group info */
     void *        ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(p);
@@ -166,7 +166,7 @@ H5O__ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)_mesg;
     unsigned char      flags = 0; /* Flags for encoding group info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(p);
@@ -217,7 +217,7 @@ H5O__ginfo_copy(const void *_mesg, void *_dest)
     H5O_ginfo_t *      dest      = (H5O_ginfo_t *)_dest;
     void *             ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(ginfo);
@@ -256,7 +256,7 @@ H5O__ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
     const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = 1 +                                             /* Version */
@@ -288,7 +288,7 @@ H5O__ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
 static herr_t
 H5O__ginfo_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -314,7 +314,7 @@ H5O__ginfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
 {
     const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

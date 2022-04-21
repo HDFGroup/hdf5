@@ -15,6 +15,7 @@ package test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
@@ -25,24 +26,28 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Tbasic {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname = new TestName();
 
     @Before
-    public void checkOpenIDs() {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void checkOpenIDs()
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
     }
     @After
-    public void nextTestName() {
+    public void nextTestName()
+    {
         System.out.println();
     }
 
     @Test
-    public void testH5Tcopy() {
+    public void testH5Tcopy()
+    {
         long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-            assertTrue("H5.H5Tcopy",H5strdid > 0);
+            assertTrue("H5.H5Tcopy", H5strdid > 0);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -50,18 +55,23 @@ public class TestH5Tbasic {
         }
         finally {
             if (H5strdid >= 0)
-                try {H5.H5Tclose(H5strdid);} catch (Exception ex) {}
+                try {
+                    H5.H5Tclose(H5strdid);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void testH5Tequal() {
+    public void testH5Tequal()
+    {
         long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-            assertTrue("H5.H5Tcopy",H5strdid > 0);
+            assertTrue("H5.H5Tcopy", H5strdid > 0);
             boolean teq = H5.H5Tequal(HDF5Constants.H5T_C_S1, H5strdid);
-            assertTrue("H5.H5Tequal",teq);
+            assertTrue("H5.H5Tequal", teq);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -69,18 +79,23 @@ public class TestH5Tbasic {
         }
         finally {
             if (H5strdid >= 0)
-                try {H5.H5Tclose(H5strdid);} catch (Exception ex) {}
+                try {
+                    H5.H5Tclose(H5strdid);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void testH5Tequal_not() {
+    public void testH5Tequal_not()
+    {
         long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_STD_U64LE);
-            assertTrue("H5.H5Tcopy",H5strdid > 0);
+            assertTrue("H5.H5Tcopy", H5strdid > 0);
             boolean teq = H5.H5Tequal(HDF5Constants.H5T_IEEE_F32BE, H5strdid);
-            assertFalse("H5.H5Tequal",teq);
+            assertFalse("H5.H5Tequal", teq);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -88,22 +103,27 @@ public class TestH5Tbasic {
         }
         finally {
             if (H5strdid >= 0)
-                try {H5.H5Tclose(H5strdid);} catch (Exception ex) {}
+                try {
+                    H5.H5Tclose(H5strdid);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 
     @Test
-    public void testH5Tconvert() {
-        String[] strs = {"a1234","b1234"};
-        int srcLen = 5;
-        int dstLen = 10;
-        long srcId = HDF5Constants.H5I_INVALID_HID;
-        long dstId = HDF5Constants.H5I_INVALID_HID;
-        int dimSize = strs.length;
-        byte[]   buf = new byte[dimSize*dstLen];
+    public void testH5Tconvert()
+    {
+        String[] strs = {"a1234", "b1234"};
+        int srcLen    = 5;
+        int dstLen    = 10;
+        long srcId    = HDF5Constants.H5I_INVALID_HID;
+        long dstId    = HDF5Constants.H5I_INVALID_HID;
+        int dimSize   = strs.length;
+        byte[] buf    = new byte[dimSize * dstLen];
 
-        for (int i=0; i<dimSize; i++)
-            System.arraycopy(strs[i].getBytes(), 0, buf, i*srcLen, 5);
+        for (int i = 0; i < dimSize; i++)
+            System.arraycopy(strs[i].getBytes(), 0, buf, i * srcLen, 5);
 
         try {
             srcId = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -119,22 +139,31 @@ public class TestH5Tbasic {
             fail("testH5Tconvert: " + err);
         }
         finally {
-            try {H5.H5Tclose(srcId);} catch (Exception ex) {}
-            try {H5.H5Tclose(dstId);} catch (Exception ex) {}
+            try {
+                H5.H5Tclose(srcId);
+            }
+            catch (Exception ex) {
+            }
+            try {
+                H5.H5Tclose(dstId);
+            }
+            catch (Exception ex) {
+            }
         }
 
-        for (int i=0; i<strs.length; i++) {
-            assertTrue((new String(buf, i*dstLen, dstLen)).startsWith(strs[i]));
+        for (int i = 0; i < strs.length; i++) {
+            assertTrue((new String(buf, i * dstLen, dstLen)).startsWith(strs[i]));
         }
     }
 
     @Test
-    public void testH5Torder_size() {
+    public void testH5Torder_size()
+    {
         long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             // Fixed length string
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
-            assertTrue("H5.H5Tcopy",H5strdid > 0);
+            assertTrue("H5.H5Tcopy", H5strdid > 0);
             H5.H5Tset_size(H5strdid, (long)5);
             assertTrue(HDF5Constants.H5T_ORDER_NONE == H5.H5Tget_order(H5strdid));
             H5.H5Tset_order(H5strdid, HDF5Constants.H5T_ORDER_NONE);
@@ -152,7 +181,11 @@ public class TestH5Tbasic {
         }
         finally {
             if (H5strdid >= 0)
-                try {H5.H5Tclose(H5strdid);} catch (Exception ex) {}
+                try {
+                    H5.H5Tclose(H5strdid);
+                }
+                catch (Exception ex) {
+                }
         }
     }
 }

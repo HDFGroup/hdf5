@@ -117,7 +117,7 @@ H5A__create_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     void *attr      = NULL;            /* Attribute created */
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(vol_obj);
@@ -162,7 +162,7 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -308,7 +308,7 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -453,7 +453,7 @@ H5A__open_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const ch
     void *attr      = NULL; /* attr object from VOL connector */
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(vol_obj);
@@ -497,7 +497,7 @@ H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, void **
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -619,7 +619,7 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -751,7 +751,7 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -887,7 +887,7 @@ H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, void **toke
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_DATATYPE != H5I_get_type(type_id))
@@ -995,7 +995,7 @@ H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, void **token_ptr,
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_DATATYPE != H5I_get_type(dtype_id))
@@ -1587,7 +1587,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(vol_obj);
@@ -1632,7 +1632,7 @@ H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name,
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -1745,7 +1745,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
@@ -2330,7 +2330,7 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(vol_obj);
@@ -2371,7 +2371,7 @@ H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(obj_id))
@@ -2487,7 +2487,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))

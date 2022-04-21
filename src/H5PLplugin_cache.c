@@ -175,7 +175,7 @@ H5PL__expand_cache(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Update the capacity */
     H5PL_cache_capacity_g += H5PL_CACHE_CAPACITY_ADD;

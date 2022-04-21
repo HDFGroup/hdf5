@@ -20,7 +20,7 @@ find . \( -type d -path ./config -prune -and -not -path ./config \) \
         -or -name H5version.h \
         -or -name H5overflow.h \
         \) \) \
-    -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp \) \) \
+    -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp -or -iname *.java \) \) \
     | xargs clang-format -style=file -i -fallback-style=none
 
 git diff > clang_format.patch

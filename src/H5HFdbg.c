@@ -175,7 +175,7 @@ done:
 static herr_t
 H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.

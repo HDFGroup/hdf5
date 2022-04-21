@@ -26,9 +26,7 @@ public class HDF5JavaException extends HDF5Exception {
      * Constructs an <code>HDF5JavaException</code> with no specified detail
      * message.
      */
-    public HDF5JavaException() {
-        super();
-    }
+    public HDF5JavaException() { super(); }
 
     /**
      * Constructs an <code>HDF5JavaException</code> with the specified detail
@@ -37,7 +35,5 @@ public class HDF5JavaException extends HDF5Exception {
      * @param s
      *            the detail message.
      */
-    public HDF5JavaException(String s) {
-        super(s);
-    }
+    public HDF5JavaException(String s) { super(s); }
 }

@@ -445,7 +445,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     H5F_efc_ent_t *prev_ent  = NULL;    /* Previous EFC entry */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(efc);
@@ -586,7 +586,7 @@ H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(efc);
@@ -652,7 +652,7 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
     H5F_efc_ent_t *ent = NULL; /* EFC entry */
     H5F_shared_t * esf;        /* Convenience pointer to ent->file->shared */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(sf);
@@ -725,7 +725,7 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
     H5F_efc_ent_t *ent = NULL; /* EFC entry */
     H5F_shared_t * esf;        /* Convenience pointer to ent->file->shared */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(sf);
