@@ -7679,7 +7679,15 @@ H5C__load_entry(H5F_t *f,
 
                     H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
-                    HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+#ifdef H5_HAVE_PARALLEL
+                    if (coll_access) {
+                        /* Push an error, but still participate in following MPI_Bcast */
+                        HDmemset(image, 0, len);
+                        HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+                    }
+                    else
+#endif
+                        HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
                 }
 
                 H5C__RESET_PB_READ_HINTS(f->shared->cache)
@@ -7766,7 +7774,15 @@ H5C__load_entry(H5F_t *f,
 
                                 H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
-                                HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+#ifdef H5_HAVE_PARALLEL
+                                if (coll_access) {
+                                    /* Push an error, but still participate in following MPI_Bcast */
+                                    HDmemset(image + len, 0, actual_len - len);
+                                    HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                                }
+                                else
+#endif
+                                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
                             }
                             H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
