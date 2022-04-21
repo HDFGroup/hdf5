@@ -285,8 +285,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
-H5FD__vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename, char *name /*out*/)
+static herr_t
+H5FD__vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename,
+                                  char *name /*out*/)
 {
     size_t tot_len   = 0;
     size_t tmp_len   = 0;
@@ -303,14 +304,14 @@ H5FD__vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf
         HDstrcat(name, "/");
     }
 
-    if((tmp_len = HDstrlen(config->md_file_name)) != 0) {
-        if((tot_len += tmp_len) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+    if ((tmp_len = HDstrlen(config->md_file_name)) != 0) {
+        if ((tot_len += tmp_len) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name exceeds maximum");
         HDstrcat(name, config->md_file_name);
     }
     else {
         /* Automatic generation of metadata file name based on hdf5_filename + '.md' */
-        if((tot_len += (HDstrlen(hdf5_filename) + 3)) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        if ((tot_len += (HDstrlen(hdf5_filename) + 3)) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name maximum");
 
         HDstrcat(name, hdf5_filename);
@@ -354,7 +355,7 @@ H5FD__vfd_swmr_create_make_believe_data(H5FD_vfd_swmr_t *_file)
 
     FUNC_LEAVE_NOAPI_VOID
 
-}  /* H5FD__vfd_swmr_create_make_believe_data() */
+} /* H5FD__vfd_swmr_create_make_believe_data() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_open
@@ -418,7 +419,7 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     file->hdf5_filename[sizeof(file->hdf5_filename) - 1] = '\0';
 
     /* Retain a copy of the metadata file name */
-    if(H5FD__vfd_swmr_build_md_path_name(vfd_swmr_config, name, file->md_file_path_name) < 0)
+    if (H5FD__vfd_swmr_build_md_path_name(vfd_swmr_config, name, file->md_file_path_name) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, "building md_file_path and md_file_name failed")
 
     file->md_file_path_name[sizeof(file->md_file_path_name) - 1] = '\0';
