@@ -1590,6 +1590,9 @@ H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], s
 
     H5_CHECK_OVERFLOW(h5_fid, hid_t, uint64_t);
 
+    if (count == 0)
+        H5FD_IOC_GOTO_DONE(SUCCEED);
+
     if ((sf_context_id = H5_subfile_fid_to_context((uint64_t)h5_fid)) < 0)
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't map file ID to subfiling context ID");
 
@@ -1639,10 +1642,8 @@ H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], s
      * We can can now try to complete those before returning
      * to the caller for the next set of IO operations.
      */
-#if 1 /* JRM */ /* experiment with synchronous send */
     if (sf_async_reqs[0]->completion_func.io_function)
         ret_value = (*sf_async_reqs[0]->completion_func.io_function)(mpi_reqs);
-#endif /* JRM */
 
 done:
     if (active_reqs)
@@ -1679,6 +1680,9 @@ H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], si
     HDassert(bufs);
 
     H5_CHECK_OVERFLOW(h5_fid, hid_t, uint64_t);
+
+    if (count == 0)
+        H5FD_IOC_GOTO_DONE(SUCCEED);
 
     if ((sf_context_id = H5_subfile_fid_to_context((uint64_t)h5_fid)) < 0)
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't map file ID to subfiling context ID");
