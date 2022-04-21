@@ -1076,7 +1076,7 @@ done:
  */
 static herr_t
 H5FD__sec2_ctl(H5FD_t *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
-    const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
+               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
 {
     herr_t ret_value = SUCCEED;
 
