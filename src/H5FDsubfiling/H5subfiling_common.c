@@ -1446,11 +1446,11 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
 
     /* Check for an IOC stripe size setting in the environment */
     if ((env_value = HDgetenv(H5_IOC_STRIPE_SIZE))) {
-        long stripe_size = -1;
+        long long stripe_size = -1;
 
         errno = 0;
 
-        stripe_size = HDstrtol(env_value, NULL, 0);
+        stripe_size = HDstrtoll(env_value, NULL, 0);
         if (ERANGE == errno) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: invalid stripe size setting '%s' for " H5_IOC_STRIPE_SIZE "\n", __func__,
