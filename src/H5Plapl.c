@@ -189,7 +189,7 @@ H5P__lacc_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register property for number of links traversed */
     if (H5P__register_real(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE, &H5L_def_nlinks_g, NULL, NULL,
@@ -255,7 +255,7 @@ H5P__lacc_elink_fapl_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     hid_t  l_fapl_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -297,7 +297,7 @@ H5P__lacc_elink_fapl_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     hid_t  l_fapl_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -344,7 +344,7 @@ H5P__lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     size_t          fapl_size        = 0;       /* FAPL's encoded size */
     herr_t          ret_value        = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for non-default FAPL */
     if (*elink_fapl != H5P_DEFAULT) {
@@ -413,7 +413,7 @@ H5P__lacc_elink_fapl_dec(const void **_pp, void *_value)
     hbool_t         non_default_fapl;    /* Whether the FAPL is non-default */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(pp);
@@ -468,7 +468,7 @@ H5P__lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
     hid_t  l_fapl_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -503,7 +503,7 @@ H5P__lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
     hid_t  l_fapl_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -547,7 +547,7 @@ H5P__lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     H5P_genplist_t *obj1, *obj2; /* Property lists to compare */
     int             ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for comparison with default value */
     if (*fapl1 == 0 && *fapl2 > 0)
@@ -594,7 +594,7 @@ H5P__lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
     hid_t  l_fapl_id;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -627,7 +627,7 @@ static herr_t
 H5P__lacc_elink_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(value);
@@ -655,7 +655,7 @@ static herr_t
 H5P__lacc_elink_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(value);
@@ -690,7 +690,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
     uint64_t    enc_value;
     unsigned    enc_size;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -746,7 +746,7 @@ H5P__lacc_elink_pref_dec(const void **_pp, void *_value)
     unsigned        enc_size;  /* Size of encoded property */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(pp);
     HDassert(*pp);
@@ -793,7 +793,7 @@ static herr_t
 H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 
@@ -817,7 +817,7 @@ H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED
 static herr_t
 H5P__lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 
@@ -847,7 +847,7 @@ H5P__lacc_elink_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     const char *pref2     = *(const char *const *)value2;
     int         ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
@@ -875,7 +875,7 @@ done:
 static herr_t
 H5P__lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 

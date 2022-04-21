@@ -118,7 +118,7 @@ H5FA__test_crt_context(void H5_ATTR_UNUSED *udata)
     H5FA__test_ctx_t *ctx; /* Context for callbacks */
     void *            ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
@@ -151,7 +151,7 @@ H5FA__test_dst_context(void *_ctx)
 {
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx; /* Callback context to destroy */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
@@ -179,7 +179,7 @@ H5FA__test_fill(void *nat_blk, size_t nelmts)
 {
     uint64_t fill_val = H5FA_TEST_FILL; /* Value to fill elements with */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(nat_blk);
@@ -210,7 +210,7 @@ H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUS
 #endif
     const uint64_t *elmt = (const uint64_t *)_elmt; /* Convenience pointer to native elements */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -255,7 +255,7 @@ H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNU
     uint64_t *     elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
     const uint8_t *raw  = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(raw);
@@ -296,7 +296,7 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
 {
     char temp_str[128]; /* Temporary string, for formatting */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(stream);
@@ -329,7 +329,7 @@ H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_a
     H5FA__test_ctx_t *ctx; /* Context for callbacks */
     void *            ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))

@@ -74,7 +74,7 @@ H5FL_DEFINE(H5O_unknown_t);
 static herr_t
 H5O__unknown_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 

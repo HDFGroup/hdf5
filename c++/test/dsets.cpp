@@ -412,7 +412,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
 static size_t
 filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes,
              size_t *buf_size, void **buf)
-// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
     // Unused
     (void)flags;

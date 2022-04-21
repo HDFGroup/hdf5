@@ -159,7 +159,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
     size_t n_chars;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -290,7 +290,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
     H5C_log_trace_udata_t *trace_udata = NULL;
     herr_t                 ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(log_info);
@@ -335,7 +335,7 @@ H5C__trace_write_expunge_entry_log_msg(void *udata, haddr_t address, int type_id
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -371,7 +371,7 @@ H5C__trace_write_flush_cache_log_msg(void *udata, herr_t fxn_ret_value)
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -407,7 +407,7 @@ H5C__trace_write_insert_entry_log_msg(void *udata, haddr_t address, int type_id,
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -443,7 +443,7 @@ H5C__trace_write_mark_entry_dirty_log_msg(void *udata, const H5C_cache_entry_t *
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -480,7 +480,7 @@ H5C__trace_write_mark_entry_clean_log_msg(void *udata, const H5C_cache_entry_t *
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -518,7 +518,7 @@ H5C__trace_write_mark_unserialized_entry_log_msg(void *udata, const H5C_cache_en
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -556,7 +556,7 @@ H5C__trace_write_mark_serialized_entry_log_msg(void *udata, const H5C_cache_entr
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -594,7 +594,7 @@ H5C__trace_write_move_entry_log_msg(void *udata, haddr_t old_addr, haddr_t new_a
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -630,7 +630,7 @@ H5C__trace_write_pin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry, 
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -669,7 +669,7 @@ H5C__trace_write_create_fd_log_msg(void *udata, const H5C_cache_entry_t *parent,
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -709,7 +709,7 @@ H5C__trace_write_protect_entry_log_msg(void *udata, const H5C_cache_entry_t *ent
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -747,7 +747,7 @@ H5C__trace_write_resize_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -784,7 +784,7 @@ H5C__trace_write_unpin_entry_log_msg(void *udata, const H5C_cache_entry_t *entry
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -823,7 +823,7 @@ H5C__trace_write_destroy_fd_log_msg(void *udata, const H5C_cache_entry_t *parent
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -863,7 +863,7 @@ H5C__trace_write_unprotect_entry_log_msg(void *udata, haddr_t address, int type_
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -900,7 +900,7 @@ H5C__trace_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);
@@ -949,7 +949,7 @@ H5C__trace_write_remove_entry_log_msg(void *udata, const H5C_cache_entry_t *entr
     H5C_log_trace_udata_t *trace_udata = (H5C_log_trace_udata_t *)(udata);
     herr_t                 ret_value   = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(trace_udata);

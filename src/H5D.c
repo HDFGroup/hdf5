@@ -97,7 +97,7 @@ H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t spac
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!name)
@@ -340,7 +340,7 @@ H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!name)
@@ -558,7 +558,7 @@ H5D__get_space_api_common(hid_t dset_id, void **token_ptr, H5VL_object_t **_vol_
     H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -946,7 +946,7 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (mem_space_id < 0)
@@ -1145,7 +1145,7 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (mem_space_id < 0)
@@ -1760,7 +1760,7 @@ H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], void **token_ptr
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                       ret_value = SUCCEED; /* Return value                 */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))

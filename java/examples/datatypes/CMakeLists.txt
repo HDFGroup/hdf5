@@ -47,6 +47,13 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 #  install_jar (${example} ${HJAVA_INSTALL_DATA_DIR}/examples examples)
   get_target_property (${example}_CLASSPATH ${example} CLASSDIR)
   add_dependencies (${example} ${HDF5_JAVA_HDF5_LIB_TARGET})
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_JAVA_${example}_SRC_FORMAT ${example}.java)
+  endif ()
 endforeach ()
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_NOP_JAR}")

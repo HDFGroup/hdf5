@@ -172,7 +172,7 @@ H5FD_vfd_swmr_init(void)
 static herr_t
 H5FD__vfd_swmr_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
     H5FD_VFD_SWMR_g = 0;
@@ -226,7 +226,7 @@ H5FD__swmr_reader_open(H5FD_vfd_swmr_t *file)
     hbool_t    do_try; /* more tries remain */
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     file->api_elapsed_nbuckets = file->config.max_lag + 1;
 
@@ -279,7 +279,7 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     H5F_vfd_swmr_config_t *vfd_swmr_config;
     H5FD_t *               ret_value = NULL; /* Return value     */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get file access property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -368,7 +368,7 @@ H5FD__swmr_reader_close(H5FD_vfd_swmr_t *file)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (file->api_elapsed_ticks != NULL)
         H5MM_xfree(file->api_elapsed_ticks);
@@ -405,7 +405,7 @@ H5FD__vfd_swmr_close(H5FD_t *_file)
     H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file;
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (file->hdf5_file_lf != NULL) {
         if (file->hdf5_file_lf->exc_owner != NULL) {
@@ -448,7 +448,7 @@ H5FD__vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_vfd_swmr_t *f2        = (const H5FD_vfd_swmr_t *)_f2;
     int                    ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     ret_value = H5FD_cmp(f1->hdf5_file_lf, f2->hdf5_file_lf);
 
@@ -573,7 +573,7 @@ done:
 static herr_t
 H5FD__vfd_swmr_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -625,7 +625,7 @@ H5FD__vfd_swmr_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     const H5FD_vfd_swmr_t *file      = (const H5FD_vfd_swmr_t *)_file;
     haddr_t                ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if ((ret_value = H5FD_get_eoa(file->hdf5_file_lf, type)) == HADDR_UNDEF)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to get HDF5 file eoa")
@@ -652,7 +652,7 @@ H5FD__vfd_swmr_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
     H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (H5FD_set_eoa(file->hdf5_file_lf, type, addr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to set HDF5 file eoa")
@@ -679,7 +679,7 @@ H5FD__vfd_swmr_get_eof(const H5FD_t *_file, H5FD_mem_t type)
     const H5FD_vfd_swmr_t *file      = (const H5FD_vfd_swmr_t *)_file;
     haddr_t                ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* LATER: need to determine the metadata file or underlying HDF5 file ? */
     if ((ret_value = H5FD_get_eof(file->hdf5_file_lf, type)) == HADDR_UNDEF)
@@ -704,7 +704,7 @@ H5FD__vfd_swmr_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
     H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -771,7 +771,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
     if (file->writer)
         return H5FD_read(file->hdf5_file_lf, type, addr, size, buf);
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -900,7 +900,7 @@ H5FD__vfd_swmr_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t clo
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* This routine should only be called if the VFD instance is opened
      * for writing.
@@ -925,7 +925,7 @@ H5FD__vfd_swmr_lock(H5FD_t *_file, hbool_t rw)
     H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
     herr_t           ret_value = SUCCEED;                  /* Return value  */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -951,7 +951,7 @@ H5FD__vfd_swmr_unlock(H5FD_t *_file)
     H5FD_vfd_swmr_t *file      = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
     herr_t           ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1022,7 +1022,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
     static uint64_t         last_index_offset = 0;
     herr_t                  ret_value         = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     for (do_try         = H5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX, H5_RETRY_ONE_SECOND / 10,
                                 H5_RETRY_ONE_SECOND);
@@ -1144,7 +1144,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_header
     uint64_t index_length;
     ssize_t  nread;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Set file pointer to the beginning the file */
     if (HDlseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
@@ -1229,7 +1229,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
     htri_t   ret_value = TRUE;
     ssize_t  nread;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate buffer for reading index */
     if (NULL == (image = H5MM_malloc(md_header->index_length)))

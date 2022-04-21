@@ -160,7 +160,7 @@ H5FS__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* User-data for metadata cache callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -194,7 +194,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -235,7 +235,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     unsigned             nclasses;                               /* Number of section classes */
     H5FS_t *             ret_value = NULL;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -342,7 +342,7 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5FS_t *fspace = (const H5FS_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(fspace);
@@ -392,7 +392,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     H5AC_ring_t orig_ring = H5AC_RING_INV;    /* Original ring value */
     herr_t      ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -690,7 +690,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     uint32_t metadata_chksum;            /* Computed metadata checksum value */
     herr_t   ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -854,7 +854,7 @@ H5FS__cache_hdr_free_icr(void *_thing)
     H5FS_t *fspace    = (H5FS_t *)_thing; /* Pointer to the object */
     herr_t  ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(fspace);
@@ -892,7 +892,7 @@ H5FS__cache_sinfo_get_initial_load_size(void *_udata, size_t *image_len)
     const H5FS_t *         fspace;                                  /* free space manager */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(udata);
@@ -972,7 +972,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     uint32_t               stored_chksum;                           /* Stored metadata checksum  */
     void *                 ret_value = NULL;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -1123,7 +1123,7 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
 {
     const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(sinfo);
@@ -1165,7 +1165,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     haddr_t       sinfo_addr;                     /* Address for section info */
     herr_t        ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -1250,7 +1250,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     unsigned       bin;                              /* Current bin we are on */
     herr_t         ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -1394,7 +1394,7 @@ H5FS__cache_sinfo_free_icr(void *_thing)
     H5FS_sinfo_t *sinfo     = (H5FS_sinfo_t *)_thing; /* Pointer to the object */
     herr_t        ret_value = SUCCEED;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(sinfo);
@@ -1433,7 +1433,7 @@ H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
     H5FS_iter_ud_t *      udata     = (H5FS_iter_ud_t *)_udata;     /* Callback info */
     herr_t                ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -1487,7 +1487,7 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
     H5FS_iter_ud_t *udata       = (H5FS_iter_ud_t *)_udata; /* Callback info */
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(fspace_node);

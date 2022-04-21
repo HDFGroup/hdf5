@@ -120,7 +120,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     const uint8_t *p_end     = p + p_size; /* End of the p buffer */
     void *         ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -293,7 +293,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     uint64_t          len;        /* Length of a string in the message */
     unsigned char     link_flags; /* Flags for encoding link info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -417,7 +417,7 @@ H5O__link_copy(const void *_mesg, void *_dest)
     H5O_link_t *      dest      = (H5O_link_t *)_dest;
     void *            ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(lnk);
@@ -484,7 +484,7 @@ H5O__link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
     size_t            name_size;     /* Size of encoded name length */
     size_t            ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
@@ -553,7 +553,7 @@ H5O__link_reset(void *_mesg)
 {
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (lnk) {
         /* Free information for link (but don't free link pointer) */
@@ -586,7 +586,7 @@ H5O__link_free(void *_mesg)
 {
     H5O_link_t *lnk = (H5O_link_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(lnk);
 
@@ -682,7 +682,7 @@ static herr_t
 H5O__link_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
                         hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -721,7 +721,7 @@ H5O__link_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t H5_A
     H5O_link_t *link_src  = (H5O_link_t *)native_src;
     void *      ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(link_src);
@@ -761,7 +761,7 @@ H5O__link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     H5O_link_t *      link_dst  = (H5O_link_t *)mesg_dst;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(link_src);
@@ -798,7 +798,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     const H5O_link_t *lnk       = (const H5O_link_t *)_mesg;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);

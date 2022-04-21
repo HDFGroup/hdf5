@@ -380,7 +380,7 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -451,7 +451,7 @@ H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSE
     size_t  tmp_sieve_buf_size;  /* Temporary holder for sieve buffer size */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -570,7 +570,7 @@ H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_
                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
     io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
@@ -673,7 +673,7 @@ H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size)
     size_t  mem_curr_seq  = 0;       /* "Current sequence" in memory */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(io_info);
 
@@ -716,7 +716,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
     hsize_t min;                 /* temporary minimum value (avoids some ugly macro nesting) */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Stash local copies of these value */
     if (dset_contig->sieve_buf != NULL) {
@@ -870,7 +870,7 @@ H5D__contig_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata
     H5D_contig_readvv_ud_t *udata = (H5D_contig_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t                  ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Write data */
     if (H5F_shared_block_read(udata->f_sh, H5FD_MEM_DRAW, (udata->dset_addr + dst_off), len,
@@ -906,7 +906,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
 {
     ssize_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);
@@ -983,7 +983,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
     hsize_t min;                 /* temporary minimum value (avoids some ugly macro nesting) */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Stash local copies of these values */
     if (dset_contig->sieve_buf != NULL) {
@@ -1188,7 +1188,7 @@ H5D__contig_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udat
         (H5D_contig_writevv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Write data */
     if (H5F_shared_block_write(udata->f_sh, H5FD_MEM_DRAW, (udata->dset_addr + dst_off), len,
@@ -1224,7 +1224,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 {
     ssize_t ret_value = -1; /* Return value (Size of sequence in bytes) */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);
@@ -1287,7 +1287,7 @@ H5D__contig_flush(H5D_t *dset)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);

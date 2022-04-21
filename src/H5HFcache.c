@@ -205,7 +205,7 @@ H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref)
     const uint8_t *image     = *image_ref; /* Pointer into into supplied image */
     herr_t         ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(hdr);
@@ -248,7 +248,7 @@ done:
 static herr_t
 H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -296,7 +296,7 @@ H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
 static herr_t
 H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -352,7 +352,7 @@ H5HF__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* Pointer to user data */
     H5HF_hdr_t           dummy_hdr;                             /* Dummy header -- to compute size */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(udata);
@@ -392,7 +392,7 @@ H5HF__cache_hdr_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG_UN
     H5HF_hdr_cache_ud_t *udata     = (H5HF_hdr_cache_ud_t *)_udata; /* User data for callback */
     herr_t               ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -436,7 +436,7 @@ H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -476,7 +476,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     uint8_t              heap_flags;                            /* Status flags for heap */
     void *               ret_value = NULL;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -606,7 +606,7 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5HF_hdr_t *hdr = (const H5HF_hdr_t *)_thing; /* Fractal heap info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(hdr);
@@ -647,7 +647,7 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
     H5HF_hdr_t *hdr       = (H5HF_hdr_t *)_thing; /* Fractal heap info */
     herr_t      ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -734,7 +734,7 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     uint32_t    metadata_chksum;              /* Computed metadata checksum value */
     herr_t      ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -846,7 +846,7 @@ H5HF__cache_hdr_free_icr(void *_thing)
     H5HF_hdr_t *hdr       = (H5HF_hdr_t *)_thing; /* Fractal heap info */
     herr_t      ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(hdr);
@@ -880,7 +880,7 @@ H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5HF_iblock_cache_ud_t *udata = (H5HF_iblock_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(udata);
@@ -915,7 +915,7 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -962,7 +962,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     unsigned                u;                /* Local index variable */
     void *                  ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -1143,7 +1143,7 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5HF_indirect_t *iblock = (const H5HF_indirect_t *)_thing; /* Indirect block info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(iblock);
@@ -1184,7 +1184,7 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     H5HF_indirect_t *iblock    = (H5HF_indirect_t *)_thing; /* Indirect block info */
     herr_t           ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -1312,7 +1312,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     size_t   u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(f);
@@ -1423,7 +1423,7 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     H5HF_indirect_t *iblock    = (H5HF_indirect_t *)_thing; /* Indirect block info */
     herr_t           ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(iblock);
@@ -1522,7 +1522,7 @@ H5HF__cache_iblock_free_icr(void *thing)
     H5HF_indirect_t *iblock    = (H5HF_indirect_t *)thing; /* Fractal heap indirect block to free */
     herr_t           ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(iblock);
@@ -1560,7 +1560,7 @@ H5HF__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
     const H5HF_parent_t *         par_info; /* Pointer to parent information */
     const H5HF_hdr_t *            hdr;      /* Shared fractal heap information */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(udata);
@@ -1615,7 +1615,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     uint8_t *               chk_p;            /* Pointer to the area for validating checksum */
     htri_t                  ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -1745,7 +1745,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     haddr_t                 heap_addr;                                /* Address of heap header in the file */
     void *                  ret_value = NULL;                         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -1921,7 +1921,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
     const H5HF_hdr_t *   hdr;                                    /* Shared fractal heap information */
     size_t               size;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(dblock);
@@ -2063,7 +2063,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     unsigned         dblock_flags = 0;
     herr_t           ret_value    = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -2427,7 +2427,7 @@ H5HF__cache_dblock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
     H5HF_direct_t *dblock    = (H5HF_direct_t *)_thing; /* Direct block info */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(f);
@@ -2478,7 +2478,7 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
     H5HF_direct_t *dblock    = (H5HF_direct_t *)_thing; /* Fractal heap direct block */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dblock);
@@ -2547,7 +2547,7 @@ H5HF__cache_dblock_free_icr(void *_thing)
     H5HF_direct_t *dblock    = (H5HF_direct_t *)_thing; /* Fractal heap direct block */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dblock);
@@ -2582,7 +2582,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 {
     const H5HF_direct_t *dblock = (const H5HF_direct_t *)_thing; /* Fractal heap direct block */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(dblock);
@@ -2669,7 +2669,7 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
     unsigned hdr_status = 0;       /* Header cache entry status */
     herr_t   ret_value  = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3033,7 +3033,7 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     hbool_t has_iblocks = FALSE;
     herr_t  ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3152,7 +3152,7 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
     haddr_t  iblock_addr;
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3317,7 +3317,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     haddr_t  iblock_addr;
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);

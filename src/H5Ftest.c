@@ -584,7 +584,7 @@ H5F__count_shadow_defrees(shadow_defree_queue_t *shadow_defrees)
     shadow_defree_t *shadow_defree;
     unsigned         count = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     TAILQ_FOREACH(shadow_defree, shadow_defrees, link)
     count++;

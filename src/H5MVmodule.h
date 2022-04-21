@@ -12,11 +12,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5MVmodule.h
+ * Created:     H5MVmodule.h
  *
- * Purpose:             This file contains declarations which define macros for
- *                      the H5MV package.  Including this header means that the
- *                      source file is part of the H5MV package.
+ * Purpose:     This file contains declarations which define macros for
+ *              the H5MV package.  Including this header means that the
+ *              source file is part of the H5MV package.
  *
  *-------------------------------------------------------------------------
  */
@@ -28,8 +28,7 @@
  *      reporting macros.
  */
 #define H5MV_MODULE
-#define H5_MY_PKG      H5MV
-#define H5_MY_PKG_ERR  H5E_RESOURCE
-#define H5_MY_PKG_INIT NO
+#define H5_MY_PKG     H5MV
+#define H5_MY_PKG_ERR H5E_RESOURCE
 
 #endif /* _H5MVmodule_H */

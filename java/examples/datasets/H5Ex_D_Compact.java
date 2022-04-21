@@ -27,43 +27,44 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Compact {
-    private static String FILENAME = "H5Ex_D_Compact.h5";
+    private static String FILENAME    = "H5Ex_D_Compact.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int RANK = 2;
+    private static final int DIM_X    = 4;
+    private static final int DIM_Y    = 7;
+    private static final int RANK     = 2;
 
     // Values for the status of space allocation
     enum H5D_layout {
-        H5D_LAYOUT_ERROR(-1), H5D_COMPACT(0), H5D_CONTIGUOUS(1), H5D_CHUNKED(2), H5D_VIRTUAL(3), H5D_NLAYOUTS(4);
+        H5D_LAYOUT_ERROR(-1),
+        H5D_COMPACT(0),
+        H5D_CONTIGUOUS(1),
+        H5D_CHUNKED(2),
+        H5D_VIRTUAL(3),
+        H5D_NLAYOUTS(4);
         private static final Map<Integer, H5D_layout> lookup = new HashMap<Integer, H5D_layout>();
 
-        static {
+        static
+        {
             for (H5D_layout s : EnumSet.allOf(H5D_layout.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5D_layout(int layout_type) {
-            this.code = layout_type;
-        }
+        H5D_layout(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5D_layout get(int code) {
-            return lookup.get(code);
-        }
+        public static H5D_layout get(int code) { return lookup.get(code); }
     }
 
-    private static void writeCompact() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void writeCompact()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Initialize data.
@@ -74,7 +75,7 @@ public class H5Ex_D_Compact {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +111,7 @@ public class H5Ex_D_Compact {
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -119,8 +120,8 @@ public class H5Ex_D_Compact {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -161,11 +162,12 @@ public class H5Ex_D_Compact {
         }
     }
 
-    private static void readCompact() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void readCompact()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open file and dataset using the default properties.
@@ -229,8 +231,8 @@ public class H5Ex_D_Compact {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -281,9 +283,9 @@ public class H5Ex_D_Compact {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_D_Compact.writeCompact();
         H5Ex_D_Compact.readCompact();
     }
-
 }
