@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 package hdf.hdf5lib;
 
 import hdf.hdf5lib.structs.H5O_token_t;
@@ -27,15 +26,13 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * <b>See also:</b> hdf.hdf5lib.HDF5Library
  */
 public class HDF5Constants {
-    static {
-        H5.loadH5Lib();
-    }
+    static { H5.loadH5Lib(); }
 
     // /////////////////////////////////////////////////////////////////////////
     // Get the HDF5 constants from the library //
     // /////////////////////////////////////////////////////////////////////////
 
-    //public static final long H5_QUARTER_HADDR_MAX = H5_QUARTER_HADDR_MAX();
+    // public static final long H5_QUARTER_HADDR_MAX = H5_QUARTER_HADDR_MAX();
 
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();
@@ -70,9 +67,11 @@ public class HDF5Constants {
     /** */
     public static final int H5AC_MAX_TRACE_FILE_NAME_LEN = H5AC_MAX_TRACE_FILE_NAME_LEN();
     /** */
-    public static final int H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY = H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY();
+    public static final int H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY =
+        H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY();
     /** */
-    public static final int H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED = H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED();
+    public static final int H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED =
+        H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED();
     /** */
     public static final int H5C_incr_off = H5C_incr_off();
     /** */
@@ -679,22 +678,22 @@ public class HDF5Constants {
     /** */
     public static final long H5FD_MEM_DEFAULT_OHDR_SIZE = H5FD_MEM_DEFAULT_OHDR_SIZE();
 
-//    public static final int H5G_DATASET = H5G_DATASET();
-//    public static final int H5G_GROUP = H5G_GROUP();
-//    public static final int H5G_LINK = H5G_LINK();
-//    public static final int H5G_UDLINK = H5G_UDLINK();
-//    public static final int H5G_LINK_ERROR = H5G_LINK_ERROR();
-//    public static final int H5G_LINK_HARD = H5G_LINK_HARD();
-//    public static final int H5G_LINK_SOFT = H5G_LINK_SOFT();
-//    public static final int H5G_NLIBTYPES = H5G_NLIBTYPES();
-//    public static final int H5G_NTYPES = H5G_NTYPES();
-//    public static final int H5G_NUSERTYPES = H5G_NUSERTYPES();
-//    public static final int H5G_RESERVED_5 = H5G_RESERVED_5();
-//    public static final int H5G_RESERVED_6 = H5G_RESERVED_6();
-//    public static final int H5G_RESERVED_7 = H5G_RESERVED_7();
-//    public static final int H5G_SAME_LOC = H5G_SAME_LOC();
-//    public static final int H5G_TYPE = H5G_TYPE();
-//    public static final int H5G_UNKNOWN = H5G_UNKNOWN();
+    //    public static final int H5G_DATASET = H5G_DATASET();
+    //    public static final int H5G_GROUP = H5G_GROUP();
+    //    public static final int H5G_LINK = H5G_LINK();
+    //    public static final int H5G_UDLINK = H5G_UDLINK();
+    //    public static final int H5G_LINK_ERROR = H5G_LINK_ERROR();
+    //    public static final int H5G_LINK_HARD = H5G_LINK_HARD();
+    //    public static final int H5G_LINK_SOFT = H5G_LINK_SOFT();
+    //    public static final int H5G_NLIBTYPES = H5G_NLIBTYPES();
+    //    public static final int H5G_NTYPES = H5G_NTYPES();
+    //    public static final int H5G_NUSERTYPES = H5G_NUSERTYPES();
+    //    public static final int H5G_RESERVED_5 = H5G_RESERVED_5();
+    //    public static final int H5G_RESERVED_6 = H5G_RESERVED_6();
+    //    public static final int H5G_RESERVED_7 = H5G_RESERVED_7();
+    //    public static final int H5G_SAME_LOC = H5G_SAME_LOC();
+    //    public static final int H5G_TYPE = H5G_TYPE();
+    //    public static final int H5G_UNKNOWN = H5G_UNKNOWN();
 
     /** */
     public static final int H5G_STORAGE_TYPE_UNKNOWN = H5G_STORAGE_TYPE_UNKNOWN();
@@ -754,7 +753,7 @@ public class HDF5Constants {
     /** */
     public static final int H5O_COPY_SHALLOW_HIERARCHY_FLAG = H5O_COPY_SHALLOW_HIERARCHY_FLAG();
     /** */
-    public static final int H5O_COPY_EXPAND_SOFT_LINK_FLAG =  H5O_COPY_EXPAND_SOFT_LINK_FLAG();
+    public static final int H5O_COPY_EXPAND_SOFT_LINK_FLAG = H5O_COPY_EXPAND_SOFT_LINK_FLAG();
     /** */
     public static final int H5O_COPY_EXPAND_EXT_LINK_FLAG = H5O_COPY_EXPAND_EXT_LINK_FLAG();
     /** */
@@ -1436,23 +1435,35 @@ public class HDF5Constants {
     public static final int H5Z_FILTER_SHUFFLE = H5Z_FILTER_SHUFFLE();
     /** Filter IDs - szip compression */
     public static final int H5Z_FILTER_SZIP = H5Z_FILTER_SZIP();
-    /** Flags for filter definition (stored)
-     * definition flag mask */
+    /**
+     * Flags for filter definition (stored)
+     * definition flag mask
+     */
     public static final int H5Z_FLAG_DEFMASK = H5Z_FLAG_DEFMASK();
-    /** Additional flags for filter invocation (not stored)
-     * invocation flag mask */
+    /**
+     * Additional flags for filter invocation (not stored)
+     * invocation flag mask
+     */
     public static final int H5Z_FLAG_INVMASK = H5Z_FLAG_INVMASK();
-    /** Flags for filter definition (stored)
-     * filter is mandatory */
+    /**
+     * Flags for filter definition (stored)
+     * filter is mandatory
+     */
     public static final int H5Z_FLAG_MANDATORY = H5Z_FLAG_MANDATORY();
-    /** Flags for filter definition (stored)
-     * filter is optional */
+    /**
+     * Flags for filter definition (stored)
+     * filter is optional
+     */
     public static final int H5Z_FLAG_OPTIONAL = H5Z_FLAG_OPTIONAL();
-    /** Additional flags for filter invocation (not stored)
-     * reverse direction; read */
+    /**
+     * Additional flags for filter invocation (not stored)
+     * reverse direction; read
+     */
     public static final int H5Z_FLAG_REVERSE = H5Z_FLAG_REVERSE();
-    /** Additional flags for filter invocation (not stored)
-     * skip EDC filters for read */
+    /**
+     * Additional flags for filter invocation (not stored)
+     * skip EDC filters for read
+     */
     public static final int H5Z_FLAG_SKIP_EDC = H5Z_FLAG_SKIP_EDC();
     /** Symbol to remove all filters in H5Premove_filter */
     public static final int H5Z_FILTER_ALL = H5Z_FILTER_ALL();
@@ -2951,5 +2962,4 @@ public class HDF5Constants {
     private static native final int H5Z_SCALEOFFSET_USER_NPARMS();
 
     private static native final int H5Z_FILTER_ALL();
-
 }
