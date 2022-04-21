@@ -326,13 +326,13 @@ await_signal(hid_t fid)
 
 #endif /* H5_HAVE_WIN32_API */
 
-/* 
+/*
  * Revised support routines that can be used for all VFD SWMR integration tests
  */
 void
-init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, 
-                     hbool_t presume_posix_semantics, hbool_t writer, hbool_t maintain_metadata_file, 
-                     hbool_t generate_updater_files, hbool_t flush_raw_data, uint32_t md_pages_reserved, 
+init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag,
+                     hbool_t presume_posix_semantics, hbool_t writer, hbool_t maintain_metadata_file,
+                     hbool_t generate_updater_files, hbool_t flush_raw_data, uint32_t md_pages_reserved,
                      const char *md_file_path, const char *md_file_fmtstr, const char *updater_file_path, ...)
 {
     va_list ap;
@@ -342,21 +342,21 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
     config->version                = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->pb_expansion_threshold = 0;
 
-    config->tick_len               = tick_len;
-    config->max_lag                = max_lag;
+    config->tick_len                = tick_len;
+    config->max_lag                 = max_lag;
     config->presume_posix_semantics = presume_posix_semantics;
-    config->writer                 = writer;
-    config->maintain_metadata_file = maintain_metadata_file;
-    config->generate_updater_files = generate_updater_files;
-    config->flush_raw_data         = flush_raw_data;
-    config->md_pages_reserved      = md_pages_reserved;
+    config->writer                  = writer;
+    config->maintain_metadata_file  = maintain_metadata_file;
+    config->generate_updater_files  = generate_updater_files;
+    config->flush_raw_data          = flush_raw_data;
+    config->md_pages_reserved       = md_pages_reserved;
 
-    if(md_file_path == NULL)
+    if (md_file_path == NULL)
         config->md_file_path[0] = '\0';
     else
         HDstrcpy(config->md_file_path, md_file_path);
 
-    if(md_file_fmtstr == NULL)
+    if (md_file_fmtstr == NULL)
         config->md_file_name[0] = '\0';
 
     else {

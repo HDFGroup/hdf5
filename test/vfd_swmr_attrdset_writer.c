@@ -135,7 +135,7 @@ static hbool_t state_init(state_t *s, int argc, const char *const *argv);
 static hbool_t np_init(np_state_t *np, hbool_t writer);
 static hbool_t np_close(np_state_t *np, hbool_t writer);
 static hbool_t np_writer(hbool_t result, unsigned step, const state_t *s, np_state_t *np,
-                        H5F_vfd_swmr_config_t *config);
+                         H5F_vfd_swmr_config_t *config);
 static hbool_t np_reader(hbool_t result, unsigned step, const state_t *s, np_state_t *np);
 static hbool_t np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np);
 static hbool_t np_reader_no_verification(const state_t *s, np_state_t *np, H5F_vfd_swmr_config_t *config);
@@ -143,11 +143,11 @@ static hbool_t np_reader_no_verification(const state_t *s, np_state_t *np, H5F_v
 static hbool_t create_dsets(const state_t *s, dsets_state_t *ds);
 static hbool_t open_dsets(const state_t *s, dsets_state_t *ds);
 static hbool_t open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *max_compact,
-                             unsigned *min_dense);
+                              unsigned *min_dense);
 static hbool_t close_dsets(const dsets_state_t *ds);
 
 static hbool_t perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                       np_state_t *np);
+                                        np_state_t *np);
 static hbool_t attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static hbool_t attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
 static hbool_t add_attr(const state_t *s, hid_t did, unsigned int which);
@@ -155,14 +155,14 @@ static hbool_t modify_attr(const state_t *s, hid_t did, unsigned int which);
 static hbool_t delete_attr(hid_t did, unsigned int which);
 
 static hbool_t verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                      np_state_t *np);
+                                       np_state_t *np);
 static hbool_t verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
-                                       unsigned which);
+                                        unsigned which);
 static hbool_t verify_attr_action(unsigned action, hid_t did, unsigned which);
 static hbool_t verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which);
 static hbool_t verify_delete_attr(hid_t did, char *attr_name);
 static hbool_t verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max_compact,
-                                  unsigned min_dense, unsigned asteps);
+                                   unsigned min_dense, unsigned asteps);
 static hbool_t verify_storage_cont_real(hid_t did, unsigned int which, unsigned cut_point);
 
 /* Names for datasets */

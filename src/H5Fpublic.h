@@ -276,7 +276,7 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *          This flag should be set to TRUE if both of the following conditions hold:
  *          1) Both the metadata file and HDF5 file are being written on a POSIX
  *             file system that is local to the reader.
- *          2) The metadata file is being maintained directly by the VFD SWMR 
+ *          2) The metadata file is being maintained directly by the VFD SWMR
  *             writer (i.e. without use of updater files and the auxiliary process.)
  *          If this flag is FALSE, the VFD SWMR reader must make the two adjustments:
  *          1) Per legacy SWMR, the VFD that reads the HDF5 file proper must allow
@@ -348,7 +348,7 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *      md_file_path:
  *          If both the writer and maintain_metadata_file fields are TRUE, this
  *          field contains the path but not the name of the metadata file.
- *          If writer is FALSE, this field contains the path (but not the name) 
+ *          If writer is FALSE, this field contains the path (but not the name)
  *          of the (possibly local copy of the) metadata file.
  *
  *      md_file_name:
