@@ -1075,8 +1075,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
-               void H5_ATTR_UNUSED **output)
+H5FD__sec2_ctl(H5FD_t *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
+    const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1085,6 +1085,7 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     /* Sanity checks */
     HDassert(_file);
 
+    /* No op codes are understood. */
     if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
 
