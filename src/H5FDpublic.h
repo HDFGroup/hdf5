@@ -182,7 +182,7 @@
 /*
  * Defining H5FD_FEAT_SUPPORTS_VFD_SWMR for a VFL driver means that the
  * driver supports the SWMR feature that is implemented in a more modular
- * fashion and simplies maintenance.
+ * fashion and simplifies maintenance.
  */
 #define H5FD_FEAT_SUPPORTS_VFD_SWMR 0x00020000
 
