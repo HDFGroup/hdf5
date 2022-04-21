@@ -914,7 +914,8 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
 
         /* Remove H5P_FILE_ACCESS_ANY_VFD and restore the original code */
         src_file = H5F_prefix_open_file(vdset->oloc.file, H5F_PREFIX_VDS, vdset->shared->vds_prefix,
-                                        source_dset->file_name, intent, vdset->shared->layout.storage.u.virt.source_fapl);
+                                        source_dset->file_name, intent,
+                                        vdset->shared->layout.storage.u.virt.source_fapl);
 
         /* If we opened the source file here, we should close it when leaving */
         if (src_file)
