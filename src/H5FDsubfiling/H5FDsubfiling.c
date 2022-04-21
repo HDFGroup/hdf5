@@ -1406,37 +1406,32 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
              */
 
             for (int i = 0; i < max_io_req_per_ioc; i++) {
-                int next = ioc_start;
+                uint32_t final_vec_len = vector_len;
+                int      next          = ioc_start;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
-                for (uint32_t k = 0; k < vector_len; k++) {
+                for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
                     size_t idx = (size_t)next * max_depth + (size_t)i;
 
-                    io_types[k] = type;
-                    H5_CHECKED_ASSIGN(io_addrs[k], haddr_t, sf_offset[idx], int64_t);
-                    H5_CHECKED_ASSIGN(io_sizes[k], size_t, sf_data_size[idx], int64_t);
-                    io_bufs[k] = ((char *)buf + source_data_offset[idx]);
-
-                    /*
-                     * TODO: this seems suspicious. may chop off last I/O
-                     * if a 0 I/O appears in middle of vectors?
-                     */
-                    if (io_sizes[k] == 0)
-                        vector_len--;
+                    io_types[vec_idx] = type;
+                    H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
+                    H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
+                    io_bufs[vec_idx] = ((char *)buf + source_data_offset[idx]);
 
                     next = (next + 1) % ioc_count;
 
-                    /* TODO: Reconcile between writes and reads here */
-#if 0
-                    next++;
-                    if (next == ioc_total)
-                        next = 0;
-#endif
+                    /* Skip 0-sized I/Os */
+                    if (io_sizes[vec_idx] == 0) {
+                        final_vec_len--;
+                        continue;
+                    }
+
+                    vec_idx++;
                 }
 
                 /* Make vector read call to subfile */
-                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs, io_sizes,
-                                    io_bufs) < 0)
+                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs,
+                                    io_sizes, io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed")
             }
 
@@ -1633,32 +1628,32 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
              */
 
             for (int i = 0; i < max_io_req_per_ioc; i++) {
-                int next = ioc_start;
+                uint32_t final_vec_len = vector_len;
+                int      next          = ioc_start;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
-                for (uint32_t k = 0; k < vector_len; k++) {
+                for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
                     size_t idx = (size_t)next * max_depth + (size_t)i;
 
-                    io_types[k] = type;
-                    H5_CHECKED_ASSIGN(io_addrs[k], haddr_t, sf_offset[idx], int64_t);
-                    H5_CHECKED_ASSIGN(io_sizes[k], size_t, sf_data_size[idx], int64_t);
-                    io_bufs[k] = ((const char *)buf + source_data_offset[idx]);
+                    io_types[vec_idx] = type;
+                    H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
+                    H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
+                    io_bufs[vec_idx] = ((const char *)buf + source_data_offset[idx]);
 
-                    /*
-                     * TODO: this seems suspicious. may chop off last I/O
-                     * if a 0 I/O appears in middle of vectors?
-                     */
-                    if (io_sizes[k] == 0)
-                        vector_len--;
+                    next = (next + 1) % ioc_count;
 
-                    next++;
-                    if (next == ioc_total)
-                        next = 0;
+                    /* Skip 0-sized I/Os */
+                    if (io_sizes[vec_idx] == 0) {
+                        final_vec_len--;
+                        continue;
+                    }
+
+                    vec_idx++;
                 }
 
                 /* Make vector write call to subfile */
-                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, vector_len, io_types, io_addrs, io_sizes,
-                                     io_bufs) < 0)
+                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs,
+                                     io_sizes, io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed")
             }
 
