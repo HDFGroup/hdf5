@@ -3231,6 +3231,10 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
       AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
     fi
 
+# Checks for libraries.
+    AC_CHECK_LIB([rt], [shm_open])
+    AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
+
 else
     AC_MSG_RESULT([no])
 fi
