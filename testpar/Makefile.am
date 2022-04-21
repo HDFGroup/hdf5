@@ -30,7 +30,7 @@ check_SCRIPTS = $(TEST_SCRIPT_PARA)
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel t_2Gio
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_pmulti_dset t_shapesame t_filters_parallel t_2Gio
 
 # t_pflush1 and t_pflush2 are used by testpflush.sh
 check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
@@ -50,7 +50,11 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # shutdown.h5 is from t_pshutdown
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
+<<<<<<< HEAD
 CHECK_CLEANFILES+=MPItest.h5 Para*.h5 bigio_test.h5 CacheTestDummy.h5 \
 		  ShapeSameTest.h5 shutdown.h5  after_mpi_fin.h5 go
+=======
+CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 shutdown.h5 pmulti_dset.h5 after_mpi_fin.h5 go
+>>>>>>> multi_rd_wd_coll_io-hdf5_canon
 
 include $(top_srcdir)/config/conclude.am

@@ -454,6 +454,8 @@
 ./fortran/testpar/ptest.f90
 ./fortran/testpar/hyper.f90
 ./fortran/testpar/mdset.f90
+./fortran/testpar/ptest_F03.f90
+./fortran/testpar/multidsetrw_F03.f90
 
 #------------------------------------------------------------------------------
 #
@@ -1271,6 +1273,7 @@
 ./test/links.c
 ./test/links_env.c
 ./test/memleak_H5O_dtype_decode_helper_H5Odtype.h5
+./test/mdset.c
 ./test/mergemsg.h5
 ./test/mf.c
 ./test/mirror_vfd.c
@@ -1517,6 +1520,7 @@
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
 ./testpar/t_pread.c
+./testpar/t_pmulti_dset.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_pshutdown.c

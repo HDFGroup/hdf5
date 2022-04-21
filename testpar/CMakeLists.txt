@@ -86,6 +86,7 @@ set (H5P_TESTS
     t_pshutdown
     t_prestart
     t_init_term
+    t_pmulti_dset
     t_shapesame
     t_filters_parallel
     t_2Gio

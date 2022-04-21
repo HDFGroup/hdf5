@@ -90,9 +90,9 @@ typedef struct H5D_contig_writevv_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t  H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                   H5D_chunk_map_t *cm);
+                                   H5D_dset_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                   size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -113,9 +113,9 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {
     {H5D__contig_construct, H5D__contig_init, H5D__contig_is_space_alloc, H5D__contig_is_data_cached,
      H5D__contig_io_init, H5D__contig_read, H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
-     H5D__contig_collective_read, H5D__contig_collective_write,
+     H5D__collective_read, H5D__collective_write,
 #endif /* H5_HAVE_PARALLEL */
-     H5D__contig_readvv, H5D__contig_writevv, H5D__contig_flush, NULL, NULL}};
+     H5D__contig_readvv, H5D__contig_writevv, H5D__contig_flush, H5D__piece_io_term, NULL}};
 
 /*******************/
 /* Local Variables */
@@ -126,6 +126,9 @@ H5FL_BLK_DEFINE(sieve_buf);
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
+
+/* Declare extern the free list to manage the H5D_piece_info_t struct */
+H5FL_EXTERN(H5D_piece_info_t);
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__contig_alloc
@@ -175,6 +178,7 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
 {
     const H5D_t * dset = io_info->dset; /* the dataset pointer */
     H5D_io_info_t ioinfo;               /* Dataset I/O info */
+    H5D_dset_info_t dset_info;          /* Dset info */
     H5D_storage_t store;                /* Union of storage info for dataset */
     hssize_t      snpoints;             /* Number of points in space (for error checking) */
     size_t        npoints;              /* Number of points in space */
@@ -240,7 +244,12 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     offset = 0;
 
     /* Simple setup for dataset I/O info struct */
-    H5D_BUILD_IO_INFO_WRT(&ioinfo, dset, &store, fb_info.fill_buf);
+    ioinfo.op_type = H5D_IO_OP_WRITE;
+
+    dset_info.dset = (H5D_t *)dset;
+    dset_info.store = &store;
+    dset_info.u.wbuf = fb_info.fill_buf;
+    ioinfo.dsets_info = &dset_info;
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -543,22 +552,199 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
- *
+ * Programmer:	Jonathan Kim
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                     hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
-                    const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
+                    const H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t *dinfo)
 {
-    FUNC_ENTER_STATIC_NOERR
+    H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
 
-    io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
-    io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
+    hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
+    htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
+    int sf_ndims;               /* The number of dimensions of the file dataspace (signed) */
+    H5S_class_t fsclass_type;   /* file space class type */
+    H5S_sel_type fsel_type;     /* file space selection type */
+    hbool_t sel_hyper_flag;
+
+    herr_t ret_value = SUCCEED;	/* Return value		*/
+
+    FUNC_ENTER_STATIC
+
+    dinfo->store->contig.dset_addr = dataset->shared->layout.storage.u.contig.addr;
+    dinfo->store->contig.dset_size = dataset->shared->layout.storage.u.contig.size;
+
+    /* Get layout for dataset */
+    dinfo->layout = &(dataset->shared->layout);
+    /* num of element selected */
+    dinfo->nelmts = nelmts;
+
+    /* Check if the memory space is scalar & make equivalent memory space */
+    if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
+    /* Set the number of dimensions for the memory dataspace */
+    H5_CHECKED_ASSIGN(dinfo->m_ndims, unsigned, sm_ndims, int);
+
+    /* Get dim number and dimensionality for each dataspace */
+    if((sf_ndims = H5S_GET_EXTENT_NDIMS(file_space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
+    /* Set the number of dimensions for the file dataspace */
+    H5_CHECKED_ASSIGN(dinfo->f_ndims, unsigned, sf_ndims, int);
+
+    if(H5S_get_simple_extent_dims(file_space, dinfo->f_dims, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
+
+    /* Normalize hyperslab selections by adjusting them by the offset */
+    /* (It might be worthwhile to normalize both the file and memory dataspaces
+     * before any (contiguous, chunked, etc) file I/O operation, in order to
+     * speed up hyperslab calculations by removing the extra checks and/or
+     * additions involving the offset and the hyperslab selection -QAK)
+     */
+    if((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+
+    /* Initialize "last chunk" information */
+    dinfo->last_index = (hsize_t)-1;
+    dinfo->last_piece_info = NULL;
+
+    /* Point at the dataspaces */
+    dinfo->file_space = file_space;
+    dinfo->mem_space = mem_space;
+
+    /* Only need single skip list point over multiple read/write IO 
+     * and multiple dsets until H5D_close. Thus check both 
+     * since io_info->sel_pieces only lives single write/read IO, 
+     * even cache.sel_pieces lives until Dclose */
+    if(NULL == dataset->shared->cache.sel_pieces &&
+       NULL == io_info->sel_pieces) {
+        if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
+
+        /* keep the skip list in cache, so do not need to recreate until close */
+        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
+    } /* end if */
+
+    /* this is need when multiple write/read occurs on the same dsets,
+     * just pass the previously created pointer */
+    if (NULL == io_info->sel_pieces)
+        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
+
+    HDassert(io_info->sel_pieces);
+
+    /* We are not using single element mode */
+    dinfo->use_single = FALSE;
+
+    /* Get type of space class on disk */
+    if((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADTYPE, FAIL, "unable to get fspace class type")
+
+    /* Get type of selection on disk & in memory */
+    if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
+    if((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
+
+    /* if class type is scalar or null for contiguous dset */
+    if(fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
+        sel_hyper_flag = FALSE;
+    /* if class type is H5S_SIMPLE & if selection is NONE or POINTS */
+    else if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+        sel_hyper_flag = FALSE;
+    else
+        sel_hyper_flag = TRUE;
+
+    /* if selected elements exist */
+    if (dinfo->nelmts) {
+        unsigned    u;
+        H5D_piece_info_t *new_piece_info;   /* piece information to insert into skip list */
+
+        /* Get copy of dset file_space, so it can be changed temporarily 
+         * purpose 
+         * This tmp_fspace allows multiple write before close dset */
+        H5S_t *tmp_fspace;                  /* Temporary file dataspace */
+        /* Create "temporary" chunk for selection operations (copy file space) */
+        if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+        /* Actions specific to hyperslab selections */
+        if(sel_hyper_flag) {
+            /* Sanity check */
+            HDassert(dinfo->f_ndims > 0);
+
+            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+            if(H5S_hyper_convert(tmp_fspace) < 0) {
+                (void)H5S_close(tmp_fspace);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+            } /* end if */
+        } /* end if */
+
+        /* Add temporary chunk to the list of pieces */
+        /* collect piece_info into Skip List */
+        /* Allocate the file & memory chunk information */
+        if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
+            (void)H5S_close(tmp_fspace);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+        } /* end if */
+
+        /* Set the piece index */
+        new_piece_info->index = 0;
+
+        /* Set the file chunk dataspace */
+        new_piece_info->fspace = tmp_fspace;
+        new_piece_info->fspace_shared = FALSE;
+
+        /* Set the memory chunk dataspace */
+        /* same as one chunk, just use dset mem space */
+        new_piece_info->mspace = mem_space;
+
+        /* set true for sharing mem space with dset, which means
+         * fspace gets free by applicaton H5Sclose(), and
+         * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
+         */
+        new_piece_info->mspace_shared = TRUE;
+
+        /* Copy the piece's coordinates */
+        for(u = 0; u < dinfo->f_ndims; u++)
+            new_piece_info->scaled[u] = 0;
+        new_piece_info->scaled[dinfo->f_ndims] = 0;
+
+        /* make connection to related dset info from this piece_info */
+        new_piece_info->dset_info = dinfo;
+
+        /* get dset file address for piece */
+        new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
+
+        /* Save piece to last_piece_info so it is freed at the end of the
+         * operation */
+        dinfo->last_piece_info = new_piece_info;
+
+        /* insert piece info */
+        if(H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
+            /* mimic H5D__free_piece_info */
+            H5S_select_all(new_piece_info->fspace, TRUE);
+            H5FL_FREE(H5D_piece_info_t, new_piece_info);
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
+        } /* end if */
+        H5_CHECKED_ASSIGN(new_piece_info->piece_points, uint32_t, nelmts, hssize_t);
+    } /* end if */
+
+done:
+    if(ret_value < 0) {
+        if(H5D__piece_io_term(io_info, dinfo) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
+    } /* end if */
+
+    if(file_space_normalized) {
+        /* (Casting away const OK -QAK) */
+        if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_io_init() */
 
 /*-------------------------------------------------------------------------
@@ -575,7 +761,7 @@ H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_
  */
 herr_t
 H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+                 const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo)
 {
     herr_t ret_value = SUCCEED; /*return value		*/
 
@@ -583,10 +769,12 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(io_info->u.rbuf);
+    HDassert(dinfo->u.rbuf);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
+
+    io_info->dset = io_info->dsets_info[0].dset;
 
     /* Read data */
     if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
@@ -610,7 +798,7 @@ done:
  */
 herr_t
 H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+                  const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo)
 {
     herr_t ret_value = SUCCEED; /*return value		*/
 
@@ -618,10 +806,12 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(io_info->u.wbuf);
+    HDassert(dinfo->u.wbuf);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
+
+    io_info->dset = io_info->dsets_info[0].dset;
 
     /* Write data */
     if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
@@ -887,6 +1077,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
+    H5D_dset_info_t dset_info;
     ssize_t ret_value = -1; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -900,15 +1091,17 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
+    dset_info = io_info->dsets_info[0];
+
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
         H5D_contig_readvv_sieve_ud_t udata; /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh         = io_info->f_sh;
-        udata.dset_contig  = &(io_info->dset->shared->cache.contig);
-        udata.store_contig = &(io_info->store->contig);
-        udata.rbuf         = (unsigned char *)io_info->u.rbuf;
+        udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
+        udata.store_contig = &(dset_info.store->contig);
+        udata.rbuf         = (unsigned char *)dset_info.u.rbuf;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -921,8 +1114,8 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
-        udata.dset_addr = io_info->store->contig.dset_addr;
-        udata.rbuf      = (unsigned char *)io_info->u.rbuf;
+        udata.dset_addr = dset_info.store->contig.dset_addr;
+        udata.rbuf      = (unsigned char *)dset_info.u.rbuf;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
@@ -1205,6 +1398,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
+    H5D_dset_info_t dset_info;
     ssize_t ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
@@ -1218,15 +1412,17 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
+    dset_info = io_info->dsets_info[0];
+
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
         H5D_contig_writevv_sieve_ud_t udata; /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh         = io_info->f_sh;
-        udata.dset_contig  = &(io_info->dset->shared->cache.contig);
-        udata.store_contig = &(io_info->store->contig);
-        udata.wbuf         = (const unsigned char *)io_info->u.wbuf;
+        udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
+        udata.store_contig = &(dset_info.store->contig);
+        udata.wbuf         = (const unsigned char *)dset_info.u.wbuf;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -1239,8 +1435,8 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
-        udata.dset_addr = io_info->store->contig.dset_addr;
-        udata.wbuf      = (const unsigned char *)io_info->u.wbuf;
+        udata.dset_addr = dset_info.store->contig.dset_addr;
+        udata.wbuf      = (const unsigned char *)dset_info.u.wbuf;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,

@@ -46,6 +46,7 @@ $Source = "";
                "H5FD_file_image_callbacks_t" => "DI",
                "H5D_chunk_index_t"          => "Dk",
                "H5D_layout_t"               => "Dl",
+               "H5D_rw_multi_t"             => "Dm",
                "H5D_mpio_no_collective_cause_t" => "Dn",
                "H5D_mpio_actual_chunk_opt_mode_t" => "Do",
                "H5D_operator_t"             => "DO",
