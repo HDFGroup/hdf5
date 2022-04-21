@@ -2433,11 +2433,8 @@ init_indep_io(subfiling_context_t *sf_context, size_t max_depth, int64_t offset,
         }
     }
 
-    if (total_bytes != data_size) {
-#ifdef VERBOSE
-        HDprintf("%s: error - total_bytes != data_size\n", __func__);
-#endif
-    }
+    /* TODO: convert to normal error */
+    HDassert((total_bytes == data_size) && "init_indep_io: total bytes didn't match data size!");
 
     *n_containers = container_count;
 
@@ -2524,10 +2521,9 @@ H5FD__create_first_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t
             f_offset += context->sf_blocksize_per_stripe;
             next_offset += context->sf_blocksize_per_stripe;
         }
-        if (total_bytes != target_datasize) {
-            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
-                   target_datasize);
-        }
+
+        /* TODO: convert to normal error */
+        HDassert((total_bytes == target_datasize) && "H5FD__create_first_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_first_mpi_type() */
@@ -2605,10 +2601,8 @@ H5FD__create_final_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t
         io_f_offset[k] = f_offset;
         total_bytes += last_io;
 
-        if (total_bytes != target_datasize) {
-            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
-                   target_datasize);
-        }
+        /* TODO: convert to normal error */
+        HDassert((total_bytes == target_datasize) && "H5FD__create_final_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_final_mpi_type() */
@@ -2684,10 +2678,8 @@ H5FD__create_f_l_mpi_type(subfiling_context_t *context, int ioc_depth, int64_t s
 #endif
         total_bytes += last_io;
 
-        if (total_bytes != target_datasize) {
-            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
-                   target_datasize);
-        }
+        /* TODO: convert to normal error */
+        HDassert((total_bytes == target_datasize) && "H5FD__create_f_l_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_f_l_mpi_type() */
@@ -2761,10 +2753,8 @@ H5FD__create_mpi_uniform_type(subfiling_context_t *context, int ioc_depth, int64
             next_offset += blocksize_per_stripe;
         }
 
-        if (total_bytes != target_datasize) {
-            printf("Warning (%s): total_SUM(%ld) != target_bytes(%ld)\n", __func__, total_bytes,
-                   target_datasize);
-        }
+        /* TODO: convert to normal error */
+        HDassert((total_bytes == target_datasize) && "H5FD__create_mpi_uniform_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_mpi_uniform_type() */
