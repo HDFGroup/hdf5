@@ -1466,9 +1466,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     /* Update current file position and EOF */
     file_ptr->pos = addr;
     file_ptr->op  = OP_READ;
-    /* TODO: this seems suspicious. Shouldn't need to update EOF on read */
-    if (file_ptr->pos > file_ptr->eof)
-        file_ptr->eof = file_ptr->pos;
 
 done:
     HDfree(io_bufs);
