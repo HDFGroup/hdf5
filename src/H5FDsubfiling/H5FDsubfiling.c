@@ -1269,7 +1269,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     int64_t *            source_data_offset = NULL;
     int64_t *            sf_data_size       = NULL;
     int64_t *            sf_offset          = NULL;
-    hbool_t              addrs_cooked       = FALSE;
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
@@ -1284,13 +1283,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
                     addr, size)
-
-    /*
-     * Apply the base address offset to the address for the read call.
-     * Must then undo this addition before updating the file position
-     */
-    addr += _file->base_addr;
-    addrs_cooked = TRUE;
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
@@ -1456,13 +1448,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     /* Point to the end of the current I/O */
     addr += (haddr_t)size;
 
-    /*
-     * If we applied the base address offset to the
-     * address for reading, undo that operation now.
-     */
-    if (addrs_cooked)
-        addr -= _file->base_addr;
-
     /* Update current file position and EOF */
     file_ptr->pos = addr;
     file_ptr->op  = OP_READ;
@@ -1511,7 +1496,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     int64_t *            source_data_offset = NULL;
     int64_t *            sf_data_size       = NULL;
     int64_t *            sf_offset          = NULL;
-    hbool_t              addrs_cooked       = FALSE;
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
@@ -1526,13 +1510,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
                     addr, size)
-
-    /*
-     * Apply the base address offset to the address for the write call.
-     * Must then undo this addition before updating the file position
-     */
-    addr += _file->base_addr;
-    addrs_cooked = TRUE;
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
@@ -1692,13 +1669,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
 
     /* Point to the end of the current I/O */
     addr += (haddr_t)size;
-
-    /*
-     * If we applied the base address offset to the
-     * address for writing, undo that operation now.
-     */
-    if (addrs_cooked)
-        addr -= _file->base_addr;
 
     /* Update current file position and EOF */
     file_ptr->pos = addr;
