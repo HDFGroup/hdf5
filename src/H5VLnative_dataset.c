@@ -270,11 +270,11 @@ herr_t
 H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                           hid_t dxpl_id, void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *dset       = (H5D_t *)obj;
-    H5D_dset_info_t *dinfo = NULL;
-    H5S_t *mem_space  = NULL;
-    H5S_t *file_space = NULL;
-    herr_t ret_value  = SUCCEED; /* Return value */
+    H5D_t *          dset       = (H5D_t *)obj;
+    H5D_dset_info_t *dinfo      = NULL;
+    H5S_t *          mem_space  = NULL;
+    H5S_t *          file_space = NULL;
+    herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -291,16 +291,16 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
     H5CX_set_dxpl(dxpl_id);
 
     {
-        hid_t file_id;                      /* File ID for operation */
+        hid_t file_id; /* File ID for operation */
 
         /* Alloc dset_info */
         if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-        dinfo->dset = dset;
-        dinfo->mem_space = mem_space;
-        dinfo->file_space = file_space;
-        dinfo->u.rbuf = buf;
+        dinfo->dset        = dset;
+        dinfo->mem_space   = mem_space;
+        dinfo->file_space  = file_space;
+        dinfo->u.rbuf      = buf;
         dinfo->mem_type_id = me_type_id;
 
         /* Retrieve file_id */
@@ -313,7 +313,7 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
 
 done:
     /* Clean up */
-    if(dinfo)
+    if (dinfo)
         H5MM_xfree(dinfo);
     if (H5S_BLOCK == mem_space_id && mem_space) {
         if (H5S_close(mem_space) < 0)
@@ -341,11 +341,11 @@ herr_t
 H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                            hid_t dxpl_id, const void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *dset       = (H5D_t *)obj;
-    H5D_dset_info_t *dinfo = NULL;
-    H5S_t *mem_space  = NULL;
-    H5S_t *file_space = NULL;
-    herr_t ret_value  = SUCCEED; /* Return value */
+    H5D_t *          dset       = (H5D_t *)obj;
+    H5D_dset_info_t *dinfo      = NULL;
+    H5S_t *          mem_space  = NULL;
+    H5S_t *          file_space = NULL;
+    herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -362,16 +362,16 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
     H5CX_set_dxpl(dxpl_id);
 
     {
-        hid_t file_id;                      /* File ID for operation */
+        hid_t file_id; /* File ID for operation */
 
         /* Alloc dset_info */
         if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-        dinfo->dset = dset;
-        dinfo->mem_space = mem_space;
-        dinfo->file_space = file_space;
-        dinfo->u.wbuf = buf;
+        dinfo->dset        = dset;
+        dinfo->mem_space   = mem_space;
+        dinfo->file_space  = file_space;
+        dinfo->u.wbuf      = buf;
         dinfo->mem_type_id = me_type_id;
 
         /* Retrieve file_id */
@@ -384,7 +384,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
 
 done:
     /* Clean up */
-    if(dinfo)
+    if (dinfo)
         H5MM_xfree(dinfo);
     if (H5S_BLOCK == mem_space_id && mem_space) {
         if (H5S_close(mem_space) < 0)

@@ -1371,22 +1371,22 @@ h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *
  *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *  March 25, 2014 
+ *  March 25, 2014
  * SOURCE
-*/
+ */
 int_f
 nh5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
 /******/
 {
-  int ret_value = -1;
-  /*
-   * Call H5Dread_multi function.
-   */
-  if( (H5Dread_multi((hid_t)*dxpl_id, (size_t)*count, info )) <0 )
-    return ret_value; /* error occurred */
+    int ret_value = -1;
+    /*
+     * Call H5Dread_multi function.
+     */
+    if ((H5Dread_multi((hid_t)*dxpl_id, (size_t)*count, info)) < 0)
+        return ret_value; /* error occurred */
 
-  ret_value = 0;
-  return ret_value;
+    ret_value = 0;
+    return ret_value;
 }
 
 /****if* H5FDmpio/h5dwrite_multi_c
@@ -1399,25 +1399,25 @@ nh5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
  *  count   - the number of accessing datasets.
  *  dxpl_id - dataset transfer property.
  *  Info    - the array of dataset information and write buffer.
- *  
+ *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *  March 25, 2014 
+ *  March 25, 2014
  * SOURCE
-*/
+ */
 int_f
 nh5dwrite_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
 /******/
 {
-  int ret_value = -1;
-  /*
-   * Call H5Dwrite_multi function.
-   */
-  if( (H5Dwrite_multi((hid_t)*dxpl_id, (size_t)*count, info )) <0 )
-    return ret_value; /* error occurred */
+    int ret_value = -1;
+    /*
+     * Call H5Dwrite_multi function.
+     */
+    if ((H5Dwrite_multi((hid_t)*dxpl_id, (size_t)*count, info)) < 0)
+        return ret_value; /* error occurred */
 
-  ret_value = 0;
-  return ret_value;
+    ret_value = 0;
+    return ret_value;
 }

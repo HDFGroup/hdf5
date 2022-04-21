@@ -90,9 +90,8 @@ typedef struct H5D_contig_writevv_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                   hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                   H5D_dset_info_t *dinfo);
+static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                   const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                   size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -176,14 +175,14 @@ done:
 herr_t
 H5D__contig_fill(const H5D_io_info_t *io_info)
 {
-    const H5D_t * dset = io_info->dset; /* the dataset pointer */
-    H5D_io_info_t ioinfo;               /* Dataset I/O info */
-    H5D_dset_info_t dset_info;          /* Dset info */
-    H5D_storage_t store;                /* Union of storage info for dataset */
-    hssize_t      snpoints;             /* Number of points in space (for error checking) */
-    size_t        npoints;              /* Number of points in space */
-    hsize_t       offset;               /* Offset of dataset */
-    size_t        max_temp_buf;         /* Maximum size of temporary buffer */
+    const H5D_t *   dset = io_info->dset; /* the dataset pointer */
+    H5D_io_info_t   ioinfo;               /* Dataset I/O info */
+    H5D_dset_info_t dset_info;            /* Dset info */
+    H5D_storage_t   store;                /* Union of storage info for dataset */
+    hssize_t        snpoints;             /* Number of points in space (for error checking) */
+    size_t          npoints;              /* Number of points in space */
+    hsize_t         offset;               /* Offset of dataset */
+    size_t          max_temp_buf;         /* Maximum size of temporary buffer */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
@@ -246,9 +245,9 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     /* Simple setup for dataset I/O info struct */
     ioinfo.op_type = H5D_IO_OP_WRITE;
 
-    dset_info.dset = (H5D_t *)dset;
-    dset_info.store = &store;
-    dset_info.u.wbuf = fb_info.fill_buf;
+    dset_info.dset    = (H5D_t *)dset;
+    dset_info.store   = &store;
+    dset_info.u.wbuf  = fb_info.fill_buf;
     ioinfo.dsets_info = &dset_info;
 
     /*
@@ -560,18 +559,18 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
                     hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
                     const H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t *dinfo)
 {
-    H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
+    H5D_t *dataset = dinfo->dset; /* Local pointer to dataset info */
 
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
-    htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
+    htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
 
-    int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    int sf_ndims;               /* The number of dimensions of the file dataspace (signed) */
-    H5S_class_t fsclass_type;   /* file space class type */
-    H5S_sel_type fsel_type;     /* file space selection type */
-    hbool_t sel_hyper_flag;
+    int          sm_ndims;     /* The number of dimensions of the memory buffer's dataspace (signed) */
+    int          sf_ndims;     /* The number of dimensions of the file dataspace (signed) */
+    H5S_class_t  fsclass_type; /* file space class type */
+    H5S_sel_type fsel_type;    /* file space selection type */
+    hbool_t      sel_hyper_flag;
 
-    herr_t ret_value = SUCCEED;	/* Return value		*/
+    herr_t ret_value = SUCCEED; /* Return value		*/
 
     FUNC_ENTER_STATIC
 
@@ -584,18 +583,18 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     dinfo->nelmts = nelmts;
 
     /* Check if the memory space is scalar & make equivalent memory space */
-    if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
+    if ((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
     /* Set the number of dimensions for the memory dataspace */
     H5_CHECKED_ASSIGN(dinfo->m_ndims, unsigned, sm_ndims, int);
 
     /* Get dim number and dimensionality for each dataspace */
-    if((sf_ndims = H5S_GET_EXTENT_NDIMS(file_space)) < 0)
+    if ((sf_ndims = H5S_GET_EXTENT_NDIMS(file_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
     /* Set the number of dimensions for the file dataspace */
     H5_CHECKED_ASSIGN(dinfo->f_ndims, unsigned, sf_ndims, int);
 
-    if(H5S_get_simple_extent_dims(file_space, dinfo->f_dims, NULL) < 0)
+    if (H5S_get_simple_extent_dims(file_space, dinfo->f_dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
     /* Normalize hyperslab selections by adjusting them by the offset */
@@ -604,24 +603,23 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
      * speed up hyperslab calculations by removing the extra checks and/or
      * additions involving the offset and the hyperslab selection -QAK)
      */
-    if((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+    if ((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
 
     /* Initialize "last chunk" information */
-    dinfo->last_index = (hsize_t)-1;
+    dinfo->last_index      = (hsize_t)-1;
     dinfo->last_piece_info = NULL;
 
     /* Point at the dataspaces */
     dinfo->file_space = file_space;
-    dinfo->mem_space = mem_space;
+    dinfo->mem_space  = mem_space;
 
-    /* Only need single skip list point over multiple read/write IO 
-     * and multiple dsets until H5D_close. Thus check both 
-     * since io_info->sel_pieces only lives single write/read IO, 
+    /* Only need single skip list point over multiple read/write IO
+     * and multiple dsets until H5D_close. Thus check both
+     * since io_info->sel_pieces only lives single write/read IO,
      * even cache.sel_pieces lives until Dclose */
-    if(NULL == dataset->shared->cache.sel_pieces &&
-       NULL == io_info->sel_pieces) {
-        if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+    if (NULL == dataset->shared->cache.sel_pieces && NULL == io_info->sel_pieces) {
+        if (NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
 
         /* keep the skip list in cache, so do not need to recreate until close */
@@ -639,53 +637,53 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     dinfo->use_single = FALSE;
 
     /* Get type of space class on disk */
-    if((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
+    if ((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
         HGOTO_ERROR(H5E_FSPACE, H5E_BADTYPE, FAIL, "unable to get fspace class type")
 
     /* Get type of selection on disk & in memory */
-    if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+    if ((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
-    if((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
+    if ((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
 
     /* if class type is scalar or null for contiguous dset */
-    if(fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
+    if (fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
         sel_hyper_flag = FALSE;
     /* if class type is H5S_SIMPLE & if selection is NONE or POINTS */
-    else if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+    else if (fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
         sel_hyper_flag = FALSE;
     else
         sel_hyper_flag = TRUE;
 
     /* if selected elements exist */
     if (dinfo->nelmts) {
-        unsigned    u;
-        H5D_piece_info_t *new_piece_info;   /* piece information to insert into skip list */
+        unsigned          u;
+        H5D_piece_info_t *new_piece_info; /* piece information to insert into skip list */
 
-        /* Get copy of dset file_space, so it can be changed temporarily 
-         * purpose 
+        /* Get copy of dset file_space, so it can be changed temporarily
+         * purpose
          * This tmp_fspace allows multiple write before close dset */
-        H5S_t *tmp_fspace;                  /* Temporary file dataspace */
+        H5S_t *tmp_fspace; /* Temporary file dataspace */
         /* Create "temporary" chunk for selection operations (copy file space) */
-        if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
+        if (NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
         /* Actions specific to hyperslab selections */
-        if(sel_hyper_flag) {
+        if (sel_hyper_flag) {
             /* Sanity check */
             HDassert(dinfo->f_ndims > 0);
 
             /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-            if(H5S_hyper_convert(tmp_fspace) < 0) {
+            if (H5S_hyper_convert(tmp_fspace) < 0) {
                 (void)H5S_close(tmp_fspace);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         /* Add temporary chunk to the list of pieces */
         /* collect piece_info into Skip List */
         /* Allocate the file & memory chunk information */
-        if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
+        if (NULL == (new_piece_info = H5FL_MALLOC(H5D_piece_info_t))) {
             (void)H5S_close(tmp_fspace);
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
         } /* end if */
@@ -694,7 +692,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
         new_piece_info->index = 0;
 
         /* Set the file chunk dataspace */
-        new_piece_info->fspace = tmp_fspace;
+        new_piece_info->fspace        = tmp_fspace;
         new_piece_info->fspace_shared = FALSE;
 
         /* Set the memory chunk dataspace */
@@ -708,7 +706,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
         new_piece_info->mspace_shared = TRUE;
 
         /* Copy the piece's coordinates */
-        for(u = 0; u < dinfo->f_ndims; u++)
+        for (u = 0; u < dinfo->f_ndims; u++)
             new_piece_info->scaled[u] = 0;
         new_piece_info->scaled[dinfo->f_ndims] = 0;
 
@@ -723,7 +721,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
         dinfo->last_piece_info = new_piece_info;
 
         /* insert piece info */
-        if(H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
+        if (H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
             /* mimic H5D__free_piece_info */
             H5S_select_all(new_piece_info->fspace, TRUE);
             H5FL_FREE(H5D_piece_info_t, new_piece_info);
@@ -733,14 +731,14 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     } /* end if */
 
 done:
-    if(ret_value < 0) {
-        if(H5D__piece_io_term(io_info, dinfo) < 0)
+    if (ret_value < 0) {
+        if (H5D__piece_io_term(io_info, dinfo) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
-    if(file_space_normalized) {
+    if (file_space_normalized) {
         /* (Casting away const OK -QAK) */
-        if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
+        if (H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
     } /* end if */
 
@@ -1078,7 +1076,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_dset_info_t dset_info;
-    ssize_t ret_value = -1; /* Return value */
+    ssize_t         ret_value = -1; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1399,7 +1397,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_dset_info_t dset_info;
-    ssize_t ret_value = -1; /* Return value (Size of sequence in bytes) */
+    ssize_t         ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 

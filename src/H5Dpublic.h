@@ -126,15 +126,14 @@ typedef enum H5D_fill_value_t {
 /**
  * Parameter struct for multi-dset Read/Write
  */
-typedef struct H5D_rw_multi_t
-{
-    hid_t dset_id;          /* dataset ID */
-    hid_t dset_space_id;    /* dataset selection dataspace ID */
-    hid_t mem_type_id;      /* memory datatype ID */
-    hid_t mem_space_id;     /* memory selection dataspace ID */
+typedef struct H5D_rw_multi_t {
+    hid_t dset_id;       /* dataset ID */
+    hid_t dset_space_id; /* dataset selection dataspace ID */
+    hid_t mem_type_id;   /* memory datatype ID */
+    hid_t mem_space_id;  /* memory selection dataspace ID */
     union {
-        void *rbuf;         /* pointer to read buffer */
-        const void *wbuf;   /* pointer to write buffer */
+        void *      rbuf; /* pointer to read buffer */
+        const void *wbuf; /* pointer to write buffer */
     } u;
 } H5D_rw_multi_t;
 //! <!-- [H5D_rw_multi_t_snip] -->
@@ -265,7 +264,6 @@ typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, 
 /********************/
 /* Public Variables */
 /********************/
-
 
 /*********************/
 /* Public Prototypes */

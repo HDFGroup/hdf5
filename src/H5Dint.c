@@ -1933,7 +1933,7 @@ H5D_close(H5D_t *dataset)
         switch (dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
                 /* Check for skip list for iterating over pieces during I/O to close */
-                if(dataset->shared->cache.sel_pieces) {
+                if (dataset->shared->cache.sel_pieces) {
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
@@ -1954,7 +1954,7 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Check for skip list for iterating over pieces during I/O to close */
-                if(dataset->shared->cache.sel_pieces) {
+                if (dataset->shared->cache.sel_pieces) {
                     HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
                     H5SL_close(dataset->shared->cache.sel_pieces);
                     dataset->shared->cache.sel_pieces = NULL;
@@ -2672,7 +2672,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
-    H5D_dset_info_t *dset_info = NULL;  /* Internal multi-dataset info placeholder */
+    H5D_dset_info_t *          dset_info    = NULL;         /* Internal multi-dataset info placeholder */
     herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2687,16 +2687,16 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point")
 
     {
-        hid_t file_id;                      /* File ID for operation */
+        hid_t file_id; /* File ID for operation */
 
         /* Alloc dset_info */
-        if(NULL == (dset_info = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+        if (NULL == (dset_info = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-        dset_info->dset = vlen_bufsize->dset;
-        dset_info->mem_space = vlen_bufsize->mspace;
-        dset_info->file_space = vlen_bufsize->fspace;
-        dset_info->u.rbuf = vlen_bufsize->fl_tbuf;
+        dset_info->dset        = vlen_bufsize->dset;
+        dset_info->mem_space   = vlen_bufsize->mspace;
+        dset_info->file_space  = vlen_bufsize->fspace;
+        dset_info->u.rbuf      = vlen_bufsize->fl_tbuf;
         dset_info->mem_type_id = type_id;
 
         /* Retrieve file_id */
@@ -2708,7 +2708,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
     }
 
 done:
-    if(dset_info)
+    if (dset_info)
         H5MM_xfree(dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2742,7 +2742,7 @@ herr_t
 H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size)
 {
     H5D_vlen_bufsize_native_t vlen_bufsize = {NULL, NULL, NULL, {NULL, NULL, 0, 0}};
-    H5D_dset_info_t *dset_info = NULL;  /* Internal multi-dataset info placeholder */
+    H5D_dset_info_t *         dset_info    = NULL; /* Internal multi-dataset info placeholder */
     H5S_t *                   fspace       = NULL; /* Dataset's dataspace */
     H5S_t *                   mspace       = NULL; /* Memory dataspace */
     char                      bogus;               /* bogus value to pass to H5Diterate() */

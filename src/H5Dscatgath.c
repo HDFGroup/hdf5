@@ -83,19 +83,19 @@ H5FL_SEQ_EXTERN(hsize_t);
 static herr_t
 H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nelmts, const void *_buf)
 {
-    H5D_io_info_t tmp_io_info;           /* Temporary I/O info object */
-    H5D_dset_info_t tmp_dset_info;       /* Temporary I/O info object */
-    hsize_t *     off = NULL;            /* Pointer to sequence offsets */
-    hsize_t       mem_off;               /* Offset in memory */
-    size_t        mem_curr_seq;          /* "Current sequence" in memory */
-    size_t        dset_curr_seq;         /* "Current sequence" in dataset */
-    size_t *      len = NULL;            /* Array to store sequence lengths */
-    size_t        orig_mem_len, mem_len; /* Length of sequence in memory */
-    size_t        nseq;                  /* Number of sequences generated */
-    size_t        nelem;                 /* Number of elements used in sequences */
-    size_t        dxpl_vec_size;         /* Vector length from API context's DXPL */
-    size_t        vec_size;              /* Vector length */
-    herr_t        ret_value = SUCCEED;   /* Return value */
+    H5D_io_info_t   tmp_io_info;           /* Temporary I/O info object */
+    H5D_dset_info_t tmp_dset_info;         /* Temporary I/O info object */
+    hsize_t *       off = NULL;            /* Pointer to sequence offsets */
+    hsize_t         mem_off;               /* Offset in memory */
+    size_t          mem_curr_seq;          /* "Current sequence" in memory */
+    size_t          dset_curr_seq;         /* "Current sequence" in dataset */
+    size_t *        len = NULL;            /* Array to store sequence lengths */
+    size_t          orig_mem_len, mem_len; /* Length of sequence in memory */
+    size_t          nseq;                  /* Number of sequences generated */
+    size_t          nelem;                 /* Number of elements used in sequences */
+    size_t          dxpl_vec_size;         /* Vector length from API context's DXPL */
+    size_t          vec_size;              /* Vector length */
+    herr_t          ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -108,8 +108,8 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     HDmemcpy(&tmp_dset_info, &(_io_info->dsets_info[0]), sizeof(tmp_dset_info));
-    tmp_io_info.op_type = H5D_IO_OP_WRITE;
-    tmp_dset_info.u.wbuf = _buf;
+    tmp_io_info.op_type    = H5D_IO_OP_WRITE;
+    tmp_dset_info.u.wbuf   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
@@ -139,7 +139,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
 
         /* Write sequence list out */
         if ((*tmp_dset_info.layout_ops.writevv)(&tmp_io_info, nseq, &dset_curr_seq, len, off, (size_t)1,
-                                              &mem_curr_seq, &mem_len, &mem_off) < 0)
+                                                &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
 
         /* Update buffer */
@@ -183,19 +183,19 @@ done:
 static size_t
 H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nelmts, void *_buf /*out*/)
 {
-    H5D_io_info_t tmp_io_info;           /* Temporary I/O info object */
-    H5D_dset_info_t tmp_dset_info;       /* Temporary I/O info object */
-    hsize_t *     off = NULL;            /* Pointer to sequence offsets */
-    hsize_t       mem_off;               /* Offset in memory */
-    size_t        mem_curr_seq;          /* "Current sequence" in memory */
-    size_t        dset_curr_seq;         /* "Current sequence" in dataset */
-    size_t *      len = NULL;            /* Pointer to sequence lengths */
-    size_t        orig_mem_len, mem_len; /* Length of sequence in memory */
-    size_t        nseq;                  /* Number of sequences generated */
-    size_t        nelem;                 /* Number of elements used in sequences */
-    size_t        dxpl_vec_size;         /* Vector length from API context's DXPL */
-    size_t        vec_size;              /* Vector length */
-    size_t        ret_value = nelmts;    /* Return value */
+    H5D_io_info_t   tmp_io_info;           /* Temporary I/O info object */
+    H5D_dset_info_t tmp_dset_info;         /* Temporary I/O info object */
+    hsize_t *       off = NULL;            /* Pointer to sequence offsets */
+    hsize_t         mem_off;               /* Offset in memory */
+    size_t          mem_curr_seq;          /* "Current sequence" in memory */
+    size_t          dset_curr_seq;         /* "Current sequence" in dataset */
+    size_t *        len = NULL;            /* Pointer to sequence lengths */
+    size_t          orig_mem_len, mem_len; /* Length of sequence in memory */
+    size_t          nseq;                  /* Number of sequences generated */
+    size_t          nelem;                 /* Number of elements used in sequences */
+    size_t          dxpl_vec_size;         /* Vector length from API context's DXPL */
+    size_t          vec_size;              /* Vector length */
+    size_t          ret_value = nelmts;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -210,8 +210,8 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
     HDmemcpy(&tmp_dset_info, &(_io_info->dsets_info[0]), sizeof(tmp_dset_info));
-    tmp_io_info.op_type = H5D_IO_OP_READ;
-    tmp_dset_info.u.rbuf = _buf;
+    tmp_io_info.op_type    = H5D_IO_OP_READ;
+    tmp_dset_info.u.rbuf   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
@@ -241,7 +241,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
 
         /* Read sequence list in */
         if ((*tmp_dset_info.layout_ops.readvv)(&tmp_io_info, nseq, &dset_curr_seq, len, off, (size_t)1,
-                                             &mem_curr_seq, &mem_len, &mem_off) < 0)
+                                               &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error")
 
         /* Update buffer */
@@ -446,7 +446,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                    const H5S_t *file_space, const H5S_t *mem_space)
 {
     void *          buf            = io_info->dsets_info[0].u.rbuf; /* Local pointer to application buffer */
-    H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
+    H5S_sel_iter_t *mem_iter       = NULL;                          /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
     hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
@@ -586,7 +586,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
                     const H5S_t *file_space, const H5S_t *mem_space)
 {
     const void *    buf            = io_info->dsets_info[0].u.wbuf; /* Local pointer to application buffer */
-    H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
+    H5S_sel_iter_t *mem_iter       = NULL;                          /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
     hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
