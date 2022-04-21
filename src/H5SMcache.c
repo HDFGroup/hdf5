@@ -134,7 +134,7 @@ H5SM__cache_table_get_initial_load_size(void *_udata, size_t *image_len)
 {
     const H5SM_table_cache_ud_t *udata = (const H5SM_table_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -168,7 +168,7 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -210,7 +210,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     size_t                 u;                                       /* Counter variable for index headers */
     void *                 ret_value = NULL;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -323,7 +323,7 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
     const H5SM_master_table_t *table =
         (const H5SM_master_table_t *)_thing; /* Shared message table to query */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(table);
@@ -358,7 +358,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
     uint32_t             computed_chksum;                       /* Computed metadata checksum value */
     size_t               u;                                     /* Counter variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -444,7 +444,7 @@ H5SM__cache_table_free_icr(void *_thing)
     H5SM_master_table_t *table     = (H5SM_master_table_t *)_thing; /* Shared message table to release */
     herr_t               ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(table);
@@ -479,7 +479,7 @@ H5SM__cache_list_get_initial_load_size(void *_udata, size_t *image_len)
 {
     const H5SM_list_cache_ud_t *udata = (const H5SM_list_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -516,7 +516,7 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     uint32_t              computed_chksum;  /* Computed metadata checksum value */
     htri_t                ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -561,7 +561,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     size_t                u;                                      /* Counter variable for messages in list */
     void *                ret_value = NULL;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -638,7 +638,7 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
 {
     const H5SM_list_t *list = (const H5SM_list_t *)_thing; /* Shared message list to query */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(list);
@@ -677,7 +677,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     size_t         u;                            /* Local index variable */
     herr_t         ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -748,7 +748,7 @@ H5SM__cache_list_free_icr(void *_thing)
     H5SM_list_t *list      = (H5SM_list_t *)_thing; /* Shared message list to release */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(list);

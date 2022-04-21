@@ -280,7 +280,7 @@ H5VL__free_cls(H5VL_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(cls);
@@ -318,7 +318,7 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
     H5VL_class_t *           cls       = (H5VL_class_t *)obj;
     int                      ret_value = H5_ITER_CONT; /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (H5VL_GET_CONNECTOR_BY_NAME == op_data->key.kind) {
         if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
@@ -498,7 +498,7 @@ H5VL__wrap_obj(void *obj, H5I_type_t obj_type)
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL; /* Object wrapping context */
     void *           ret_value    = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(obj);
@@ -541,7 +541,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
     hbool_t        conn_rc_incr = FALSE; /* Whether the VOL connector refcount has been incremented */
     H5VL_object_t *ret_value    = NULL;  /* Return value                                 */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(object);
@@ -1861,7 +1861,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
     H5VL_object_t *vol_obj   = NULL;
     void *         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the underlying object */
     switch (obj_type) {
@@ -2229,7 +2229,7 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(vol_wrap_ctx);

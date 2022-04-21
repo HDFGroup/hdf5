@@ -31,12 +31,13 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Pfapls3 {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname = new TestName();
 
-    long fapl_id = HDF5Constants.H5I_INVALID_HID;
-    long plapl_id = HDF5Constants.H5I_INVALID_HID;
-    long dapl_id = HDF5Constants.H5I_INVALID_HID;
-    long plist_id = HDF5Constants.H5I_INVALID_HID;
+    long fapl_id    = HDF5Constants.H5I_INVALID_HID;
+    long plapl_id   = HDF5Constants.H5I_INVALID_HID;
+    long dapl_id    = HDF5Constants.H5I_INVALID_HID;
+    long plist_id   = HDF5Constants.H5I_INVALID_HID;
     long btplist_id = HDF5Constants.H5I_INVALID_HID;
 
     @Before
@@ -62,9 +63,9 @@ public class TestH5Pfapls3 {
         }
         assertTrue(plapl_id > 0);
         try {
-            plist_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
+            plist_id   = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
             btplist_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
-            dapl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
+            dapl_id    = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -79,15 +80,35 @@ public class TestH5Pfapls3 {
     public void deleteFileAccess() throws HDF5LibraryException
     {
         if (fapl_id > 0)
-            try {H5.H5Pclose(fapl_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(fapl_id);
+            }
+            catch (Exception ex) {
+            }
         if (plapl_id > 0)
-            try {H5.H5Pclose(plapl_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(plapl_id);
+            }
+            catch (Exception ex) {
+            }
         if (dapl_id > 0)
-            try {H5.H5Pclose(dapl_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(dapl_id);
+            }
+            catch (Exception ex) {
+            }
         if (plist_id > 0)
-            try {H5.H5Pclose(plist_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(plist_id);
+            }
+            catch (Exception ex) {
+            }
         if (btplist_id > 0)
-            try {H5.H5Pclose(btplist_id);} catch (Exception ex) {}
+            try {
+                H5.H5Pclose(btplist_id);
+            }
+            catch (Exception ex) {
+            }
         System.out.println();
     }
 
@@ -98,18 +119,15 @@ public class TestH5Pfapls3 {
             return;
 
         final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t();
-        assertEquals("Default fapl has unexpected contents",
-                new H5FD_ros3_fapl_t("", "", ""), config);
+        assertEquals("Default fapl has unexpected contents", new H5FD_ros3_fapl_t("", "", ""), config);
 
         H5.H5Pset_fapl_ros3(fapl_id, config);
 
-        assertEquals("driver types don't match",
-                HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
+        assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
         /* get_fapl_ros3 can throw exception in error cases */
         H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
-        assertEquals("contents of fapl set and get don't match",
-                new H5FD_ros3_fapl_t("", "", ""), copy);
+        assertEquals("contents of fapl set and get don't match", new H5FD_ros3_fapl_t("", "", ""), copy);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -125,13 +143,12 @@ public class TestH5Pfapls3 {
     {
         if (HDF5Constants.H5FD_ROS3 < 0)
             throw new HDF5LibraryException("skip");
-        if (HDF5Constants.H5FD_SEC2 < 0 )
+        if (HDF5Constants.H5FD_SEC2 < 0)
             throw new HDF5LibraryException("skip");
-            /* TODO: for now, test against a sec2 fapl only */
+        /* TODO: for now, test against a sec2 fapl only */
 
         H5.H5Pset_fapl_sec2(fapl_id);
-        assertEquals("fapl_id was not set properly",
-                HDF5Constants.H5FD_SEC2, H5.H5Pget_driver(fapl_id));
+        assertEquals("fapl_id was not set properly", HDF5Constants.H5FD_SEC2, H5.H5Pget_driver(fapl_id));
         H5FD_ros3_fapl_t fails = H5.H5Pget_fapl_ros3(fapl_id);
     }
 
@@ -147,12 +164,10 @@ public class TestH5Pfapls3 {
 
         final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t(region, acc_id, acc_key);
         H5.H5Pset_fapl_ros3(fapl_id, config);
-        assertEquals("driver types don't match",
-                HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
+        assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
         H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
         assertEquals("contents of fapl set and get don't match",
-                new H5FD_ros3_fapl_t(region, acc_id, acc_key), copy);
+                     new H5FD_ros3_fapl_t(region, acc_id, acc_key), copy);
     }
-
 }

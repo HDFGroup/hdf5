@@ -97,7 +97,7 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(src_oloc);
     HDassert(dst_oloc);
@@ -161,7 +161,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
     size_t              token_size = H5F_SIZEOF_ADDR(src_oloc->file);
     herr_t              ret_value  = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Making equivalent references in the destination file */
     for (i = 0; i < ref_count; i++) {
@@ -221,7 +221,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
     size_t                 i; /* Local index variable */
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Making equivalent references in the destination file */
     for (i = 0; i < ref_count; i++) {
@@ -305,7 +305,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     const unsigned char zeros[H5R_REF_BUF_SIZE] = {0};
     herr_t              ret_value               = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Create datatype ID for src datatype. */
     if ((tid_src == H5I_INVALID_HID) && (tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)

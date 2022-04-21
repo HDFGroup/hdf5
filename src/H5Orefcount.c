@@ -91,7 +91,7 @@ H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     H5O_refcount_t *refcount  = NULL; /* Reference count */
     void *          ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -136,7 +136,7 @@ H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
 {
     const H5O_refcount_t *refcount = (const H5O_refcount_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -173,7 +173,7 @@ H5O__refcount_copy(const void *_mesg, void *_dest)
     H5O_refcount_t *      dest      = (H5O_refcount_t *)_dest;
     void *                ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(refcount);
@@ -211,7 +211,7 @@ H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = 1    /* Version */
@@ -235,7 +235,7 @@ H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable
 static herr_t
 H5O__refcount_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -263,7 +263,7 @@ H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_U
                             hbool_t *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info,
                             void H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -294,7 +294,7 @@ H5O__refcount_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, in
 {
     const H5O_refcount_t *refcount = (const H5O_refcount_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

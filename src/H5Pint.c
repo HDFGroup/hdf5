@@ -707,7 +707,7 @@ H5P__close_class_cb(void *_pclass, void H5_ATTR_UNUSED **request)
     H5P_genclass_t *pclass    = (H5P_genclass_t *)_pclass; /* Property list class to close */
     herr_t          ret_value = SUCCEED;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(pclass);
@@ -738,7 +738,7 @@ H5P__close_list_cb(void *_plist, void H5_ATTR_UNUSED **request)
     H5P_genplist_t *plist     = (H5P_genplist_t *)_plist; /* Property list to close */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -780,7 +780,7 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
     H5P_genprop_t *pcopy     = NULL;    /* Copy of property to insert into skip list */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(slist);
@@ -1146,7 +1146,7 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
     H5P_genprop_t *prop      = NULL; /* Pointer to new property copied */
     H5P_genprop_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(oprop);
     HDassert(type != H5P_PROP_WITHIN_UNKNOWN);
@@ -1260,7 +1260,7 @@ H5P__create_prop(const char *name, size_t size, H5P_prop_within_t type, const vo
     H5P_genprop_t *prop      = NULL; /* Pointer to new property copied */
     H5P_genprop_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(name);
     HDassert((size > 0 && value != NULL) || (size == 0));
@@ -1437,7 +1437,7 @@ H5P__find_prop_pclass(H5P_genclass_t *pclass, const char *name)
 {
     H5P_genprop_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(pclass);
     HDassert(name);
@@ -1471,7 +1471,7 @@ done:
 static herr_t
 H5P__free_prop(H5P_genprop_t *prop)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(prop);
 
@@ -1514,7 +1514,7 @@ H5P__free_prop_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
     H5P_genprop_t *tprop   = (H5P_genprop_t *)item; /* Temporary pointer to property */
     hbool_t        make_cb = *(hbool_t *)op_data;   /* Whether to make property 'close' callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(tprop);
 
@@ -1552,7 +1552,7 @@ H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
 {
     char *del_name = (char *)item; /* Temporary pointer to deleted name */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(del_name);
 
@@ -1682,7 +1682,7 @@ H5P__open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
     H5P_check_class_t *key       = (H5P_check_class_t *)_key; /* Pointer to key information for comparison */
     int                ret_value = 0;                         /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(obj);
     HDassert(H5I_GENPROP_CLS == H5I_get_type(id));
@@ -1837,7 +1837,7 @@ H5P__create(H5P_genclass_t *pclass)
     H5SL_t *        seen      = NULL; /* Skip list to hold names of properties already seen */
     H5P_genplist_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(pclass);
 
@@ -2778,7 +2778,7 @@ H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op
     H5P_genprop_t * prop;                /* Temporary property pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -2858,7 +2858,7 @@ H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_AT
     H5P_prop_set_ud_t *udata     = (H5P_prop_set_ud_t *)_udata; /* User data for callback */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -2905,7 +2905,7 @@ H5P__poke_pclass_cb(H5P_genplist_t *plist, const char H5_ATTR_NDEBUG_UNUSED *nam
     H5P_genprop_t *    pcopy     = NULL;    /* Copy of property to insert into skip list */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -3011,7 +3011,7 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     const void *       prp_value = NULL;                        /* Property value */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -3088,7 +3088,7 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     const void *       prp_value = NULL;    /* Property value */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -3611,7 +3611,7 @@ H5P__cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
     int cmp_value;     /* Value from comparison */
     int ret_value = 0; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(prop1);
     HDassert(prop2);
@@ -3872,7 +3872,7 @@ H5P__cmp_plist_cb(H5P_genprop_t *prop, void *_udata)
     htri_t              prop2_exist; /* Whether the property exists in the second property list */
     int                 ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(prop);
@@ -4154,7 +4154,7 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     H5P_iter_plist_ud_t *udata     = (H5P_iter_plist_ud_t *)_udata; /* Pointer to user data */
     int                  ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(item);
@@ -4207,7 +4207,7 @@ H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
     H5P_iter_plist_ud_t *udata     = (H5P_iter_plist_ud_t *)_udata; /* Pointer to user data */
     int                  ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(item);
@@ -4365,7 +4365,7 @@ H5P__iterate_pclass_cb(void *_item, void H5_ATTR_NDEBUG_UNUSED *_key, void *_uda
     H5P_iter_pclass_ud_t *udata     = (H5P_iter_pclass_ud_t *)_udata; /* Pointer to user data */
     int                   ret_value = 0;                              /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(item);
@@ -4498,7 +4498,7 @@ H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDE
     H5P_prop_get_ud_t *udata     = (H5P_prop_get_ud_t *)_udata; /* User data for callback */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -4591,7 +4591,7 @@ H5P__get_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, void *
     void *             tmp_value = NULL;                        /* Temporary value for property */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -4705,7 +4705,7 @@ H5P__del_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     char * del_name  = NULL;    /* Pointer to deleted name */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);
@@ -4774,7 +4774,7 @@ H5P__del_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
     void * tmp_value = NULL;    /* Temporary value for property */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(plist);

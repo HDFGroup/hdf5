@@ -571,7 +571,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         H5F_ACS_VOL_CONN_DEF;   /* Default VOL connector ID & info (initialized from a variable) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register the initial metadata cache resize configuration */
     if (H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE,
@@ -891,7 +891,7 @@ H5P__facc_set_def_driver(void)
     hid_t       driver_id      = H5I_INVALID_HID; /* VFL driver ID */
     herr_t      ret_value      = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if VFL driver environment variable is set */
     driver_env_var = HDgetenv(HDF5_DRIVER);
@@ -986,7 +986,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(driver_name);
     HDassert(driver_id);
@@ -1714,7 +1714,7 @@ H5P__file_driver_copy(void *value)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (value) {
         H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
@@ -1784,7 +1784,7 @@ H5P__file_driver_free(void *value)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (value) {
         H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
@@ -1827,7 +1827,7 @@ H5P__facc_file_driver_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNU
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make copy of file driver */
     if (H5P__file_driver_copy(value) < 0)
@@ -1856,7 +1856,7 @@ H5P__facc_file_driver_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1888,7 +1888,7 @@ H5P__facc_file_driver_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1920,7 +1920,7 @@ H5P__facc_file_driver_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the file driver ID & info */
     if (H5P__file_driver_free(value) < 0)
@@ -1948,7 +1948,7 @@ H5P__facc_file_driver_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make copy of file driver */
     if (H5P__file_driver_copy(value) < 0)
@@ -1983,7 +1983,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
     int           cmp_value;     /* Value from comparison */
     herr_t        ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(info1);
@@ -2050,7 +2050,7 @@ H5P__facc_file_driver_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUS
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the file driver */
     if (H5P__file_driver_free(value) < 0)
@@ -3462,7 +3462,7 @@ H5P__file_image_info_copy(void *value)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (value) {
         H5FD_file_image_info_t *info; /* Image info struct */
@@ -3536,7 +3536,7 @@ H5P__file_image_info_free(void *value)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (value) {
         H5FD_file_image_info_t *info; /* Image info struct */
@@ -3593,7 +3593,7 @@ H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, siz
         (const H5AC_cache_image_config_t *)_config2; /* Create local aliases for values */
     int ret_value = 0;                               /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for a property being set */
     if (config1 == NULL && config2 != NULL)
@@ -3647,7 +3647,7 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
         (const H5AC_cache_image_config_t *)value; /* Create local aliases for value */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(value);
@@ -3694,7 +3694,7 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
     unsigned                   enc_size;
     herr_t                     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -3741,7 +3741,7 @@ H5P__facc_file_image_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -3773,7 +3773,7 @@ H5P__facc_file_image_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -3807,7 +3807,7 @@ H5P__facc_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the file image info */
     if (H5P__file_image_info_free(value) < 0)
@@ -3836,7 +3836,7 @@ H5P__facc_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make copy of file image info */
     if (H5P__file_image_info_copy(value) < 0)
@@ -3869,7 +3869,7 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_
         *info2       = (const H5FD_file_image_info_t *)_info2;
     herr_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(info1);
@@ -3935,7 +3935,7 @@ H5P__facc_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the file image info */
     if (H5P__file_image_info_free(value) < 0)
@@ -3967,7 +3967,7 @@ H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t H5
         (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */
     int ret_value = 0;                         /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for a property being set */
     if (config1 == NULL && config2 != NULL)
@@ -4138,7 +4138,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
     unsigned  enc_size;  /* Size of encoded property */
     uint64_t  enc_value; /* Property to encode */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(value);
@@ -4283,7 +4283,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     uint64_t             enc_value;
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(pp);
@@ -4415,7 +4415,7 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
         (const H5F_close_degree_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(fclose_degree);
@@ -4452,7 +4452,7 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
     H5F_close_degree_t *fclose_degree = (H5F_close_degree_t *)_value; /* File close degree */
     const uint8_t **    pp            = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -4486,7 +4486,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     const H5FD_mem_t *type = (const H5FD_mem_t *)value; /* Create local alias for values */
     uint8_t **        pp   = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(type);
@@ -4523,7 +4523,7 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
     H5FD_mem_t *    type = (H5FD_mem_t *)_value; /* File close degree */
     const uint8_t **pp   = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -4556,7 +4556,7 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
     const H5F_libver_t *type = (const H5F_libver_t *)value; /* Create local alias for values */
     uint8_t **          pp   = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(type);
@@ -4592,7 +4592,7 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
     H5F_libver_t *  type = (H5F_libver_t *)_value;
     const uint8_t **pp   = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -4625,7 +4625,7 @@ H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
         (const H5F_vfd_swmr_config_t *)value; /* Create local aliases for values */
     uint8_t **pp = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(value);
@@ -4679,7 +4679,7 @@ H5P__facc_vfd_swmr_config_dec(const void **_pp, void *_value)
     H5F_vfd_swmr_config_t *config = (H5F_vfd_swmr_config_t *)_value;
     const uint8_t **       pp     = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -5001,7 +5001,7 @@ H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
     uint64_t    enc_value;
     unsigned    enc_size;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -5054,7 +5054,7 @@ H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
     unsigned        enc_size;  /* Size of encoded property */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(pp);
     HDassert(*pp);
@@ -5098,7 +5098,7 @@ static herr_t
 H5P__facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
                                size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 
@@ -5119,7 +5119,7 @@ H5P__facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_
 static herr_t
 H5P__facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 
@@ -5146,7 +5146,7 @@ H5P__facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5
     const char *pref2     = *(const char *const *)value2;
     int         ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
@@ -5172,7 +5172,7 @@ done:
 static herr_t
 H5P__facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(value);
 
@@ -5419,7 +5419,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value; /* File close degree */
     const uint8_t **         pp                = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);
@@ -5681,7 +5681,7 @@ H5P__facc_mpi_comm_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Comm  comm_tmp  = MPI_COMM_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI communicator */
     if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
@@ -5715,7 +5715,7 @@ H5P__facc_mpi_comm_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Comm  comm_tmp  = MPI_COMM_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI communicator */
     if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
@@ -5748,7 +5748,7 @@ H5P__facc_mpi_comm_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Comm *comm      = (MPI_Comm *)value;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the MPI communicator */
     if (H5_mpi_comm_free(comm) < 0)
@@ -5775,7 +5775,7 @@ H5P__facc_mpi_comm_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED s
     MPI_Comm  comm_tmp  = MPI_COMM_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI communicator */
     if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
@@ -5811,7 +5811,7 @@ H5P__facc_mpi_comm_cmp(const void *_comm1, const void *_comm2, size_t H5_ATTR_UN
     const MPI_Comm *comm2     = (const MPI_Comm *)_comm2;
     int             ret_value = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Compare the MPI communicators */
     if (H5_mpi_comm_cmp(*comm1, *comm2, &ret_value) < 0)
@@ -5837,7 +5837,7 @@ H5P__facc_mpi_comm_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
     MPI_Comm *comm      = (MPI_Comm *)value;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the MPI communicator */
     if (H5_mpi_comm_free(comm) < 0)
@@ -5865,7 +5865,7 @@ H5P__facc_mpi_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Info  info_tmp  = MPI_INFO_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI info object */
     if (H5_mpi_info_dup(*info, &info_tmp) < 0)
@@ -5899,7 +5899,7 @@ H5P__facc_mpi_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Info  info_tmp  = MPI_INFO_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI communicator */
     if (H5_mpi_info_dup(*info, &info_tmp) < 0)
@@ -5932,7 +5932,7 @@ H5P__facc_mpi_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     MPI_Info *info      = (MPI_Info *)value;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the MPI info object */
     if (H5_mpi_info_free(info) < 0)
@@ -5959,7 +5959,7 @@ H5P__facc_mpi_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED s
     MPI_Info  info_tmp  = MPI_INFO_NULL;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make a copy of the MPI info object */
     if (H5_mpi_info_dup(*info, &info_tmp) < 0)
@@ -5995,7 +5995,7 @@ H5P__facc_mpi_info_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UN
     const MPI_Info *info2     = (const MPI_Info *)_info2;
     int             ret_value = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Compare the MPI info objects */
     if (H5_mpi_info_cmp(*info1, *info2, &ret_value) < 0)
@@ -6021,7 +6021,7 @@ H5P__facc_mpi_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
     MPI_Info *info      = (MPI_Info *)value;
     herr_t    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the MPI info object */
     if (H5_mpi_info_free(info) < 0)
@@ -6571,7 +6571,7 @@ H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make copy of the VOL connector */
     if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
@@ -6597,7 +6597,7 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -6626,7 +6626,7 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -6655,7 +6655,7 @@ H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the VOL connector ID & info */
     if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
@@ -6680,7 +6680,7 @@ H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make copy of VOL connector */
     if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
@@ -6714,7 +6714,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     herr_t H5_ATTR_NDEBUG_UNUSED status;        /* Status from info comparison */
     int                          ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(info1);
@@ -6764,7 +6764,7 @@ H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Free the VOL connector */
     if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)

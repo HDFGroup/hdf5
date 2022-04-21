@@ -96,7 +96,7 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     H5B2_create_t bt2_cparam;          /* v2 B-tree creation parameters */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -246,7 +246,7 @@ H5HF__huge_new_id(H5HF_hdr_t *hdr)
     hsize_t new_id;        /* New object's ID */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -670,7 +670,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
     unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */
     herr_t   ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

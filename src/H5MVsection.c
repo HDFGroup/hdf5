@@ -188,7 +188,7 @@ H5MV__sect_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_info_
     const H5MV_free_section_t *sect2     = (const H5MV_free_section_t *)_sect2; /* File free section */
     htri_t                     ret_value = FAIL;                                /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect1);
@@ -221,7 +221,7 @@ H5MV__sect_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2, void
     H5MV_free_section_t * sect2     = (H5MV_free_section_t *)_sect2;  /* File free section */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect1);
@@ -261,7 +261,7 @@ H5MV__sect_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     haddr_t                    end;               /* End of section to extend */
     htri_t                     ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -300,7 +300,7 @@ H5MV__sect_shrink(H5FS_section_info_t **_sect, void *_udata)
     H5MV_free_section_t **sect      = (H5MV_free_section_t **)_sect; /* File free section */
     herr_t                ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(sect);
@@ -336,7 +336,7 @@ H5MV__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_sect
 {
     const H5MV_free_section_t *sect = (const H5MV_free_section_t *)_sect; /* File free section */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     HDassert(sect);
@@ -360,7 +360,7 @@ H5MV__sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
     H5MV_free_section_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate space for new section */
     if (NULL == (ret_value = H5MV__sect_new(sect->addr, frag_size)))

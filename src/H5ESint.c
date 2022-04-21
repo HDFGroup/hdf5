@@ -192,7 +192,7 @@ H5ES__close_cb(void *_es, void H5_ATTR_UNUSED **rt)
     H5ES_t *es        = (H5ES_t *)_es; /* The event set to close */
     herr_t  ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
@@ -261,7 +261,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
     hbool_t       ev_inserted = FALSE;   /* Flag to indicate that event is in active list */
     herr_t        ret_value   = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
@@ -447,7 +447,7 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
     H5ES_get_requests_ctx_t *ctx       = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
     int                      ret_value = H5_ITER_CONT;                    /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ev);
@@ -523,7 +523,7 @@ done:
 static herr_t
 H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(es);
@@ -561,7 +561,7 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
     hid_t                        err_stack_id = H5I_INVALID_HID; /* Error stack for failed operation */
     herr_t                       ret_value    = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
@@ -657,7 +657,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
     uint64_t start_time = 0, elapsed_time = 0; /* Start and elapsed times for waiting on an operation */
     int      ret_value = H5_ITER_CONT;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(ev);
@@ -777,7 +777,7 @@ H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED; /* Status from event's operation */
     int                   ret_value = H5_ITER_CONT;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(ev);
@@ -885,7 +885,7 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     H5ES_gei_ctx_t *             ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
     int                          ret_value = H5_ITER_CONT;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(ev);

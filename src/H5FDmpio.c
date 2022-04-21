@@ -172,7 +172,7 @@ static int H5FD_mpio_debug_rank_s = -1;
 static void
 H5FD__mpio_parse_debug_str(const char *s)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(s);
@@ -311,7 +311,7 @@ done:
 static herr_t
 H5FD__mpio_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Terminate MPI if the driver initialized it */
     if (H5FD_mpi_self_initialized) {
@@ -834,7 +834,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     int     mpi_code;         /* MPI return code */
     H5FD_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get a pointer to the fapl */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -976,7 +976,7 @@ H5FD__mpio_close(H5FD_t *_file)
     int    mpi_code;            /* MPI return code */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -1021,7 +1021,7 @@ done:
 static herr_t
 H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -1056,7 +1056,7 @@ H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_mpio_t *file = (const H5FD_mpio_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -1084,7 +1084,7 @@ H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -1126,7 +1126,7 @@ H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_mpio_t *file = (const H5FD_mpio_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -1153,7 +1153,7 @@ H5FD__mpio_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -1215,7 +1215,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -1485,7 +1485,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -1684,7 +1684,7 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
     int    mpi_code; /* mpi return code */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -1741,7 +1741,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 #endif
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -1841,7 +1841,7 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
     int             mpi_code;            /* MPI return code */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 

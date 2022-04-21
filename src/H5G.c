@@ -152,7 +152,7 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!name)
@@ -382,7 +382,7 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!name)
@@ -549,7 +549,7 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **to
     H5I_type_t            id_type;                    /* Type of ID */
     herr_t                ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     id_type = H5I_get_type(loc_id);
@@ -658,7 +658,7 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
     H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
     herr_t                ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!group_info)
@@ -767,7 +767,7 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
     H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
     herr_t                ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!group_info)

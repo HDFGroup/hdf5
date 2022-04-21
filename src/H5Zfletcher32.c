@@ -67,7 +67,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     uint8_t        tmp;
     size_t         ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(sizeof(uint32_t) >= 4);
 
