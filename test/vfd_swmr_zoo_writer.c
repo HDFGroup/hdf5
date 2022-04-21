@@ -475,9 +475,11 @@ main(int argc, char **argv)
 
     parse_command_line_options(argc, argv);
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(&vfd_swmr_config, TICK_LEN, 7, writer, TRUE, FALSE, TRUE, 128, "./zoo-shadow", NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(&vfd_swmr_config, TICK_LEN, 7, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
+                         "zoo-shadow", NULL);
 
     /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */

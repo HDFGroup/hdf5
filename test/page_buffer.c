@@ -115,7 +115,9 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
         HDfprintf(stderr, "H5_basename() failed\n");
         return -1;
     }
-    HDsnprintf(config.md_file_path, sizeof(config.md_file_path), "%s/%s.shadow", dname, bname);
+    HDsnprintf(config.md_file_path, sizeof(config.md_file_path), "%s", dname);
+    HDsnprintf(config.md_file_name, sizeof(config.md_file_name), "%s.shadow", bname);
+
     HDfree(dname);
     HDfree(bname);
 

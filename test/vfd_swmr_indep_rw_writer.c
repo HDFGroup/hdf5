@@ -359,14 +359,16 @@ error:
  *  for the VFD SMWR independence of the reader/writer test.
  */
 static hbool_t
-indep_init_vfd_swmr_config_plist(state_t *s, hbool_t writer, const char *mdf_path)
+indep_init_vfd_swmr_config_plist(state_t *s, hbool_t writer, const char *mdf_name)
 {
 
     H5F_vfd_swmr_config_t config;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
-    init_vfd_swmr_config(&config, s->tick_len, s->max_lag, writer, TRUE, FALSE, TRUE, 128, mdf_path, NULL);
+    /* config, tick_len, max_lag, presume_posix_semantics, writer,
+     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+     * md_file_path, md_file_name, updater_file_path */
+    init_vfd_swmr_config(&config, s->tick_len, s->max_lag, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
+                         mdf_name, NULL);
 
     /* Pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
     if ((s->fapl = vfd_swmr_create_fapl(TRUE, s->use_vfd_swmr, TRUE, s->pbs, &config)) < 0) {
@@ -645,7 +647,7 @@ main(int argc, char **argv)
     if (s.first_proc) {
 
         writer = TRUE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file1-shadow")) {
             HDfprintf(stderr, "Writer: Cannot initialize file property lists for file %s\n", s.filename[0]);
             TEST_ERROR;
         }
@@ -678,7 +680,7 @@ main(int argc, char **argv)
         }
 
         writer = FALSE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file2-shadow")) {
             HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[1]);
             TEST_ERROR;
         }
@@ -715,7 +717,7 @@ main(int argc, char **argv)
          * then writes a dataset in the second file for the first process to read.
          */
         writer = FALSE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file1-shadow")) {
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file1-shadow")) {
             HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[0]);
             TEST_ERROR;
         }
@@ -737,7 +739,7 @@ main(int argc, char **argv)
         }
 
         writer = TRUE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "./file2-shadow")) {
+        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file2-shadow")) {
             HDfprintf(stderr, "writer: Cannot initialize file property lists for file %s\n", s.filename[1]);
             TEST_ERROR;
         }

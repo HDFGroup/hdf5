@@ -374,6 +374,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)               ((F)->shared->threshold)
 #define H5F_PGEND_META_THRES(F)        ((F)->shared->fs.pgend_meta_thres)
 #define H5F_POINT_OF_NO_RETURN(F)      ((F)->shared->fs.point_of_no_return)
+#define H5F_SHARED_USE_VFD_SWMR(F_SH)  ((F_SH)->vfd_swmr)
 #define H5F_USE_VFD_SWMR(F)            ((F)->shared->vfd_swmr)
 #define H5F_NULL_FSM_ADDR(F)           ((F)->shared->null_fsm_addr)
 #define H5F_GET_MIN_DSET_OHDR(F)       ((F)->shared->crt_dset_min_ohdr_flag)
@@ -438,6 +439,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_THRESHOLD(F)               (H5F_get_threshold(F))
 #define H5F_PGEND_META_THRES(F)        (H5F_get_pgend_meta_thres(F))
 #define H5F_POINT_OF_NO_RETURN(F)      (H5F_get_point_of_no_return(F))
+#define H5F_SHARED_USE_VFD_SWMR(F_SH)  (H5F_shared_get_use_vfd_swmr(F_SH))
 #define H5F_USE_VFD_SWMR(F)            (H5F_get_use_vfd_swmr(F))
 #define H5F_NULL_FSM_ADDR(F)           (H5F_get_null_fsm_addr(F))
 #define H5F_GET_MIN_DSET_OHDR(F)       (H5F_get_min_dset_ohdr(F))
@@ -628,6 +630,7 @@ typedef struct H5F_t H5F_t;
         /* int32_t    version                 = */ 0,                                                        \
         /* int32_t    tick_len                = */ 0,                                                        \
         /* int32_t    max_lag                 = */ 0,                                                        \
+        /* hbool_t    presume_posix_semantics = */ FALSE,                                                    \
         /* hbool_t    vfd_swmr_writer         = */ FALSE,                                                    \
         /* hbool_t    maintain_metadata_file  = */ FALSE,                                                    \
         /* hbool_t    generate_updater_files  = */ FALSE,                                                    \
@@ -635,6 +638,7 @@ typedef struct H5F_t H5F_t;
         /* int32_t    md_pages_reserved       = */ 0,                                                        \
         /* int32_t    pb_expansion_threshold  = */ 0,                                                        \
         /* char       md_file_path[]          = */ "",                                                       \
+        /* char       md_file_name[]          = */ "",                                                       \
         /* char       updater_file_path[]     = */ "",                                                       \
         /* char       log_file_path[]         = */ ""                                                        \
     }

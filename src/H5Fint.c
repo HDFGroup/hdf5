@@ -1828,9 +1828,24 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /*
+     * If the driver has a 'cmp' method then the driver is capable of
+     * determining when two file handles refer to the same file and the
+     * library can insure that when the application opens a file twice
+     * that the two handles coordinate their operations appropriately.
+     * Otherwise it is the application's responsibility to never open the
+     * same file more than once at a time.
+     */
+    if (NULL == (drvr = H5FD_get_class(fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
+
     /* Get the file access property list, for future queries */
     if (NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* Check if we are using file locking */
+    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
 
     /* Allocate space for VFD SWMR configuration info */
     if (NULL == (vfd_swmr_config_ptr = H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
@@ -1852,25 +1867,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if (H5P_get(a_plist, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get generate_md_ck_cb info")
     }
-
-    /*
-     * If the driver has a 'cmp' method then the driver is capable of
-     * determining when two file handles refer to the same file and the
-     * library can insure that when the application opens a file twice
-     * that the two handles coordinate their operations appropriately.
-     * Otherwise it is the application's responsibility to never open the
-     * same file more than once at a time.
-     */
-    if (NULL == (drvr = H5FD_get_class(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
-
-    /* Get the file access property list, for future queries */
-    if (NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
-    /* Check if we are using file locking */
-    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
 
     /*
      * Opening a file is a two step process. First we try to open the

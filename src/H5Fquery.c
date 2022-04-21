@@ -1344,6 +1344,25 @@ H5F_get_file_locking(const H5F_t *f)
 } /* end H5F_get_file_locking */
 
 /*-------------------------------------------------------------------------
+ * Function: H5F_shared_get_use_vfd_swmr
+ *
+ * Purpose:  Determine if VFD SWMR is enabled for this file.
+ *
+ * Return:   TRUE/FALSE
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_shared_get_use_vfd_swmr(const H5F_shared_t *f_sh)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f_sh);
+
+    FUNC_LEAVE_NOAPI(f_sh->vfd_swmr)
+} /* end H5F_shared_get_use_vfd_swmr() */
+
+/*-------------------------------------------------------------------------
  * Function: H5F_get_use_vfd_swmr
  *
  * Purpose:  Determine if VFD SWMR is enabled for this file.
