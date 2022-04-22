@@ -285,6 +285,28 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to allow the user to enable debug output
+# from various HDF5 modules
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
+if (HDF5_ENABLE_DEBUG_APIS)
+  # Add standard debug definitions to any existing ones
+  list (APPEND HDF5_DEBUG_APIS
+      H5AC_DEBUG
+      H5CX_DEBUG
+      H5D_DEBUG
+      H5D_CHUNK_DEBUG
+      H5F_DEBUG
+      H5HL_DEBUG
+      H5I_DEBUG
+      H5O_DEBUG
+      H5S_DEBUG
+      H5T_DEBUG
+      H5Z_DEBUG
+  )
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to allow the user to enable all warnings
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ALL_WARNINGS "Enable all warnings" ON)
