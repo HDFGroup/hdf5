@@ -24,9 +24,7 @@ public class HDF5LowLevelIOException extends HDF5LibraryException {
      * Constructs an <code>HDF5LowLevelIOException</code> with no specified
      * detail message.
      */
-    public HDF5LowLevelIOException() {
-        super();
-    }
+    public HDF5LowLevelIOException() { super(); }
 
     /**
      * Constructs an <code>HDF5LowLevelIOException</code> with the specified
@@ -35,7 +33,5 @@ public class HDF5LowLevelIOException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5LowLevelIOException(String s) {
-        super(s);
-    }
+    public HDF5LowLevelIOException(String s) { super(s); }
 }

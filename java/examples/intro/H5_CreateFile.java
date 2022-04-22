@@ -22,13 +22,14 @@ import hdf.hdf5lib.HDF5Constants;
 public class H5_CreateFile {
     static final String FILENAME = "H5_CreateFile.h5";
 
-    private static void CreateFile() {
+    private static void CreateFile()
+    {
         long file_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -42,11 +43,7 @@ public class H5_CreateFile {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5_CreateFile.CreateFile();
-    }
-
+    public static void main(String[] args) { H5_CreateFile.CreateFile(); }
 }

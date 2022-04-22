@@ -390,7 +390,7 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
-  # Comma separated lists of sanitize options wil be entered intact in
+  # Comma separated lists of sanitize options will be entered intact in
   # one -fsanitize=<list> flag.  Space separated lists will be entered in
   # separate -fsanitize=<item> flags.
   # NOTE: No sanity checking done here!
@@ -3590,8 +3590,8 @@ fi
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
-## HDF5 version from the first line of the README.txt file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+## HDF5 version from the first line of the README.md file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
 AC_SUBST([H5_VERSION])
 
 ## Configuration date

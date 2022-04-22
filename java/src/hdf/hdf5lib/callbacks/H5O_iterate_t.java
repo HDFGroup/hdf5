@@ -13,9 +13,8 @@
 package hdf.hdf5lib.callbacks;
 
 /**
- * Data class for link callback for H5Ovisit/H5Ovisit_by_name.
+ * Information class for link callback for H5Ovisit/H5Ovisit_by_name.
  *
  */
 public interface H5O_iterate_t {
-
 }

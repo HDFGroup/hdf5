@@ -136,7 +136,7 @@ New Features
 
     Fortran Library:
     ----------------
-    - 
+    -
 
 
     C++ Library:
@@ -308,7 +308,7 @@ Bug Fixes since HDF5-1.10.7 release
 
     Documentation
     -------------
-    - 
+    -
 
 
     F90 APIs

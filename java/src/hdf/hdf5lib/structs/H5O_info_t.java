@@ -21,35 +21,38 @@ import java.io.Serializable;
 public class H5O_info_t implements Serializable {
     private static final long serialVersionUID = 4691681163544054518L;
     /** File number that object is located in */
-    public long   fileno;
+    public long fileno;
     /** Object address in file */
-    public long   addr;
+    public long addr;
     /** Basic object type (group, dataset, etc.) */
-    public int    type;
+    public int type;
     /** Reference count of object */
-    public int    rc;
+    public int rc;
     /** Access time */
-    public long   atime;
+    public long atime;
     /** Modification time */
-    public long   mtime;
+    public long mtime;
     /** Change time */
-    public long   ctime;
+    public long ctime;
     /** Birth time */
-    public long   btime;
-    /** # of attributes attached to object */
-    public long   num_attrs;
+    public long btime;
+    /** Number of attributes attached to object */
+    public long num_attrs;
     /** Object header information */
-    public H5O_hdr_info_t   hdr;
-    /** Extra metadata storage for obj
+    public H5O_hdr_info_t hdr;
+    /**
+     * Extra metadata storage for obj
      * v1/v2 B-tree and local/fractal heap for groups, B-tree for chunked datasets
      */
-    public H5_ih_info_t     meta_size_obj;
-    /** Extra metadata storage for attributes
+    public H5_ih_info_t meta_size_obj;
+    /**
+     * Extra metadata storage for attributes
      * v2 B-tree and heap for attributes
      */
-    public H5_ih_info_t     meta_size_attr;
+    public H5_ih_info_t meta_size_attr;
 
-    /** Constructor for data model information struct for objects
+    /**
+     * Constructor for data model information struct for objects
      *
      * @param fileno: File number that object is located in
      * @param addr: Object address in file
@@ -64,21 +67,21 @@ public class H5O_info_t implements Serializable {
      * @param meta_size_obj: v1/v2 B-tree and local/fractal heap for groups, B-tree for chunked datasets
      * @param meta_size_attr: v2 B-tree and heap for attributes
      */
-    public H5O_info_t (long fileno, long addr, int type,
-        int rc, long num_attrs, long atime, long mtime, long ctime, long btime,
-        H5O_hdr_info_t hdr, H5_ih_info_t meta_size_obj, H5_ih_info_t meta_size_attr)
+    public H5O_info_t(long fileno, long addr, int type, int rc, long num_attrs, long atime, long mtime,
+                      long ctime, long btime, H5O_hdr_info_t hdr, H5_ih_info_t meta_size_obj,
+                      H5_ih_info_t meta_size_attr)
     {
-        this.fileno = fileno;
-        this.addr = addr;
-        this.type = type;
-        this.rc = rc;
-        this.num_attrs = num_attrs;
-        this.atime = atime;
-        this.mtime = mtime;
-        this.ctime = ctime;
-        this.btime = btime;
-        this.hdr = hdr;
-        this.meta_size_obj = meta_size_obj;
+        this.fileno         = fileno;
+        this.addr           = addr;
+        this.type           = type;
+        this.rc             = rc;
+        this.num_attrs      = num_attrs;
+        this.atime          = atime;
+        this.mtime          = mtime;
+        this.ctime          = ctime;
+        this.btime          = btime;
+        this.hdr            = hdr;
+        this.meta_size_obj  = meta_size_obj;
         this.meta_size_attr = meta_size_attr;
     }
 }

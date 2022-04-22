@@ -26,17 +26,18 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Hyperslab {
-    private static String FILENAME = "H5Ex_D_Hyperslab.h5";
+    private static String FILENAME    = "H5Ex_D_Hyperslab.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 6;
-    private static final int DIM_Y = 8;
-    private static final int RANK = 2;
+    private static final int DIM_X    = 6;
+    private static final int DIM_Y    = 8;
+    private static final int RANK     = 2;
 
-    private static void writeHyperslab() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void writeHyperslab()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Initialize data to "1", to make it easier to see the selections.
@@ -57,7 +58,7 @@ public class H5Ex_D_Hyperslab {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -76,20 +77,22 @@ public class H5Ex_D_Hyperslab {
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         // Define and select the first part of the hyperslab selection.
-        long[] start = { 0, 0 };
-        long[] stride = { 3, 3 };
-        long[] count = { 2, 3 };
-        long[] block = { 2, 2 };
+        long[] start  = {0, 0};
+        long[] stride = {3, 3};
+        long[] count  = {2, 3};
+        long[] block  = {2, 2};
         try {
             if ((filespace_id >= 0))
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                       block);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -101,12 +104,13 @@ public class H5Ex_D_Hyperslab {
         block[1] = 1;
         try {
             if ((filespace_id >= 0)) {
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count,
+                                       block);
 
                 // Write the data to the dataset.
                 if (dataset_id >= 0)
                     H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
-                            HDF5Constants.H5P_DEFAULT, dset_data);
+                                HDF5Constants.H5P_DEFAULT, dset_data);
             }
         }
         catch (Exception e) {
@@ -140,11 +144,12 @@ public class H5Ex_D_Hyperslab {
         }
     }
 
-    private static void readHyperslab() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void readHyperslab()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file.
@@ -167,8 +172,8 @@ public class H5Ex_D_Hyperslab {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -194,18 +199,19 @@ public class H5Ex_D_Hyperslab {
             if (dataset_id >= 0) {
                 filespace_id = H5.H5Dget_space(dataset_id);
 
-                long[] start = { 0, 1 };
-                long[] stride = { 4, 4 };
-                long[] count = { 2, 2 };
-                long[] block = { 2, 3 };
+                long[] start  = {0, 1};
+                long[] stride = {4, 4};
+                long[] count  = {2, 2};
+                long[] block  = {2, 3};
 
                 if (filespace_id >= 0) {
-                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count, block);
+                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                           block);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0))
-                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
-                                HDF5Constants.H5P_DEFAULT, dset_data);
+                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                                   filespace_id, HDF5Constants.H5P_DEFAULT, dset_data);
                 }
             }
         }
@@ -258,9 +264,9 @@ public class H5Ex_D_Hyperslab {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_D_Hyperslab.writeHyperslab();
         H5Ex_D_Hyperslab.readHyperslab();
     }
-
 }

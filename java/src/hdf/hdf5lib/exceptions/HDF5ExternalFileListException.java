@@ -24,9 +24,7 @@ public class HDF5ExternalFileListException extends HDF5LibraryException {
      * Constructs an <code>HDF5ExternalFileListException</code> with no
      * specified detail message.
      */
-    public HDF5ExternalFileListException() {
-        super();
-    }
+    public HDF5ExternalFileListException() { super(); }
 
     /**
      * Constructs an <code>HDF5ExternalFileListException</code> with the
@@ -35,7 +33,5 @@ public class HDF5ExternalFileListException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5ExternalFileListException(String s) {
-        super(s);
-    }
+    public HDF5ExternalFileListException(String s) { super(s); }
 }
