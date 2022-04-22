@@ -24,17 +24,18 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_T_Bit {
-    private static String FILENAME = "H5Ex_T_Bit.h5";
+    private static String FILENAME    = "H5Ex_T_Bit.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM0 = 4;
-    private static final int DIM1 = 7;
-    private static final int RANK = 2;
+    private static final int DIM0     = 4;
+    private static final int DIM1     = 7;
+    private static final int RANK     = 2;
 
-    private static void CreateDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateDataset()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0, DIM1 };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM0, DIM1};
         int[][] dset_data = new int[DIM0][DIM1];
 
         // Initialize data.
@@ -42,15 +43,15 @@ public class H5Ex_T_Bit {
             for (int jndx = 0; jndx < DIM1; jndx++) {
                 dset_data[indx][jndx] = 0;
                 dset_data[indx][jndx] |= (indx * jndx - jndx) & 0x03; /* Field "A" */
-                dset_data[indx][jndx] |= (indx & 0x03) << 2; /* Field "B" */
-                dset_data[indx][jndx] |= (jndx & 0x03) << 4; /* Field "C" */
+                dset_data[indx][jndx] |= (indx & 0x03) << 2;          /* Field "B" */
+                dset_data[indx][jndx] |= (jndx & 0x03) << 4;          /* Field "C" */
                 dset_data[indx][jndx] |= ((indx + jndx) & 0x03) << 6; /* Field "D" */
             }
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -69,7 +70,8 @@ public class H5Ex_T_Bit {
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_B8BE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -78,8 +80,8 @@ public class H5Ex_T_Bit {
         // Write the bitfield data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_B8, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_B8, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -111,14 +113,14 @@ public class H5Ex_T_Bit {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void ReadDataset()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0, DIM1 };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM0, DIM1};
         int[][] dset_data;
 
         // Open an existing file.
@@ -157,13 +159,13 @@ public class H5Ex_T_Bit {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        dset_data = new int[(int) dims[0]][(int) (dims[1])];
+        dset_data = new int[(int)dims[0]][(int)(dims[1])];
 
         // Read data.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_B8, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_B8, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,10 +211,10 @@ public class H5Ex_T_Bit {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_T_Bit.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -220,5 +222,4 @@ public class H5Ex_T_Bit {
         // data using malloc().
         H5Ex_T_Bit.ReadDataset();
     }
-
 }

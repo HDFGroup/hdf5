@@ -24,9 +24,7 @@ public class HDF5AtomException extends HDF5LibraryException {
      * Constructs an <code>HDF5AtomException</code> with no specified detail
      * message.
      */
-    public HDF5AtomException() {
-        super();
-    }
+    public HDF5AtomException() { super(); }
 
     /**
      * Constructs an <code>HDF5AtomException</code> with the specified detail
@@ -35,8 +33,5 @@ public class HDF5AtomException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5AtomException(String s) {
-        super(s);
-    }
-
+    public HDF5AtomException(String s) { super(s); }
 }
