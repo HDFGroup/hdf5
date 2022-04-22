@@ -2183,8 +2183,9 @@ test_on_disk_zoo(void)
     if (pass) {
         validate_zoo(file_id, grp_name, 0); /* sanity-check */
     }
+
     if (!pass) {
-        HDprintf(failure_mssg);
+        HDprintf("%s", failure_mssg);
         TEST_ERROR;
     }
 
