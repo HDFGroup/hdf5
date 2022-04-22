@@ -1411,18 +1411,18 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
 
             for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
                 uint32_t final_vec_len = vector_len;
-                int      next          = ioc_start;
+                int      next_ioc      = ioc_start;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
                 for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
-                    size_t idx = (size_t)next * max_depth + (size_t)i;
+                    size_t idx = (size_t)next_ioc * max_depth + (size_t)i;
 
                     io_types[vec_idx] = type;
                     H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
                     io_bufs[vec_idx] = ((char *)buf + source_data_offset[idx]);
 
-                    next = (next + 1) % ioc_count;
+                    next_ioc = (next_ioc + 1) % ioc_total;
 
                     /* Skip 0-sized I/Os */
                     if (io_sizes[vec_idx] == 0) {
@@ -1636,18 +1636,18 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
 
             for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
                 uint32_t final_vec_len = vector_len;
-                int      next          = ioc_start;
+                int      next_ioc      = ioc_start;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
                 for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
-                    size_t idx = (size_t)next * max_depth + (size_t)i;
+                    size_t idx = (size_t)next_ioc * max_depth + (size_t)i;
 
                     io_types[vec_idx] = type;
                     H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
                     io_bufs[vec_idx] = ((const char *)buf + source_data_offset[idx]);
 
-                    next = (next + 1) % ioc_count;
+                    next_ioc = (next_ioc + 1) % ioc_total;
 
                     /* Skip 0-sized I/Os */
                     if (io_sizes[vec_idx] == 0) {
