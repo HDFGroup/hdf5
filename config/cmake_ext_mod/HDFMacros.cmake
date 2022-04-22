@@ -223,7 +223,7 @@ macro (TARGET_C_PROPERTIES wintarget libtype)
 endmacro ()
 
 #-----------------------------------------------------------------------------
-# Configure the README.txt file for the binary package
+# Configure the README.md file for the binary package
 #-----------------------------------------------------------------------------
 macro (HDF_README_PROPERTIES target_fortran)
   set (BINARY_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
@@ -301,8 +301,8 @@ macro (HDF_README_PROPERTIES target_fortran)
   endif ()
 
   configure_file (
-      ${HDF_RESOURCES_DIR}/README.txt.cmake.in
-      ${CMAKE_BINARY_DIR}/README.txt @ONLY
+      ${HDF_RESOURCES_DIR}/README.md.cmake.in
+      ${CMAKE_BINARY_DIR}/README.md @ONLY
   )
 endmacro ()
 
