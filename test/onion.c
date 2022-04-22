@@ -4279,12 +4279,12 @@ test_integration_ctl(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t   group_id      = H5I_INVALID_HID;
-    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hsize_t attr_dim[1]   = {4};
-    H5FD_t *file_drv_ptr  = NULL;
-    uint64_t op_code;
-    uint64_t flags;
+    hid_t     group_id      = H5I_INVALID_HID;
+    hid_t     attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+    hsize_t   attr_dim[1]  = {4};
+    H5FD_t *  file_drv_ptr = NULL;
+    uint64_t  op_code;
+    uint64_t  flags;
     uint64_t *num_revisions = NULL;
 
     TESTING("onion-created HDF5 file with revisions testing H5FDctl");
@@ -4424,8 +4424,8 @@ test_integration_ctl(void)
         TEST_ERROR
 
     num_revisions = HDmalloc(sizeof(uint64_t));
-    op_code = H5FD_CTL__GET_NUM_REVISIONS;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_code       = H5FD_CTL__GET_NUM_REVISIONS;
+    flags         = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
     if (H5FDctl(file_drv_ptr, op_code, flags, NULL, &num_revisions) < 0)
         TEST_ERROR
