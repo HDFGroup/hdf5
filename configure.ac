@@ -3232,7 +3232,7 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     fi
 
 # Checks for libraries.
-    AC_CHECK_LIB([rt], [shm_open])
+    AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
 
 else
