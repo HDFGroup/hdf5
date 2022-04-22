@@ -1,0 +1,128 @@
+/** \page UG HDF5 User’s Guide
+
+<center>
+HDF5 Release 1.10
+
+\image html HDFG-logo.png "The HDF Group"
+
+</center>
+
+\section sec_data_model The HDF5 Data Model and File Structure
+    - <!-- @ref subsec_data_model_intro --> Introduction
+    - <!-- @ref subsec_data_model_abstract --> The Abstract Data Model
+    - <!-- @ref subsec_data_model_storage --> The HDF5 Storage Model
+    - <!-- @ref subsec_data_model_structure --> The Structure of an HDF5 File
+
+\section sec_program The HDF5 Library and Programming Model
+    - <!-- @ref subsec_program_intro --> Introduction
+    - <!-- @ref subsec_program_model --> The HDF5 Programming Model
+    - <!-- @ref subsec_program_transfer_pipeline --> The Data Transfer Pipeline
+
+\section sec_file The HDF5 File
+    - <!-- @ref subsec_file_intro --> Introduction
+    - <!-- @ref subsec_file_access_modes --> File Access Modes
+    - <!-- @ref subsec_file_creation_access --> File Creation and File Access Properties
+    - <!-- @ref subsec_file_drivers --> Low-level File Drivers
+    - <!-- @ref subsec_file_program_model --> "Programming Model for Files
+    - <!-- @ref subsec_file_h5dump --> Using h5dump to View a File
+    - <!-- @ref subsec_file_summary --> File Function Summaries
+    - <!-- @ref subsec_file_create --> Creating or Opening an HDF5 File
+    - <!-- @ref subsec_file_closes --> Closing an HDF5 File
+    - <!-- @ref subsec_file_property_lists --> File Property Lists
+    - <!-- @ref subsec_file_alternate_drivers --> Alternate File Storage Layouts and Low-level File Drivers
+    - <!-- @ref subsec_file_examples --> Code Examples for Opening and Closing Files
+    - <!-- @ref subsec_file_multiple --> Working with Multiple HDF5 Files
+
+\section sec_group HDF5 Groups
+    - <!-- @ref subsec_group_intro --> Introduction
+    - <!-- @ref subsec_group_descr --> Description of the Group Object
+    - <!-- @ref subsec_group_h5dump --> Using h5dump
+    - <!-- @ref subsec_group_function --> Group Function Summaries
+    - <!-- @ref subsec_group_program --> Programming Model for Groups
+    - <!-- @ref subsec_group_examples --> Examples of File Structures
+
+\section sec_dataset HDF5 Datasets
+    - <!-- @ref subsec_dataset_intro --> Introduction
+    - <!-- @ref subsec_dataset_function --> Dataset Function Summaries
+    - <!-- @ref subsec_dataset_program --> Programming Model for Datasets
+    - <!-- @ref subsec_dataset_transfer --> Data Transfer
+    - <!-- @ref subsec_dataset_allocation --> Allocation of Space in the File
+    - <!-- @ref subsec_dataset_filters --> Using HDF5 Filters
+
+\section sec_datatype HDF5 Datatypes
+
+\section sec_dataspace HDF5 Dataspaces and Partial I/O
+
+\section sec_attribute HDF5 Attributes
+\li \ref subsec_attribute_intro
+\li \ref subsec_attribute_program
+    <ul>
+        <li> <!-- @ref subsubsec_attribute_program_exist --> To Open and Read or Write an Existing Attribute
+    </ul>
+\li \ref H5A Attribute Function Summaries
+\li \ref subsec_attribute_work
+    <ul>
+        <li> \ref subsubsec_attribute_work_struct
+        <li> \ref subsubsec_attribute_work_create
+        <li> \ref subsubsec_attribute_work_access
+        <li> \ref subsubsec_attribute_work_info
+        <li> \ref subsubsec_attribute_work_iterate
+        <li> \ref subsubsec_attribute_work_delete
+        <li> \ref subsubsec_attribute_work_close
+    </ul>
+\li \ref subsec_attribute_special
+
+\section sec_error HDF5 Error Handling
+
+\section sec_plist Properties and Property Lists in HDF5
+
+\section sec_addition Additional Resources
+
+<!-- 
+<table>
+<tr><td style="border: none;">
+\li \ref H5A "Attributes (H5A)"
+\li \ref H5D "Datasets (H5D)"
+\li \ref H5S "Dataspaces (H5S)"
+\li \ref H5T "Datatypes (H5T)"
+\li \ref H5E "Error Handling (H5E)"
+\li \ref H5F "Files (H5F)"
+\li \ref H5Z "Filters (H5Z)"
+\li \ref H5G "Groups (H5G)"
+</td><td style="border: none;">
+\li \ref H5I "Identifiers (H5I)"
+\li \ref H5 "Library General (H5)"
+\li \ref H5L "Links (H5L)"
+\li \ref H5O "Objects (H5O)"
+\li \ref H5P "Property Lists (H5P)"
+\li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
+\li \ref H5R "References (H5R)"
+</td><td style="border: none;vertical-align: top;">
+\li \ref api-compat-macros
+\li <a href="./deprecated.html">Deprecated functions</a>
+\li High-level Extensions
+    <ul>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Lite">\Bold{HDF5 Lite} (H5LT)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Images">\Bold{HDF5 Image} (H5IM)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Tables">\Bold{HDF5 Table} (H5TB)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Packet+Tables">\Bold{HDF5 Packet Table} (H5TB)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Dimension+Scales">\Bold{HDF5 Dimension Scale} (H5DS)</a></li>
+    </ul>
+</td></tr>
+<tr><td colspan="3" style="border: none;">
+\ref H5 \ref H5A \ref H5D \ref H5E \ref H5F \ref H5G \ref H5I \ref H5L
+\ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5Z
+</td></tr>
+</table>
+
+</td></tr>
+</table>
+ -->
+
+\par Don't like what you see? - You can help to improve this User’s Guide
+     Complete the survey linked near the top of this page!\n
+     We treat documentation like code: Fork the
+     <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
+     <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !\n
+
+*/
