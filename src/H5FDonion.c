@@ -168,6 +168,8 @@ static uint64_t H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs,
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
+static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
+                               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
 
 static const H5FD_class_t H5FD_onion_g = {
     H5FD_CLASS_VERSION,             /* struct version       */
@@ -208,7 +210,7 @@ static const H5FD_class_t H5FD_onion_g = {
     NULL,                           /* lock                 */
     NULL,                           /* unlock               */
     NULL,                           /* del                  */
-    NULL,                           /* ctl                  */
+    H5FD__onion_ctl,                /* ctl                  */
     H5FD_FLMAP_DICHOTOMY            /* fl_map               */
 };
 
@@ -2551,6 +2553,53 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__onion_ctl
+ *
+ * Purpose:     Onion VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    H5FD_onion_t *file      = (H5FD_onion_t *)_file;
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(file);
+
+    switch (op_code) {
+        case H5FD_CTL__GET_NUM_REVISIONS:
+            if (!output || !*output)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "the output parameter is null")
+
+            **((uint64_t **)output) = file->summary.n_revisions;
+            break;
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__onion_ctl() */
 
 /*-----------------------------------------------------------------------------
  *
