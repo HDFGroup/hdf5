@@ -168,8 +168,8 @@ static uint64_t H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs,
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
-static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
-               void H5_ATTR_UNUSED **output);
+static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
+                               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
 
 static const H5FD_class_t H5FD_onion_g = {
     H5FD_CLASS_VERSION,             /* struct version       */
@@ -2573,11 +2573,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
-               void **output)
+H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
 {
-    H5FD_onion_t *file     = (H5FD_onion_t *)_file;
-    herr_t       ret_value = SUCCEED;
+    H5FD_onion_t *file      = (H5FD_onion_t *)_file;
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
