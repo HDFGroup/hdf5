@@ -28,7 +28,7 @@
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 1
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT    2
 #define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN                      255
-#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST                   (uint64_t)(-1)
+#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST                   UINT64_MAX
 
 typedef enum H5FD_onion_target_file_constant_t {
     H5FD_ONION_STORE_TARGET_H5,    /* Onion history as part of HDF5 file */
