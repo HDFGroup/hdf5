@@ -2278,8 +2278,6 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int64_t stripe_idx           = 0;
     int64_t final_stripe_idx     = 0;
     int64_t curr_stripe_idx      = 0;
-    int64_t sf_offset            = 0;
-    int64_t block_offset         = 0;
     int64_t final_offset         = 0;
     int64_t start_length         = 0;
     int64_t final_length         = 0;
@@ -2287,6 +2285,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int64_t ioc_final            = 0;
     int64_t sf_start_row         = 0;
     int64_t sf_row_offset        = 0;
+    int64_t sf_col_offset        = 0;
     int64_t row_stripe_idx_start = 0;
     int64_t row_stripe_idx_final = 0;
     int64_t iovec_depth          = 0;
@@ -2341,7 +2340,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      *      the block size would be 4MiB and file offset 4096 would have
      *      a stripe index of 4 and reside in the same subfile as stripe
      *      index 0 (offsets 0-1023)
-     *  sf_offset
+     *  sf_col_offset
      *    - the relative starting offset in the subfile that the starting
      *      file offset resides in
      *  stripe_offset
@@ -2351,13 +2350,12 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      *      operation. Simply the I/O size added to the starting file
      *      offset.
      */
-    stripe_idx   = file_offset / stripe_size;
-    sf_offset    = file_offset % stripe_size; /* TODO: sf_offset misnomer. Think of as column offset. Apply row_offset + col_offset to get real sf_offset */
-    block_offset = file_offset % block_size;
-    final_offset = file_offset + data_size;
+    stripe_idx    = file_offset / stripe_size;
+    sf_col_offset = file_offset % stripe_size;
+    final_offset  = file_offset + data_size;
 
     /* Determine the size of data written to the first and last stripes */
-    start_length = MIN(data_size, (stripe_size - sf_offset));
+    start_length = MIN(data_size, (stripe_size - sf_col_offset));
     final_length = (start_length == data_size ? 0 : final_offset % stripe_size);
 
     /*
@@ -2470,22 +2468,20 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         }
 
         _mem_buf_offset[0]     = mem_offset;
-        _target_file_offset[0] = sf_row_offset + block_offset; /* TODO: sf_offset, not block offset */;
+        _target_file_offset[0] = sf_row_offset + sf_col_offset;
         _io_block_len[0]       = ioc_bytes;
 
         if (ioc_count > 1) {
             /* Fill the I/O vectors */
             if (is_first) {
                 if (is_last) { /* First + Last */
-                    /* TODO: sf_offset, not block offset */
                     H5FD__create_f_l_mpi_type(sf_context, ioc_depth + 1, mem_offset, ioc_bytes,
-                                              sf_row_offset + block_offset, _mem_buf_offset,
+                                              sf_row_offset + sf_col_offset, _mem_buf_offset,
                                               _io_block_len, _target_file_offset, start_length, final_length);
                 }
                 else { /* First ONLY */
-                    /* TODO: sf_offset, not block offset */
                     H5FD__create_first_mpi_type(sf_context, ioc_depth, mem_offset, ioc_bytes,
-                                                sf_row_offset + block_offset, _mem_buf_offset,
+                                                sf_row_offset + sf_col_offset, _mem_buf_offset,
                                                 _io_block_len, _target_file_offset, start_length);
                 }
                 /* Move the memory pointer to the starting location
@@ -2494,29 +2490,27 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 mem_offset += start_length;
             }
             else if (is_last) { /* Last ONLY */
-                /* TODO: sf_offset, not block offset */
                 H5FD__create_final_mpi_type(sf_context, ioc_depth + 1, mem_offset, ioc_bytes,
-                                            sf_row_offset + block_offset, _mem_buf_offset,
+                                            sf_row_offset + sf_col_offset, _mem_buf_offset,
                                             _io_block_len, _target_file_offset, final_length);
                 /* XXX: Probably not needed... */
                 mem_offset += stripe_size;
             }
             else { /* Everything else (uniform) */
-                /* TODO: sf_offset, not block offset */
                 H5FD__create_mpi_uniform_type(sf_context, ioc_depth, mem_offset, ioc_bytes,
-                                              sf_row_offset + block_offset, _mem_buf_offset,
+                                              sf_row_offset + sf_col_offset, _mem_buf_offset,
                                               _io_block_len, _target_file_offset);
                 mem_offset += stripe_size;
             }
         }
 
         k++;
-        block_offset += _io_block_len[0]; /* TODO: probably sf_offset, not block offset */
+        sf_col_offset += _io_block_len[0];
         curr_stripe_idx++;
 
         if (k == ioc_count) {
             k = 0;
-            block_offset = 0; /* TODO: probably sf_offset, not block offset */
+            sf_col_offset = 0;
             iovec_depth = ((row_stripe_idx_final - curr_stripe_idx) / ioc_count) + 1;
             sf_row_offset += block_size;
         }
