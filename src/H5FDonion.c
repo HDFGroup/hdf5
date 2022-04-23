@@ -581,9 +581,9 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    time(&rawtime);
-    info = gmtime(&rawtime);
-    strftime(rec_p->time_of_creation, sizeof(rec_p->time_of_creation), "%Y%m%dT%H%M%SZ", info);
+    HDtime(&rawtime);
+    info = HDgmtime(&rawtime);
+    HDstrftime(rec_p->time_of_creation, sizeof(rec_p->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
     rec_p->logi_eof = file->logi_eof;
 
@@ -782,7 +782,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *-----------------------------------------------------------------------------
  */
 static inline hid_t
-get_legit_fapl_id(hid_t fapl_id)
+H5FD__onion_get_legit_fapl_id(hid_t fapl_id)
 {
     if (H5P_DEFAULT == fapl_id)
         return H5P_FILE_ACCESS_DEFAULT;
@@ -1466,7 +1466,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Can't record user info")
 
-    backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+    backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid backing FAPL ID")
 
@@ -1862,7 +1862,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     HDsnprintf(file->name_recov, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
     /* Translate H5P_DEFAULT to a a real fapl ID, if necessary */
-    backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+    backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID");
 
@@ -1962,7 +1962,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Can't record user info")
 
-                backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+                backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
                 if (H5I_INVALID_HID == backing_fapl_id)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID")
 
@@ -2473,7 +2473,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             } /* end if page exists in neither index */
 
             /* Copy input buffer to temporary page buffer */
-            assert((page_size - page_gap_head) >= page_n_used);
+            HDassert((page_size - page_gap_head) >= page_n_used);
             HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
             write_buf = page_buf;
 
