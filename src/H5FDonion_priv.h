@@ -139,8 +139,8 @@ typedef struct H5FD_onion_history_header_t {
  */
 typedef struct H5FD_onion_revision_record_t {
     uint8_t                     version;
-    uint64_t                    revision_id;
-    uint64_t                    parent_revision_id;
+    uint64_t                    revision_num;
+    uint64_t                    parent_revision_num;
     char                        time_of_creation[16];
     uint64_t                    logi_eof;
     uint32_t                    user_id;

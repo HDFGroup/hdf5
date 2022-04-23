@@ -168,6 +168,8 @@ static uint64_t H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs,
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
+static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
+                               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
 
 static const H5FD_class_t H5FD_onion_g = {
     H5FD_CLASS_VERSION,             /* struct version       */
@@ -208,7 +210,7 @@ static const H5FD_class_t H5FD_onion_g = {
     NULL,                           /* lock                 */
     NULL,                           /* unlock               */
     NULL,                           /* del                  */
-    NULL,                           /* ctl                  */
+    H5FD__onion_ctl,                /* ctl                  */
     H5FD_FLMAP_DICHOTOMY            /* fl_map               */
 };
 
@@ -990,12 +992,12 @@ H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record
 
     HDmemcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
-    UINT64DECODE(ui8p, record->revision_id);
+    UINT64DECODE(ui8p, record->revision_num);
     ptr += 8;
 
     HDmemcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
-    UINT64DECODE(ui8p, record->parent_revision_id);
+    UINT64DECODE(ui8p, record->parent_revision_num);
     ptr += 8;
 
     HDmemcpy(record->time_of_creation, ptr, 16);
@@ -1168,8 +1170,8 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
     HDmemcpy(ptr, H5FD__ONION_REVISION_RECORD_SIGNATURE, 4);
     ptr += 4;
     UINT32ENCODE(ptr, vers_u32);
-    UINT64ENCODE(ptr, record->revision_id);
-    UINT64ENCODE(ptr, record->parent_revision_id);
+    UINT64ENCODE(ptr, record->revision_num);
+    UINT64ENCODE(ptr, record->parent_revision_num);
     HDmemcpy(ptr, record->time_of_creation, 16);
     ptr += 16;
     UINT64ENCODE(ptr, record->logi_eof);
@@ -1598,7 +1600,7 @@ done:
  */
 static herr_t
 H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *raw_file,
-                                   const H5FD_onion_whole_history_t *whs, uint64_t revision_id)
+                                   const H5FD_onion_whole_history_t *whs, uint64_t revision_num)
 {
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
@@ -1663,7 +1665,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         if (r_out->checksum != sum)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
-        if (revision_id == r_out->revision_id)
+        if (revision_num == r_out->revision_num)
             break;
 
         H5MM_xfree(buf);
@@ -1673,7 +1675,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         r_out->comment_size             = 0;
         r_out->username_size            = 0;
 
-        if (r_out->revision_id < revision_id)
+        if (r_out->revision_num < revision_num)
             low = (n == high) ? high : n + 1;
         else
             high = (n == low) ? low : n - 1;
@@ -1698,9 +1700,9 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         if (r_out->checksum != sum)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
-        if (revision_id != r_out->revision_id) {
+        if (revision_num != r_out->revision_num) {
 #if 0
-            HDprintf("revision_id: %d, r_out->revision_id: %d\n", revision_id, r_out->revision_id);
+            HDprintf("revision_num: %d, r_out->revision_num: %d\n", revision_num, r_out->revision_num);
 #endif
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                         "could not find target revision!") /* TODO: corrupted? */
@@ -2060,20 +2062,20 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 HDprintf("File has %d revisions\n", file->summary.n_revisions);
 #endif
             /* Sanity check on revision ID */
-            if (fa->revision_id > file->summary.n_revisions &&
-                fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
+            if (fa->revision_num > file->summary.n_revisions &&
+                fa->revision_num != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
-            if (fa->revision_id == 0) {
+            if (fa->revision_num == 0) {
                 file->rev_record.logi_eof = canon_eof;
             }
             else if (file->summary.n_revisions > 0 &&
                      H5FD__onion_ingest_revision_record(
                          &file->rev_record, file->backing_onion, &file->summary,
-                         MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) < 0) {
+                         MIN(fa->revision_num - 1, (file->summary.n_revisions - 1))) < 0) {
 #if 0
-                HDprintf("fa->revision_id: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_id,
-                         file->summary.n_revisions, MIN(fa->revision_id, file->summary.n_revisions));
+                HDprintf("fa->revision_num: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_num,
+                         file->summary.n_revisions, MIN(fa->revision_num, file->summary.n_revisions));
 #endif
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
             }
@@ -2100,7 +2102,7 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
     }
     file->origin_eof = file->header.origin_eof;
 #if 0
-HDprintf("fa->revision_id: %d\n", fa->revision_id);
+HDprintf("fa->revision_num: %d\n", fa->revision_num);
 HDprintf("file->origin_eof: %llu\n", file->origin_eof);
 HDprintf("file->rev_record.logi_eof: %llu, file->logi_eof: %llu, canon_eof: %llu\n", file->rev_record.logi_eof, file->logi_eof, canon_eof);
 #endif
@@ -2208,9 +2210,9 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
 
     if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index")
-    file->rev_record.parent_revision_id = file->rev_record.revision_id;
+    file->rev_record.parent_revision_num = file->rev_record.revision_num;
     if (!new_open)
-        file->rev_record.revision_id += 1;
+        file->rev_record.revision_num += 1;
     file->is_open_rw = TRUE;
 
 done:
@@ -2309,7 +2311,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         page_readsize = (size_t)page_size - page_gap_head - page_gap_tail;
 
-        if (TRUE == file->is_open_rw && file->fa.revision_id != 0 &&
+        if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out_p)) {
 #if 0
             HDputs("READING from revision index");
@@ -2320,7 +2322,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
-        else if (file->fa.revision_id != 0 &&
+        else if (file->fa.revision_num != 0 &&
                  H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
 #if 0
             HDputs("READING from archival index");
@@ -2551,6 +2553,53 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__onion_ctl
+ *
+ * Purpose:     Onion VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    H5FD_onion_t *file      = (H5FD_onion_t *)_file;
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(file);
+
+    switch (op_code) {
+        case H5FD_CTL__GET_NUM_REVISIONS:
+            if (!output || !*output)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "the output parameter is null")
+
+            **((uint64_t **)output) = file->summary.n_revisions;
+            break;
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__onion_ctl() */
 
 /*-----------------------------------------------------------------------------
  *

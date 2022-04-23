@@ -65,7 +65,7 @@ typedef enum H5FD_onion_target_file_constant_t {
  *                      file". Shares filename and path as hdf5 file (if any),
  *                      with only a different filename extension.
  *
- * revision_id: Which revision to open. Must be 0 (the original file) or the
+ * revision_num: Which revision to open. Must be 0 (the original file) or the
  *              revision number of an existing revision.
  *              Revision ID -1 is reserved to open the most recently-created
  *              revision in history.
@@ -118,7 +118,7 @@ typedef struct H5FD_onion_fapl_info_t {
     hid_t                             backing_fapl_id;
     uint32_t                          page_size;
     H5FD_onion_target_file_constant_t store_target;
-    uint64_t                          revision_id;
+    uint64_t                          revision_num;
     uint8_t                           force_write_open;
     uint8_t                           creation_flags;
     char                              comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
