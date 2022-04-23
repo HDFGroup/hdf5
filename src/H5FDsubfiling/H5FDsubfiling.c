@@ -2504,8 +2504,10 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
         }
 
-        k++;
         sf_col_offset += _io_block_len[0];
+        sf_col_offset %= stripe_size;
+
+        k++;
         curr_stripe_idx++;
 
         if (k == ioc_count) {
