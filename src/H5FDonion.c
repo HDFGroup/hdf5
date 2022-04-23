@@ -2573,7 +2573,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
+                void **output)
 {
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     herr_t        ret_value = SUCCEED;
