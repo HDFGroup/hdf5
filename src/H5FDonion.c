@@ -584,7 +584,6 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     time(&rawtime);
     info = gmtime(&rawtime);
     strftime(rec_p->time_of_creation, sizeof(rec_p->time_of_creation), "%Y%m%dT%H%M%SZ", info);
-    // HDmemcpy(rec_p->time_of_creation, "19411207T190643Z", 16);
 
     rec_p->logi_eof = file->logi_eof;
 
@@ -719,8 +718,6 @@ done:
         /* TODO: Use the VFD's del callback instead of remove (this requires
          *       storing a copy of the fapl that was used to open it)
          */
-        // if (HDremove(file->name_recov) < 0)
-        //    HDONE_ERROR(H5E_VFL, H5E_CANTDELETE, FAIL, "can't remove delete backing recovery file")
         HDremove(file->name_recov);
     }
     if (file->rev_index)
@@ -1947,7 +1944,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 new_open = true;
 
-                // hdr_p->flags = H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
                     hdr_p->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
@@ -1978,7 +1974,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
-                // Write history header with "no" whole-history summary to history.
+                /* Write history header with "no" whole-history summary to history */
                 hdr_p->whole_history_size = H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY; /* record for later use */
                 hdr_p->whole_history_addr =
                     H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
@@ -2018,7 +2014,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 file->header.whole_history_addr = file->history_eof;
 
-                // Write nascent whole-history summary (with no revisions) to the backing onion file
+                /* Write nascent whole-history summary (with no revisions) to the backing onion file */
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, saved_size + 1, size, wh_buf) <
                     0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
@@ -2058,9 +2054,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                                                  file->header.whole_history_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get whole-history from backing store")
 
-#if 0
-HDprintf("File has %d revisions\n", file->summary.n_revisions);
-#endif
             /* Sanity check on revision ID */
             if (fa->revision_num > file->summary.n_revisions &&
                 fa->revision_num != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
@@ -2073,10 +2066,6 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                      H5FD__onion_ingest_revision_record(
                          &file->rev_record, file->backing_onion, &file->summary,
                          MIN(fa->revision_num - 1, (file->summary.n_revisions - 1))) < 0) {
-#if 0
-                HDprintf("fa->revision_num: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_num,
-                         file->summary.n_revisions, MIN(fa->revision_num, file->summary.n_revisions));
-#endif
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
             }
 
@@ -2101,13 +2090,7 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
         }
     }
     file->origin_eof = file->header.origin_eof;
-#if 0
-HDprintf("fa->revision_num: %d\n", fa->revision_num);
-HDprintf("file->origin_eof: %llu\n", file->origin_eof);
-HDprintf("file->rev_record.logi_eof: %llu, file->logi_eof: %llu, canon_eof: %llu\n", file->rev_record.logi_eof, file->logi_eof, canon_eof);
-#endif
     file->logi_eof = MAX(file->rev_record.logi_eof, file->logi_eof);
-    // file->logi_eof   = file->rev_record.logi_eof;
     file->logi_eoa = 0;
 
     file->history_eof = H5FD_get_eoa(file->backing_onion, H5FD_MEM_DRAW);
@@ -2261,10 +2244,8 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     unsigned char *buf_out        = (unsigned char *)_buf_out;
     herr_t         ret_value      = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
-#if 0
-    HDprintf("ONION READ - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
-#endif
+    FUNC_ENTER_PACKAGE
+
     HDassert(file != NULL);
     HDassert(buf_out != NULL);
 
@@ -2278,9 +2259,6 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     page_size_log2 = file->rev_record.archival_index.page_size_log2;
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
-#if 0
-    HDprintf("n_pages: %d\n", n_pages);
-#endif
 
     /* Read, page-by-page */
     for (i = 0; i < n_pages; i++) {
@@ -2292,43 +2270,26 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
-            // Check if we need to add an additional page to make up for the page_gap_head
+            /* Check if we need to add an additional page to make up for the page_gap_head */
             if (page_gap_head > 0 &&
                 (page_gap_head + (bytes_to_read % page_size) > page_size || bytes_to_read % page_size == 0)) {
                 n_pages++;
-#if 0
-                HDputs("Incremented n_pages");
-#endif
             }
         }
 
-        if (n_pages - 1 == i) {
+        if (n_pages - 1 == i)
             page_gap_tail = page_size - bytes_to_read - page_gap_head;
-#if 0
-            HDprintf("Last page?: %d\n", i);
-#endif
-        }
 
         page_readsize = (size_t)page_size - page_gap_head - page_gap_tail;
 
         if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out_p)) {
-#if 0
-            HDputs("READING from revision index");
-            HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
-                     page_size, page_gap_head, page_gap_tail, page_readsize);
-#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
         else if (file->fa.revision_num != 0 &&
                  H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
-#if 0
-            HDputs("READING from archival index");
-            HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
-                     page_size, page_gap_head, page_gap_tail, page_readsize);
-#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
@@ -2338,10 +2299,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             haddr_t addr_start   = (haddr_t)page_i * (haddr_t)page_size + (haddr_t)page_gap_head;
             haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
             haddr_t read_size    = MIN(overlap_size, page_readsize);
-#if 0
-HDputs("READING from original file");
-HDprintf("page_size: %llu, addr_start: %llu page_gap_head: %llu, page_gap_tail: %llu overlap_size: %llu page_readsize:%llu read_size: %llu\n", page_size, addr_start, page_gap_head, page_gap_tail, overlap_size, page_readsize, read_size);
-#endif
+
             /* Get all original bytes in page range */
             if ((read_size > 0) &&
                 H5FDread(file->backing_canon, type, H5P_DEFAULT, addr_start, read_size, buf_out) < 0) {
@@ -2414,10 +2372,8 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     const unsigned char *buf            = (const unsigned char *)_buf;
     herr_t               ret_value      = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
-#if 0
-    HDfprintf(stdout, "ONION WRITE - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
-#endif
+    FUNC_ENTER_PACKAGE
+
     HDassert(file != NULL);
     HDassert(buf != NULL);
     HDassert(file->rev_index != NULL);
@@ -2449,8 +2405,10 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
-            // If we have a page_gap_head and the number of bytes to write is evenly divisible by the page
-            // size we need to add an additional page to make up for the page_gap_head
+            /* If we have a page_gap_head and the number of bytes to write is
+             * evenly divisible by the page size we need to add an additional
+             * page to make up for the page_gap_head
+             */
             if (page_gap_head > 0 && (page_gap_head + (bytes_to_write % page_size) > page_size ||
                                       bytes_to_write % page_size == 0)) {
                 n_pages++;
@@ -2531,10 +2489,6 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                       write_buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
-#if 0
-        HDfprintf(stdout, "ADDING TO REVISION INDEX - page: %d, phys_addr = %" PRIuHADDR "\n",
-                  new_entry.logi_page, new_entry.phys_addr);
-#endif
         if (H5FD_onion_revision_index_insert(file->rev_index, &new_entry) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "can't insert new index entry into revision index")
 
