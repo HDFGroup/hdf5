@@ -614,8 +614,9 @@ handle_work_request(void *arg)
         HDfflush(stdout);
 #endif
 
-        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
-                            translate_opcode((io_op_t)msg->tag), msg->subfile_rank);
+        /* TODO: set error value for work request queue entry */
+        /* H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
+                               translate_opcode((io_op_t)msg->tag), msg->subfile_rank); */
     }
 
 #ifdef H5FD_IOC_DEBUG
