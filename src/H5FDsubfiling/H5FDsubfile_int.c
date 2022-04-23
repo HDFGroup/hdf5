@@ -312,13 +312,6 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         }
     }
 
-    /*
-     * TODO: temporary barrier to prevent races between writes from
-     *       ranks during the course of operations
-     */
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_file_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier", mpi_code)
-
     *logical_eof_ptr = logical_eof;
 
 done:
