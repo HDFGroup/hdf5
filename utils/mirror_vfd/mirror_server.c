@@ -46,8 +46,8 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#define LISTENQ               80   /* max pending mirrorS requests              */
-#define DEFAULT_PORT          3000 /* default listening port                    */
+#define LISTENQ      80   /* max pending mirrorS requests              */
+#define DEFAULT_PORT 3000 /* default listening port                    */
 
 /* semi-unique "magic" numbers to sanity-check structure pointers */
 #define OP_ARGS_MAGIC    0xCF074379u

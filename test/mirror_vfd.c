@@ -90,8 +90,8 @@ static char mesg[MIRR_MESG_SIZE + 1];
  * ----------------------------------------------------------------------------
  */
 struct mt_opts {
-    int      portno;
-    char     ip[H5FD_MIRROR_MAX_IP_LEN + 1];
+    int  portno;
+    char ip[H5FD_MIRROR_MAX_IP_LEN + 1];
 };
 
 /* Convenience structure for passing file names via helper functions.
@@ -117,7 +117,8 @@ static herr_t _close_chunking_ids(unsigned min_dset, unsigned max_dset, hid_t *d
 static herr_t _populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, char *path_out,
                                  hbool_t h5suffix);
 
-static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names, const struct mt_opts *opts);
+static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names,
+                                         const struct mt_opts *opts);
 
 static void mybzero(void *dest, size_t size);
 
@@ -1266,7 +1267,7 @@ error:
  */
 static hid_t
 create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names,
-    const struct mt_opts *opts)
+                            const struct mt_opts *opts)
 {
     H5FD_splitter_vfd_config_t splitter_config;
     H5FD_mirror_fapl_t         mirror_conf;
@@ -2655,7 +2656,8 @@ confirm_server(struct mt_opts *opts)
             attempt++;
             HDsleep(1);
             HDprintf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -2700,7 +2702,7 @@ int
 main(int argc, char **argv)
 {
     struct mt_opts opts;
-    int nerrors = 0;
+    int            nerrors = 0;
 
     h5_reset();
 
