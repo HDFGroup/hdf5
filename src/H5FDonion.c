@@ -222,7 +222,6 @@ static const H5FD_class_t H5FD_onion_g = {
  *
  * Return:      Success:    The driver ID for the onion driver.
  *              Failure:    Negative
- *
  *-----------------------------------------------------------------------------
  */
 hid_t
@@ -247,7 +246,6 @@ H5FD_onion_init(void)
  * Purpose:     Shut down the Onion VFD.
  *
  * Returns:     SUCCEED (Can't fail)
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -263,7 +261,6 @@ H5FD__onion_term(void)
 } /* end H5FD__onion_term() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5Pget_fapl_onion
  *
  * Purpose:     Copy the Onion configuration information from the FAPL at
@@ -271,7 +268,6 @@ H5FD__onion_term(void)
  *
  * Return:      Success: Non-negative value (SUCCEED).
  *              Failure: Negative value (FAIL).
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -315,7 +311,6 @@ done:
  *
  * Return:      Success: Non-negative value (SUCCEED).
  *              Failure: Negative value (FAIL).
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -364,7 +359,6 @@ done:
  *
  * Return:      Success:    The super block driver data size
  *              Failure:    never fails
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -478,14 +472,12 @@ done:
 } /* end H5FD__onion_update_and_write_header()*/
 
 /*-----------------------------------------------------------------------------
- *
- * Function:    H5FD__onion_whole_history_write()
+ * Function:    H5FD__onion_whole_history_write
  *
  * Purpose:     Encode and write whole-history to file at the given address.
  *
  * Returns:     Success:    Number of bytes written to destination file (always non-zero)
  *              Failure:    0
- *
  *-----------------------------------------------------------------------------
  */
 static uint64_t
@@ -521,12 +513,8 @@ done:
 } /* end H5FD__onion_whole_history_write() */
 
 /*-----------------------------------------------------------------------------
- *
  * Write in-memory whole-history summary to appropriate backing file.
  * Update information in other in-memory components.
- *
- * 11 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -556,12 +544,8 @@ done:
 } /* end H5FD__onion_update_and_write_whole_history() */
 
 /*-----------------------------------------------------------------------------
- *
  * Write in-memory revision record to appropriate backing file.
  * Update information in other in-memory components.
- *
- * 11 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -581,10 +565,9 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    time(&rawtime);
-    info = gmtime(&rawtime);
-    strftime(rec_p->time_of_creation, sizeof(rec_p->time_of_creation), "%Y%m%dT%H%M%SZ", info);
-    // HDmemcpy(rec_p->time_of_creation, "19411207T190643Z", 16);
+    HDtime(&rawtime);
+    info = HDgmtime(&rawtime);
+    HDstrftime(rec_p->time_of_creation, sizeof(rec_p->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
     rec_p->logi_eof = file->logi_eof;
 
@@ -662,13 +645,11 @@ done:
 } /* end H5FD__onion_commit_new_revision_record() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_close
  *
  * Purpose:     Close an onionized file
  *
  * Return:      SUCCEED/FAIL
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -719,8 +700,6 @@ done:
         /* TODO: Use the VFD's del callback instead of remove (this requires
          *       storing a copy of the fapl that was used to open it)
          */
-        // if (HDremove(file->name_recov) < 0)
-        //    HDONE_ERROR(H5E_VFL, H5E_CANTDELETE, FAIL, "can't remove delete backing recovery file")
         HDremove(file->name_recov);
     }
     if (file->rev_index)
@@ -739,13 +718,11 @@ done:
 } /* end H5FD__onion_close() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_get_eoa
  *
  * Purpose:     Get end-of-address address.
  *
  * Return:      Address of first byte past the addressed space
- *
  *-----------------------------------------------------------------------------
  */
 static haddr_t
@@ -759,13 +736,11 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 } /* end H5FD__onion_get_eoa() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_get_eof
  *
  * Purpose:     Get end-of-file address.
  *
  * Return:      Address of first byte past the file-end.
- *
  *-----------------------------------------------------------------------------
  */
 static haddr_t
@@ -779,13 +754,11 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 } /* end H5FD__onion_get_eof() */
 
 /*-----------------------------------------------------------------------------
- *
  * Sanitize the backing FAPL ID
- *
  *-----------------------------------------------------------------------------
  */
 static inline hid_t
-get_legit_fapl_id(hid_t fapl_id)
+H5FD__onion_get_legit_fapl_id(hid_t fapl_id)
 {
     if (H5P_DEFAULT == fapl_id)
         return H5P_FILE_ACCESS_DEFAULT;
@@ -796,7 +769,6 @@ get_legit_fapl_id(hid_t fapl_id)
 }
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_history_header_decode
  *
  * Purpose:     Attempt to read a buffer and store it as a history-header
@@ -807,7 +779,6 @@ get_legit_fapl_id(hid_t fapl_id)
  *
  * Return:      Success:    Number of bytes read from buffer
  *              Failure:    0
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -876,7 +847,6 @@ done:
 } /* end H5FD_onion_history_header_decode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_history_header_encode
  *
  * Purpose:     Write history-header structure to the given buffer.
@@ -891,7 +861,6 @@ done:
  * Return:      Number of bytes written to buffer.
  *              The checksum of the generated buffer contents (excluding the
  *              checksum itself) is stored in the pointer `sum_out`).
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -926,7 +895,6 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
 } /* end H5FD_onion_history_header_encode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_record_decode
  *
  * Purpose:     Attempt to read a buffer and store it as a revision record
@@ -958,7 +926,6 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
  *
  * Return:      Success:    Number of bytes read from buffer
  *              Failure:    0
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -1128,7 +1095,6 @@ done:
 } /* end H5FD_onion_revision_record_decode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_record_encode
  *
  * Purpose:     Write revision-record structure to the given buffer.
@@ -1146,7 +1112,6 @@ done:
  * Return:      Number of bytes written to buffer.
  *              The checksum of the generated buffer contents (excluding the
  *              checksum itself) is stored in the pointer `sum_out`).
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -1220,7 +1185,6 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
 } /* end H5FD_onion_revision_record_encode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_whole_history_decode
  *
  * Purpose:     Attempt to read a buffer and store it as a whole-history
@@ -1246,7 +1210,6 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
  *
  * Return:      Success:    Number of bytes read from buffer
  *              Failure:    0
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -1329,7 +1292,6 @@ done:
 } /* end H5FD_onion_whole_history_decode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_whole_history_encode
  *
  * Purpose:     Write whole-history structure to the given buffer.
@@ -1347,7 +1309,6 @@ done:
  * Return:      Number of bytes written to buffer.
  *              The checksum of the generated buffer contents (excluding the
  *              checksum itself) is stored in the pointer `sum_out`).
- *
  *-----------------------------------------------------------------------------
  */
 uint64_t
@@ -1384,13 +1345,9 @@ H5FD_onion_whole_history_encode(H5FD_onion_whole_history_t *summary, unsigned ch
 } /* end H5FD_onion_whole_history_encode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Populate user_id and username (string) in revision record pointer.
  * Assumes that the username string pointer arrives as NULL;
  * Allocated username string must be manually freed when done.
- *
- * 11 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1422,7 +1379,6 @@ done:
 } /* end H5FD__onion_set_userinfo_in_record() */
 
 /*-----------------------------------------------------------------------------
- *
  * Create/truncate HDF5 and onion data for a fresh file.
  *
  * Special open operation required to instantiate the canonical file and
@@ -1435,7 +1391,6 @@ done:
  * unintuitive. (create file -> initialize and commit empty first revision
  * (revision 0); any data written to file during the 'create' open, as seen by
  * the user, would be in the second revision (revision 1).)
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1469,7 +1424,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Can't record user info")
 
-    backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+    backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid backing FAPL ID")
 
@@ -1545,12 +1500,8 @@ done:
 } /* end H5FD__onion_create_truncate_onion() */
 
 /*-----------------------------------------------------------------------------
- *
  * Read and decode the history header information from `raw_file` at `addr`,
  * and store the decoded information in the structure at `hdr_out`.
- *
- * 12 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1589,13 +1540,9 @@ done:
 } /* end H5FD__onion_ingest_history_header() */
 
 /*-----------------------------------------------------------------------------
- *
  * Read and decode the revision_record information from `raw_file` at
  * `addr` .. `addr + size` (taken from whole-history), and store the decoded
  * information in the structure at `r_out`.
- *
- * 13 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1700,14 +1647,10 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         if (r_out->checksum != sum)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
-        if (revision_num != r_out->revision_num) {
-#if 0
-            HDprintf("revision_num: %d, r_out->revision_num: %d\n", revision_num, r_out->revision_num);
-#endif
+        if (revision_num != r_out->revision_num)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                         "could not find target revision!") /* TODO: corrupted? */
-        }
-    } /* end if revision ID at 'leaf' in binary search */
+    }                                                      /* end if revision ID at 'leaf' in binary search */
 
     if (r_out->username_size > 0)
         if (NULL == (r_out->username = H5MM_malloc(sizeof(char) * r_out->username_size)))
@@ -1737,16 +1680,12 @@ done:
 } /* end H5FD__onion_ingest_revision_record() */
 
 /*-----------------------------------------------------------------------------
- *
  * Read and decode the whole-history information from `raw_file` at
  * `addr` .. `addr + size` (taken from history header), and store the decoded
  * information in the structure at `whs_out`.
  *
  * If successful, `whs_out->record_pointer_list` is always allocated, even if
  * there is zero revisions.
- *
- * 12 August 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1759,40 +1698,33 @@ H5FD__onion_ingest_whole_history(H5FD_onion_whole_history_t *whs_out, H5FD_t *ra
 
     FUNC_ENTER_PACKAGE;
 
-    if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size)) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF");
-    }
+    if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF")
 
     buf = H5MM_malloc(sizeof(char) * size);
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
     }
 
-    if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA");
-    }
+    if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA")
 
-    if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, addr, size, buf) < 0) {
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read whole-history from file");
-    }
+    if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read whole-history from file")
 
-    if (H5FD_onion_whole_history_decode(buf, whs_out) != size) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode whole-history (initial)");
-    }
+    if (H5FD_onion_whole_history_decode(buf, whs_out) != size)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode whole-history (initial)")
 
     sum = H5_checksum_fletcher32(buf, size - 4);
-    if (whs_out->checksum != sum) {
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
-    }
+    if (whs_out->checksum != sum)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
     whs_out->record_pointer_list = H5MM_calloc(whs_out->n_revisions * sizeof(H5FD_onion_record_pointer_t));
-    if (whs_out->n_revisions > 0 && NULL == whs_out->record_pointer_list) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list");
-    }
+    if (whs_out->n_revisions > 0 && NULL == whs_out->record_pointer_list)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list")
 
-    if (H5FD_onion_whole_history_decode(buf, whs_out) != size) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode whole-history (final)");
-    }
+    if (H5FD_onion_whole_history_decode(buf, whs_out) != size)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode whole-history (final)")
 
 done:
     H5MM_xfree(buf);
@@ -1803,14 +1735,12 @@ done:
 } /* end H5FD__onion_ingest_whole_history() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_open
  *
- * Purpose:     Open an onionized file.
+ * Purpose:     Open an onionized file
  *
  * Return:      Success:    A pointer to a new file data structure
  *              Failure:    NULL
- *
  *-----------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1865,7 +1795,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     HDsnprintf(file->name_recov, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
     /* Translate H5P_DEFAULT to a a real fapl ID, if necessary */
-    backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+    backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID");
 
@@ -1947,7 +1877,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 new_open = true;
 
-                // hdr_p->flags = H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
                     hdr_p->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
@@ -1966,7 +1895,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Can't record user info")
 
-                backing_fapl_id = get_legit_fapl_id(file->fa.backing_fapl_id);
+                backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
                 if (H5I_INVALID_HID == backing_fapl_id)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID")
 
@@ -1978,7 +1907,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
-                // Write history header with "no" whole-history summary to history.
+                /* Write history header with "no" whole-history summary to history */
                 hdr_p->whole_history_size = H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY; /* record for later use */
                 hdr_p->whole_history_addr =
                     H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
@@ -2018,7 +1947,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 file->header.whole_history_addr = file->history_eof;
 
-                // Write nascent whole-history summary (with no revisions) to the backing onion file
+                /* Write nascent whole-history summary (with no revisions) to the backing onion file */
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, saved_size + 1, size, wh_buf) <
                     0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
@@ -2058,9 +1987,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                                                  file->header.whole_history_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get whole-history from backing store")
 
-#if 0
-HDprintf("File has %d revisions\n", file->summary.n_revisions);
-#endif
             /* Sanity check on revision ID */
             if (fa->revision_num > file->summary.n_revisions &&
                 fa->revision_num != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
@@ -2073,10 +1999,6 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                      H5FD__onion_ingest_revision_record(
                          &file->rev_record, file->backing_onion, &file->summary,
                          MIN(fa->revision_num - 1, (file->summary.n_revisions - 1))) < 0) {
-#if 0
-                HDprintf("fa->revision_num: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_num,
-                         file->summary.n_revisions, MIN(fa->revision_num, file->summary.n_revisions));
-#endif
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
             }
 
@@ -2101,14 +2023,8 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
         }
     }
     file->origin_eof = file->header.origin_eof;
-#if 0
-HDprintf("fa->revision_num: %d\n", fa->revision_num);
-HDprintf("file->origin_eof: %llu\n", file->origin_eof);
-HDprintf("file->rev_record.logi_eof: %llu, file->logi_eof: %llu, canon_eof: %llu\n", file->rev_record.logi_eof, file->logi_eof, canon_eof);
-#endif
-    file->logi_eof = MAX(file->rev_record.logi_eof, file->logi_eof);
-    // file->logi_eof   = file->rev_record.logi_eof;
-    file->logi_eoa = 0;
+    file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
+    file->logi_eoa   = 0;
 
     file->history_eof = H5FD_get_eoa(file->backing_onion, H5FD_MEM_DRAW);
     if (TRUE == file->page_align_history)
@@ -2150,8 +2066,7 @@ done:
 } /* end H5FD__onion_open() */
 
 /*-----------------------------------------------------------------------------
- *
- * Function:    H5FD__onion_open_rw()
+ * Function:    H5FD__onion_open_rw
  *
  * Purpose:     Complete onion file-open, handling process for write mode.
  *
@@ -2160,9 +2075,7 @@ done:
  *              Force write-open is not yet supported (recovery provision) TODO
  *              Establishes write-lock in history header (sets lock flag).
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
- *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -2236,14 +2149,11 @@ done:
 } /* end H5FD__onion_open_rw() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_read
  *
- * Purpose:     Read bytes from an onionized file.
+ * Purpose:     Read bytes from an onionized file
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
- *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -2261,10 +2171,8 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     unsigned char *buf_out        = (unsigned char *)_buf_out;
     herr_t         ret_value      = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
-#if 0
-    HDprintf("ONION READ - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
-#endif
+    FUNC_ENTER_PACKAGE
+
     HDassert(file != NULL);
     HDassert(buf_out != NULL);
 
@@ -2278,9 +2186,6 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     page_size_log2 = file->rev_record.archival_index.page_size_log2;
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
-#if 0
-    HDprintf("n_pages: %d\n", n_pages);
-#endif
 
     /* Read, page-by-page */
     for (i = 0; i < n_pages; i++) {
@@ -2292,43 +2197,26 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
-            // Check if we need to add an additional page to make up for the page_gap_head
+            /* Check if we need to add an additional page to make up for the page_gap_head */
             if (page_gap_head > 0 &&
                 (page_gap_head + (bytes_to_read % page_size) > page_size || bytes_to_read % page_size == 0)) {
                 n_pages++;
-#if 0
-                HDputs("Incremented n_pages");
-#endif
             }
         }
 
-        if (n_pages - 1 == i) {
+        if (n_pages - 1 == i)
             page_gap_tail = page_size - bytes_to_read - page_gap_head;
-#if 0
-            HDprintf("Last page?: %d\n", i);
-#endif
-        }
 
         page_readsize = (size_t)page_size - page_gap_head - page_gap_tail;
 
         if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out_p)) {
-#if 0
-            HDputs("READING from revision index");
-            HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
-                     page_size, page_gap_head, page_gap_tail, page_readsize);
-#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
         else if (file->fa.revision_num != 0 &&
                  H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
-#if 0
-            HDputs("READING from archival index");
-            HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
-                     page_size, page_gap_head, page_gap_tail, page_readsize);
-#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
@@ -2338,10 +2226,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             haddr_t addr_start   = (haddr_t)page_i * (haddr_t)page_size + (haddr_t)page_gap_head;
             haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
             haddr_t read_size    = MIN(overlap_size, page_readsize);
-#if 0
-HDputs("READING from original file");
-HDprintf("page_size: %llu, addr_start: %llu page_gap_head: %llu, page_gap_tail: %llu overlap_size: %llu page_readsize:%llu read_size: %llu\n", page_size, addr_start, page_gap_head, page_gap_tail, overlap_size, page_readsize, read_size);
-#endif
+
             /* Get all original bytes in page range */
             if ((read_size > 0) &&
                 H5FDread(file->backing_canon, type, H5P_DEFAULT, addr_start, read_size, buf_out) < 0) {
@@ -2388,14 +2273,11 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 } /* end H5FD__onion_set_eoa() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_write
  *
- * Purpose:     Write bytes to an onionized file.
+ * Purpose:     Write bytes to an onionized file
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
- *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -2414,10 +2296,8 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     const unsigned char *buf            = (const unsigned char *)_buf;
     herr_t               ret_value      = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
-#if 0
-    HDfprintf(stdout, "ONION WRITE - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
-#endif
+    FUNC_ENTER_PACKAGE
+
     HDassert(file != NULL);
     HDassert(buf != NULL);
     HDassert(file->rev_index != NULL);
@@ -2449,8 +2329,10 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         if (0 == i) {
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
-            // If we have a page_gap_head and the number of bytes to write is evenly divisible by the page
-            // size we need to add an additional page to make up for the page_gap_head
+            /* If we have a page_gap_head and the number of bytes to write is
+             * evenly divisible by the page size we need to add an additional
+             * page to make up for the page_gap_head
+             */
             if (page_gap_head > 0 && (page_gap_head + (bytes_to_write % page_size) > page_size ||
                                       bytes_to_write % page_size == 0)) {
                 n_pages++;
@@ -2515,7 +2397,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             } /* end if page exists in neither index */
 
             /* Copy input buffer to temporary page buffer */
-            assert((page_size - page_gap_head) >= page_n_used);
+            HDassert((page_size - page_gap_head) >= page_n_used);
             HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
             write_buf = page_buf;
 
@@ -2531,10 +2413,6 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                       write_buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
-#if 0
-        HDfprintf(stdout, "ADDING TO REVISION INDEX - page: %d, phys_addr = %" PRIuHADDR "\n",
-                  new_entry.logi_page, new_entry.phys_addr);
-#endif
         if (H5FD_onion_revision_index_insert(file->rev_index, &new_entry) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "can't insert new index entry into revision index")
 
@@ -2568,12 +2446,12 @@ done:
  *              The input and output parameters allow op_code specific
  *              input and output
  *
- * Return:      Non-negative on success/Negative on failure
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
+                void **output)
 {
     H5FD_onion_t *file      = (H5FD_onion_t *)_file;
     herr_t        ret_value = SUCCEED;
@@ -2602,7 +2480,6 @@ done:
 } /* end H5FD__onion_ctl() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_archival_index_is_valid
  *
  * Purpose:     Determine whether an archival index structure is valid.
@@ -2613,9 +2490,7 @@ done:
  *                + Sorted by increasing logical address (no duplicates)
  *                + Logical addresses are multiples of page size.
  *
- * Return:      TRUE if above creteria are met.
- *              FALSE otherwise.
- *
+ * Return:      TRUE/FALSE
  *-----------------------------------------------------------------------------
  */
 hbool_t
@@ -2643,7 +2518,6 @@ done:
 } /* end H5FD_onion_archival_index_is_valid() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_archival_index_find
  *
  * Purpose:     Retrieve the archival index entry by logical page ID.
@@ -2655,7 +2529,6 @@ done:
  *                       Entry out pointer-pointer is set to point to entry.
  *              Failure: Zero (0) -- entry not found.
  *                       Entry out pointer-pointer is unmodified.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -2720,13 +2593,11 @@ done:
 } /* end H5FD_onion_archival_index_find() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_index_destroy
  *
  * Purpose:     Release all resources of a revision index.
  *
  * Return:      SUCCEED/FAIL
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -2762,7 +2633,6 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
 } /* end H5FD_onion_revision_index_destroy() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_index_init
  *
  * Purpose:     Initialize a revision index structure with a default starting
@@ -2771,7 +2641,6 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
  *
  * Return:      Success:    Pointer to newly-allocated structure
  *              Failure:    NULL
- *
  *-----------------------------------------------------------------------------
  */
 H5FD__onion_revision_index_t *
@@ -2813,7 +2682,6 @@ done:
 } /* end H5FD_onion_revision_index_init() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD__onion_revision_index_resize()
  *
  * Purpose:     Replace the hash table in the revision index.
@@ -2824,7 +2692,6 @@ done:
  *              Fails if unable to allocate space for larger hash table.
  *
  * Return:      SUCCEED/FAIL
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -2879,7 +2746,6 @@ done:
 } /* end H5FD__onion_revision_index_resize() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_index_insert()
  *
  * Purpose:     Add an entry to the revision index, or update an existing
@@ -2890,7 +2756,6 @@ done:
  *              can be safley re-used or discarded after operation.
  *
  * Return:      SUCCEED/FAIL
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -2955,7 +2820,6 @@ done:
 } /* end H5FD_onion_revision_index_insert() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    H5FD_onion_revision_index_find()
  *
  *
@@ -2966,7 +2830,6 @@ done:
  *                       Entry out pointer-pointer is set to point to entry.
  *              Failure: Zero (0) -- entry not found.
  *                       Entry out pointer-pointer is unmodified.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -3002,9 +2865,7 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
 } /* end H5FD_onion_revision_index_find() */
 
 /*-----------------------------------------------------------------------------
- *
  * Callback for comparisons in sorting archival index entries by logi_page.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -3021,8 +2882,7 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
 } /* end H5FD__onion_archival_index_list_sort_cmp() */
 
 /*-----------------------------------------------------------------------------
- *
- * Function:    H5FD_onion_merge_revision_index_into_archival_index()
+ * Function:    H5FD_onion_merge_revision_index_into_archival_index
  *
  * Purpose:     Merge index entries from revision index into archival index.
  *
@@ -3035,7 +2895,6 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
  *              revision index entries to their logical addresses in-file.
  *
  * Return:      SUCCEED/FAIL
- *
  *-----------------------------------------------------------------------------
  */
 herr_t

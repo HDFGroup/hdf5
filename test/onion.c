@@ -34,8 +34,8 @@
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
 
-#define ONION_TEST_PAGE_SIZE_1                    (uint32_t)4
-#define ONION_TEST_PAGE_SIZE_5                    (uint32_t)32
+#define ONION_TEST_PAGE_SIZE_1                    4
+#define ONION_TEST_PAGE_SIZE_5                    32
 #define ONION_TEST_BASENAME_SIZE                  32
 #define ONION_TEST_FIXNAME_SIZE                   1024
 #define ONION_TEST_EXPECTED_HISTORY_REVISIONS_MAX 16
@@ -118,39 +118,39 @@ onion_filepaths_init(const char *basename, H5FD_onion_fapl_info_t *fa_info)
 {
     struct onion_filepaths *paths = NULL;
 
-    paths = HDmalloc(sizeof(struct onion_filepaths));
-    if (NULL == paths)
-        TEST_ERROR;
+    if (NULL == (paths = HDmalloc(sizeof(struct onion_filepaths))))
+        TEST_ERROR
     paths->canon    = NULL;
     paths->onion    = NULL;
     paths->recovery = NULL;
 
-    paths->canon = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE);
-    if (NULL == paths->canon)
-        TEST_ERROR;
+    if (NULL == (paths->canon = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+        TEST_ERROR
     if (!h5_fixname_no_suffix(basename, fa_info->backing_fapl_id, paths->canon, ONION_TEST_FIXNAME_SIZE))
-        TEST_ERROR;
+        TEST_ERROR
 
-    paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE);
+    if (NULL == (paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+        TEST_ERROR
     HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
-    paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE);
+    if (NULL == (paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+        TEST_ERROR
     HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 
 error:
     if (paths != NULL) {
-        if (paths->canon != NULL)
-            HDfree(paths->canon);
-        if (paths->onion != NULL)
-            HDfree(paths->onion);
-        if (paths->recovery != NULL)
-            HDfree(paths->recovery);
+        HDfree(paths->canon);
+        HDfree(paths->onion);
+        HDfree(paths->recovery);
     }
+    HDfree(paths);
+
     return NULL;
 }
 
+/* Free onion file paths */
 static void
 onion_filepaths_destroy(struct onion_filepaths *s)
 {
@@ -177,7 +177,6 @@ up_size_to_page_boundary(uint64_t size_in, uint32_t page_size)
 #endif
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_archival_index()
  *
  * Purpose:     Unit-test mechanisms for the onion archival index.
@@ -185,7 +184,6 @@ up_size_to_page_boundary(uint64_t size_in, uint32_t page_size)
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -203,7 +201,7 @@ test_archival_index(void)
     H5FD_onion_index_entry_t sorted[8]            = {e0, e1, e2, e3, e4, e5, e6, e7};
     H5FD_onion_index_entry_t sorted_duplicates[8] = {e0, e1, e2, e2, e4, e5, e6, e7};
     H5FD_onion_index_entry_t sorted_incomplete[8] = {e1, e3, e4, e5};
-    /* partially-sorted list also aligned to 2 * page-size */
+    /* Partially-sorted list also aligned to 2 * page-size */
     H5FD_onion_index_entry_t    sorted_partial[8] = {e1, e4, e5, e7, e0, e6, e2, e3}; /* 0..3 sorted */
     H5FD_onion_index_entry_t    unsorted[8]       = {e3, e1, e4, e5, e0, e6, e2, e7};
     H5FD_onion_archival_index_t aix               = {
@@ -221,85 +219,81 @@ test_archival_index(void)
 
     aix.version++;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* invalid version should fail */
-    aix.version = 0;
+        TEST_ERROR /* invalid version should fail */
+            aix.version = 0;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* invalid version should fail */
-    aix.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
+        TEST_ERROR /* invalid version should fail */
+            aix.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
     aix.list = NULL;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* list cannot be NULL */
+        TEST_ERROR /* list cannot be NULL */
 
-    aix.list = sorted_incomplete;
+            aix.list = sorted_incomplete;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* list must be full */
+        TEST_ERROR /* list must be full */
 
-    aix.list = unsorted;
+            aix.list = unsorted;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* list must be sorted */
+        TEST_ERROR /* list must be sorted */
 
-    aix.list = sorted_duplicates;
+            aix.list = sorted_duplicates;
     if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* list cannot have duplicates */
+        TEST_ERROR /* list cannot have duplicates */
 
-    /*
-     * Passing validity checks
-     */
+            /*
+             * Passing validity checks
+             */
 
-    aix.list = sorted;
+            aix.list = sorted;
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* everything in order should report valid */
+        TEST_ERROR /* everything in order should report valid */
 
-    aix.list      = sorted_partial;
+            aix.list = sorted_partial;
     aix.n_entries = 4;
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* elements after n_entries are ignored */
+        TEST_ERROR /* elements after n_entries are ignored */
 
-    /*
-     * Archival index search routine
-     */
+            /*
+             * Archival index search routine
+             */
 
-    aix.list      = sorted;
+            aix.list = sorted;
     aix.n_entries = 8;
 
     if (H5FD_onion_archival_index_find(&aix, 3, &entry_out_p) != 0)
-        TEST_ERROR; /* address not in array -> returns 0 */
-    if (entry_out_p != NULL)
-        TEST_ERROR; /* pointer should remain unset */
+        TEST_ERROR                              /* address not in array -> returns 0 */
+            if (entry_out_p != NULL) TEST_ERROR /* pointer should remain unset */
 
-    if (H5FD_onion_archival_index_find(&aix, 4, &entry_out_p) != 1)
-        TEST_ERROR; /* address found -> should return 1 */
-    if (NULL == entry_out_p)
-        TEST_ERROR; /* pointer should be set */
-    if (558 != entry_out_p->phys_addr)
-        TEST_ERROR; /* incorrect address recorded */
+            if (H5FD_onion_archival_index_find(&aix, 4, &entry_out_p) != 1)
+                TEST_ERROR                                /* address found -> should return 1 */
+            if (NULL == entry_out_p) TEST_ERROR           /* pointer should be set */
+            if (558 != entry_out_p->phys_addr) TEST_ERROR /* incorrect address recorded */
 
-    /*
-     * Test search edge cases
-     */
+                /*
+                 * Test search edge cases
+                 */
 
-    aix.list      = sorted_incomplete;
+                aix.list = sorted_incomplete;
     aix.n_entries = 4;
 
     if (H5FD_onion_archival_index_find(&aix, 1, &entry_out_p) != 0)
-        TEST_ERROR; /* address not in array -> returns 0 */
+        TEST_ERROR /* address not in array -> returns 0 */
 
-    if (H5FD_onion_archival_index_find(&aix, 101, &entry_out_p) != 0)
-        TEST_ERROR; /* address not in array -> returns 0 */
+            if (H5FD_onion_archival_index_find(&aix, 101, &entry_out_p) != 0)
+                TEST_ERROR /* address not in array -> returns 0 */
 
-    /*
-     * Empty archival index
-     */
+                    /*
+                     * Empty archival index
+                     */
 
-    entry_out_p   = NULL;
+                    entry_out_p = NULL;
     aix.n_entries = 0; /* actually populated list is irrelevant */
     if (H5FD_onion_archival_index_find(&aix, 3, &entry_out_p) != 0)
-        TEST_ERROR; /* address not in array -> returns 0 */
-    if (entry_out_p != NULL)
-        TEST_ERROR; /* pointer should remain unset */
+        TEST_ERROR                              /* address not in array -> returns 0 */
+            if (entry_out_p != NULL) TEST_ERROR /* pointer should remain unset */
 
-    PASSED();
+            PASSED();
     return 0;
 
 error:
@@ -307,14 +301,12 @@ error:
 } /* end test_archival_index() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_revision_index()
  *
- * Purpose:     TBD
+ * Purpose:     Test revision index functionality
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -332,86 +324,77 @@ test_revision_index(void)
     /* Test index creation */
 
     if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix_p->version)
-        TEST_ERROR;
+        TEST_ERROR
     if (0 != rix_p->n_entries)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Test missed search */
 
     if (H5FD_onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) != 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Test successful insertion and lookup */
 
     if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR; /* insertion failed */
-    if (1 != rix_p->n_entries)
-        TEST_ERROR;
-    if (H5FD_onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) < 0)
-        TEST_ERROR; /* lookup failed */
-    if (NULL == entry_out_p)
-        TEST_ERROR; /* failure to set output parameter */
-    if (entry.logi_page != entry_out_p->logi_page)
-        TEST_ERROR;
-    if (H5FD_onion_revision_index_find(rix_p, entry.logi_page + 1, &entry_out_p) != 0)
-        TEST_ERROR; /* seeking other, absent page should miss */
+        TEST_ERROR /* insertion failed */
+            if (1 != rix_p->n_entries)
+                TEST_ERROR if (H5FD_onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) < 0)
+                    TEST_ERROR                  /* lookup failed */
+            if (NULL == entry_out_p) TEST_ERROR /* failure to set output parameter */
+            if (entry.logi_page != entry_out_p->logi_page)
+                TEST_ERROR if (H5FD_onion_revision_index_find(rix_p, entry.logi_page + 1, &entry_out_p) != 0)
+                    TEST_ERROR /* seeking other, absent page should miss */
 
-    /* Test / demonstrate stored entry independent of user object */
+                        /* Test / demonstrate stored entry independent of user object */
 
-    entry.logi_page = 100;
+                        entry.logi_page = 100;
     entry.phys_addr = 101;
     if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (2 != rix_p->n_entries)
-        TEST_ERROR;
+        TEST_ERROR
     entry.logi_page = 500;
     entry.phys_addr = 501;
     if (H5FD_onion_revision_index_find(rix_p, 100, &entry_out_p) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (100 != entry_out_p->logi_page || 101 != entry_out_p->phys_addr)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* Demonstrate updating an entry
-     */
+    /* Demonstrate updating an entry */
 
     /* Error cases */
 
     entry.logi_page = 100; /* phys_addr still 501, checksum bbbbbbbb */
     if (H5FD_onion_revision_index_insert(rix_p, &entry) >= 0)
-        TEST_ERROR; /* all components but sum must match */
-    entry.phys_addr = 101;
+        TEST_ERROR /* all components but sum must match */
+            entry.phys_addr = 101;
 
     /* Successful update */
 
     entry.logi_page = 100;
     entry.phys_addr = 101;
     if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (2 != rix_p->n_entries)
-        TEST_ERROR; /* Should still be two unique entries, not three */
-    if (H5FD_onion_revision_index_find(rix_p, 100, &entry_out_p) < 0)
-        TEST_ERROR;
-    if (100 != entry_out_p->logi_page || 101 != entry_out_p->phys_addr)
-        TEST_ERROR;
+        TEST_ERROR /* Should still be two unique entries, not three */
+            if (H5FD_onion_revision_index_find(rix_p, 100, &entry_out_p) < 0)
+                TEST_ERROR if (100 != entry_out_p->logi_page || 101 != entry_out_p->phys_addr) TEST_ERROR
 
-    if (H5FD_onion_revision_index_destroy(rix_p) < 0)
-        TEST_ERROR;
-    rix_p = NULL;
+            if (H5FD_onion_revision_index_destroy(rix_p) < 0) TEST_ERROR
 
-    PASSED();
+            PASSED();
     return 0;
 
 error:
-    if (rix_p != NULL) {
+    if (rix_p != NULL)
         (void)H5FD_onion_revision_index_destroy(rix_p);
-    }
+
     return -1;
 } /* end test_revision_index() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_revision_index_collisions()
  *
  * Purpose:     With knowledge of the revision index implementation, test
@@ -419,7 +402,6 @@ error:
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -431,46 +413,43 @@ test_revision_index_collisions(void)
         0, /* phys_addr */
     };
     const H5FD_onion_index_entry_t *entry_out_p       = NULL;
-    uint64_t                        i                 = 0;
     const uint64_t                  n_insert          = 40;
     const uint64_t                  offset_from_power = 5;
 
     TESTING("revision index collisions");
 
-    rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5);
-    if (NULL == rix_p)
-        TEST_ERROR; /* unable to initialize working index */
+    if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
+        TEST_ERROR
 
-    for (i = 0; i < n_insert; i++) {
+    for (uint64_t i = 0; i < n_insert; i++) {
         entry.phys_addr = i;
         entry.logi_page = U64_EXP2(i) + offset_from_power;
         if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     if (n_insert != rix_p->n_entries)
-        TEST_ERROR;
+        TEST_ERROR
 
-    for (i = 0; i < n_insert; i++) {
+    for (uint64_t i = 0; i < n_insert; i++) {
         uint64_t page_id = U64_EXP2(i) + offset_from_power;
 
         if (H5FD_onion_revision_index_find(rix_p, page_id, &entry_out_p) != 1)
-            TEST_ERROR;
+            TEST_ERROR
         if (entry_out_p->phys_addr != i)
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     if (H5FD_onion_revision_index_destroy(rix_p) < 0)
-        TEST_ERROR;
-    rix_p = NULL;
+        TEST_ERROR
 
     PASSED();
     return 0;
 
 error:
-    if (rix_p != NULL) {
+    if (rix_p != NULL)
         (void)H5FD_onion_revision_index_destroy(rix_p);
-    }
+
     return -1;
 } /* end test_revision_index_collisions() */
 
@@ -495,57 +474,52 @@ test_revision_index_resizing(void)
         0, /* phys_addr */
     };
     const H5FD_onion_index_entry_t *entry_out_p = NULL;
-    uint64_t                        i           = 0;
     const uint64_t                  n_insert = U64_EXP2((H5FD__ONION_REVISION_INDEX_STARTING_SIZE_LOG2 + 3));
 
     TESTING("revision index resizing");
 
-    rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5);
-    if (NULL == rix_p)
-        TEST_ERROR; /* unable to initialize working index */
+    if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
+        TEST_ERROR
 
-    for (i = 0; i < n_insert; i++) {
+    for (uint64_t i = 0; i < n_insert; i++) {
         entry.logi_page = i;
         entry.phys_addr = ((uint64_t)(-1) - i);
         if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     if (n_insert != rix_p->n_entries)
-        TEST_ERROR;
+        TEST_ERROR
 
-    for (i = 0; i < n_insert; i++) {
+    for (uint64_t i = 0; i < n_insert; i++) {
         uint64_t page_id = i;
 
         if (H5FD_onion_revision_index_find(rix_p, page_id, &entry_out_p) != 1)
-            TEST_ERROR;
+            TEST_ERROR
         if (entry_out_p->phys_addr != ((uint64_t)(-1) - i))
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     if (H5FD_onion_revision_index_destroy(rix_p) < 0)
-        TEST_ERROR;
-    rix_p = NULL;
+        TEST_ERROR
 
     PASSED();
     return 0;
 
 error:
-    if (rix_p != NULL) {
+    if (rix_p != NULL)
         (void)H5FD_onion_revision_index_destroy(rix_p);
-    }
+
     return -1;
 } /* end test_revision_index_resizing() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_revision_index_to_archival_index()
  *
  * Purpose:     Verify to_archival_index().
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -563,7 +537,6 @@ test_revision_index_to_archival_index(void)
         NULL,
     };
     const uint64_t n_insert = 10;
-    uint64_t       i        = 0;
 
     TESTING("revision index to archival index");
 
@@ -572,20 +545,21 @@ test_revision_index_to_archival_index(void)
      */
 
     if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR; /* Unable to initialize working index */
+        TEST_ERROR /* Unable to initialize working index */
 
-    /* Add scattered entries in reverse order. */
-    for (i = 0; i < n_insert; i++) {
-        uint64_t n = 2003 * (n_insert - i) + 47;
+            /* Add scattered entries in reverse order. */
+            for (uint64_t i = 0; i < n_insert; i++)
+        {
+            uint64_t n = 2003 * (n_insert - i) + 47;
 
-        rix_entry.logi_page = n;
-        rix_entry.phys_addr = n * 13;
-        if (H5FD_onion_revision_index_insert(rix_p, &rix_entry) < 0)
-            TEST_ERROR;
-    }
+            rix_entry.logi_page = n;
+            rix_entry.phys_addr = n * 13;
+            if (H5FD_onion_revision_index_insert(rix_p, &rix_entry) < 0)
+                TEST_ERROR
+        }
 
     if (n_insert != rix_p->n_entries)
-        TEST_ERROR;
+        TEST_ERROR
 
     aix.list      = NULL;
     aix.n_entries = 0;
@@ -593,32 +567,32 @@ test_revision_index_to_archival_index(void)
     /* Successful merge into empty archival index */
 
     if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* Entries not sorted, or other obscure issue */
+        TEST_ERROR /* Entries not sorted, or other obscure issue */
 
-    if (n_insert != aix.n_entries)
-        TEST_ERROR; /* Failed to resize and/or update archival index info */
+            if (n_insert != aix.n_entries) TEST_ERROR /* Failed to resize and/or update archival index info */
 
-    for (i = 0; i < n_insert; i++) {
-        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
-        uint64_t                        n           = 2003 * (i + 1) + 47;
+            for (uint64_t i = 0; i < n_insert; i++)
+        {
+            const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+            uint64_t                        n           = 2003 * (i + 1) + 47;
 
-        aix_entry_p = &aix.list[i];
+            aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
-            TEST_ERROR;
-        if (aix_entry_p->phys_addr != (n * 13))
-            TEST_ERROR;
-    }
+            if (aix_entry_p->logi_page != n)
+                TEST_ERROR
+            if (aix_entry_p->phys_addr != (n * 13))
+                TEST_ERROR
+        }
 
     /* Successful merge into populated archival index */
 
     H5MM_xfree(aix.list);
     aix.list = NULL;
     if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
-        TEST_ERROR;
+        TEST_ERROR
     aix.list[0].logi_page = 47;
     aix.list[0].phys_addr = 47 * 13;
     aix.list[1].logi_page = (2003 * (n_insert + 1) + 47);
@@ -626,35 +600,34 @@ test_revision_index_to_archival_index(void)
     aix.n_entries         = 2;
 
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* entries not sorted, or other obscure issue */
+        TEST_ERROR /* entries not sorted, or other obscure issue */
 
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+            if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0) TEST_ERROR
 
-    if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* entries not sorted, or other obscure issue */
+            if (!H5FD_onion_archival_index_is_valid(&aix))
+                TEST_ERROR /* entries not sorted, or other obscure issue */
 
-    if (n_insert + 2 != aix.n_entries)
-        TEST_ERROR;
+            if (n_insert + 2 != aix.n_entries) TEST_ERROR
 
-    for (i = 0; i < (n_insert + 2); i++) {
-        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
-        uint64_t                        n           = 2003 * i + 47;
+            for (uint64_t i = 0; i < (n_insert + 2); i++)
+        {
+            const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+            uint64_t                        n           = 2003 * i + 47;
 
-        aix_entry_p = &aix.list[i];
+            aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
-            TEST_ERROR;
-        if (aix_entry_p->phys_addr != (n * 13))
-            TEST_ERROR;
-    }
+            if (aix_entry_p->logi_page != n)
+                TEST_ERROR
+            if (aix_entry_p->phys_addr != (n * 13))
+                TEST_ERROR
+        }
 
     /* Merged enties from revision index replace existing entries */
 
     H5MM_xfree(aix.list);
     aix.list = NULL;
     if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
-        TEST_ERROR;
+        TEST_ERROR
     aix.list[0].logi_page = 2003 * (n_insert / 2) + 47;
     aix.list[0].phys_addr = 103;
     aix.list[1].logi_page = 2003 * (n_insert / 2 + 1) + 47;
@@ -662,36 +635,32 @@ test_revision_index_to_archival_index(void)
     aix.n_entries         = 2;
 
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* entries not sorted, or other obscure issue */
+        TEST_ERROR /* entries not sorted, or other obscure issue */
 
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+            if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0) TEST_ERROR
 
-    if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* entries not sorted, or other obscure issue */
+            if (!H5FD_onion_archival_index_is_valid(&aix))
+                TEST_ERROR /* entries not sorted, or other obscure issue */
 
-    if (n_insert != aix.n_entries)
-        TEST_ERROR;
+            if (n_insert != aix.n_entries) TEST_ERROR
 
-    for (i = 0; i < n_insert; i++) {
-        const H5FD_onion_index_entry_t *aix_entry_p = NULL;
-        uint64_t                        n           = 2003 * (i + 1) + 47;
+            for (uint64_t i = 0; i < n_insert; i++)
+        {
+            const H5FD_onion_index_entry_t *aix_entry_p = NULL;
+            uint64_t                        n           = 2003 * (i + 1) + 47;
 
-        aix_entry_p = &aix.list[i];
+            aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
-            TEST_ERROR;
-        if (aix_entry_p->phys_addr != (n * 13))
-            TEST_ERROR;
-    }
+            if (aix_entry_p->logi_page != n)
+                TEST_ERROR
+            if (aix_entry_p->phys_addr != (n * 13))
+                TEST_ERROR
+        }
 
-    /*
-     * CLEANUP
-     */
+    /* CLEANUP */
 
     if (H5FD_onion_revision_index_destroy(rix_p) < 0)
-        TEST_ERROR;
-
+        TEST_ERROR
     H5MM_xfree(aix.list);
 
     PASSED();
@@ -700,20 +669,18 @@ test_revision_index_to_archival_index(void)
 error:
     if (rix_p)
         (void)H5FD_onion_revision_index_destroy(rix_p);
-    if (aix.list)
-        H5MM_xfree(aix.list);
+    H5MM_xfree(aix.list);
+
     return -1;
 } /* end test_revision_index_to_archival_index() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_fapl()
  *
  * Purpose:     Verify H5Pget and set behavior, and data-consistency checks.
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -737,40 +704,38 @@ test_fapl(void)
 
     TESTING("file access property list");
 
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    if (H5I_INVALID_HID == dxpl_id)
-        TEST_ERROR;
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR
 
-    fapl_id_sec2 = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id_sec2)
-        TEST_ERROR;
+    if ((fapl_id_sec2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
     if (H5Pset_fapl_sec2(fapl_id_sec2))
-        TEST_ERROR;
+        TEST_ERROR
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
 
-    /*
-     * Set FAPL
-     */
+    /* Set FAPL */
 
+    /* Invalid fapl should fail */
     H5E_BEGIN_TRY
     {
         ret = H5Pset_fapl_onion(H5I_INVALID_HID, &info_in);
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* fapl_id must be valid */
+        TEST_ERROR
 
+    /* NULL info pointer should fail */
     H5E_BEGIN_TRY
     {
         ret = H5Pset_fapl_onion(fapl_id, NULL);
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* info pointer cannot be NULL */
+        TEST_ERROR
 
+    /* Invalid version should fail */
     info_in.version++;
     H5E_BEGIN_TRY
     {
@@ -778,9 +743,10 @@ test_fapl(void)
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* info version must be valid */
+        TEST_ERROR
     info_in.version--;
 
+    /* Page size not a power of 2 should fail */
     info_in.page_size = 7;
     H5E_BEGIN_TRY
     {
@@ -788,8 +754,9 @@ test_fapl(void)
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* page size must be valid power of 2 */
+        TEST_ERROR
 
+    /* Page size <=0 should fail */
     info_in.page_size = 0;
     H5E_BEGIN_TRY
     {
@@ -797,9 +764,10 @@ test_fapl(void)
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* page size must be greater than zero */
+        TEST_ERROR
     info_in.page_size = ONION_TEST_PAGE_SIZE_1;
 
+    /* Invalid backing fapl should fail */
     info_in.backing_fapl_id = H5I_INVALID_HID;
     H5E_BEGIN_TRY
     {
@@ -807,8 +775,9 @@ test_fapl(void)
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* backing fapl ID cannot be invalid */
+        TEST_ERROR
 
+    /* Backing fapl not a fapl should fail */
     info_in.backing_fapl_id = dxpl_id;
     H5E_BEGIN_TRY
     {
@@ -816,98 +785,92 @@ test_fapl(void)
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* backing fapl ID must be file access proptery list ID */
+        TEST_ERROR
     info_in.backing_fapl_id = H5P_DEFAULT;
 
     if (H5Pset_fapl_onion(fapl_id, &info_in) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /*
-     * Get onion fapl info
-     */
+    /* Get onion fapl info */
 
+    /* NULL info_out pointer should fail */
     H5E_BEGIN_TRY
     {
         ret = H5Pget_fapl_onion(fapl_id, NULL);
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* info_out pointer cannot be NULL */
+        TEST_ERROR
 
+    /* Invalid fapl should fail */
     H5E_BEGIN_TRY
     {
         ret = H5Pget_fapl_onion(H5I_INVALID_HID, &info_out);
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* fapl_id must be valid */
+        TEST_ERROR
 
+    /* Non-onion fapl ID should fail */
     H5E_BEGIN_TRY
     {
         ret = H5Pget_fapl_onion(fapl_id_sec2, &info_out);
     }
     H5E_END_TRY;
     if (SUCCEED == ret)
-        TEST_ERROR; /* wrong fapl_id in */
+        TEST_ERROR
 
+    /* Normal case */
     if (H5Pget_fapl_onion(fapl_id, &info_out) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_ONION_FAPL_INFO_VERSION_CURR != info_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5P_DEFAULT != info_out.backing_fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (ONION_TEST_PAGE_SIZE_1 != info_out.page_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_ONION_STORE_TARGET_ONION != info_out.store_target)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST != info_out.revision_num)
-        TEST_ERROR;
+        TEST_ERROR
     if (0 != info_out.creation_flags)
-        TEST_ERROR;
+        TEST_ERROR
     if (0 != info_out.force_write_open)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrcmp(info_in.comment, info_out.comment))
-        TEST_ERROR;
+        TEST_ERROR
 
-    /*
-     * Cleanup
-     */
+    /* Cleanup */
 
     if (H5Pclose(dxpl_id) < 0)
-        TEST_ERROR;
-    dxpl_id = H5I_INVALID_HID;
-
+        TEST_ERROR
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-    fapl_id = H5I_INVALID_HID;
-
+        TEST_ERROR
     if (H5Pclose(fapl_id_sec2) < 0)
-        TEST_ERROR;
-    fapl_id_sec2 = H5I_INVALID_HID;
+        TEST_ERROR
 
     PASSED();
     return 0;
 
 error:
-    if (H5I_INVALID_HID != dxpl_id)
-        (void)H5Pclose(dxpl_id);
-    if (H5I_INVALID_HID != fapl_id)
-        (void)H5Pclose(fapl_id);
-    if (H5I_INVALID_HID != fapl_id_sec2)
-        (void)H5Pclose(fapl_id_sec2);
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_sec2);
+    }
+    H5E_END_TRY
 
     return -1;
 } /* end test_fapl() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_header_encode_decode()
  *
  * Purpose:     Verify onion header encoding and decoding behavior.
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -944,15 +907,15 @@ test_header_encode_decode(void)
     hdr.whole_history_size = 88;
 
     if (H5FD_onion_history_header_encode(&hdr, buf, &sum_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (sum != sum_out)
-        TEST_ERROR;
+        TEST_ERROR
 
     for (i = 0; i < H5FD__ONION_ENCODED_SIZE_HEADER; i++) {
         if (exp[i] != buf[i]) {
             HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
-            TEST_ERROR;
+            TEST_ERROR
         }
     }
 
@@ -972,7 +935,7 @@ test_header_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
     exp[3] = 'H'; /* reset */
 
@@ -986,7 +949,7 @@ test_header_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
     exp[4] = H5FD__ONION_HEADER_VERSION_CURR + 1; /* encoded super-version?! */
     H5E_BEGIN_TRY
@@ -995,25 +958,25 @@ test_header_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
-    exp[4] = H5FD__ONION_HEADER_VERSION_CURR; /* reset */
+    /* Reset */
+    exp[4] = H5FD__ONION_HEADER_VERSION_CURR;
 
-    /* Valid header can be decoded.
-     */
+    /* Valid header can be decoded */
 
     if (H5FD_onion_history_header_decode(buf, &hdr_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_HEADER_VERSION_CURR != hdr_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr.flags != hdr_out.flags)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr.page_size != hdr_out.page_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr.whole_history_addr != hdr_out.whole_history_addr)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr.whole_history_size != hdr_out.whole_history_size)
-        TEST_ERROR;
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -1023,7 +986,6 @@ error:
 } /* end test_header_encode_decode() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_whole_history_encode_decode_empty()
  *
  * Purpose:     Verify onion whole-history encoding and decoding behavior.
@@ -1032,7 +994,6 @@ error:
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -1068,19 +1029,18 @@ test_whole_history_encode_decode_empty(void)
     UINT32ENCODE(ptr, sum);
 
     if (H5FD_onion_whole_history_encode(&whs, buf, &sum_out) != H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < 20; i++) {
         if (exp[i] != buf[i]) {
             HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
-            TEST_ERROR;
+            TEST_ERROR
         }
     }
     if (sum != sum_out)
-        TEST_ERROR;
+        TEST_ERROR
     whs.checksum = sum; /* set to compare later */
 
-    /* Invalid signature prevents decoding.
-     */
+    /* Invalid signature prevents decoding */
 
     exp[3] = 'X'; /* invalidate encoded signature */
     H5E_BEGIN_TRY
@@ -1089,12 +1049,11 @@ test_whole_history_encode_decode_empty(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
     exp[3] = 'H'; /* reset */
 
-    /* Invalid version prevents decoding.
-     */
+    /* Invalid version prevents decoding */
 
     exp[4] = 0; /* encoded version 0?!? */
     H5E_BEGIN_TRY
@@ -1103,7 +1062,7 @@ test_whole_history_encode_decode_empty(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
     exp[4] = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR + 1;
     H5E_BEGIN_TRY
@@ -1112,23 +1071,22 @@ test_whole_history_encode_decode_empty(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
     exp[4] = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR; /* reset */
 
-    /* Valid summary can be decoded.
-     */
+    /* Valid summary can be decoded */
 
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs.n_revisions != whs_out.n_revisions)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs.checksum != whs_out.checksum)
-        TEST_ERROR;
+        TEST_ERROR
     if (NULL != whs_out.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -1138,7 +1096,6 @@ error:
 } /* end test_whole_history_encode_decode_empty() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_whole_history_encode_decode()
  *
  * Purpose:     Verify onion whole-history encoding and decoding behavior.
@@ -1146,7 +1103,6 @@ error:
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -1185,11 +1141,11 @@ test_whole_history_encode_decode(void)
     TESTING("encode/decode whole-history");
 
     if (80 != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
 
     whs.record_pointer_list = HDcalloc(whs.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* must match values in exp */
     whs.record_pointer_list[0].phys_addr   = 568ull;
@@ -1217,78 +1173,70 @@ test_whole_history_encode_decode(void)
     UINT32ENCODE(buf_p, whs.checksum);
 
     if (NULL == (buf = HDmalloc(exp_size)))
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5FD_onion_whole_history_encode(&whs, buf, &sum_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (whs.checksum != sum_out)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Initial decode, gets always-present components.
      */
 
     whs_out.n_revisions = 0; /* must be initialized to 0 */
     if (H5FD_onion_whole_history_decode(exp, &whs_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs.n_revisions != whs_out.n_revisions)
-        TEST_ERROR;
+        TEST_ERROR
     if (NULL != whs_out.record_pointer_list)
-        TEST_ERROR; /* Must be created by us */
+        TEST_ERROR /* Must be created by us */
 
-    /* True decode requires allocating space for record pointers
-     */
+            /* True decode requires allocating space for record pointers */
 
-    whs_out.record_pointer_list = HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
+            whs_out.record_pointer_list = HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5FD_onion_whole_history_decode(exp, &whs_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs.n_revisions != whs_out.n_revisions)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs.checksum != whs_out.checksum)
-        TEST_ERROR;
+        TEST_ERROR
     if (NULL == whs_out.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < whs.n_revisions; i++) {
         H5FD_onion_record_pointer_t exp_rp = whs.record_pointer_list[i];
         H5FD_onion_record_pointer_t act_rp = whs_out.record_pointer_list[i];
 
         if (exp_rp.phys_addr != act_rp.phys_addr)
-            TEST_ERROR;
+            TEST_ERROR
         if (exp_rp.record_size != act_rp.record_size)
-            TEST_ERROR;
+            TEST_ERROR
         if (exp_rp.checksum != act_rp.checksum)
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     HDfree(whs_out.record_pointer_list);
-    whs_out.record_pointer_list = NULL;
-
     HDfree(buf);
-    buf = NULL;
-
     HDfree(whs.record_pointer_list);
-    whs.record_pointer_list = NULL;
 
     PASSED();
     return 0;
 
 error:
-    if (whs_out.record_pointer_list != NULL)
-        HDfree(whs_out.record_pointer_list);
-    if (buf != NULL)
-        HDfree(buf);
-    if (whs.record_pointer_list != NULL)
-        HDfree(whs.record_pointer_list);
+    HDfree(whs_out.record_pointer_list);
+    HDfree(buf);
+    HDfree(whs.record_pointer_list);
+
     return -1;
 } /* end test_whole_history_encode_decode() */
 
@@ -1374,13 +1322,13 @@ test_revision_record_encode_decode(void)
     TESTING("encode/decode revision record");
 
     if (189 != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDmemcpy(record.time_of_creation, "19411207T190643Z", 16);
     record.archival_index.list = HDcalloc(record.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == record.archival_index.list)
-        TEST_ERROR;
-    /* convert logi_page and should match address in expected buffer */
+        TEST_ERROR
+    /* Convert logi_page and should match address in expected buffer */
     record.archival_index.list[0].logi_page = 491ull;
     record.archival_index.list[0].phys_addr = 587ull;
     record.archival_index.list[1].logi_page = 751ull;
@@ -1408,7 +1356,7 @@ test_revision_record_encode_decode(void)
     buf_p           = exp + exp_size - 4;
     UINT32ENCODE(buf_p, record.checksum);
 
-    /* required initialization for record-out structure */
+    /* Required initialization for record-out structure */
     r_out.version                  = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
     r_out.username_size            = 0;
     r_out.comment_size             = 0;
@@ -1419,27 +1367,22 @@ test_revision_record_encode_decode(void)
     r_out.archival_index.list      = NULL;
 
     if (NULL == (buf = HDmalloc(sizeof(unsigned char) * exp_size)))
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* Test encode
-     */
+    /* Test encode */
 
     if (H5FD_onion_revision_record_encode(&record, buf, &sum_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (record.checksum != sum_out)
-        TEST_ERROR;
+        TEST_ERROR
 
-    HDfree(buf);
-    buf = NULL;
+    /* Test decode (malformed encoding) */
 
-    /* Test decode (malformed encoding)
-     */
-
-    /* invalid signature */
+    /* Invalid signature */
     exp[2] = 'Y';
     H5E_BEGIN_TRY
     {
@@ -1447,10 +1390,10 @@ test_revision_record_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
     exp[2] = 'R'; /* reset */
 
-    /* zero version */
+    /* Zero version */
     exp[4] = 0;
     H5E_BEGIN_TRY
     {
@@ -1458,9 +1401,9 @@ test_revision_record_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* advance version */
+    /* Advance version */
     exp[4] = H5FD__ONION_REVISION_RECORD_VERSION_CURR + 1;
     H5E_BEGIN_TRY
     {
@@ -1468,112 +1411,100 @@ test_revision_record_encode_decode(void)
     }
     H5E_END_TRY;
     if (0 != size_ret)
-        TEST_ERROR;
+        TEST_ERROR
     exp[4] = H5FD__ONION_REVISION_RECORD_VERSION_CURR; /* reset */
 
-    /* Test successful decode
-     */
+    /* Test successful decode */
 
     /* Initial decode; get variable-length component sizes */
     if (H5FD_onion_revision_record_decode(exp, &r_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.username_size != r_out.username_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.comment_size != r_out.comment_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.archival_index.n_entries != r_out.archival_index.n_entries)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Allocate variable-length components */
     r_out.username = HDcalloc(r_out.username_size, sizeof(char));
     if (NULL == r_out.username)
-        TEST_ERROR;
+        TEST_ERROR
     r_out.comment = HDcalloc(r_out.comment_size, sizeof(char));
     if (NULL == r_out.comment)
-        TEST_ERROR;
+        TEST_ERROR
     r_out.archival_index.list = HDcalloc(r_out.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == r_out.archival_index.list)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Decode into all components */
     if (H5FD_onion_revision_record_decode(exp, &r_out) != exp_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != r_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.user_id != r_out.user_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.revision_num != r_out.revision_num)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.parent_revision_num != r_out.parent_revision_num)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.parent_revision_num != r_out.parent_revision_num)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.checksum != r_out.checksum)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.username_size != r_out.username_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.username_size != HDstrlen(r_out.username) + 1)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrlen(record.username) != HDstrlen(r_out.username))
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrcmp(record.username, r_out.username) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.comment_size != r_out.comment_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.comment_size != HDstrlen(r_out.comment) + 1)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrlen(record.comment) != HDstrlen(r_out.comment))
-        TEST_ERROR;
+        TEST_ERROR
     if (HDstrcmp(record.comment, r_out.comment) != 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != r_out.archival_index.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.archival_index.page_size_log2 != r_out.archival_index.page_size_log2)
-        TEST_ERROR;
+        TEST_ERROR
     if (record.archival_index.n_entries != r_out.archival_index.n_entries)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < record.archival_index.n_entries; i++) {
         H5FD_onion_index_entry_t *ep = &record.archival_index.list[i];
         H5FD_onion_index_entry_t *ap = &r_out.archival_index.list[i];
 
         if (ep->phys_addr != ap->phys_addr)
-            TEST_ERROR;
+            TEST_ERROR
         if (ep->logi_page != ap->logi_page)
-            TEST_ERROR;
+            TEST_ERROR
     }
 
-    /* Cleanup
-     */
+    /* Cleanup */
 
     HDfree(r_out.archival_index.list);
-    r_out.archival_index.list = NULL;
-
     HDfree(r_out.comment);
-    r_out.comment = NULL;
-
     HDfree(r_out.username);
-    r_out.username = NULL;
-
+    HDfree(buf);
     HDfree(record.archival_index.list);
-    record.archival_index.list = NULL;
 
     PASSED();
     return 0;
 
 error:
-    if (r_out.archival_index.list != NULL)
-        HDfree(r_out.archival_index.list);
-    if (r_out.comment != NULL)
-        HDfree(r_out.comment);
-    if (r_out.username != NULL)
-        HDfree(r_out.username);
-    if (buf != NULL)
-        HDfree(buf);
-    if (record.archival_index.list != NULL)
-        HDfree(record.archival_index.list);
+    HDfree(r_out.archival_index.list);
+    HDfree(r_out.comment);
+    HDfree(r_out.username);
+    HDfree(buf);
+    HDfree(record.archival_index.list);
+
     return -1;
 } /* end test_revision_record_encode_decode() */
 
@@ -1589,47 +1520,44 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
 {
     H5FD_t *       raw_vfile = NULL; /* virtual file to look at raw file contents */
     unsigned char *act_buf   = NULL; /* allocated area for actual file bytes */
-    size_t         i         = 0;
     uint64_t       filesize  = 0;
 
-    raw_vfile = H5FDopen(filepath, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    if (NULL == raw_vfile)
-        TEST_ERROR;
+    if (NULL == (raw_vfile = H5FDopen(filepath, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR
 
     filesize = (uint64_t)H5FDget_eof(raw_vfile, H5FD_MEM_DRAW);
     if ((uint64_t)nbytes != filesize)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (NULL == (act_buf = HDmalloc(nbytes)))
-        TEST_ERROR;
-    for (i = 0; i < nbytes; i++)
-        act_buf[i] = (unsigned char)(-1); /* fill with bogus all-1s */
+        TEST_ERROR
+    /* Fill buffer with bogus UCHAR_MAX values */
+    for (size_t i = 0; i < nbytes; i++)
+        act_buf[i] = UCHAR_MAX;
     if (H5FDset_eoa(raw_vfile, H5FD_MEM_DRAW, nbytes) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(raw_vfile, H5FD_MEM_DRAW, H5P_DEFAULT, 0, nbytes, act_buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* compare raw bytes data */
-    for (i = 0; i < nbytes; i++) {
+    /* Compare raw bytes data */
+    for (size_t i = 0; i < nbytes; i++) {
         if (exp[i] != act_buf[i]) {
             HDprintf("first mismatched byte %zu: expected 0x%02X was 0x%02X\n", i, exp[i], act_buf[i]);
-            TEST_ERROR;
+            TEST_ERROR
         }
     }
 
     if (H5FDclose(raw_vfile) < 0)
-        TEST_ERROR;
-    raw_vfile = NULL;
-
+        TEST_ERROR
     HDfree(act_buf);
 
     return 0;
 
 error:
-    if (act_buf != NULL)
-        HDfree(act_buf);
     if (raw_vfile != NULL)
         H5FDclose(raw_vfile);
+    HDfree(act_buf);
+
     return -1;
 } /* end compare_file_bytes_exactly() */
 
@@ -1663,64 +1591,62 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
 
     filesize = (uint64_t)H5FDget_eof(raw_file, H5FD_MEM_DRAW);
     if (H5FDset_eoa(raw_file, H5FD_MEM_DRAW, filesize) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* Injest onion header.
-     */
+    /* Ingest onion header */
 
     readsize = MIN(filesize, H5FD__ONION_ENCODED_SIZE_HEADER);
     if (NULL == (buf = HDmalloc(readsize * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, readsize, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     readsize = H5FD_onion_history_header_decode(buf, &hdr_out);
     if (0 == readsize)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_HEADER_VERSION_CURR != hdr_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDmemcmp(&hdr_out.checksum, &buf[readsize - 4], 4) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
-        TEST_ERROR;
+        TEST_ERROR
     if (filter->page_size != hdr_out.page_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr_out.whole_history_addr + hdr_out.whole_history_size != filesize)
-        TEST_ERROR;
+        TEST_ERROR
     if (filter->origin_eof != hdr_out.origin_eof)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDfree(buf);
     buf = NULL;
 
-    /* Injest whole-history.
-     */
+    /* Ingest whole-history */
 
     readsize = hdr_out.whole_history_size;
     if (NULL == (buf = HDmalloc(readsize * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.whole_history_addr, readsize, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Initial read, get count of revisions */
     readsize = H5FD_onion_whole_history_decode(buf, &whs_out);
     if (0 == readsize)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDmemcmp(&whs_out.checksum, &buf[readsize - 4], 4) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
-        TEST_ERROR;
+        TEST_ERROR
     if (filter->n_revisions != whs_out.n_revisions)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Final read, populate pointers to revision records */
     whs_out.record_pointer_list = HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != readsize)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Re-use buffer space to sanity-check checksum for record pointer(s). */
     HDassert(readsize >= sizeof(H5FD_onion_record_pointer_t));
@@ -1735,14 +1661,13 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         sum = H5_checksum_fletcher32(buf, 16);
 #endif
         if (whs_out.record_pointer_list[i].checksum != H5_checksum_fletcher32(buf, 16))
-            TEST_ERROR;
+            TEST_ERROR
     }
 
     HDfree(buf);
     buf = NULL;
 
-    /* Injest revision(s).
-     */
+    /* Ingest revision(s) */
 
     for (i = 0; i < whs_out.n_revisions; i++) {
         H5FD_onion_record_pointer_t *rpp = &whs_out.record_pointer_list[i];
@@ -1758,69 +1683,62 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
 
         readsize = rpp->record_size;
         if (NULL == (buf = HDmalloc((size_t)rpp->record_size)))
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDread(raw_file, H5FD_MEM_DRAW, H5P_DEFAULT, rpp->phys_addr, rpp->record_size, buf) < 0)
-            TEST_ERROR;
+            TEST_ERROR
 
         /* Initial revision read -- get fixed components */
         readsize = H5FD_onion_revision_record_decode(buf, &rev_out);
         if (0 == readsize)
-            TEST_ERROR;
+            TEST_ERROR
         if (rpp->record_size != readsize)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != rev_out.version)
-            TEST_ERROR;
+            TEST_ERROR
         if (HDmemcmp(&rev_out.checksum, &buf[readsize - 4], 4) != 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (rev_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
-            TEST_ERROR;
+            TEST_ERROR
         if (erp->revision_num != rev_out.revision_num)
-            TEST_ERROR;
+            TEST_ERROR
         if (erp->parent_revision_num != rev_out.parent_revision_num)
-            TEST_ERROR;
+            TEST_ERROR
         if (erp->logi_eof != rev_out.logi_eof)
-            TEST_ERROR;
+            TEST_ERROR
 
         /* Final read, get variable-length data */
         if (NULL == (rev_out.comment = HDmalloc((size_t)rev_out.comment_size)))
-            TEST_ERROR;
+            TEST_ERROR
         rev_out.archival_index.list =
             HDcalloc(rev_out.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
         if (NULL == rev_out.archival_index.list)
-            TEST_ERROR;
+            TEST_ERROR
         if (NULL == (rev_out.username = HDmalloc((size_t)rev_out.username_size)))
-            TEST_ERROR;
+            TEST_ERROR
 
         readsize = H5FD_onion_revision_record_decode(buf, &rev_out);
         if (rpp->record_size != readsize)
-            TEST_ERROR;
+            TEST_ERROR
 
         /* Compare revision info with expected filter */
         if (erp->comment == NULL) {
             if (rev_out.comment_size != 0)
-                TEST_ERROR;
+                TEST_ERROR
         }
         else {
             if (HDstrlen(rev_out.comment) != HDstrlen(erp->comment))
-                TEST_ERROR;
+                TEST_ERROR
             if (HDstrcmp(rev_out.comment, erp->comment) != 0)
-                TEST_ERROR;
+                TEST_ERROR
         }
         if (erp->n_index_entries != (uint64_t)(-1) &&
             erp->n_index_entries != rev_out.archival_index.n_entries)
-            TEST_ERROR;
+            TEST_ERROR
 
         HDfree(buf);
-        buf = NULL;
-
         HDfree(rev_out.comment);
-        rev_out.comment = NULL;
-
         HDfree(rev_out.archival_index.list);
-        rev_out.archival_index.list = NULL;
-
         HDfree(rev_out.username);
-        rev_out.username = NULL;
     }
 
     HDfree(whs_out.record_pointer_list);
@@ -1829,16 +1747,11 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     return 0;
 
 error:
-    if (buf != NULL)
-        HDfree(buf);
-    if (rev_out.comment != NULL)
-        HDfree(rev_out.comment);
-    if (rev_out.archival_index.list != NULL)
-        HDfree(rev_out.archival_index.list);
-    if (rev_out.username != NULL)
-        HDfree(rev_out.username);
-    if (whs_out.record_pointer_list != NULL)
-        HDfree(whs_out.record_pointer_list);
+    HDfree(buf);
+    HDfree(rev_out.comment);
+    HDfree(rev_out.archival_index.list);
+    HDfree(rev_out.username);
+    HDfree(whs_out.record_pointer_list);
 
     return -1;
 
@@ -1885,8 +1798,7 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     if (H5Pset_fapl_onion(onion_fapl_id, onion_info) < 0)
         TEST_ERROR
 
-    /* Finish populating expected header bytes
-     */
+    /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
     UINT32ENCODE(ptr, onion_info->page_size);
     sum = H5_checksum_fletcher32(hdr_exp_bytes, H5FD__ONION_ENCODED_SIZE_HEADER - 4);
@@ -1894,23 +1806,21 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     UINT32ENCODE(ptr, sum);
     ptr = NULL;
 
-    /* Finish populating expected whole-history bytes
-     */
+    /* Finish populating expected whole-history bytes */
     sum = H5_checksum_fletcher32(whs_exp_bytes, H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY - 4);
     ptr = whs_exp_bytes + H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY - 4;
     UINT32ENCODE(ptr, sum);
     ptr = NULL;
 
-    /* Look at h5 file: should have zero bytes.
-     */
+    /* Look at h5 file: should have zero bytes */
 
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
 
-    act_buf = HDcalloc(1, 8); /* any size would do */
-    if (NULL == act_buf)
-        TEST_ERROR;
+    /* Size here is arbitrary */
+    if (NULL == (act_buf = HDcalloc(1, 8)))
+        TEST_ERROR
 
     H5E_BEGIN_TRY
     {
@@ -1918,53 +1828,47 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     }
     H5E_END_TRY;
     if (err_ret != FAIL)
-        TEST_ERROR; /* cannot read from empty file */
+        TEST_ERROR /* cannot read from empty file */
 
-    HDfree(act_buf);
+            HDfree(act_buf);
     act_buf = NULL;
 
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
 
-    /* Look at onion file: should have header.
-     */
-
+    /* Look at onion file: should have header */
     if (compare_file_bytes_exactly(paths->onion, fapl_id, H5FD__ONION_ENCODED_SIZE_HEADER, hdr_exp_bytes) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* Look at history backing file: should have nascent whole-history.
-     */
-
+    /* Look at history backing file: should have nascent whole-history */
     if (compare_file_bytes_exactly(paths->recovery, fapl_id, whs_exp_bytes_size, whs_exp_bytes) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    /* Inspect .h5 file contents
-     */
-
-    if (compare_file_bytes_exactly(paths->canon, fapl_id, 8, (const unsigned char *)"ONIONEOF") < 0) {
-        TEST_ERROR;
-    }
+    /* Inspect .h5 file contents */
+    if (compare_file_bytes_exactly(paths->canon, fapl_id, 8, (const unsigned char *)"ONIONEOF") < 0)
+        TEST_ERROR
 
     if (H5Pclose(onion_fapl_id) < 0)
-        TEST_ERROR;
-    onion_fapl_id = H5I_INVALID_HID;
+        TEST_ERROR
 
     return 0;
 
 error:
     if (file != NULL)
         (void)H5FDclose(file);
-    if (act_buf != NULL)
-        HDfree(act_buf);
-    if (onion_fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(onion_fapl_id);
+    HDfree(act_buf);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(onion_fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end verify_stored_onion_create_0_open() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_create_oniontarget()
  *
  * Purpose:     Test the ability of the Onion VFD to create a valid
@@ -1978,7 +1882,6 @@ error:
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -2023,13 +1926,13 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     onion_info.backing_fapl_id = h5_fileaccess();
     fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     paths = onion_filepaths_init(basename, &onion_info);
     if (NULL == paths)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -2040,14 +1943,14 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         /* Create canonical file. */
         vfile_raw = H5FDopen(paths->canon, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
         if (NULL == vfile_raw)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDset_eoa(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDwrite(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, b_list_s) < 0) {
-            TEST_ERROR;
+            TEST_ERROR
         }
         if (H5FDclose(vfile_raw) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         vfile_raw = NULL;
         H5E_BEGIN_TRY
         {
@@ -2055,19 +1958,19 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         }
         H5E_END_TRY;
         if (NULL != vfile_raw)
-            TEST_ERROR; /* no onion history to onion-open created file */
+            TEST_ERROR /* no onion history to onion-open created file */
 
-        /* Create "existing onion file". */
-        vfile_raw = H5FDopen(paths->onion, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
+                /* Create "existing onion file". */
+                vfile_raw = H5FDopen(paths->onion, flags_create_s, onion_info.backing_fapl_id, HADDR_UNDEF);
         if (NULL == vfile_raw)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDset_eoa(vfile_raw, H5FD_MEM_DRAW, b_list_size_s) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDwrite(vfile_raw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 23, "prior history stand-in") < 0) {
-            TEST_ERROR;
+            TEST_ERROR
         }
         if (H5FDclose(vfile_raw) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         vfile_raw = NULL;
     } /* end if to create canonical file for truncation */
 
@@ -2080,7 +1983,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
 
     vfile_rw = H5FDopen(paths->canon, flags_create_s, fapl_id, HADDR_UNDEF);
     if (NULL == vfile_rw)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (verify_stored_onion_create_0_open(paths, &onion_info) < 0)
         TEST_ERROR
@@ -2091,78 +1994,79 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     }
     H5E_END_TRY;
     if (vfile_ro != NULL)
-        TEST_ERROR; /* onionization (creation) not complete; nothing to open */
+        TEST_ERROR /* onionization (creation) not complete; nothing to open */
 
-    /*
-     * WRITING
-     */
+            /*
+             * WRITING
+             */
 
-    if (TRUE == with_initial_data) {
-        haddr_t half_size = 0;
-        haddr_t buf_size  = 0;
+            if (TRUE == with_initial_data)
+        {
+            haddr_t half_size = 0;
+            haddr_t buf_size  = 0;
 
-        /* Write the sub-page entry at addr 0 */
-        if (4 >= onion_info.page_size)
-            TEST_ERROR;
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, 4) < 0)
-            TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, a_list_s) < 0) {
-            TEST_ERROR;
-        }
+            /* Write the sub-page entry at addr 0 */
+            if (4 >= onion_info.page_size)
+                TEST_ERROR
+            if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, 4) < 0)
+                TEST_ERROR
+            if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, a_list_s) < 0) {
+                TEST_ERROR
+            }
 
-        /* Verify logical file contents. */
-        if (NULL == (buf = HDmalloc(4 * sizeof(char))))
-            TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, buf) < 0)
-            TEST_ERROR;
-        if (HDmemcmp(a_list_s, buf, 4) != 0)
-            TEST_ERROR;
-        HDfree(buf);
-        buf = NULL;
+            /* Verify logical file contents. */
+            if (NULL == (buf = HDmalloc(4 * sizeof(char))))
+                TEST_ERROR
+            if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, buf) < 0)
+                TEST_ERROR
+            if (HDmemcmp(a_list_s, buf, 4) != 0)
+                TEST_ERROR
+            HDfree(buf);
+            buf = NULL;
 
-        /* Write the latter half of buffer at addr 0 (more than one page) */
-        half_size = a_list_size_s / 2;
-        buf_size  = a_list_size_s - half_size;
-        if (buf_size <= onion_info.page_size)
-            TEST_ERROR;
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, buf_size) < 0)
-            TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, a_list_s + half_size) < 0)
-            TEST_ERROR;
+            /* Write the latter half of buffer at addr 0 (more than one page) */
+            half_size = a_list_size_s / 2;
+            buf_size  = a_list_size_s - half_size;
+            if (buf_size <= onion_info.page_size)
+                TEST_ERROR
+            if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, buf_size) < 0)
+                TEST_ERROR
+            if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, a_list_s + half_size) < 0)
+                TEST_ERROR
 
-        /* Verify logical file contents. */
-        if (NULL == (buf = HDmalloc(buf_size * sizeof(char))))
-            TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, buf) < 0)
-            TEST_ERROR;
-        if (HDmemcmp(a_list_s + half_size, buf, buf_size) != 0)
-            TEST_ERROR;
-        HDfree(buf);
-        buf = NULL;
+            /* Verify logical file contents. */
+            if (NULL == (buf = HDmalloc(buf_size * sizeof(char))))
+                TEST_ERROR
+            if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, buf) < 0)
+                TEST_ERROR
+            if (HDmemcmp(a_list_s + half_size, buf, buf_size) != 0)
+                TEST_ERROR
+            HDfree(buf);
+            buf = NULL;
 
-        /* Overwrite existing data with entire buffer at addr 0 */
-        if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, a_list_size_s) < 0)
-            TEST_ERROR;
-        if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, a_list_s) < 0)
-            TEST_ERROR;
+            /* Overwrite existing data with entire buffer at addr 0 */
+            if (H5FDset_eoa(vfile_rw, H5FD_MEM_DRAW, a_list_size_s) < 0)
+                TEST_ERROR
+            if (H5FDwrite(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, a_list_s) < 0)
+                TEST_ERROR
 
-        /* Verify logical file contents. */
-        if (NULL == (buf = HDmalloc(a_list_size_s * sizeof(char))))
-            TEST_ERROR;
-        if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
-            TEST_ERROR;
-        if (HDmemcmp(a_list_s, buf, a_list_size_s) != 0)
-            TEST_ERROR;
-        HDfree(buf);
-        buf = NULL;
-    } /* end if writing data to logical file */
+            /* Verify logical file contents. */
+            if (NULL == (buf = HDmalloc(a_list_size_s * sizeof(char))))
+                TEST_ERROR
+            if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
+                TEST_ERROR
+            if (HDmemcmp(a_list_s, buf, a_list_size_s) != 0)
+                TEST_ERROR
+            HDfree(buf);
+            buf = NULL;
+        } /* end if writing data to logical file */
 
     /*
      * CLOSED
      */
 
     if (H5FDclose(vfile_rw) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     vfile_rw = NULL;
 
     /* Look at h5 file: should be known-empty
@@ -2170,7 +2074,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
 
     if (compare_file_bytes_exactly(paths->canon, onion_info.backing_fapl_id, 8,
                                    (const unsigned char *)"ONIONEOF") < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Look at recovery file: should be gone.
      */
@@ -2181,14 +2085,14 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     }
     H5E_END_TRY;
     if (NULL != vfile_raw)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Inspect onion file.
      */
 
     vfile_raw = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     if (NULL == vfile_raw)
-        TEST_ERROR;
+        TEST_ERROR
 
     filter.page_size                        = onion_info.page_size;
     filter.n_revisions                      = 1;
@@ -2200,10 +2104,10 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     filter.revisions[0].logi_eof            = (TRUE == with_initial_data) ? a_list_size_s : 0;
 
     if (verify_history_as_expected_onion(vfile_raw, &filter) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5FDclose(vfile_raw) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     vfile_raw = NULL;
 
     /* R/O open the file with Onion VFD; inspect logial file.
@@ -2211,33 +2115,33 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
 
     vfile_ro = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == vfile_ro)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (TRUE == with_initial_data) {
         if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != a_list_size_s)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDget_eoa(vfile_ro, H5FD_MEM_DRAW) != 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDset_eoa(vfile_ro, H5FD_MEM_DRAW, a_list_size_s) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (NULL == (buf = HDmalloc(a_list_size_s * 64 * sizeof(char))))
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDread(vfile_ro, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (HDmemcmp(a_list_s, buf, a_list_size_s) != 0)
-            TEST_ERROR;
+            TEST_ERROR
         HDfree(buf);
         buf = NULL;
     } /* end if data was written to initial revision */
     else {
         if (H5FDget_eoa(vfile_ro, H5FD_MEM_DRAW) != 0)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != 0)
-            TEST_ERROR;
+            TEST_ERROR
     } /* end if initial revision has no data */
 
     if (H5FDclose(vfile_ro) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     vfile_ro = NULL;
 
     /*
@@ -2245,7 +2149,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
      */
 
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     HDremove(paths->canon);
@@ -2347,7 +2251,7 @@ test_several_revisions_with_logical_gaps(void)
 
     paths = onion_filepaths_init(basename, &onion_info);
     if (NULL == paths)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -2384,7 +2288,7 @@ test_several_revisions_with_logical_gaps(void)
     about[3].writes[0].buf    = a_list_s;
 
     if (do_onion_open_and_writes(paths->canon, &onion_info, 4, about) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Inspect logical file */
 
@@ -2392,42 +2296,42 @@ test_several_revisions_with_logical_gaps(void)
     onion_info.revision_num = 0;
     fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     if (8 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
         HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
-        TEST_ERROR;
+        TEST_ERROR
     }
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /* Empty first revision */
     onion_info.revision_num = 1;
     fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
         HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
-        TEST_ERROR;
+        TEST_ERROR
     }
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /* One offset block in second revision */
@@ -2435,51 +2339,51 @@ test_several_revisions_with_logical_gaps(void)
     // onion_info.revision_num = 1;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     size = a_off + a_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
         HDprintf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
                  H5FDget_eof(file, H5FD_MEM_DRAW));
-        TEST_ERROR;
+        TEST_ERROR
     }
     if (NULL == (buf = HDmalloc(size * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < a_off; i++) {
         if (0 != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (HDmemcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
     /* Repeat read at page offset; test possible read offset error */
     if (NULL == (buf = HDmalloc(ONION_TEST_PAGE_SIZE_5 * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, ONION_TEST_PAGE_SIZE_5, ONION_TEST_PAGE_SIZE_5, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     size = a_off - ONION_TEST_PAGE_SIZE_5;
     for (i = 0; i < size; i++) {
         if (0 != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (HDmemcmp(buf + size, a_list_s, ONION_TEST_PAGE_SIZE_5 - size) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /* Two offset blocks in third revision */
@@ -2487,40 +2391,40 @@ test_several_revisions_with_logical_gaps(void)
     // onion_info.revision_num = 2;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     size = b_off + b_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW))
-        TEST_ERROR;
+        TEST_ERROR
     if (NULL == (buf = HDmalloc(size * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = 0; i < a_off; i++) {
         if (0 != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (HDmemcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = a_off + a_list_size_s; i < b_off; i++) {
         if (0 != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (HDmemcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /* From start and partial overwrite in fourth revision */
@@ -2528,39 +2432,39 @@ test_several_revisions_with_logical_gaps(void)
     // onion_info.revision_num = 3;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     size = b_off + b_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW))
-        TEST_ERROR;
+        TEST_ERROR
     buf = (unsigned char *)HDmalloc(sizeof(unsigned char) * size);
     if (NULL == buf)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDset_eoa(file, H5FD_MEM_DRAW, size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDmemcmp(buf, a_list_s, a_list_size_s) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDmemcmp(buf + a_list_size_s, a_list_s + a_list_size_s - a_off, a_off) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     for (i = a_off + a_list_size_s; i < b_off; i++) {
         if (0 != buf[i])
-            TEST_ERROR;
+            TEST_ERROR
     }
     if (HDmemcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /* No fifth revision */
@@ -2569,25 +2473,25 @@ test_several_revisions_with_logical_gaps(void)
         //onion_info.revision_num = 4;
         fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
         if (H5I_INVALID_HID == fapl_id)
-            TEST_ERROR;
+            TEST_ERROR
         if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
         if (NULL != file)
-            TEST_ERROR;
+            TEST_ERROR
 
         if (H5FDclose(file) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         file = NULL;
         if (H5Pclose(fapl_id) < 0)
-            TEST_ERROR;
+            TEST_ERROR
         fapl_id = H5I_INVALID_HID;
     */
     /* Inspect history construction */
 
     file = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
 
     filter.page_size   = onion_info.page_size;
     filter.n_revisions = 4;
@@ -2619,10 +2523,10 @@ test_several_revisions_with_logical_gaps(void)
     filter.revisions[3].logi_eof            = b_off + b_list_size_s;
 
     if (verify_history_as_expected_onion(file, &filter) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
 
     /*
@@ -2646,14 +2550,17 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (whs_out.record_pointer_list != NULL)
-        HDfree(whs_out.record_pointer_list);
-    if (buf != NULL)
-        HDfree(buf);
+    HDfree(whs_out.record_pointer_list);
+    HDfree(buf);
+
     if (file != NULL)
         (void)H5FDclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_several_revisions_with_logical_gaps() */
@@ -2711,14 +2618,14 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             /* Write to file */
             if (H5FDget_eoa(file, H5FD_MEM_DRAW) < wi->offset + wi->size &&
                 H5FDset_eoa(file, H5FD_MEM_DRAW, wi->offset + wi->size) < 0)
-                TEST_ERROR;
+                TEST_ERROR
             if (H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, wi->buf) < 0)
-                TEST_ERROR;
+                TEST_ERROR
             /* Verify write as expected */
             if (NULL == (buf_vfy = HDmalloc(wi->size * sizeof(unsigned char))))
-                TEST_ERROR;
+                TEST_ERROR
             if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, buf_vfy) < 0)
-                TEST_ERROR;
+                TEST_ERROR
             if (HDmemcmp(buf_vfy, wi->buf, wi->size) != 0) {
                 const unsigned char *_buf = wi->buf;
                 size_t               z    = 0;
@@ -2726,7 +2633,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 for (z = 0; z < wi->size; z++)
                     HDprintf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
                 HDfflush(stdout);
-                TEST_ERROR;
+                TEST_ERROR
             }
             HDfree(buf_vfy);
             buf_vfy = NULL;
@@ -2745,10 +2652,14 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
 error:
     if (file != NULL)
         (void)H5FDclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
-    if (buf_vfy != NULL)
-        HDfree(buf_vfy);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    HDfree(buf_vfy);
 
     return -1;
 } /* end do_onion_open_and_writes() */
@@ -2809,13 +2720,13 @@ test_page_aligned_history_create(void)
     onion_info.backing_fapl_id = h5_fileaccess();
     fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     paths = onion_filepaths_init(basename, &onion_info);
     if (NULL == paths)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -2838,20 +2749,20 @@ test_page_aligned_history_create(void)
     about[1].writes[0].buf    = a_list_s;
 
     if (do_onion_open_and_writes(paths->canon, &onion_info, 2, about) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Inspect logical file */
     if (NULL == (buf = HDmalloc(b_list_size_s * sizeof(unsigned char))))
-        TEST_ERROR;
+        TEST_ERROR
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == file)
-        TEST_ERROR;
+        TEST_ERROR
     if (b_list_size_s != H5FDget_eof(file, H5FD_MEM_DRAW))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDset_eoa(file, H5FD_MEM_DRAW, b_list_size_s) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (HDmemcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
         HDprintf("aoff: %" PRIu64 "\n", a_off);
@@ -2860,7 +2771,7 @@ test_page_aligned_history_create(void)
             HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
         HDfflush(stdout);
-        TEST_ERROR;
+        TEST_ERROR
     }
     if (HDmemcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
@@ -2870,10 +2781,10 @@ test_page_aligned_history_create(void)
             HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
         HDfflush(stdout);
-        TEST_ERROR;
+        TEST_ERROR
     }
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     HDfree(buf);
     buf = NULL;
@@ -2881,18 +2792,18 @@ test_page_aligned_history_create(void)
     /* Inspect history construction */
 
     if (NULL == (file = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF)))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDset_eoa(file, H5FD_MEM_DRAW, H5FDget_eof(file, H5FD_MEM_DRAW)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (NULL == (buf = HDmalloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, H5FD__ONION_ENCODED_SIZE_HEADER, buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_onion_history_header_decode(buf, &hdr_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
-        TEST_ERROR;
+        TEST_ERROR
     if (hdr_out.whole_history_addr & ((1 << 5) - 1)) /* 5::PAGE_SIZE_5 */
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
 
@@ -2900,23 +2811,23 @@ test_page_aligned_history_create(void)
         TEST_ERROR
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.whole_history_addr, hdr_out.whole_history_size,
                  buf) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != hdr_out.whole_history_size)
-        TEST_ERROR;
+        TEST_ERROR
     if (whs_out.n_revisions != 2)
-        TEST_ERROR;
+        TEST_ERROR
     whs_out.record_pointer_list = HDcalloc(whs_out.n_revisions, sizeof(H5FD_onion_record_pointer_t));
     if (NULL == whs_out.record_pointer_list)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != hdr_out.whole_history_size)
-        TEST_ERROR;
+        TEST_ERROR
     HDfree(buf);
     buf = NULL;
 
     for (i = 0; i < whs_out.n_revisions; i++) {
         H5FD_onion_record_pointer_t *rr_p = &whs_out.record_pointer_list[i];
         if (rr_p->phys_addr & ((1 << 5) - 1)) /* 5::PAGE_SIZE_5 */
-            TEST_ERROR;
+            TEST_ERROR
         /* TODO: check phys_addr of each page entry? */
     }
 
@@ -2924,7 +2835,7 @@ test_page_aligned_history_create(void)
     whs_out.record_pointer_list = NULL;
 
     if (H5FDclose(file) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     file = NULL;
     HDfree(buf);
     buf = NULL;
@@ -2934,7 +2845,7 @@ test_page_aligned_history_create(void)
      */
 
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     HDremove(paths->canon);
@@ -2954,27 +2865,28 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (whs_out.record_pointer_list != NULL)
-        HDfree(whs_out.record_pointer_list);
-    if (buf != NULL)
-        HDfree(buf);
+    HDfree(whs_out.record_pointer_list);
+    HDfree(buf);
+
     if (file != NULL)
         (void)H5FDclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_page_aligned_history_create() */
 
 /*-----------------------------------------------------------------------------
- *
  * Function:    test_integration_create()
  *
  * Purpose:     Create and make multiple revisions in an HDF5 file.
  *
  * Return:      PASSED : 0
  *              FAILED : -1
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -3001,12 +2913,12 @@ test_integration_create(void)
 
     onion_info.backing_fapl_id = h5_fileaccess();
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
-        TEST_ERROR;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -3077,10 +2989,10 @@ test_integration_create(void)
      *----------------------------------------------------------------------
      */
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3094,7 +3006,7 @@ test_integration_create(void)
             dset_data[i][j] = i * 6 + j + 1;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3107,23 +3019,18 @@ test_integration_create(void)
      * Second revision: open the file with Onion VFD and change the data
      *----------------------------------------------------------------------
      */
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-
-    if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR
-    }
+
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     for (i = 0; i < 128; i++)
         for (j = 0; j < 256; j++)
             dset_data[i][j] = i * 3 + j + 5;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* CLEANUP */
     if (H5Dclose(dset) < 0)
@@ -3133,7 +3040,7 @@ test_integration_create(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
@@ -3147,14 +3054,14 @@ test_integration_create(void)
     onion_info.revision_num = 0;
     fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
 
     if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3184,7 +3091,7 @@ test_integration_create(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
@@ -3192,23 +3099,15 @@ test_integration_create(void)
      *----------------------------------------------------------------------
      */
     onion_info.revision_num = 1;
-    fapl_id                 = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
-    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
-
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
-
-    if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
-    }
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR
 
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
 
@@ -3230,7 +3129,7 @@ test_integration_create(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
@@ -3239,38 +3138,27 @@ test_integration_create(void)
      */
     onion_info.revision_num = 2;
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
-    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
-
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
-
-    if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
-    }
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR
 
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
 
     for (i = 0; i < 128; i++) {
         for (j = 0; j < 256; j++) {
-            // printf("i: %d, j: %d\n", i, j);
             int expected = i * 3 + j + 5;
-            // int expected = i * 6 + j + 1;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
             }
             else {
-                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
             }
         }
@@ -3278,17 +3166,10 @@ test_integration_create(void)
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
-    dset = H5I_INVALID_HID;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR
-    file_id = H5I_INVALID_HID;
-
-    /*
-     * Close and release resources.
-     */
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-    fapl_id = H5I_INVALID_HID;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -3307,12 +3188,13 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file_id != H5I_INVALID_HID)
-        (void)H5Fclose(file_id);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_integration_create() */
@@ -3341,13 +3223,13 @@ test_integration_create_simple(void)
     onion_info.backing_fapl_id = h5_fileaccess();
     fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     paths = onion_filepaths_init(basename, &onion_info);
     if (NULL == paths)
-        TEST_ERROR;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -3357,61 +3239,52 @@ test_integration_create_simple(void)
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {1, ONE_DIM_SIZE}, maxdims[2] = {1, ONE_DIM_SIZE};
-    int     wdata[1][ONE_DIM_SIZE], /* Write buffer */
-        fillval, i, j;
+    hid_t   file       = H5I_INVALID_HID;
+    hid_t   space      = H5I_INVALID_HID;
+    hid_t   dset       = H5I_INVALID_HID;
+    hid_t   dcpl       = H5I_INVALID_HID;
+    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
+    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
+    int     wdata[1][ONE_DIM_SIZE]; /* Write buffer */
+    int     fillval;
 
-    /*
-     * Initialize data.
-     */
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    /* Initialize data */
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         wdata[0][i] = i;
 
-    /*
-     * Create a new file using the default properties.
-     */
-    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create dataspace with unlimited dimensions.
-     */
-    space = H5Screate_simple(2, dims, maxdims);
+    /* Create dataspace with unlimited dimensions*/
+    if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create the dataset creation property list
-     */
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    /* Create the dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
 
-    /*
-     * Set the fill value for the dataset.
-     */
+    /* Set the fill value for the dataset */
     fillval = 99;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
         TEST_ERROR
 
-    /*
-     * Set the allocation time to "early".  This way we can be sure
+    /* Set the allocation time to "early".  This way we can be sure
      * that reading from the dataset immediately after creation will
      * return the fill value.
      */
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         TEST_ERROR
 
-    /*
-     * Create the dataset using the dataset creation property list.
-     */
-    dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    /* Create the dataset using the dataset creation property list */
+    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Write the data to the dataset.
-     */
+    /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]) < 0)
         TEST_ERROR
 
-    /*
-     * Close and release resources.
-     */
+    /* Close everything */
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR
     if (H5Dclose(dset) < 0)
@@ -3425,22 +3298,18 @@ test_integration_create_simple(void)
      * First revision: open the file with Onion VFD and change the data
      *----------------------------------------------------------------------
      */
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file_id) {
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR
-    }
+
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     int dset_data[1][ONE_DIM_SIZE];
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data[0][i] = i + ONE_DIM_SIZE;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3453,23 +3322,16 @@ test_integration_create_simple(void)
      * Second revision: open the file with Onion VFD and change the data
      *----------------------------------------------------------------------
      */
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file_id) {
-        printf("\n\n\n\nERROR OPENING\n\n\n\n");
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
-        printf("\n\n\n\nERROR OPENING DSET\n\n\n\n");
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR
-    }
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data[0][i] = i + 2048;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* CLEANUP */
     if (H5Dclose(dset) < 0)
@@ -3483,23 +3345,16 @@ test_integration_create_simple(void)
      * Third revision: open the file with Onion VFD and change the data
      *----------------------------------------------------------------------
      */
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file_id) {
-        printf("\n\n\n\nERROR OPENING\n\n\n\n");
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
-        printf("\n\n\n\nERROR OPENING DSET\n\n\n\n");
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR
-    }
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    for (i = 0; i < ONE_DIM_SIZE; i += 20)
+    for (int i = 0; i < ONE_DIM_SIZE; i += 20)
         dset_data[0][i] = i + 3072;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* CLEANUP */
     if (H5Dclose(dset) < 0)
@@ -3509,7 +3364,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     fapl_id = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
@@ -3522,31 +3377,22 @@ test_integration_create_simple(void)
      */
     onion_info.revision_num = 2;
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
-    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
-
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
-
-    if (H5I_INVALID_HID == file_id) {
-        printf("\n\n\n\nERROR OPENING\n\n\n\n");
-        TEST_ERROR;
-    }
-
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    if (dset < 0) {
-        printf("\n\n\n\nERROR OPENING DSET\n\n\n\n");
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
-    }
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR
+
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     int rdata[1][ONE_DIM_SIZE];
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 1; i++) {
-        for (j = 0; j < ONE_DIM_SIZE; j += 20) {
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < ONE_DIM_SIZE; j += 20) {
             int expected = j + 2048;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
@@ -3555,19 +3401,13 @@ test_integration_create_simple(void)
         }
     }
 
+    /* Close everything */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
-    dset = H5I_INVALID_HID;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR
-    file_id = H5I_INVALID_HID;
-
-    /*
-     * Close and release resources.
-     */
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-    fapl_id = H5I_INVALID_HID;
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -3586,12 +3426,13 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file_id != H5I_INVALID_HID)
-        (void)H5Fclose(file_id);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_integration_create_simple() */
@@ -3613,22 +3454,26 @@ test_integration_create_delete_objects(void)
         "initial commit" /* comment          */
     };
     hid_t   group_id      = H5I_INVALID_HID;
-    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hsize_t attr_dim[1] = {4};
+    hid_t   attr_space_id = H5I_INVALID_HID;
+    hid_t   attr_id       = H5I_INVALID_HID;
+    hsize_t attr_dim[1]   = {4};
+
+    hid_t   file, space, dset, dcpl; /* Handles */
+    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
+    int     wdata[4][4], /* Write buffer */
+        fillval, i, j;
 
     TESTING("onion-created HDF5 file with revisions testing addition and deletion of objects");
 
     /* Set up */
     onion_info.backing_fapl_id = h5_fileaccess();
-    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    paths = onion_filepaths_init(basename, &onion_info);
-    if (NULL == paths)
-        TEST_ERROR;
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -3639,22 +3484,14 @@ test_integration_create_delete_objects(void)
      *----------------------------------------------------------------------
      */
 
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    int     wdata[4][4], /* Write buffer */
-        fillval, i, j;
-
-    /*
-     * Initialize data.
-     */
+    /* Initialize data */
     for (i = 0; i < 4; i++)
         for (j = 0; j < 4; j++)
             wdata[i][j] = i + j;
 
-    /*
-     * Create a new file using the default properties.
-     */
-    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     /*
      * Create dataspace with unlimited dimensions.
@@ -3706,7 +3543,7 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /*
@@ -3734,11 +3571,11 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     if (H5Ldelete(file, "DS2", H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3750,7 +3587,7 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* Create dataspace for attribute */
@@ -3758,7 +3595,7 @@ test_integration_create_delete_objects(void)
 
     if ((attr_id =
              H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Sclose(attr_space_id) < 0)
         TEST_ERROR
@@ -3774,11 +3611,11 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     if (H5Adelete(file, "file_attribute") < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3790,11 +3627,11 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     if ((group_id = H5Gcreate2(file, "new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR
@@ -3808,11 +3645,11 @@ test_integration_create_delete_objects(void)
      */
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     if (H5Ldelete(file, "new_group", H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3829,16 +3666,16 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 1;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The second dataset (DS2) should exist */
     if (H5Lexists(file, "DS2", H5P_DEFAULT) <= 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3851,16 +3688,16 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 2;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The second dataset (DS2) shouldn't exist */
     if (H5Lexists(file, "DS2", H5P_DEFAULT) > 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3873,16 +3710,16 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 3;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The file attribute should exist */
     if (H5Aexists(file, "file_attribute") <= 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3895,16 +3732,16 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 4;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The file attribute should be removed */
     if (H5Aexists(file, "file_attribute") > 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3917,16 +3754,16 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 5;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The new group should exist */
     if (H5Lexists(file, "new_group", H5P_DEFAULT) <= 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -3939,24 +3776,20 @@ test_integration_create_delete_objects(void)
     onion_info.revision_num = 6;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
     if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
+        TEST_ERROR
     }
 
     /* The new group should exist */
     if (H5Lexists(file, "new_group", H5P_DEFAULT) > 0)
-        TEST_ERROR;
+        TEST_ERROR
 
+    /* Close everything */
     if (H5Fclose(file) < 0)
         TEST_ERROR
-    file = H5I_INVALID_HID;
-
-    /*
-     * Close and release resources.
-     */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR
     if (H5Pclose(dcpl) < 0)
@@ -3981,12 +3814,14 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file != H5I_INVALID_HID)
-        (void)H5Fclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Pclose(fapl_id);
+        H5Sclose(space);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_integration_create_delete_objects */
@@ -4007,28 +3842,31 @@ test_integration_dset_extension(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t   file = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hid_t   space, dset_space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    hsize_t size[2], offset[2];
-    int     wdata[4][4], /* Write buffer */
-        fillval, i, j;
-    int rdata[4][4]; /* Read buffer */
+    hid_t   file       = H5I_INVALID_HID;
+    hid_t   space      = H5I_INVALID_HID;
+    hid_t   dset_space = H5I_INVALID_HID;
+    hid_t   dset       = H5I_INVALID_HID;
+    hid_t   dcpl       = H5I_INVALID_HID;
+    hsize_t dims[2]    = {4, 4};
+    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2]   = {4, 4};
+    hsize_t size[2];
+    hsize_t offset[2];
+    int     wdata[4][4]; /* Write buffer */
+    int     fillval;
+    int     rdata[4][4]; /* Read buffer */
 
     TESTING("onion-created HDF5 file with revisions testing dataset extension");
 
     /* Setup */
     onion_info.backing_fapl_id = h5_fileaccess();
-    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
-    paths = onion_filepaths_init(basename, &onion_info);
-    if (NULL == paths)
-        TEST_ERROR;
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -4038,28 +3876,25 @@ test_integration_dset_extension(void)
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    /*
-     * Initialize data.
-     */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+
+    /* Initialize data */
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             wdata[i][j] = i + j;
 
-    /*
-     * Create a new file using the default properties.
-     */
-    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create dataspace with unlimited dimensions.
-     */
-    space = H5Screate_simple(2, dims, maxdims);
+    /* Create dataspace with unlimited dimensions*/
+    if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create the dataset creation property list, and set the chunk
-     * size.
+    /* Create the dataset creation property list, and set the chunk
+     * size
      */
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         TEST_ERROR
 
@@ -4077,7 +3912,7 @@ test_integration_dset_extension(void)
 
     /* Create the dataset using the dataset creation property list */
     if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
@@ -4093,7 +3928,7 @@ test_integration_dset_extension(void)
      *----------------------------------------------------------------------
      */
     if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Open the dataset */
     if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
@@ -4131,13 +3966,12 @@ test_integration_dset_extension(void)
      * Second revision: open the file with Onion VFD and shrink the dataset
      *----------------------------------------------------------------------
      */
-    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
-    }
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR
 
     /* Open the dataset */
-    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     /* Extend the dataset and shrink back the size */
     if (H5Dset_extent(dset, dims) < 0)
@@ -4161,14 +3995,14 @@ test_integration_dset_extension(void)
     onion_info.revision_num = 1;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Open the dataset */
     if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if ((dset_space = H5Dget_space(dset)) < 0)
         TEST_ERROR
@@ -4181,8 +4015,8 @@ test_integration_dset_extension(void)
     if (H5Dread(dset, H5T_NATIVE_INT, space, dset_space, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             if (rdata[i][j] != wdata[i][j])
                 TEST_ERROR
 
@@ -4201,10 +4035,10 @@ test_integration_dset_extension(void)
     onion_info.revision_num = 2;
 
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Open the dataset */
     dset = H5Dopen(file, "DS1", H5P_DEFAULT);
@@ -4215,8 +4049,8 @@ test_integration_dset_extension(void)
     if (H5Dread(dset, H5T_NATIVE_INT, space, dset_space, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             if (rdata[i][j] != wdata[i][j])
                 TEST_ERROR
 
@@ -4253,12 +4087,13 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file != H5I_INVALID_HID)
-        (void)H5Fclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* end test_integration_dset_extension */
@@ -4267,7 +4102,16 @@ static int
 test_integration_ctl(void)
 {
     const char *            basename   = "integration_ctl.h5";
+    hid_t                   file       = H5I_INVALID_HID;
+    hid_t                   space      = H5I_INVALID_HID;
+    hid_t                   dset       = H5I_INVALID_HID;
+    hid_t                   dcpl       = H5I_INVALID_HID;
     hid_t                   fapl_id    = H5I_INVALID_HID;
+    hsize_t                 dims[2]    = {4, 4};
+    hsize_t                 maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t                 chunk[2]   = {4, 4};
+    int                     wdata[4][4]; /* Write buffer */
+    int                     fillval;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
@@ -4277,11 +4121,8 @@ test_integration_ctl(void)
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-        "initial commit" /* comment          */
+        "initial commit" /* comment */
     };
-    hid_t     group_id      = H5I_INVALID_HID;
-    hid_t     attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hsize_t   attr_dim[1]  = {4};
     H5FD_t *  file_drv_ptr = NULL;
     uint64_t  op_code;
     uint64_t  flags;
@@ -4291,15 +4132,14 @@ test_integration_ctl(void)
 
     /* Set up */
     onion_info.backing_fapl_id = h5_fileaccess();
-    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
-    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
 
-    paths = onion_filepaths_init(basename, &onion_info);
-    if (NULL == paths)
-        TEST_ERROR;
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR
+
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
+        TEST_ERROR
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -4310,59 +4150,42 @@ test_integration_ctl(void)
      *----------------------------------------------------------------------
      */
 
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    int     wdata[4][4], /* Write buffer */
-        fillval, i, j;
-
-    /*
-     * Initialize data.
-     */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    /* Initialize data */
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             wdata[i][j] = i + j;
 
-    /*
-     * Create a new file using the default properties.
-     */
-    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create dataspace with unlimited dimensions.
-     */
-    space = H5Screate_simple(2, dims, maxdims);
+    /* Create dataspace with unlimited dimensions */
+    if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create the dataset creation property list, and set the chunk
-     * size.
-     */
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    /* Create the dataset creation property list, and set the chunk size */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         TEST_ERROR
 
-    /*
-     * Set the fill value for the dataset.
-     */
+    /* Set the fill value for the dataset */
     fillval = 99;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
         TEST_ERROR
 
-    /*
-     * Set the allocation time to "early".  This way we can be sure
+    /* Set the allocation time to "early".  This way we can be sure
      * that reading from the dataset immediately after creation will
      * return the fill value.
      */
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         TEST_ERROR
 
-    /*
-     * Create the dataset using the dataset creation property list.
-     */
-    dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    /* Create the dataset using the dataset creation property list */
+    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Write the data to the dataset.
-     */
+    /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR
 
@@ -4375,19 +4198,14 @@ test_integration_ctl(void)
      * First revision: open the file with Onion VFD and add a dataset (DS2) to the file
      *----------------------------------------------------------------------
      */
-    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
-    }
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR
 
-    /*
-     * Create the dataset using the dataset creation property list.
-     */
-    dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    /* Create the dataset using the dataset creation property list */
+    if ((dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
-    /*
-     * Write the data to the dataset.
-     */
+    /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR
 
@@ -4403,13 +4221,11 @@ test_integration_ctl(void)
      * which was added during the first revision.
      *----------------------------------------------------------------------
      */
-    file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file) {
-        TEST_ERROR;
-    }
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR
 
     if (H5Ldelete(file, "DS2", H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     if (H5Fclose(file) < 0)
         TEST_ERROR
@@ -4423,15 +4239,16 @@ test_integration_ctl(void)
     if (NULL == (file_drv_ptr = H5FDopen(basename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR
 
-    num_revisions = HDmalloc(sizeof(uint64_t));
-    op_code       = H5FD_CTL__GET_NUM_REVISIONS;
-    flags         = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    if (NULL == (num_revisions = HDmalloc(sizeof(uint64_t))))
+        TEST_ERROR
+    op_code = H5FD_CTL__GET_NUM_REVISIONS;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
-    if (H5FDctl(file_drv_ptr, op_code, flags, NULL, &num_revisions) < 0)
+    if (H5FDctl(file_drv_ptr, op_code, flags, NULL, (void **)&num_revisions) < 0)
         TEST_ERROR
 
     if (*num_revisions != 2) {
-        HDprintf("the number of revisions should be 2 but got %lld\n", *num_revisions);
+        HDprintf("the number of revisions should be 2 but got %" PRIu64 "\n", *num_revisions);
         TEST_ERROR
     }
 
@@ -4439,17 +4256,14 @@ test_integration_ctl(void)
     if (H5FDclose(file_drv_ptr) < 0)
         TEST_ERROR
 
-    /*
-     * Close and release resources.
-     */
+    /* Close and release resources */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR
     if (H5Sclose(space) < 0)
         TEST_ERROR
-    if (num_revisions)
-        HDfree(num_revisions);
+    HDfree(num_revisions);
 
     HDremove(paths->canon);
     HDremove(paths->onion);
@@ -4468,12 +4282,13 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file != H5I_INVALID_HID)
-        (void)H5Fclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 }
@@ -4523,7 +4338,7 @@ main(void)
 
 #if H5FD_ONION_ENABLE_INDEX_STATS
     nerrors -= test_working_index_stats(); /* TODO */
-#endif                                     /* H5FD_ONION_ENABLE_INDEX_STATS */
+#endif
 
     if (nerrors > 0) {
         HDprintf("***** %d Onion TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
