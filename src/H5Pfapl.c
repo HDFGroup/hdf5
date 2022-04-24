@@ -1636,7 +1636,7 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
         size_t config_str_len = HDstrlen(config_str);
 
         if (config_buf) {
-            HDstrncpy(config_buf, config_str, MIN(config_str_len + 1, buf_size));
+            HDstrncpy(config_buf, config_str, buf_size);
             if (config_str_len >= buf_size)
                 config_buf[buf_size - 1] = '\0';
         }

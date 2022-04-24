@@ -8124,8 +8124,8 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
     /* Compose chunked index info struct */
     idx_info.f       = dset->oloc.file;
     idx_info.pline   = &dset->shared->dcpl_cache.pline;
-    idx_info.layout  = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.layout  = &layout->u.chunk;
+    idx_info.storage = &layout->storage.u.chunk;
 
     /* If the dataset is not written, return without errors */
     if (H5F_addr_defined(idx_info.storage->idx_addr)) {
@@ -8136,8 +8136,7 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         ud.op_data = op_data;
 
         /* Iterate over the allocated chunks calling the iterator callback */
-        if ((ret_value =
-                 (dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
+        if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
             HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
     } /* end if H5F_addr_defined */
 

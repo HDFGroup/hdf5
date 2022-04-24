@@ -3014,7 +3014,7 @@ H5O_get_proxy(const H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__free(H5O_t *oh, hbool_t force)
+H5O__free(H5O_t *oh, hbool_t H5_ATTR_NDEBUG_UNUSED force)
 {
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */

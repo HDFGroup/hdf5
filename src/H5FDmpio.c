@@ -1865,7 +1865,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 if (!sub_types) {
                     HDassert(!sub_types_created);
 
-                    if (NULL == (sub_types = (int *)HDmalloc((size_t)count * sizeof(MPI_Datatype))))
+                    if (NULL == (sub_types = HDmalloc((size_t)count * sizeof(MPI_Datatype))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
                     if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
                         H5MM_free(sub_types);
