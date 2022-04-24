@@ -31,6 +31,7 @@ CMP='cmp'
 DIFF='diff -c'
 CP='cp'
 DIRNAME='dirname'
+BASENAME='basename'
 LS='ls'
 AWK='awk'
 
@@ -141,17 +142,21 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDLIBDIR
+                $CP -fR $tstfile $BLDLIBDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
+                BNAME=`$BASENAME $tstfile`
+                if [ "$BNAME" = "libhdf5_java.dylib" ]; then
+                    COPIED_LIBHDF5_JAVA=1
+                fi
             fi
         fi
     done
-    if [ "$IS_DARWIN" = "yes" ]; then
+    if [[ "$IS_DARWIN" = "yes" ]] && [[ $COPIED_LIBHDF5_JAVA -eq 1 ]]; then
        (cd testlibs; \
          install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
          exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
@@ -172,7 +177,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDLIBDIR
+                $CP -fR $tstfile $BLDLIBDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -195,7 +200,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $BLDLIBDIR
+                $CP -fR $tstfile $BLDLIBDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
