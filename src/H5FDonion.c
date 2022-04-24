@@ -1650,7 +1650,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
         if (revision_num != r_out->revision_num)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                         "could not find target revision!") /* TODO: corrupted? */
-    } /* end if revision ID at 'leaf' in binary search */
+    }                                                      /* end if revision ID at 'leaf' in binary search */
 
     if (r_out->username_size > 0)
         if (NULL == (r_out->username = H5MM_malloc(sizeof(char) * r_out->username_size)))
@@ -2023,8 +2023,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         }
     }
     file->origin_eof = file->header.origin_eof;
-    file->logi_eof = MAX(file->rev_record.logi_eof, file->logi_eof);
-    file->logi_eoa = 0;
+    file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
+    file->logi_eoa   = 0;
 
     file->history_eof = H5FD_get_eoa(file->backing_onion, H5FD_MEM_DRAW);
     if (TRUE == file->page_align_history)
