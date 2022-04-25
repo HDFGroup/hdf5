@@ -300,7 +300,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
+H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -318,8 +318,7 @@ H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth)
         ;
     }
     else if (depth == H5_COPY_SHALLOW) {
-        /* Discarding 'const' qualifier OK - QAK */
-        H5G__ent_reset((H5G_entry_t *)src);
+        H5G__ent_reset(src);
     } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID

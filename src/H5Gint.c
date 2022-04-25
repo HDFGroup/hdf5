@@ -689,7 +689,7 @@ H5G_oloc(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5G_nameof(const H5G_t *grp)
+H5G_nameof(H5G_t *grp)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
