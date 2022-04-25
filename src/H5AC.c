@@ -2432,7 +2432,7 @@ done:
 /*------------------------------------------------------------------------------
  * Function:    H5AC_expunge_tag_type_metadata()
  *
- * Purpose:     Wrapper for cache level function which expunge entries with
+ * Purpose:     Wrapper for cache level function which expunges entries with
  *              a specific tag and type id.
  *
  * Return:      SUCCEED on success, FAIL otherwise.
