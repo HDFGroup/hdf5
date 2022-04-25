@@ -74,7 +74,6 @@ static int sf_open_file_count = 0;
 #endif
 
 FILE *sf_logfile = NULL;
-FILE *client_log = NULL;
 
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
@@ -87,7 +86,7 @@ static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topolog
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
-static herr_t generate_subfile_name(subfiling_context_t *sf_context, char *filename_out,
+static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
                                     size_t filename_out_len, char **filename_basename_out,
                                     char **subfile_dir_out);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
@@ -95,10 +94,7 @@ static herr_t create_config_file(subfiling_context_t *sf_context, const char *ba
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                const char *subfile_dir, const char *mode, FILE **config_file_out);
 
-static void initialize_statistics(void);
-#if 0 /* TODO */
-static void        manage_client_logfile(int client_rank, int flag_value);
-#endif
+static void        initialize_statistics(void);
 static int         numDigits(int n);
 static int         active_file_map_entries(void);
 static void        clear_fid_map_entry(uint64_t sf_fid);
@@ -115,25 +111,6 @@ initialize_statistics(void)
 {
     HDmemset(subfiling_stats, 0, sizeof(subfiling_stats));
 }
-
-#if 0 /* TODO */
-static void
-manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_value)
-{
-#ifndef NDEBUG
-    if (flag_value) {
-        char logname[64];
-        HDsnprintf(logname, sizeof(logname), "sf_client_%d.log", client_rank);
-        client_log = fopen(logname, "a+");
-    }
-    else if (client_log) {
-        fclose(client_log);
-        client_log = 0;
-    }
-#endif
-    return;
-}
-#endif
 
 static int
 numDigits(int n)
@@ -937,11 +914,6 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
         if (check_value > 0)
             sf_verbose_flag = 1;
     }
-
-    /* Maybe open client-side log files */
-    if (sf_verbose_flag) {
-        manage_client_logfile(world_rank, sf_verbose_flag);
-    }
 #endif
 
     /* Initialize new subfiling context ID based on configuration information */
@@ -1004,7 +976,7 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
 done:
     if (ret_value < 0) {
-        if (context_id > 0 && H5_free_subfiling_object(context_id) < 0) {
+        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't free subfiling object\n", __func__);
 #endif
@@ -1465,7 +1437,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_stripe_size = H5FD_DEFAULT_STRIPE_DEPTH;
     sf_context->sf_write_count = 0;
     sf_context->sf_read_count  = 0;
-    sf_context->sf_eof         = 0;
+    sf_context->sf_eof         = HADDR_UNDEF;
     sf_context->sf_fid         = -1;
     sf_context->sf_group_size  = 1;
     sf_context->sf_group_rank  = 0;
@@ -1475,11 +1447,11 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
 
     /* Check for an IOC stripe size setting in the environment */
     if ((env_value = HDgetenv(H5_IOC_STRIPE_SIZE))) {
-        long stripe_size = -1;
+        long long stripe_size = -1;
 
         errno = 0;
 
-        stripe_size = HDstrtol(env_value, NULL, 0);
+        stripe_size = HDstrtoll(env_value, NULL, 0);
         if (ERANGE == errno) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: invalid stripe size setting '%s' for " H5_IOC_STRIPE_SIZE "\n", __func__,
@@ -1732,6 +1704,10 @@ done:
         ret_value = FAIL;
     }
 
+    if (ret_value < 0) {
+        clear_fid_map_entry(sf_context->h5_file_id);
+    }
+
     return ret_value;
 }
 
@@ -1872,7 +1848,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     char * filepath    = NULL;
     char * subfile_dir = NULL;
     char * base        = NULL;
-    int    retries     = 2;
+    int    fd          = -1;
     herr_t ret_value   = SUCCEED;
 
     HDassert(msg);
@@ -1907,7 +1883,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     }
 
     /* Generate the name of the subfile that this IOC rank will open */
-    if (generate_subfile_name(sf_context, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
+    if (generate_subfile_name(sf_context, file_acc_flags, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't generate name for subfile\n", __func__);
 #endif
@@ -1928,18 +1904,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     begin_thread_exclusive();
 
     /* Attempt to create/open the subfile for this IOC rank */
-    for (int k = 0; k < retries; k++) {
-        int fd;
-
-        if ((fd = HDopen(filepath, file_acc_flags, mode)) > 0) {
-            sf_context->sf_fid = fd;
-            if (file_acc_flags & O_CREAT)
-                sf_context->sf_eof = 0;
-            break;
-        }
-    }
-
-    if (sf_context->sf_fid < 0) {
+    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
         end_thread_exclusive(); /* TODO: try to only unlock in one place? */
 
         HDperror("ioc_open_file - file open failed");
@@ -1954,6 +1919,10 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
         ret_value = FAIL;
         goto done;
     }
+
+    sf_context->sf_fid = fd;
+    if (file_acc_flags & O_CREAT)
+        sf_context->sf_eof = 0;
 
 #ifdef H5_SUBFILING_DEBUG
     if (sf_verbose_flag) {
@@ -2004,8 +1973,8 @@ done:
 #ifdef H5_SUBFILING_DEBUG
     t_end = MPI_Wtime();
     if (sf_verbose_flag) {
-        HDprintf("[%s %d] open completed in %lf seconds with %d errors\n", __func__, subfile_rank,
-                 (t_end - t_start), errors);
+        HDprintf("[%s %d] open completed in %lf seconds\n", __func__, sf_context->topology->subfile_rank,
+                 (t_end - t_start));
     }
 #endif
 
@@ -2025,8 +1994,8 @@ done:
  * - an optional filename prefix specified by the user
  */
 static herr_t
-generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_t filename_out_len,
-                      char **filename_basename_out, char **subfile_dir_out)
+generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
+                      size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out)
 {
     FILE * config_file = NULL;
     char * config_buf  = NULL;
@@ -2049,13 +2018,14 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
     /*
      * Initially use the number of I/O concentrators specified in the
      * subfiling context. However, if there's an existing subfiling
-     * configuration file we will use the number specified there
-     * instead, as that should be the actual number that the subfile
-     * names were originally generated with. The current subfiling
-     * context may have a different number of I/O concentrators
-     * specified; e.g. a simple serial file open for reading purposes
-     * (think h5dump) might only be using 1 I/O concentrator, whereas
-     * the file was created with several I/O concentrators.
+     * configuration file (and we aren't truncating it) we will use
+     * the number specified there instead, as that should be the actual
+     * number that the subfile names were originally generated with.
+     * The current subfiling context may have a different number of I/O
+     * concentrators specified; e.g. a simple serial file open for
+     * reading purposes (think h5dump) might only be using 1 I/O
+     * concentrator, whereas the file was created with several I/O
+     * concentrators.
      */
     n_io_concentrators = sf_context->topology->n_io_concentrators;
 
@@ -2114,19 +2084,25 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
         }
     }
 
-    /* Open the file's subfiling configuration file, if it exists */
-    if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
+    /*
+     * Open the file's subfiling configuration file, if it exists and
+     * we aren't truncating the file.
+     */
+    if (0 == (file_acc_flags & O_TRUNC)) {
+        if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
 #ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
+            HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
 #endif
 
-        ret_value = FAIL;
-        goto done;
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
     /*
-     * If a subfiling configuration file exists, read the number of I/O
-     * concentrators used in order to generate the correct subfile names.
+     * If a subfiling configuration file exists and we aren't truncating
+     * it, read the number of I/O concentrators used at file creation time
+     * in order to generate the correct subfile names.
      */
     if (config_file) {
         char *ioc_substr      = NULL;
@@ -2213,15 +2189,16 @@ generate_subfile_name(subfiling_context_t *sf_context, char *filename_out, size_
      * produce files of the following form:
      * If we assume the HDF5 file is named ABC.h5, and 20 I/O
      * concentrators are used, then the subfiles will have names:
-     *   ABC.h5.subfile_<file-number>_00_of_20,
-     *   ABC.h5.subfile_<file-number>_01_of_20, etc.
+     *   ABC.h5.subfile_<file-number>_01_of_20,
+     *   ABC.h5.subfile_<file-number>_02_of_20, etc.
      *
      * and the configuration file will be named:
      *   ABC.h5.subfile_<file-number>.config
      */
     num_digits = numDigits(n_io_concentrators);
     HDsnprintf(filename_out, filename_out_len, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base,
-               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank, n_io_concentrators);
+               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
+               n_io_concentrators);
 
 done:
     if (config_file && (EOF == HDfclose(config_file))) {
@@ -2319,7 +2296,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
     if (config_file_exists && (ret != 0)) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't check existence of configuration file", __func__);
+        HDperror("couldn't check existence of configuration file");
 #endif
 
         ret_value = FAIL;
@@ -2332,13 +2309,14 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
      * O_TRUNC flag was specified. In this case, truncate
      * the existing config file and create a new one.
      */
+    /* TODO: if truncating, consider removing old stale config files. */
     if (!config_file_exists || truncate_if_exists) {
         int n_io_concentrators = sf_context->topology->n_io_concentrators;
         int num_digits;
 
         if (NULL == (config_file = HDfopen(config_filename, "w+"))) {
 #ifdef H5_SUBFILING_DEBUG
-            HDperror("%s: couldn't open subfiling configuration file", __func__);
+            HDperror("couldn't open subfiling configuration file");
 #endif
 
             ret_value = FAIL;
@@ -2402,7 +2380,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         num_digits = numDigits(n_io_concentrators);
         for (int k = 0; k < n_io_concentrators; k++) {
             HDsnprintf(line_buf, PATH_MAX, "%s" SF_FILENAME_TEMPLATE "\n", base_filename,
-                       sf_context->h5_file_id, num_digits, k, n_io_concentrators);
+                       sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
 
             if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
 #ifdef H5_SUBFILING_DEBUG
@@ -2506,7 +2484,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
 
     if (config_file_exists && (ret != 0)) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't check existence of configuration file", __func__);
+        HDperror("couldn't check existence of configuration file");
 #endif
 
         ret_value = FAIL;
@@ -2515,7 +2493,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
 
     if (NULL == (config_file = HDfopen(config_filename, mode))) {
 #ifdef H5_SUBFILING_DEBUG
-        HDperror("%s: couldn't open subfiling configuration file", __func__);
+        HDperror("couldn't open subfiling configuration file");
 #endif
 
         ret_value = FAIL;
@@ -2845,15 +2823,6 @@ done:
 
         ret_value = FAIL;
     }
-
-#ifdef H5_SUBFILING_DEBUG
-    if (sf_verbose_flag) {
-        if (client_log != NULL) {
-            HDfclose(client_log);
-            client_log = NULL;
-        }
-    }
-#endif
 
     if (ret_value < 0) {
         errors = 1;

@@ -101,11 +101,11 @@ static int ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, in
 static int ioc_file_truncate(int fd, int64_t length, int subfile_rank);
 static int ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
 
-static ioc_io_queue_entry_t *H5FD_ioc__alloc_io_q_entry(void);
-static void                  H5FD_ioc__complete_io_q_entry(ioc_io_queue_entry_t *entry_ptr);
-static void                  H5FD_ioc__dispatch_elegible_io_q_entries(void);
-static void                  H5FD_ioc__free_io_q_entry(ioc_io_queue_entry_t *q_entry_ptr);
-static void                  H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr);
+static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
+static void                  ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr);
+static void                  ioc_io_queue_dispatch_eligible_entries(void);
+static void                  ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
+static void                  ioc_io_queue_add_entry(sf_work_request_t *wk_req_ptr);
 
 void __attribute__((destructor)) finalize_ioc_threads(void);
 bool tpool_is_empty(void);
@@ -203,13 +203,9 @@ initialize_ioc_threads(void *_sf_context)
     if (status)
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread mutex");
 
-#if 1 /* JRM */ /* needed for new dispatch code */
-
     status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
     if (status)
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread queue mutex");
-
-#endif /* JRM */
 
     /* Allow experimentation with the number of helper threads */
     if ((env_value = HDgetenv(H5_IOC_THREAD_POOL_COUNT)) != NULL) {
@@ -394,13 +390,11 @@ ioc_main(int64_t context_id)
     subfile_rank = context->sf_group_rank;
 
     /* Initialize atomic vars */
-#if 1 /* JRM */
     atomic_init(&sf_work_pending, 0);
-#endif /* JRM */
     atomic_init(&sf_shutdown_flag, 0);
-#if 1 /* JRM */
-    /* this variable is incremented by H5FD_ioc__queue_io_q_entry() when work
-     * is added to the I/O request queue, and decremented by H5FD_ioc__complete_io_q_entry()
+
+    /* this variable is incremented by ioc_io_queue_add_entry() when work
+     * is added to the I/O request queue, and decremented by ioc_io_queue_complete_entry()
      * when an I/O request is completed and removed from the queue..
      *
      * On shutdown, we must wait until this field is decremented to zero before
@@ -410,17 +404,14 @@ ioc_main(int64_t context_id)
      * However, accessing this field requires locking io_queue_g.q_mutex.
      */
     atomic_init(&sf_io_ops_pending, 0);
-#endif /* JRM */
+
     /* tell initialize_ioc_threads() that ioc_main() is ready to enter its main loop */
     atomic_init(&sf_ioc_ready, 1);
 
     shutdown_requested = 0;
 
-    while ((!shutdown_requested) || (0 < atomic_load(&sf_io_ops_pending))
-#if 1 /* JRM */
-           || (0 < atomic_load(&sf_work_pending))
-#endif /* JRM */
-    ) {
+    while ((!shutdown_requested) || (0 < atomic_load(&sf_io_ops_pending)) ||
+           (0 < atomic_load(&sf_work_pending))) {
         MPI_Message mpi_msg;
         MPI_Status  status;
         useconds_t  delay = 20;
@@ -484,11 +475,11 @@ ioc_main(int64_t context_id)
             wk_req.start_time   = queue_start_time;
             wk_req.buffer       = NULL;
 
-            H5FD_ioc__queue_io_q_entry(&wk_req);
+            ioc_io_queue_add_entry(&wk_req);
 
             HDassert(atomic_load(&sf_io_ops_pending) >= 0);
 
-            H5FD_ioc__dispatch_elegible_io_q_entries();
+            ioc_io_queue_dispatch_eligible_entries();
         }
         else {
             usleep(delay);
@@ -566,9 +557,9 @@ handle_work_request(void *arg)
     sf_work_request_t *   msg             = &(q_entry_ptr->wk_req);
     int64_t               file_context_id = msg->header[2];
     int                   op_ret;
-#if 1 /* JRM */
+#ifdef H5FD_IOC_DEBUG
     int curr_io_ops_pending;
-#endif /* JRM */
+#endif
     hg_thread_ret_t ret_value = 0;
 
     HDassert(q_entry_ptr);
@@ -578,9 +569,8 @@ handle_work_request(void *arg)
     sf_context = H5_get_subfiling_object(file_context_id);
     assert(sf_context != NULL);
 
-#if 1                                      /* JRM */
-    atomic_fetch_add(&sf_work_pending, 1); // atomic
-#endif                                     /* JRM */
+    atomic_fetch_add(&sf_work_pending, 1);
+
     msg->in_progress = 1;
 
     switch (msg->tag) {
@@ -614,7 +604,7 @@ handle_work_request(void *arg)
             break;
     }
 
-    atomic_fetch_sub(&sf_work_pending, 1); // atomic
+    atomic_fetch_sub(&sf_work_pending, 1);
 
     if (op_ret < 0) {
 #ifdef H5FD_IOC_DEBUG
@@ -625,29 +615,23 @@ handle_work_request(void *arg)
         HDfflush(stdout);
 #endif
 
-        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
-                            translate_opcode((io_op_t)msg->tag), msg->subfile_rank);
+        /* TODO: set error value for work request queue entry */
+        /* H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
+                               translate_opcode((io_op_t)msg->tag), msg->subfile_rank); */
     }
 
-#if 1 /* JRM */
-    curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
 #ifdef H5FD_IOC_DEBUG
-    if (curr_io_ops_pending <= 0) {
-        HDprintf("\n\nhandle_work_request: curr_io_ops_pending = %d, op = %d, offset/len = %lld/%lld.\n\n",
-                 curr_io_ops_pending, (msg->tag), (long long)(msg->header[1]), (long long)(msg->header[0]));
-        HDfflush(stdout);
-    }
-#endif
+    curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
     HDassert(curr_io_ops_pending > 0);
-#endif /* JRM */
+#endif
 
     /* complete the I/O request */
-    H5FD_ioc__complete_io_q_entry(q_entry_ptr);
+    ioc_io_queue_complete_entry(q_entry_ptr);
 
     HDassert(atomic_load(&sf_io_ops_pending) >= 0);
 
     /* Check the I/O Queue to see if there are any dispatchable entries */
-    H5FD_ioc__dispatch_elegible_io_q_entries();
+    ioc_io_queue_dispatch_eligible_entries();
 
 done:
     H5FD_IOC_FUNC_LEAVE;
@@ -950,7 +934,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     if (sf_verbose_flag) {
         if (sf_logfile) {
             HDfprintf(sf_logfile, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n", subfile_rank,
-                      __func__, data_size, source, ret);
+                      __func__, data_size, source, mpi_code);
         }
     }
 #endif
@@ -1249,7 +1233,7 @@ ioc_file_truncate(int fd, int64_t length, int subfile_rank)
 
 #ifdef H5FD_IOC_DEBUG
     HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", subfile_rank, __func__,
-             (long long)length, ret);
+             (long long)length, errno);
     HDfflush(stdout);
 #endif
 
@@ -1345,10 +1329,8 @@ H5FD_ioc_take_down_thread_pool(void)
     return;
 } /* H5FD_ioc_take_down_thread_pool() */
 
-#if 1 /* JRM */ /* dispatch code -- move elsewhere? */
-
 /*-------------------------------------------------------------------------
- * Function:    H5FD_ioc__alloc_io_q_entry
+ * Function:    ioc_io_queue_alloc_entry
  *
  * Purpose:     Allocate and initialize an instance of
  *              ioc_io_queue_entry_t.  Return pointer to the new
@@ -1365,7 +1347,7 @@ H5FD_ioc_take_down_thread_pool(void)
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
 static ioc_io_queue_entry_t *
-H5FD_ioc__alloc_io_q_entry(void)
+ioc_io_queue_alloc_entry(void)
 {
     ioc_io_queue_entry_t *q_entry_ptr = NULL;
 
@@ -1389,21 +1371,25 @@ H5FD_ioc__alloc_io_q_entry(void)
     }
 
     return q_entry_ptr;
-} /* H5FD_ioc__alloc_io_q_entry() */
+} /* ioc_io_queue_alloc_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_ioc__complete_io_q_entry
+ * Function:    ioc_io_queue_add_entry
  *
- * Purpose:     Update the IOC I/O Queue for the completion of an I/O
- *              request.
+ * Purpose:     Add an I/O request to the tail of the IOC I/O Queue.
  *
- *              To do this:
+ *              To do this, we must:
  *
- *              1) Remove the entry from the I/O Queue
+ *              1) allocate a new instance of ioc_io_queue_entry_t
  *
- *              2) If so configured, update statistics
+ *              2) Initialize the new instance and copy the supplied
+ *                 instance of sf_work_request_t into it.
  *
- *              3) Discard the instance of ioc_io_queue_entry_t.
+ *              3) Append it to the IOC I/O queue.
+ *
+ *              Note that this does not dispatch the request even if it
+ *              is eligible for immediate dispatch.  This is done with
+ *              a call to ioc_io_queue_dispatch_eligible_entries().
  *
  * Return:      void.
  *
@@ -1416,68 +1402,100 @@ H5FD_ioc__alloc_io_q_entry(void)
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
 /* TODO: Update for per file I/O Queue */
 static void
-H5FD_ioc__complete_io_q_entry(ioc_io_queue_entry_t *entry_ptr)
+ioc_io_queue_add_entry(sf_work_request_t *wk_req_ptr)
 {
-#if 0  /* H5FD_IOC__COLLECT_STATS */
-    uint64_t queued_time;
-    uint64_t execution_time;
-#endif /* H5FD_IOC__COLLECT_STATS */
+    ioc_io_queue_entry_t *entry_ptr = NULL;
+
+    HDassert(wk_req_ptr);
+    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
+
+    entry_ptr = ioc_io_queue_alloc_entry();
 
     HDassert(entry_ptr);
     HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
-    /* must obtain io_queue_g mutex before deleting and updating stats */
+    HDmemcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
+
+    /* must obtain io_queue_g mutex before appending */
     hg_thread_mutex_lock(&(io_queue_g.q_mutex));
-
-    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
-    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
-    HDassert(io_queue_g.num_in_progress > 0);
-
-    H5FD_IOC__Q_REMOVE(&io_queue_g, entry_ptr);
-
-    io_queue_g.num_in_progress--;
-
-    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
-
-    atomic_fetch_sub(&sf_io_ops_pending, 1);
-
-#if 0  /* JRM */
-    HDfprintf(stdout, 
-           "\n\nH5FD_ioc__complete_io_q_entry: request %d completed. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
-              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
-              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-              atomic_load(&sf_io_ops_pending));
-    HDfflush(stdout);
-#endif /* JRM */
 
     HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
 
-#if H5FD_IOC__COLLECT_STATS
-#if 0 /* no place to collect this yet */
-    /* Compute the queued and execution time */
-    queued_time = entry_ptr->dispatch_time - entry_ptr->q_time;
-    execution_time = H5_now_usec() = entry_ptr->dispatch_time;
+    entry_ptr->counter = io_queue_g.req_counter++;
+
+    io_queue_g.num_pending++;
+
+    H5FD_IOC__Q_APPEND(&io_queue_g, entry_ptr);
+
+    atomic_fetch_add(&sf_io_ops_pending, 1);
+
+#ifdef H5FD_IOC_DEBUG
+    HDfprintf(stdout,
+              "\n\nioc_io_queue_add_entry: request %d queued. op = %d, offset/len = %lld/%lld, "
+              "q-ed/disp/ops_pend = %d/%d/%d.\n",
+              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
+              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+              atomic_load(&sf_io_ops_pending));
+    HDfflush(stdout);
 #endif
 
-    io_queue_g.requests_completed++;
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+
+#if H5FD_IOC__COLLECT_STATS
 
     entry_ptr->q_time = H5_now_usec();
 
+    if (io_queue_g.q_len > io_queue_g.max_q_len) {
+
+        io_queue_g.max_q_len = io_queue_g.q_len;
+    }
+
+    if (io_queue_g.num_pending > io_queue_g.max_num_pending) {
+
+        io_queue_g.max_num_pending = io_queue_g.num_pending;
+    }
+
+    if (entry_ptr->wk_req.tag == READ_INDEP) {
+
+        io_queue_g.ind_read_requests++;
+    }
+    else if (entry_ptr->wk_req.tag == WRITE_INDEP) {
+
+        io_queue_g.ind_write_requests++;
+    }
+    else if (entry_ptr->wk_req.tag == TRUNC_OP) {
+
+        io_queue_g.truncate_requests++;
+    }
+    else if (entry_ptr->wk_req.tag == GET_EOF_OP) {
+
+        io_queue_g.get_eof_requests++;
+    }
+
+    io_queue_g.requests_queued++;
+
 #endif /* H5FD_IOC__COLLECT_STATS */
+
+#ifdef H5FD_IOC_DEBUG
+    if (io_queue_g.q_len != atomic_load(&sf_io_ops_pending)) {
+
+        HDfprintf(
+            stdout,
+            "\n\nioc_io_queue_add_entry: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).\n\n",
+            io_queue_g.q_len, atomic_load(&sf_io_ops_pending));
+        HDfflush(stdout);
+    }
+#endif
+
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
 
     hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
 
-    HDassert(entry_ptr->wk_req.buffer == NULL);
-
-    H5FD_ioc__free_io_q_entry(entry_ptr);
-
-    entry_ptr = NULL;
-
     return;
-} /* H5FD_ioc__complete_io_q_entry() */
+} /* ioc_io_queue_add_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_ioc__dispatch_elegible_io_q_entries
+ * Function:    ioc_io_queue_dispatch_eligible_entries
  *
  * Purpose:     Scan the IOC I/O Queue for dispatchable entries, and
  *              dispatch any such entries found.
@@ -1522,7 +1540,7 @@ H5FD_ioc__complete_io_q_entry(ioc_io_queue_entry_t *entry_ptr)
  *       can become O(N**2) in the worst case.
  */
 static void
-H5FD_ioc__dispatch_elegible_io_q_entries(void)
+ioc_io_queue_dispatch_eligible_entries(void)
 {
     hbool_t               conflict_detected;
     int64_t               entry_offset;
@@ -1618,14 +1636,16 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
 
                 io_queue_g.requests_dispatched++;
 
-#if 0  /* JRM */
-                HDfprintf(stdout, 
-"\n\nH5FD_ioc__dispatch_elegible_io_q_entries: request %d dispatched. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
-                    entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
-                    (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-                    atomic_load(&sf_io_ops_pending));
+#ifdef H5FD_IOC_DEBUG
+                HDfprintf(stdout,
+                          "\n\nioc_io_queue_dispatch_eligible_entries: request %d dispatched. op = %d, "
+                          "offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
+                          entry_ptr->counter, (entry_ptr->wk_req.tag),
+                          (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
+                          io_queue_g.num_pending, io_queue_g.num_in_progress,
+                          atomic_load(&sf_io_ops_pending));
                 HDfflush(stdout);
-#endif /* JRM */
+#endif
 
                 entry_ptr->dispatch_time = H5_now_usec();
 
@@ -1653,10 +1673,103 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
     HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
 
     hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
-} /* H5FD_ioc__dispatch_elegible_io_q_entries() */
+} /* ioc_io_queue_dispatch_eligible_entries() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_ioc__free_io_q_entry
+ * Function:    ioc_io_queue_complete_entry
+ *
+ * Purpose:     Update the IOC I/O Queue for the completion of an I/O
+ *              request.
+ *
+ *              To do this:
+ *
+ *              1) Remove the entry from the I/O Queue
+ *
+ *              2) If so configured, update statistics
+ *
+ *              3) Discard the instance of ioc_io_queue_entry_t.
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 11/7/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+/* TODO: Update for per file I/O Queue */
+static void
+ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
+{
+#if 0  /* H5FD_IOC__COLLECT_STATS */
+    uint64_t queued_time;
+    uint64_t execution_time;
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+
+    /* must obtain io_queue_g mutex before deleting and updating stats */
+    hg_thread_mutex_lock(&(io_queue_g.q_mutex));
+
+    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+    HDassert(io_queue_g.num_in_progress > 0);
+
+    H5FD_IOC__Q_REMOVE(&io_queue_g, entry_ptr);
+
+    io_queue_g.num_in_progress--;
+
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+
+    atomic_fetch_sub(&sf_io_ops_pending, 1);
+
+#ifdef H5FD_IOC_DEBUG
+    /*
+     * If this I/O request is a truncate or "get eof" op, make sure
+     * there aren't other operations in progress
+     */
+    if ((entry_ptr->wk_req.tag == GET_EOF_OP) || (entry_ptr->wk_req.tag == TRUNC_OP))
+        HDassert(io_queue_g.num_in_progress == 0);
+
+    HDfprintf(stdout,
+              "ioc_io_queue_complete_entry: request %d completed. op = %d, offset/len = %lld/%lld, "
+              "q-ed/disp/ops_pend = %d/%d/%d.\n",
+              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
+              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+              atomic_load(&sf_io_ops_pending));
+    HDfflush(stdout);
+#endif
+
+    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
+
+#if H5FD_IOC__COLLECT_STATS
+#if 0 /* no place to collect this yet */
+    /* Compute the queued and execution time */
+    queued_time = entry_ptr->dispatch_time - entry_ptr->q_time;
+    execution_time = H5_now_usec() = entry_ptr->dispatch_time;
+#endif
+
+    io_queue_g.requests_completed++;
+
+    entry_ptr->q_time = H5_now_usec();
+
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+    hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
+
+    HDassert(entry_ptr->wk_req.buffer == NULL);
+
+    ioc_io_queue_free_entry(entry_ptr);
+
+    entry_ptr = NULL;
+
+    return;
+} /* ioc_io_queue_complete_entry() */
+
+/*-------------------------------------------------------------------------
+ * Function:    ioc_io_queue_free_entry
  *
  * Purpose:     Free the supplied instance of ioc_io_queue_entry_t.
  *
@@ -1674,7 +1787,7 @@ H5FD_ioc__dispatch_elegible_io_q_entries(void)
  */
 /* TODO: update function when we decide how to handle error reporting in the IOCs */
 static void
-H5FD_ioc__free_io_q_entry(ioc_io_queue_entry_t *q_entry_ptr)
+ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr)
 {
     /* use assertions for error checking, since the following should never fail. */
     HDassert(q_entry_ptr);
@@ -1691,123 +1804,3 @@ H5FD_ioc__free_io_q_entry(ioc_io_queue_entry_t *q_entry_ptr)
 
     return;
 } /* H5FD_ioc__free_c_io_q_entry() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc__queue_io_q_entry
- *
- * Purpose:     Add an I/O request to the tail of the IOC I/O Queue.
- *
- *              To do this, we must:
- *
- *              1) allocate a new instance of ioc_io_queue_entry_t
- *
- *              2) Initialize the new instance and copy the supplied
- *                 instance of sf_work_request_t into it.
- *
- *              3) Append it to the IOC I/O queue.
- *
- *              Note that this does not dispatch the request even if it
- *              is eligible for immediate dispatch.  This is done with
- *              a call to H5FD_ioc__dispatch_elegible_io_q_entries().
- *
- * Return:      void.
- *
- * Programmer:  JRM -- 11/7/21
- *
- * Changes:     None.
- *
- *-------------------------------------------------------------------------
- */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
-/* TODO: Update for per file I/O Queue */
-static void
-H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
-{
-    ioc_io_queue_entry_t *entry_ptr = NULL;
-
-    HDassert(wk_req_ptr);
-    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
-
-    entry_ptr = H5FD_ioc__alloc_io_q_entry();
-
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
-
-    HDmemcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
-
-    /* must obtain io_queue_g mutex before appending */
-    hg_thread_mutex_lock(&(io_queue_g.q_mutex));
-
-    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
-
-    entry_ptr->counter = io_queue_g.req_counter++;
-
-    io_queue_g.num_pending++;
-
-    H5FD_IOC__Q_APPEND(&io_queue_g, entry_ptr);
-
-    atomic_fetch_add(&sf_io_ops_pending, 1);
-
-#if 0  /* JRM */
-    HDfprintf(stdout, 
-              "\n\nH5FD_ioc__queue_io_q_entry: request %d queued. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
-              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]), 
-              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-              atomic_load(&sf_io_ops_pending));
-    HDfflush(stdout);
-#endif /* JRM */
-
-    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
-
-#if H5FD_IOC__COLLECT_STATS
-
-    entry_ptr->q_time = H5_now_usec();
-
-    if (io_queue_g.q_len > io_queue_g.max_q_len) {
-
-        io_queue_g.max_q_len = io_queue_g.q_len;
-    }
-
-    if (io_queue_g.num_pending > io_queue_g.max_num_pending) {
-
-        io_queue_g.max_num_pending = io_queue_g.num_pending;
-    }
-
-    if (entry_ptr->wk_req.tag == READ_INDEP) {
-
-        io_queue_g.ind_read_requests++;
-    }
-    else if (entry_ptr->wk_req.tag == WRITE_INDEP) {
-
-        io_queue_g.ind_write_requests++;
-    }
-    else if (entry_ptr->wk_req.tag == TRUNC_OP) {
-
-        io_queue_g.truncate_requests++;
-    }
-    else if (entry_ptr->wk_req.tag == GET_EOF_OP) {
-
-        io_queue_g.get_eof_requests++;
-    }
-
-    io_queue_g.requests_queued++;
-
-#endif /* H5FD_IOC__COLLECT_STATS */
-
-#if 0  /* JRM */ 
-    if ( io_queue_g.q_len != atomic_load(&sf_io_ops_pending) ) {
-
-        HDfprintf(stdout, "\n\nH5FD_ioc__queue_io_q_entry: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).\n\n", 
-                  io_queue_g.q_len, atomic_load(&sf_io_ops_pending));
-        HDfflush(stdout);
-    }
-#endif /* JRM */
-
-    HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));
-
-    hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
-
-    return;
-} /* H5FD_ioc__queue_io_q_entry() */
-
-#endif /* JRM */ /* dispatch code -- move elsewhere? */

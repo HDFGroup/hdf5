@@ -26,6 +26,11 @@
 #include "H5FDioc.h"
 
 /*
+ * Some definitions for debugging the Subfiling feature
+ */
+/* #define H5_SUBFILING_DEBUG */
+
+/*
  * The following is our basic template for a subfile filename.
  * Note that eventually we shouldn't use 0_of_N since we
  * intend to use the user defined HDF5 filename for a
@@ -216,7 +221,6 @@ typedef struct {
 } sf_work_request_t;
 
 extern FILE *sf_logfile;
-extern FILE *client_log;
 
 extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;
