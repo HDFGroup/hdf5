@@ -4134,7 +4134,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata, hbo
                   uint32_t naccessed)
 {
     const H5O_layout_t *layout = &(io_info->dsets_info[0].dset->shared->layout);
-        /* Dataset layout */                                                                 /*!FIXME -NAF */
+    /* Dataset layout */                                                                     /*!FIXME -NAF */
     const H5D_rdcc_t *rdcc = &(io_info->dsets_info[0].dset->shared->cache.chunk);            /*!FIXME -NAF */
     const H5D_t *dset = io_info->dsets_info[0].dset; /* Local pointer to the dataset info */ /*!FIXME -NAF */
     herr_t       ret_value = SUCCEED; /* Return value */
