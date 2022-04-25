@@ -87,7 +87,8 @@ static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int fil
 static herr_t record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
 static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
-                                    size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out);
+                                    size_t filename_out_len, char **filename_basename_out,
+                                    char **subfile_dir_out);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                  const char *subfile_dir, hbool_t truncate_if_exists);
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
@@ -1972,8 +1973,8 @@ done:
 #ifdef H5_SUBFILING_DEBUG
     t_end = MPI_Wtime();
     if (sf_verbose_flag) {
-        HDprintf("[%s %d] open completed in %lf seconds\n", __func__,
-                 sf_context->topology->subfile_rank, (t_end - t_start));
+        HDprintf("[%s %d] open completed in %lf seconds\n", __func__, sf_context->topology->subfile_rank,
+                 (t_end - t_start));
     }
 #endif
 
@@ -2196,7 +2197,8 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      */
     num_digits = numDigits(n_io_concentrators);
     HDsnprintf(filename_out, filename_out_len, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base,
-               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1, n_io_concentrators);
+               sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
+               n_io_concentrators);
 
 done:
     if (config_file && (EOF == HDfclose(config_file))) {

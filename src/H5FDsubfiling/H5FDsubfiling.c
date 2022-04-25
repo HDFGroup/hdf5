@@ -215,16 +215,16 @@ static herr_t init_indep_io(subfiling_context_t *sf_context, int64_t file_offset
                             size_t dtype_extent, size_t max_iovec_len, int64_t *mem_buf_offset,
                             int64_t *target_file_offset, int64_t *io_block_len, int *first_ioc_index,
                             int *n_iocs_used, int64_t *max_io_req_per_ioc);
-static void H5FD__create_first_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
+static void   H5FD__create_first_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
+                                          int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                          int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io);
+static void   H5FD__create_final_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
+                                          int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
+                                          int64_t *io_datasize, int64_t *io_f_offset, int64_t last_io);
+static void   H5FD__create_f_l_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
                                         int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
-                                        int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io);
-static void H5FD__create_final_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
-                                        int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
-                                        int64_t *io_datasize, int64_t *io_f_offset, int64_t last_io);
-static void H5FD__create_f_l_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
-                                      int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
-                                      int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io,
-                                      int64_t last_io);
+                                        int64_t *io_datasize, int64_t *io_f_offset, int64_t first_io,
+                                        int64_t last_io);
 static void H5FD__create_mpi_uniform_type(subfiling_context_t *context, int64_t ioc_depth, int64_t src_offset,
                                           int64_t target_datasize, int64_t f_offset, int64_t *io_offset,
                                           int64_t *io_datasize, int64_t *io_f_offset);
@@ -1434,8 +1434,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                 }
 
                 /* Make vector read call to subfile */
-                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs,
-                                    io_sizes, io_bufs) < 0)
+                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs, io_sizes,
+                                    io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed")
             }
 
@@ -1659,8 +1659,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
                 }
 
                 /* Make vector write call to subfile */
-                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs,
-                                     io_sizes, io_bufs) < 0)
+                if (H5FDwrite_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs, io_sizes,
+                                     io_bufs) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed")
             }
 
@@ -2267,10 +2267,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_nelemts,
-              size_t dtype_extent, size_t max_iovec_len, int64_t *mem_buf_offset,
-              int64_t *target_file_offset, int64_t *io_block_len, int *first_ioc_index,
-              int *n_iocs_used, int64_t *max_io_req_per_ioc)
+init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_nelemts, size_t dtype_extent,
+              size_t max_iovec_len, int64_t *mem_buf_offset, int64_t *target_file_offset,
+              int64_t *io_block_len, int *first_ioc_index, int *n_iocs_used, int64_t *max_io_req_per_ioc)
 {
     int64_t stripe_size          = 0;
     int64_t block_size           = 0;
@@ -2393,7 +2392,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      */
     row_stripe_idx_start = stripe_idx - ioc_start;
     row_stripe_idx_final = final_stripe_idx - ioc_final;
-    iovec_depth = ((row_stripe_idx_final - row_stripe_idx_start) / ioc_count) + 1;
+    iovec_depth          = ((row_stripe_idx_final - row_stripe_idx_start) / ioc_count) + 1;
 
     /* Set returned first IOC index early */
     *first_ioc_index = (int)ioc_start;
@@ -2412,7 +2411,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         int64_t  ioc_bytes = 0;
         int64_t  ioc_depth;
         hbool_t  is_first = FALSE;
-        hbool_t  is_last = FALSE;
+        hbool_t  is_last  = FALSE;
         size_t   output_offset;
 
         /* Reset current IOC depth to the max. I/O vector depth */
@@ -2422,7 +2421,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
          * Setup the pointers to the next set of I/O vectors in
          * the output arrays and clear those vectors
          */
-        output_offset       = (size_t)(k) * max_iovec_len;
+        output_offset       = (size_t)(k)*max_iovec_len;
         _mem_buf_offset     = mem_buf_offset + output_offset;
         _target_file_offset = target_file_offset + output_offset;
         _io_block_len       = io_block_len + output_offset;
@@ -2452,7 +2451,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
 
             if (k == ioc_final) {
-                is_last   = TRUE;
+                is_last = TRUE;
                 ioc_bytes += final_length;
 
                 /* Account for the final_length */
@@ -2463,7 +2462,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                     iovec_depth--;
             }
 
-            ioc_bytes   += ioc_depth * stripe_size;
+            ioc_bytes += ioc_depth * stripe_size;
             total_bytes += ioc_bytes;
         }
 
@@ -2476,13 +2475,13 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             if (is_first) {
                 if (is_last) { /* First + Last */
                     H5FD__create_f_l_mpi_type(sf_context, ioc_depth + 1, mem_offset, ioc_bytes,
-                                              sf_row_offset + sf_col_offset, _mem_buf_offset,
-                                              _io_block_len, _target_file_offset, start_length, final_length);
+                                              sf_row_offset + sf_col_offset, _mem_buf_offset, _io_block_len,
+                                              _target_file_offset, start_length, final_length);
                 }
                 else { /* First ONLY */
                     H5FD__create_first_mpi_type(sf_context, ioc_depth, mem_offset, ioc_bytes,
-                                                sf_row_offset + sf_col_offset, _mem_buf_offset,
-                                                _io_block_len, _target_file_offset, start_length);
+                                                sf_row_offset + sf_col_offset, _mem_buf_offset, _io_block_len,
+                                                _target_file_offset, start_length);
                 }
                 /* Move the memory pointer to the starting location
                  * for next IOC request.
@@ -2491,15 +2490,15 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
             else if (is_last) { /* Last ONLY */
                 H5FD__create_final_mpi_type(sf_context, ioc_depth + 1, mem_offset, ioc_bytes,
-                                            sf_row_offset + sf_col_offset, _mem_buf_offset,
-                                            _io_block_len, _target_file_offset, final_length);
+                                            sf_row_offset + sf_col_offset, _mem_buf_offset, _io_block_len,
+                                            _target_file_offset, final_length);
                 /* XXX: Probably not needed... */
                 mem_offset += stripe_size;
             }
             else { /* Everything else (uniform) */
                 H5FD__create_mpi_uniform_type(sf_context, ioc_depth, mem_offset, ioc_bytes,
-                                              sf_row_offset + sf_col_offset, _mem_buf_offset,
-                                              _io_block_len, _target_file_offset);
+                                              sf_row_offset + sf_col_offset, _mem_buf_offset, _io_block_len,
+                                              _target_file_offset);
                 mem_offset += stripe_size;
             }
         }
@@ -2511,17 +2510,17 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         curr_stripe_idx++;
 
         if (k == ioc_count) {
-            k = 0;
+            k             = 0;
             sf_col_offset = 0;
-            iovec_depth = ((row_stripe_idx_final - curr_stripe_idx) / ioc_count) + 1;
+            iovec_depth   = ((row_stripe_idx_final - curr_stripe_idx) / ioc_count) + 1;
             sf_row_offset += block_size;
         }
     }
 
     if (total_bytes != data_size) {
 #ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: total_bytes(%" PRId64 ") didn't match data_size(%" PRId64 ")!",
-                 __func__, total_bytes, data_size);
+        HDprintf("%s: total_bytes(%" PRId64 ") didn't match data_size(%" PRId64 ")!", __func__, total_bytes,
+                 data_size);
 #endif
 
         ret_value = FAIL;
@@ -2616,7 +2615,8 @@ H5FD__create_first_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int
         }
 
         /* TODO: convert to normal error */
-        HDassert((total_bytes == target_datasize) && "H5FD__create_first_mpi_type: total bytes didn't match data size!");
+        HDassert((total_bytes == target_datasize) &&
+                 "H5FD__create_first_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_first_mpi_type() */
@@ -2695,7 +2695,8 @@ H5FD__create_final_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int
         total_bytes += last_io;
 
         /* TODO: convert to normal error */
-        HDassert((total_bytes == target_datasize) && "H5FD__create_final_mpi_type: total bytes didn't match data size!");
+        HDassert((total_bytes == target_datasize) &&
+                 "H5FD__create_final_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_final_mpi_type() */
@@ -2772,7 +2773,8 @@ H5FD__create_f_l_mpi_type(subfiling_context_t *context, int64_t ioc_depth, int64
         total_bytes += last_io;
 
         /* TODO: convert to normal error */
-        HDassert((total_bytes == target_datasize) && "H5FD__create_f_l_mpi_type: total bytes didn't match data size!");
+        HDassert((total_bytes == target_datasize) &&
+                 "H5FD__create_f_l_mpi_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_f_l_mpi_type() */
@@ -2847,7 +2849,8 @@ H5FD__create_mpi_uniform_type(subfiling_context_t *context, int64_t ioc_depth, i
         }
 
         /* TODO: convert to normal error */
-        HDassert((total_bytes == target_datasize) && "H5FD__create_mpi_uniform_type: total bytes didn't match data size!");
+        HDassert((total_bytes == target_datasize) &&
+                 "H5FD__create_mpi_uniform_type: total bytes didn't match data size!");
     }
     return;
 } /* end H5FD__create_mpi_uniform_type() */
