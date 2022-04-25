@@ -2694,18 +2694,18 @@ my_isnan(dtype_t type, void *val)
     if (FLT_FLOAT == type) {
         float x = 0.0;
         HDmemcpy(&x, val, sizeof(float));
-        retval = (x != x);
+        retval = !H5_FLT_ABS_EQUAL(x, x);
     }
     else if (FLT_DOUBLE == type) {
         double x = 0.0;
         HDmemcpy(&x, val, sizeof(double));
-        retval = (x != x);
+        retval = !H5_DBL_ABS_EQUAL(x, x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     }
     else if (FLT_LDOUBLE == type) {
         long double x = 0.0L;
         HDmemcpy(&x, val, sizeof(long double));
-        retval = (x != x);
+        retval = !H5_LDBL_ABS_EQUAL(x, x);
 #endif
     }
     else {
