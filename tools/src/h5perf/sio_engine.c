@@ -123,7 +123,6 @@ static hid_t    h5dxpl          = H5I_INVALID_HID; /* Dataset transfer property 
  * Purpose:         SIO Engine where IO are executed.
  * Return:          results
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 void
 do_sio(parameters param, results *res)
@@ -134,17 +133,19 @@ do_sio(parameters param, results *res)
     iotype     iot;                /* API type */
     char       base_name[256];     /* test file base name */
     /* return codes */
-    herr_t ret_code = 0; /*return code                           */
+    herr_t ret_code = 0; /* return code */
 
-    char fname[FILENAME_MAX]; /* test file name */
-    int  i;
+    char *fname = NULL;
+    int   i;
+
     /* HDF5 variables */
-    herr_t hrc; /*HDF5 return code              */
-
-    /* Sanity check parameters */
+    herr_t hrc; /* HDF5 return code */
 
     /* IO type */
     iot = param.io_type;
+
+    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     switch (iot) {
         case POSIXIO:
@@ -267,8 +268,8 @@ done:
     }
 
     /* release generic resources */
-    if (buffer)
-        free(buffer);
+    HDfree(buffer);
+    HDfree(fname);
 
     res->ret_code = ret_code;
 }
@@ -1125,7 +1126,6 @@ done:
  * Purpose:     Sets file driver.
  * Return:      SUCCESS or FAIL
  * Programmer:  Christian Chilan, April, 2008
- * Modifications:
  */
 
 hid_t
@@ -1164,9 +1164,11 @@ set_vfd(parameters *param)
         H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
         hid_t       memb_fapl[H5FD_MEM_NTYPES];
         const char *memb_name[H5FD_MEM_NTYPES];
-        char        sv[H5FD_MEM_NTYPES][1024];
         haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
+        struct {
+            char arr[H5FD_MEM_NTYPES][1024];
+        } *sv = NULL;
 
         HDmemset(memb_map, 0, sizeof memb_map);
         HDmemset(memb_fapl, 0, sizeof memb_fapl);
@@ -1174,16 +1176,22 @@ set_vfd(parameters *param)
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+
+        if (NULL == (sv = HDcalloc(1, sizeof(*sv))))
+            return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
-            memb_name[mt] = sv[mt];
+            HDsprintf(sv->arr[mt], "%%s-%c.h5", multi_letters[mt]);
+            memb_name[mt] = sv->arr[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
 
         if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
+            HDfree(sv);
             return -1;
         }
+
+        HDfree(sv);
     }
     else if (vfd == family) {
         hsize_t fam_size = 1 * 1024 * 1024; /*100 MB*/
@@ -1262,14 +1270,18 @@ done:
  * Purpose:     Cleanup temporary file unless HDF5_NOCLEANUP is set.
  * Return:      void
  * Programmer:  Albert Cheng 2001/12/12
- * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
-    char  temp[4096 + sizeof("-?.h5")];
-    int   j;
-    hid_t driver;
+    char * temp = NULL;
+    size_t temp_sz;
+    int    j;
+    hid_t  driver;
+
+    temp_sz = (4096 + sizeof("-?.h5")) * sizeof(char);
+    if (NULL == (temp = HDcalloc(1, temp_sz)))
+        goto done;
 
     if (clean_file_g == -1)
         clean_file_g = (HDgetenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
@@ -1286,7 +1298,7 @@ do_cleanupfile(iotype iot, char *filename)
 
                 if (driver == H5FD_FAMILY) {
                     for (j = 0; /*void*/; j++) {
-                        HDsnprintf(temp, sizeof temp, filename, j);
+                        HDsnprintf(temp, temp_sz, filename, j);
 
                         if (HDaccess(temp, F_OK) < 0)
                             break;
@@ -1305,10 +1317,10 @@ do_cleanupfile(iotype iot, char *filename)
                 }
                 else if (driver == H5FD_MULTI) {
                     H5FD_mem_t mt;
-                    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                    HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
                     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
-                        HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+                        HDsnprintf(temp, temp_sz, "%s-%c.h5", filename, multi_letters[mt]);
                         HDremove(temp); /*don't care if it fails*/
                     }
                 }
@@ -1325,4 +1337,7 @@ do_cleanupfile(iotype iot, char *filename)
                 break;
         }
     }
+
+done:
+    HDfree(temp);
 }

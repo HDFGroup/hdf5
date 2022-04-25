@@ -7510,7 +7510,7 @@ get_free_sections_test(hbool_t single_file_vfd)
  *-------------------------------------------------------------------------
  */
 static unsigned
-evict_on_close_test(hbool_t single_file_vfd)
+evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
 {
 #ifndef H5_HAVE_PARALLEL
     const char *fcn_name = "evict_on_close_test()";

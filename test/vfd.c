@@ -4053,10 +4053,11 @@ error:
 
 static hbool_t
 test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                        void *write_bufs[], void *read_bufs[], char base_fill_char)
+                        const void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
+    void *     temp_buf  = NULL;
     uint32_t   i;
     uint32_t   j;
     H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW,
@@ -4072,17 +4073,16 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
     }
 
     for (i = 0; i < count; i++) {
-
         types[i] = mem_types[i % 6];
 
         addrs[i] = HADDR_UNDEF;
 
         sizes[i] = (size_t)((rand() & 1023) + 1);
 
-        write_bufs[i] = HDmalloc(sizes[i] + 1);
-        read_bufs[i]  = HDmalloc(sizes[i] + 1);
+        temp_buf     = HDmalloc(sizes[i] + 1);
+        read_bufs[i] = HDmalloc(sizes[i] + 1);
 
-        if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
+        if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
             HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
@@ -4091,23 +4091,28 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
         for (j = 0; j < sizes[i]; j++) {
 
-            ((char *)(write_bufs[i]))[j] = fill_char;
-            ((char *)(read_bufs[i]))[j]  = '\0';
+            ((char *)temp_buf)[j]       = fill_char;
+            ((char *)(read_bufs[i]))[j] = '\0';
         }
 
-        ((char *)(write_bufs[i]))[sizes[i]] = '\0';
-        ((char *)(read_bufs[i]))[sizes[i]]  = '\0';
+        ((char *)temp_buf)[sizes[i]]       = '\0';
+        ((char *)(read_bufs[i]))[sizes[i]] = '\0';
+
+        write_bufs[i] = (const void *)temp_buf;
+        temp_buf      = NULL;
 
         fill_char++;
     }
 
     if (!result) { /* free buffers */
 
+        HDfree(temp_buf);
+
         for (i = 0; i < count; i++) {
 
             if (write_bufs[i]) {
 
-                HDfree(write_bufs[i]);
+                HDfree((void *)write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4154,10 +4159,11 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
 static hbool_t
 test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                                   void *write_bufs[], void *read_bufs[], char base_fill_char)
+                                   const void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
+    void *     temp_buf  = NULL;
     uint32_t   fix_point;
     uint32_t   i;
     uint32_t   j;
@@ -4197,8 +4203,8 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             sizes[i] = (size_t)((rand() & 1023) + 1);
 
-            write_bufs[i] = HDmalloc(sizes[i] + 1);
-            read_bufs[i]  = HDmalloc(sizes[i] + 1);
+            temp_buf     = HDmalloc(sizes[i] + 1);
+            read_bufs[i] = HDmalloc(sizes[i] + 1);
         }
         else {
 
@@ -4213,11 +4219,11 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             addrs[i] = HADDR_UNDEF;
 
-            write_bufs[i] = HDmalloc(sizes[fix_point] + 1);
-            read_bufs[i]  = HDmalloc(sizes[fix_point] + 1);
+            temp_buf     = HDmalloc(sizes[fix_point] + 1);
+            read_bufs[i] = HDmalloc(sizes[fix_point] + 1);
         }
 
-        if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
+        if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
             HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
@@ -4229,23 +4235,28 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
         for (j = 0; j < sizes[k]; j++) {
 
-            ((char *)(write_bufs[i]))[j] = fill_char;
-            ((char *)(read_bufs[i]))[j]  = '\0';
+            ((char *)temp_buf)[j]       = fill_char;
+            ((char *)(read_bufs[i]))[j] = '\0';
         }
 
-        ((char *)(write_bufs[i]))[sizes[k]] = '\0';
-        ((char *)(read_bufs[i]))[sizes[k]]  = '\0';
+        ((char *)temp_buf)[sizes[k]]       = '\0';
+        ((char *)(read_bufs[i]))[sizes[k]] = '\0';
+
+        write_bufs[i] = (const void *)temp_buf;
+        temp_buf      = NULL;
 
         fill_char++;
     }
 
     if (!result) { /* free buffers */
 
+        HDfree(temp_buf);
+
         for (i = 0; i < count; i++) {
 
             if (write_bufs[i]) {
 
-                HDfree(write_bufs[i]);
+                HDfree((void *)write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4340,7 +4351,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
 
 static hbool_t
 test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                              void *write_bufs[])
+                              const void *write_bufs[])
 {
     hbool_t    size_fixed = FALSE;
     hbool_t    type_fixed = FALSE;
@@ -4390,7 +4401,7 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
  */
 
 static hbool_t
-test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], void *write_bufs[],
+test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], const void *write_bufs[],
                          void *read_bufs[], const char *name)
 {
     hbool_t     size_fixed = FALSE;
@@ -4399,7 +4410,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
     hbool_t     verbose    = TRUE;
     uint32_t    i;
     size_t      j;
-    char *      w_buf;
+    const char *w_buf;
     char *      r_buf;
     const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
                                      "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
@@ -4414,7 +4425,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
 
         SET_TYPE(type_fixed, types, type, i);
 
-        w_buf = (char *)(write_bufs[i]);
+        w_buf = (const char *)(write_bufs[i]);
         r_buf = (char *)(read_bufs[i]);
 
         j = 0;
@@ -4462,7 +4473,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], voi
 
 static void
 test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                                  void *write_bufs[], void *read_bufs[], const char *name)
+                                  const void *write_bufs[], void *read_bufs[], const char *name)
 {
     hbool_t     size_fixed = FALSE;
     hbool_t     type_fixed = FALSE;
@@ -4472,8 +4483,8 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
     size_t      size              = SIZE_MAX;
     H5FD_mem_t  type              = H5FD_MEM_NTYPES;
 
-    char *w_buf;
-    char *r_buf;
+    const char *w_buf;
+    char *      r_buf;
 
     HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
 
@@ -4485,7 +4496,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
 
         HDassert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
 
-        w_buf = (char *)(write_bufs[i]);
+        w_buf = (const char *)(write_bufs[i]);
 
         if (read_bufs) {
 
@@ -4540,59 +4551,59 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
 static herr_t
 test_vector_io(const char *vfd_name)
 {
-    char       test_title[80];
-    hbool_t    size_fixed_0 = FALSE; /* whether remaining entry      */
-    hbool_t    size_fixed_1 = FALSE; /* sizes in vector are fixed.   */
-    hbool_t    size_fixed_2 = FALSE; /*                              */
-    hbool_t    type_fixed_0 = FALSE; /* whether remaining entry      */
-    hbool_t    type_fixed_1 = FALSE; /* types in vector are fixed.   */
-    hbool_t    type_fixed_2 = FALSE; /*                              */
-    hbool_t    verbose      = FALSE;
-    hid_t      fapl_id      = -1;          /* file access property list ID */
-    haddr_t    eoa;                        /* file eoa                     */
-    char       filename[1024];             /* filename                     */
-    char *     buf;                        /* tmp ptr to buf               */
-    unsigned   flags = 0;                  /* file open flags              */
-    H5FD_t *   lf;                         /* VFD struct ptr               */
-    uint32_t   i;                          /* index                        */
-    uint32_t   j;                          /* index                        */
-    uint32_t   count = VECTOR_LEN;         /* length of vectors            */
-    H5FD_mem_t types_0[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t types_1[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t types_2[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t f_types_0[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t f_types_1[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t f_types_2[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t f_type_0 = H5FD_MEM_NTYPES; /* current type for f vector 0  */
-    H5FD_mem_t f_type_1 = H5FD_MEM_NTYPES; /* current type for f vector 1  */
-    H5FD_mem_t f_type_2 = H5FD_MEM_NTYPES; /* current type for f vector 2  */
-    haddr_t    addrs_0[VECTOR_LEN];        /* addresses vector             */
-    haddr_t    addrs_1[VECTOR_LEN];        /* addresses vector             */
-    haddr_t    addrs_2[VECTOR_LEN];        /* addresses vector             */
-    haddr_t    f_addrs_0[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t    f_addrs_1[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t    f_addrs_2[VECTOR_LEN];      /* fixed addresses vector       */
-    size_t     sizes_0[VECTOR_LEN];        /* sizes vector                 */
-    size_t     sizes_1[VECTOR_LEN];        /* sizes vector                 */
-    size_t     sizes_2[VECTOR_LEN];        /* sizes vector                 */
-    size_t     f_sizes_0[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t     f_sizes_1[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t     f_sizes_2[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t     f_size_0 = 0;               /* current size for f vector 0  */
-    size_t     f_size_1 = 0;               /* current size for f vector 1  */
-    size_t     f_size_2 = 0;               /* current size for f vector 2  */
-    void *     write_bufs_0[VECTOR_LEN];   /* write bufs vector            */
-    void *     write_bufs_1[VECTOR_LEN];   /* write bufs vector            */
-    void *     write_bufs_2[VECTOR_LEN];   /* write bufs vector            */
-    void *     f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
-    void *     f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
-    void *     f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
-    void *     read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
-    void *     read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
-    void *     read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
-    void *     f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *     f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *     f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
+    char        test_title[80];
+    hbool_t     size_fixed_0 = FALSE; /* whether remaining entry      */
+    hbool_t     size_fixed_1 = FALSE; /* sizes in vector are fixed.   */
+    hbool_t     size_fixed_2 = FALSE; /*                              */
+    hbool_t     type_fixed_0 = FALSE; /* whether remaining entry      */
+    hbool_t     type_fixed_1 = FALSE; /* types in vector are fixed.   */
+    hbool_t     type_fixed_2 = FALSE; /*                              */
+    hbool_t     verbose      = FALSE;
+    hid_t       fapl_id      = -1;          /* file access property list ID */
+    haddr_t     eoa;                        /* file eoa                     */
+    char        filename[1024];             /* filename                     */
+    char *      buf;                        /* tmp ptr to buf               */
+    unsigned    flags = 0;                  /* file open flags              */
+    H5FD_t *    lf;                         /* VFD struct ptr               */
+    uint32_t    i;                          /* index                        */
+    uint32_t    j;                          /* index                        */
+    uint32_t    count = VECTOR_LEN;         /* length of vectors            */
+    H5FD_mem_t  types_0[VECTOR_LEN];        /* types vector                 */
+    H5FD_mem_t  types_1[VECTOR_LEN];        /* types vector                 */
+    H5FD_mem_t  types_2[VECTOR_LEN];        /* types vector                 */
+    H5FD_mem_t  f_types_0[VECTOR_LEN];      /* fixed types vector           */
+    H5FD_mem_t  f_types_1[VECTOR_LEN];      /* fixed types vector           */
+    H5FD_mem_t  f_types_2[VECTOR_LEN];      /* fixed types vector           */
+    H5FD_mem_t  f_type_0 = H5FD_MEM_NTYPES; /* current type for f vector 0  */
+    H5FD_mem_t  f_type_1 = H5FD_MEM_NTYPES; /* current type for f vector 1  */
+    H5FD_mem_t  f_type_2 = H5FD_MEM_NTYPES; /* current type for f vector 2  */
+    haddr_t     addrs_0[VECTOR_LEN];        /* addresses vector             */
+    haddr_t     addrs_1[VECTOR_LEN];        /* addresses vector             */
+    haddr_t     addrs_2[VECTOR_LEN];        /* addresses vector             */
+    haddr_t     f_addrs_0[VECTOR_LEN];      /* fixed addresses vector       */
+    haddr_t     f_addrs_1[VECTOR_LEN];      /* fixed addresses vector       */
+    haddr_t     f_addrs_2[VECTOR_LEN];      /* fixed addresses vector       */
+    size_t      sizes_0[VECTOR_LEN];        /* sizes vector                 */
+    size_t      sizes_1[VECTOR_LEN];        /* sizes vector                 */
+    size_t      sizes_2[VECTOR_LEN];        /* sizes vector                 */
+    size_t      f_sizes_0[VECTOR_LEN];      /* fixed sizes vector           */
+    size_t      f_sizes_1[VECTOR_LEN];      /* fixed sizes vector           */
+    size_t      f_sizes_2[VECTOR_LEN];      /* fixed sizes vector           */
+    size_t      f_size_0 = 0;               /* current size for f vector 0  */
+    size_t      f_size_1 = 0;               /* current size for f vector 1  */
+    size_t      f_size_2 = 0;               /* current size for f vector 2  */
+    const void *write_bufs_0[VECTOR_LEN];   /* write bufs vector            */
+    const void *write_bufs_1[VECTOR_LEN];   /* write bufs vector            */
+    const void *write_bufs_2[VECTOR_LEN];   /* write bufs vector            */
+    const void *f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
+    const void *f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
+    const void *f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
+    void *      read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
+    void *      read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
+    void *      read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
+    void *      f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
+    void *      f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
+    void *      f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
 
     HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
@@ -4911,13 +4922,13 @@ test_vector_io(const char *vfd_name)
 
     for (i = 0; i < count; i++) {
 
-        HDfree(write_bufs_0[i]);
+        HDfree((void *)write_bufs_0[i]);
         write_bufs_0[i] = NULL;
 
-        HDfree(write_bufs_1[i]);
+        HDfree((void *)write_bufs_1[i]);
         write_bufs_1[i] = NULL;
 
-        HDfree(write_bufs_2[i]);
+        HDfree((void *)write_bufs_2[i]);
         write_bufs_2[i] = NULL;
 
         HDfree(read_bufs_0[i]);
@@ -4929,13 +4940,13 @@ test_vector_io(const char *vfd_name)
         HDfree(read_bufs_2[i]);
         read_bufs_2[i] = NULL;
 
-        HDfree(f_write_bufs_0[i]);
+        HDfree((void *)f_write_bufs_0[i]);
         f_write_bufs_0[i] = NULL;
 
-        HDfree(f_write_bufs_1[i]);
+        HDfree((void *)f_write_bufs_1[i]);
         f_write_bufs_1[i] = NULL;
 
-        HDfree(f_write_bufs_2[i]);
+        HDfree((void *)f_write_bufs_2[i]);
         f_write_bufs_2[i] = NULL;
 
         HDfree(f_read_bufs_0[i]);
