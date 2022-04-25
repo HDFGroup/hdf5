@@ -11367,35 +11367,32 @@ struct onion_filepaths {
  * Should be released with onion_filepaths_destroy() when done.
  */
 static struct onion_filepaths *
-onion_filepaths_init(const char *basename, H5FD_onion_fapl_info_t *fa_info)
+onion_filepaths_init(const char *basename)
 {
     struct onion_filepaths *paths = NULL;
 
-    paths = (struct onion_filepaths *)HDmalloc(sizeof(struct onion_filepaths));
-    if (NULL == paths)
+    if (NULL == (paths = HDcalloc(1, sizeof(struct onion_filepaths))))
         goto error;
-    paths->canon    = NULL;
-    paths->onion    = NULL;
-    paths->recovery = NULL;
 
-    paths->canon = HDstrdup(basename);
+    if (NULL == (paths->canon = HDstrdup(basename)))
+        goto error;
 
-    paths->onion = (char *)HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE);
+    if (NULL == (paths->onion = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+        goto error;
     HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
-    paths->recovery = (char *)HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE);
+    if (NULL == (paths->recovery = HDmalloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
+        goto error;
     HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 
 error:
     if (paths != NULL) {
-        if (paths->canon != NULL)
-            HDfree(paths->canon);
-        if (paths->onion != NULL)
-            HDfree(paths->onion);
-        if (paths->recovery != NULL)
-            HDfree(paths->recovery);
+        HDfree(paths->canon);
+        HDfree(paths->onion);
+        HDfree(paths->recovery);
+        HDfree(paths);
     }
     return NULL;
 }
@@ -11403,15 +11400,22 @@ error:
 static void
 onion_filepaths_destroy(struct onion_filepaths *s)
 {
-    HDfree(s->canon);
-    HDfree(s->onion);
-    HDfree(s->recovery);
-    HDfree(s);
+    if (s) {
+        HDfree(s->canon);
+        HDfree(s->onion);
+        HDfree(s->recovery);
+        HDfree(s);
+    }
 }
 
 static int
-gent_onion_1d_dset()
+gent_onion_1d_dset(void)
 {
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t   file = H5I_INVALID_HID;
+    hid_t space = H5I_INVALID_HID;
+    hid_t dset = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -11424,7 +11428,10 @@ gent_onion_1d_dset()
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t file_id = H5I_INVALID_HID;
+    hsize_t dims[2] = {1, ONE_DIM_SIZE};
+    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
+    int     wdata[1][ONE_DIM_SIZE];
+    int fillval;
 
     /* Setup */
     onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -11434,72 +11441,50 @@ gent_onion_1d_dset()
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         goto error;
 
-    if ((paths = onion_filepaths_init(FILE90, &onion_info)) == NULL)
+    if ((paths = onion_filepaths_init(FILE90)) == NULL)
         goto error;
 
     /*----------------------------------------------------------------------
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {1, ONE_DIM_SIZE}, maxdims[2] = {1, ONE_DIM_SIZE};
-    int     wdata[1][ONE_DIM_SIZE], /* Write buffer */
-        fillval, i, j;
-
-    /*
-     * Initialize data.
-     */
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    /* Initialize data */
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         wdata[0][i] = i;
 
-    /*
-     * Create a new file using the default properties.
-     */
+    /* Create a new file using the default properties */
     if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
-    /*
-     * Create dataspace with unlimited dimensions.
-     */
+    /* Create dataspace with unlimited dimensions */
     if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
         goto error;
 
-    /*
-     * Create the dataset creation property list
-     */
+    /* Create the dataset creation property list */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
-    /*
-     * Set the fill value for the dataset.
-     */
+    /* Set the fill value for the dataset */
     fillval = 99;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
         goto error;
 
-    /*
-     * Set the allocation time to "early".  This way we can be sure
+    /* Set the allocation time to "early". This way we can be sure
      * that reading from the dataset immediately after creation will
      * return the fill value.
      */
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         goto error;
 
-    /*
-     * Create the dataset using the dataset creation property list.
-     */
+    /* Create the dataset using the dataset creation property list */
     if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    /*
-     * Write the data to the dataset.
-     */
+    /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]) < 0)
         goto error;
 
-    /*
-     * Close and release resources.
-     */
+    /* Close and release resources */
     if (H5Pclose(dcpl) < 0)
         goto error;
     if (H5Dclose(dset) < 0)
@@ -11520,7 +11505,7 @@ gent_onion_1d_dset()
         goto error;
 
     int dset_data[1][ONE_DIM_SIZE];
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data[0][i] = i + ONE_DIM_SIZE;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
@@ -11535,21 +11520,13 @@ gent_onion_1d_dset()
      * Second revision: open the file with Onion VFD and change the data
      *----------------------------------------------------------------------
      */
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    goto error;
-    if (H5I_INVALID_HID == file_id) {
-        printf("\n\n\n\nERROR OPENING\n\n\n\n");
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         goto error;
-    }
 
-    dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
-    goto error;
-    if (dset < 0) {
-        printf("\n\n\n\nERROR OPENING DSET\n\n\n\n");
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         goto error;
-    }
 
-    for (i = 0; i < ONE_DIM_SIZE; i++)
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data[0][i] = i + 2048;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
@@ -11573,7 +11550,7 @@ gent_onion_1d_dset()
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
-    for (i = 0; i < ONE_DIM_SIZE; i += 20)
+    for (int i = 0; i < ONE_DIM_SIZE; i += 20)
         dset_data[0][i] = i + 3072;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
@@ -11634,7 +11611,7 @@ gent_onion_create_delete_objects(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         goto error;
 
-    if ((paths = onion_filepaths_init(FILE91, &onion_info)) == NULL)
+    if ((paths = onion_filepaths_init(FILE91)) == NULL)
         goto error;
 
     /*----------------------------------------------------------------------
@@ -11853,8 +11830,12 @@ error:
 static int
 gent_onion_dset_extension(void)
 {
-    const char *            basename   = "integration_dset_ext.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
+    hid_t   file = H5I_INVALID_HID;
+    hid_t   space = H5I_INVALID_HID;
+    hid_t   dset_space = H5I_INVALID_HID;
+    hid_t dset = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
@@ -11866,14 +11847,13 @@ gent_onion_dset_extension(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t   file = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
-    hid_t   space, dset_space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    hsize_t size[2], offset[2];
-    int     wdata[4][4], /* Write buffer */
-        fillval, i, j;
-    int rdata[4][4]; /* Read buffer */
+    hsize_t dims[2] = {4, 4};
+    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2] = {4, 4};
+    hsize_t size[2];
+    hsize_t offset[2];
+    int     wdata[4][4]; /* Write buffer */
+    int fillval;
 
     /* Setup */
     if ((onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -11884,34 +11864,27 @@ gent_onion_dset_extension(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         goto error;
 
-    if ((paths = onion_filepaths_init(FILE92, &onion_info)) == NULL)
+    if ((paths = onion_filepaths_init(FILE92)) == NULL)
         goto error;
 
     /*----------------------------------------------------------------------
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    /*
-     * Initialize data.
-     */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    /* Initialize data */
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             wdata[i][j] = i + j;
 
-    /*
-     * Create a new file using the default properties.
-     */
+    /* Create a new file using the default properties */
     if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
-    /*
-     * Create dataspace with unlimited dimensions.
-     */
+    /* Create dataspace with unlimited dimensions */
     if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
         goto error;
 
-    /*
-     * Create the dataset creation property list, and set the chunk
+    /* Create the dataset creation property list, and set the chunk
      * size.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -11919,30 +11892,23 @@ gent_onion_dset_extension(void)
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         goto error;
 
-    /*
-     * Set the fill value for the dataset.
-     */
+    /* Set the fill value for the dataset */
     fillval = 99;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
         goto error;
 
-    /*
-     * Set the allocation time to "early".  This way we can be sure
+    /* Set the allocation time to "early". This way we can be sure
      * that reading from the dataset immediately after creation will
      * return the fill value.
      */
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         goto error;
 
-    /*
-     * Create the dataset using the dataset creation property list.
-     */
+    /* Create the dataset using the dataset creation property list */
     if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    /*
-     * Write the data to the dataset.
-     */
+    /* Write the data to the dataset */
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         goto error;
 
@@ -12034,14 +12000,14 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-    if (dset != H5I_INVALID_HID)
-        (void)H5Dclose(dset);
-    if (file != H5I_INVALID_HID)
-        (void)H5Fclose(file);
-    if (fapl_id != H5I_INVALID_HID)
-        (void)H5Pclose(fapl_id);
-    if (onion_info.backing_fapl_id != H5I_INVALID_HID)
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Pclose(fapl_id);
         H5Pclose(onion_info.backing_fapl_id);
+    }
+    H5E_END_TRY;
 
     return -1;
 } /* gent_onion_dset_extension */
