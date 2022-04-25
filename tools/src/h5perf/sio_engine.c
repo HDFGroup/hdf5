@@ -136,7 +136,7 @@ do_sio(parameters param, results *res)
     herr_t ret_code = 0; /* return code */
 
     char *fname = NULL;
-    int  i;
+    int   i;
 
     /* HDF5 variables */
     herr_t hrc; /* HDF5 return code */
@@ -1274,10 +1274,10 @@ done:
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
-    char  *temp = NULL;
+    char * temp = NULL;
     size_t temp_sz;
-    int   j;
-    hid_t driver;
+    int    j;
+    hid_t  driver;
 
     temp_sz = (4096 + sizeof("-?.h5")) * sizeof(char);
     if (NULL == (temp = HDcalloc(1, temp_sz)))
