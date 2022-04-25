@@ -24,9 +24,7 @@ public class HDF5InternalErrorException extends HDF5LibraryException {
      * Constructs an <code>HDF5InternalErrorException</code> with no specified
      * detail message.
      */
-    public HDF5InternalErrorException() {
-        super();
-    }
+    public HDF5InternalErrorException() { super(); }
 
     /**
      * Constructs an <code>HDF5InternalErrorException</code> with the specified
@@ -35,7 +33,5 @@ public class HDF5InternalErrorException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5InternalErrorException(String s) {
-        super(s);
-    }
+    public HDF5InternalErrorException(String s) { super(s); }
 }

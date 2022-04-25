@@ -23,9 +23,7 @@ public class HDF5AttributeException extends HDF5LibraryException {
      * Constructs an <code>HDF5AttributeException</code> with no specified
      * detail message.
      */
-    public HDF5AttributeException() {
-        super();
-    }
+    public HDF5AttributeException() { super(); }
 
     /**
      * Constructs an <code>HDF5AttributeException</code> with the specified
@@ -34,7 +32,5 @@ public class HDF5AttributeException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5AttributeException(String s) {
-        super(s);
-    }
+    public HDF5AttributeException(String s) { super(s); }
 }

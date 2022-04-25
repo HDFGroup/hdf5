@@ -29,49 +29,47 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Alloc {
-    private static String FILENAME = "H5Ex_D_Alloc.h5";
+    private static String FILENAME     = "H5Ex_D_Alloc.h5";
     private static String DATASETNAME1 = "DS1";
     private static String DATASETNAME2 = "DS2";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int FILLVAL = 99;
-    private static final int RANK = 2;
+    private static final int DIM_X     = 4;
+    private static final int DIM_Y     = 7;
+    private static final int FILLVAL   = 99;
+    private static final int RANK      = 2;
 
     // Values for the status of space allocation
     enum H5D_space_status {
-        H5D_SPACE_STATUS_ERROR(-1), H5D_SPACE_STATUS_NOT_ALLOCATED(0), H5D_SPACE_STATUS_PART_ALLOCATED(1), H5D_SPACE_STATUS_ALLOCATED(
-                2);
+        H5D_SPACE_STATUS_ERROR(-1),
+        H5D_SPACE_STATUS_NOT_ALLOCATED(0),
+        H5D_SPACE_STATUS_PART_ALLOCATED(1),
+        H5D_SPACE_STATUS_ALLOCATED(2);
         private static final Map<Integer, H5D_space_status> lookup = new HashMap<Integer, H5D_space_status>();
 
-        static {
+        static
+        {
             for (H5D_space_status s : EnumSet.allOf(H5D_space_status.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5D_space_status(int space_status) {
-            this.code = space_status;
-        }
+        H5D_space_status(int space_status) { this.code = space_status; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5D_space_status get(int code) {
-            return lookup.get(code);
-        }
+        public static H5D_space_status get(int code) { return lookup.get(code); }
     }
 
-    private static void allocation() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void allocation()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id1 = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id2 = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
+        long dataset_id1  = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id2  = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM_X, DIM_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
-        int space_status = 0;
+        int space_status  = 0;
         long storage_size = 0;
 
         // Initialize the dataset.
@@ -82,7 +80,7 @@ public class H5Ex_D_Alloc {
         // Create a file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +123,8 @@ public class H5Ex_D_Alloc {
         try {
             if ((file_id >= 0) && (filespace_id >= 0))
                 dataset_id1 = H5.H5Dcreate(file_id, DATASETNAME1, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                           HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -135,7 +134,7 @@ public class H5Ex_D_Alloc {
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
                 dataset_id2 = H5.H5Dcreate(file_id, DATASETNAME2, HDF5Constants.H5T_NATIVE_INT, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                                           HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -190,16 +189,16 @@ public class H5Ex_D_Alloc {
         // Write the data to the datasets.
         try {
             if (dataset_id1 >= 0)
-                H5.H5Dwrite(dataset_id1, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data[0]);
+                H5.H5Dwrite(dataset_id1, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data[0]);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         try {
             if (dataset_id2 >= 0)
-                H5.H5Dwrite(dataset_id2, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data[0]);
+                H5.H5Dwrite(dataset_id2, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data[0]);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -291,8 +290,5 @@ public class H5Ex_D_Alloc {
         }
     }
 
-    public static void main(String[] args) {
-        H5Ex_D_Alloc.allocation();
-    }
-
+    public static void main(String[] args) { H5Ex_D_Alloc.allocation(); }
 }

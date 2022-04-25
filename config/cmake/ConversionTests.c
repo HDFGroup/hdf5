@@ -234,59 +234,6 @@ done:
 }
 #endif
 
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS_TEST
-
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct {
-    size_t len;
-    void *p;
-} hvl_t;
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-extern "C"
-#  endif
-int FC_DUMMY_MAIN()
-{ return 1;}
-#endif
-#endif
-int HDF_NO_UBSAN
-main ()
-{
-
-    char *chp = "beefs";
-    char **chpp = malloc (2 * sizeof (char *));
-    char **chpp2;
-    hvl_t vl = { 12345, (void *) chp };
-    hvl_t *vlp;
-    hvl_t *vlp2;
-
-    memcpy ((void *) ((char *) chpp + 1), &chp, sizeof (char *));
-    chpp2 = (char **) ((char *) chpp + 1);
-    if (strcmp (*chpp2, chp)) {
-        free (chpp);
-        return 1;
-    }
-    free (chpp);
-
-    vlp = malloc (2 * sizeof (hvl_t));
-    memcpy ((void *) ((char *) vlp + 1), &vl, sizeof (hvl_t));
-    vlp2 = (hvl_t *) ((char *) vlp + 1);
-    if (vlp2->len != vl.len || vlp2->p != vl.p) {
-        free (vlp);
-        return 1;
-    }
-    free (vlp);
-
-  ;
-  return 0;
-}
-
-#endif
-
 #ifdef H5_DISABLE_SOME_LDOUBLE_CONV_TEST
 
 #include <stdio.h>

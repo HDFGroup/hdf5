@@ -28,17 +28,18 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_T_Float {
-    private static String FILENAME = "H5Ex_T_Float.h5";
+    private static String FILENAME    = "H5Ex_T_Float.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM0 = 4;
-    private static final int DIM1 = 7;
-    private static final int RANK = 2;
+    private static final int DIM0     = 4;
+    private static final int DIM1     = 7;
+    private static final int RANK     = 2;
 
-    private static void CreateDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0, DIM1 };
+    private static void CreateDataset()
+    {
+        long file_id         = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id    = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] dims          = {DIM0, DIM1};
         double[][] dset_data = new double[DIM0][DIM1];
 
         // Initialize data.
@@ -50,7 +51,7 @@ public class H5Ex_T_Float {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -73,7 +74,8 @@ public class H5Ex_T_Float {
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_IEEE_F64LE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -82,8 +84,8 @@ public class H5Ex_T_Float {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -115,14 +117,14 @@ public class H5Ex_T_Float {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void ReadDataset()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0, DIM1 };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM0, DIM1};
         double[][] dset_data;
 
         // Open an existing file.
@@ -161,13 +163,13 @@ public class H5Ex_T_Float {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        dset_data = new double[(int) dims[0]][(int) (dims[1])];
+        dset_data = new double[(int)dims[0]][(int)(dims[1])];
 
         // Read data.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -211,10 +213,10 @@ public class H5Ex_T_Float {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_T_Float.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -222,5 +224,4 @@ public class H5Ex_T_Float {
         // data using malloc().
         H5Ex_T_Float.ReadDataset();
     }
-
 }

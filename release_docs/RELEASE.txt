@@ -151,7 +151,12 @@ Bug Fixes since HDF5-1.13.1 release
 
     Fortran API
     -----------
-    - 
+    - h5open_f and h5close_f fixes
+     * Fixed it so both h5open_f and h5close_f can be called multiple times.
+     * Fixed an issue with open objects remaining after h5close_f was called.
+     * Added additional tests.
+       (MSB, 2022/04/19, HDFFV-11306)
+
 
 
     High-Level Library

@@ -20,25 +20,26 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5_CreateAttribute {
-    private static String FILENAME = "H5_CreateAttribute.h5";
-    private static String DATASETNAME = "dset";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 6;
+    private static String FILENAME         = "H5_CreateAttribute.h5";
+    private static String DATASETNAME      = "dset";
+    private static final int DIM_X         = 4;
+    private static final int DIM_Y         = 6;
     private static String DATASETATTRIBUTE = "Units";
 
-    private static void CreateDatasetAttribute() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateDatasetAttribute()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
         long attribute_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims1 = { DIM_X, DIM_Y };
-        long[] dims = { 2 };
-        int[] attr_data = { 100, 200 };
+        long[] dims1      = {DIM_X, DIM_Y};
+        long[] dims       = {2};
+        int[] attr_data   = {100, 200};
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -55,8 +56,9 @@ public class H5_CreateAttribute {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, "/" + DATASETNAME, HDF5Constants.H5T_STD_I32BE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5.H5Dcreate(file_id, "/" + DATASETNAME, HDF5Constants.H5T_STD_I32BE,
+                                          dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -82,8 +84,9 @@ public class H5_CreateAttribute {
         // Create a dataset attribute.
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0))
-                attribute_id = H5.H5Acreate(dataset_id, DATASETATTRIBUTE, HDF5Constants.H5T_STD_I32BE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                attribute_id =
+                    H5.H5Acreate(dataset_id, DATASETATTRIBUTE, HDF5Constants.H5T_STD_I32BE, dataspace_id,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -135,8 +138,5 @@ public class H5_CreateAttribute {
         }
     }
 
-    public static void main(String[] args) {
-        H5_CreateAttribute.CreateDatasetAttribute();
-    }
-
+    public static void main(String[] args) { H5_CreateAttribute.CreateDatasetAttribute(); }
 }

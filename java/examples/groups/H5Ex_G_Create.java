@@ -20,17 +20,18 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_G_Create {
-    private static String FILENAME = "H5Ex_G_Create.h5";
+    private static String FILENAME  = "H5Ex_G_Create.h5";
     private static String GROUPNAME = "G1";
 
-    private static void CreateGroup() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateGroup()
+    {
+        long file_id  = HDF5Constants.H5I_INVALID_HID;
         long group_id = HDF5Constants.H5I_INVALID_HID;
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -39,8 +40,8 @@ public class H5Ex_G_Create {
         // Create a group in the file.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                group_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT,
+                                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -81,11 +82,7 @@ public class H5Ex_G_Create {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5Ex_G_Create.CreateGroup();
-    }
-
+    public static void main(String[] args) { H5Ex_G_Create.CreateGroup(); }
 }
