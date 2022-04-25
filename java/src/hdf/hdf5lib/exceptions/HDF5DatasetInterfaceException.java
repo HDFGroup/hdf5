@@ -23,9 +23,7 @@ public class HDF5DatasetInterfaceException extends HDF5LibraryException {
      * Constructs an <code>HDF5DatasetInterfaceException</code> with no
      * specified detail message.
      */
-    public HDF5DatasetInterfaceException() {
-        super();
-    }
+    public HDF5DatasetInterfaceException() { super(); }
 
     /**
      * Constructs an <code>HDF5DatasetInterfaceException</code> with the
@@ -34,7 +32,5 @@ public class HDF5DatasetInterfaceException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5DatasetInterfaceException(String s) {
-        super(s);
-    }
+    public HDF5DatasetInterfaceException(String s) { super(s); }
 }

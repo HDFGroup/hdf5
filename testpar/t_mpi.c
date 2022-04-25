@@ -768,6 +768,24 @@ test_mpio_derived_dtype(char *filename)
         return 1;
     }
 
+    if ((mpi_err = MPI_Type_free(&filetype)) != MPI_SUCCESS) {
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        return 1;
+    }
+
+    if ((mpi_err = MPI_Type_free(&adv_filetype)) != MPI_SUCCESS) {
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        return 1;
+    }
+
+    if ((mpi_err = MPI_Type_free(&filetypenew)) != MPI_SUCCESS) {
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        return 1;
+    }
+
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
@@ -848,7 +866,9 @@ test_mpio_special_collective(char *filename)
 {
     int          mpi_size, mpi_rank;
     MPI_File     fh;
-    MPI_Datatype etype, buftype, filetype;
+    MPI_Datatype etype;
+    MPI_Datatype filetype = MPI_BYTE;
+    MPI_Datatype buftype  = MPI_BYTE;
     char         mpi_err_str[MPI_MAX_ERROR_STRING];
     int          mpi_err_strlen;
     int          mpi_err;
@@ -906,10 +926,6 @@ test_mpio_special_collective(char *filename)
             return 1;
         } /* end if */
     }     /* end if */
-    else {
-        filetype = MPI_BYTE;
-        buftype  = MPI_BYTE;
-    } /* end else */
 
     /* Open a file */
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL,
@@ -931,6 +947,12 @@ test_mpio_special_collective(char *filename)
         return 1;
     } /* end if */
 
+    if (filetype != MPI_BYTE && (mpi_err = MPI_Type_free(&filetype)) != MPI_SUCCESS) {
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        return 1;
+    }
+
     /* Collectively write into the file */
     if ((mpi_err = MPI_File_write_at_all(fh, mpi_off, writedata, bufcount, buftype, &mpi_stat)) !=
         MPI_SUCCESS) {
@@ -939,6 +961,12 @@ test_mpio_special_collective(char *filename)
                  mpi_err_str);
         return 1;
     } /* end if */
+
+    if (buftype != MPI_BYTE && (mpi_err = MPI_Type_free(&buftype)) != MPI_SUCCESS) {
+        MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        return 1;
+    }
 
     /* Close the file */
     if ((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS) {

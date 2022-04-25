@@ -9,11 +9,11 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
     steps:
     - uses: actions/checkout@v2
-    - name: Run clang-format style check for C programs.
+    - name: Run clang-format style check for C and Java programs.
       uses: DoozyX/clang-format-lint-action@v0.11
       with:
         source: '.'
-        extensions: 'c,h,cpp,hpp'
+        extensions: 'c,h,cpp,hpp,java'
         clangFormatVersion: 10
         inplace: True
         style: file

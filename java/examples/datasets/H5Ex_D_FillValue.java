@@ -26,29 +26,30 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_FillValue {
-    private static String FILENAME = "H5Ex_D_FillValue.h5";
+    private static String FILENAME    = "H5Ex_D_FillValue.h5";
     private static String DATASETNAME = "ExtendibleArray";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 7;
-    private static final int EDIM_X = 6;
-    private static final int EDIM_Y = 10;
-    private static final int CHUNK_X = 4;
-    private static final int CHUNK_Y = 4;
-    private static final int RANK = 2;
-    private static final int NDIMS = 2;
-    private static final int FILLVAL = 99;
+    private static final int DIM_X    = 4;
+    private static final int DIM_Y    = 7;
+    private static final int EDIM_X   = 6;
+    private static final int EDIM_Y   = 10;
+    private static final int CHUNK_X  = 4;
+    private static final int CHUNK_Y  = 4;
+    private static final int RANK     = 2;
+    private static final int NDIMS    = 2;
+    private static final int FILLVAL  = 99;
 
-    private static void fillValue() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] extdims = { EDIM_X, EDIM_Y };
-        long[] chunk_dims = { CHUNK_X, CHUNK_Y };
-        long[] maxdims = { HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED };
-        int[][] write_dset_data = new int[DIM_X][DIM_Y];
-        int[][] read_dset_data = new int[DIM_X][DIM_Y];
+    private static void fillValue()
+    {
+        long file_id             = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id             = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id        = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id          = HDF5Constants.H5I_INVALID_HID;
+        long[] dims              = {DIM_X, DIM_Y};
+        long[] extdims           = {EDIM_X, EDIM_Y};
+        long[] chunk_dims        = {CHUNK_X, CHUNK_Y};
+        long[] maxdims           = {HDF5Constants.H5S_UNLIMITED, HDF5Constants.H5S_UNLIMITED};
+        int[][] write_dset_data  = new int[DIM_X][DIM_Y];
+        int[][] read_dset_data   = new int[DIM_X][DIM_Y];
         int[][] extend_dset_data = new int[EDIM_X][EDIM_Y];
 
         // Initialize the dataset.
@@ -59,7 +60,7 @@ public class H5Ex_D_FillValue {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +93,7 @@ public class H5Ex_D_FillValue {
 
         // Set the fill value for the dataset
         try {
-            int[] fill_value = { FILLVAL };
+            int[] fill_value = {FILLVAL};
             if (dcpl_id >= 0)
                 H5.H5Pset_fill_value(dcpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
         }
@@ -115,7 +116,7 @@ public class H5Ex_D_FillValue {
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (dcpl_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -124,8 +125,8 @@ public class H5Ex_D_FillValue {
         // Read values from the dataset, which has not been written to yet.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, read_dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, read_dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -144,8 +145,8 @@ public class H5Ex_D_FillValue {
         // Write the data to the dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, write_dset_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, write_dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -154,8 +155,8 @@ public class H5Ex_D_FillValue {
         // Read the data back.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, read_dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, read_dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -183,8 +184,8 @@ public class H5Ex_D_FillValue {
         // Read from the extended dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, extend_dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, extend_dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -233,11 +234,7 @@ public class H5Ex_D_FillValue {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5Ex_D_FillValue.fillValue();
-    }
-
+    public static void main(String[] args) { H5Ex_D_FillValue.fillValue(); }
 }

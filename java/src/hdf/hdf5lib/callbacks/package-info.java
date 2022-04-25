@@ -11,7 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/** All callback definitions must derive from the Callbacks interface.  Any
+/**
+ * All callback definitions must derive from the Callbacks interface.  Any
  * derived interfaces must define a single public method named "callback".
  * You are responsible for deregistering your callback (if necessary)
  * in its {@link Object#finalize} method.  If native code attempts to call
