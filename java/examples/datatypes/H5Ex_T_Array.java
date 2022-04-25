@@ -24,22 +24,23 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_T_Array {
-    private static String FILENAME = "H5Ex_T_Array.h5";
+    private static String FILENAME    = "H5Ex_T_Array.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM0 = 4;
-    private static final int ADIM0 = 3;
-    private static final int ADIM1 = 5;
-    private static final int RANK = 1;
-    private static final int NDIMS = 2;
+    private static final int DIM0     = 4;
+    private static final int ADIM0    = 3;
+    private static final int ADIM1    = 5;
+    private static final int RANK     = 1;
+    private static final int NDIMS    = 2;
 
-    private static void CreateDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0 };
-        long[] adims = { ADIM0, ADIM1 };
+    private static void CreateDataset()
+    {
+        long file_id        = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id    = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id     = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id   = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id     = HDF5Constants.H5I_INVALID_HID;
+        long[] dims         = {DIM0};
+        long[] adims        = {ADIM0, ADIM1};
         int[][][] dset_data = new int[DIM0][ADIM0][ADIM1];
 
         // Initialize data. indx is the element in the dataspace, jndx and kndx the
@@ -52,7 +53,7 @@ public class H5Ex_T_Array {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -86,8 +87,9 @@ public class H5Ex_T_Array {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, DATASETNAME, filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id =
+                    H5.H5Dcreate(file_id, DATASETNAME, filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -97,7 +99,7 @@ public class H5Ex_T_Array {
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5Dwrite(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                            HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -147,16 +149,16 @@ public class H5Ex_T_Array {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void ReadDataset()
+    {
+        long file_id     = HDF5Constants.H5I_INVALID_HID;
         long filetype_id = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0 };
-        long[] adims = { ADIM0, ADIM1 };
+        long memtype_id  = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id  = HDF5Constants.H5I_INVALID_HID;
+        long[] dims      = {DIM0};
+        long[] adims     = {ADIM0, ADIM1};
         int[][][] dset_data;
 
         // Open an existing file.
@@ -196,7 +198,7 @@ public class H5Ex_T_Array {
 
         // Allocate array of pointers to two-dimensional arrays (the
         // elements of the dataset.
-        dset_data = new int[(int) dims[0]][(int) (adims[0])][(int) (adims[1])];
+        dset_data = new int[(int)dims[0]][(int)(adims[0])][(int)(adims[1])];
 
         // Create array datatypes for memory.
         try {
@@ -210,7 +212,7 @@ public class H5Ex_T_Array {
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5Dread(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                           HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -264,10 +266,10 @@ public class H5Ex_T_Array {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_T_Array.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -275,5 +277,4 @@ public class H5Ex_T_Array {
         // data using malloc().
         H5Ex_T_Array.ReadDataset();
     }
-
 }

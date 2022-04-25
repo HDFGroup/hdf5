@@ -24,9 +24,7 @@ public class HDF5FileInterfaceException extends HDF5LibraryException {
      * Constructs an <code>HDF5FileInterfaceException</code> with no specified
      * detail message.
      */
-    public HDF5FileInterfaceException() {
-        super();
-    }
+    public HDF5FileInterfaceException() { super(); }
 
     /**
      * Constructs an <code>HDF5FileInterfaceException</code> with the specified
@@ -35,7 +33,5 @@ public class HDF5FileInterfaceException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5FileInterfaceException(String s) {
-        super(s);
-    }
+    public HDF5FileInterfaceException(String s) { super(s); }
 }
