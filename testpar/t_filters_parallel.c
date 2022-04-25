@@ -7857,8 +7857,10 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
  * edge chunk and writes to just a portion of the edge chunk.
  */
 static void
-test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                               hid_t dxpl_id)
+test_edge_chunks_partial_write(const char H5_ATTR_PARALLEL_UNUSED * parent_group,
+                               H5Z_filter_t H5_ATTR_PARALLEL_UNUSED filter_id,
+                               hid_t H5_ATTR_PARALLEL_UNUSED fapl_id, hid_t H5_ATTR_PARALLEL_UNUSED dcpl_id,
+                               hid_t H5_ATTR_PARALLEL_UNUSED dxpl_id)
 {
     /* TODO */
 }
