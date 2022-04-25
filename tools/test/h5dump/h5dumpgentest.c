@@ -11411,11 +11411,11 @@ onion_filepaths_destroy(struct onion_filepaths *s)
 static int
 gent_onion_1d_dset(void)
 {
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t   file = H5I_INVALID_HID;
-    hid_t space = H5I_INVALID_HID;
-    hid_t dset = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
+    hid_t                   file_id    = H5I_INVALID_HID;
+    hid_t                   file       = H5I_INVALID_HID;
+    hid_t                   space      = H5I_INVALID_HID;
+    hid_t                   dset       = H5I_INVALID_HID;
+    hid_t                   dcpl       = H5I_INVALID_HID;
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -11428,10 +11428,10 @@ gent_onion_1d_dset(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hsize_t dims[2] = {1, ONE_DIM_SIZE};
+    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
     hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
     int     wdata[1][ONE_DIM_SIZE];
-    int fillval;
+    int     fillval;
 
     /* Setup */
     onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -11831,11 +11831,11 @@ static int
 gent_onion_dset_extension(void)
 {
     hid_t                   fapl_id    = H5I_INVALID_HID;
-    hid_t   file = H5I_INVALID_HID;
-    hid_t   space = H5I_INVALID_HID;
-    hid_t   dset_space = H5I_INVALID_HID;
-    hid_t dset = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
+    hid_t                   file       = H5I_INVALID_HID;
+    hid_t                   space      = H5I_INVALID_HID;
+    hid_t                   dset_space = H5I_INVALID_HID;
+    hid_t                   dset       = H5I_INVALID_HID;
+    hid_t                   dcpl       = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
@@ -11847,13 +11847,13 @@ gent_onion_dset_extension(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hsize_t dims[2] = {4, 4};
+    hsize_t dims[2]    = {4, 4};
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t chunk[2] = {4, 4};
+    hsize_t chunk[2]   = {4, 4};
     hsize_t size[2];
     hsize_t offset[2];
     int     wdata[4][4]; /* Write buffer */
-    int fillval;
+    int     fillval;
 
     /* Setup */
     if ((onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
