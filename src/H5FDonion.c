@@ -358,12 +358,8 @@ hssize_t
 H5FDget_onion_revision_count(const char *filename, hid_t fapl_id)
 {
     H5P_genplist_t *plist        = NULL;
-    ssize_t         ret_value    = 7;
+    ssize_t         ret_value    = 0;
     H5FD_t *        file_drv_ptr = NULL;
-    uint64_t        op_code;
-    uint64_t        flags;
-    uint64_t *      num_revisions = NULL;
-
     FUNC_ENTER_API(FAIL)
 
     /* Make sure using the correct driver */
