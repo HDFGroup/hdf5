@@ -249,6 +249,7 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     dset_info.store   = &store;
     dset_info.u.wbuf  = fb_info.fill_buf;
     ioinfo.dsets_info = &dset_info;
+    ioinfo.f_sh       = H5F_SHARED(dset_info.dset->oloc.file);
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -568,7 +569,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     int          sf_ndims;     /* The number of dimensions of the file dataspace (signed) */
     H5S_class_t  fsclass_type; /* file space class type */
     H5S_sel_type fsel_type;    /* file space selection type */
-    hbool_t      sel_hyper_flag;
 
     herr_t ret_value = SUCCEED; /* Return value		*/
 
@@ -646,15 +646,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     if ((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
 
-    /* if class type is scalar or null for contiguous dset */
-    if (fsclass_type == H5S_SCALAR || fsclass_type == H5S_NULL)
-        sel_hyper_flag = FALSE;
-    /* if class type is H5S_SIMPLE & if selection is NONE or POINTS */
-    else if (fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
-        sel_hyper_flag = FALSE;
-    else
-        sel_hyper_flag = TRUE;
-
     /* if selected elements exist */
     if (dinfo->nelmts) {
         unsigned          u;
@@ -667,18 +658,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
         /* Create "temporary" chunk for selection operations (copy file space) */
         if (NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
-
-        /* Actions specific to hyperslab selections */
-        if (sel_hyper_flag) {
-            /* Sanity check */
-            HDassert(dinfo->f_ndims > 0);
-
-            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-            if (H5S_hyper_convert(tmp_fspace) < 0) {
-                (void)H5S_close(tmp_fspace);
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
-            } /* end if */
-        }     /* end if */
 
         /* Add temporary chunk to the list of pieces */
         /* collect piece_info into Skip List */

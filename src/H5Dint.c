@@ -1967,10 +1967,10 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Check for cached single element chunk info */
-                if (dataset->shared->cache.chunk.single_chunk_info) {
-                    dataset->shared->cache.chunk.single_chunk_info =
-                        H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_chunk_info);
-                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                if (dataset->shared->cache.chunk.single_piece_info) {
+                    dataset->shared->cache.chunk.single_piece_info =
+                        H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
+                    dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
                 break;
 
@@ -2161,10 +2161,10 @@ H5D_mult_refresh_close(hid_t dset_id)
                 } /* end if */
 
                 /* Check for cached single element chunk info */
-                if (dataset->shared->cache.chunk.single_chunk_info) {
-                    dataset->shared->cache.chunk.single_chunk_info =
-                        H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
-                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                if (dataset->shared->cache.chunk.single_piece_info) {
+                    dataset->shared->cache.chunk.single_piece_info =
+                        H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
+                    dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
                 break;
 
@@ -2687,29 +2687,24 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point")
 
     {
-        hid_t file_id; /* File ID for operation */
-
         /* Alloc dset_info */
-        if (NULL == (dset_info = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+        if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_info_t)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
         dset_info->dset        = vlen_bufsize->dset;
         dset_info->mem_space   = vlen_bufsize->mspace;
         dset_info->file_space  = vlen_bufsize->fspace;
-        dset_info->u.rbuf      = vlen_bufsize->fl_tbuf;
+        dset_info->u.rbuf      = vlen_bufsize->common.fl_tbuf;
         dset_info->mem_type_id = type_id;
 
-        /* Retrieve file_id */
-        file_id = H5F_FILE_ID(dset_info->dset->oloc.file);
-
         /* Read in the point (with the custom VL memory allocator) */
-        if (H5D__read(file_id, 1, dset_info) < 0)
+        if (H5D__read(1, dset_info, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 done:
     if (dset_info)
-        H5MM_xfree(dset_info);
+        dset_info = H5FL_FREE(H5D_dset_info_t, dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_cb() */
@@ -2742,7 +2737,6 @@ herr_t
 H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size)
 {
     H5D_vlen_bufsize_native_t vlen_bufsize = {NULL, NULL, NULL, {NULL, NULL, 0, 0}};
-    H5D_dset_info_t *         dset_info    = NULL; /* Internal multi-dataset info placeholder */
     H5S_t *                   fspace       = NULL; /* Dataset's dataspace */
     H5S_t *                   mspace       = NULL; /* Memory dataspace */
     char                      bogus;               /* bogus value to pass to H5Diterate() */
