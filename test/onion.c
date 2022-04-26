@@ -2854,6 +2854,11 @@ test_integration_create(void)
 {
     const char *            basename   = "integration_2d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t   file = H5I_INVALID_HID;
+    hid_t space = H5I_INVALID_HID;
+    hid_t dset = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
@@ -2865,11 +2870,31 @@ test_integration_create(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t file_id = H5I_INVALID_HID;
+    hsize_t dims[2]    = {128, 256};
+    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2]   = {4, 4};
+    int     fillval;
+    struct {
+        int arr[128][256];
+    } *wdata = NULL;
+    struct {
+        int arr[128][256];
+    } *rdata = NULL;
+    struct {
+        int arr[128][256];
+    } *dset_data = NULL;
+
 
     TESTING("onion-created two dimensional HDF5 file with revisions");
 
     /* SETUP */
+
+    if (NULL == (wdata = HDcalloc(1, sizeof(*wdata))))
+        TEST_ERROR
+    if (NULL == (rdata = HDcalloc(1, sizeof(*rdata))))
+        TEST_ERROR
+    if (NULL == (dset_data = HDcalloc(1, sizeof(*dset_data))))
+        TEST_ERROR
 
     onion_info.backing_fapl_id = h5_fileaccess();
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -2888,23 +2913,19 @@ test_integration_create(void)
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2]    = {128, 256};
-    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t chunk[2]   = {4, 4};
-    int     wdata[128][256]; /* Write buffer */
-    int     fillval, i, j;
-
+ 
     /* Initialize data */
-    for (i = 0; i < 128; i++)
-        for (j = 0; j < 256; j++)
-            wdata[i][j] = i * j - j;
+    for (int i = 0; i < 128; i++)
+        for (int j = 0; j < 256; j++)
+            wdata->arr[i][j] = i * j - j;
 
     /* Create a new file using the default properties */
-    file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
 
     /* Create dataspace with unlimited dimensions */
-    space = H5Screate_simple(2, dims, maxdims);
+    if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
+        TEST_ERROR
 
     /* Create the dataset creation property list, and set the chunk
      * size
@@ -2931,7 +2952,7 @@ test_integration_create(void)
         TEST_ERROR
 
     /* Write the data to the dataset */
-    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR
 
     /* Close and release resources */
@@ -2954,10 +2975,9 @@ test_integration_create(void)
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    int dset_data[128][256];
-    for (i = 0; i < 128; i++)
-        for (j = 0; j < 256; j++)
-            dset_data[i][j] = i * 6 + j + 1;
+    for (int i = 0; i < 128; i++)
+        for (int j = 0; j < 256; j++)
+            dset_data->arr[i][j] = i * 6 + j + 1;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR
@@ -2979,9 +2999,9 @@ test_integration_create(void)
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 128; i++)
-        for (j = 0; j < 256; j++)
-            dset_data[i][j] = i * 3 + j + 5;
+    for (int i = 0; i < 128; i++)
+        for (int j = 0; j < 256; j++)
+            dset_data->arr[i][j] = i * 3 + j + 5;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR
@@ -3018,15 +3038,14 @@ test_integration_create(void)
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    int rdata[128][256];
-    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 128; i++) {
-        for (j = 0; j < 256; j++) {
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 256; j++) {
             int expected = i * j - j;
-            if (rdata[i][j] != expected) {
-                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+            if (rdata->arr[i][j] != expected) {
+                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
             }
@@ -3057,14 +3076,14 @@ test_integration_create(void)
         TEST_ERROR
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 128; i++) {
-        for (j = 0; j < 256; j++) {
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 256; j++) {
             int expected = i * 6 + j + 1;
-            if (rdata[i][j] != expected) {
-                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+            if (rdata->arr[i][j] != expected) {
+                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
             }
@@ -3096,14 +3115,14 @@ test_integration_create(void)
         TEST_ERROR
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (i = 0; i < 128; i++) {
-        for (j = 0; j < 256; j++) {
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 256; j++) {
             int expected = i * 3 + j + 5;
-            if (rdata[i][j] != expected) {
-                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+            if (rdata->arr[i][j] != expected) {
+                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR
             }
@@ -3125,6 +3144,10 @@ test_integration_create(void)
     HDremove(paths->recovery);
     onion_filepaths_destroy(paths);
 
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
+
     PASSED();
     return 0;
 
@@ -3144,6 +3167,10 @@ error:
         H5Pclose(fapl_id);
     }
     H5E_END_TRY;
+
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
 
     return -1;
 } /* end test_integration_create() */
@@ -3165,19 +3192,40 @@ test_integration_create_simple(void)
         "initial commit" /* comment          */
     };
     hid_t file_id = H5I_INVALID_HID;
+    hid_t   file       = H5I_INVALID_HID;
+    hid_t   space      = H5I_INVALID_HID;
+    hid_t   dset       = H5I_INVALID_HID;
+    hid_t   dcpl       = H5I_INVALID_HID;
+    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
+    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
+    int     fillval;
+    struct {
+        int     arr[ONE_DIM_SIZE];
+    } *wdata = NULL;
+    struct {
+        int arr[ONE_DIM_SIZE];
+    } *rdata = NULL;
+    struct {
+        int arr[ONE_DIM_SIZE];
+    } *dset_data = NULL;
 
     TESTING("onion-created one-dimensional HDF5 file with revisions");
 
     /* Setup */
+    if (NULL == (wdata = HDcalloc(1, sizeof(*wdata))))
+        TEST_ERROR
+    if (NULL == (rdata = HDcalloc(1, sizeof(*rdata))))
+        TEST_ERROR
+    if (NULL == (dset_data = HDcalloc(1, sizeof(*dset_data))))
+        TEST_ERROR
+
     onion_info.backing_fapl_id = h5_fileaccess();
-    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR
 
-    paths = onion_filepaths_init(basename, &onion_info);
-    if (NULL == paths)
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
         TEST_ERROR
 
     HDremove(paths->canon);
@@ -3188,18 +3236,9 @@ test_integration_create_simple(void)
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
-    hid_t   file       = H5I_INVALID_HID;
-    hid_t   space      = H5I_INVALID_HID;
-    hid_t   dset       = H5I_INVALID_HID;
-    hid_t   dcpl       = H5I_INVALID_HID;
-    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
-    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
-    int     wdata[1][ONE_DIM_SIZE]; /* Write buffer */
-    int     fillval;
-
     /* Initialize data */
     for (int i = 0; i < ONE_DIM_SIZE; i++)
-        wdata[0][i] = i;
+        wdata->arr[i] = i;
 
     /* Create a new file using the default properties */
     if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -3230,7 +3269,7 @@ test_integration_create_simple(void)
         TEST_ERROR
 
     /* Write the data to the dataset */
-    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
         TEST_ERROR
 
     /* Close everything */
@@ -3253,9 +3292,8 @@ test_integration_create_simple(void)
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    int dset_data[1][ONE_DIM_SIZE];
     for (int i = 0; i < ONE_DIM_SIZE; i++)
-        dset_data[0][i] = i + ONE_DIM_SIZE;
+        dset_data->arr[i] = i + ONE_DIM_SIZE;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR
@@ -3277,7 +3315,7 @@ test_integration_create_simple(void)
         TEST_ERROR
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
-        dset_data[0][i] = i + 2048;
+        dset_data->arr[i] = i + 2048;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR
@@ -3300,7 +3338,7 @@ test_integration_create_simple(void)
         TEST_ERROR
 
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
-        dset_data[0][i] = i + 3072;
+        dset_data->arr[i] = i + 3072;
 
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR
@@ -3336,17 +3374,14 @@ test_integration_create_simple(void)
     if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    int rdata[1][ONE_DIM_SIZE];
-    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR
 
-    for (int i = 0; i < 1; i++) {
-        for (int j = 0; j < ONE_DIM_SIZE; j += 20) {
-            int expected = j + 2048;
-            if (rdata[i][j] != expected) {
-                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
-                TEST_ERROR
-            }
+    for (int i = 0; i < ONE_DIM_SIZE; i += 20) {
+        int expected = i + 2048;
+        if (rdata->arr[i] != expected) {
+            HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
+            TEST_ERROR
         }
     }
 
@@ -3362,6 +3397,10 @@ test_integration_create_simple(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
     onion_filepaths_destroy(paths);
+
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
 
     PASSED();
     return 0;
@@ -3382,6 +3421,10 @@ error:
         H5Pclose(fapl_id);
     }
     H5E_END_TRY;
+
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
 
     return -1;
 } /* end test_integration_create_simple() */
