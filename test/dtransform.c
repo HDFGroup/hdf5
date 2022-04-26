@@ -120,7 +120,9 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
 
 #define TEST_TYPE_CONTIG(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                              \
     {                                                                                                        \
-        TYPE        array[ROWS][COLS];                                                                       \
+        struct {                                                                                             \
+            TYPE arr[ROWS][COLS];                                                                            \
+        } *array = NULL;                                                                                     \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
         const char *utrans = "(x/4+25)*3";                                                                   \
@@ -128,6 +130,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         hid_t       dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset, dset_nn, dt_nn;                         \
         H5T_order_t order;                                                                                   \
         hsize_t     dim[2] = {ROWS, COLS};                                                                   \
+                                                                                                             \
+        /* NOTE: If this part of the test macro encounters errors, this memory will leak */                  \
+        if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
+            TEST_ERROR;                                                                                      \
                                                                                                              \
         if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)                                                \
             TEST_ERROR;                                                                                      \
@@ -177,25 +183,25 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Dread(dset, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                                     \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
         else                                                                                                 \
-            UCOMPARE(TYPE, array, COMPARE_DATA, 4)                                                           \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
                                                                                                              \
         TESTING("contiguous, byte order conversion (" TEST_STR "->" TEST_STR ")")                            \
                                                                                                              \
         if (H5Dread(dset_nn, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                                  \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
         else                                                                                                 \
-            UCOMPARE(TYPE, array, COMPARE_DATA, 4)                                                           \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
                                                                                                              \
         if (SIGNED) {                                                                                        \
             TESTING("contiguous, with type conversion (float->" TEST_STR ")")                                \
                                                                                                              \
             if (H5Dread(dset_id_float, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0)                        \
                 TEST_ERROR;                                                                                  \
-            COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
         }                                                                                                    \
                                                                                                              \
         if (H5Dclose(dset_nn) < 0)                                                                           \
@@ -204,11 +210,15 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             TEST_ERROR;                                                                                      \
         if (H5Sclose(dataspace) < 0)                                                                         \
             TEST_ERROR;                                                                                      \
+                                                                                                             \
+        HDfree(array);                                                                                       \
     }
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                               \
     {                                                                                                        \
-        TYPE        array[ROWS][COLS];                                                                       \
+        struct {                                                                                             \
+            TYPE arr[ROWS][COLS];                                                                            \
+        } *array = NULL;                                                                                     \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
         const char *utrans = "(x/4+25)*3";                                                                   \
@@ -216,6 +226,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         hid_t   dataspace, dxpl_id_f_to_c, dxpl_id_utrans, cparms, memspace, dset_chunk, filespace;          \
         hsize_t dim[2]    = {ROWS, COLS};                                                                    \
         hsize_t offset[2] = {0, 0};                                                                          \
+                                                                                                             \
+        /* NOTE: If this part of the test macro encounters errors, this memory will leak */                  \
+        if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
+            TEST_ERROR;                                                                                      \
                                                                                                              \
         if ((dataspace = H5Screate_simple(2, dim, NULL)) < 0)                                                \
             TEST_ERROR;                                                                                      \
@@ -263,16 +277,16 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         if (H5Dread(dset_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0)                            \
             TEST_ERROR;                                                                                      \
         if (SIGNED)                                                                                          \
-            COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
         else                                                                                                 \
-            UCOMPARE(TYPE, array, COMPARE_DATA, 4)                                                           \
+            UCOMPARE(TYPE, array->arr, COMPARE_DATA, 4)                                                      \
                                                                                                              \
         if (SIGNED) {                                                                                        \
             TESTING("chunked, with type conversion (float->" TEST_STR ")")                                   \
                                                                                                              \
             if (H5Dread(dset_id_float_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0)               \
                 TEST_ERROR;                                                                                  \
-            COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
+            COMPARE(TYPE, array->arr, COMPARE_DATA, 2)                                                       \
         }                                                                                                    \
                                                                                                              \
         if (H5Pclose(cparms) < 0)                                                                            \
@@ -283,6 +297,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             TEST_ERROR;                                                                                      \
         if (H5Sclose(memspace) < 0)                                                                          \
             TEST_ERROR;                                                                                      \
+                                                                                                             \
+        HDfree(array);                                                                                       \
     }
 
 #define INVALID_SET_TEST(TRANSFORM)                                                                          \
