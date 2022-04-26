@@ -147,6 +147,8 @@ H5FL_DEFINE_STATIC(H5FD_onion_t);
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
 
+#define H5FD_CTL__GET_NUM_REVISIONS           20001
+
 /* Prototypes */
 static herr_t  H5FD__onion_close(H5FD_t *);
 static haddr_t H5FD__onion_get_eoa(const H5FD_t *, H5FD_mem_t);
@@ -170,6 +172,7 @@ static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsi
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
 static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
                                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
+static hssize_t H5FD__get_onion_revision_count(H5FD_t *file);
 
 static const H5FD_class_t H5FD_onion_g = {
     H5FD_CLASS_VERSION,             /* struct version       */
@@ -350,6 +353,67 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_onion() */
+
+hssize_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id)
+{
+    H5P_genplist_t *plist     = NULL;
+    ssize_t         ret_value = 7;
+    H5FD_t *  file_drv_ptr = NULL;
+    uint64_t  op_code;
+    uint64_t  flags;
+    uint64_t *num_revisions = NULL;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Make sure using the correct driver */
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid FAPL ID")
+
+    if (H5FD_ONION != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Onion VFL driver")
+
+    /* Open the file with the driver */
+    if (NULL == (file_drv_ptr = H5FD_open(filename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to open file with onion driver")
+
+    /* Call the private function */
+    if ((ret_value = H5FD__get_onion_revision_count(file_drv_ptr)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "failed to get the number of revisions")
+
+    /* Close H5FD_t structure pointer */
+    if (H5FD_close(file_drv_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+static hssize_t H5FD__get_onion_revision_count(H5FD_t *file)
+{
+    hssize_t  ret_value = 0;
+    uint64_t  op_code;
+    uint64_t  flags;
+    uint64_t *num_revisions = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    if (NULL == (num_revisions = HDmalloc(sizeof(uint64_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to alloc memory")
+
+    op_code = H5FD_CTL__GET_NUM_REVISIONS;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /* Call private function */
+    if (H5FD_ctl(file, op_code, flags, NULL, (void **)&num_revisions) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+
+    ret_value = *num_revisions;
+
+    HDfree(num_revisions);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__onion_sb_size

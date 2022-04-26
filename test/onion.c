@@ -4232,28 +4232,10 @@ test_integration_ctl(void)
     file = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
-     *  Start to verify the revision
+     *  Start to verify the number of revisions
      *----------------------------------------------------------------------
      */
-
-    if (NULL == (file_drv_ptr = H5FDopen(basename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
-        TEST_ERROR
-
-    if (NULL == (num_revisions = HDmalloc(sizeof(uint64_t))))
-        TEST_ERROR
-    op_code = H5FD_CTL__GET_NUM_REVISIONS;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-
-    if (H5FDctl(file_drv_ptr, op_code, flags, NULL, (void **)&num_revisions) < 0)
-        TEST_ERROR
-
-    if (*num_revisions != 2) {
-        HDprintf("the number of revisions should be 2 but got %" PRIu64 "\n", *num_revisions);
-        TEST_ERROR
-    }
-
-    /* Close H5FD_t structure pointer */
-    if (H5FDclose(file_drv_ptr) < 0)
+    if (H5FDget_onion_revision_count(basename, fapl_id) != 2)
         TEST_ERROR
 
     /* Close and release resources */

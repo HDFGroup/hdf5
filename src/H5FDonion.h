@@ -131,6 +131,7 @@ extern "C" {
 H5_DLL hid_t  H5FD_onion_init(void);
 H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
 H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
+H5_DLL hssize_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id);
 
 #ifdef __cplusplus
 }
