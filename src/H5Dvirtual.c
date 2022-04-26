@@ -104,8 +104,7 @@ static herr_t H5D__virtual_build_source_name(char *                             
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
 static herr_t H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage,
-                                  const H5S_t *file_space, const H5S_t *mem_space, hsize_t *tot_nelmts,
-                                  H5D_io_info_t *io_info);
+                                  const H5S_t *file_space, const H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info,
                                     const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
@@ -2379,7 +2378,7 @@ done:
  */
 static herr_t
 H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, const H5S_t *file_space,
-                    const H5S_t *mem_space, hsize_t *tot_nelmts, H5D_io_info_t *io_info)
+                    const H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     const H5D_t *dset = dset_info->dset;     /* Local pointer to dataset info */
     hssize_t     select_nelmts;              /* Number of elements in selection */
@@ -2401,9 +2400,10 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, 
     /* Initialize layout if necessary */
     if (!storage->init)
         if (H5D__virtual_init_all(dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout")
 
-            /* Initialize tot_nelmts */
-            *tot_nelmts = 0;
+    /* Initialize tot_nelmts */
+    *tot_nelmts = 0;
 
     /* Iterate over mappings */
     for (i = 0; i < storage->list_nused; i++) {
@@ -2716,10 +2716,8 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
                         "can't project virtual intersection onto source space")
 
         {
-            hid_t file_id; /* File ID for operation */
-
             /* Alloc dset_info */
-            if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
             dinfo->dset        = source_dset->dset;
@@ -2728,11 +2726,8 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
             dinfo->u.rbuf      = dset_info->u.rbuf;
             dinfo->mem_type_id = type_info->dst_type_id;
 
-            /* Retrieve file_id */
-            file_id = H5F_FILE_ID(dinfo->dset->oloc.file);
-
             /* Read in the point (with the custom VL memory allocator) */
-            if (H5D__read(file_id, 1, dinfo) < 0)
+            if (H5D__read(1, dinfo, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
         }
 
@@ -2743,9 +2738,9 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
     } /* end if */
 
 done:
-    if (dinfo)
-        H5MM_xfree(dinfo);
     /* Release allocated resources on failure */
+    if (dinfo)
+        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
@@ -2798,7 +2793,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
 
     /* Iterate over mappings */
@@ -2930,10 +2925,8 @@ H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_i
                         "can't project virtual intersection onto source space")
 
         {
-            hid_t file_id; /* File ID for operation */
-
             /* Alloc dset_info */
-            if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
             dinfo->dset        = source_dset->dset;
@@ -2942,11 +2935,8 @@ H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_i
             dinfo->u.wbuf      = dset_info->u.wbuf;
             dinfo->mem_type_id = type_info->dst_type_id;
 
-            /* Retrieve file_id */
-            file_id = H5F_FILE_ID(dinfo->dset->oloc.file);
-
             /* Read in the point (with the custom VL memory allocator) */
-            if (H5D__write(file_id, 1, dinfo) < 0)
+            if (H5D__write(1, dinfo, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
         }
 
@@ -2957,10 +2947,9 @@ H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_i
     } /* end if */
 
 done:
-    if (dinfo)
-        H5MM_xfree(dinfo);
-
     /* Release allocated resources on failure */
+    if (dinfo)
+        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
@@ -3011,7 +3000,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsi
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
-    if (H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info) < 0)
+    if (H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
 
     /* Fail if there are unmapped parts of the selection as they would not be

@@ -73,20 +73,20 @@ static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_ma
                                     size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                     size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
 static herr_t  H5D__compact_flush(H5D_t *dset);
-static herr_t  H5D__compact_dest(H5D_t *dset)
+static herr_t  H5D__compact_dest(H5D_t *dset);
 
-    /*********************/
-    /* Package Variables */
-    /*********************/
+/*********************/
+/* Package Variables */
+/*********************/
 
-    /* Compact storage layout I/O ops */
-    const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {
-        {H5D__compact_construct, NULL, H5D__compact_is_space_alloc, NULL, H5D__compact_io_init,
-         H5D__contig_read, H5D__contig_write,
+/* Compact storage layout I/O ops */
+const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {
+    {H5D__compact_construct, NULL, H5D__compact_is_space_alloc, NULL, H5D__compact_io_init, H5D__contig_read,
+     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
-         NULL, NULL,
+     NULL, NULL,
 #endif /* H5_HAVE_PARALLEL */
-         H5D__compact_readvv, H5D__compact_writevv, H5D__compact_flush, NULL, H5D__compact_dest}};
+     H5D__compact_readvv, H5D__compact_writevv, H5D__compact_flush, NULL, H5D__compact_dest}};
 
 /*******************/
 /* Local Variables */

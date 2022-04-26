@@ -197,7 +197,7 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__efl_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+H5D__efl_io_init(H5D_io_info_t H5_ATTR_UNUSED *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                  hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
                  const H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t *dinfo)
 {

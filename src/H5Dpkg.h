@@ -33,6 +33,7 @@
 #include "H5ACprivate.h" /* Metadata cache            */
 #include "H5B2private.h" /* v2 B-trees                */
 #include "H5Fprivate.h"  /* File access               */
+#include "H5FLprivate.h" /* Free Lists                */
 #include "H5Gprivate.h"  /* Groups                    */
 #include "H5SLprivate.h" /* Skip lists                */
 #include "H5Tprivate.h"  /* Datatypes                 */
@@ -131,10 +132,8 @@ typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, const H5
 typedef herr_t (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                           hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
                                           struct H5D_dset_info_t *dinfo);
-typedef herr_t (*H5D_layout_read_md_func_t)(const hid_t file_id, const size_t count,
-                                            struct H5D_io_info_t *io_info);
-typedef herr_t (*H5D_layout_write_md_func_t)(const hid_t file_id, const size_t count,
-                                             struct H5D_io_info_t *io_info);
+typedef herr_t (*H5D_layout_read_md_func_t)(const size_t count, struct H5D_io_info_t *io_info);
+typedef herr_t (*H5D_layout_write_md_func_t)(const size_t count, struct H5D_io_info_t *io_info);
 typedef ssize_t (*H5D_layout_readvv_func_t)(const struct H5D_io_info_t *io_info, size_t dset_max_nseq,
                                             size_t *dset_curr_seq, size_t dset_len_arr[],
                                             hsize_t dset_offset_arr[], size_t mem_max_nseq,
@@ -226,13 +225,13 @@ typedef enum H5D_io_op_type_t {
 
 /* piece info for multiple dsets. */
 typedef struct H5D_piece_info_t {
-    haddr_t      faddr;                    /* file addr. key of skip list */
-    hsize_t      index;                    /* "Index" of chunk in dataset */
-    uint32_t     piece_points;             /* Number of elements selected in piece */
-    hsize_t      scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
-    const H5S_t *fspace;                   /* Dataspace describing chunk & selection in it */
+    haddr_t  faddr;                    /* file addr. key of skip list */
+    hsize_t  index;                    /* "Index" of chunk in dataset */
+    uint32_t piece_points;             /* Number of elements selected in piece */
+    hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
+    H5S_t *  fspace;                   /* Dataspace describing chunk & selection in it */
     unsigned fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    const H5S_t *mspace;    /* Dataspace describing selection in memory corresponding to this chunk */
+    H5S_t *  mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
     unsigned mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
     struct H5D_dset_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
@@ -296,6 +295,7 @@ typedef struct H5D_io_info_t {
     const void *     base_maddr_w;   /* start mem addr for write */
     void *           base_maddr_r;   /* start mem addr for read */
     hbool_t          is_coll_broken; /* is collective mode broken? */
+    hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */
@@ -434,7 +434,6 @@ typedef struct H5D_rdcc_t {
         unsigned nmisses;  /* Number of cache misses        */
         unsigned nflushes; /* Number of cache flushes        */
     } stats;
-<<<<<<< HEAD
     size_t                 nbytes_max; /* Maximum cached raw data in bytes    */
     size_t                 nslots;     /* Number of chunk slots allocated    */
     double                 w0;         /* Chunk preemption policy          */
@@ -449,24 +448,7 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t **slot;              /* Chunk slots, each points to a chunk*/
     H5SL_t *                sel_chunks;        /* Skip list containing information for each chunk selected */
     H5S_t *                 single_space;      /* Dataspace for single element I/O on chunks */
-    H5D_chunk_info_t *      single_chunk_info; /* Pointer to single chunk's info */
-=======
-    size_t                 nbytes_max; /* Maximum cached raw data in bytes	*/
-    size_t                 nslots;     /* Number of chunk slots allocated	*/
-    double                 w0;         /* Chunk preemption policy          */
-    struct H5D_rdcc_ent_t *head;       /* Head of doubly linked list		*/
-    struct H5D_rdcc_ent_t *tail;       /* Tail of doubly linked list		*/
-    struct H5D_rdcc_ent_t
-        *tmp_head; /* Head of temporary doubly linked list.  Chunks on this list are not in the hash table
-                      (slot).  The head entry is a sentinel (does not refer to an actual chunk). */
-    size_t                  nbytes_used;       /* Current cached raw data in bytes */
-    int                     nused;             /* Number of chunk slots in use		*/
-    H5D_chunk_cached_t      last;              /* Cached copy of last chunk information */
-    struct H5D_rdcc_ent_t **slot;              /* Chunk slots, each points to a chunk*/
-    H5SL_t *                sel_chunks;        /* Skip list containing information for each chunk selected */
-    H5S_t *                 single_space;      /* Dataspace for single element I/O on chunks */
     H5D_piece_info_t *      single_piece_info; /* Pointer to single piece's info */
->>>>>>> multi_rd_wd_coll_io-hdf5_canon
 
     /* Cached information about scaled dataspace dimensions */
     hsize_t  scaled_dims[H5S_MAX_RANK];        /* The scaled dim sizes */
@@ -597,6 +579,9 @@ H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 /*  Array of versions for Layout */
 H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
 
+/* Declare extern the free list for H5D_dset_info_t */
+H5FL_EXTERN(H5D_dset_info_t);
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
@@ -633,8 +618,8 @@ H5_DLL herr_t  H5D__refresh(H5D_t *dataset, hid_t dset_id);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 
 /* Internal I/O routines */
-H5_DLL herr_t H5D__read(hid_t file_id, size_t count, H5D_dset_info_t *dset_info);
-H5_DLL herr_t H5D__write(hid_t file_id, size_t count, H5D_dset_info_t *dset_info);
+H5_DLL herr_t H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset);
+H5_DLL herr_t H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
@@ -762,16 +747,16 @@ H5_DLL herr_t H5D__mpio_select_write(const H5D_io_info_t *io_info, hsize_t nelmt
                                      const H5S_t *mem_space);
 
 /* MPI-IO functions to handle collective IO for multiple dsets (CONTIG, CHUNK) */
-H5_DLL herr_t H5D__collective_read(const hid_t file_id, const size_t count, H5D_io_info_t *io_info);
-H5_DLL herr_t H5D__collective_write(const hid_t file_id, const size_t count, H5D_io_info_t *io_info);
+H5_DLL herr_t H5D__collective_read(const size_t count, H5D_io_info_t *io_info);
+H5_DLL herr_t H5D__collective_write(const size_t count, H5D_io_info_t *io_info);
 
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
-H5_DLL htri_t H5D__mpio_opt_possible(const size_t count, H5D_io_info_t *io_info, H5P_genplist_t *dx_plist);
+H5_DLL htri_t H5D__mpio_opt_possible(const size_t count, H5D_io_info_t *io_info);
 
 /* function to invoke collective I/O calls for ranks that have no I/O
    on a dataset to match other ranks' collective calls */
-H5_DLL herr_t H5D__match_coll_calls(hid_t file_id, H5P_genplist_t *plist, hbool_t do_read);
+H5_DLL herr_t H5D__match_coll_calls(H5F_t *file, H5P_genplist_t *plist, hbool_t do_read);
 
 #endif /* H5_HAVE_PARALLEL */
 

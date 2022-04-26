@@ -411,6 +411,11 @@ test_pmdset(size_t niter, unsigned flags)
                         size_t npoints =
                             (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
 
+                        /* Reset dataset usage array if reading, since in this case we don't care
+                         * about overlapping selections between processes */
+                        if (do_read)
+                            HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+
                         /* Generate points */
                         for (m = 0; m < npoints; m++) {
                             overlap = TRUE;
@@ -419,12 +424,11 @@ test_pmdset(size_t niter, unsigned flags)
                                 points[2 * m]       = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
                                 points[(2 * m) + 1] = (unsigned)((hsize_t)HDrandom() % dset_dims[k][1]);
 
-                                /* If writing, check for overlap with other
-                                 * processes */
+                                /* Check for overlap with other processes (write) or this process
+                                 * (always) */
                                 overlap = FALSE;
-                                if (!do_read)
-                                    if (dset_usagei[k][points[2 * m]][points[(2 * m) + 1]])
-                                        overlap = TRUE;
+                                if (dset_usagei[k][points[2 * m]][points[(2 * m) + 1]])
+                                    overlap = TRUE;
                             } /* end for */
 
                             /* If we did not find a non-overlapping point quit
@@ -433,12 +437,12 @@ test_pmdset(size_t niter, unsigned flags)
                                 npoints = m;
                                 break;
                             } /* end if */
-                        }     /* end for */
 
-                        /* Update dataset usage array if writing */
-                        if (!do_read)
-                            for (m = 0; m < npoints; m++)
-                                dset_usagei[k][points[2 * m]][points[(2 * m) + 1]] = (unsigned char)1;
+                            /* Update dataset usage array after each point to prevent the same point
+                             * being selected twice by a single process, since this is not supported
+                             * by MPI */
+                            dset_usagei[k][points[2 * m]][points[(2 * m) + 1]] = (unsigned char)1;
+                        } /* end for */
 
                         /* Select points in file if this is the current process
                          */

@@ -50,11 +50,7 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # shutdown.h5 is from t_pshutdown
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
-<<<<<<< HEAD
 CHECK_CLEANFILES+=MPItest.h5 Para*.h5 bigio_test.h5 CacheTestDummy.h5 \
-		  ShapeSameTest.h5 shutdown.h5  after_mpi_fin.h5 go
-=======
-CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 shutdown.h5 pmulti_dset.h5 after_mpi_fin.h5 go
->>>>>>> multi_rd_wd_coll_io-hdf5_canon
+		  ShapeSameTest.h5 shutdown.h5 pmulti_dset.h5 after_mpi_fin.h5 go
 
 include $(top_srcdir)/config/conclude.am

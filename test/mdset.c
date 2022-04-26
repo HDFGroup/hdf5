@@ -319,7 +319,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                 /* Decide whether to do a hyperslab or point selection */
                 if (HDrandom() % 2) {
                     /* Hyperslab */
-                    size_t nhs      = (size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */
+                    size_t nhs      = 1; //(size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */
                     size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                           ? MAX_HS_X
                                           : dset_dims[k][0]; /* Determine maximum hyperslab size in X */

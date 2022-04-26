@@ -291,30 +291,25 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
     H5CX_set_dxpl(dxpl_id);
 
     {
-        hid_t file_id; /* File ID for operation */
-
         /* Alloc dset_info */
-        if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+        if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
         dinfo->dset        = dset;
         dinfo->mem_space   = mem_space;
         dinfo->file_space  = file_space;
         dinfo->u.rbuf      = buf;
-        dinfo->mem_type_id = me_type_id;
-
-        /* Retrieve file_id */
-        file_id = H5F_FILE_ID(dinfo->dset->oloc.file);
+        dinfo->mem_type_id = mem_type_id;
 
         /* Read raw data */
-        if (H5D__read(file_id, 1, dinfo) < 0)
+        if (H5D__read(1, dinfo, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 done:
     /* Clean up */
     if (dinfo)
-        H5MM_xfree(dinfo);
+        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
     if (H5S_BLOCK == mem_space_id && mem_space) {
         if (H5S_close(mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
@@ -362,30 +357,25 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
     H5CX_set_dxpl(dxpl_id);
 
     {
-        hid_t file_id; /* File ID for operation */
-
         /* Alloc dset_info */
-        if (NULL == (dinfo = (H5D_dset_info_t *)H5MM_calloc(sizeof(H5D_dset_info_t))))
+        if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
         dinfo->dset        = dset;
         dinfo->mem_space   = mem_space;
         dinfo->file_space  = file_space;
         dinfo->u.wbuf      = buf;
-        dinfo->mem_type_id = me_type_id;
-
-        /* Retrieve file_id */
-        file_id = H5F_FILE_ID(dinfo->dset->oloc.file);
+        dinfo->mem_type_id = mem_type_id;
 
         /* Write the data */
-        if (H5D__write(file_id, 1, dinfo) < 0)
+        if (H5D__write(1, dinfo, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     }
 
 done:
     /* Clean up */
     if (dinfo)
-        H5MM_xfree(dinfo);
+        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
     if (H5S_BLOCK == mem_space_id && mem_space) {
         if (H5S_close(mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
