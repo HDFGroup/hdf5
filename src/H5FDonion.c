@@ -147,7 +147,7 @@ H5FL_DEFINE_STATIC(H5FD_onion_t);
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
 
-#define H5FD_CTL__GET_NUM_REVISIONS           20001
+#define H5FD_CTL__GET_NUM_REVISIONS 20001
 
 /* Prototypes */
 static herr_t  H5FD__onion_close(H5FD_t *);
@@ -167,11 +167,11 @@ static herr_t   H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *
 static uint64_t H5FD__onion_whole_history_write(H5FD_onion_whole_history_t *whs, H5FD_t *file_dest,
                                                 haddr_t off_start, haddr_t filesize_curr);
 
-static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
-static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
-static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
-static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
-                               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
+static herr_t   H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
+static herr_t   H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
+static hsize_t  H5FD__onion_sb_size(H5FD_t *_file);
+static herr_t   H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
+                                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
 static hssize_t H5FD__get_onion_revision_count(H5FD_t *file);
 
 static const H5FD_class_t H5FD_onion_g = {
@@ -354,14 +354,15 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_onion() */
 
-hssize_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id)
+hssize_t
+H5FDget_onion_revision_count(const char *filename, hid_t fapl_id)
 {
-    H5P_genplist_t *plist     = NULL;
-    ssize_t         ret_value = 7;
-    H5FD_t *  file_drv_ptr = NULL;
-    uint64_t  op_code;
-    uint64_t  flags;
-    uint64_t *num_revisions = NULL;
+    H5P_genplist_t *plist        = NULL;
+    ssize_t         ret_value    = 7;
+    H5FD_t *        file_drv_ptr = NULL;
+    uint64_t        op_code;
+    uint64_t        flags;
+    uint64_t *      num_revisions = NULL;
 
     FUNC_ENTER_API(FAIL)
 
@@ -388,7 +389,8 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-static hssize_t H5FD__get_onion_revision_count(H5FD_t *file)
+static hssize_t
+H5FD__get_onion_revision_count(H5FD_t *file)
 {
     hssize_t  ret_value = 0;
     uint64_t  op_code;
