@@ -1151,14 +1151,14 @@ single_rank_independent_io(void)
         VRFY_G((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
 
         /* Write data */
-        H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
         VRFY_G((ret >= 0), "H5Dwrite succeeded");
 
         /* Wipe buffer */
         HDmemset(data, 0, LARGE_DIM * sizeof(int));
 
         /* Read data back */
-        H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        ret = H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
         VRFY_G((ret >= 0), "H5Dread succeeded");
 
         /* Verify data */
