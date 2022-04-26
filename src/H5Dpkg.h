@@ -593,8 +593,8 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_inf
                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space);
 
 /* Functions that perform direct copying between memory buffers */
-H5_DLL herr_t H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf,
-                                const H5S_t *src_space, size_t elmt_size, size_t nelmts);
+H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space,
+                                size_t elmt_size, size_t nelmts);
 
 /* Functions that perform scatter-gather serial I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
@@ -640,8 +640,8 @@ H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_ov
                                    const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
-H5_DLL void *  H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-H5_DLL void    H5D__chunk_mem_free(void *chk, const void *_pline);
+H5_DLL void *  H5D__chunk_mem_alloc(size_t size, void *pline);
+H5_DLL void    H5D__chunk_mem_free(void *chk, void *pline);
 H5_DLL void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
 H5_DLL void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);

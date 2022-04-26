@@ -457,21 +457,21 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
      */
     if (TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
-                                    /* to the beginning of the projected mem space.  */
+        ptrdiff_t buf_adj = 0;
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if (H5S_select_construct_projection(mem_space, &projected_mem_space,
-                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
-                                            type_info.dst_type_size) < 0)
+                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space),
+                                            type_info.dst_type_size, &buf_adj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
-        HDassert(adj_buf);
+
+        /* Adjust the buffer by the given amount */
+        buf = (void *)(((uint8_t *)buf) + buf_adj);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
-        buf       = (void *)adj_buf; /* Casting away 'const' OK -QAK */
-    }                                /* end if */
+    } /* end if */
 
     /* Retrieve dataset properties */
     /* <none needed in the general case> */
@@ -696,20 +696,20 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
      */
     if (TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
-                                    /* to the beginning of the projected mem space.  */
+        ptrdiff_t buf_adj = 0;
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if (H5S_select_construct_projection(mem_space, &projected_mem_space,
-                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
-                                            type_info.src_type_size) < 0)
+                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space),
+                                            type_info.src_type_size, &buf_adj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
-        HDassert(adj_buf);
+
+        /* Adjust the buffer by the given amount */
+        buf = (const void *)(((const uint8_t *)buf) + buf_adj);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
-        buf       = adj_buf;
     } /* end if */
 
     /* Retrieve dataset properties */

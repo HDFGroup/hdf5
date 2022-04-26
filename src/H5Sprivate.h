@@ -246,8 +246,8 @@ H5_DLL herr_t       H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_
 H5_DLL htri_t       H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL htri_t       H5S_select_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
 H5_DLL herr_t       H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr,
-                                                    unsigned new_space_rank, const void *buf,
-                                                    void const **adj_buf_ptr, hsize_t element_size);
+                                                    unsigned new_space_rank, hsize_t element_size,
+                                                    ptrdiff_t *buf_adj);
 H5_DLL herr_t       H5S_select_release(H5S_t *ds);
 H5_DLL hssize_t     H5S_select_serial_size(const H5S_t *space);
 H5_DLL herr_t       H5S_select_serialize(const H5S_t *space, uint8_t **p);
