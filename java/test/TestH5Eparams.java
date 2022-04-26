@@ -22,9 +22,9 @@ import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.callbacks.H5E_walk_cb;
 import hdf.hdf5lib.callbacks.H5E_walk_t;
+import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5E_error2_t;
 
 import org.junit.After;
@@ -35,19 +35,21 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Eparams {
-    @Rule public TestName testname = new TestName();
-    long hdf_java_classid = -1;
-    long current_stackid = -1;
+    @Rule
+    public TestName testname = new TestName();
+    long hdf_java_classid    = -1;
+    long current_stackid     = -1;
 
     @Before
-    public void H5Eget_stack_class() {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void H5Eget_stack_class()
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
 
         hdf_java_classid = -1;
         try {
             hdf_java_classid = H5.H5Eregister_class("HDF-Java-Error", "hdf-java", "2.5");
-            current_stackid = H5.H5Eget_current_stack();
+            current_stackid  = H5.H5Eget_current_stack();
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -56,7 +58,8 @@ public class TestH5Eparams {
     }
 
     @After
-    public void H5Erestore_stack_class() {
+    public void H5Erestore_stack_class()
+    {
         try {
             H5.H5Eunregister_class(hdf_java_classid);
             hdf_java_classid = -1;
@@ -71,7 +74,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eget_class_name() {
+    public void testH5Eget_class_name()
+    {
         try {
             String class_name = H5.H5Eget_class_name(hdf_java_classid);
             assertNotNull("H5.H5Eget_class_name: " + class_name, class_name);
@@ -84,7 +88,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eprint2() {
+    public void testH5Eprint2()
+    {
         try {
             assertFalse(current_stackid < 0);
             H5.H5Eprint2(current_stackid, null);
@@ -96,17 +101,20 @@ public class TestH5Eparams {
     }
 
     @Ignore("Tested with create_msg_major[minor]")
-    public void testH5Eclose_msg() {
+    public void testH5Eclose_msg()
+    {
         fail("Not yet implemented");
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Ecreate_msg_name_null() throws Throwable {
+    public void testH5Ecreate_msg_name_null() throws Throwable
+    {
         H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MAJOR, null);
     }
 
     @Test
-    public void testH5Ecreate_msg_major() {
+    public void testH5Ecreate_msg_major()
+    {
         try {
             long err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MAJOR, "Error in Test");
             assertFalse("H5.H5Ecreate_msg_major: " + err_id, err_id < 0);
@@ -119,9 +127,11 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Ecreate_msg_minor() {
+    public void testH5Ecreate_msg_minor()
+    {
         try {
-            long err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MINOR, "Error in Test Function");
+            long err_id =
+                H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MINOR, "Error in Test Function");
             assertFalse("H5.H5Ecreate_msg_minor: " + err_id, err_id < 0);
             H5.H5Eclose_msg(err_id);
         }
@@ -132,10 +142,11 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eget_msg() {
-        int[] error_msg_type = { HDF5Constants.H5E_MINOR };
-        long err_id = -1;
-        String msg = null;
+    public void testH5Eget_msg()
+    {
+        int[] error_msg_type = {HDF5Constants.H5E_MINOR};
+        long err_id          = -1;
+        String msg           = null;
         try {
             err_id = H5.H5Ecreate_msg(hdf_java_classid, HDF5Constants.H5E_MAJOR, "Error in Test");
         }
@@ -164,7 +175,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Ecreate_stack() {
+    public void testH5Ecreate_stack()
+    {
         long stk_id = -1;
         try {
             stk_id = H5.H5Ecreate_stack();
@@ -184,7 +196,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5EprintInt() {
+    public void testH5EprintInt()
+    {
         assertFalse(current_stackid < 0);
         try {
             H5.H5Eprint2(current_stackid, null);
@@ -196,7 +209,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5EclearInt() {
+    public void testH5EclearInt()
+    {
         try {
             H5.H5Eclear(current_stackid);
         }
@@ -207,7 +221,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eclear2() {
+    public void testH5Eclear2()
+    {
         try {
             H5.H5Eclear2(current_stackid);
         }
@@ -218,7 +233,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eauto_is_v2() {
+    public void testH5Eauto_is_v2()
+    {
         boolean is_v2 = false;
         try {
             is_v2 = H5.H5Eauto_is_v2(current_stackid);
@@ -231,7 +247,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eget_num() {
+    public void testH5Eget_num()
+    {
         long num_msg = -1;
         try {
             num_msg = H5.H5Eget_num(current_stackid);
@@ -244,7 +261,8 @@ public class TestH5Eparams {
     }
 
     @Test
-    public void testH5Eget_num_with_msg() {
+    public void testH5Eget_num_with_msg()
+    {
         try {
             H5.H5Eset_current_stack(current_stackid);
         }
@@ -277,5 +295,4 @@ public class TestH5Eparams {
         }
         assertTrue("H5.H5Eget_num_with_msg #:" + num_msg, num_msg > 0);
     }
-
 }

@@ -40,9 +40,7 @@ public class HDF5Exception extends RuntimeException {
      * Constructs an <code>HDF5Exception</code> with no specified detail
      * message.
      */
-    public HDF5Exception() {
-        super();
-    }
+    public HDF5Exception() { super(); }
 
     /**
      * Constructs an <code>HDF5Exception</code> with the specified detail
@@ -51,7 +49,8 @@ public class HDF5Exception extends RuntimeException {
      * @param message
      *            the detail message.
      */
-    public HDF5Exception(String message) {
+    public HDF5Exception(String message)
+    {
         super();
         detailMessage = message;
     }
@@ -63,7 +62,8 @@ public class HDF5Exception extends RuntimeException {
      *         have a detail message.
      */
     @Override
-    public String getMessage() {
+    public String getMessage()
+    {
         return detailMessage;
     }
 }

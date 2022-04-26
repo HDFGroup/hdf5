@@ -31,45 +31,59 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Fbasic {
-    @Rule public TestName testname = new TestName();
-    private static final String H5_FILE = "testFb.h5";
+    @Rule
+    public TestName testname             = new TestName();
+    private static final String H5_FILE  = "testFb.h5";
     private static final String TXT_FILE = "testFb.txt";
-    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5fid                           = HDF5Constants.H5I_INVALID_HID;
 
-    private final void _deleteFile(String filename) {
+    private final void _deleteFile(String filename)
+    {
         File file = new File(filename);
 
         if (file.exists()) {
-            try {file.delete();} catch (SecurityException e) {}
+            try {
+                file.delete();
+            }
+            catch (SecurityException e) {
+            }
         }
     }
 
     @Before
-    public void createH5file() throws HDF5LibraryException, NullPointerException {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void createH5file() throws HDF5LibraryException, NullPointerException
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
 
-        H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT);
         H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
     }
 
     @After
-    public void deleteH5file() throws HDF5LibraryException {
+    public void deleteH5file() throws HDF5LibraryException
+    {
         if (H5fid > 0) {
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(H5fid);
+            }
+            catch (Exception ex) {
+            }
         }
         _deleteFile(H5_FILE);
         System.out.println();
     }
 
     @Test
-    public void testH5Fcreate() {
+    public void testH5Fcreate()
+    {
         assertTrue(H5fid > 0);
     }
 
     @Test
-    public void testH5Fis_hdf5() {
+    public void testH5Fis_hdf5()
+    {
         boolean isH5 = false;
 
         try {
@@ -82,18 +96,19 @@ public class TestH5Fbasic {
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Fcreate_EXCL() throws Throwable {
-        H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_EXCL,
-                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+    public void testH5Fcreate_EXCL() throws Throwable
+    {
+        H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_EXCL, HDF5Constants.H5P_DEFAULT,
+                     HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Fopen_read_only() throws Throwable {
+    public void testH5Fopen_read_only() throws Throwable
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -108,8 +123,7 @@ public class TestH5Fbasic {
         File file = new File(H5_FILE);
         if (file.setWritable(false)) {
             // this should fail.
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
 
             try {
                 H5.H5Fclose(fid);
@@ -123,13 +137,13 @@ public class TestH5Fbasic {
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Freopen_closed() throws Throwable {
-        long fid = HDF5Constants.H5I_INVALID_HID;
+    public void testH5Freopen_closed() throws Throwable
+    {
+        long fid  = HDF5Constants.H5I_INVALID_HID;
         long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -146,13 +160,13 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Freopen() {
-        long fid = HDF5Constants.H5I_INVALID_HID;
+    public void testH5Freopen()
+    {
+        long fid  = HDF5Constants.H5I_INVALID_HID;
         long fid2 = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -180,12 +194,12 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Fclose() {
+    public void testH5Fclose()
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -200,12 +214,12 @@ public class TestH5Fbasic {
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Fclose_twice() throws Throwable {
+    public void testH5Fclose_twice() throws Throwable
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -223,7 +237,8 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Fget_freespace() {
+    public void testH5Fget_freespace()
+    {
         long freeSpace = 0;
 
         try {
@@ -238,7 +253,8 @@ public class TestH5Fbasic {
     // TODO add/and delete objects and test freespace
 
     @Test
-    public void testH5Fget_filesize() {
+    public void testH5Fget_filesize()
+    {
         long fileSize = 0;
 
         try {
@@ -253,7 +269,8 @@ public class TestH5Fbasic {
     // TODO add/and delete objects and test freespace
 
     @Test
-    public void testH5Fget_mdc_hit_rate() {
+    public void testH5Fget_mdc_hit_rate()
+    {
         double rate;
 
         try {
@@ -265,8 +282,9 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Fget_mdc_size() {
-        int nentries = -1;
+    public void testH5Fget_mdc_size()
+    {
+        int nentries       = -1;
         long cache_sizes[] = new long[3];
 
         try {
@@ -281,7 +299,8 @@ public class TestH5Fbasic {
     // TODO: test more cases of different cache sizes.
 
     @Test
-    public void testH5Freset_mdc_hit_rate_stats() {
+    public void testH5Freset_mdc_hit_rate_stats()
+    {
 
         try {
             H5.H5Freset_mdc_hit_rate_stats(H5fid);
@@ -292,7 +311,8 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Fget_name() {
+    public void testH5Fget_name()
+    {
         String fname = null;
 
         try {
@@ -306,7 +326,8 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5Fclear_elink_file_cache() {
+    public void testH5Fclear_elink_file_cache()
+    {
 
         try {
             H5.H5Fclear_elink_file_cache(H5fid);
@@ -317,7 +338,8 @@ public class TestH5Fbasic {
     }
 
     @Test
-    public void testH5F_dset_no_attrs_hint() {
+    public void testH5F_dset_no_attrs_hint()
+    {
         boolean ret_val_id = true;
         try {
             ret_val_id = H5.H5Fget_dset_no_attrs_hint(H5fid);
