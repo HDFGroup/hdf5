@@ -32,46 +32,54 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5Fparams {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname = new TestName();
 
     @Before
-    public void checkOpenIDs() {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void checkOpenIDs()
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
     }
     @After
-    public void nextTestName() {
+    public void nextTestName()
+    {
         System.out.println();
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Fcreate_null() throws Throwable {
-        H5.H5Fcreate(null, HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+    public void testH5Fcreate_null() throws Throwable
+    {
+        H5.H5Fcreate(null, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Fopen_null() throws Throwable {
+    public void testH5Fopen_null() throws Throwable
+    {
         H5.H5Fopen(null, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Fis_hdf5_null() throws Throwable {
+    public void testH5Fis_hdf5_null() throws Throwable
+    {
         H5.H5Fis_hdf5(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Fmount_null() throws Throwable {
+    public void testH5Fmount_null() throws Throwable
+    {
         H5.H5Fmount(-1, null, -1, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Funmount_null() throws Throwable {
+    public void testH5Funmount_null() throws Throwable
+    {
         H5.H5Funmount(-1, null);
     }
 
     @Test
-    public void testH5Fis_hdf5_text() {
+    public void testH5Fis_hdf5_text()
+    {
         File txtFile = null;
         boolean isH5 = false;
 
@@ -91,25 +99,27 @@ public class TestH5Fparams {
             txtFile.delete();
         }
         catch (SecurityException e) {
-            ;// e.printStackTrace();
+            ; // e.printStackTrace();
         }
     }
 
-    @Test//(expected = HDF5LibraryException.class)
-    public void testH5Fclose_negative() throws Throwable {
+    @Test //(expected = HDF5LibraryException.class)
+    public void testH5Fclose_negative() throws Throwable
+    {
         // cannot close a file with negative id.
         int fid = H5.H5Fclose(-1);
         assertTrue(fid == 0);
     }
 
     @Test
-    public void testH5Fcreate() {
-        long fid = HDF5Constants.H5I_INVALID_HID;
+    public void testH5Fcreate()
+    {
+        long fid  = HDF5Constants.H5I_INVALID_HID;
         File file = null;
 
         try {
-            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                               HDF5Constants.H5P_DEFAULT);
             if (fid > 0) {
                 H5.H5Fclose(fid);
             }
@@ -124,18 +134,19 @@ public class TestH5Fparams {
                 file.delete();
             }
             catch (SecurityException e) {
-                ;// e.printStackTrace();
+                ; // e.printStackTrace();
             }
         }
     }
 
     @Test
-    public void testH5Fflush_global() {
+    public void testH5Fflush_global()
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                               HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -156,12 +167,13 @@ public class TestH5Fparams {
     }
 
     @Test
-    public void testH5Fflush_local() {
+    public void testH5Fflush_local()
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
-            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                               HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
@@ -182,13 +194,14 @@ public class TestH5Fparams {
     }
 
     @Test
-    public void testH5Fget_info() {
+    public void testH5Fget_info()
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {
-                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
                 fail("H5.H5Fcreate: " + err);
@@ -205,21 +218,26 @@ public class TestH5Fparams {
             }
         }
         catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
         finally {
-            try {H5.H5Fclose(fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(fid);
+            }
+            catch (Exception ex) {
+            }
         }
     }
 
-    @Ignore//(expected = HDF5FunctionArgumentException.class)
-    public void testH5Fset_libver_bounds_invalidlow() throws Throwable {
+    @Ignore //(expected = HDF5FunctionArgumentException.class)
+    public void testH5Fset_libver_bounds_invalidlow() throws Throwable
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {
-                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
                 fail("H5.H5Fcreate: " + err);
@@ -227,26 +245,35 @@ public class TestH5Fparams {
             H5.H5Fset_libver_bounds(fid, 5, HDF5Constants.H5F_LIBVER_LATEST);
         }
         finally {
-            try {H5.H5Fclose(fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(fid);
+            }
+            catch (Exception ex) {
+            }
         }
     }
 
-    @Ignore//(expected = HDF5FunctionArgumentException.class)
-    public void testH5Fset_libver_bounds_invalidhigh() throws Throwable {
+    @Ignore //(expected = HDF5FunctionArgumentException.class)
+    public void testH5Fset_libver_bounds_invalidhigh() throws Throwable
+    {
         long fid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             try {
-                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                fid = H5.H5Fcreate("test.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
             }
             catch (Throwable err) {
                 fail("H5.H5Fcreate: " + err);
             }
-            H5.H5Fset_libver_bounds(fid, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V110+1);
+            H5.H5Fset_libver_bounds(fid, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V110 + 1);
         }
         finally {
-            try {H5.H5Fclose(fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(fid);
+            }
+            catch (Exception ex) {
+            }
         }
     }
 }

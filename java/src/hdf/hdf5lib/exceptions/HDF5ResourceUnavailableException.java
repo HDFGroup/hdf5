@@ -24,9 +24,7 @@ public class HDF5ResourceUnavailableException extends HDF5LibraryException {
      * Constructs an <code>HDF5ResourceUnavailableException</code> with no
      * specified detail message.
      */
-    public HDF5ResourceUnavailableException() {
-        super();
-    }
+    public HDF5ResourceUnavailableException() { super(); }
 
     /**
      * Constructs an <code>HDF5FunctionArgumentException</code> with the
@@ -35,7 +33,5 @@ public class HDF5ResourceUnavailableException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5ResourceUnavailableException(String s) {
-        super(s);
-    }
+    public HDF5ResourceUnavailableException(String s) { super(s); }
 }

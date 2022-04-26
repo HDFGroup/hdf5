@@ -20,13 +20,14 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5_CreateGroupAbsoluteRelative {
-    private static String FILENAME = "H5_CreateGroupAbsoluteRelative.h5";
-    private static String GROUPNAME = "MyGroup";
+    private static String FILENAME    = "H5_CreateGroupAbsoluteRelative.h5";
+    private static String GROUPNAME   = "MyGroup";
     private static String GROUPNAME_A = "GroupA";
     private static String GROUPNAME_B = "GroupB";
 
-    private static void CreateGroupAbsoluteAndRelative() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateGroupAbsoluteAndRelative()
+    {
+        long file_id   = HDF5Constants.H5I_INVALID_HID;
         long group1_id = HDF5Constants.H5I_INVALID_HID;
         long group2_id = HDF5Constants.H5I_INVALID_HID;
         long group3_id = HDF5Constants.H5I_INVALID_HID;
@@ -34,7 +35,7 @@ public class H5_CreateGroupAbsoluteRelative {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -44,7 +45,7 @@ public class H5_CreateGroupAbsoluteRelative {
         try {
             if (file_id >= 0)
                 group1_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -53,8 +54,9 @@ public class H5_CreateGroupAbsoluteRelative {
         // Create group "Group_A" in group "MyGroup" using absolute name.
         try {
             if (file_id >= 0)
-                group2_id = H5.H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                group2_id =
+                    H5.H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -63,8 +65,8 @@ public class H5_CreateGroupAbsoluteRelative {
         // Create group "Group_B" in group "MyGroup" using relative name.
         try {
             if (group1_id >= 0)
-                group3_id = H5.H5Gcreate(group1_id, GROUPNAME_B, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                group3_id = H5.H5Gcreate(group1_id, GROUPNAME_B, HDF5Constants.H5P_DEFAULT,
+                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -105,11 +107,10 @@ public class H5_CreateGroupAbsoluteRelative {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5_CreateGroupAbsoluteRelative.CreateGroupAbsoluteAndRelative();
     }
-
 }

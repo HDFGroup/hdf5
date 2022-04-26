@@ -30,47 +30,48 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Chunk {
-    private static String FILENAME = "H5Ex_D_Chunk.h5";
+    private static String FILENAME    = "H5Ex_D_Chunk.h5";
     private static String DATASETNAME = "DS1";
-    private static final int DIM_X = 6;
-    private static final int DIM_Y = 8;
-    private static final int CHUNK_X = 4;
-    private static final int CHUNK_Y = 4;
-    private static final int RANK = 2;
-    private static final int NDIMS = 2;
+    private static final int DIM_X    = 6;
+    private static final int DIM_Y    = 8;
+    private static final int CHUNK_X  = 4;
+    private static final int CHUNK_Y  = 4;
+    private static final int RANK     = 2;
+    private static final int NDIMS    = 2;
 
     // Values for the status of space allocation
     enum H5D_layout {
-        H5D_LAYOUT_ERROR(-1), H5D_COMPACT(0), H5D_CONTIGUOUS(1), H5D_CHUNKED(2), H5D_VIRTUAL(3), H5D_NLAYOUTS(4);
+        H5D_LAYOUT_ERROR(-1),
+        H5D_COMPACT(0),
+        H5D_CONTIGUOUS(1),
+        H5D_CHUNKED(2),
+        H5D_VIRTUAL(3),
+        H5D_NLAYOUTS(4);
         private static final Map<Integer, H5D_layout> lookup = new HashMap<Integer, H5D_layout>();
 
-        static {
+        static
+        {
             for (H5D_layout s : EnumSet.allOf(H5D_layout.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5D_layout(int layout_type) {
-            this.code = layout_type;
-        }
+        H5D_layout(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5D_layout get(int code) {
-            return lookup.get(code);
-        }
+        public static H5D_layout get(int code) { return lookup.get(code); }
     }
 
-    private static void writeChunk() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void writeChunk()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
-        long[] chunk_dims = { CHUNK_X, CHUNK_Y };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM_X, DIM_Y};
+        long[] chunk_dims = {CHUNK_X, CHUNK_Y};
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Initialize data to "1", to make it easier to see the selections.
@@ -91,7 +92,7 @@ public class H5Ex_D_Chunk {
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -127,20 +128,21 @@ public class H5Ex_D_Chunk {
         try {
             if ((file_id >= 0) && (filespace_id >= 0) && (dcpl_id >= 0))
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, filespace_id,
-                        HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, dcpl_id, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         // Define and select the first part of the hyperslab selection.
-        long[] start = { 0, 0 };
-        long[] stride = { 3, 3 };
-        long[] count = { 2, 3 };
-        long[] block = { 2, 2 };
+        long[] start  = {0, 0};
+        long[] stride = {3, 3};
+        long[] count  = {2, 3};
+        long[] block  = {2, 2};
         try {
             if ((filespace_id >= 0))
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                       block);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -152,12 +154,13 @@ public class H5Ex_D_Chunk {
         block[1] = 1;
         try {
             if ((filespace_id >= 0)) {
-                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count, block);
+                H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_NOTB, start, stride, count,
+                                       block);
 
                 // Write the data to the dataset.
                 if (dataset_id >= 0)
                     H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
-                            HDF5Constants.H5P_DEFAULT, dset_data);
+                                HDF5Constants.H5P_DEFAULT, dset_data);
             }
         }
         catch (Exception e) {
@@ -199,11 +202,12 @@ public class H5Ex_D_Chunk {
         }
     }
 
-    private static void readChunk() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void readChunk()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long filespace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long dcpl_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long dcpl_id      = HDF5Constants.H5I_INVALID_HID;
         int[][] dset_data = new int[DIM_X][DIM_Y];
 
         // Open an existing file.
@@ -267,8 +271,8 @@ public class H5Ex_D_Chunk {
         // Read the data using the default properties.
         try {
             if (dataset_id >= 0)
-                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                           HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -294,18 +298,19 @@ public class H5Ex_D_Chunk {
             if (dataset_id >= 0) {
                 filespace_id = H5.H5Dget_space(dataset_id);
 
-                long[] start = { 0, 1 };
-                long[] stride = { 4, 4 };
-                long[] count = { 2, 2 };
-                long[] block = { 2, 3 };
+                long[] start  = {0, 1};
+                long[] stride = {4, 4};
+                long[] count  = {2, 2};
+                long[] block  = {2, 3};
 
                 if (filespace_id >= 0) {
-                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count, block);
+                    H5.H5Sselect_hyperslab(filespace_id, HDF5Constants.H5S_SELECT_SET, start, stride, count,
+                                           block);
 
                     // Read the data using the previously defined hyperslab.
                     if ((dataset_id >= 0) && (filespace_id >= 0))
-                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, filespace_id,
-                                HDF5Constants.H5P_DEFAULT, dset_data);
+                        H5.H5Dread(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                                   filespace_id, HDF5Constants.H5P_DEFAULT, dset_data);
                 }
             }
         }
@@ -358,9 +363,9 @@ public class H5Ex_D_Chunk {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_D_Chunk.writeChunk();
         H5Ex_D_Chunk.readChunk();
     }
-
 }

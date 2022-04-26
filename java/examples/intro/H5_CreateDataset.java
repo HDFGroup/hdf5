@@ -20,21 +20,22 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5_CreateDataset {
-    private static String FILENAME = "H5_CreateDataset.h5";
+    private static String FILENAME    = "H5_CreateDataset.h5";
     private static String DATASETNAME = "dset";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 6;
+    private static final int DIM_X    = 4;
+    private static final int DIM_Y    = 6;
 
-    private static void CreateDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    private static void CreateDataset()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM_X, DIM_Y };
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
+        long[] dims       = {DIM_X, DIM_Y};
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -51,8 +52,9 @@ public class H5_CreateDataset {
         // Create the dataset.
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, "/" + DATASETNAME, HDF5Constants.H5T_STD_I32BE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5.H5Dcreate(file_id, "/" + DATASETNAME, HDF5Constants.H5T_STD_I32BE,
+                                          dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,11 +86,7 @@ public class H5_CreateDataset {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
-        H5_CreateDataset.CreateDataset();
-    }
-
+    public static void main(String[] args) { H5_CreateDataset.CreateDataset(); }
 }
