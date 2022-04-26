@@ -26,10 +26,6 @@ const char *FILENAME[] = {"ntypes", NULL};
 #define DIM1 200
 #define DIM3 20
 
-int   ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
-short spoints2[DIM0][DIM1], scheck2[DIM0][DIM1];
-int   ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
-
 #define DSET_ATOMIC_NAME_1   "atomic_type_1"
 #define DSET_ATOMIC_NAME_2   "atomic_type_2"
 #define DSET_ATOMIC_NAME_3   "atomic_type_3"
@@ -80,13 +76,24 @@ test_atomic_dtype(hid_t file)
     int     i, j, n;
     hsize_t dims[2];
     void *  tmp = NULL;
+    struct {
+        int   arr[DIM0][DIM1];
+    } *ipoints2 = NULL;
+    struct {
+        int   arr[DIM0][DIM1];
+    } *icheck2 = NULL;
 
     TESTING("atomic datatype");
+
+    if (NULL == (ipoints2 = HDcalloc(1, sizeof(*ipoints2))))
+        TEST_ERROR;
+    if (NULL == (icheck2 = HDcalloc(1, sizeof(*icheck2))))
+        TEST_ERROR;
 
     /* Initialize the dataset */
     for (i = n = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
-            ipoints2[i][j] = n++;
+            ipoints2->arr[i][j] = n++;
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -146,7 +153,7 @@ test_atomic_dtype(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
-            if (ipoints2[i][j] != icheck2[i][j]) {
+            if (ipoints2->arr[i][j] != icheck2->arr[i][j]) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %d,%d\n", i, j);
@@ -270,6 +277,9 @@ test_atomic_dtype(hid_t file)
     if (H5Sclose(space) < 0)
         TEST_ERROR;
 
+    HDfree(ipoints2);
+    HDfree(icheck2);
+
     PASSED();
 
     return 0;
@@ -286,6 +296,9 @@ error:
         H5Sclose(space);
     }
     H5E_END_TRY;
+
+    HDfree(ipoints2);
+    HDfree(icheck2);
 
     return -1;
 }
@@ -1328,13 +1341,24 @@ test_enum_dtype(hid_t file)
     short         colors[8];
     unsigned char sub_colors[16];
     const char *  mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
+    struct {
+        short arr[DIM0][DIM1];
+    } *spoints2 = NULL;
+    struct {
+        short arr[DIM0][DIM1];
+    } *scheck2 = NULL;
 
     TESTING("enum datatype");
+
+    if (NULL == (spoints2 = HDcalloc(1, sizeof(*spoints2))))
+        TEST_ERROR;
+    if (NULL == (scheck2 = HDcalloc(1, sizeof(*scheck2))))
+        TEST_ERROR;
 
     /* Initialize the dataset */
     for (i = 0; i < DIM0; i++)
         for (j = 0, n = 0; j < DIM1; j++, n++)
-            spoints2[i][j] = (short)((i * 10 + j * 100 + n) % 8);
+            spoints2->arr[i][j] = (short)((i * 10 + j * 100 + n) % 8);
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -1402,8 +1426,6 @@ test_enum_dtype(hid_t file)
         TEST_ERROR;
 
     HDmemcpy(scheck2, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
-    tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), scheck2, NULL, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -1411,11 +1433,11 @@ test_enum_dtype(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
-            if (spoints2[i][j] != scheck2[i][j]) {
+            if (spoints2->arr[i][j] != scheck2->arr[i][j]) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %d,%d\n", i, j);
-                HDprintf(" spoints2[i][j]=%hd, scheck2[i][j]=%hd\n", spoints2[i][j], scheck2[i][j]);
+                HDprintf(" spoints2[i][j]=%hd, scheck2[i][j]=%hd\n", spoints2->arr[i][j], scheck2->arr[i][j]);
                 goto error;
             } /* end if */
 
@@ -1423,13 +1445,19 @@ test_enum_dtype(hid_t file)
     H5Tclose(dtype);
     H5Tclose(native_type);
     H5Tclose(tid_m);
+
+    HDfree(tmp);
+    HDfree(spoints2);
+    HDfree(scheck2);
+
     PASSED();
     return 0;
 
 error:
     /* Free memory for test data */
-    if (tmp)
-        HDfree(tmp);
+    HDfree(tmp);
+    HDfree(spoints2);
+    HDfree(scheck2);
 
     H5E_BEGIN_TRY
     {
@@ -1657,14 +1685,25 @@ test_array_dtype2(hid_t file)
     int     i, j, k, n;
     hsize_t space_dims[2], array_dims[1] = {5};
     void *  tmp = NULL;
+    struct {
+        int   arr[DIM0][DIM1][5];
+    } *ipoints3 = NULL;
+    struct {
+        int   arr[DIM0][DIM1][5];
+    } *icheck3 = NULL;
 
     TESTING("array of atomic datatype");
+
+    if (NULL == (ipoints3 = HDcalloc(1, sizeof(*ipoints3))))
+        goto error;
+    if (NULL == (icheck3 = HDcalloc(1, sizeof(*icheck3))))
+        goto error;
 
     /* Initialize the dataset */
     for (i = n = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
             for (k = 0; k < 5; k++)
-                ipoints3[i][j][k] = n++;
+                ipoints3->arr[i][j][k] = n++;
 
     /* Create the data space */
     space_dims[0] = DIM0;
@@ -1729,7 +1768,7 @@ test_array_dtype2(hid_t file)
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
             for (k = 0; k < 5; k++)
-                if (icheck3[i][j][k] != ipoints3[i][j][k]) {
+                if (icheck3->arr[i][j][k] != ipoints3->arr[i][j][k]) {
                     H5_FAILED();
                     HDprintf("    Read different values than written.\n");
                     HDprintf("    At index %d,%d\n", i, j);
@@ -1745,6 +1784,9 @@ test_array_dtype2(hid_t file)
         TEST_ERROR;
     if (H5Tclose(tid_m) < 0)
         TEST_ERROR;
+
+    HDfree(ipoints3);
+    HDfree(icheck3);
 
     PASSED();
     return 0;
@@ -1764,6 +1806,9 @@ error:
         H5Tclose(tid_m);
     }
     H5E_END_TRY;
+
+    HDfree(ipoints3);
+    HDfree(icheck3);
 
     return -1;
 }
