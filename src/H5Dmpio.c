@@ -945,13 +945,13 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info)
     hbool_t *     chunk_mft_is_derived_array =
         NULL; /* Flags to indicate each chunk's MPI file datatype is derived */
     hbool_t *chunk_mbt_is_derived_array =
-        NULL;                            /* Flags to indicate each chunk's MPI memory datatype is derived */
-    int *  chunk_mpi_file_counts = NULL; /* Count of MPI file datatype for each chunk */
-    int *  chunk_mpi_mem_counts  = NULL; /* Count of MPI memory datatype for each chunk */
-    int    mpi_code;                     /* MPI return code */
+        NULL;                          /* Flags to indicate each chunk's MPI memory datatype is derived */
+    int *chunk_mpi_file_counts = NULL; /* Count of MPI file datatype for each chunk */
+    int *chunk_mpi_mem_counts  = NULL; /* Count of MPI memory datatype for each chunk */
+    int  mpi_code;                     /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
-    H5D_mpio_actual_io_mode_t actual_io_mode = 0;
-    herr_t ret_value = SUCCEED;
+    H5D_mpio_actual_io_mode_t        actual_io_mode        = 0;
+    herr_t                           ret_value             = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1101,15 +1101,15 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info)
                 if (is_permuted)
                     HDassert(!permute_map);
 
-                /* Piece address relative to the first piece addr 
-                 * Assign piece address to MPI displacement 
+                /* Piece address relative to the first piece addr
+                 * Assign piece address to MPI displacement
                  * (assume MPI_Aint big enough to hold it) */
                 chunk_file_disp_array[u] = (MPI_Aint)piece_info->faddr - (MPI_Aint)ctg_store.contig.dset_addr;
 
-                if(io_info->op_type == H5D_IO_OP_WRITE) {
+                if (io_info->op_type == H5D_IO_OP_WRITE) {
                     chunk_mem_disp_array[u] =
                         (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
-                } 
+                }
                 else if (io_info->op_type == H5D_IO_OP_READ) {
                     chunk_mem_disp_array[u] =
                         (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_rbuf_addr;
@@ -1463,9 +1463,9 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info)
 #ifdef H5Dmpio_DEBUG
     int mpi_rank;
 #endif
-    size_t                    num_chunk;  /* Number of chunks for this process */
+    size_t                    num_chunk;         /* Number of chunks for this process */
     H5SL_node_t *             piece_node = NULL; /* Current node in chunk skip list */
-    size_t                    u; /* Local index variable */
+    size_t                    u;                 /* Local index variable */
     H5D_mpio_actual_io_mode_t actual_io_mode =
         H5D_MPIO_NO_COLLECTIVE; /* Local variable for tracking the I/O mode used. */
     herr_t ret_value = SUCCEED;
@@ -1866,7 +1866,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info)
                 mpi_buf_count = 1;
 
                 /* Set up the base storage address for this operation */
-                ctg_io_info.store_faddr    = chunk_list[i].chunk_states.new_chunk.offset;
+                ctg_io_info.store_faddr = chunk_list[i].chunk_states.new_chunk.offset;
 
                 /* Override the write buffer to point to the address of the
                  * chunk data buffer
@@ -1876,7 +1876,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info)
             else {
                 mem_type_array[i] = file_type_array[i] = MPI_BYTE;
                 mpi_buf_count                          = 0;
-                ctg_io_info.base_maddr_r = io_info->dsets_info[0].u.rbuf;
+                ctg_io_info.base_maddr_r               = io_info->dsets_info[0].u.rbuf;
             } /* end else */
 
             /* Perform the I/O */
@@ -2237,11 +2237,11 @@ H5D__match_coll_calls(H5F_t *file, H5P_genplist_t *plist, hbool_t do_read)
         H5D_io_info_t io_info;
 
         /* Init io_info */
-        io_info.f_sh = H5F_SHARED(file);
-        io_info.op_type = do_read ? H5D_IO_OP_READ : H5D_IO_OP_WRITE;
-        io_info.io_ops.single_read_md = H5D__mpio_select_read;
+        io_info.f_sh                   = H5F_SHARED(file);
+        io_info.op_type                = do_read ? H5D_IO_OP_READ : H5D_IO_OP_WRITE;
+        io_info.io_ops.single_read_md  = H5D__mpio_select_read;
         io_info.io_ops.single_write_md = H5D__mpio_select_write;
-        io_info.store_faddr = 0;
+        io_info.store_faddr            = 0;
 
         /* Call the I/O routine with no data to match collective calls */
         if (H5D__inter_collective_io(&io_info, NULL, NULL, NULL) < 0)
@@ -2758,7 +2758,8 @@ H5D__chunk_redistribute_shared_chunks(const H5D_io_info_t *              io_info
             size_t            mod_data_size;
 
             /* Look up the chunk and get its file and memory dataspaces */
-            if (NULL == (chunk_info = (H5D_piece_info_t *)H5SL_search(di->dset_sel_pieces, &chunk_entry->index)))
+            if (NULL ==
+                (chunk_info = (H5D_piece_info_t *)H5SL_search(di->dset_sel_pieces, &chunk_entry->index)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate chunk in skip list")
 
             /* Determine size of serialized chunk file dataspace, plus the size of

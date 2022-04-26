@@ -225,13 +225,13 @@ typedef enum H5D_io_op_type_t {
 
 /* piece info for multiple dsets. */
 typedef struct H5D_piece_info_t {
-    haddr_t      faddr;                    /* file addr. key of skip list */
-    hsize_t      index;                    /* "Index" of chunk in dataset */
-    uint32_t     piece_points;             /* Number of elements selected in piece */
-    hsize_t      scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
-    H5S_t *fspace;                         /* Dataspace describing chunk & selection in it */
+    haddr_t  faddr;                    /* file addr. key of skip list */
+    hsize_t  index;                    /* "Index" of chunk in dataset */
+    uint32_t piece_points;             /* Number of elements selected in piece */
+    hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
+    H5S_t *  fspace;                   /* Dataspace describing chunk & selection in it */
     unsigned fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    H5S_t *mspace;          /* Dataspace describing selection in memory corresponding to this chunk */
+    H5S_t *  mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
     unsigned mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
     struct H5D_dset_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
@@ -295,7 +295,7 @@ typedef struct H5D_io_info_t {
     const void *     base_maddr_w;   /* start mem addr for write */
     void *           base_maddr_r;   /* start mem addr for read */
     hbool_t          is_coll_broken; /* is collective mode broken? */
-    hbool_t          is_mdset;       /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
+    hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */

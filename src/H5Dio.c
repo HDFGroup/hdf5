@@ -89,8 +89,8 @@ static herr_t
 H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                     hid_t dset_space_id, const H5D_dset_buf_t *u_buf)
 {
-    H5VL_object_t *vol_obj = NULL; /* Object for dset_id */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;    /* Object for dset_id */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -145,8 +145,8 @@ static H5F_t *
 H5D__verify_location(size_t count, const H5D_dset_info_t *info)
 {
     H5F_shared_t *f_sh;
-    size_t u;
-    H5F_t *ret_value = NULL; /* Return value */
+    size_t        u;
+    H5F_t *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -154,7 +154,8 @@ H5D__verify_location(size_t count, const H5D_dset_info_t *info)
 
     for (u = 1; u < count; u++) {
         if (f_sh != H5F_SHARED(info[u].dset->oloc.file))
-            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "different files detected in multi dataset I/O request")
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL,
+                        "different files detected in multi dataset I/O request")
     } /* end for */
 
     ret_value = info[0].dset->oloc.file;
@@ -380,11 +381,11 @@ done:
 static herr_t
 H5D__pre_write(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 {
-    H5P_genplist_t * plist;                /* DXPL property list pointer */
-    size_t           u;                    /* Local index variable */
-    hbool_t          broke_mdset = FALSE;  /* Whether to break multi-dataset option */
-    H5FD_mpio_xfer_t xfer_mode;            /* Parallel I/O transfer mode */
-    herr_t           ret_value = SUCCEED;  /* Return value */
+    H5P_genplist_t * plist;               /* DXPL property list pointer */
+    size_t           u;                   /* Local index variable */
+    hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
+    H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -466,27 +467,27 @@ done:
 herr_t
 H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 {
-    H5D_io_info_t io_info;              /* Dataset I/O info  for multi dsets */
-    size_t        type_info_init = 0;   /* Number of datatype info structs that have been initialized */
+    H5D_io_info_t io_info;                    /* Dataset I/O info  for multi dsets */
+    size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
     H5S_t **      projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
-                                        /* projection of the supplied mem_space to a new  */
-                                        /* dataspace with rank equal to that of           */
-                                        /* file_space.                                    */
-                                        /*                                                */
-                                        /* This field is only used if                     */
-                                        /* H5S_select_shape_same() returns TRUE when      */
-                                        /* comparing the mem_space and the data_space,    */
-                                        /* and the mem_space have different rank.         */
-                                        /*                                                */
-                                        /* Note that if this variable is used, the        */
-                                        /* projected mem space must be discarded at the   */
-                                        /* end of the function to avoid a memory leak.    */
-    H5D_storage_t *store = NULL;        /* Union of EFL and chunk pointer in file space */
-    hsize_t        nelmts;              /* Total number of elmts	*/
-    size_t         io_op_init = 0;      /* Number I/O ops that have been initialized */
-    size_t         i;                   /* Local index variable */
-    char           fake_char;           /* Temporary variable for NULL buffer pointers */
-    herr_t         ret_value = SUCCEED; /* Return value	*/
+                                              /* projection of the supplied mem_space to a new  */
+                                              /* dataspace with rank equal to that of           */
+                                              /* file_space.                                    */
+                                              /*                                                */
+                                              /* This field is only used if                     */
+                                              /* H5S_select_shape_same() returns TRUE when      */
+                                              /* comparing the mem_space and the data_space,    */
+                                              /* and the mem_space have different rank.         */
+                                              /*                                                */
+                                              /* Note that if this variable is used, the        */
+                                              /* projected mem space must be discarded at the   */
+                                              /* end of the function to avoid a memory leak.    */
+    H5D_storage_t *store = NULL;              /* Union of EFL and chunk pointer in file space */
+    hsize_t        nelmts;                    /* Total number of elmts	*/
+    size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
+    size_t         i;                         /* Local index variable */
+    char           fake_char;                 /* Temporary variable for NULL buffer pointers */
+    herr_t         ret_value = SUCCEED;       /* Return value	*/
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -494,7 +495,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     io_info.sel_pieces   = NULL;
     io_info.store_faddr  = 0;
     io_info.base_maddr_r = NULL;
-    io_info.is_mdset = is_mdset;
+    io_info.is_mdset     = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -689,9 +690,9 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             io_info.dsets_info = &(dset_info[i]);
 
-            if ((*io_info.io_ops.multi_read)(&io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
-                                             dset_info[i].file_space, dset_info[i].mem_space,
-                                             &dset_info[i]) < 0)
+            if ((*io_info.io_ops.multi_read)(
+                    &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
+                    dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
             /* Reset metadata tagging */
@@ -704,7 +705,8 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++)
-        if (dset_info[i].layout_ops.io_term && (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
+        if (dset_info[i].layout_ops.io_term &&
+            (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
     /* Shut down datatype info for operation */
@@ -779,7 +781,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     io_info.sel_pieces   = NULL;
     io_info.store_faddr  = 0;
     io_info.base_maddr_w = NULL;
-    io_info.is_mdset = is_mdset;
+    io_info.is_mdset     = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -893,8 +895,9 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             /* Attempt to construct projected dataspace for memory dataspace */
             if (H5S_select_construct_projection(dset_info[i].mem_space, &(projected_mem_space[i]),
-                                                (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space), dset_info[i].u.wbuf,
-                                                &adj_buf, dset_info[i].type_info.src_type_size) < 0)
+                                                (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
+                                                dset_info[i].u.wbuf, &adj_buf,
+                                                dset_info[i].type_info.src_type_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
             HDassert(projected_mem_space[i]);
             HDassert(adj_buf);
@@ -974,9 +977,9 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             io_info.dsets_info = &(dset_info[i]);
 
             /* Invoke correct "high level" I/O routine */
-            if ((*io_info.io_ops.multi_write)(&io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
-                                              dset_info[i].file_space, dset_info[i].mem_space,
-                                              &dset_info[i]) < 0)
+            if ((*io_info.io_ops.multi_write)(
+                    &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
+                    dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);

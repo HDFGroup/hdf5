@@ -442,7 +442,7 @@ test_pmdset(size_t niter, unsigned flags)
                              * being selected twice by a single process, since this is not supported
                              * by MPI */
                             dset_usagei[k][points[2 * m]][points[(2 * m) + 1]] = (unsigned char)1;
-                        }     /* end for */
+                        } /* end for */
 
                         /* Select points in file if this is the current process
                          */
