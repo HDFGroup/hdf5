@@ -37,7 +37,6 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5Dprivate.h"  /* Datasets */
 #include "H5Eprivate.h"  /* Errors   */
-#include "H5ESprivate.h" /* Event Sets */
 #include "H5Fprivate.h"  /* Files    */
 #include "H5Gprivate.h"  /* Groups   */
 #include "H5Iprivate.h"  /* IDs      */
