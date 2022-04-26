@@ -77,10 +77,10 @@ test_atomic_dtype(hid_t file)
     hsize_t dims[2];
     void *  tmp = NULL;
     struct {
-        int   arr[DIM0][DIM1];
+        int arr[DIM0][DIM1];
     } *ipoints2 = NULL;
     struct {
-        int   arr[DIM0][DIM1];
+        int arr[DIM0][DIM1];
     } *icheck2 = NULL;
 
     TESTING("atomic datatype");
@@ -1686,10 +1686,10 @@ test_array_dtype2(hid_t file)
     hsize_t space_dims[2], array_dims[1] = {5};
     void *  tmp = NULL;
     struct {
-        int   arr[DIM0][DIM1][5];
+        int arr[DIM0][DIM1][5];
     } *ipoints3 = NULL;
     struct {
-        int   arr[DIM0][DIM1][5];
+        int arr[DIM0][DIM1][5];
     } *icheck3 = NULL;
 
     TESTING("array of atomic datatype");
