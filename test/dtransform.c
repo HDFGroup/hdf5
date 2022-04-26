@@ -131,7 +131,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         H5T_order_t order;                                                                                   \
         hsize_t     dim[2] = {ROWS, COLS};                                                                   \
                                                                                                              \
-        /* NOTE: If this part of the test macro encounters errors, this memory will leak */                  \
+        /* NOTE: If this macro encounters errors, this memory will leak */                                   \
         if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
             TEST_ERROR;                                                                                      \
                                                                                                              \
@@ -227,7 +227,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         hsize_t dim[2]    = {ROWS, COLS};                                                                    \
         hsize_t offset[2] = {0, 0};                                                                          \
                                                                                                              \
-        /* NOTE: If this part of the test macro encounters errors, this memory will leak */                  \
+        /* NOTE: If this macro encounters errors, this memory will leak */                                   \
         if (NULL == (array = HDcalloc(1, sizeof(*array))))                                                   \
             TEST_ERROR;                                                                                      \
                                                                                                              \
