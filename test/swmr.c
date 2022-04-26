@@ -6716,7 +6716,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* H5_HAVE_UNISTD_H */
+#else /* H5_HAVE_UNISTD_H */
 /* Skip test now since a bug in the library is preventing it from working properly */
 static int
 test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
