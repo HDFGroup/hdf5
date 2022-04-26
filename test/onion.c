@@ -2854,11 +2854,11 @@ test_integration_create(void)
 {
     const char *            basename   = "integration_2d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t   file = H5I_INVALID_HID;
-    hid_t space = H5I_INVALID_HID;
-    hid_t dset = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
+    hid_t                   file_id    = H5I_INVALID_HID;
+    hid_t                   file       = H5I_INVALID_HID;
+    hid_t                   space      = H5I_INVALID_HID;
+    hid_t                   dset       = H5I_INVALID_HID;
+    hid_t                   dcpl       = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
@@ -2883,7 +2883,6 @@ test_integration_create(void)
     struct {
         int arr[128][256];
     } *dset_data = NULL;
-
 
     TESTING("onion-created two dimensional HDF5 file with revisions");
 
@@ -2913,7 +2912,7 @@ test_integration_create(void)
      * Create the skeleton file (create the file without Onion VFD)
      *----------------------------------------------------------------------
      */
- 
+
     /* Initialize data */
     for (int i = 0; i < 128; i++)
         for (int j = 0; j < 256; j++)
@@ -3191,7 +3190,7 @@ test_integration_create_simple(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t file_id = H5I_INVALID_HID;
+    hid_t   file_id    = H5I_INVALID_HID;
     hid_t   file       = H5I_INVALID_HID;
     hid_t   space      = H5I_INVALID_HID;
     hid_t   dset       = H5I_INVALID_HID;
@@ -3200,7 +3199,7 @@ test_integration_create_simple(void)
     hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
     int     fillval;
     struct {
-        int     arr[ONE_DIM_SIZE];
+        int arr[ONE_DIM_SIZE];
     } *wdata = NULL;
     struct {
         int arr[ONE_DIM_SIZE];
