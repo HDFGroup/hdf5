@@ -129,9 +129,59 @@ extern "C" {
 #endif
 
 H5_DLL hid_t    H5FD_onion_init(void);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5P
+ *
+ * \brief get the onion info from the file access property list
+ *
+ * \fapl_id
+ * \param[out] fa_out the pointer to the structure H5FD_onion_fapl_info_t
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_fapl_onion() retrieves the structure H5FD_onion_fapl_info_t
+ *          from the file access property list that is set for the onion VFD
+ *          driver.
+ */
 H5_DLL herr_t   H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5P
+ *
+ * \brief set the onion info for the file access property list
+ *
+ * \fapl_id
+ * \param[in] fa the pointer to the structure H5FD_onion_fapl_info_t
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_fapl_onion() sets the structure H5FD_onion_fapl_info_t
+ *          for the file access property list that is set for the onion VFD
+ *          driver.
+ */
 H5_DLL herr_t   H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
-H5_DLL hssize_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5FD
+ *
+ * \brief get the number of revisions
+ *
+ * \filename
+ * \fapl_id
+ * \param[out] revision_count the number of revisions
+ *
+ * \return \herr_t
+ *
+ * \details H5FDget_onion_revision_count() returns the number of revisions
+ *          for an onion file. It takes the file name and file access property
+ *          list that is set for the onion VFD driver.
+ *
+ */
+H5_DLL herr_t   H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
 
 #ifdef __cplusplus
 }

@@ -4126,7 +4126,7 @@ test_integration_ctl(void)
     H5FD_t *  file_drv_ptr = NULL;
     uint64_t  op_code;
     uint64_t  flags;
-    uint64_t *num_revisions = NULL;
+    size_t    revision_count;
 
     TESTING("onion-created HDF5 file with revisions testing H5FDctl");
 
@@ -4235,7 +4235,10 @@ test_integration_ctl(void)
      *  Start to verify the number of revisions
      *----------------------------------------------------------------------
      */
-    if (H5FDget_onion_revision_count(basename, fapl_id) != 2)
+    if (H5FDget_onion_revision_count(basename, fapl_id, &revision_count) < 0)
+        TEST_ERROR
+
+    if (2 != revision_count)
         TEST_ERROR
 
     /* Close and release resources */
@@ -4245,7 +4248,6 @@ test_integration_ctl(void)
         TEST_ERROR
     if (H5Sclose(space) < 0)
         TEST_ERROR
-    HDfree(num_revisions);
 
     HDremove(paths->canon);
     HDremove(paths->onion);
