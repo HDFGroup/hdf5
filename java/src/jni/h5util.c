@@ -3517,7 +3517,7 @@ done:
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5__1H5export_1dataset_1string(JNIEnv *env, jclass clss, jstring file_export_name,
-                                              jstring file_name, jstring object_path, jint binary_order)
+                                                jstring file_name, jstring object_path, jint binary_order)
 {
     const char *file_export = NULL;
     const char *fileName    = NULL;
