@@ -4123,10 +4123,10 @@ test_integration_ctl(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment */
     };
-    H5FD_t *  file_drv_ptr = NULL;
-    uint64_t  op_code;
-    uint64_t  flags;
-    size_t    revision_count;
+    H5FD_t * file_drv_ptr = NULL;
+    uint64_t op_code;
+    uint64_t flags;
+    size_t   revision_count;
 
     TESTING("onion-created HDF5 file with revisions testing H5FDctl");
 

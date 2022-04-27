@@ -128,7 +128,7 @@ typedef struct H5FD_onion_fapl_info_t {
 extern "C" {
 #endif
 
-H5_DLL hid_t    H5FD_onion_init(void);
+H5_DLL hid_t H5FD_onion_init(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -145,7 +145,7 @@ H5_DLL hid_t    H5FD_onion_init(void);
  *          from the file access property list that is set for the onion VFD
  *          driver.
  */
-H5_DLL herr_t   H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
+H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
 
 /**
  * --------------------------------------------------------------------------
@@ -162,7 +162,7 @@ H5_DLL herr_t   H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
  *          for the file access property list that is set for the onion VFD
  *          driver.
  */
-H5_DLL herr_t   H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
+H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
 
 /**
  * --------------------------------------------------------------------------
@@ -181,7 +181,7 @@ H5_DLL herr_t   H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *f
  *          list that is set for the onion VFD driver.
  *
  */
-H5_DLL herr_t   H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
+H5_DLL herr_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
 
 #ifdef __cplusplus
 }
