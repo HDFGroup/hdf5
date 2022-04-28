@@ -53,7 +53,7 @@ HDF5 Release 1.10
 
 \section sec_dataspace HDF5 Dataspaces and Partial I/O
 
-\section sec_attribute HDF5 Attributes
+\ref sec_attribute
 \li \ref subsec_attribute_intro
 \li \ref subsec_attribute_program
     <ul>
@@ -72,7 +72,10 @@ HDF5 Release 1.10
     </ul>
 \li \ref subsec_attribute_special
 
-\section sec_error HDF5 Error Handling
+\ref sec_error
+\li \ref subsec_error_intro
+\li \ref subsec_error_ops
+\li \ref H5E Error Handling Function Summaries
 
 \section sec_plist Properties and Property Lists in HDF5
 

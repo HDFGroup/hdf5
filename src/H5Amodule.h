@@ -31,12 +31,12 @@
 
 /** \page H5A_UG HDF5 Attributes
  *
- * \defgroup sec_attribute HDF5 Attributes
+ * \section sec_attribute HDF5 Attributes
  *
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
  * object. A primary data object may be a dataset, group, or committed datatype.
  *
- * \defgroup subsec_attribute_intro Introduction
+ * \subsection subsec_attribute_intro Introduction
  *
  * Attributes are assumed to be very small as data objects go, so storing them as standard HDF5 datasets would
  * be quite inefficient. HDF5 attributes are therefore managed through a special attributes interface, H5A,
@@ -62,7 +62,7 @@
  * \li Being small, an attribute is stored in the object header of the object it describes and is thus attached
  *  directly to that object
  *
- * \defgroup subsec_attribute_program Programming Model for Attributes
+ * \subsection subsec_attribute_program Programming Model for Attributes
  *
  * The figure below shows the UML model for an HDF5 attribute and its associated dataspace and datatype.
  * \image html UML_Attribute.jpg "The UML model for an HDF5 attribute"
@@ -113,9 +113,9 @@
  * </tr>
  * </table>
  *
- * \defgroup subsec_attribute_work Working with Attributes
+ * \subsection subsec_attribute_work Working with Attributes
  *
- * \defgroup subsubsec_attribute_work_struct The Structure of an Attribute
+ * \subsubsection subsubsec_attribute_work_struct The Structure of an Attribute
  *
  * An attribute has two parts: name and value(s).
  *
@@ -129,7 +129,7 @@
  * HDF5 attributes have all the characteristics of HDF5 datasets except that there is no partial I/O
  * capability. In other words, attributes can be written and read only in full with no sub-setting.
  *
- * \defgroup subsubsec_attribute_work_create Creating, Writing, and Reading Attributes
+ * \subsubsection subsubsec_attribute_work_create Creating, Writing, and Reading Attributes
  *
  * If attributes are used in an HDF5 file, these functions will be employed: H5Acreate, H5Awrite,
  * and H5Aread. H5Acreate and H5Awrite are used together to place the attribute in the file. If
@@ -163,7 +163,7 @@
  * The HDF5 Library converts the metadata between the in-memory datatype, mem_type_id, and the in-file datatype,
  * defined when the attribute was created, without user intervention.
  *
- * \defgroup subsubsec_attribute_work_access Accessing Attributes by Name or Index
+ * \subsubsection subsubsec_attribute_work_access Accessing Attributes by Name or Index
  *
  * Attributes can be accessed by name or index value. The use of an index value makes it possible to iterate
  * through all of the attributes associated with a given object.
@@ -177,7 +177,7 @@
  * course of opening several attributes for later access. Use H5Aiterate if the intent is to perform the same
  * operation on every attribute attached to an object.
  *
- * \defgroup subsubsec_attribute_work_info Obtaining Information Regarding an Object’s Attributes
+ * \subsubsection subsubsec_attribute_work_info Obtaining Information Regarding an Object’s Attributes
  *
  * In the course of working with HDF5 attributes, one may need to obtain any of several pieces of information:
  * \li An attribute name
@@ -214,7 +214,7 @@
  * step in determining attribute index values. If the call returns N, the attributes attached to the object
  * object_id have index values of 0 through N-1.
  *
- * \defgroup subsubsec_attribute_work_iterate Iterating across an Object’s Attributes
+ * \subsubsection subsubsec_attribute_work_iterate Iterating across an Object’s Attributes
  *
  * It is sometimes useful to be able to perform the identical operation across all of the attributes attached
  * to an object. At the simplest level, you might just want to open each attribute. At a higher level, you
@@ -241,7 +241,7 @@
  * op_data is also user-defined to meet the requirements of op_func. Beyond providing a parameter with which
  * to pass this data, HDF5 provides no tools for its management and imposes no restrictions.
  *
- * \defgroup subsubsec_attribute_work_delete Deleting an Attribute
+ * \subsubsection subsubsec_attribute_work_delete Deleting an Attribute
  *
  * Once an attribute has outlived its usefulness or is no longer appropriate, it may become necessary to
  * delete it.
@@ -256,7 +256,7 @@
  * can cause the internal attribute indexes to change; future writes to an open attribute would then produce
  * unintended results.
  *
- * \defgroup subsubsec_attribute_work_close Closing an Attribute
+ * \subsubsection subsubsec_attribute_work_close Closing an Attribute
  *
  * As is the case with all HDF5 objects, once access to an attribute it is no longer needed, that attribute
  * must be closed. It is best practice to close it as soon as practicable; it is mandatory that it be closed
@@ -268,7 +268,7 @@
  * \endcode
  *￼H5Aclose closes the specified attribute by terminating access to its identifier, attr_id.
  *
- * \defgroup subsec_attribute_special Special Issues
+ * \subsection subsec_attribute_special Special Issues
  *
  * Some special issues for attributes are discussed below.
  *
