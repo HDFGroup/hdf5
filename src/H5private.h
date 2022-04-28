@@ -1561,6 +1561,15 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif
 
+/*
+ * Ugly hack to cast away const for freeing const-qualified pointers.
+ * Should only be used sparingly, where the alternative (like keeping
+ * an equivalent non-const pointer around) is far messier messier.
+ */
+#ifndef HDfree_const
+#define HDfree_const(mem) HDfree((void *)(uintptr_t)mem)
+#endif
+
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
 #define H5_STRINGIZE(x) #x

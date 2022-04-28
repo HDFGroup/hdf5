@@ -140,13 +140,6 @@ static int __k;
         }                                                                                                    \
     } while (FALSE)
 
-/*
- * Ugly hack to cast away const for freeing const-qualified memory
- */
-#ifndef HDfree_const
-#define HDfree_const(mem) HDfree((void *)(uintptr_t)mem)
-#endif
-
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {
