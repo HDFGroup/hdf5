@@ -6939,21 +6939,18 @@ main(int argc, char **argv)
     }
 
     if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
-        if (MAINPROCESS)
-            HDprintf("    Couldn't allocate data array.  Exiting.\n");
+        HDprintf("    Couldn't allocate data array.  Exiting.\n");
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
     if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
-        if (MAINPROCESS)
-            HDprintf("    Couldn't allocate data index array.  Exiting.\n");
+        HDprintf("    Couldn't allocate data index array.  Exiting.\n");
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
-            if (MAINPROCESS)
-                HDprintf("couldn't allocate filename array\n");
+            HDprintf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
     }
