@@ -66,7 +66,7 @@ use strict;
 # ./H5public.h or ./src/H5public.h.
 #
 # If the version number is changed (either `-s' or `-i' was used on
-# the command line) then the first line of the README.md and RELEASE.txt files
+# the command line) then the version line of the README.md and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 # The AC_INIT macro in configure.ac will also change in this case to be
