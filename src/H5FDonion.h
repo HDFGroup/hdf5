@@ -136,8 +136,8 @@ H5_DLL hid_t H5FD_onion_init(void);
  *
  * \brief get the onion info from the file access property list
  *
- * \fapl_id
- * \param[out] fa_out the pointer to the structure H5FD_onion_fapl_info_t
+ * \param[in] fapl_id The ID of the file access property list
+ * \param[out] fa_out The pointer to the structure H5FD_onion_fapl_info_t
  *
  * \return \herr_t
  *
@@ -153,8 +153,8 @@ H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
  *
  * \brief set the onion info for the file access property list
  *
- * \fapl_id
- * \param[in] fa the pointer to the structure H5FD_onion_fapl_info_t
+ * \param[in] fapl_id The ID of the file access property list
+ * \param[in] fa The pointer to the structure H5FD_onion_fapl_info_t
  *
  * \return \herr_t
  *
@@ -170,9 +170,9 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
  *
  * \brief get the number of revisions
  *
- * \filename
- * \fapl_id
- * \param[out] revision_count the number of revisions
+ * \param[in] filename The name of the onion file
+ * \param[in] fapl_id The ID of the file access property list
+ * \param[out] revision_count The number of revisions
  *
  * \return \herr_t
  *
