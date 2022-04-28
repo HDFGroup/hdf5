@@ -3406,8 +3406,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             /* For nested VL case, free leftover heap objects from the deeper level if the
                              * length of new data elements is shorter than the old data elements.*/
                             if (nested && seq_len < bg_seq_len) {
-                                const uint8_t *tmp;
-                                size_t         u;
+                                uint8_t *tmp;
+                                size_t   u;
 
                                 /* Sanity check */
                                 HDassert(write_to_file);

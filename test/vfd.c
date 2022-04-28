@@ -140,6 +140,13 @@ static int __k;
         }                                                                                                    \
     } while (FALSE)
 
+/*
+ * Ugly hack to cast away const for freeing const-qualified memory
+ */
+#ifndef HDfree_const
+#define HDfree_const(mem) HDfree((void *)(uintptr_t)mem)
+#endif
+
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {
@@ -4112,7 +4119,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
             if (write_bufs[i]) {
 
-                HDfree((void *)write_bufs[i]);
+                HDfree_const(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4256,7 +4263,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             if (write_bufs[i]) {
 
-                HDfree((void *)write_bufs[i]);
+                HDfree_const(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4922,13 +4929,13 @@ test_vector_io(const char *vfd_name)
 
     for (i = 0; i < count; i++) {
 
-        HDfree((void *)write_bufs_0[i]);
+        HDfree_const(write_bufs_0[i]);
         write_bufs_0[i] = NULL;
 
-        HDfree((void *)write_bufs_1[i]);
+        HDfree_const(write_bufs_1[i]);
         write_bufs_1[i] = NULL;
 
-        HDfree((void *)write_bufs_2[i]);
+        HDfree_const(write_bufs_2[i]);
         write_bufs_2[i] = NULL;
 
         HDfree(read_bufs_0[i]);
@@ -4940,13 +4947,13 @@ test_vector_io(const char *vfd_name)
         HDfree(read_bufs_2[i]);
         read_bufs_2[i] = NULL;
 
-        HDfree((void *)f_write_bufs_0[i]);
+        HDfree_const(f_write_bufs_0[i]);
         f_write_bufs_0[i] = NULL;
 
-        HDfree((void *)f_write_bufs_1[i]);
+        HDfree_const(f_write_bufs_1[i]);
         f_write_bufs_1[i] = NULL;
 
-        HDfree((void *)f_write_bufs_2[i]);
+        HDfree_const(f_write_bufs_2[i]);
         f_write_bufs_2[i] = NULL;
 
         HDfree(f_read_bufs_0[i]);
