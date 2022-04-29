@@ -5523,8 +5523,8 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     hbool_t            restart_slist_scan;
     uint32_t           protected_entries = 0;
     int32_t            i;
-    int32_t            cur_ring_pel_len;
-    int32_t            old_ring_pel_len;
+    uint32_t            cur_ring_pel_len;
+    uint32_t            old_ring_pel_len;
     unsigned           cooked_flags;
     unsigned           evict_flags;
     H5SL_node_t *      node_ptr       = NULL;
