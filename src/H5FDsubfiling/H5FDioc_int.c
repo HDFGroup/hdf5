@@ -28,19 +28,19 @@ static inline void
 calculate_target_ioc(int64_t file_offset, int64_t stripe_size, int n_io_concentrators, int64_t *target_ioc,
                      int64_t *ioc_file_offset)
 {
-    int64_t start_id;
-    int64_t ioc_row;
+    int64_t stripe_idx;
+    int64_t subfile_row;
 
     HDassert(target_ioc);
     HDassert(ioc_file_offset);
-    HDassert(stripe_size != 0); /* TODO: negative stripe size? */
+    HDassert(stripe_size > 0);
     HDassert(n_io_concentrators > 0);
 
-    start_id = file_offset / stripe_size;
-    ioc_row  = start_id / n_io_concentrators;
+    stripe_idx  = file_offset / stripe_size;
+    subfile_row = stripe_idx / n_io_concentrators;
 
-    *target_ioc      = start_id % n_io_concentrators;
-    *ioc_file_offset = (file_offset % stripe_size) + (ioc_row * stripe_size);
+    *target_ioc      = stripe_idx % n_io_concentrators;
+    *ioc_file_offset = (subfile_row * stripe_size) + (file_offset % stripe_size);
 }
 
 /*
@@ -98,11 +98,11 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     io_req_t *           sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
-    int64_t              msg[3]          = {0};
-    int *                io_concentrator = NULL;
-    int                  active_sends    = 0;
-    int                  n_waiting       = 0;
-    int                  data_tag        = 0;
+    int64_t              msg[3]           = {0};
+    int *                io_concentrators = NULL;
+    int                  active_sends     = 0;
+    int                  n_waiting        = 0;
+    int                  data_tag         = 0;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
@@ -113,7 +113,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->io_concentrators);
 
-    io_concentrator = sf_context->topology->io_concentrators;
+    io_concentrators = sf_context->topology->io_concentrators;
 
     /*
      * Calculate the IOC that we'll send the I/O request to
@@ -128,7 +128,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     msg[0] = elements;
     msg[1] = ioc_offset;
     msg[2] = context_id;
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrator[ioc_start], WRITE_INDEP,
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], WRITE_INDEP,
                                             sf_context->sf_msg_comm)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
@@ -144,7 +144,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      * data. This allows us to distinguish between multiple
      * concurrent writes from a single rank.
      */
-    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&data_tag, 1, MPI_INT, io_concentrator[ioc_start],
+    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&data_tag, 1, MPI_INT, io_concentrators[ioc_start],
                                              WRITE_INDEP_ACK, sf_context->sf_data_comm, &ack_request)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
@@ -196,7 +196,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      */
     H5_CHECK_OVERFLOW(elements, int64_t, int);
     if (MPI_SUCCESS !=
-        (mpi_code = MPI_Isend(data, (int)elements, MPI_BYTE, io_concentrator[ioc_start], data_tag,
+        (mpi_code = MPI_Isend(data, (int)elements, MPI_BYTE, io_concentrators[ioc_start], data_tag,
                               sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code);
 
@@ -260,8 +260,8 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     io_req_t *           sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
-    int64_t              msg[3]          = {0};
-    int *                io_concentrator = NULL;
+    int64_t              msg[3]           = {0};
+    int *                io_concentrators = NULL;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
@@ -272,7 +272,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->io_concentrators);
 
-    io_concentrator = sf_context->topology->io_concentrators;
+    io_concentrators = sf_context->topology->io_concentrators;
 
     /*
      * Calculate the IOC that we'll send the I/O request to
@@ -287,7 +287,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     msg[0] = elements;
     msg[1] = ioc_offset;
     msg[2] = context_id;
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrator[ioc_start], READ_INDEP,
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], READ_INDEP,
                                             sf_context->sf_msg_comm)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
@@ -314,7 +314,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     /* Start the actual data transfer */
     H5_CHECK_OVERFLOW(elements, int64_t, int);
     if (MPI_SUCCESS !=
-        (mpi_code = MPI_Irecv(data, (int)elements, MPI_BYTE, io_concentrator[ioc_start], READ_INDEP_DATA,
+        (mpi_code = MPI_Irecv(data, (int)elements, MPI_BYTE, io_concentrators[ioc_start], READ_INDEP_DATA,
                               sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 

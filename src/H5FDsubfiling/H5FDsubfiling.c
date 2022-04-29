@@ -217,17 +217,21 @@ static herr_t init_indep_io(subfiling_context_t *sf_context, int64_t file_offset
                             int *n_iocs_used, int64_t *max_io_req_per_ioc);
 static herr_t iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t target_datasize,
                                int64_t start_mem_offset, int64_t start_file_offset, int64_t first_io_len,
-                               int64_t *mem_offset_out, int64_t *target_file_offset_out, int64_t *io_block_len_out);
+                               int64_t *mem_offset_out, int64_t *target_file_offset_out,
+                               int64_t *io_block_len_out);
 static herr_t iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t target_datasize,
                               int64_t start_mem_offset, int64_t start_file_offset, int64_t last_io_len,
-                              int64_t *mem_offset_out, int64_t *target_file_offset_out, int64_t *io_block_len_out);
-static herr_t iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t target_datasize,
-                                    int64_t start_mem_offset, int64_t start_file_offset, int64_t first_io_len,
-                                    int64_t last_io_len, int64_t *mem_offset_out, int64_t *target_file_offset_out,
+                              int64_t *mem_offset_out, int64_t *target_file_offset_out,
+                              int64_t *io_block_len_out);
+static herr_t iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth,
+                                    int64_t target_datasize, int64_t start_mem_offset,
+                                    int64_t start_file_offset, int64_t first_io_len, int64_t last_io_len,
+                                    int64_t *mem_offset_out, int64_t *target_file_offset_out,
                                     int64_t *io_block_len_out);
-static herr_t iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t target_datasize,
-                                 int64_t start_mem_offset, int64_t start_file_offset, int64_t *mem_offset_out,
-                                 int64_t *target_file_offset_out, int64_t *io_block_len_out);
+static herr_t iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth,
+                                 int64_t target_datasize, int64_t start_mem_offset, int64_t start_file_offset,
+                                 int64_t *mem_offset_out, int64_t *target_file_offset_out,
+                                 int64_t *io_block_len_out);
 
 static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_CLASS_VERSION,              /* VFD interface version */
@@ -2277,17 +2281,19 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int64_t stripe_idx           = 0;
     int64_t final_stripe_idx     = 0;
     int64_t curr_stripe_idx      = 0;
+    int64_t offset_in_stripe     = 0;
+    int64_t offset_in_block      = 0;
     int64_t final_offset         = 0;
     int64_t start_length         = 0;
     int64_t final_length         = 0;
     int64_t ioc_start            = 0;
     int64_t ioc_final            = 0;
-    int64_t sf_start_row         = 0;
-    int64_t sf_row_offset        = 0;
-    int64_t sf_col_offset        = 0;
+    int64_t start_row            = 0;
+    int64_t row_offset           = 0;
     int64_t row_stripe_idx_start = 0;
     int64_t row_stripe_idx_final = 0;
     int64_t max_iovec_depth      = 0;
+    int64_t curr_max_iovec_depth = 0;
     int64_t total_bytes          = 0;
     int64_t mem_offset           = 0;
     int     ioc_count            = 0;
@@ -2340,22 +2346,24 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      *      the block size would be 4MiB and file offset 4096 would have
      *      a stripe index of 4 and reside in the same subfile as stripe
      *      index 0 (offsets 0-1023)
-     *  sf_col_offset
-     *    - the relative starting offset in the subfile that the starting
-     *      file offset resides in
-     *  stripe_offset
-     *    - the offset within this block across the IOCs
+     *  offset_in_stripe
+     *    - the relative offset in the stripe that the starting file
+     *      offset resides in
+     *  offset_in_block
+     *    - the relative offset in the "block" of stripes across the I/O
+     *      concentrators
      *  final_offset
      *    - the last offset in the virtual file covered by this I/O
      *      operation. Simply the I/O size added to the starting file
      *      offset.
      */
-    stripe_idx    = file_offset / stripe_size;
-    sf_col_offset = file_offset % stripe_size;
-    final_offset  = file_offset + data_size;
+    stripe_idx       = file_offset / stripe_size;
+    offset_in_stripe = file_offset % stripe_size;
+    offset_in_block  = file_offset % block_size;
+    final_offset     = file_offset + data_size;
 
     /* Determine the size of data written to the first and last stripes */
-    start_length = MIN(data_size, (stripe_size - sf_col_offset));
+    start_length = MIN(data_size, (stripe_size - offset_in_stripe));
     final_length = (start_length == data_size ? 0 : final_offset % stripe_size);
     HDassert(start_length <= stripe_size);
     HDassert(final_length <= stripe_size);
@@ -2363,21 +2371,23 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     /*
      * Determine which I/O concentrator the I/O request begins
      * in and which "row" the I/O request begins in within the
-     * I/O concentrator's subfile. Note that "row" here is just
-     * a conceptual way to think of how a subfile is laid out.
-     * A subfile's "column" size is equal to the stripe size and
-     * therefore file offsets in the subfile that are multiples
-     * of the stripe size begin a new "row".
+     * "block" of stripes across the I/O concentrators. Note that
+     * "row" here is just a conceptual way to think of how a block
+     * of data stripes is laid out across the I/O concentrator
+     * subfiles. A block's "column" size in bytes is equal to the
+     * stripe size multiplied the number of I/O concentrators.
+     * Therefore, file offsets that are multiples of the block size
+     * begin a new "row".
      */
-    sf_start_row = stripe_idx / ioc_count; /* Starting row in subfile as an index value */
-    ioc_start    = stripe_idx % ioc_count;
+    start_row = stripe_idx / ioc_count;
+    ioc_start = stripe_idx % ioc_count;
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
 
     /*
-     * Set initial file offset for starting row in subfile
+     * Set initial file offset for starting "row"
      * based on the start row index
      */
-    sf_row_offset = sf_start_row * stripe_size;
+    row_offset = start_row * block_size;
 
     /*
      * Determine the stripe "index" of the last offset in the
@@ -2397,6 +2407,9 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     row_stripe_idx_final = final_stripe_idx - ioc_final;
     max_iovec_depth      = ((row_stripe_idx_final - row_stripe_idx_start) / ioc_count) + 1;
 
+    if (ioc_final < ioc_start)
+        max_iovec_depth--;
+
     /* Set returned parameters early */
     *first_ioc_index    = (int)ioc_start;
     *n_iocs_used        = ioc_count;
@@ -2408,7 +2421,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      * whose data size is zero will not have I/O requests passed
      * to them.
      */
-    curr_stripe_idx = stripe_idx;
+    curr_stripe_idx      = stripe_idx;
+    curr_max_iovec_depth = max_iovec_depth;
     for (int i = 0, k = (int)ioc_start; i < ioc_count; i++) {
         int64_t *_mem_buf_offset;
         int64_t *_target_file_offset;
@@ -2419,7 +2433,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         hbool_t  is_last  = FALSE;
         size_t   output_offset;
 
-        iovec_depth = ((row_stripe_idx_final - curr_stripe_idx) / ioc_count) + 1;
+        iovec_depth = curr_max_iovec_depth;
 
         /*
          * Setup the pointers to the next set of I/O vectors in
@@ -2469,6 +2483,32 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 }
             }
 
+            /* Account for IOCs with uniform segments */
+            if (!is_first && !is_last) {
+                hbool_t thin_uniform_section;
+
+                /*
+                 * When an IOC has an index value that is greater
+                 * than both the starting IOC and ending IOC indices,
+                 * it is a "thinner" section with a smaller I/O vector
+                 * depth.
+                 */
+                thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+
+                /*
+                 * This can also happen when the IOC with the final
+                 * data segment has a smaller IOC index than the IOC
+                 * with the first data segment and the current IOC
+                 * index falls between the two.
+                 */
+                thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+
+                if (thin_uniform_section) {
+                    iovec_depth--;
+                    num_full_stripes--;
+                }
+            }
+
             /*
              * After accounting for the length of the initial
              * and/or final data segments, add the combined
@@ -2480,23 +2520,24 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         }
 
         _mem_buf_offset[0]     = mem_offset;
-        _target_file_offset[0] = sf_row_offset + sf_col_offset;
+        _target_file_offset[0] = row_offset + offset_in_block;
         _io_block_len[0]       = ioc_bytes;
 
         if (ioc_count > 1) {
-            int64_t curr_file_offset = sf_row_offset + sf_col_offset;
+            int64_t curr_file_offset = row_offset + offset_in_block;
 
             /* Fill the I/O vectors */
             if (is_first) {
                 if (is_last) { /* First + Last */
-                    if (iovec_fill_first_last(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
-                                              start_length, final_length, _mem_buf_offset, _target_file_offset,
-                                              _io_block_len) < 0)
+                    if (iovec_fill_first_last(sf_context, iovec_depth, ioc_bytes, mem_offset,
+                                              curr_file_offset, start_length, final_length, _mem_buf_offset,
+                                              _target_file_offset, _io_block_len) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
                 }
                 else { /* First ONLY */
                     if (iovec_fill_first(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
-                                         start_length, _mem_buf_offset, _target_file_offset, _io_block_len) < 0)
+                                         start_length, _mem_buf_offset, _target_file_offset,
+                                         _io_block_len) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
                 }
                 /* Move the memory pointer to the starting location
@@ -2519,22 +2560,26 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
         }
 
-        sf_col_offset += _io_block_len[0];
-        sf_col_offset %= stripe_size;
+        offset_in_block += _io_block_len[0];
 
         k++;
         curr_stripe_idx++;
 
         if (k == ioc_count) {
-            k             = 0;
-            sf_col_offset = 0;
-            sf_row_offset += stripe_size;
+            k                    = 0;
+            offset_in_block      = 0;
+            curr_max_iovec_depth = ((final_stripe_idx - curr_stripe_idx) / ioc_count) + 1;
+
+            row_offset += block_size;
         }
+
+        HDassert(offset_in_block <= block_size);
     }
 
     if (total_bytes != data_size)
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "total bytes (%" PRId64 " didn't match data size (%" PRId64 ")!",
-                    total_bytes, data_size);
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                    "total bytes (%" PRId64 ") didn't match data size (%" PRId64 ")!", total_bytes,
+                    data_size);
 
 done:
     return ret_value;
@@ -2583,7 +2628,8 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
     block_size  = sf_context->sf_blocksize_per_stripe;
 
 #ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64 "\n",
+    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64
+             "\n",
              __func__, start_mem_offset, start_file_offset, first_io_len);
     HDfflush(stdout);
 #endif
@@ -2614,7 +2660,8 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
             io_block_len_out[i]       = stripe_size;
 
 #ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                      __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
             HDfflush(stdout);
 #endif
@@ -2625,8 +2672,9 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
         }
 
         if (total_bytes != target_datasize)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "total bytes (%" PRId64 " didn't match target data size (%" PRId64 ")!",
-                        total_bytes, target_datasize);
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
+                        target_datasize);
     }
 
 done:
@@ -2678,7 +2726,8 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     block_size  = sf_context->sf_blocksize_per_stripe;
 
 #ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", last_io_len = %" PRId64 "\n",
+    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", last_io_len = %" PRId64
+             "\n",
              __func__, start_mem_offset, start_file_offset, last_io_len);
     HDfflush(stdout);
 #endif
@@ -2687,37 +2736,45 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     target_file_offset_out[0] = start_file_offset;
     io_block_len_out[0]       = last_io_len;
 
-    /*
-     * If the last I/O size is positive but less than our
-     * target data size, there is at least one full stripe
-     * preceding the last I/O block
-     */
-    if ((last_io_len > 0) && (last_io_len < target_datasize))
-        io_block_len_out[0] = stripe_size;
-
+    if (last_io_len == target_datasize) {
 #ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64 "\n",
+        HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64
+                 "\n",
                  __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
         HDfflush(stdout);
 #endif
 
-    if (last_io_len == target_datasize)
         HGOTO_DONE(SUCCEED);
-
-    if (last_io_len > 0) {
+    }
+    else {
         int64_t next_mem_offset  = start_mem_offset + block_size;
         int64_t next_file_offset = start_file_offset + block_size;
         int64_t i;
 
+        /*
+         * If the last I/O size doesn't cover the target data
+         * size, there is at least one full stripe preceding
+         * the last I/O block
+         */
+        io_block_len_out[0] = stripe_size;
+
+#ifdef H5FD_SUBFILING_DEBUG
+        HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64
+                 "\n",
+                 __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
+        HDfflush(stdout);
+#endif
+
         total_bytes = stripe_size;
 
-        for (i = 1; i < iovec_depth - 1; ) {
+        for (i = 1; i < iovec_depth - 1;) {
             mem_offset_out[i]         = next_mem_offset;
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
 #ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                      __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
             HDfflush(stdout);
 #endif
@@ -2734,7 +2791,8 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
         io_block_len_out[i]       = last_io_len;
 
 #ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                  __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
         HDfflush(stdout);
 #endif
@@ -2742,8 +2800,9 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
         total_bytes += last_io_len;
 
         if (total_bytes != target_datasize)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "total bytes (%" PRId64 " didn't match target data size (%" PRId64 ")!",
-                        total_bytes, target_datasize);
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
+                        target_datasize);
     }
 
 done:
@@ -2798,7 +2857,8 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
     block_size  = sf_context->sf_blocksize_per_stripe;
 
 #ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64 ", last_io_len = %" PRId64 "\n",
+    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64
+             ", last_io_len = %" PRId64 "\n",
              __func__, start_mem_offset, start_file_offset, first_io_len, last_io_len);
     HDfflush(stdout);
 #endif
@@ -2824,13 +2884,14 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
 
         total_bytes = first_io_len;
 
-        for (i = 1; i < iovec_depth - 1; ) {
+        for (i = 1; i < iovec_depth - 1;) {
             mem_offset_out[i]         = next_mem_offset;
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
 #ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                      __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
             HDfflush(stdout);
 #endif
@@ -2847,7 +2908,8 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
         io_block_len_out[i]       = last_io_len;
 
 #ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                  __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
         HDfflush(stdout);
 #endif
@@ -2855,8 +2917,9 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
         total_bytes += last_io_len;
 
         if (total_bytes != target_datasize)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "total bytes (%" PRId64 " didn't match target data size (%" PRId64 ")!",
-                        total_bytes, target_datasize);
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
+                        target_datasize);
     }
 
 done:
@@ -2902,7 +2965,8 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
     block_size  = sf_context->sf_blocksize_per_stripe;
 
 #ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", segment size = %" PRId64 "\n",
+    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", segment size = %" PRId64
+             "\n",
              __func__, start_mem_offset, start_file_offset, stripe_size);
     HDfflush(stdout);
 #endif
@@ -2939,7 +3003,8 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
             io_block_len_out[i]       = stripe_size;
 
 #ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
+            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
                      __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
             HDfflush(stdout);
 #endif
@@ -2950,8 +3015,9 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
         }
 
         if (total_bytes != target_datasize)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "total bytes (%" PRId64 " didn't match target data size (%" PRId64 ")!",
-                        total_bytes, target_datasize);
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
+                        target_datasize);
     }
 
 done:
