@@ -2693,8 +2693,8 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
 
                 if (entry_ptr->age >= H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX)
                     image_entries[u].age = H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX;
-		else
-		    image_entries[u].age     = entry_ptr->age + 1;
+                else
+                    image_entries[u].age = entry_ptr->age + 1;
             } /* end if */
             else {
                 image_entries[u].type_id = entry_ptr->type->id;
