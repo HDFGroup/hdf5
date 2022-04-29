@@ -207,20 +207,24 @@
 #define H5C__UPDATE_PAGE_BUFFER_FLAG        0x40000 /* Set during parallel I/O */
 
 /* Debugging/sanity checking/statistics settings */
-#ifndef NDEBUG
-#define H5C_DO_SANITY_CHECKS         1
-#define H5C_DO_SLIST_SANITY_CHECKS   0
-#define H5C_DO_TAGGING_SANITY_CHECKS 1
-#define H5C_DO_EXTREME_SANITY_CHECKS 0
-#else /* NDEBUG */
-/* With rare exceptions, the following defines should be set
- * to 0 if NDEBUG is defined
+/* #define H5C_DO_SANITY_CHECKS */
+/* #define H5C_DO_SLIST_SANITY_CHECKS */
+/* #define H5C_DO_TAGGING_SANITY_CHECKS */
+/* #define H5C_DO_EXTREME_SANITY_CHECKS */
+
+/*
+ * If not already set externally (e.g., from the build
+ * system), set a few debugging options for debug builds.
  */
-#define H5C_DO_SANITY_CHECKS         0
-#define H5C_DO_SLIST_SANITY_CHECKS   0
-#define H5C_DO_TAGGING_SANITY_CHECKS 0
-#define H5C_DO_EXTREME_SANITY_CHECKS 0
-#endif /* NDEBUG */
+#ifndef NDEBUG
+#ifndef H5C_DO_SANITY_CHECKS
+#define H5C_DO_SANITY_CHECKS
+#endif
+
+#ifndef H5C_DO_TAGGING_SANITY_CHECKS
+#define H5C_DO_TAGGING_SANITY_CHECKS
+#endif
+#endif
 
 /* Cork actions: cork/uncork/get cork status of an object */
 #define H5C__SET_CORK   0x1
@@ -2236,7 +2240,7 @@ H5_DLL herr_t H5C_flush_tagged_entries(H5F_t *f, haddr_t tag);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
 herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f);
@@ -2292,11 +2296,11 @@ H5_DLL herr_t   H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *
 H5_DLL hbool_t  H5C_cache_image_pending(const H5C_t *cache_ptr);
 H5_DLL herr_t   H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len);
 
-#if H5C_DO_SLIST_SANITY_CHECKS
+#ifdef H5C_DO_SLIST_SANITY_CHECKS
 H5_DLL hbool_t H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
 #endif
 
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
 H5_DLL herr_t H5C_validate_lru_list(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_validate_pinned_entry_list(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_validate_protected_entry_list(H5C_t *cache_ptr);
