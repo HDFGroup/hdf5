@@ -263,6 +263,9 @@ if test "X-gcc" = "X-$cc_vendor"; then
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
+
+        # Remove deprecated strict-overflow option
+        H5_CFLAGS=`echo "$H5_CFLAGS" | sed 's/-Wstrict-overflow=[0-9]//g'`
     fi
 
     # gcc 9

@@ -247,6 +247,9 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     else ()
       ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-8")
     endif ()
+
+    # Remove deprecated strict-overflow option if added
+    list (REMOVE_ITEM H5_CFLAGS "-Wstrict-overflow=5")
   endif ()
 
   # Append more extra warning flags that only gcc 9.x+ knows about
