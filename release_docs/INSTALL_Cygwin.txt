@@ -2,7 +2,7 @@
          HDF5 Build and Install Instructions for Cygwin
 ************************************************************************
 
-This document is a instruction on how to build, test and install HDF5 libary on
+This document is a instruction on how to build, test and install HDF5 library on
 Cygwin.  See detailed information in hdf5/INSTALL.
 
 NOTE: hdf5 can be built with CMake, see the INSTALL_CMake.txt file for more guidance.
@@ -66,7 +66,7 @@ Preconditions:
     2.2.2 Szip
        The HDF5 library has a predefined compression filter that uses
        the extended-Rice lossless compression algorithm for chunked
-       datatsets. For more information on Szip compression, license terms,
+       datasets. For more information on Szip compression, license terms,
        and obtaining the Szip source code, see:
 
           https://portal.hdfgroup.org/display/HDF5/Szip+Compression+in+HDF+Products

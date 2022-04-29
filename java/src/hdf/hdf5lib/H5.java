@@ -534,6 +534,33 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException;
 
     /**
+     * H5export_dataset is a utility function to save data in a file.
+     *
+     * @param file_export_name
+     *            The file name to export data into.
+     * @param file_name
+     *            The name of the HDF5 file containing the dataset.
+     * @param object_path
+     *            The full path of the dataset to be exported.
+     * @param binary_order
+     *            99 - export data as text.
+     *            1 - export data as binary Native Order.
+     *            2 - export data as binary Little Endian.
+     *            3 - export data as binary Big Endian.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF-5 Library.
+     **/
+    public static void H5export_dataset(String file_export_name, String file_name, String object_path,
+                                        int binary_order) throws HDF5LibraryException
+    {
+        _H5export_dataset_string(file_export_name, file_name, object_path, binary_order);
+    }
+    private synchronized static native void _H5export_dataset_string(String file_export_name, String file_name,
+                                                              String object_path, int binary_order)
+        throws HDF5LibraryException;
+
+    /**
      * H5export_attribute is a utility function to save data in a file.
      *
      * @param file_export_name
@@ -5303,7 +5330,7 @@ public class H5 implements java.io.Serializable {
         String n[] = new String[1];
         n[0]       = new String("");
         oname[0]   = H5Lget_name_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC,
-                                      idx, HDF5Constants.H5P_DEFAULT);
+                                        idx, HDF5Constants.H5P_DEFAULT);
         H5L_info_t info = H5Lget_info_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME,
                                              HDF5Constants.H5_ITER_INC, idx, HDF5Constants.H5P_DEFAULT);
         type[0]         = info.type;
@@ -11790,8 +11817,8 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5Sselect_project_intersection(long src_space_id, long dst_space_id,
-                                                                          long src_intersect_space_id)
+    public synchronized static native long
+    H5Sselect_project_intersection(long src_space_id, long dst_space_id, long src_intersect_space_id)
         throws HDF5LibraryException;
 
     // ////////////////////////////////////////////////////////////
@@ -12633,8 +12660,8 @@ public class H5 implements java.io.Serializable {
 
     /**
      * If any internal bits of a floating point type are unused (that is, those significant bits which are not
-     * part of the sign, exponent, or mantissa), then H5Tset_inpad will be filled according to the value of the
-     * padding value property inpad.
+     * part of the sign, exponent, or mantissa), then H5Tset_inpad will be filled according to the value of
+     * the padding value property inpad.
      *
      * @param type_id
      *            IN: Identifier of datatype to modify.

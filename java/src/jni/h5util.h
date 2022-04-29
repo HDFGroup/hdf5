@@ -111,6 +111,14 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, j
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    _H5export_dataset_string
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5__1H5export_1dataset_1string(JNIEnv *, jclass, jstring, jstring,
+                                                                       jstring, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5export_attribute
  * Signature: (Ljava/lang/String;JLjava/lang/String;I)V
  */
