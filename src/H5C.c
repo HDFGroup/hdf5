@@ -4667,10 +4667,11 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
     cache_ptr->epoch_marker_ringbuf_first =
         (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
+    if (cache_ptr->epoch_marker_ringbuf_size <= 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
+
     cache_ptr->epoch_marker_ringbuf_size -= 1;
 
-    if (cache_ptr->epoch_marker_ringbuf_size < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
     if ((cache_ptr->epoch_marker_active)[i] != TRUE)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
 
@@ -4690,10 +4691,10 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
 
     (cache_ptr->epoch_marker_ringbuf)[cache_ptr->epoch_marker_ringbuf_last] = i;
 
-    cache_ptr->epoch_marker_ringbuf_size += 1;
-
-    if (cache_ptr->epoch_marker_ringbuf_size > H5C__MAX_EPOCH_MARKERS)
+    if (cache_ptr->epoch_marker_ringbuf_size >= H5C__MAX_EPOCH_MARKERS)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer overflow")
+
+    cache_ptr->epoch_marker_ringbuf_size += 1;
 
     H5C__DLL_PREPEND((&((cache_ptr->epoch_markers)[i])), (cache_ptr)->LRU_head_ptr, (cache_ptr)->LRU_tail_ptr,
                      (cache_ptr)->LRU_list_len, (cache_ptr)->LRU_list_size, (FAIL))
@@ -4965,12 +4966,12 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr)
 
     (cache_ptr->epoch_marker_ringbuf)[cache_ptr->epoch_marker_ringbuf_last] = i;
 
-    cache_ptr->epoch_marker_ringbuf_size += 1;
-
-    if (cache_ptr->epoch_marker_ringbuf_size > H5C__MAX_EPOCH_MARKERS) {
+    if (cache_ptr->epoch_marker_ringbuf_size >= H5C__MAX_EPOCH_MARKERS) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer overflow")
     }
+
+    cache_ptr->epoch_marker_ringbuf_size += 1;
 
     H5C__DLL_PREPEND((&((cache_ptr->epoch_markers)[i])), (cache_ptr)->LRU_head_ptr, (cache_ptr)->LRU_tail_ptr,
                      (cache_ptr)->LRU_list_len, (cache_ptr)->LRU_list_size, (FAIL))
@@ -5019,10 +5020,10 @@ H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr)
         cache_ptr->epoch_marker_ringbuf_first =
             (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
-        cache_ptr->epoch_marker_ringbuf_size -= 1;
-
-        if (cache_ptr->epoch_marker_ringbuf_size < 0)
+        if (cache_ptr->epoch_marker_ringbuf_size <= 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
+
+        cache_ptr->epoch_marker_ringbuf_size -= 1;
 
         if ((cache_ptr->epoch_marker_active)[i] != TRUE)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
@@ -5092,10 +5093,11 @@ H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr)
         cache_ptr->epoch_marker_ringbuf_first =
             (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
+        if (cache_ptr->epoch_marker_ringbuf_size <= 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
+
         cache_ptr->epoch_marker_ringbuf_size -= 1;
 
-        if (cache_ptr->epoch_marker_ringbuf_size < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
         if ((cache_ptr->epoch_marker_active)[i] != TRUE)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
 
@@ -5523,8 +5525,8 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     hbool_t            restart_slist_scan;
     uint32_t           protected_entries = 0;
     int32_t            i;
-    int32_t            cur_ring_pel_len;
-    int32_t            old_ring_pel_len;
+    uint32_t           cur_ring_pel_len;
+    uint32_t           old_ring_pel_len;
     unsigned           cooked_flags;
     unsigned           evict_flags;
     H5SL_node_t *      node_ptr       = NULL;
