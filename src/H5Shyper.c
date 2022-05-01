@@ -160,7 +160,7 @@ static herr_t  H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t max
 static herr_t  H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem,
                                                    size_t *nseq, size_t *nelem, hsize_t *off, size_t *len);
 static herr_t  H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata);
-static herr_t  H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
+static herr_t  H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *      ss_span_info,
                                            const H5S_hyper_span_info_t *sis_span_info, hsize_t count,
                                            unsigned depth, H5S_hyper_project_intersect_ud_t *udata);
 static void    H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count, hsize_t *block,
@@ -11331,9 +11331,8 @@ sis_span_info unsigned depth;         IN: Depth of iteration (in terms of rank)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
-                            const H5S_hyper_span_info_t *sis_span_info, hsize_t count, unsigned depth,
-                            H5S_hyper_project_intersect_ud_t *udata)
+H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper_span_info_t *sis_span_info,
+                            hsize_t count, unsigned depth, H5S_hyper_project_intersect_ud_t *udata)
 {
     const H5S_hyper_span_t *ss_span;             /* Current span in source space */
     const H5S_hyper_span_t *sis_span;            /* Current span in source intersect space */
@@ -11596,7 +11595,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                                 const H5S_t *src_intersect_space, H5S_t *proj_space, hbool_t share_selection)
 {
     H5S_hyper_project_intersect_ud_t udata; /* User data for subroutines */
-    const H5S_hyper_span_info_t *    ss_span_info;
+    H5S_hyper_span_info_t *          ss_span_info;
     const H5S_hyper_span_info_t *    ds_span_info;
     H5S_hyper_span_info_t *          ss_span_info_buf = NULL;
     H5S_hyper_span_info_t *          ds_span_info_buf = NULL;
