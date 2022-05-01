@@ -8089,13 +8089,13 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
+H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
-    const H5O_layout_t *layout = NULL;       /* Dataset layout */
-    const H5D_rdcc_t *  rdcc   = NULL;       /* Raw data chunk cache */
-    H5D_rdcc_ent_t *    ent;                 /* Cache entry index */
-    H5D_chk_idx_info_t  idx_info;            /* Chunked index info */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    const H5D_rdcc_t * rdcc   = NULL;       /* Raw data chunk cache */
+    H5O_layout_t *     layout = NULL;       /* Dataset layout */
+    H5D_rdcc_ent_t *   ent;                 /* Cache entry index */
+    H5D_chk_idx_info_t idx_info;            /* Chunked index info */
+    herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
