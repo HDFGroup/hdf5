@@ -41,7 +41,7 @@ const char *FILENAME[NFILENAME] = {"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* !PATH_MAX */
-char    filenames[NFILENAME][PATH_MAX];
+char *  filenames[NFILENAME];
 hid_t   fapl;                      /* file access property list */
 haddr_t max_addr = 0;              /* used to store the end of
                                     * the address space used by
@@ -192,7 +192,7 @@ struct datum {
 
 #define NUM_DATA_ENTRIES 100000
 
-struct datum data[NUM_DATA_ENTRIES];
+struct datum *data = NULL;
 
 /* Many tests use the size of data array as the size of test loops.
  * On some machines, this results in unacceptably long test runs.
@@ -231,7 +231,7 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *
  *****************************************************************************/
 
-int data_index[NUM_DATA_ENTRIES];
+int *data_index = NULL;
 
 /*****************************************************************************
  * The following two #defines are used to control code that is in turn used
@@ -2251,13 +2251,13 @@ datum_deserialize(const void *image_ptr, H5_ATTR_UNUSED size_t len, void *udata_
 static herr_t
 datum_image_len(const void *thing, size_t *image_len)
 {
-    int           idx;
-    struct datum *entry_ptr;
+    int                 idx;
+    const struct datum *entry_ptr;
 
     HDassert(thing);
     HDassert(image_len);
 
-    entry_ptr = (struct datum *)thing;
+    entry_ptr = (const struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
@@ -6932,6 +6932,23 @@ main(int argc, char **argv)
         goto finish;
     }
 
+    if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
+        HDprintf("    Couldn't allocate data array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+    if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
+        HDprintf("    Couldn't allocate data index array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
     set_up_file_communicator();
 
     setup_derived_types();
@@ -7047,6 +7064,11 @@ main(int argc, char **argv)
 #endif
 
 finish:
+    if (data_index)
+        HDfree(data_index);
+    if (data)
+        HDfree(data);
+
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
