@@ -121,23 +121,6 @@ typedef enum H5D_fill_value_t {
 } H5D_fill_value_t;
 //! <!-- [H5D_fill_value_t_snip] -->
 
-/* Parameter struct for multi-dset Read/Write */
-//! <!-- [H5D_rw_multi_t_snip] -->
-/**
- * Parameter struct for multi-dset Read/Write
- */
-typedef struct H5D_rw_multi_t {
-    hid_t dset_id;       /* dataset ID */
-    hid_t dset_space_id; /* dataset selection dataspace ID */
-    hid_t mem_type_id;   /* memory datatype ID */
-    hid_t mem_space_id;  /* memory selection dataspace ID */
-    union {
-        void *      rbuf; /* pointer to read buffer */
-        const void *wbuf; /* pointer to write buffer */
-    } u;
-} H5D_rw_multi_t;
-//! <!-- [H5D_rw_multi_t_snip] -->
-
 /* Values for VDS bounds option */
 //! <!-- [H5D_vds_view_t_snip] -->
 /**
@@ -869,7 +852,8 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                       hid_t dxpl_id, void *buf /*out*/);
 
-H5_DLL herr_t H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
+H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                            hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/);
 
 /**
  * --------------------------------------------------------------------------
@@ -996,7 +980,8 @@ H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                        hid_t dxpl_id, const void *buf);
 
-H5_DLL herr_t H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info);
+H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                             hid_t file_space_id[], hid_t dxpl_id, const void *buf[]);
 
 /**
  * --------------------------------------------------------------------------

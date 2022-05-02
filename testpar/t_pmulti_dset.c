@@ -97,7 +97,12 @@ int nerrors = 0;
 static void
 test_pmdset(size_t niter, unsigned flags)
 {
-    H5D_rw_multi_t multi_info[MAX_DSETS];
+    hid_t          dset_ids[MAX_DSETS];
+    hid_t          mem_type_ids[MAX_DSETS];
+    hid_t          mem_space_ids[MAX_DSETS];
+    hid_t          file_space_ids[MAX_DSETS];
+    void *         rbufs[MAX_DSETS];
+    const void *   wbufs[MAX_DSETS];
     size_t         max_dsets;
     size_t         buf_size;
     size_t         ndsets;
@@ -171,22 +176,22 @@ test_pmdset(size_t niter, unsigned flags)
         count[i][2] = 1;
     } /* end for */
 
-    /* Initialize multi_info */
+    /* Initialize IDs */
     for (i = 0; i < max_dsets; i++) {
-        multi_info[i].dset_id       = -1;
-        multi_info[i].dset_space_id = -1;
-        multi_info[i].mem_type_id   = H5T_NATIVE_UINT;
-        multi_info[i].mem_space_id  = -1;
+        dset_ids[i]       = -1;
+        file_space_ids[i] = -1;
+        mem_type_ids[i]   = H5T_NATIVE_UINT;
+        mem_space_ids[i]  = -1;
     } /* end for */
 
     /* Generate memory dataspace */
     dset_dims[0][0] = MAX_DSET_X;
     dset_dims[0][1] = MAX_DSET_Y;
-    if ((multi_info[0].mem_space_id =
+    if ((mem_space_ids[0] =
              H5Screate_simple((flags & MDSET_FLAG_SHAPESAME) ? 2 : 3, dset_dims[0], NULL)) < 0)
         T_PMD_ERROR
     for (i = 1; i < max_dsets; i++)
-        if ((multi_info[i].mem_space_id = H5Scopy(multi_info[0].mem_space_id)) < 0)
+        if ((mem_space_ids[i] = H5Scopy(mem_space_ids[0])) < 0)
             T_PMD_ERROR
 
     /* Create fapl */
@@ -233,7 +238,7 @@ test_pmdset(size_t niter, unsigned flags)
             /* Generate file dataspace */
             dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
             dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
-            if ((multi_info[j].dset_space_id =
+            if ((file_space_ids[j] =
                      H5Screate_simple(2, dset_dims[j], (flags & MDSET_FLAG_CHUNK) ? max_dims : NULL)) < 0)
                 T_PMD_ERROR
 
@@ -246,8 +251,8 @@ test_pmdset(size_t niter, unsigned flags)
             } /* end if */
 
             /* Create dataset */
-            if ((multi_info[j].dset_id =
-                     H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, multi_info[j].dset_space_id,
+            if ((dset_ids[j] =
+                     H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, file_space_ids[j],
                                 H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                 T_PMD_ERROR
         } /* end for */
@@ -285,9 +290,9 @@ test_pmdset(size_t niter, unsigned flags)
             if (!last_read) {
                 /* Close datasets */
                 for (k = 0; k < ndsets; k++) {
-                    if (H5Dclose(multi_info[k].dset_id) < 0)
+                    if (H5Dclose(dset_ids[k]) < 0)
                         T_PMD_ERROR
-                    multi_info[k].dset_id = -1;
+                    dset_ids[k] = -1;
                 } /* end for */
 
                 /* Close file */
@@ -304,7 +309,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                 /* Reopen datasets */
                 for (k = 0; k < ndsets; k++) {
-                    if ((multi_info[k].dset_id = H5Dopen2(file_id, dset_name[k], H5P_DEFAULT)) < 0)
+                    if ((dset_ids[k] = H5Dopen2(file_id, dset_name[k], H5P_DEFAULT)) < 0)
                         T_PMD_ERROR
                 } /* end for */
 
@@ -318,9 +323,9 @@ test_pmdset(size_t niter, unsigned flags)
             /* Loop over datasets */
             for (k = 0; k < ndsets; k++) {
                 /* Reset selection */
-                if (H5Sselect_none(multi_info[k].mem_space_id) < 0)
+                if (H5Sselect_none(mem_space_ids[k]) < 0)
                     T_PMD_ERROR
-                if (H5Sselect_none(multi_info[k].dset_space_id) < 0)
+                if (H5Sselect_none(file_space_ids[k]) < 0)
                     T_PMD_ERROR
 
                 /* Reset dataset usage array, if writing */
@@ -378,10 +383,10 @@ test_pmdset(size_t niter, unsigned flags)
                             /* Select hyperslab if this is the current process
                              */
                             if (l == (size_t)mpi_rank) {
-                                if (H5Sselect_hyperslab(multi_info[k].mem_space_id, H5S_SELECT_OR, start[m],
+                                if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_OR, start[m],
                                                         NULL, count[m], NULL) < 0)
                                     T_PMD_ERROR
-                                if (H5Sselect_hyperslab(multi_info[k].dset_space_id, H5S_SELECT_OR, start[m],
+                                if (H5Sselect_hyperslab(file_space_ids[k], H5S_SELECT_OR, start[m],
                                                         NULL, count[m], NULL) < 0)
                                     T_PMD_ERROR
                             } /* end if */
@@ -447,7 +452,7 @@ test_pmdset(size_t niter, unsigned flags)
                         /* Select points in file if this is the current process
                          */
                         if ((l == (size_t)mpi_rank) && (npoints > 0))
-                            if (H5Sselect_elements(multi_info[k].dset_space_id, H5S_SELECT_APPEND, npoints,
+                            if (H5Sselect_elements(file_space_ids[k], H5S_SELECT_APPEND, npoints,
                                                    points) < 0)
                                 T_PMD_ERROR
 
@@ -479,7 +484,7 @@ test_pmdset(size_t niter, unsigned flags)
                             } /* end if */
 
                             /* Select elements */
-                            if (H5Sselect_elements(multi_info[k].mem_space_id, H5S_SELECT_APPEND, npoints,
+                            if (H5Sselect_elements(mem_space_ids[k], H5S_SELECT_APPEND, npoints,
                                                    points) < 0)
                                 T_PMD_ERROR
                         } /* end if */
@@ -492,16 +497,16 @@ test_pmdset(size_t niter, unsigned flags)
                 if (flags & MDSET_FLAG_MDSET) {
                     /* Set buffers */
                     for (k = 0; k < ndsets; k++)
-                        multi_info[k].u.rbuf = rbufi[k][0];
+                        rbufs[k] = rbufi[k][0];
 
                     /* Read datasets */
-                    if (H5Dread_multi(dxpl_id, ndsets, multi_info) < 0)
+                    if (H5Dread_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids, dxpl_id, rbufs) < 0)
                         T_PMD_ERROR
                 } /* end if */
                 else
                     /* Read */
-                    if (H5Dread(multi_info[0].dset_id, multi_info[0].mem_type_id, multi_info[0].mem_space_id,
-                                multi_info[0].dset_space_id, dxpl_id, rbuf) < 0)
+                    if (H5Dread(dset_ids[0], mem_type_ids[0], mem_space_ids[0],
+                                file_space_ids[0], dxpl_id, rbuf) < 0)
                     T_PMD_ERROR
 
                 /* Verify data */
@@ -512,16 +517,16 @@ test_pmdset(size_t niter, unsigned flags)
                 if (flags & MDSET_FLAG_MDSET) {
                     /* Set buffers */
                     for (k = 0; k < ndsets; k++)
-                        multi_info[k].u.wbuf = wbufi[k][0];
+                        wbufs[k] = wbufi[k][0];
 
                     /* Write datasets */
-                    if (H5Dwrite_multi(dxpl_id, ndsets, multi_info) < 0)
+                    if (H5Dwrite_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids, dxpl_id, wbufs) < 0)
                         T_PMD_ERROR
                 } /* end if */
                 else
                     /* Write */
-                    if (H5Dwrite(multi_info[0].dset_id, multi_info[0].mem_type_id, multi_info[0].mem_space_id,
-                                 multi_info[0].dset_space_id, dxpl_id, wbuf) < 0)
+                    if (H5Dwrite(dset_ids[0], mem_type_ids[0], mem_space_ids[0],
+                                 file_space_ids[0], dxpl_id, wbuf) < 0)
                     T_PMD_ERROR
 
                 /* Update wbuf */
@@ -534,12 +539,12 @@ test_pmdset(size_t niter, unsigned flags)
 
         /* Close */
         for (j = 0; j < ndsets; j++) {
-            if (H5Dclose(multi_info[j].dset_id) < 0)
+            if (H5Dclose(dset_ids[j]) < 0)
                 T_PMD_ERROR
-            multi_info[j].dset_id = -1;
-            if (H5Sclose(multi_info[j].dset_space_id) < 0)
+            dset_ids[j] = -1;
+            if (H5Sclose(file_space_ids[j]) < 0)
                 T_PMD_ERROR
-            multi_info[j].dset_space_id = -1;
+            file_space_ids[j] = -1;
         } /* end for */
         if (H5Fclose(file_id) < 0)
             T_PMD_ERROR
@@ -548,9 +553,9 @@ test_pmdset(size_t niter, unsigned flags)
 
     /* Close */
     for (i = 0; i < max_dsets; i++) {
-        if (H5Sclose(multi_info[i].mem_space_id) < 0)
+        if (H5Sclose(mem_space_ids[i]) < 0)
             T_PMD_ERROR
-        multi_info[i].mem_space_id = -1;
+        mem_space_ids[i] = -1;
     } /* end for */
     if (H5Pclose(dxpl_id) < 0)
         T_PMD_ERROR
