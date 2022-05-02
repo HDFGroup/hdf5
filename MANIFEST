@@ -318,6 +318,7 @@
 ./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/ph5mdsettest.c
 ./examples/h5_vds.c
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c
@@ -454,9 +455,9 @@
 ./fortran/testpar/ptest.f90
 ./fortran/testpar/hyper.f90
 ./fortran/testpar/mdset.f90
-./fortran/testpar/ptest_F03.f90
-./fortran/testpar/multidsetrw_F03.f90
-
+./fortran/testpar/ptest_F03.F90
+./fortran/testpar/multidsetrw_F03.F90
+./fortran/testpar/benchmark_mdwr.F90
 #------------------------------------------------------------------------------
 #
 # End Fortran interface

@@ -177,7 +177,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
+H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+              hid_t dxpl_id, void *buf[] /*out*/)
 {
     H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
     size_t           u;                   /* Local index variable */
@@ -185,7 +186,7 @@ H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iz*Dm", dxpl_id, count, info);
+    H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     if (count <= 0)
         HGOTO_DONE(SUCCEED)
@@ -203,8 +204,8 @@ H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
     /* Translate public multi-dataset info to internal structure */
     /* (And check parameters) */
     for (u = 0; u < count; u++) {
-        if (H5D__init_dset_info(&dset_info[u], info[u].dset_id, info[u].mem_type_id, info[u].mem_space_id,
-                                info[u].dset_space_id, (const H5D_dset_buf_t *)&(info[u].u.rbuf)) < 0)
+        if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
+                                (const H5D_dset_buf_t *)&(buf[u])) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     } /* end for */
 
@@ -322,7 +323,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
+H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+               hid_t file_space_id[], hid_t dxpl_id, const void *buf[])
 {
     H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
     size_t           u;                   /* Local index variable */
@@ -330,7 +332,7 @@ H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iz*Dm", dxpl_id, count, info);
+    H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     if (count <= 0)
         HGOTO_DONE(SUCCEED)
@@ -348,8 +350,8 @@ H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
     /* Translate public multi-dataset info to internal structure */
     /* (And check parameters) */
     for (u = 0; u < count; u++) {
-        if (H5D__init_dset_info(&dset_info[u], info[u].dset_id, info[u].mem_type_id, info[u].mem_space_id,
-                                info[u].dset_space_id, (const H5D_dset_buf_t *)&(info[u].u.wbuf)) < 0)
+        if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
+                                (const H5D_dset_buf_t *)&(buf[u])) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     }
 

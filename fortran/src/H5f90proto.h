@@ -203,8 +203,8 @@ H5_FCDLL int_f h5dread_f_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_
                            hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 H5_FCDLL int_f h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *buf);
 
-H5_FCDLL int_f nh5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
-H5_FCDLL int_f nh5dwrite_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
+H5_FCDLL int_f h5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
+H5_FCDLL int_f h5dwrite_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info);
 /*
  * Functions from H5Gf.c
  */

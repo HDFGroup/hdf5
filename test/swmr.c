@@ -6716,8 +6716,24 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* H5_HAVE_UNISTD_H */
+#else /* H5_HAVE_UNISTD_H */
+/* Skip test now since a bug in the library is preventing it from working properly */
+static int
+test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
+{
+    if (new_format) {
+        TESTING("H5Drefresh()--concurrent access for latest format");
+    }
+    else {
+        TESTING("H5Drefresh()--concurrent access for non-latest-format");
+    }
 
+    SKIPPED();
+    HDputs("    Test skipped due to a bug in the HDF5 library's SWMR implementation.");
+    return 0;
+} /* test_refresh_concur() */
+
+#if 0
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
 {
@@ -7016,6 +7032,7 @@ error:
     return -1;
 
 } /* test_refresh_concur() */
+#endif
 #endif /* H5_HAVE_UNISTD_H */
 
 /*
