@@ -40,30 +40,29 @@ if [ ! -f "$file_config" ]; then
     exit $FAILED
 fi
 
-stripe_size=$(grep "stripe_size=" $file_config  | cut -d "=" -f2)
+stripe_size=$(grep "stripe_size=" "$file_config"  | cut -d "=" -f2)
 if test -z "$stripe_size"; then
     echo -e "$RED failed to find stripe_size in $file_config $NC"
     exit $FAILED
 fi
 
-hdf5_file="$(grep "hdf5_file=" $file_config  | cut -d "=" -f2)"
+hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
 if test -z "$hdf5_file"; then
     echo -e "$RED failed to find hdf5 output file in $file_config $NC"
     exit $FAILED
 fi
 
-subfile_dir="$(grep "subfile_dir=" $file_config  | cut -d "=" -f2)"
+subfile_dir="$(grep "subfile_dir=" "$file_config"  | cut -d "=" -f2)"
 if test -z "$subfile_dir"; then
     echo -e "$RED failed to find subfile directory in $file_config $NC"
     exit $FAILED
 fi
 
-subfiles=( $( sed -e '1,/subfile_dir=/d' $file_config ) )
+subfiles=( $( sed -e '1,/subfile_dir=/d' "$file_config" ) )
 #for i in "${subfiles[@]}"; do
 #      echo "$i"
 #done
-
-if test -z "$subfiles"; then
+if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED
 fi
@@ -75,7 +74,7 @@ rm -f "$hdf5_file"
 skip=0
 status=$nfiles
 START="$(date +%s%N)"
-while [ $status -gt 0 ]; do
+while [ "$status" -gt 0 ]; do
   icnt=0
   for i in "${subfiles[@]}"; do
       subfile="${subfile_dir}/${i}"
@@ -91,11 +90,11 @@ while [ $status -gt 0 ]; do
       t_elapsed=0
 
       while fuser -s "${subfile}"; do
-          if [[ $(($t_elapsed % 5)) -eq 0 ]]; then
+          if [[ $((t_elapsed % 5)) -eq 0 ]]; then
               echo -e "$GRN waiting for process to finish accessing file \"${subfile}\" ... [${t_elapsed}s/${t_max}s] $NC"
           fi
           sleep $t_sleep
-          t_elapsed=$(($t_elapsed+$t_sleep))
+          t_elapsed=$((t_elapsed+t_sleep))
           if [[ $t_elapsed -ge $t_max ]]; then
               echo -e "$RED ERROR: file \"${subfile}\" still has process accessing it after ${t_elapsed}s $NC"
               exit $FAILED
@@ -103,18 +102,18 @@ while [ $status -gt 0 ]; do
       done
 
       fsize=$(wc -c "${subfile}" | awk '{print $1}')
-      if [ $(($skip*$stripe_size)) -le $fsize ]; then
-          EXEC="dd count=1 bs=$stripe_size if="${subfile}" of="${hdf5_file}" skip=$skip oflag=append conv=notrunc"
+      if [ $((skip*stripe_size)) -le "$fsize" ]; then
+          EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip oflag=append conv=notrunc"
           echo -e "$GRN $EXEC $NC"
           err="$( $EXEC 2>&1 > /dev/null &)"
-          icnt=$(($icnt+1))
+          icnt=$((icnt+1))
       else
-          subfiles=("${subfiles[@]:0:$icnt}" "${subfiles[@]:$(($icnt+1))}")
+          subfiles=("${subfiles[@]:0:icnt}" "${subfiles[@]:$((icnt+1))}")
           status=${#subfiles[@]}
       fi
   done; wait
-  skip=$(($skip+1))
+  skip=$((skip+1))
 done
-END=$[ $(date +%s%N) - ${START} ]
-DURATION_SEC=$(awk -vp=$END -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
+END=$(( $(date +%s%N) - START ))
+DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
 echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
