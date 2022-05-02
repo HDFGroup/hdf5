@@ -298,7 +298,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         /* Hold a copy of the object's file pointer, since closing the object will
          * invalidate the file pointer in the oloc.
          */
-        file = oloc->file;
+        file = oloc.file;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
