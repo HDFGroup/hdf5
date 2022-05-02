@@ -46,22 +46,29 @@ if test -z "$stripe_size"; then
     exit $FAILED
 fi
 
-subfiles=( $( sed -e '1,/hdf5_file=/d' $file_config ) )
-#for i in "${subfiles[@]}"; do
-#      echo "$i"
-#done
-if test -z "$subfiles"; then
-    echo -e "$RED failed to find subfiles list in $file_config $NC"
-    exit $FAILED
-fi
-
-hdf5_file=$(grep "hdf5_file=" $file_config  | cut -d "=" -f2)
+hdf5_file="$(grep "hdf5_file=" $file_config  | cut -d "=" -f2)"
 if test -z "$hdf5_file"; then
     echo -e "$RED failed to find hdf5 output file in $file_config $NC"
     exit $FAILED
 fi
 
-rm -f $hdf5_file
+subfile_dir="$(grep "subfile_dir=" $file_config  | cut -d "=" -f2)"
+if test -z "$subfile_dir"; then
+    echo -e "$RED failed to find subfile directory in $file_config $NC"
+    exit $FAILED
+fi
+
+subfiles=( $( sed -e '1,/subfile_dir=/d' $file_config ) )
+#for i in "${subfiles[@]}"; do
+#      echo "$i"
+#done
+
+if test -z "$subfiles"; then
+    echo -e "$RED failed to find subfiles list in $file_config $NC"
+    exit $FAILED
+fi
+
+rm -f "$hdf5_file"
 
 ## COMBINE SUBFILES INTO AN HDF5 FILE ##
 
@@ -71,10 +78,10 @@ START="$(date +%s%N)"
 while [ $status -gt 0 ]; do
   icnt=0
   for i in "${subfiles[@]}"; do
-
+      subfile="${subfile_dir}/${i}"
       # Verify the file exists
-      if [ ! -f "$i" ]; then
-          echo -e "$RED ERROR: file \"$i\" does not exist. $NC"
+      if [ ! -f "${subfile}" ]; then
+          echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
           exit $FAILED
       fi
 
@@ -83,24 +90,24 @@ while [ $status -gt 0 ]; do
       t_sleep=1
       t_elapsed=0
 
-      while fuser -s $i; do
+      while fuser -s "${subfile}"; do
           if [[ $(($t_elapsed % 5)) -eq 0 ]]; then
-              echo -e "$GRN waiting for process to finish accessing file \"$i\" ... [${t_elapsed}s/${t_max}s] $NC"
+              echo -e "$GRN waiting for process to finish accessing file \"${subfile}\" ... [${t_elapsed}s/${t_max}s] $NC"
           fi
           sleep $t_sleep
           t_elapsed=$(($t_elapsed+$t_sleep))
           if [[ $t_elapsed -ge $t_max ]]; then
-              echo -e "$RED ERROR: file \"$i\" still has process accessing it after ${t_elapsed}s $NC"
+              echo -e "$RED ERROR: file \"${subfile}\" still has process accessing it after ${t_elapsed}s $NC"
               exit $FAILED
           fi
       done
 
-      fsize=$(wc -c $i | awk '{print $1}')
+      fsize=$(wc -c "${subfile}" | awk '{print $1}')
       if [ $(($skip*$stripe_size)) -le $fsize ]; then
-          EXEC="dd count=1 bs=$stripe_size if=$i of=$hdf5_file skip=$skip oflag=append conv=notrunc"
+          EXEC="dd count=1 bs=$stripe_size if="${subfile}" of="${hdf5_file}" skip=$skip oflag=append conv=notrunc"
           echo -e "$GRN $EXEC $NC"
           err="$( $EXEC 2>&1 > /dev/null &)"
-          icnt=$(($icnt+1)) 
+          icnt=$(($icnt+1))
       else
           subfiles=("${subfiles[@]:0:$icnt}" "${subfiles[@]:$(($icnt+1))}")
           status=${#subfiles[@]}
@@ -111,5 +118,3 @@ done
 END=$[ $(date +%s%N) - ${START} ]
 DURATION_SEC=$(awk -vp=$END -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
 echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
-
-
