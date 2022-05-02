@@ -4564,7 +4564,7 @@ test_vector_io(const char *vfd_name)
     char        filename[1024];             /* filename                     */
     char *      buf;                        /* tmp ptr to buf               */
     unsigned    flags = 0;                  /* file open flags              */
-    H5FD_t *    lf;                         /* VFD struct ptr               */
+    H5FD_t *    lf = NULL;                  /* VFD struct ptr               */
     uint32_t    i;                          /* index                        */
     uint32_t    j;                          /* index                        */
     uint32_t    count = VECTOR_LEN;         /* length of vectors            */
@@ -5118,7 +5118,7 @@ test_selection_io(const char *vfd_name)
     hid_t      fapl_id = -1;                                        /* file access property list ID */
     char       filename[1024];                                      /* filename                     */
     unsigned   flags = 0;                                           /* file open flags              */
-    H5FD_t *   lf;                                                  /* VFD struct ptr               */
+    H5FD_t *   lf = NULL;                                           /* VFD struct ptr               */
     int        i;                                                   /* index                        */
     int        j;                                                   /* index                        */
     int        i2;                                                  /* index                        */
