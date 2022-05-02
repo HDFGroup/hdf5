@@ -2957,7 +2957,7 @@ test_ninteger(void)
     hid_t   nid1    = -1;     /* native datatype */
     hid_t   nid2    = -1;     /* native datatype */
     hsize_t dims[1] = {DIM3}; /* dataspace dimensions */
-    int     rank = 1;         /* rank of dataset */
+    int     rank    = 1;      /* rank of dataset */
     int     buf[DIM3];
     int     chk[DIM3];
     int     i;
