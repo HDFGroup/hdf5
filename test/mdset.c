@@ -51,18 +51,18 @@ char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 static int
 test_mdset_location(hid_t fapl_id)
 {
-    hid_t          file_id1, file_id2;
-    herr_t         ret;
-    hid_t          dset_ids[2];
-    hid_t          mem_type_ids[2];
-    hid_t          mem_space_ids[2];
-    hid_t          file_space_ids[2];
-    void *         rbufs[2];
-    const void *   wbufs[2];
-    hsize_t        dset_dims[2];
-    int *          buf = NULL;
-    char           filename1[NAME_BUF_SIZE];
-    char           filename2[NAME_BUF_SIZE];
+    hid_t       file_id1, file_id2;
+    herr_t      ret;
+    hid_t       dset_ids[2];
+    hid_t       mem_type_ids[2];
+    hid_t       mem_space_ids[2];
+    hid_t       file_space_ids[2];
+    void *      rbufs[2];
+    const void *wbufs[2];
+    hsize_t     dset_dims[2];
+    int *       buf = NULL;
+    char        filename1[NAME_BUF_SIZE];
+    char        filename2[NAME_BUF_SIZE];
 
     TESTING("mdset location");
 
@@ -92,13 +92,11 @@ test_mdset_location(hid_t fapl_id)
     mem_type_ids[0] = H5T_NATIVE_UINT;
     mem_type_ids[1] = H5T_NATIVE_UINT;
 
-    if ((dset_ids[0] =
-             H5Dcreate2(file_id1, dset_name[0], H5T_NATIVE_UINT, file_space_ids[0], H5P_DEFAULT,
-                        H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset_ids[0] = H5Dcreate2(file_id1, dset_name[0], H5T_NATIVE_UINT, file_space_ids[0], H5P_DEFAULT,
+                                  H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if ((dset_ids[1] =
-             H5Dcreate2(file_id2, dset_name[1], H5T_NATIVE_UINT, file_space_ids[1], H5P_DEFAULT,
-                        H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset_ids[1] = H5Dcreate2(file_id2, dset_name[1], H5T_NATIVE_UINT, file_space_ids[1], H5P_DEFAULT,
+                                  H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     wbufs[0] = buf;
@@ -174,34 +172,34 @@ error:
 static int
 test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
 {
-    hid_t          dset_ids[MAX_DSETS];
-    hid_t          mem_type_ids[MAX_DSETS];
-    hid_t          mem_space_ids[MAX_DSETS];
-    hid_t          file_space_ids[MAX_DSETS];
-    void *         rbufs[MAX_DSETS];
-    const void *   wbufs[MAX_DSETS];
-    size_t         max_dsets;
-    size_t         buf_size;
-    size_t         ndsets;
-    hid_t          file_id = -1;
-    hid_t          dcpl_id = -1;
-    hsize_t        dset_dims[MAX_DSETS][3];
-    hsize_t        chunk_dims[2];
-    hsize_t        max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    unsigned *     rbuf        = NULL;
-    unsigned *     rbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     erbuf = NULL;
-    unsigned *     erbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     wbuf = NULL;
-    unsigned *     wbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     efbuf = NULL;
-    unsigned *     efbufi[MAX_DSETS][MAX_DSET_X];
-    hbool_t        do_read;
-    hsize_t        start[3];
-    hsize_t        count[3];
-    hsize_t        points[3 * MAX_POINTS];
-    char           filename[NAME_BUF_SIZE];
-    size_t         i, j, k, l, m, n;
+    hid_t       dset_ids[MAX_DSETS];
+    hid_t       mem_type_ids[MAX_DSETS];
+    hid_t       mem_space_ids[MAX_DSETS];
+    hid_t       file_space_ids[MAX_DSETS];
+    void *      rbufs[MAX_DSETS];
+    const void *wbufs[MAX_DSETS];
+    size_t      max_dsets;
+    size_t      buf_size;
+    size_t      ndsets;
+    hid_t       file_id = -1;
+    hid_t       dcpl_id = -1;
+    hsize_t     dset_dims[MAX_DSETS][3];
+    hsize_t     chunk_dims[2];
+    hsize_t     max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    unsigned *  rbuf        = NULL;
+    unsigned *  rbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned *  erbuf = NULL;
+    unsigned *  erbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned *  wbuf = NULL;
+    unsigned *  wbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned *  efbuf = NULL;
+    unsigned *  efbufi[MAX_DSETS][MAX_DSET_X];
+    hbool_t     do_read;
+    hsize_t     start[3];
+    hsize_t     count[3];
+    hsize_t     points[3 * MAX_POINTS];
+    char        filename[NAME_BUF_SIZE];
+    size_t      i, j, k, l, m, n;
 
     TESTING("random I/O");
 
@@ -250,8 +248,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     /* Generate memory dataspace */
     dset_dims[0][0] = MAX_DSET_X;
     dset_dims[0][1] = MAX_DSET_Y;
-    if ((mem_space_ids[0] =
-             H5Screate_simple((flags & MDSET_FLAG_SHAPESAME) ? 2 : 3, dset_dims[0], NULL)) < 0)
+    if ((mem_space_ids[0] = H5Screate_simple((flags & MDSET_FLAG_SHAPESAME) ? 2 : 3, dset_dims[0], NULL)) < 0)
         TEST_ERROR
     for (i = 1; i < max_dsets; i++)
         if ((mem_space_ids[i] = H5Scopy(mem_space_ids[0])) < 0)
@@ -294,9 +291,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
             } /* end if */
 
             /* Create dataset */
-            if ((dset_ids[j] =
-                     H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, file_space_ids[j],
-                                H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, file_space_ids[j],
+                                          H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                 TEST_ERROR
         } /* end for */
 
@@ -329,7 +325,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                 /* Decide whether to do a hyperslab or point selection */
                 if (HDrandom() % 2) {
                     /* Hyperslab */
-                    size_t nhs      = 1; //(size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
+                    size_t nhs =
+                        1; //(size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
                     size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                           ? MAX_HS_X
                                           : dset_dims[k][0]; /* Determine maximum hyperslab size in X */
@@ -349,11 +346,11 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                                        : (hsize_t)HDrandom() % (dset_dims[k][1] - count[1] + 1);
 
                         /* Select hyperslab */
-                        if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_OR, start, NULL, count,
-                                                NULL) < 0)
+                        if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_OR, start, NULL, count, NULL) <
+                            0)
                             TEST_ERROR
-                        if (H5Sselect_hyperslab(file_space_ids[k], H5S_SELECT_OR, start, NULL,
-                                                count, NULL) < 0)
+                        if (H5Sselect_hyperslab(file_space_ids[k], H5S_SELECT_OR, start, NULL, count, NULL) <
+                            0)
                             TEST_ERROR
 
                         /* Update expected buffers */
@@ -379,8 +376,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     } /* end for */
 
                     /* Select points in file */
-                    if (H5Sselect_elements(file_space_ids[k], H5S_SELECT_APPEND, npoints, points) <
-                        0)
+                    if (H5Sselect_elements(file_space_ids[k], H5S_SELECT_APPEND, npoints, points) < 0)
                         TEST_ERROR
 
                     /* Update expected buffers */
@@ -406,8 +402,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     } /* end if */
 
                     /* Select points in memory */
-                    if (H5Sselect_elements(mem_space_ids[k], H5S_SELECT_APPEND, npoints, points) <
-                        0)
+                    if (H5Sselect_elements(mem_space_ids[k], H5S_SELECT_APPEND, npoints, points) < 0)
                         TEST_ERROR
                 } /* end else */
             }     /* end for */
@@ -420,13 +415,14 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                         rbufs[k] = rbufi[k][0];
 
                     /* Read datasets */
-                    if (H5Dread_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids, H5P_DEFAULT, rbufs) < 0)
+                    if (H5Dread_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids,
+                                      H5P_DEFAULT, rbufs) < 0)
                         TEST_ERROR
                 } /* end if */
                 else
                     /* Read */
-                    if (H5Dread(dset_ids[0], mem_type_ids[0], mem_space_ids[0],
-                                file_space_ids[0], H5P_DEFAULT, rbuf) < 0)
+                    if (H5Dread(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0],
+                                H5P_DEFAULT, rbuf) < 0)
                     TEST_ERROR
 
                 /* Verify data */
@@ -440,13 +436,14 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                         wbufs[k] = wbufi[k][0];
 
                     /* Write datasets */
-                    if (H5Dwrite_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids, H5P_DEFAULT, wbufs) < 0)
+                    if (H5Dwrite_multi(ndsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids,
+                                       H5P_DEFAULT, wbufs) < 0)
                         TEST_ERROR
                 } /* end if */
                 else
                     /* Write */
-                    if (H5Dwrite(dset_ids[0], mem_type_ids[0], mem_space_ids[0],
-                                 file_space_ids[0], H5P_DEFAULT, wbuf) < 0)
+                    if (H5Dwrite(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0],
+                                 H5P_DEFAULT, wbuf) < 0)
                     TEST_ERROR
 
                 /* Update wbuf */

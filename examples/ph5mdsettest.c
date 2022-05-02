@@ -1586,7 +1586,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -1609,7 +1609,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -1632,7 +1632,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #endif
 
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[2].dset_id       = dataset3;
         dset_info[2].mem_type_id   = H5T_NATIVE_INT;
         dset_info[2].mem_space_id  = mem_dataspace3;
@@ -1655,7 +1655,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #endif
 
 #if 1 // USE_DSET4
-        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+      // init H5D_rw_multi_t for write DSET4 (CONTIG)
         dset_info[3].dset_id       = dataset4;
         dset_info[3].mem_type_id   = H5T_NATIVE_INT;
         dset_info[3].mem_space_id  = mem_dataspace4;
@@ -1680,7 +1680,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -1703,7 +1703,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -1726,7 +1726,7 @@ phdf5Write_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t 
 #endif
 
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[2].dset_id       = dataset3;
         dset_info[2].mem_type_id   = H5T_NATIVE_INT;
         dset_info[2].mem_space_id  = mem_dataspace3;
@@ -2659,7 +2659,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -2683,7 +2683,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -2707,7 +2707,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #endif
 
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[2].dset_id       = dataset3;
         dset_info[2].mem_type_id   = H5T_NATIVE_INT;
         dset_info[2].mem_space_id  = mem_dataspace3;
@@ -2731,7 +2731,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #endif
 
 #if 1 // USE_DSET4
-        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+      // init H5D_rw_multi_t for write DSET4 (CONTIG)
         dset_info[3].dset_id       = dataset4;
         dset_info[3].mem_type_id   = H5T_NATIVE_INT;
         dset_info[3].mem_space_id  = mem_dataspace4;
@@ -2757,7 +2757,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -2781,7 +2781,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -2805,7 +2805,7 @@ phdf5Read_mdset_All(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t m
 #endif
 
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[2].dset_id       = dataset3;
         dset_info[2].mem_type_id   = H5T_NATIVE_INT;
         dset_info[2].mem_space_id  = mem_dataspace3;
@@ -3451,7 +3451,7 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -3474,7 +3474,7 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -3499,7 +3499,7 @@ phdf5Write_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -4094,7 +4094,7 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -4118,7 +4118,7 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
 #endif
 
 #if 1 // USE_DSET2
-        // init H5D_rw_multi_t for write DSET2 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET2 (CHUNKED)
         dset_info[1].dset_id       = dataset2;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace2;
@@ -4144,7 +4144,7 @@ phdf5Read_mdset_Chunk(char *filename, phdf5_mode_t pmode, mpio_collective_mode_t
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET1
-        // init H5D_rw_multi_t for write DSET1 (CHUNKED)
+      // init H5D_rw_multi_t for write DSET1 (CHUNKED)
         dset_info[0].dset_id       = dataset1;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace1;
@@ -4743,7 +4743,7 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[0].dset_id       = dataset3;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace3;
@@ -4766,7 +4766,7 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 #endif
 
 #if 1 // USE_DSET4
-        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+      // init H5D_rw_multi_t for write DSET4 (CONTIG)
         dset_info[1].dset_id       = dataset4;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace4;
@@ -4791,7 +4791,7 @@ phdf5Write_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[0].dset_id       = dataset3;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace3;
@@ -5365,7 +5365,7 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
     if (mpi_rank == 0) {
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[0].dset_id       = dataset3;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace3;
@@ -5389,7 +5389,7 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 #endif
 
 #if 1 // USE_DSET4
-        // init H5D_rw_multi_t for write DSET4 (CONTIG)
+      // init H5D_rw_multi_t for write DSET4 (CONTIG)
         dset_info[1].dset_id       = dataset4;
         dset_info[1].mem_type_id   = H5T_NATIVE_INT;
         dset_info[1].mem_space_id  = mem_dataspace4;
@@ -5415,7 +5415,7 @@ phdf5Read_mdset_Contig(char *filename, phdf5_mode_t pmode, mpio_collective_mode_
 
     if (mpi_rank == 1) {
 #if 1 // USE_DSET3
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[0].dset_id       = dataset3;
         dset_info[0].mem_type_id   = H5T_NATIVE_INT;
         dset_info[0].mem_space_id  = mem_dataspace3;
@@ -6275,7 +6275,7 @@ phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t chunks
 #ifdef TEST_MDSET_NO_LAST_DSET_2ND_PROC //------------------------I
         if (mpi_rank == 0) {
 #if 1 // USE_DSET3
-            // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
             dset_info[j].dset_id       = did;
             dset_info[j].mem_type_id   = H5T_NATIVE_INT;
             dset_info[j].mem_space_id  = m_sid;
@@ -6301,7 +6301,7 @@ phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t chunks
 
         if (mpi_rank == 1) {
 #if 1 // USE_DSET3
-            // init H5D_rw_multi_t for write DSET3 (CONTIG)
+      // init H5D_rw_multi_t for write DSET3 (CONTIG)
             dset_info[j].dset_id       = did;
             dset_info[j].mem_type_id   = H5T_NATIVE_INT;
             dset_info[j].mem_space_id  = m_sid;
@@ -6326,7 +6326,7 @@ phdf5Read_mdset_many(char *filename, size_t ndsets, hsize_t dim0, hsize_t chunks
         }
 
 #else  // TEST_MDSET_NO_LAST_DSET_2ND_PROC ------------------------
-        // init H5D_rw_multi_t for write DSET3 (CONTIG)
+       // init H5D_rw_multi_t for write DSET3 (CONTIG)
         dset_info[j].dset_id       = did;
         dset_info[j].mem_type_id   = H5T_NATIVE_INT;
         dset_info[j].mem_space_id  = m_sid;
