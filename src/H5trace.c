@@ -120,8 +120,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     void *            vp                  = NULL;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer      = {{0}, {0}, {0}, FALSE};
-    H5_timevals_t     function_times;
+    H5_timer_t        function_timer;
+    H5_timevals_t     function_times = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;
     static int        current_depth   = 0;
@@ -132,6 +132,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     if (!out)
         return 0.0F; /*tracing is off*/
     HDva_start(ap, type);
+
+    /* Initialize the timer for this function */
+    if (H5_debug_g.ttimes)
+        H5_timer_init(&function_timer);
 
     if (H5_debug_g.ttop) {
         if (returning) {
@@ -156,11 +160,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5_timer_init(&running_timer);
         H5_timer_start(&running_timer);
     } /* end if */
-    if (H5_debug_g.ttimes) {
-        /* start the timer for this function */
-        H5_timer_init(&function_timer);
+
+    /* Start the timer for this function */
+    if (H5_debug_g.ttimes)
         H5_timer_start(&function_timer);
-    } /* end if */
 
     /* Print the first part of the line.  This is the indication of the
      * nesting depth followed by the function name and either start of

@@ -35,6 +35,8 @@
 #include "H5private.h"
 #include "testphdf5.h"
 
+#define LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG 0
+
 static void coll_write_test(int chunk_factor);
 static void coll_read_test(void);
 
@@ -1431,8 +1433,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
  *-------------------------------------------------------------------------
  */
 
-#define LDSCT_DS_RANK                             5
-#define LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG 0
+#define LDSCT_DS_RANK 5
 
 static void
 lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_collective_io,

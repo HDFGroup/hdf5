@@ -20,27 +20,28 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5_CreateGroupDataset {
-    private static String FILENAME = "H5_CreateGroupDataset.h5";
-    private static String GROUPNAME = "MyGroup";
-    private static String GROUPNAME_A = "GroupA";
+    private static String FILENAME     = "H5_CreateGroupDataset.h5";
+    private static String GROUPNAME    = "MyGroup";
+    private static String GROUPNAME_A  = "GroupA";
     private static String DATASETNAME1 = "dset1";
     private static String DATASETNAME2 = "dset2";
-    private static final int DIM1_X = 3;
-    private static final int DIM1_Y = 3;
-    private static final int DIM2_X = 2;
-    private static final int DIM2_Y = 10;
+    private static final int DIM1_X    = 3;
+    private static final int DIM1_Y    = 3;
+    private static final int DIM2_X    = 2;
+    private static final int DIM2_Y    = 10;
 
-    private static void h5_crtgrpd() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long group_id = HDF5Constants.H5I_INVALID_HID;
-        long group1_id = HDF5Constants.H5I_INVALID_HID;
-        long group2_id = HDF5Constants.H5I_INVALID_HID;
+    private static void h5_crtgrpd()
+    {
+        long file_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id  = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id    = HDF5Constants.H5I_INVALID_HID;
+        long group_id      = HDF5Constants.H5I_INVALID_HID;
+        long group1_id     = HDF5Constants.H5I_INVALID_HID;
+        long group2_id     = HDF5Constants.H5I_INVALID_HID;
         int[][] dset1_data = new int[DIM1_X][DIM1_Y];
         int[][] dset2_data = new int[DIM2_X][DIM2_Y];
-        long[] dims1 = { DIM1_X, DIM1_Y };
-        long[] dims2 = { DIM2_X, DIM2_Y };
+        long[] dims1       = {DIM1_X, DIM1_Y};
+        long[] dims2       = {DIM2_X, DIM2_Y};
 
         // Initialize the first dataset.
         for (int indx = 0; indx < DIM1_X; indx++)
@@ -55,15 +56,16 @@ public class H5_CreateGroupDataset {
         // Create a file.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
             // Create a group named "/MyGroup" in the file.
             if (file_id >= 0) {
                 group1_id = H5.H5Gcreate(file_id, "/" + GROUPNAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 // Create group "Group_A" in group "MyGroup" using absolute name.
                 if (group1_id >= 0) {
-                    group2_id = H5.H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT,
-                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    group2_id =
+                        H5.H5Gcreate(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT,
+                                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                     if (group2_id >= 0)
                         H5.H5Gclose(group2_id);
                 }
@@ -86,8 +88,9 @@ public class H5_CreateGroupDataset {
         // Create the dataset in group "MyGroup".
         try {
             if ((file_id >= 0) && (dataspace_id >= 0))
-                dataset_id = H5.H5Dcreate(file_id, "/" + GROUPNAME + "/" + DATASETNAME1, HDF5Constants.H5T_STD_I32BE,
-                        dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dataset_id = H5.H5Dcreate(
+                    file_id, "/" + GROUPNAME + "/" + DATASETNAME1, HDF5Constants.H5T_STD_I32BE, dataspace_id,
+                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -96,8 +99,8 @@ public class H5_CreateGroupDataset {
         // Write the first dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset1_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset1_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -126,7 +129,8 @@ public class H5_CreateGroupDataset {
         // Open an existing group of the specified file.
         try {
             if (file_id >= 0)
-                group_id = H5.H5Gopen(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT);
+                group_id =
+                    H5.H5Gopen(file_id, "/" + GROUPNAME + "/" + GROUPNAME_A, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -144,7 +148,8 @@ public class H5_CreateGroupDataset {
         try {
             if ((group_id >= 0) && (dataspace_id >= 0))
                 dataset_id = H5.H5Dcreate(group_id, DATASETNAME2, HDF5Constants.H5T_STD_I32BE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -153,8 +158,8 @@ public class H5_CreateGroupDataset {
         // Write the second dataset.
         try {
             if (dataset_id >= 0)
-                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset2_data);
+                H5.H5Dwrite(dataset_id, HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, dset2_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -197,8 +202,5 @@ public class H5_CreateGroupDataset {
         }
     }
 
-    public static void main(String[] args) {
-        H5_CreateGroupDataset.h5_crtgrpd();
-    }
-
+    public static void main(String[] args) { H5_CreateGroupDataset.h5_crtgrpd(); }
 }

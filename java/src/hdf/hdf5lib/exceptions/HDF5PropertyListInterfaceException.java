@@ -24,9 +24,7 @@ public class HDF5PropertyListInterfaceException extends HDF5LibraryException {
      * Constructs an <code>HDF5PropertyListInterfaceException</code> with no
      * specified detail message.
      */
-    public HDF5PropertyListInterfaceException() {
-        super();
-    }
+    public HDF5PropertyListInterfaceException() { super(); }
 
     /**
      * Constructs an <code>HDF5PropertyListInterfaceException</code> with the
@@ -35,7 +33,5 @@ public class HDF5PropertyListInterfaceException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5PropertyListInterfaceException(String s) {
-        super(s);
-    }
+    public HDF5PropertyListInterfaceException(String s) { super(s); }
 }

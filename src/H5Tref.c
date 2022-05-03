@@ -716,6 +716,7 @@ done:
  * the "blob". Disable this warning here (at least temporarily)
  * for this reason.
  */
+H5_GCC_DIAG_OFF("cast-qual")
 static herr_t
 H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
@@ -749,6 +750,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_disk_isnull() */
+H5_GCC_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__ref_disk_setnull

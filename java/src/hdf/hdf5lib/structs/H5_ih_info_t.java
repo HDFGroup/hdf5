@@ -21,25 +21,26 @@ import java.io.Serializable;
 public class H5_ih_info_t implements Serializable {
     private static final long serialVersionUID = -142238015615462707L;
     /** btree and/or list size of index */
-    public long     index_size;
+    public long index_size;
     /** btree and/or list size of hp */
-    public long     heap_size;
+    public long heap_size;
 
-    H5_ih_info_t (long index_size, long heap_size)
+    H5_ih_info_t(long index_size, long heap_size)
     {
         this.index_size = index_size;
-        this.heap_size = heap_size;
+        this.heap_size  = heap_size;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o)
             return true;
 
         if (!(o instanceof H5_ih_info_t))
             return false;
 
-        H5_ih_info_t info = (H5_ih_info_t) o;
+        H5_ih_info_t info = (H5_ih_info_t)o;
 
         if (this.index_size != info.index_size)
             return false;

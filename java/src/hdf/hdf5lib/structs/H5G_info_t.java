@@ -18,7 +18,7 @@ import java.io.Serializable;
  * Information struct for group (for H5Gget_info/H5Gget_info_by_name/H5Gget_info_by_idx)
  *
  */
-public class H5G_info_t implements Serializable{
+public class H5G_info_t implements Serializable {
     private static final long serialVersionUID = -3746463015312132912L;
     /** Type of storage for links in group */
     public int storage_type;
