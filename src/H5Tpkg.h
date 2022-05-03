@@ -287,7 +287,7 @@ typedef herr_t (*H5T_vlen_setnull_func_t)(H5VL_object_t *file, void *_vl, void *
 typedef herr_t (*H5T_vlen_read_func_t)(H5VL_object_t *file, void *_vl, void *buf, size_t len);
 typedef herr_t (*H5T_vlen_write_func_t)(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info,
                                         void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
-typedef herr_t (*H5T_vlen_delete_func_t)(H5VL_object_t *file, const void *_vl);
+typedef herr_t (*H5T_vlen_delete_func_t)(H5VL_object_t *file, void *_vl);
 
 /* VL datatype callbacks */
 typedef struct H5T_vlen_class_t {

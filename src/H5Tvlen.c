@@ -76,7 +76,7 @@ static herr_t H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *_bg);
 static herr_t H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *_buf, size_t len);
 static herr_t H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
                                    void *_buf, void *_bg, size_t seq_len, size_t base_size);
-static herr_t H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl);
+static herr_t H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl);
 
 /*********************/
 /* Public Variables */
@@ -955,9 +955,9 @@ static herr_t
 H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_alloc_info,
                      void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
-    uint8_t *      vl        = (uint8_t *)_vl;       /* Pointer to the user's hvl_t information */
-    const uint8_t *bg        = (const uint8_t *)_bg; /* Pointer to the old data hvl_t */
-    herr_t         ret_value = SUCCEED;              /* Return value */
+    uint8_t *vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    uint8_t *bg        = (uint8_t *)_bg; /* Pointer to the old data hvl_t */
+    herr_t   ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -995,10 +995,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl)
+H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
 {
-    const uint8_t *vl        = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
-    herr_t         ret_value = SUCCEED;              /* Return value */
+    uint8_t *vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    herr_t   ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1014,7 +1014,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, const void *_vl)
 
         /* Delete object, if length > 0 */
         if (seq_len > 0)
-            if (H5VL_blob_specific(file, (void *)vl, H5VL_BLOB_DELETE) < 0) /* Casting away 'const' OK -QAK */
+            if (H5VL_blob_specific(file, vl, H5VL_BLOB_DELETE) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
     } /* end if */
 
