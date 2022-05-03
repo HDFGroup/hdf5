@@ -704,152 +704,156 @@
 #endif /* H5_WANT_DCONV_EXCEPTION */
 
 /* The main part of every integer hardware conversion macro */
-#define H5T_CONV(GUTS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, PREC)                                               \
-    {                                                                                                          \
-        herr_t ret_value = SUCCEED; /* Return value         */                                                 \
-                                                                                                               \
-        FUNC_ENTER_PACKAGE                                                                                     \
-                                                                                                               \
-        {                                                                                                      \
-            size_t elmtno;                    /*element number        */                                       \
-            H5T_CONV_DECL_PREC(PREC)          /*declare precision variables, or not */                         \
-            uint8_t *     src_buf;            /*'raw' source buffer        */                                  \
-            uint8_t *     dst_buf;            /*'raw' destination buffer    */                                 \
-            ST *          src, *s;            /*source buffer            */                                    \
-            DT *          dst, *d;            /*destination buffer        */                                   \
-            H5T_t *       st, *dt;            /*datatype descriptors        */                                 \
-            ST            src_aligned;        /*source aligned type        */                                  \
-            DT            dst_aligned;        /*destination aligned type    */                                 \
-            hbool_t       s_mv, d_mv;         /*move data to align it?    */                                   \
-            ssize_t       s_stride, d_stride; /*src and dst strides        */                                  \
-            size_t        safe;               /*how many elements are safe to process in each pass */          \
-            H5T_conv_cb_t cb_struct;          /*conversion callback structure */                               \
-                                                                                                               \
-            switch (cdata->command) {                                                                          \
-                case H5T_CONV_INIT:                                                                            \
-                    /* Sanity check and initialize statistics */                                               \
-                    cdata->need_bkg = H5T_BKG_NO;                                                              \
-                    if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                          \
-                        NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                            \
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                          \
-                                    "unable to dereference datatype object ID")                                \
-                    if (st->shared->size != sizeof(ST) || dt->shared->size != sizeof(DT))                      \
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about datatype size")      \
-                    CI_ALLOC_PRIV                                                                              \
-                    break;                                                                                     \
-                                                                                                               \
-                case H5T_CONV_FREE:                                                                            \
-                    /* Print and free statistics */                                                            \
-                    CI_PRINT_STATS(STYPE, DTYPE);                                                              \
-                    CI_FREE_PRIV                                                                               \
-                    break;                                                                                     \
-                                                                                                               \
-                case H5T_CONV_CONV:                                                                            \
-                    /* Initialize source & destination strides */                                              \
-                    if (buf_stride) {                                                                          \
-                        HDassert(buf_stride >= sizeof(ST));                                                    \
-                        HDassert(buf_stride >= sizeof(DT));                                                    \
-                        s_stride = d_stride = (ssize_t)buf_stride;                                             \
-                    }                                                                                          \
-                    else {                                                                                     \
-                        s_stride = sizeof(ST);                                                                 \
-                        d_stride = sizeof(DT);                                                                 \
-                    }                                                                                          \
-                                                                                                               \
-                    /* Is alignment required for source or dest? */                                            \
-                    s_mv = H5T_NATIVE_##STYPE##_ALIGN_g > 1 &&                                                 \
-                           ((size_t)buf % H5T_NATIVE_##STYPE##_ALIGN_g ||                                      \
-                            /* Cray */ ((size_t)((ST *)buf) != (size_t)buf) ||                                 \
-                            (size_t)s_stride % H5T_NATIVE_##STYPE##_ALIGN_g);                                  \
-                    d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g > 1 &&                                                 \
-                           ((size_t)buf % H5T_NATIVE_##DTYPE##_ALIGN_g ||                                      \
-                            /* Cray */ ((size_t)((DT *)buf) != (size_t)buf) ||                                 \
-                            (size_t)d_stride % H5T_NATIVE_##DTYPE##_ALIGN_g);                                  \
-                    CI_INC_SRC(s_mv)                                                                           \
-                    CI_INC_DST(d_mv)                                                                           \
-                                                                                                               \
-                    /* Get conversion exception callback property */                                           \
-                    if (H5CX_get_dt_conv_cb(&cb_struct) < 0)                                                   \
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,                                           \
-                                    "unable to get conversion exception callback")                             \
-                                                                                                               \
-                    /* Get source and destination datatypes */                                                 \
-                    if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                          \
-                        NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                            \
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                          \
-                                    "unable to dereference datatype object ID")                                \
-                                                                                                               \
-                    H5T_CONV_SET_PREC(PREC) /*init precision variables, or not */                              \
-                                                                                                               \
-                    /* The outer loop of the type conversion macro, controlling which */                       \
-                    /* direction the buffer is walked */                                                       \
-                    while (nelmts > 0) {                                                                       \
-                        /* Check if we need to go backwards through the buffer */                              \
-                        if (d_stride > s_stride) {                                                             \
-                            /* Compute the number of "safe" destination elements at */                         \
-                            /* the end of the buffer (Those which don't overlap with */                        \
-                            /* any source elements at the beginning of the buffer) */                          \
-                            safe = nelmts - (((nelmts * (size_t)s_stride) + (size_t)(d_stride - 1)) /          \
-                                             (size_t)d_stride);                                                \
-                                                                                                               \
-                            /* If we're down to the last few elements, just wrap up */                         \
-                            /* with a "real" reverse copy */                                                   \
-                            if (safe < 2) {                                                                    \
-                                src      = (ST *)(src_buf = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride); \
-                                dst      = (DT *)(dst_buf = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride); \
-                                s_stride = -s_stride;                                                          \
-                                d_stride = -d_stride;                                                          \
-                                                                                                               \
-                                safe = nelmts;                                                                 \
-                            } /* end if */                                                                     \
-                            else {                                                                             \
-                                src = (ST *)(src_buf = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride);   \
-                                dst = (DT *)(dst_buf = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride);   \
-                            } /* end else */                                                                   \
-                        }     /* end if */                                                                     \
-                        else {                                                                                 \
-                            /* Single forward pass over all data */                                            \
-                            src  = (ST *)(src_buf = (uint8_t *)buf);                                           \
-                            dst  = (DT *)(dst_buf = (uint8_t *)buf);                                           \
-                            safe = nelmts;                                                                     \
-                        } /* end else */                                                                       \
-                                                                                                               \
-                        /* Perform loop over elements to convert */                                            \
-                        if (s_mv && d_mv) {                                                                    \
-                            /* Alignment is required for both source and dest */                               \
-                            s = &src_aligned;                                                                  \
-                            H5T_CONV_LOOP_OUTER(PRE_SALIGN, PRE_DALIGN, POST_SALIGN, POST_DALIGN, GUTS,        \
-                                                STYPE, DTYPE, s, d, ST, DT, D_MIN, D_MAX)                      \
-                        }                                                                                      \
-                        else if (s_mv) {                                                                       \
-                            /* Alignment is required only for source */                                        \
-                            s = &src_aligned;                                                                  \
-                            H5T_CONV_LOOP_OUTER(PRE_SALIGN, PRE_DNOALIGN, POST_SALIGN, POST_DNOALIGN, GUTS,    \
-                                                STYPE, DTYPE, s, dst, ST, DT, D_MIN, D_MAX)                    \
-                        }                                                                                      \
-                        else if (d_mv) {                                                                       \
-                            /* Alignment is required only for destination */                                   \
-                            H5T_CONV_LOOP_OUTER(PRE_SNOALIGN, PRE_DALIGN, POST_SNOALIGN, POST_DALIGN, GUTS,    \
-                                                STYPE, DTYPE, src, d, ST, DT, D_MIN, D_MAX)                    \
-                        }                                                                                      \
-                        else {                                                                                 \
-                            /* Alignment is not required for both source and destination */                    \
-                            H5T_CONV_LOOP_OUTER(PRE_SNOALIGN, PRE_DNOALIGN, POST_SNOALIGN, POST_DNOALIGN,      \
-                                                GUTS, STYPE, DTYPE, src, dst, ST, DT, D_MIN, D_MAX)            \
-                        }                                                                                      \
-                                                                                                               \
-                        /* Decrement number of elements left to convert */                                     \
-                        nelmts -= safe;                                                                        \
-                    } /* end while */                                                                          \
-                    break;                                                                                     \
-                                                                                                               \
-                default:                                                                                       \
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");            \
-            }                                                                                                  \
-        }                                                                                                      \
-                                                                                                               \
-done:                                                                                                          \
-        FUNC_LEAVE_NOAPI(ret_value)                                                                            \
+#define H5T_CONV(GUTS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, PREC)                                             \
+    {                                                                                                        \
+        herr_t ret_value = SUCCEED; /* Return value         */                                               \
+                                                                                                             \
+        FUNC_ENTER_PACKAGE                                                                                   \
+                                                                                                             \
+        {                                                                                                    \
+            size_t elmtno;                    /*element number        */                                     \
+            H5T_CONV_DECL_PREC(PREC)          /*declare precision variables, or not */                       \
+            void *        src_buf;            /*'raw' source buffer        */                                \
+            void *        dst_buf;            /*'raw' destination buffer    */                               \
+            ST *          src, *s;            /*source buffer            */                                  \
+            DT *          dst, *d;            /*destination buffer        */                                 \
+            H5T_t *       st, *dt;            /*datatype descriptors        */                               \
+            ST            src_aligned;        /*source aligned type        */                                \
+            DT            dst_aligned;        /*destination aligned type    */                               \
+            hbool_t       s_mv, d_mv;         /*move data to align it?    */                                 \
+            ssize_t       s_stride, d_stride; /*src and dst strides        */                                \
+            size_t        safe;               /*how many elements are safe to process in each pass */        \
+            H5T_conv_cb_t cb_struct;          /*conversion callback structure */                             \
+                                                                                                             \
+            switch (cdata->command) {                                                                        \
+                case H5T_CONV_INIT:                                                                          \
+                    /* Sanity check and initialize statistics */                                             \
+                    cdata->need_bkg = H5T_BKG_NO;                                                            \
+                    if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                        \
+                        NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                          \
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                        \
+                                    "unable to dereference datatype object ID")                              \
+                    if (st->shared->size != sizeof(ST) || dt->shared->size != sizeof(DT))                    \
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "disagreement about datatype size")    \
+                    CI_ALLOC_PRIV                                                                            \
+                    break;                                                                                   \
+                                                                                                             \
+                case H5T_CONV_FREE:                                                                          \
+                    /* Print and free statistics */                                                          \
+                    CI_PRINT_STATS(STYPE, DTYPE);                                                            \
+                    CI_FREE_PRIV                                                                             \
+                    break;                                                                                   \
+                                                                                                             \
+                case H5T_CONV_CONV:                                                                          \
+                    /* Initialize source & destination strides */                                            \
+                    if (buf_stride) {                                                                        \
+                        HDassert(buf_stride >= sizeof(ST));                                                  \
+                        HDassert(buf_stride >= sizeof(DT));                                                  \
+                        s_stride = d_stride = (ssize_t)buf_stride;                                           \
+                    }                                                                                        \
+                    else {                                                                                   \
+                        s_stride = sizeof(ST);                                                               \
+                        d_stride = sizeof(DT);                                                               \
+                    }                                                                                        \
+                                                                                                             \
+                    /* Is alignment required for source or dest? */                                          \
+                    s_mv = H5T_NATIVE_##STYPE##_ALIGN_g > 1 &&                                               \
+                           ((size_t)buf % H5T_NATIVE_##STYPE##_ALIGN_g ||                                    \
+                            /* Cray */ ((size_t)((ST *)buf) != (size_t)buf) ||                               \
+                            (size_t)s_stride % H5T_NATIVE_##STYPE##_ALIGN_g);                                \
+                    d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g > 1 &&                                               \
+                           ((size_t)buf % H5T_NATIVE_##DTYPE##_ALIGN_g ||                                    \
+                            /* Cray */ ((size_t)((DT *)buf) != (size_t)buf) ||                               \
+                            (size_t)d_stride % H5T_NATIVE_##DTYPE##_ALIGN_g);                                \
+                    CI_INC_SRC(s_mv)                                                                         \
+                    CI_INC_DST(d_mv)                                                                         \
+                                                                                                             \
+                    /* Get conversion exception callback property */                                         \
+                    if (H5CX_get_dt_conv_cb(&cb_struct) < 0)                                                 \
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,                                         \
+                                    "unable to get conversion exception callback")                           \
+                                                                                                             \
+                    /* Get source and destination datatypes */                                               \
+                    if (NULL == (st = (H5T_t *)H5I_object(src_id)) ||                                        \
+                        NULL == (dt = (H5T_t *)H5I_object(dst_id)))                                          \
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,                                        \
+                                    "unable to dereference datatype object ID")                              \
+                                                                                                             \
+                    H5T_CONV_SET_PREC(PREC) /*init precision variables, or not */                            \
+                                                                                                             \
+                    /* The outer loop of the type conversion macro, controlling which */                     \
+                    /* direction the buffer is walked */                                                     \
+                    while (nelmts > 0) {                                                                     \
+                        /* Check if we need to go backwards through the buffer */                            \
+                        if (d_stride > s_stride) {                                                           \
+                            /* Compute the number of "safe" destination elements at */                       \
+                            /* the end of the buffer (Those which don't overlap with */                      \
+                            /* any source elements at the beginning of the buffer) */                        \
+                            safe = nelmts - (((nelmts * (size_t)s_stride) + (size_t)(d_stride - 1)) /        \
+                                             (size_t)d_stride);                                              \
+                                                                                                             \
+                            /* If we're down to the last few elements, just wrap up */                       \
+                            /* with a "real" reverse copy */                                                 \
+                            if (safe < 2) {                                                                  \
+                                src      = (ST *)(src_buf = (void *)((uint8_t *)buf +                        \
+                                                                (nelmts - 1) * (size_t)s_stride));      \
+                                dst      = (DT *)(dst_buf = (void *)((uint8_t *)buf +                        \
+                                                                (nelmts - 1) * (size_t)d_stride));      \
+                                s_stride = -s_stride;                                                        \
+                                d_stride = -d_stride;                                                        \
+                                                                                                             \
+                                safe = nelmts;                                                               \
+                            } /* end if */                                                                   \
+                            else {                                                                           \
+                                src = (ST *)(src_buf = (void *)((uint8_t *)buf +                             \
+                                                                (nelmts - safe) * (size_t)s_stride));        \
+                                dst = (DT *)(dst_buf = (void *)((uint8_t *)buf +                             \
+                                                                (nelmts - safe) * (size_t)d_stride));        \
+                            } /* end else */                                                                 \
+                        }     /* end if */                                                                   \
+                        else {                                                                               \
+                            /* Single forward pass over all data */                                          \
+                            src  = (ST *)(src_buf = buf);                                                    \
+                            dst  = (DT *)(dst_buf = buf);                                                    \
+                            safe = nelmts;                                                                   \
+                        } /* end else */                                                                     \
+                                                                                                             \
+                        /* Perform loop over elements to convert */                                          \
+                        if (s_mv && d_mv) {                                                                  \
+                            /* Alignment is required for both source and dest */                             \
+                            s = &src_aligned;                                                                \
+                            H5T_CONV_LOOP_OUTER(PRE_SALIGN, PRE_DALIGN, POST_SALIGN, POST_DALIGN, GUTS,      \
+                                                STYPE, DTYPE, s, d, ST, DT, D_MIN, D_MAX)                    \
+                        }                                                                                    \
+                        else if (s_mv) {                                                                     \
+                            /* Alignment is required only for source */                                      \
+                            s = &src_aligned;                                                                \
+                            H5T_CONV_LOOP_OUTER(PRE_SALIGN, PRE_DNOALIGN, POST_SALIGN, POST_DNOALIGN, GUTS,  \
+                                                STYPE, DTYPE, s, dst, ST, DT, D_MIN, D_MAX)                  \
+                        }                                                                                    \
+                        else if (d_mv) {                                                                     \
+                            /* Alignment is required only for destination */                                 \
+                            H5T_CONV_LOOP_OUTER(PRE_SNOALIGN, PRE_DALIGN, POST_SNOALIGN, POST_DALIGN, GUTS,  \
+                                                STYPE, DTYPE, src, d, ST, DT, D_MIN, D_MAX)                  \
+                        }                                                                                    \
+                        else {                                                                               \
+                            /* Alignment is not required for both source and destination */                  \
+                            H5T_CONV_LOOP_OUTER(PRE_SNOALIGN, PRE_DNOALIGN, POST_SNOALIGN, POST_DNOALIGN,    \
+                                                GUTS, STYPE, DTYPE, src, dst, ST, DT, D_MIN, D_MAX)          \
+                        }                                                                                    \
+                                                                                                             \
+                        /* Decrement number of elements left to convert */                                   \
+                        nelmts -= safe;                                                                      \
+                    } /* end while */                                                                        \
+                    break;                                                                                   \
+                                                                                                             \
+                default:                                                                                     \
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");          \
+            }                                                                                                \
+        }                                                                                                    \
+                                                                                                             \
+done:                                                                                                        \
+        FUNC_LEAVE_NOAPI(ret_value)                                                                          \
     }
 
 /* Declare the source & destination precision variables */
@@ -958,10 +962,10 @@ done:                                                                           
             H5_GLUE(H5T_CONV_LOOP_, POST_DALIGN_GUTS)(DT)                                                    \
                                                                                                              \
             /* Advance pointers */                                                                           \
-            src_buf += s_stride;                                                                             \
-        src = (ST *)src_buf;                                                                                 \
-        dst_buf += d_stride;                                                                                 \
-        dst = (DT *)dst_buf;                                                                                 \
+            src_buf = (void *)((uint8_t *)src_buf + s_stride);                                               \
+        src         = (ST *)src_buf;                                                                         \
+        dst_buf     = (void *)((uint8_t *)dst_buf + d_stride);                                               \
+        dst         = (DT *)dst_buf;                                                                         \
     }
 
 /* Macro to call the actual "guts" of the type conversion, or call the "no exception" guts */
@@ -2730,11 +2734,11 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     if (1 == src->shared->size || sizeof(short) == src->shared->size || sizeof(int) == src->shared->size) {
         for (i = 0; i < src->shared->u.enumer.nmembs; i++) {
             if (1 == src->shared->size)
-                n = *((signed char *)(src->shared->u.enumer.value + i));
+                n = *((signed char *)((uint8_t *)src->shared->u.enumer.value + i));
             else if (sizeof(short) == src->shared->size)
-                n = *((short *)(src->shared->u.enumer.value + i * src->shared->size));
+                n = *((short *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
             else
-                n = *((int *)(src->shared->u.enumer.value + i * src->shared->size));
+                n = *((int *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
             if (0 == i) {
                 domain[0] = domain[1] = n;
             }
@@ -2756,11 +2760,13 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                 map[i] = -1; /*entry unused*/
             for (i = 0; i < src->shared->u.enumer.nmembs; i++) {
                 if (1 == src->shared->size)
-                    n = *((signed char *)(src->shared->u.enumer.value + i));
+                    n = *((signed char *)((uint8_t *)src->shared->u.enumer.value + i));
                 else if (sizeof(short) == src->shared->size)
-                    n = *((short *)(src->shared->u.enumer.value + i * src->shared->size));
+                    n = *((
+                        short *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
                 else
-                    n = *((int *)(src->shared->u.enumer.value + i * src->shared->size));
+                    n = *(
+                        (int *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
                 n -= priv->base;
                 HDassert(n >= 0 && (unsigned)n < priv->length);
                 HDassert(map[n] < 0);
@@ -2908,9 +2914,9 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     if (1 == src->shared->size)
                         n = *((signed char *)s);
                     else if (sizeof(short) == src->shared->size)
-                        n = *((short *)s);
+                        n = *((short *)((void *)s));
                     else
-                        n = *((int *)s);
+                        n = *((int *)((void *)s));
                     n -= priv->base;
                     if (n < 0 || (unsigned)n >= priv->length || priv->src2dst[n] < 0) {
                         /*overflow*/
@@ -2927,9 +2933,10 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                         "can't handle conversion exception")
                     }
                     else
-                        H5MM_memcpy(
-                            d, dst->shared->u.enumer.value + (unsigned)priv->src2dst[n] * dst->shared->size,
-                            dst->shared->size);
+                        H5MM_memcpy(d,
+                                    (uint8_t *)dst->shared->u.enumer.value +
+                                        ((unsigned)priv->src2dst[n] * dst->shared->size),
+                                    dst->shared->size);
                 } /* end if */
                 else {
                     /* Use O(log N) lookup */
@@ -2940,7 +2947,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
                     while (lt < rt) {
                         md  = (lt + rt) / 2;
-                        cmp = HDmemcmp(s, src->shared->u.enumer.value + md * src->shared->size,
+                        cmp = HDmemcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
                                        src->shared->size);
                         if (cmp < 0)
                             rt = md;
@@ -2964,9 +2971,10 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     } /* end if */
                     else {
                         HDassert(priv->src2dst[md] >= 0);
-                        H5MM_memcpy(
-                            d, dst->shared->u.enumer.value + (unsigned)priv->src2dst[md] * dst->shared->size,
-                            dst->shared->size);
+                        H5MM_memcpy(d,
+                                    (uint8_t *)dst->shared->u.enumer.value +
+                                        ((unsigned)priv->src2dst[md] * dst->shared->size),
+                                    dst->shared->size);
                     } /* end else */
                 }     /* end else */
             }
