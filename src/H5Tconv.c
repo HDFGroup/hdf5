@@ -2693,8 +2693,8 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * symbol names and build a map from source member index to destination
      * member index.
      */
-    H5T__sort_name(src, NULL);
-    H5T__sort_name(dst, NULL);
+    H5T__sort_name(src->shared, NULL);
+    H5T__sort_name(dst->shared, NULL);
     if (NULL == (priv->src2dst = (int *)H5MM_malloc(src->shared->u.enumer.nmembs * sizeof(int))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for (i = 0, j = 0; i < src->shared->u.enumer.nmembs && j < dst->shared->u.enumer.nmembs; i++, j++) {
@@ -2874,7 +2874,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
              * sort keys are used here during conversion. See H5T__conv_enum_init(). But
              * we actually don't care about the source type's order when doing the O(1)
              * conversion algorithm, which is turned on by non-zero priv->length */
-            H5T__sort_name(dst, NULL);
+            H5T__sort_name(dst->shared, NULL);
             if (!priv->length)
                 H5T__sort_value(src, NULL);
 

@@ -70,8 +70,8 @@
         FAIL_STACK_ERROR                                                                                     \
     if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                                                            \
         H5_FAILED();                                                                                         \
-        HDprintf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                        \
-                 (long long)H5I_nmembers(H5I_DATATYPE));                                                     \
+        HDprintf("    #dtype ids expected: %" PRId64 "; found: %" PRId64 "\n", (NMEMBS),                     \
+                 H5I_nmembers(H5I_DATATYPE));                                                                \
         goto error;                                                                                          \
     }
 
@@ -781,11 +781,11 @@ test_compound_2(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = HDmalloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = HDmalloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -842,11 +842,12 @@ test_compound_2(void)
         }
     }
 
+    CHECK_NMEMBS(nmembs, st, dt)
+
     /* Release resources */
     HDfree(buf);
     HDfree(bkg);
     HDfree(orig);
-    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
 
@@ -1096,11 +1097,12 @@ test_compound_4(void)
         }
     }
 
+    CHECK_NMEMBS(nmembs, st, dt)
+
     /* Release resources */
     HDfree(buf);
     HDfree(bkg);
     HDfree(orig);
-    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
 
@@ -3450,7 +3452,7 @@ test_compound_16(void)
     if (open_dtypes[1]) {
         H5_FAILED();
         AT();
-        HDprintf("    H5Fget_obj_ids returned as second id: %lld; expected: 0\n", (long long)open_dtypes[1]);
+        HDprintf("    H5Fget_obj_ids returned as second id: %" PRIdHID "; expected: 0\n", open_dtypes[1]);
         goto error;
     }
 

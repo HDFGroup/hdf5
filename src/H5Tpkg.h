@@ -260,6 +260,7 @@ typedef struct H5T_compnd_t {
     hbool_t      packed;    /*are members packed together?       */
     H5T_cmemb_t *memb;      /*array of struct members	     */
     size_t       memb_size; /*total of all member sizes          */
+    size_t *     idx_name;  /*index to sort members by name		*/
 } H5T_compnd_t;
 
 /* An enumeration datatype */
@@ -877,7 +878,7 @@ H5_DLL herr_t H5T__get_member_value(const H5T_t *dt, unsigned membno, void *valu
 /* Field functions (for both compound & enumerated types) */
 H5_DLL char * H5T__get_member_name(H5T_t const *dt, unsigned membno);
 H5_DLL herr_t H5T__sort_value(const H5T_t *dt, int *map);
-H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
+H5_DLL herr_t H5T__sort_name(H5T_shared_t *sh, size_t *map);
 
 /* Debugging functions */
 H5_DLL herr_t H5T__print_stats(H5T_path_t *path, int *nprint /*in,out*/);
