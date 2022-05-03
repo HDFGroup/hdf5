@@ -2957,8 +2957,7 @@ test_ninteger(void)
     hid_t   nid1    = -1;     /* native datatype */
     hid_t   nid2    = -1;     /* native datatype */
     hsize_t dims[1] = {DIM3}; /* dataspace dimensions */
-    hsize_t nelmts;           /* number of elements in dataset */
-    int     rank = 1;         /* rank of dataset */
+    int     rank    = 1;      /* rank of dataset */
     int     buf[DIM3];
     int     chk[DIM3];
     int     i;
@@ -3042,9 +3041,6 @@ test_ninteger(void)
     /* get dimension */
     if (H5Sget_simple_extent_dims(sid1, dims, NULL) < 0)
         FAIL_STACK_ERROR
-    nelmts = 1;
-    for (i = 0; i < rank; i++)
-        nelmts *= dims[i];
 
     /* read */
     if (H5Dread(did1, nid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, chk) < 0)
