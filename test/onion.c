@@ -4073,10 +4073,10 @@ test_integration_ctl(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment */
     };
-    H5FD_t *  file_drv_ptr = NULL;
-    uint64_t  op_code;
-    uint64_t  flags;
-    uint64_t *num_revisions = NULL;
+    H5FD_t * file_drv_ptr = NULL;
+    uint64_t op_code;
+    uint64_t flags;
+    size_t   revision_count;
 
     TESTING("onion-created HDF5 file with revisions testing H5FDctl");
 
@@ -4182,28 +4182,13 @@ test_integration_ctl(void)
     file = H5I_INVALID_HID;
 
     /*----------------------------------------------------------------------
-     *  Start to verify the revision
+     *  Start to verify the number of revisions
      *----------------------------------------------------------------------
      */
-
-    if (NULL == (file_drv_ptr = H5FDopen(basename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+    if (H5FDget_onion_revision_count(basename, fapl_id, &revision_count) < 0)
         TEST_ERROR
 
-    if (NULL == (num_revisions = HDmalloc(sizeof(uint64_t))))
-        TEST_ERROR
-    op_code = H5FD_CTL__GET_NUM_REVISIONS;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-
-    if (H5FDctl(file_drv_ptr, op_code, flags, NULL, (void **)&num_revisions) < 0)
-        TEST_ERROR
-
-    if (*num_revisions != 2) {
-        HDprintf("the number of revisions should be 2 but got %" PRIu64 "\n", *num_revisions);
-        TEST_ERROR
-    }
-
-    /* Close H5FD_t structure pointer */
-    if (H5FDclose(file_drv_ptr) < 0)
+    if (2 != revision_count)
         TEST_ERROR
 
     /* Close and release resources */
@@ -4213,7 +4198,6 @@ test_integration_ctl(void)
         TEST_ERROR
     if (H5Sclose(space) < 0)
         TEST_ERROR
-    HDfree(num_revisions);
 
     HDremove(paths->canon);
     HDremove(paths->onion);

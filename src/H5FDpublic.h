@@ -197,7 +197,6 @@
 #define H5FD_CTL__MEM_ALLOC                   5
 #define H5FD_CTL__MEM_FREE                    6
 #define H5FD_CTL__MEM_COPY                    7
-#define H5FD_CTL__GET_NUM_REVISIONS           8
 
 /* ctl function flags: */
 
