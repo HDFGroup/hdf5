@@ -46,6 +46,13 @@ if (CMAKE_VERSION VERSION_LESS "3.14.0")
   endif()
 endif ()
 
+include (GNUInstallDirs)
+set (HDF5_INSTALL_BIN_DIR "${CMAKE_INSTALL_FULL_BINDIR}")
+set (HDF5_INSTALL_DATA_DIR "${CMAKE_INSTALL_FULL_DATADIR}")
+set (HDF5_INSTALL_DOC_DIR "${CMAKE_INSTALL_FULL_DOCDIR}")
+set (HDF5_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+set (HDF5_INSTALL_LIB_DIR "${CMAKE_INSTALL_FULL_LIBDIR}")
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #

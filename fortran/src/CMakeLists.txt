@@ -537,8 +537,8 @@ endif ()
 #-----------------------------------------------------------------------------
 set (_PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
 set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
-set (_PKG_CONFIG_LIBDIR \${exec_prefix}/lib)
-set (_PKG_CONFIG_INCLUDEDIR \${prefix}/include)
+set (_PKG_CONFIG_LIBDIR \${exec_prefix}/${CMAKE_INSTALL_LIBDIR})
+set (_PKG_CONFIG_INCLUDEDIR \${prefix}/${CMAKE_INSTALL_INCLUDEDIR})
 set (_PKG_CONFIG_LIBNAME "${HDF5_F90_LIB_CORENAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
 
