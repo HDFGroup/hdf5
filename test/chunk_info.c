@@ -167,7 +167,9 @@ test_get_chunk_info_highest18(hid_t fapl)
     unsigned     filter_mask  = 0;                                 /* Filter mask */
     unsigned     read_flt_msk = 0;                                 /* Filter mask after direct read */
     int          fillvalue    = -1;                                /* Fill value */
-    int          aggression   = 9;                                 /* Compression aggression setting */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    int aggression   = 9; /* Compression aggression setting */
+#endif
     H5F_libver_t low, high;                                        /* File format bounds */
     hsize_t      offset[2];                                        /* Offset coordinates of a chunk */
     hsize_t      out_offset[2] = {0, 0};                           /* Buffer to get offset coordinates */

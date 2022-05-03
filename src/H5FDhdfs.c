@@ -1731,7 +1731,7 @@ H5FD_hdfs_init(void)
 }
 
 herr_t
-H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+H5Pget_fapl_hdfs(hid_t H5_ATTR_UNUSED fapl_id, H5FD_hdfs_fapl_t H5_ATTR_UNUSED *fa_out)
 {
     herr_t ret_value = FAIL;
 
@@ -1745,7 +1745,7 @@ done:
 }
 
 herr_t
-H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
+H5Pset_fapl_hdfs(hid_t H5_ATTR_UNUSED fapl_id, H5FD_hdfs_fapl_t H5_ATTR_UNUSED *fa)
 {
     herr_t ret_value = FAIL;
 
