@@ -1202,6 +1202,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     int n;
 #endif
     hbool_t use_view_this_time = FALSE;
+    hbool_t derived_type       = FALSE;
     hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1229,8 +1230,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
     size_i = (int)size;
-    if ((hsize_t)size_i != size)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
@@ -1340,6 +1339,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
@@ -1409,6 +1423,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         HDmemset((char *)buf + bytes_read, 0, (size_t)n);
 
 done:
+    if (derived_type)
+        MPI_Type_free(&buf_type);
+
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
@@ -1527,20 +1544,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
          */
         mpi_off = 0;
     } /* end if */
-    else if (size != (hsize_t)size_i) {
-        /* If HERE, then we need to work around the integer size limit
-         * of 2GB. The input size_t size variable cannot fit into an integer,
-         * but we can get around that limitation by creating a different datatype
-         * and then setting the integer size (or element count) to 1 when using
-         * the derived_type.
-         */
-
-        if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
-
-        derived_type = TRUE;
-        size_i       = 1;
-    }
 
     /* Write the data. */
     if (use_view_this_time) {
@@ -1586,6 +1589,21 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } /* end if */
     else {
+        if (size != (hsize_t)size_i) {
+            /* If HERE, then we need to work around the integer size limit
+             * of 2GB. The input size_t size variable cannot fit into an integer,
+             * but we can get around that limitation by creating a different datatype
+             * and then setting the integer size (or element count) to 1 when using
+             * the derived_type.
+             */
+
+            if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+            derived_type = TRUE;
+            size_i       = 1;
+        }
+
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
