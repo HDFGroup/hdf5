@@ -1597,6 +1597,9 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
     hbool_t       both_zero = FALSE;
     double        per;
 
+    /* both_zero is set in the PER_UNSIGN macro but not used in this function */
+    (void)both_zero;
+
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
     H5TOOLS_START_DEBUG(" %d=%d", temp1_uchar, temp2_uchar);

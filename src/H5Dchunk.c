@@ -5190,13 +5190,10 @@ done:
 static int
 H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
 {
-    const struct chunk_coll_fill_info *entry1;
-    const struct chunk_coll_fill_info *entry2;
+    const struct chunk_coll_fill_info *entry1 = (const struct chunk_coll_fill_info *)_entry1;
+    const struct chunk_coll_fill_info *entry2 = (const struct chunk_coll_fill_info *)_entry2;
 
     FUNC_ENTER_STATIC_NOERR
-
-    entry1 = (const struct chunk_coll_fill_info *)_entry1;
-    entry2 = (const struct chunk_coll_fill_info *)_entry2;
 
     FUNC_LEAVE_NOAPI(H5F_addr_cmp(entry1->addr, entry2->addr))
 } /* end H5D__chunk_cmp_coll_fill_info() */
