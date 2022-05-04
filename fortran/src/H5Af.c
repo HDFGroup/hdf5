@@ -272,7 +272,7 @@ done:
  * PURPOSE
  *  Call H5Aopen to open an attribute
  * INPUTS
- *  obj_id       - Identifer for object to which attribute is attached
+ *  obj_id       - Identifier for object to which attribute is attached
  *	        attr_name    - Attribute access property list
  *  attr_namelen - size of attr_name
  *  aapl_id      - Link access property list
@@ -317,7 +317,7 @@ done:
  * PURPOSE
  *  Call h5adelete_by_name to remove an attribute from a specified location
  * INPUTS
- *  loc_id - identifer for object to which attribute is attached
+ *  loc_id - identifier for object to which attribute is attached
  *  obj_name - object identifier
  *  obj_namelen - name length
  *  attr_name - name of the attribute
@@ -424,7 +424,7 @@ done:
  * INPUTS
  *
  *
- *  loc_id - Identifer for object to which attribute is attached
+ *  loc_id - Identifier for object to which attribute is attached
  *  obj_name - Name of object, relative to location,
  *  from which attribute is to be removed *TEST* check NULL
  *  idx_type - Type of index; Possible values are:
@@ -532,7 +532,7 @@ done:
  *  aapl_id - Attribute access property list
  *  lapl_id - Link access property list
  * OUTPUTS
- *  attr_id - attribute identifer
+ *  attr_id - attribute identifier
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

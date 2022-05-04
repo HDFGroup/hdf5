@@ -145,7 +145,7 @@ DONE:
  *  Elena Pourmal
  *  Tuesday, May 14, 2002
  * HISTORY
- *  This function was added to accomodate h5dwrite_f with the
+ *  This function was added to accommodate h5dwrite_f with the
  *  dims argument being of INTEGER(HSIZE_T) type
  * SOURCE
  */
@@ -217,7 +217,7 @@ h5dwrite_ref_reg_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
  *  Elena Pourmal
  *  Wednesday, May 15, 2002
  * HISTORY
- *  This function was added to accomodate h5dread_f subroutine
+ *  This function was added to accommodate h5dread_f subroutine
  *  with the dims parameter being of INTEGER(HSIZE_T_F) size.
  * SOURCE
  */
@@ -495,10 +495,10 @@ h5dget_storage_size_c(hid_t_f *dset_id, hsize_t_f *size)
 
     c_dset_id = (hid_t)*dset_id;
     c_size    = H5Dget_storage_size(c_dset_id);
-    if (c_size == 0)
-        return ret_value;
-    *size     = (hsize_t_f)c_size;
-    ret_value = 0;
+    if (c_size != 0) {
+        ret_value = 0;
+    }
+    *size = (hsize_t_f)c_size;
     return ret_value;
 }
 
@@ -783,7 +783,7 @@ h5dwrite_vl_string_c(hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
         return ret_value;
     }
     /*
-     * Move data from temorary buffer
+     * Move data from temporary buffer
      */
     tmp_p = tmp;
     for (i = 0; i < num_elem; i++) {
@@ -1350,73 +1350,6 @@ h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *
     status = H5Treclaim((hid_t)*type_id, (hid_t)*space_id, (hid_t)*plist_id, buf);
     if (status < 0)
         return ret_value;
-
-    ret_value = 0;
-    return ret_value;
-}
-
-/****if* H5FDmpio/h5dread_multi_c
- * NAME
- *  h5dread_multi_c
- * PURPOSE
- *  Calls H5Dread_multi
- *
- * INPUTS
- *  dxpl_id - dataset transfer property.
- *  count   - the number of accessing datasets.
- * OUTPUTS
- *  info    - the array of dataset information and read buffer.
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 25, 2014
- * SOURCE
- */
-int_f
-nh5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
-/******/
-{
-    int ret_value = -1;
-    /*
-     * Call H5Dread_multi function.
-     */
-    if ((H5Dread_multi((hid_t)*dxpl_id, (size_t)*count, info)) < 0)
-        return ret_value; /* error occurred */
-
-    ret_value = 0;
-    return ret_value;
-}
-
-/****if* H5FDmpio/h5dwrite_multi_c
- * NAME
- *  h5dwrite_multi_c
- * PURPOSE
- *  Calls H5Dwrite_multi
- *
- * INPUTS
- *  count   - the number of accessing datasets.
- *  dxpl_id - dataset transfer property.
- *  Info    - the array of dataset information and write buffer.
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 25, 2014
- * SOURCE
- */
-int_f
-nh5dwrite_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
-/******/
-{
-    int ret_value = -1;
-    /*
-     * Call H5Dwrite_multi function.
-     */
-    if ((H5Dwrite_multi((hid_t)*dxpl_id, (size_t)*count, info)) < 0)
-        return ret_value; /* error occurred */
 
     ret_value = 0;
     return ret_value;

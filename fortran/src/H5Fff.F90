@@ -97,7 +97,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
-                                           ! File creation propertly
+                                           ! File creation property
                                            ! list identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                            ! File access property list
