@@ -10690,7 +10690,7 @@ external_link_win7(hid_t fapl, hbool_t new_format)
 
     if (new_format)
         TESTING(
-            "external links via main file's UNC local host/main drive/rel path(windows)(w/new group format)")
+            "external links via main file's UNC local host/main drive/rel path(windows)(w/new group format)");
     else
         TESTING("external links via main file's UNC local host/main drive/rel path(windows)");
 
@@ -10787,7 +10787,7 @@ external_link_win8(hid_t fapl, hbool_t new_format)
 
     if (new_format)
         TESTING(
-            "external links via target's Long UNC abs drive/abs path directly (windows)(w/new group format)")
+            "external links via target's Long UNC abs drive/abs path directly (windows)(w/new group format)");
     else
         TESTING("external links via target's Long UNC abs drive/abs path directly (windows)");
 
