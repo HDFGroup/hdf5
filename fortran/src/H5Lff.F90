@@ -469,7 +469,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id       ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id       ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of object, relative to location,
                                                !  from which attribute is to be removed
     INTEGER, INTENT(IN) :: index_field         ! Type of index; Possible values are:
@@ -1315,7 +1315,7 @@ CONTAINS
 ! Inputs:
 !  group_id   - Identifier specifying subject group
 !  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_NAME_F      - Alphanumeric index on name
 !                H5_INDEX_CRT_ORDER_F - Index on creation order
 !  order      - Order within index:
 !                H5_ITER_INC_F    - Increasing order
@@ -1391,7 +1391,7 @@ CONTAINS
 !  loc_id     - File or group identifier specifying location of subject group
 !  group_name - Name of subject group
 !  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_NAME_F      - Alphanumeric index on name
 !                H5_INDEX_CRT_ORDER_F - Index on creation order
 !  order      - Order within index:
 !                H5_ITER_INC_F    - Increasing order

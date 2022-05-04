@@ -32,28 +32,34 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   CHARACTER(LEN=80):: dsetname ! Dataset name
-  TYPE(H5D_rw_multi_t), ALLOCATABLE, DIMENSION(:) :: info_md
   INTEGER(hsize_t), DIMENSION(1:2) :: cdims           ! chunk dimensions
 
-  INTEGER(SIZE_T):: ndsets
   INTEGER(HID_T) :: file_id       ! File identifier
   INTEGER(HID_T) :: filespace     ! Dataspace identifier in file 
   INTEGER(HID_T) :: memspace      ! Dataspace identifier in memory
   INTEGER(HID_T) :: plist_id      ! Property list identifier 
   INTEGER(HID_T) :: dcpl_id       ! Dataset creation property list
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsf  ! Dataset dimensions.
-  INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsfi = (/5,8/)
 
   INTEGER(HSIZE_T), DIMENSION(1:2) :: count  
   INTEGER(HSSIZE_T), DIMENSION(1:2) :: offset 
   INTEGER, ALLOCATABLE, DIMENSION(:,:,:), TARGET :: DATA  ! Data to write
   INTEGER, ALLOCATABLE, DIMENSION(:,:,:), TARGET :: rDATA  ! Data to write
   INTEGER, PARAMETER :: rank = 2 ! Dataset rank 
-  INTEGER :: i, j, k, istart
+  INTEGER :: i
+  INTEGER(HSIZE_T) :: ii, jj, kk, istart
   INTEGER :: error          ! Error flags
 
-  dimsf = (/5_hsize_t,INT(mpi_size, hsize_t)*8_hsize_t/)
-  ndsets = 5;
+  INTEGER(SIZE_T), PARAMETER :: ndsets = 5
+  INTEGER(HID_T), DIMENSION(1:ndsets) :: dset_id
+  INTEGER(HID_T), DIMENSION(1:ndsets) :: mem_type_id
+  INTEGER(HID_T), DIMENSION(1:ndsets) :: mem_space_id
+  INTEGER(HID_T), DIMENSION(1:ndsets) :: file_space_id
+  TYPE(C_PTR), DIMENSION(1:ndsets) :: buf_md
+  INTEGER(SIZE_T) :: obj_count
+
+  dimsf(1) = 5_hsize_t
+  dimsf(2) = INT(mpi_size, hsize_t)*8_hsize_t
 
   ! 
   ! Setup file access property list with parallel I/O access.
@@ -109,9 +115,6 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   ALLOCATE ( DATA(COUNT(1),COUNT(2), ndsets))
   ALLOCATE ( rdata(COUNT(1),COUNT(2), ndsets))
 
-  ALLOCATE(info_md(1:ndsets))
-
-  !
   ! Create property list for collective dataset write
   !
   CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
@@ -127,53 +130,53 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Create the dataset with default properties.
   !
-  info_md(1:ndsets)%mem_type_id = H5T_NATIVE_INTEGER
-  info_md(1:ndsets)%mem_space_id = memspace
-  info_md(1:ndsets)%dset_space_id = filespace
+  mem_type_id(1:ndsets) = H5T_NATIVE_INTEGER
+  mem_space_id(1:ndsets) = memspace
+  file_space_id(1:ndsets)= filespace
 
-  DO i = 1, ndsets
+  DO ii = 1, ndsets
      ! Create the data
-     DO k = 1, COUNT(1)
-        DO j = 1, COUNT(2)
-           istart = (k-1)*dimsf(2) + mpi_rank*COUNT(2)
-           DATA(k,j,i) = (istart + j)*10**(i-1)
+     DO kk = 1, COUNT(1)
+        DO jj = 1, COUNT(2)
+           istart = (kk-1)*dimsf(2) + mpi_rank*COUNT(2)
+           DATA(kk,jj,ii) = INT((istart + jj)*10**(ii-1))
         ENDDO
      ENDDO
      ! Point to te data
-     info_md(i)%buf = C_LOC(DATA(1,1,i))
+     buf_md(ii) = C_LOC(DATA(1,1,ii))
 
      ! direct the output of the write statement to unit "dsetname"
-     WRITE(dsetname,'("dataset ",I0)') i
+     WRITE(dsetname,'("dataset ",I0)') ii
      ! create the dataset
-     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, filespace, info_md(i)%dset_id, error, dcpl_id)
+     CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, filespace, dset_id(ii), error, dcpl_id)
      CALL check("h5dcreate_f", error, nerrors)
   ENDDO
   !
   ! Write the dataset collectively. 
-  !
-  CALL h5dwrite_multi_f(plist_id, ndsets, info_md, error)
+  !  
+  CALL h5dwrite_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
   CALL check("h5dwrite_multi_f", error, nerrors)
 
   DO i = 1, ndsets
      ! Point to the read buffer
-     info_md(i)%buf = C_LOC(rdata(1,1,i))
+     buf_md(i) = C_LOC(rdata(1,1,i))
   ENDDO
 
-  CALL H5Dread_multi_f(plist_id, ndsets, info_md, error)
+  CALL H5Dread_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
   CALL check("h5dread_multi_f", error, nerrors)
 
   DO i = 1, ndsets
      ! Close all the datasets
-     CALL h5dclose_f(info_md(i)%dset_id, error)
+     CALL h5dclose_f(dset_id(i), error)
      CALL check("h5dclose_f", error, nerrors)
   ENDDO
 
   ! check the data read and write buffers
-  DO i = 1, ndsets
+  DO ii = 1, ndsets
      ! Create the data
-     DO k = 1, COUNT(1)
-        DO j = 1, COUNT(2)
-           IF(rDATA(k,j,i).NE.DATA(k,j,i))THEN
+     DO kk = 1, COUNT(1)
+        DO jj = 1, COUNT(2)
+           IF(rDATA(kk,jj,ii).NE.DATA(kk,jj,ii))THEN
               nerrors = nerrors + 1
            ENDIF
         ENDDO
@@ -194,8 +197,15 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Close the dataset and property list.
   !
+  CALL h5pclose_f(dcpl_id, error)
+  CALL check("h5pclose_f", error, nerrors)
   CALL h5pclose_f(plist_id, error)
   CALL check("h5pclose_f", error, nerrors)
+
+  CALL h5fget_obj_count_f(file_id, H5F_OBJ_ALL_F, obj_count, error)
+  IF(obj_count.NE.1)THEN
+     nerrors = nerrors + 1
+  END IF
 
   !
   ! Close the file.

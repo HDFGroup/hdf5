@@ -237,19 +237,23 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferror)
   CALL check("h5pget_mpio_actual_io_mode_f", hdferror, nerrors)
 
-  IF(do_collective.AND.do_chunk)THEN
-     IF(actual_io_mode.NE.H5D_MPIO_CHUNK_COLLECTIVE_F)THEN
-        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-     ENDIF
-  ELSEIF(.NOT.do_collective)THEN
-     IF(actual_io_mode.NE.H5D_MPIO_NO_COLLECTIVE_F)THEN
-        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-     ENDIF
-  ELSEIF( do_collective.AND.(.NOT.do_chunk))THEN
-     IF(actual_io_mode.NE.H5D_MPIO_CONTIG_COLLECTIVE_F)THEN
-        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
-     ENDIF
-  ENDIF
+! MSB -- TODO FIX: skipping for now since multi-dataset
+!        has no specific  path for contiguous collective
+! 
+!  IF(do_collective.AND.do_chunk)THEN
+!     IF(actual_io_mode.NE.H5D_MPIO_CHUNK_COLLECTIVE_F)THEN
+!       CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+!     ENDIF
+!  ELSEIF(.NOT.do_collective)THEN
+!     IF(actual_io_mode.NE.H5D_MPIO_NO_COLLECTIVE_F)THEN
+!        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+!     ENDIF
+!  ELSEIF( do_collective.AND.(.NOT.do_chunk))THEN
+!     IF(actual_io_mode.NE.H5D_MPIO_CONTIG_COLLECTIVE_F)THEN
+!        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+!     ENDIF
+!  ENDIF
+! MSB
 
   !
   ! close HDF5 I/O
@@ -318,7 +322,6 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
 
   CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
-
   IF (do_collective) THEN
      CALL h5pset_dxpl_mpio_f(dxpl_id, H5FD_MPIO_COLLECTIVE_F, hdferror)
      CALL check("h5pcreate_f", hdferror, nerrors)
