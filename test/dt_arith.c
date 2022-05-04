@@ -915,7 +915,7 @@ test_derived_flt(void)
     }
 
     if ((tid1 = H5Topen2(file, "new float type 1", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_fields(tid1, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         HDprintf("Can't get fields\n");
@@ -1075,7 +1075,7 @@ test_derived_flt(void)
     }
 
     if ((tid2 = H5Topen2(file, "new float type 2", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_fields(tid2, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         HDprintf("Can't get fields\n");
@@ -1351,7 +1351,7 @@ test_derived_integer(void)
     }
 
     if ((tid1 = H5Topen2(file, "new integer type 1", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_precision(tid1) != 24) {
         H5_FAILED();
         HDprintf("Can't get precision or wrong precision\n");
@@ -1412,7 +1412,7 @@ test_derived_integer(void)
     }
 
     if ((tid2 = H5Topen2(file, "new integer type 2", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_precision(tid2) != 48) {
         H5_FAILED();
         HDprintf("Can't get precision or wrong precision\n");

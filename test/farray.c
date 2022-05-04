@@ -174,25 +174,25 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Get statistics for fixed array and verify they are correct */
     if (H5FA_get_stats(fa, &farray_stats) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
         HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
                   farray_stats.hdr_size, state->hdr_size);
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
         HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
                   farray_stats.dblk_size, state->dblk_size);
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     if (farray_stats.nelmts != state->nelmts) {
         HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
                   farray_stats.nelmts, state->nelmts);
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     /* Success */
@@ -259,21 +259,21 @@ reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr,
         /* Close array, if given */
         if (fa && *fa) {
             if (H5FA_close(*fa) < 0)
-                FAIL_STACK_ERROR
+                FAIL_STACK_ERROR;
             *fa = NULL;
         }
 
         /* Close file */
         if (*fid) {
             if (H5Fclose(*fid) < 0)
-                FAIL_STACK_ERROR
+                FAIL_STACK_ERROR;
             *fid = H5I_INVALID_HID;
             *f   = NULL;
         }
 
         /* Re-open the file */
         if ((*fid = H5Fopen(filename_g, H5F_ACC_RDWR, fapl_id)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (*f = (H5F_t *)H5VL_object(*fid)))
@@ -281,12 +281,12 @@ reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, H5FA_t **fa, haddr_t fa_addr,
 
         /* Ignore metadata tags in the file's cache */
         if (H5AC_ignore_tags(*f) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Re-open array, if given */
         if (fa)
             if (NULL == (*fa = H5FA_open(*f, fa_addr, NULL)))
-                FAIL_STACK_ERROR
+                FAIL_STACK_ERROR;
     }
 
     /* Success */
@@ -312,20 +312,20 @@ create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_add
 
     /* Create array */
     if (NULL == (*fa = H5FA_create(f, cparam, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check status of array */
     if (H5FA_get_addr(*fa, fa_addr) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (!H5F_addr_defined(*fa_addr))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check array stats */
     HDmemset(&state, 0, sizeof(state));
     state.hdr_size = FA_HDR_SIZE;
     state.nelmts   = cparam->nelmts;
     if (check_stats(*fa, &state))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Success */
     return SUCCEED;
@@ -351,11 +351,11 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
     /* Retrieve creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
     if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify creation parameters */
     if (H5FA__cmp_cparam_test(cparam, &test_cparam))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Success */
     return SUCCEED;
@@ -381,23 +381,23 @@ finish(hid_t fid, hid_t fapl_id, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
 
     /* Close the fixed array */
     if (H5FA_close(fa) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Delete array */
     if (H5FA_delete(f, fa_addr, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get the size of the file */
     if ((file_size = h5_get_file_size(filename_g, fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the file is correct size */
     if (file_size != empty_size_g)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Success */
     return SUCCEED;
@@ -426,7 +426,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Display testing message
@@ -451,7 +451,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
             fa = NULL;
 
             /* Indicate error */
-            TEST_ERROR
+            TEST_ERROR;
         } /* end if */
 
         /* Set invalid max. # of elements bits */
@@ -468,7 +468,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
             fa = NULL;
 
             /* Indicate error */
-            TEST_ERROR
+            TEST_ERROR;
         } /* end if */
 
         /* Set invalid max. # of elements */
@@ -485,7 +485,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
             fa = NULL;
 
             /* Indicate error */
-            TEST_ERROR
+            TEST_ERROR;
         } /* end if */
 
         PASSED();
@@ -502,7 +502,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
 
@@ -511,11 +511,11 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(file, fapl, f, fa, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -554,7 +554,7 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Display testing message
@@ -563,27 +563,27 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the fixed array */
     if (H5FA_close(fa) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open the array */
     if (NULL == (fa = H5FA_open(f, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(file, fapl, f, fa, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -625,37 +625,37 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl_id, &fid, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Display testing message */
     TESTING("open fixed array twice");
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open the array again, through the first file handle */
     if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (verify_cparam(fa2, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the second fixed array wrapper */
     if (H5FA_close(fa2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa2 = NULL;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((fid2 = H5Freopen(fid)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
@@ -663,15 +663,15 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
 
     /* Open the fixed array through the second file handle */
     if (NULL == (fa2 = H5FA_open(f2, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the first extensible array wrapper */
     if (H5FA_close(fa) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa = NULL;
 
     /* Close the first file */
@@ -679,11 +679,11 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
      *  shared file information)
      */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(fid2, fapl_id, f2, fa2, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -739,25 +739,25 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl_id, &fid, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open the array again, through the first file handle */
     if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (verify_cparam(fa2, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the second fixed array wrapper */
     if (H5FA_close(fa2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa2 = NULL;
 
     /* Re-open the file */
@@ -765,15 +765,15 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
      *  array is closed)
      */
     if ((fid0 = H5Fopen(filename_g, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&fid, &f, fapl_id, &fa, fa_addr, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the first fixed array wrapper */
     if (H5FA_close(fa) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa = NULL;
 
     /* Close the first file */
@@ -781,7 +781,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
      *  shared file information)
      */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fid = H5I_INVALID_HID;
 
     /* Open a different file */
@@ -791,11 +791,11 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
      */
     h5_fixname(FILENAME[1], fapl_id, filename_tmp, sizeof(filename_tmp));
     if ((fid00 = H5Fcreate(filename_tmp, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Re-open the file with the fixed array */
     if ((fid2 = H5Fopen(filename_g, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
@@ -803,21 +803,21 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
 
     /* Open the fixed array through the second file handle */
     if (NULL == (fa2 = H5FA_open(f2, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa2, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the extra file handles */
     if (H5Fclose(fid0) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Fclose(fid00) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(fid2, fapl_id, f2, fa2, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -863,7 +863,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Display testing message
@@ -872,25 +872,25 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open the array again */
     if (NULL == (fa2 = H5FA_open(f, fa_addr, NULL)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Request that the array be deleted */
     if (H5FA_delete(f, fa_addr, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (verify_cparam(fa2, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the second fixed array wrapper */
     if (H5FA_close(fa2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa2 = NULL;
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
@@ -904,17 +904,17 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         H5FA_close(fa2);
 
         /* Indicate error */
-        TEST_ERROR
+        TEST_ERROR;
     } /* end if */
 
     /* Close the first fixed array wrapper */
     if (H5FA_close(fa) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     fa = NULL;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&file, &f, fapl, NULL, HADDR_UNDEF, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
     H5E_BEGIN_TRY
@@ -927,20 +927,20 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         H5FA_close(fa);
 
         /* Indicate error */
-        TEST_ERROR
+        TEST_ERROR;
     } /* end if */
 
     /* Close the file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get the size of the file */
     if ((file_size = h5_get_file_size(filename_g, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the file is correct size */
     if (file_size != empty_size_g)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -1316,11 +1316,11 @@ check_elmt(void *_relmt, void *_welmt)
 
     if (welmt == NULL) { /* check for fill value */
         if (*relmt != H5FA_TEST_FILL)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
     else {
         if (*relmt != *welmt)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end else */
 
     return (0);
@@ -1365,25 +1365,25 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (nelmts > fa_nelmts)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
@@ -1391,84 +1391,84 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
     if (check_stats(fa, &state))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get all elements from empty array */
 
     /* Initialize iterator */
     if (NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get elements of array */
     for (cnt = 0; cnt < nelmts; cnt++) {
         /* Get the array index */
         if ((sidx = tparam->fiter->next(fiter_info)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         idx = (hsize_t)sidx;
 
         /* Retrieve element of array (not set yet) */
         relmt = (uint64_t)0;
         if (H5FA_get(fa, idx, &relmt) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Verify that the retrieved is correct */
         if (check_elmt(&relmt, NULL))
-            TEST_ERROR
+            TEST_ERROR;
     } /* end for */
 
     /* Shutdown iterator */
     if (tparam->fiter->term(fiter_info) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set (& get) all elements from empty array */
 
     /* Initialize iterator */
     if (NULL == (fiter_info = tparam->fiter->init(cparam, tparam, nelmts)))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set elements of array */
     for (cnt = 0; cnt < nelmts; cnt++) {
         /* Get the array index */
         if ((sidx = tparam->fiter->next(fiter_info)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         idx = (hsize_t)sidx;
 
         relmt = (uint64_t)0;
         if (H5FA_get(fa, idx, &relmt) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Verify that the retrieved element is correct */
         if (check_elmt(&relmt, NULL))
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Set element of array */
         welmt = (uint64_t)7 + idx;
         if (H5FA_set(fa, idx, &welmt) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Retrieve element of array (set now) */
         relmt = (uint64_t)0;
         if (H5FA_get(fa, idx, &relmt) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Verify that the retrieved element is correct */
         if (check_elmt(&relmt, &welmt))
-            TEST_ERROR
+            TEST_ERROR;
     } /* end for */
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Shutdown iterator */
     if (tparam->fiter->term(fiter_info) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(file, fapl, f, fa, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -1520,25 +1520,25 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create array */
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the creation parameters */
     if (verify_cparam(fa, cparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check for closing & re-opening the file */
     if (reopen_file(&file, &f, fapl, &fa, fa_addr, tparam) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5FA_get_nelmts(fa, &fa_nelmts) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (skip_elmts >= fa_nelmts)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
@@ -1546,7 +1546,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
     if (check_stats(fa, &state))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set (& get) element after skipping elements */
     idx = skip_elmts;
@@ -1554,31 +1554,31 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
     /* Retrieve element of array (not set yet) */
     relmt = (uint64_t)0;
     if (H5FA_get(fa, idx, &relmt) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the retrieved is correct */
     if (check_elmt(&relmt, NULL))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set element of array */
     welmt = (uint64_t)7 + idx;
     if (H5FA_set(fa, idx, &welmt) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Retrieve element of array (set now) */
     relmt = (uint64_t)0;
     if (H5FA_get(fa, idx, &relmt) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the retrieved is correct */
     if (check_elmt(&relmt, &welmt))
-        TEST_ERROR
+        TEST_ERROR;
 
     if (check_rest) {
         /* Get unset elements of array */
@@ -1586,17 +1586,17 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
             /* Retrieve element of array (not set yet) */
             relmt = (uint64_t)0;
             if (H5FA_get(fa, cnt, &relmt) < 0)
-                FAIL_STACK_ERROR
+                FAIL_STACK_ERROR;
 
             /* Verify that the retrieved is correct */
             if (check_elmt(&relmt, NULL))
-                TEST_ERROR
+                TEST_ERROR;
         } /* end for */
     }     /* end if */
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(file, fapl, f, fa, fa_addr) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();
@@ -1650,7 +1650,7 @@ main(void)
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Seed random #'s */
@@ -1662,15 +1662,15 @@ main(void)
         hid_t file; /* File ID */
 
         if ((file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Get the size of a file w/no array */
         if ((empty_size_g = h5_get_file_size(filename_g, fapl)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     /* Iterate over the testing parameters */
@@ -1783,7 +1783,7 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     if (nerrors)
