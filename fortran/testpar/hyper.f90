@@ -180,7 +180,6 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
   IF (do_chunk) THEN
-     PRINT*,"setting chunk"
      CALL h5pset_chunk_f(dcpl_id, 1, cdims, hdferror)
      CALL check("h5pset_chunk_f", hdferror, nerrors)
   ENDIF
