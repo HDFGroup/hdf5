@@ -413,7 +413,7 @@ SetTestVerbosity(int newval)
  Values:
  0: Exhaustive run
     Tests should take as long as necessary
- 1: Full run.  Default if HDF5TestExpress is not defined
+ 1: Full run
     Tests should take no more than 30 minutes
  2: Quick run
     Tests should take no more than 10 minutes
