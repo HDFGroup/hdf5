@@ -417,7 +417,9 @@ SetTestVerbosity(int newval)
     Tests should take no more than 30 minutes
  2: Quick run
     Tests should take no more than 10 minutes
- 3: Smoke test.  Default if HDF5TestExpress is set to a value other than 0-3
+ 3: Smoke test.
+    Default if HDF5TestExpress is not defined.
+    Default if HDF5TestExpress is set to a value other than 0-3
     Tests should take less than 1 minute
 
  Design:
@@ -445,7 +447,7 @@ GetTestExpress(void)
         env_val = HDgetenv("HDF5TestExpress");
 
         if (env_val == NULL)
-            SetTestExpress(1);
+            SetTestExpress(3);
         else if (HDstrcmp(env_val, "0") == 0)
             SetTestExpress(0);
         else if (HDstrcmp(env_val, "1") == 0)
