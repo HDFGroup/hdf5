@@ -484,7 +484,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     HDsprintf(s, "istore sparse: %s", dims);
     TESTING(s);
     if (skip_test) {
-        SKIPPED()
+        SKIPPED();
         return SUCCEED;
     }
     buf = (uint8_t *)HDmalloc(nx * ny * nz);

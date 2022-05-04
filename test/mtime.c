@@ -196,7 +196,7 @@ main(void)
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* All looks good */
     HDputs("All modification time tests passed.");
