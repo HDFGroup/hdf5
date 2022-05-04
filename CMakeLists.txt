@@ -962,7 +962,7 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
-  option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
+  option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "3")
   mark_as_advanced (HDF_TEST_EXPRESS)
 
   enable_testing ()
