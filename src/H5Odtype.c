@@ -1745,7 +1745,8 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
             HDfprintf(stream, "%*s%-*s 0x", indent, "", fwidth, "Raw bytes of value:");
             for (k = 0; k < dt->shared->parent->shared->size; k++)
                 HDfprintf(stream, "%02x",
-                          dt->shared->u.enumer.value[i * dt->shared->parent->shared->size + k]);
+                          (unsigned)*((uint8_t *)dt->shared->u.enumer.value +
+                                      (i * dt->shared->parent->shared->size) + k));
             HDfprintf(stream, "\n");
         } /* end for */
     }     /* end else if */

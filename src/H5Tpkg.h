@@ -237,7 +237,7 @@ typedef struct H5T_enum_t {
     unsigned   nalloc; /*num entries allocated		     */
     unsigned   nmembs; /*number of members defined in enum  */
     H5T_sort_t sorted; /*how are members sorted?	     */
-    uint8_t *  value;  /*array of values		     */
+    void *     value;  /*array of values		     */
     char **    name;   /*array of symbol names		     */
 } H5T_enum_t;
 
