@@ -412,19 +412,19 @@ test_direct_chunk_overwrite_data(hid_t fid)
 
     /* Create the dataset's data space */
     if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Set chunk size and filll value */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pset_fill_value(dcpl_id, tid, &fill_value) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pset_chunk(dcpl_id, OVERWRITE_NDIMS, chunk_dims) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, DATASETNAME7, tid, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Initialize data buffers */
     n = 0;
@@ -437,35 +437,35 @@ test_direct_chunk_overwrite_data(hid_t fid)
 
     /* Write chunk data using the direct write function. */
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Write second chunk. */
     offset[2] = OVERWRITE_CHUNK_NX;
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Overwrite first chunk. */
     offset[2] = 0;
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, overwrite_buf) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Read the data back out */
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Ensure that the data are correct in chunk 1 */
     for (i = 0; i < OVERWRITE_CHUNK_NY; i++)
         for (j = 0; j < OVERWRITE_CHUNK_NX; j++) {
             if (read_buf[i][j] != OVERWRITE_VALUE)
-                TEST_ERROR
+                TEST_ERROR;
         }
 
     if (H5Pclose(dcpl_id) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -2040,7 +2040,7 @@ test_read_unallocated_chunk(hid_t file)
 
             /* Check that the chunk read call does not succeed. */
             if (status != -1)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Query the size of the non-existent chunk */
             direct_chunk_nbytes = ULONG_MAX;
@@ -2052,9 +2052,9 @@ test_read_unallocated_chunk(hid_t file)
 
             /* Check that the chunk storage size call does not succeed. */
             if (status != -1)
-                TEST_ERROR
+                TEST_ERROR;
             if (direct_chunk_nbytes != ULONG_MAX)
-                TEST_ERROR
+                TEST_ERROR;
         }
     }
 
@@ -2204,7 +2204,7 @@ test_single_chunk(unsigned config)
 
         /* Verify returned filter mask */
         if (filters != 0)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
     else
         /* Read the data */
@@ -2215,7 +2215,7 @@ test_single_chunk(unsigned config)
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
             if (rdata[i][j] != wdata[i][j])
-                TEST_ERROR
+                TEST_ERROR;
 
     /*
      * Close and release resources

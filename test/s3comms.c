@@ -2514,7 +2514,7 @@ test_uriencode(void)
     int             ncases       = 6;
     size_t          str_len      = 0;
 
-    TESTING("s3comms uriencode")
+    TESTING("s3comms uriencode");
 
     for (i = 0; i < ncases; i++) {
         str_len = cases[i].s_len;
