@@ -7087,8 +7087,8 @@ finish:
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
         HDprintf("===================================\n");
-        if (failures) {
-            HDprintf("***metadata cache tests detected %d failures***\n", failures);
+        if (nerrors || failures) {
+            HDprintf("***metadata cache tests detected %d failures***\n", nerrors + failures);
         }
         else {
             HDprintf("metadata cache tests finished with no failures\n");
@@ -7105,5 +7105,5 @@ finish:
     MPI_Finalize();
 
     /* cannot just return (failures) because exit code is limited to 1byte */
-    return (failures != 0);
+    return (nerrors != 0 || failures != 0);
 }
