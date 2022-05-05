@@ -1323,14 +1323,12 @@ end_collect:
                 if (!HDstrcmp(vfd_info_g.info, "revision_count"))
                     get_onion_revision_count = TRUE;
                 else {
-                    onion_fa_g.revision_num = HDstrtoull((char *)(vfd_info_g.info), NULL, 0);
+                    onion_fa_g.revision_num = HDstrtoull((const char *)(vfd_info_g.info), NULL, 0);
                     HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
                 }
             }
 
-            /* Need to free this memory */
-            vfd_info_g.info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(vfd_info_g.info, &onion_fa_g, sizeof(H5FD_onion_fapl_info_t));
+            vfd_info_g.info = &onion_fa_g;
         }
     } /* driver name defined */
 
@@ -1654,10 +1652,6 @@ main(int argc, char *argv[])
 done:
     /* Free tables for objects */
     table_list_free();
-
-    /* Free the VFD info */
-    if (vfd_info_g.info)
-        HDfree(vfd_info_g.info);
 
     if (fapl_id != H5P_DEFAULT && 0 < H5Pclose(fapl_id)) {
         error_msg("Can't close fapl entry\n");
