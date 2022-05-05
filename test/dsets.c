@@ -12531,10 +12531,13 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     hid_t             dcpl = -1;
     hid_t             msid = -1;
     H5D_chunk_index_t idx_type;
-    const hsize_t     shape[2]    = {8, 8};
-    const hsize_t     maxshape[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    const hsize_t     chunk[2]    = {8, 8};
-    const int         buffer[8]   = {0, 1, 2, 3, 4, 5, 6, 7};
+    const hsize_t     shape[2]     = {8, 8};
+    const hsize_t     maxshape[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
+    const hsize_t     chunk[2]     = {8, 8};
+    const int         buffer[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},         {8, 9, 10, 11, 12, 13, 14, 15},
+                              {16, 17, 18, 19, 20, 21, 22, 23}, {24, 25, 26, 27, 28, 29, 30, 31},
+                              {32, 33, 34, 35, 36, 37, 38, 39}, {40, 41, 42, 43, 44, 45, 46, 47},
+                              {48, 49, 50, 51, 52, 53, 54, 55}, {56, 57, 58, 59, 60, 61, 62, 63}};
     H5O_info2_t       info;
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
@@ -15287,8 +15290,8 @@ test_h5s_plist(void)
     /* Attempt to 'OR' block with invalid dimensions into the selection */
     H5E_BEGIN_TRY
     {
-        ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id_copy, 2, H5S_SELECT_OR, &start, &stride, &count,
-                                                    &block);
+        ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id_copy, H5S_MAX_RANK + 1, H5S_SELECT_OR, &start,
+                                                    &stride, &count, &block);
     }
     H5E_END_TRY;
     if (ret == SUCCEED)
