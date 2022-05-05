@@ -835,7 +835,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              with the cache API calls.
  *
  *              NOTE: This test takes some time to run and checks the
- *                    HDF5TestExpress environment variable.
+ *                    testing express level value.
  *
  * Return:      Test pass status (TRUE/FALSE)
  *

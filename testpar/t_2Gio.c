@@ -522,8 +522,8 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 }
 
 /* NOTE:  This is a memory intensive test and is only run
- *        with 2 MPI ranks and with $HDF5TestExpress == 0
- *        i.e. Exhaustive test run is allowed.  Otherwise
+ *        with 2 MPI ranks and with a testing express level
+ *        of 0, i.e. Exhaustive test run is allowed.  Otherwise
  *        the test is skipped.
  *
  * Thanks to l.ferraro@cineca.it for the following test::
