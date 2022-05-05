@@ -25,8 +25,8 @@ static const char *xml_dtd_uri_g = NULL;
 
 static hbool_t            use_custom_vol_g = FALSE;
 static hbool_t            use_custom_vfd_g = FALSE;
-static h5tools_vol_info_t vol_info_g;
-static h5tools_vfd_info_t vfd_info_g;
+static h5tools_vol_info_t vol_info_g       = {0};
+static h5tools_vfd_info_t vfd_info_g       = {0};
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -1238,6 +1238,8 @@ end_collect:
                     h5tools_setstatus(EXIT_FAILURE);
                     goto done;
                 }
+
+                vfd_info_g.info = &ros3_fa_g;
 #else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1255,6 +1257,8 @@ end_collect:
                     h5tools_setstatus(EXIT_FAILURE);
                     goto done;
                 }
+
+                vfd_info_g.info = &hdfs_fa_g;
 #else
                 error_msg("HDFS VFD not enabled.\n");
                 h5tools_setstatus(EXIT_FAILURE);
