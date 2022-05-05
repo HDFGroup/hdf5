@@ -39,9 +39,9 @@
  * \subsection subsec_attribute_intro Introduction
  *
  * Attributes are assumed to be very small as data objects go, so storing them as standard HDF5 datasets would
- * be quite inefficient. HDF5 attributes are therefore managed through a special attributes interface, \ref H5A,
- * which is designed to easily attach attributes to primary data objects as small datasets containing metadata
- * information and to minimize storage requirements.
+ * be quite inefficient. HDF5 attributes are therefore managed through a special attributes interface,
+ * \ref H5A, which is designed to easily attach attributes to primary data objects as small datasets containing
+ * metadata information and to minimize storage requirements.
  *
  * Consider, as examples of the simplest case, a set of laboratory readings taken under known temperature and
  * pressure conditions of 18.0 degrees Celsius and 0.5 atmospheres, respectively. The temperature and pressure
@@ -59,8 +59,8 @@
  * \li There is no partial I/O or sub-setting capability for attribute data
  * \li Attributes cannot be shared
  * \li Attributes cannot have attributes
- * \li Being small, an attribute is stored in the object header of the object it describes and is thus attached
- *  directly to that object
+ * \li Being small, an attribute is stored in the object header of the object it describes and is thus
+ * attached directly to that object
  *
  * \subsection subsec_error_H5A Attribute Function Summaries
  * \ref H5A reference manual
@@ -150,8 +150,8 @@
  * dataspace, and attribute creation property list. The attribute’s name must be locally unique: it must be
  * unique within the context of the object to which it is attached.
  *
- * \ref H5Acreate creates the attribute in memory. The attribute does not exist in the file until \ref H5Awrite writes
- * it there.
+ * \ref H5Acreate creates the attribute in memory. The attribute does not exist in the file until
+ * \ref H5Awrite writes it there.
  *
  * To write or read an attribute, call H5Awrite or H5Aread, respectively:
  * \code
@@ -160,25 +160,25 @@
  * \endcode
  * attr_id identifies the attribute while mem_type_id identifies the in-memory datatype of the attribute data.
  *
- * \ref H5Awrite writes the attribute data from the buffer buf to the file. \ref H5Aread reads attribute data from the
- * file into buf.
+ * \ref H5Awrite writes the attribute data from the buffer buf to the file. \ref H5Aread reads attribute data
+ * from the file into buf.
  *
- * The HDF5 Library converts the metadata between the in-memory datatype, mem_type_id, and the in-file datatype,
- * defined when the attribute was created, without user intervention.
+ * The HDF5 Library converts the metadata between the in-memory datatype, mem_type_id, and the in-file
+ * datatype, defined when the attribute was created, without user intervention.
  *
  * \subsubsection subsubsec_attribute_work_access Accessing Attributes by Name or Index
  *
  * Attributes can be accessed by name or index value. The use of an index value makes it possible to iterate
  * through all of the attributes associated with a given object.
  *
- * To access an attribute by its name, use the \ref H5Aopen_by_name function. \ref H5Aopen_by_name returns an attribute
- * identifier that can then be used by any function that must access an attribute such as \ref H5Aread. Use the
- * function \ref H5Aget_name to determine an attribute’s name.
+ * To access an attribute by its name, use the \ref H5Aopen_by_name function. \ref H5Aopen_by_name returns an
+ * attribute identifier that can then be used by any function that must access an attribute such as \ref
+ * H5Aread. Use the function \ref H5Aget_name to determine an attribute’s name.
  *
- * To access an attribute by its index value, use the \ref H5Aopen_by_idx function. To determine an attribute index
- * value when it is not already known, use the H5Oget_info function. \ref H5Aopen_by_idx is generally used in the
- * course of opening several attributes for later access. Use \ref H5Aiterate if the intent is to perform the same
- * operation on every attribute attached to an object.
+ * To access an attribute by its index value, use the \ref H5Aopen_by_idx function. To determine an attribute
+ * index value when it is not already known, use the H5Oget_info function. \ref H5Aopen_by_idx is generally
+ * used in the course of opening several attributes for later access. Use \ref H5Aiterate if the intent is to
+ * perform the same operation on every attribute attached to an object.
  *
  * \subsubsection subsubsec_attribute_work_info Obtaining Information Regarding an Object’s Attributes
  *
@@ -196,23 +196,17 @@
  * buffer; and buf is the buffer to which the attribute’s name will be read.
  *
  * If the length of the attribute name, and hence the value required for buf_size, is unknown, a first call
- * to \ref H5Aget_name will return that size. If the value of buf_size used in that first call is too small, the
- * name will simply be truncated in buf. A second \ref H5Aget_name call can then be used to retrieve the name in
- * an appropriately-sized buffer.
+ * to \ref H5Aget_name will return that size. If the value of buf_size used in that first call is too small,
+ * the name will simply be truncated in buf. A second \ref H5Aget_name call can then be used to retrieve the
+ * name in an appropriately-sized buffer.
  *
- * To determine the dataspace or datatype of an attribute, call \ref H5Aget_space or \ref H5Aget_type, respectively:
- * \code
- *      hid_t H5Aget_space (hid_t attr_id)
- *      hid_t H5Aget_type (hid_t attr_id)
-  * \endcode
- * \ref H5Aget_space returns the dataspace identifier for the attribute attr_id.
- * \ref H5Aget_type returns the datatype identifier for the attribute attr_id.
+ * To determine the dataspace or datatype of an attribute, call \ref H5Aget_space or \ref H5Aget_type,
+ * respectively: \code hid_t H5Aget_space (hid_t attr_id) hid_t H5Aget_type (hid_t attr_id) \endcode \ref
+ * H5Aget_space returns the dataspace identifier for the attribute attr_id. \ref H5Aget_type returns the
+ * datatype identifier for the attribute attr_id.
  *
- * To determine the number of attributes attached to an object, use the \ref H5Oget_info function. The function
- * signature is below.
- * \code
- *      herr_t H5Oget_info( hid_t object_id, H5O_info_t *object_info  )
- * \endcode
+ * To determine the number of attributes attached to an object, use the \ref H5Oget_info function. The
+ * function signature is below. \code herr_t H5Oget_info( hid_t object_id, H5O_info_t *object_info  ) \endcode
  * The number of attributes will be returned in the object_info buffer. This is generally the preferred first
  * step in determining attribute index values. If the call returns N, the attributes attached to the object
  * object_id have index values of 0 through N-1.
@@ -230,16 +224,17 @@
  *                        H5_iter_order_t order, hsize_t *n, H5A_operator2_t op,
  *                        void *op_data)
  * \endcode
- * \ref H5Aiterate successively marches across all of the attributes attached to the object specified in loc_id,
- * performing the operation(s) specified in op_func with the data specified in op_data on each attribute.
+ * \ref H5Aiterate successively marches across all of the attributes attached to the object specified in
+ * loc_id, performing the operation(s) specified in op_func with the data specified in op_data on each
+ * attribute.
  *
  * When \ref H5Aiterate is called, index contains the index of the attribute to be accessed in this call. When
- * \ref H5Aiterate returns, index will contain the index of the next attribute. If the returned index is the null
- * pointer, then all attributes have been processed, and the iterative process is complete.
+ * \ref H5Aiterate returns, index will contain the index of the next attribute. If the returned index is the
+ * null pointer, then all attributes have been processed, and the iterative process is complete.
  *
  * op_func is a user-defined operation that adheres to the \ref H5A_operator_t prototype. This prototype and
- * certain requirements imposed on the operator’s behavior are described in the \ref H5Aiterate entry in the HDF5
- * Reference Manual.
+ * certain requirements imposed on the operator’s behavior are described in the \ref H5Aiterate entry in the
+ * HDF5 Reference Manual.
  *
  * op_data is also user-defined to meet the requirements of op_func. Beyond providing a parameter with which
  * to pass this data, HDF5 provides no tools for its management and imposes no restrictions.
@@ -253,11 +248,12 @@
  * \code
  *      herr_t H5Adelete (hid_t loc_id, const char *name)
  * \endcode
- * \ref H5Adelete removes the attribute name from the group, dataset, or committed datatype specified in loc_id.
+ * \ref H5Adelete removes the attribute name from the group, dataset, or committed datatype specified in
+ * loc_id.
  *
- * \ref H5Adelete must not be called if there are any open attribute identifiers on the object loc_id. Such a call
- * can cause the internal attribute indexes to change; future writes to an open attribute would then produce
- * unintended results.
+ * \ref H5Adelete must not be called if there are any open attribute identifiers on the object loc_id. Such a
+ * call can cause the internal attribute indexes to change; future writes to an open attribute would then
+ * produce unintended results.
  *
  * \subsubsection subsubsec_attribute_work_close Closing an Attribute
  *
@@ -298,13 +294,15 @@
  *
  * Note that there are some disadvantages to using dense attribute storage. One is that this is a new feature.
  * Datasets, groups, and committed datatypes that use dense storage cannot be read by applications built with
- * earlier versions of the library. Another disadvantage is that attributes in dense storage cannot be compressed.
+ * earlier versions of the library. Another disadvantage is that attributes in dense storage cannot be
+ * compressed.
  *
  * <h4>Large Attributes Stored in Dense Attribute Storage</h4>
  *
  * We generally consider the maximum size of an attribute to be 64K bytes. The library has two ways of storing
- * attributes larger than 64K bytes: in dense attribute storage or in a separate dataset. Using dense attribute
- * storage is described in this section, and storing in a separate dataset is described in the next section.
+ * attributes larger than 64K bytes: in dense attribute storage or in a separate dataset. Using dense
+ * attribute storage is described in this section, and storing in a separate dataset is described in the next
+ * section.
  *
  * To use dense attribute storage to store large attributes, set the number of attributes that will be stored
  * in compact storage to 0 with the H5Pset_attr_phase_change function. This will force all attributes to be

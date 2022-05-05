@@ -43,8 +43,8 @@
  * line number, and error description.
  *
  * \ref subsec_error_ops discusses the basic error concepts such as error stack, error record, and error
- * message and describes the related API functions. These concepts and functions are sufficient for application
- * programs to trace errors inside the HDF5 Library.
+ * message and describes the related API functions. These concepts and functions are sufficient for
+ * application programs to trace errors inside the HDF5 Library.
  *
  * \ref subsec_error_adv talks about the advanced concepts of error
  * class and error stack handle and talks about the related functions. With these concepts and functions, an
@@ -52,14 +52,14 @@
  * error report.
  *
  * Starting with Release 1.8, we have a new set of Error Handling API functions. For the purpose of backward
- * compatibility with version 1.6 and before, we still keep the old API functions, \ref H5Epush1, \ref H5Eprint1,
- * \ref H5Ewalk1, \ref H5Eclear1, \ref H5Eget_auto1, \ref H5Eset_auto1. These functions do not have the error stack as
- * a parameter. The library allows them to operate on the default error stack.  (The H5E compatibility macros
- * will choose the correct function based on the parameters)
+ * compatibility with version 1.6 and before, we still keep the old API functions, \ref H5Epush1,
+ * \ref H5Eprint1, \ref H5Ewalk1, \ref H5Eclear1, \ref H5Eget_auto1, \ref H5Eset_auto1. These functions do
+ * not have the error stack as a parameter. The library allows them to operate on the default error stack.
+ * (The H5E compatibility macros will choose the correct function based on the parameters)
  *
  * The old API is similar to functionality discussed in \ref subsec_error_ops. The functionality discussed in
- * \ref subsec_error_adv,the ability of allowing applications to add their own error records, is the new design
- * for the Error Handling API.
+ * \ref subsec_error_adv,the ability of allowing applications to add their own error records, is the new
+ * design for the Error Handling API.
  *
  * \subsection subsec_error_H5E Error Handling Function Summaries
  * \ref H5E reference manual
@@ -70,18 +70,20 @@
  * \subsection subsec_error_ops Basic Error Handling Operations
  * Let us first try to understand the error stack. An error stack is a collection of error records. Error
  * records can be pushed onto or popped off the error stack. By default, when an error occurs deep within
- * the HDF5 Library, an error record is pushed onto an error stack and that function returns a failure indication.
- * Its caller detects the failure, pushes another record onto the stack, and returns a failure indication. This
- * continues until the API function called by the application returns a failure indication. The next API function
- * being called will reset the error stack. All HDF5 Library error records belong to the same error class. For
- * more information, see \ref subsec_error_adv.
+ * the HDF5 Library, an error record is pushed onto an error stack and that function returns a failure
+ * indication.
+ * Its caller detects the failure, pushes another record onto the stack, and returns a failure indication.
+ * This continues until the API function called by the application returns a failure indication. The next
+ * API function being called will reset the error stack. All HDF5 Library error records belong to the same
+ * error class. For more information, see \ref subsec_error_adv.
  *
  * \subsubsection subsubsec_error_ops_stack Error Stack and Error Message
- * In normal circumstances, an error causes the stack to be printed on the standard error stream automatically.
+ * In normal circumstances, an error causes the stack to be printed on the standard error stream
+ * automatically.
  * This automatic error stack is the library’s default stack. For all the functions in this section, whenever
  * an error stack ID is needed as a parameter, \ref H5E_DEFAULT can be used to indicate the library’s default
- * stack. The first error record of the error stack, number #000, is produced by the API function itself and is
- * usually sufficient to indicate to the application what went wrong.
+ * stack. The first error record of the error stack, number #000, is produced by the API function itself and
+ * is usually sufficient to indicate to the application what went wrong.
  *  <table>
  *     <caption align=top>Example: An Error Message</caption>
  *     <tr>
@@ -92,10 +94,10 @@
  *       simple error that has only one component, the API
  *       function; other errors may have many components.
  *         <p><code><pre>
-HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
-   #000: H5T.c line ### in H5Tclose(): predefined datatype
-      major: Function argument
-      minor: Bad value
+ * HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
+ *    #000: H5T.c line ### in H5Tclose(): predefined datatype
+ *       major: Function argument
+ *       minor: Bad value
  *         </pre></code>
  *       </td>
  *     </tr>
@@ -103,9 +105,9 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  * In the example above, we can see that an error record has a major message and a minor message. A major
  * message generally indicates where the error happens. The location can be a dataset or a dataspace, for
  * example. A minor message explains further details of the error. An example is “unable to open file”.
- * Another specific detail about the error can be found at the end of the first line of each error record. This
- * error description is usually added by the library designer to tell what exactly goes wrong. In the example
- * above, the “predefined datatype” is an error description.
+ * Another specific detail about the error can be found at the end of the first line of each error record.
+ * This error description is usually added by the library designer to tell what exactly goes wrong. In the
+ * example above, the “predefined datatype” is an error description.
  *
  * \subsubsection subsubsec_error_ops_print  Print and Clear an Error Stack
  * Besides the automatic error report, the error stack can also be printed and cleared by the functions
@@ -143,9 +145,9 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  *      herr_t H5Eset_auto2(hid_t error_stack, H5E_auto_t func, void *client_data)
  * \endcode
  * The \ref H5Eset_auto2 function can be used to turn on or off the automatic printing of errors
- * for the error stack specified by error_stack. When turned on (non‐null func pointer), any API function which
- * returns an error indication will first call func, passing it client_data as an argument. When the library
- * is first initialized the auto printing function is set to \ref H5Eprint2 and client_data
+ * for the error stack specified by error_stack. When turned on (non‐null func pointer), any API function
+ * which returns an error indication will first call func, passing it client_data as an argument. When the
+ * library is first initialized the auto printing function is set to \ref H5Eprint2 and client_data
  * is the standard error stream pointer, stderr.
  *
  * <em>To see the current settings:</em>
@@ -159,8 +161,8 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  *     <caption align=top>Example: Turn off error messages while probing a function</caption>
  *     <tr>
  *       <td>
- *         <p>An application can temporarily turn off error messages while “probing” a function. See the example
- * below.
+ *         <p>An application can temporarily turn off error messages while “probing” a function. See the
+ * example below.
  *         <p><code><pre>
  * ***  Save old error handler  ***
  * H5E_auto2_t oldfunc;
@@ -310,21 +312,22 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  * If a C routine that takes a function pointer as an argument is called from within C++ code, the C routine
  * should be returned from normally.
  *
- * Examples of this kind of routine include callbacks such as \ref H5Pset_elink_cb and \ref H5Pset_type_conv_cb and
+ * Examples of this kind of routine include callbacks such as \ref H5Pset_elink_cb and
+ * \ref H5Pset_type_conv_cb and
  * functions such as \ref H5Tconvert and \ref H5Ewalk2.
  *
  * Exiting the routine in its normal fashion allows the HDF5 C Library to clean up its work properly. In other
- * words, if the C++ application jumps out of the routine back to the C++ “catch” statement, the library is not
- * given the opportunity to close any temporary data structures that were set up when the routine was
+ * words, if the C++ application jumps out of the routine back to the C++ “catch” statement, the library is
+ * not given the opportunity to close any temporary data structures that were set up when the routine was
  * called. The C++ application should save some state as the routine is started so that any problem that
  * occurs might be diagnosed.
  *
  * \subsection subsec_error_adv Advanced Error Handling Operations
  * The section above, see \ref subsec_error_ops, discusses the basic error
  * handling operations of the library. In that section, all the error records on the error stack are from the
- * library itself. In this section, we are going to introduce the operations that allow an application program to
- * push its own error records onto the error stack once it declares an error class of its own through the HDF5
- * Error API.
+ * library itself. In this section, we are going to introduce the operations that allow an application program
+ * to push its own error records onto the error stack once it declares an error class of its own through the
+ * HDF5 Error API.
  *
  *   <table>
  *     <caption align=top>Example:  An Error Report</caption>
@@ -356,11 +359,11 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  * class name of the HDF5 Library. All of the library’s error messages (major and minor) are in this default
  * error class. The Error Test in the beginning of the line above error record #000 is the name of the
  * application’s error class. The first two error records, #000 and #001, are from application’s error class.
- * By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library or
- * an application library built on top of the HDF5 Library) or an application program. The error class can be
- * registered for a library or program through the HDF5 Error API. Major and minor messages can be defined
- * in an error class. An application will have object handles for the error class and for major and minor messages
- * for further operation. See the example below.
+ * By definition, an error class is a group of major and minor error messages for a library (the HDF5 Library
+ * or an application library built on top of the HDF5 Library) or an application program. The error class can
+ * be registered for a library or program through the HDF5 Error API. Major and minor messages can be defined
+ * in an error class. An application will have object handles for the error class and for major and minor
+ * messages for further operation. See the example below.
  *
  *   <table>
  *     <caption align=top>Example: The user‐defined error handler</caption>
@@ -466,7 +469,8 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  *     <caption align=top>Example: Closing error messages and unregistering the error class</caption>
  *     <tr>
  *       <td>
- *         <p>The example below shows how an application closes error messages and unregisters the error class.
+ *         <p>The example below shows how an application closes error messages and unregisters the error
+ * class.
  *         <p><code><pre>
  *    H5Eclose_msg(maj_id);
  *    H5Eclose_msg(min_id);
@@ -485,7 +489,8 @@ HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  * \code
  * hid_t H5Eget_current_stack(void)
  * \endcode
- * This function registers the current error stack, returns an object handle, and clears the current error stack.
+ * This function registers the current error stack, returns an object handle, and clears the current error
+ * stack.
  * An empty error stack will also be assigned an ID.
  *
  * <em>To replace the current error stack with another:</em>
