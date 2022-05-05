@@ -23,9 +23,9 @@ static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
 
-static hbool_t            use_custom_vol_g = FALSE;
-static hbool_t            use_custom_vfd_g = FALSE;
-static hbool_t            get_onion_revision_count = FALSE;
+static hbool_t use_custom_vol_g         = FALSE;
+static hbool_t use_custom_vfd_g         = FALSE;
+static hbool_t get_onion_revision_count = FALSE;
 
 static h5tools_vol_info_t vol_info_g;
 static h5tools_vfd_info_t vfd_info_g;
@@ -1465,7 +1465,8 @@ main(int argc, char *argv[])
 
             printf("The number of revisions for the onion file is %lu\n", revision_count);
             goto done;
-        } else
+        }
+        else
             fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
