@@ -176,12 +176,12 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
  *
  * \return \herr_t
  *
- * \details H5FDget_onion_revision_count() returns the number of revisions
+ * \details H5FDonion_get_revision_count() returns the number of revisions
  *          for an onion file. It takes the file name and file access property
  *          list that is set for the onion VFD driver.
  *
  */
-H5_DLL herr_t H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
+H5_DLL herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
 
 #ifdef __cplusplus
 }

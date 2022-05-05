@@ -355,7 +355,7 @@ done:
 } /* end H5Pset_fapl_onion() */
 
 herr_t
-H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count)
+H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count)
 {
     H5P_genplist_t *plist        = NULL;
     herr_t          ret_value    = SUCCEED;

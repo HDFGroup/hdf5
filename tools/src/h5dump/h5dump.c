@@ -1457,7 +1457,7 @@ main(int argc, char *argv[])
         if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
             size_t revision_count = 0;
 
-            if (H5FDget_onion_revision_count(fname, fapl_id, &revision_count) < 0) {
+            if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
                 error_msg("unable to create FAPL for file access\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 goto done;

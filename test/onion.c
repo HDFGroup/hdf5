@@ -4185,7 +4185,7 @@ test_integration_ctl(void)
      *  Start to verify the number of revisions
      *----------------------------------------------------------------------
      */
-    if (H5FDget_onion_revision_count(basename, fapl_id, &revision_count) < 0)
+    if (H5FDonion_get_revision_count(basename, fapl_id, &revision_count) < 0)
         TEST_ERROR
 
     if (2 != revision_count)
