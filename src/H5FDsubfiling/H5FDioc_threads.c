@@ -1563,6 +1563,20 @@ ioc_io_queue_dispatch_eligible_entries(void)
 
         HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
+        /* Check for a get EOF or truncate operation at head of queue */
+        if (io_queue_g.q_head->in_progress) {
+            if ((io_queue_g.q_head->wk_req.tag == TRUNC_OP) ||
+                (io_queue_g.q_head->wk_req.tag == GET_EOF_OP)) {
+
+                /* we have a truncate or get eof operation in progress -- thus no other operations
+                 * can be dispatched until the truncate or get eof operation completes.  Just break
+                 * out of the loop.
+                 */
+
+                break;
+            }
+        }
+
         if (!entry_ptr->in_progress) {
 
             entry_offset = entry_ptr->wk_req.header[1];
@@ -1653,18 +1667,6 @@ ioc_io_queue_dispatch_eligible_entries(void)
 
                 hg_thread_pool_post(ioc_thread_pool, &(entry_ptr->thread_wk));
             }
-        }
-        else if ((entry_ptr->wk_req.tag == TRUNC_OP) || (entry_ptr->wk_req.tag == GET_EOF_OP)) {
-
-            /* we have a truncate or get eof operation in progress -- thus no other operations
-             * can be dispatched until the truncate or get eof operation completes.  Just break
-             * out of the loop.
-             */
-            /* the truncate or get eof operation in progress must be at the head of the queue -- verify this
-             */
-            HDassert(entry_ptr->prev == NULL);
-
-            break;
         }
 
         entry_ptr = entry_ptr->next;
