@@ -23,8 +23,10 @@ static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
 
-static hbool_t            use_custom_vol_g = FALSE;
-static hbool_t            use_custom_vfd_g = FALSE;
+static hbool_t use_custom_vol_g         = FALSE;
+static hbool_t use_custom_vfd_g         = FALSE;
+static hbool_t get_onion_revision_count = FALSE;
+
 static h5tools_vol_info_t vol_info_g;
 static h5tools_vfd_info_t vfd_info_g;
 
@@ -1315,16 +1317,18 @@ end_collect:
     /* Copy the VFD driver info for the input file if it's the onion file */
     if (vfd_info_g.u.name) {
         if (!HDstrcmp(vfd_info_g.u.name, "onion")) {
-            if (vfd_info_g.info)
-                onion_fa_g.revision_num = HDatoi((char *)(vfd_info_g.info));
-            else
-                onion_fa_g.revision_num = 0;
+            onion_fa_g.revision_num = 0;
 
-            HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+            if (vfd_info_g.info) {
+                if (!HDstrcmp(vfd_info_g.info, "revision_count"))
+                    get_onion_revision_count = TRUE;
+                else {
+                    onion_fa_g.revision_num = HDstrtoull((const char *)(vfd_info_g.info), NULL, 0);
+                    HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+                }
+            }
 
-            /* Need to free this memory */
-            vfd_info_g.info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(vfd_info_g.info, &onion_fa_g, sizeof(H5FD_onion_fapl_info_t));
+            vfd_info_g.info = &onion_fa_g;
         }
     } /* driver name defined */
 
@@ -1447,7 +1451,21 @@ main(int argc, char *argv[])
     while (H5_optind < argc) {
         fname = HDstrdup(argv[H5_optind++]);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
+        /* A short cut to get the revision count of an onion file without opening the file */
+        if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
+            size_t revision_count = 0;
+
+            if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
+                error_msg("unable to create FAPL for file access\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+
+            printf("The number of revisions for the onion file is %lu\n", revision_count);
+            goto done;
+        }
+        else
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
@@ -1634,10 +1652,6 @@ main(int argc, char *argv[])
 done:
     /* Free tables for objects */
     table_list_free();
-
-    /* Free the VFD info */
-    if (vfd_info_g.info)
-        HDfree(vfd_info_g.info);
 
     if (fapl_id != H5P_DEFAULT && 0 < H5Pclose(fapl_id)) {
         error_msg("Can't close fapl entry\n");

@@ -355,12 +355,13 @@ done:
 } /* end H5Pset_fapl_onion() */
 
 herr_t
-H5FDget_onion_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count)
+H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count)
 {
     H5P_genplist_t *plist        = NULL;
     herr_t          ret_value    = SUCCEED;
     H5FD_t *        file_drv_ptr = NULL;
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "*si*z", filename, fapl_id, revision_count);
 
     /* Check the file name */
     if (!filename || !HDstrcmp(filename, ""))
