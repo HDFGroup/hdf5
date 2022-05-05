@@ -46,11 +46,8 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#define MAXBUF                2048 /* max buffer length.                        */
-#define LISTENQ               80   /* max pending mirrorS requests              */
-#define DEFAULT_PORT          3000 /* default listening port                    */
-#define MAX_PORT_LOOPS        20   /* max iteratations through port range       */
-#define PORT_LOOP_RETRY_DELAY 1    /* seconds to wait between port scans        */
+#define LISTENQ      80   /* max pending mirrorS requests              */
+#define DEFAULT_PORT 3000 /* default listening port                    */
 
 /* semi-unique "magic" numbers to sanity-check structure pointers */
 #define OP_ARGS_MAGIC    0xCF074379u
@@ -211,8 +208,8 @@ parse_args(int argc, char **argv, struct op_args *args_out)
         return -1;
     }
 
-    /* Loop over arguments after program name and writer_path */
-    for (i = 2; i < argc; i++) {
+    /* Loop over arguments after program name */
+    for (i = 1; i < argc; i++) {
         if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
             mirror_log(NULL, V_INFO, "found help argument");
             args_out->help = 1;
@@ -536,10 +533,27 @@ handle_requests(struct server_run *run)
         if (!HDstrncmp("SHUTDOWN", mybuf, 8)) {
             /* Stop operation if told to stop */
             mirror_log(run->loginfo, V_INFO, "received SHUTDOWN!", ret);
+
+            /* Confirm operation */
+            if ((ret = HDwrite(connfd, "CLOSING", 8)) < 0) {
+                mirror_log(run->loginfo, V_ERR, "write:%d", ret);
+                HDclose(connfd);
+                connfd = -1;
+                goto error;
+            }
+
             HDclose(connfd);
             connfd = -1;
             goto done;
         } /* end if explicit "SHUTDOWN" directive */
+        if (!HDstrncmp("CONFIRM", mybuf, 7)) {
+            /* Confirm operation */
+            if ((ret = HDwrite(connfd, "ALIVE", 6)) < 0) {
+                mirror_log(run->loginfo, V_ERR, "write:%d", ret);
+                goto error;
+            }
+            HDclose(connfd);
+        } /* end if "CONFIRM" directive */
         else if (H5FD_MIRROR_XMIT_OPEN_SIZE == ret) {
             H5FD_mirror_xmit_open_t xopen;
 

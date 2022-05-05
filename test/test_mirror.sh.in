@@ -22,7 +22,10 @@
 nerrors=0
 
 SERVER_VERBOSITY="--verbosity=1"
-SERVER_PORT="--port=3000"
+# Choose random ephemeral port number
+RANDOM_PORT=$[ $RANDOM % 16384 + 49152 ]
+echo "Using port: $RANDOM_PORT"
+SERVER_PORT="--port=$RANDOM_PORT"
 
 
 ###############################################################################
@@ -83,11 +86,14 @@ echo "Launching Mirror Server"
 SERVER_ARGS="$SERVER_PORT $SERVER_VERBOSITY"
 ./mirror_server $SERVER_ARGS &
 
-./mirror_vfd
+./mirror_vfd $SERVER_PORT
 nerrors=$?
 
 echo "Stopping Mirror Server"
 ./mirror_server_stop $SERVER_PORT
+
+# Wait for background server process to exit
+wait
 
 ###############################################################################
 ## Report and exit

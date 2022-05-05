@@ -78,7 +78,7 @@ void *      old_client_data; /* previous error handler arg.*/
 #define NFILENAME    3
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME] = {"ParaTest", "Hugefile", NULL};
-char        filenames[NFILENAME][PATH_MAX];
+char *      filenames[NFILENAME];
 hid_t       fapl; /* file access property list */
 MPI_Comm    test_comm = MPI_COMM_WORLD;
 
@@ -224,7 +224,7 @@ parse_options(int argc, char **argv)
         n = sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; /* exclude the NULL */
 
         for (i = 0; i < n; i++)
-            if (h5_fixname(FILENAME[i], fapl, filenames[i], sizeof(filenames[i])) == NULL) {
+            if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
                 HDprintf("h5_fixname failed\n");
                 nerrors++;
                 return (1);
@@ -4585,6 +4585,8 @@ main(int argc, char **argv)
     MPI_Comm_size(test_comm, &mpi_size);
     MPI_Comm_rank(test_comm, &mpi_rank);
 
+    HDmemset(filenames, 0, sizeof(filenames));
+
     dim0 = BIG_X_FACTOR;
     dim1 = BIG_Y_FACTOR;
     dim2 = BIG_Z_FACTOR;
@@ -4601,6 +4603,15 @@ main(int argc, char **argv)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
     /* Set the internal transition size to allow use of derived datatypes
      * without having to actually read or write large datasets (>2GB).
      */
@@ -4664,6 +4675,11 @@ main(int argc, char **argv)
 
     if (mpi_rank == 0)
         HDremove(FILENAME[0]);
+
+    for (int i = 0; i < NFILENAME; i++) {
+        HDfree(filenames[i]);
+        filenames[i] = NULL;
+    }
 
     H5close();
     if (test_comm != MPI_COMM_WORLD) {
