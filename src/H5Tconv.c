@@ -3251,9 +3251,10 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* If we're down to the last few elements, just wrap up */
                     /* with a "real" reverse copy */
                     if (safe < 2) {
-                        s        = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
-                        d        = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
-                        b        = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
                         s_stride = -s_stride;
                         d_stride = -d_stride;
                         b_stride = -b_stride;
@@ -3263,7 +3264,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     else {
                         s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
                         d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
-                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
                 }     /* end if */
                 else {
@@ -3407,7 +3409,9 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
-                    b += b_stride;
+
+                    if (b)
+                        b += b_stride;
                 } /* end for */
 
                 /* Decrement number of elements left to convert */
