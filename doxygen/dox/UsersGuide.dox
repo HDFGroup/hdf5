@@ -59,7 +59,7 @@ HDF5 Release 1.10
     <ul>
         <li> <!-- @ref subsubsec_attribute_program_exist --> To Open and Read or Write an Existing Attribute
     </ul>
-\li \ref H5A Attribute Function Summaries
+\li \ref subsec_error_H5A
 \li \ref subsec_attribute_work
     <ul>
         <li> \ref subsubsec_attribute_work_struct
@@ -74,8 +74,22 @@ HDF5 Release 1.10
 
 \ref sec_error
 \li \ref subsec_error_intro
+\li \ref subsec_error_program
+\li \ref subsec_error_H5E
 \li \ref subsec_error_ops
-\li \ref H5E Error Handling Function Summaries
+    <ul>
+        <li> \ref subsubsec_error_ops_stack
+        <li> \ref subsubsec_error_ops_print
+        <li> \ref subsubsec_error_ops_mute
+        <li> \ref subsubsec_error_ops_custom_print
+        <li> \ref subsubsec_error_ops_walk
+        <li> \ref subsubsec_error_ops_travers
+    </ul>
+\li \ref subsec_error_adv
+    <ul>
+        <li> \ref subsubsec_error_adv_more
+        <li> \ref subsubsec_error_adv_app
+    </ul>
 
 \section sec_plist Properties and Property Lists in HDF5
 
