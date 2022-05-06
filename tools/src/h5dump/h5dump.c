@@ -1321,7 +1321,7 @@ end_collect:
             if (!HDstrcmp(vfd_info_g.info, "revision_count"))
                 get_onion_revision_count = TRUE;
             else {
-                errno = 0;
+                errno                   = 0;
                 onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
                 if (errno == ERANGE) {
                     HDprintf("Invalid onion revision specified\n");

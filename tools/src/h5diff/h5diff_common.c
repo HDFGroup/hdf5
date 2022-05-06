@@ -497,7 +497,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     /* If file 1 uses the onion VFD, get the revision number */
     if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
         if (opts->vfd_info[0].info) {
-            errno = 0;
+            errno                     = 0;
             onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
             if (errno == ERANGE) {
                 HDprintf("Invalid onion revision specified for file 1\n");
@@ -514,7 +514,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     /* If file 2 uses the onion VFD, get the revision number */
     if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
         if (opts->vfd_info[1].info) {
-            errno = 0;
+            errno                     = 0;
             onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
             if (errno == ERANGE) {
                 HDprintf("Invalid onion revision specified for file 2\n");
