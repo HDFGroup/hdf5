@@ -375,7 +375,7 @@ test_revision_index(void)
     entry.logi_page = 100; /* phys_addr still 501, checksum bbbbbbbb */
     if (H5FD_onion_revision_index_insert(rix_p, &entry) >= 0)
         TEST_ERROR; /* all components but sum must match */
-            entry.phys_addr = 101;
+    entry.phys_addr = 101;
 
     /* Successful update */
 
@@ -4073,7 +4073,7 @@ test_integration_ctl(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment */
     };
-    size_t   revision_count;
+    size_t revision_count;
 
     TESTING("onion-created HDF5 file with revisions testing H5FDctl");
 
