@@ -38,7 +38,7 @@ HL="@HL@"
 ##    $FLINKER $FCFLAGS $H5BLD_FCFLAGS $F9XSUFFIXFLAG $LDFLAGS $LIBS      ##
 ##    $fmodules $link_objs $link_args $shared_link                        ##
 ##                                                                        ##
-## These settings can be overridden by setting HDF5_FCFLAGS,               ##
+## These settings can be overridden by setting HDF5_FCFLAGS,              ##
 ## HDF5_LDFLAGS, or HDF5_LIBS in the environment.                         ##
 ##                                                                        ##
 ############################################################################
