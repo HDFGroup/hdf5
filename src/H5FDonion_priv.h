@@ -31,7 +31,7 @@
 #define H5FD__ONION_ENCODED_SIZE_HEADER          40
 #define H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY     20
 #define H5FD__ONION_ENCODED_SIZE_RECORD_POINTER  20
-#define H5FD__ONION_ENCODED_SIZE_REVISION_RECORD 76
+#define H5FD__ONION_ENCODED_SIZE_REVISION_RECORD 68
 #define H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY   20
 
 /* Flags must align exactly one per bit, up to 24 bits */
@@ -143,11 +143,8 @@ typedef struct H5FD_onion_revision_record_t {
     uint64_t                    parent_revision_num;
     char                        time_of_creation[16];
     uint64_t                    logi_eof;
-    uint32_t                    user_id;
-    uint32_t                    username_size;
-    uint32_t                    comment_size;
     H5FD_onion_archival_index_t archival_index;
-    char *                      username;
+    uint32_t                    comment_size;
     char *                      comment;
     uint32_t                    checksum;
 } H5FD_onion_revision_record_t;

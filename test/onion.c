@@ -1266,44 +1266,48 @@ error:
 static int
 test_revision_record_encode_decode(void)
 {
-    unsigned char *buf      = NULL;
-    unsigned char  exp[189] = {
-        'O', 'R', 'R', 'S',                     /* signature                 */
-        1, 0, 0, 0,                             /* NOTE: update version w/ "current" as needed */
-        5, 0, 0, 0, 0, 0, 0, 0,                 /* revision ID               */
-        2, 0, 0, 0, 0, 0, 0, 0,                 /* parent revision ID        */
-        '1', '9', '4', '1', '1', '2', '0', '7', /* Time of Creation          */
-        'T', '1', '9', '0', '6', '4', '3', 'Z', /* ...                       */
-        0x11, 0x00, 0, 0, 0x02, 0, 0, 0,        /* logical file size         */
-        0, 16, 0, 0,                            /* page size                 */
-        143, 25, 0, 0,                          /* user ID                   */
-        4, 0, 0, 0, 0, 0, 0, 0,                 /* n_entries                 */
-        8, 0, 0, 0,                             /* username size             */
-        25, 0, 0, 0,                            /* comment size              */
-        /* entry0 pointer */
-        0, 0xB0, 0x1E, 0, 0, 0, 0, 0,         /* logical offset            */
-        0x4B, 0x02, 0, 0, 0, 0, 0, 0,         /* physical address          */
-        0, 0, 0, 0, /* sum populated below */ /* checksum                  */
-        /* entry1 pointer */
-        0, 0xF0, 0x2E, 0, 0, 0, 0, 0, 0xA7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* sum populated below */
-        /* entry2 pointer */
-        0, 0x50, 0x15, 0, 0, 0x20, 0, 0, 0x11, 0, 0, 0, 0x02, 0, 0, 0, 0, 0, 0, 0, /* sum populated below */
-        /* entry3 pointer */
-        0, 0xE0, 0x24, 0, 0, 0, 0, 0, 0xB1, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* sum populated below */
-        'J', 'o', 'h', 'n', 'D', 'o', 'e', '\0', /* username                  */
-        'E', 'x', 'a', 'm', 'p', 'l', 'e', ' ',  /* comment                   */
-        'c', 'o', 'm', 'm', 'e', 'n', 't', ' ',  /* ...                       */
-        'm', 'e', 's', 's', 'a', 'g', 'e', '.',  /* ...                       */
-        '\0',                                    /* ...                       */
-        /* final checksum */
-        0, 0, 0, 0 /* sum populated below */ /* checksum                  */
+/* clang-format off */
+    /* Byte array of expected values (FRAGILE!) */
+    unsigned char exp[173] = {
+        'O', 'R', 'R', 'S',                     /* Bytes 000-003:   signature */
+        1, 0, 0, 0,                             /* Bytes 004-007:   version */
+        5, 0, 0, 0, 0, 0, 0, 0,                 /* Bytes 008-015:   revision ID */
+        2, 0, 0, 0, 0, 0, 0, 0,                 /* Bytes 016-023:   parent revision ID */
+        '1', '9', '4', '1', '1', '2', '0', '7', /* Bytes 024-039:   time of creation */
+        'T', '1', '9', '0', '6', '4', '3', 'Z', /*                  ... */
+        0x11, 0x00, 0, 0, 0x02, 0, 0, 0,        /* Bytes 040-047:   logical file size */
+        0, 16, 0, 0,                            /* Bytes 048-051:   page size */
+        4, 0, 0, 0, 0, 0, 0, 0,                 /* Bytes 052-059:   # entries */
+        25, 0, 0, 0,                            /* Bytes 060-063:   comment size */
+        /* ENTRY 0 */
+        0, 0xB0, 0x1E, 0, 0, 0, 0, 0,           /* Bytes 064-071:   entry 0: logical offset */
+        0x4B, 0x02, 0, 0, 0, 0, 0, 0,           /* Bytes 072-079:   entry 0: physical address */
+        0, 0, 0, 0,                             /* Bytes 080-083:   checksum (populated below) */
+        /* ENTRY 1 */
+        0, 0xF0, 0x2E, 0, 0, 0, 0, 0,           /* Bytes 084-091:   entry 1: logical offset */
+        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */ 
+        0, 0, 0, 0,                             /* Bytes 100-103:   checksum (populated below) */
+        /* ENTRY 2 */
+        0, 0x50, 0x15, 0, 0, 0x20, 0, 0,        /* Bytes 104-111:   entry 2: logical offset */
+        0x11, 0, 0, 0, 0x02, 0, 0, 0,           /* Bytes 112-119:   entry 2: phyiscal address */
+        0, 0, 0, 0,                             /* Bytes 120-123:   checksum (populated below) */
+        /* ENTRY 3 */
+        0, 0xE0, 0x24, 0, 0, 0, 0, 0,           /* Bytes 124-131:   entry 3: logical offset */
+        0xB1, 0x01, 0, 0, 0, 0, 0, 0,           /* Bytes 132-139:   entry 3: physical address */
+        0, 0, 0, 0,                             /* Bytes 140-143:   checksum (populated below) */
+        'E', 'x', 'a', 'm', 'p', 'l', 'e', ' ', /* Bytes 144-168:   comment */
+        'c', 'o', 'm', 'm', 'e', 'n', 't', ' ', /*                  ... */
+        'm', 'e', 's', 's', 'a', 'g', 'e', '.', /*                  ... */
+        '\0',                                   /*                  ... */
+        0, 0, 0, 0                              /* Bytes 169-172:   final checksum (populated below) */
     };
+/* clang-format on */
+    unsigned char *              buf      = NULL;
     unsigned char *              buf_p = NULL;
     size_t                       i     = 0;
     uint64_t                     size_ret;
     H5FD_onion_revision_record_t r_out;
     uint32_t                     sum_out     = 0;
-    char                         username[8] = "JohnDoe";
     char                         comment[25] = "Example comment message.";
     H5FD_onion_revision_record_t record      = {
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
@@ -1311,35 +1315,30 @@ test_revision_record_encode_decode(void)
         2,             /* parent revision ID */
         {'\0'},        /* time of creation - populated below */
         8589934609ull, /* logical file size */
-        6543,          /* user ID */
-        8,             /* username size */
-        25,            /* comment size */
         {
-            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 12, /* page_size_log2 */
+            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,     /* version */
+            12,                                          /* page_size_log2 */
             4,                                           /* n_entries */
             NULL,                                        /* list - populated below */
         },                                               /* archival index struct */
-        username,                                        /* username */
+        25,                                              /* comment size */
         comment,                                         /* comment */
-        0,                                               /* checksum - computed for us */
+        0,                                               /* checksum (computed later) */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
-                        strlen("JohnDoe") + 1 + strlen("Example comment message.") + 1;
+                        HDstrlen("Example comment message.") + 1;
 
     r_out.archival_index.list = NULL;
     r_out.comment             = NULL;
-    r_out.username            = NULL;
 
     TESTING("encode/decode revision record");
-
-    if (189 != exp_size)
-        TEST_ERROR;
 
     HDmemcpy(record.time_of_creation, "19411207T190643Z", 16);
     record.archival_index.list = HDcalloc(record.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == record.archival_index.list)
         TEST_ERROR;
+
     /* Convert logi_page and should match address in expected buffer */
     record.archival_index.list[0].logi_page = 491ull;
     record.archival_index.list[0].phys_addr = 587ull;
@@ -1370,9 +1369,7 @@ test_revision_record_encode_decode(void)
 
     /* Required initialization for record-out structure */
     r_out.version                  = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
-    r_out.username_size            = 0;
     r_out.comment_size             = 0;
-    r_out.username                 = NULL;
     r_out.comment                  = NULL;
     r_out.archival_index.version   = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
     r_out.archival_index.n_entries = 0;
@@ -1385,10 +1382,33 @@ test_revision_record_encode_decode(void)
 
     if (H5FD_onion_revision_record_encode(&record, buf, &sum_out) != exp_size)
         TEST_ERROR;
+
+    hbool_t badness = FALSE;
     for (i = 0; i < exp_size; i++) {
-        if (exp[i] != buf[i])
-            TEST_ERROR;
+        if (exp[i] != buf[i]) {
+            badness = TRUE;
+            HDprintf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i, (unsigned int)exp[i], (unsigned int)buf[i]);
+        }
     }
+    if (badness) {
+        /* If this fragile test breaks, this information is helpful... */
+        HDprintf("INDEX\n");
+        for (i = 0; i < exp_size; i++)
+            HDprintf("%4zu ", i);
+        HDprintf("\n");
+
+        HDprintf("EXPECTED\n");
+        for (i = 0; i < exp_size; i++)
+            HDprintf("0x%02X ", (unsigned int)exp[i]);
+        HDprintf("\n");
+
+        HDprintf("ACTUAL\n");
+        for (i = 0; i < exp_size; i++)
+            HDprintf("0x%02X ", (unsigned int)buf[i]);
+        HDprintf("\n");
+    }
+    if (badness)
+        TEST_ERROR;
     if (record.checksum != sum_out)
         TEST_ERROR;
 
@@ -1431,17 +1451,12 @@ test_revision_record_encode_decode(void)
     /* Initial decode; get variable-length component sizes */
     if (H5FD_onion_revision_record_decode(exp, &r_out) != exp_size)
         TEST_ERROR;
-    if (record.username_size != r_out.username_size)
-        TEST_ERROR;
     if (record.comment_size != r_out.comment_size)
         TEST_ERROR;
     if (record.archival_index.n_entries != r_out.archival_index.n_entries)
         TEST_ERROR;
 
     /* Allocate variable-length components */
-    r_out.username = HDcalloc(r_out.username_size, sizeof(char));
-    if (NULL == r_out.username)
-        TEST_ERROR;
     r_out.comment = HDcalloc(r_out.comment_size, sizeof(char));
     if (NULL == r_out.comment)
         TEST_ERROR;
@@ -1454,8 +1469,6 @@ test_revision_record_encode_decode(void)
         TEST_ERROR;
     if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != r_out.version)
         TEST_ERROR;
-    if (record.user_id != r_out.user_id)
-        TEST_ERROR;
     if (record.revision_num != r_out.revision_num)
         TEST_ERROR;
     if (record.parent_revision_num != r_out.parent_revision_num)
@@ -1465,14 +1478,6 @@ test_revision_record_encode_decode(void)
     if (record.checksum != r_out.checksum)
         TEST_ERROR;
     if (HDstrncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
-        TEST_ERROR;
-    if (record.username_size != r_out.username_size)
-        TEST_ERROR;
-    if (record.username_size != HDstrlen(r_out.username) + 1)
-        TEST_ERROR;
-    if (HDstrlen(record.username) != HDstrlen(r_out.username))
-        TEST_ERROR;
-    if (HDstrcmp(record.username, r_out.username) != 0)
         TEST_ERROR;
     if (record.comment_size != r_out.comment_size)
         TEST_ERROR;
@@ -1503,7 +1508,6 @@ test_revision_record_encode_decode(void)
 
     HDfree(r_out.archival_index.list);
     HDfree(r_out.comment);
-    HDfree(r_out.username);
     HDfree(buf);
     HDfree(record.archival_index.list);
 
@@ -1513,7 +1517,6 @@ test_revision_record_encode_decode(void)
 error:
     HDfree(r_out.archival_index.list);
     HDfree(r_out.comment);
-    HDfree(r_out.username);
     HDfree(buf);
     HDfree(record.archival_index.list);
 
@@ -1685,8 +1688,6 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         rev_out.archival_index.page_size_log2 = 0;
         rev_out.comment_size                  = 0;
         rev_out.comment                       = NULL;
-        rev_out.username_size                 = 0;
-        rev_out.username                      = NULL;
 
         readsize = rpp->record_size;
         if (NULL == (buf = HDmalloc((size_t)rpp->record_size)))
@@ -1720,8 +1721,6 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
             HDcalloc(rev_out.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
         if (NULL == rev_out.archival_index.list)
             TEST_ERROR;
-        if (NULL == (rev_out.username = HDmalloc((size_t)rev_out.username_size)))
-            TEST_ERROR;
 
         readsize = H5FD_onion_revision_record_decode(buf, &rev_out);
         if (rpp->record_size != readsize)
@@ -1745,7 +1744,6 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         HDfree(buf);
         HDfree(rev_out.comment);
         HDfree(rev_out.archival_index.list);
-        HDfree(rev_out.username);
     }
 
     HDfree(whs_out.record_pointer_list);
@@ -1757,7 +1755,6 @@ error:
     HDfree(buf);
     HDfree(rev_out.comment);
     HDfree(rev_out.archival_index.list);
-    HDfree(rev_out.username);
     HDfree(whs_out.record_pointer_list);
 
     return -1;
