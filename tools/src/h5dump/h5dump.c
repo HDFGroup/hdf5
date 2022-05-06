@@ -26,8 +26,8 @@ static const char *xml_dtd_uri_g = NULL;
 static hbool_t use_custom_vol_g = FALSE;
 static hbool_t use_custom_vfd_g = FALSE;
 
-static h5tools_vol_info_t vol_info_g       = {0};
-static h5tools_vfd_info_t vfd_info_g       = {0};
+static h5tools_vol_info_t vol_info_g = {0};
+static h5tools_vfd_info_t vfd_info_g = {0};
 
 static hbool_t get_onion_revision_count = FALSE;
 
