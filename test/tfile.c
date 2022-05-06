@@ -4326,7 +4326,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 
     /* Get current split settings */
     if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (split) {
         /* Set memb_addr aligned */
@@ -4342,7 +4342,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
     /* Set multi driver with new FAPLs */
     if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl_arr, (const char *const *)memb_name, memb_addr, relax) <
         0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)

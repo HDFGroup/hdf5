@@ -99,30 +99,30 @@ main(void)
     /* File access property list */
     h5_reset();
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create a test file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
     if (H5FD_set_eoa(f->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Reset metadata accumulator for the file */
     if (accum_reset(f) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test Functions */
     nerrors += test_write_read(f);
@@ -140,12 +140,12 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     /* End of test code, close and delete file */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* This test uses a different file */
     nerrors += test_swmr_write_big(TRUE);
@@ -1295,7 +1295,7 @@ test_accum_adjust(H5F_t *f)
     /* Flush the accumulator -- we want to test the case when
         accumulator contains clean data */
     if (accum_flush(f) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Write a small (1KB) block to the end of the accumulator */
     /* ==> Accumulator will need more buffer space */
@@ -1337,7 +1337,7 @@ test_accum_adjust(H5F_t *f)
 
     /* Flush the accumulator to clean it */
     if (accum_flush(f) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* write to part of the accumulator so just the start of it is dirty */
     if (accum_write(0, 5, wbuf) < 0)
@@ -1382,7 +1382,7 @@ test_accum_adjust(H5F_t *f)
 
     /* Flush the accumulator to clean it */
     if (accum_flush(f) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* write to part of the accumulator so it's dirty, but not entirely dirty */
     /* (just the begging few bytes will be clean) */
@@ -2106,9 +2106,9 @@ test_swmr_write_big(hbool_t newest_format)
     hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
 
     if (newest_format)
-        TESTING("SWMR write of large metadata: with latest format")
+        TESTING("SWMR write of large metadata: with latest format");
     else
-        TESTING("SWMR write of large metadata: with non-latest-format")
+        TESTING("SWMR write of large metadata: with non-latest-format");
 
 #if !defined(H5_HAVE_UNISTD_H) && !defined(H5_HAVE_WIN32_API)
 
@@ -2130,43 +2130,43 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* File access property list */
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Both cases will result in v3 superblock and version 2 object header for SWMR */
     if (newest_format) { /* latest format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     }
     else { /* non-latest-format */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     } /* end if */
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Open the file with SWMR_WRITE */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (rf = (H5F_t *)H5VL_object(fid)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
     if (H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024 * 1024 * 10)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         FAIL_STACK_ERROR;
@@ -2288,7 +2288,7 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* Check if the process terminated correctly */
     if (!process_success)
-        FAIL_PUTS_ERROR("child process exited abnormally")
+        FAIL_PUTS_ERROR("child process exited abnormally");
 
     /* Flush the accumulator */
     if (accum_reset(rf) < 0)
@@ -2304,7 +2304,7 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     /* Release memory */

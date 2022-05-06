@@ -181,7 +181,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
 
     /* Allocate array */
     if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
-        TEST_ERROR
+        TEST_ERROR;
 
     init_full(dst, nx, ny, nz);
 
@@ -229,7 +229,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
                                             acc += dst[u * ny * nz + v * nz + w];
 
                                 if (acc != ref_value) {
-                                    H5_FAILED()
+                                    H5_FAILED();
                                     if (!HDisatty(1)) {
                                         /*
                                          * Print debugging info unless output
@@ -372,9 +372,9 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
      * Allocate arrays
      */
     if (NULL == (src = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
-        TEST_ERROR
+        TEST_ERROR;
 
     init_full(src, nx, ny, nz);
 
@@ -463,7 +463,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                     for (w = dst_offset[2]; w < dst_offset[2] + dz; w++)
                                         acc += dst[u * ny * nz + v * nz + w];
                             if (acc != ref_value) {
-                                H5_FAILED()
+                                H5_FAILED();
                                 if (!HDisatty(1)) {
                                     /*
                                      * Print debugging info unless output is
@@ -500,7 +500,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                              */
                             if (acc + (unsigned)dx * (unsigned)dy * (unsigned)dz !=
                                 ref_value + nx * ny * nz) {
-                                H5_FAILED()
+                                H5_FAILED();
                                 if (!HDisatty(1)) {
                                     /*
                                      * Print debugging info unless output is
@@ -579,9 +579,9 @@ test_multifill(size_t nx)
 
     /* Initialize the source and destination */
     if (NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (dst = (struct a_struct *)HDmalloc(nx * sizeof(*dst))))
-        TEST_ERROR
+        TEST_ERROR;
 
     for (i = 0; i < nx; i++) {
         src[i].left  = 1111111;
@@ -628,7 +628,7 @@ test_multifill(size_t nx)
         else if (dst[i].right != 4444444)
             HDsprintf(s, "bad dst[%lu].right", (unsigned long)i);
         if (s[0]) {
-            H5_FAILED()
+            H5_FAILED();
             if (!HDisatty(1)) {
                 AT();
                 HDprintf("   fill={%d,%g,%d}\n   ", fill.left, fill.mid, fill.right);
@@ -691,9 +691,9 @@ test_endian(size_t nx)
 
     /* Initialize arrays */
     if (NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (dst = (uint8_t *)HDcalloc(nx, (size_t)4)))
-        TEST_ERROR
+        TEST_ERROR;
 
     init_full(src, nx, (size_t)4, (size_t)1);
 
@@ -712,7 +712,7 @@ test_endian(size_t nx)
     for (i = 0; i < nx; i++) {
         for (j = 0; j < 4; j++) {
             if (src[i * 4 + j] != dst[i * 4 + 3 - j]) {
-                H5_FAILED()
+                H5_FAILED();
                 if (!HDisatty(1)) {
                     /*
                      * Print debugging info unless output is going directly
@@ -777,9 +777,9 @@ test_transpose(size_t nx, size_t ny)
 
     /* Initialize */
     if (NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (dst = (int *)HDcalloc(nx * ny, sizeof(*dst))))
-        TEST_ERROR
+        TEST_ERROR;
 
     for (i = 0; i < nx; i++)
         for (j = 0; j < ny; j++)
@@ -800,7 +800,7 @@ test_transpose(size_t nx, size_t ny)
     for (i = 0; i < nx; i++) {
         for (j = 0; j < ny; j++) {
             if (src[i * ny + j] != dst[j * nx + i]) {
-                H5_FAILED()
+                H5_FAILED();
                 if (!HDisatty(1)) {
                     AT();
                     HDprintf("   diff at i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
@@ -876,11 +876,11 @@ test_sub_super(size_t nx, size_t ny)
 
     /* Initialize */
     if (NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (half = (uint8_t *)HDcalloc((size_t)1, nx * ny)))
-        TEST_ERROR
+        TEST_ERROR;
     if (NULL == (twice = (uint8_t *)HDcalloc((size_t)4, nx * ny)))
-        TEST_ERROR
+        TEST_ERROR;
 
     init_full(full, 2 * nx, 2 * ny, (size_t)1);
 
@@ -899,7 +899,7 @@ test_sub_super(size_t nx, size_t ny)
     for (i = 0; i < nx; i++) {
         for (j = 0; j < ny; j++) {
             if (full[4 * i * ny + 2 * j] != half[i * ny + j]) {
-                H5_FAILED()
+                H5_FAILED();
                 if (!HDisatty(1)) {
                     AT();
                     HDprintf("   full[%lu][%lu] != half[%lu][%lu]\n", (unsigned long)i * 2,
@@ -958,7 +958,7 @@ test_sub_super(size_t nx, size_t ny)
                 HDsprintf(s, "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
                           (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
             if (s[0]) {
-                H5_FAILED()
+                H5_FAILED();
                 if (!HDisatty(1)) {
                     AT();
                     HDprintf("   %s\n   Half is:\n", s);
@@ -1019,7 +1019,7 @@ test_array_fill(size_t lo, size_t hi)
 
     /* Initialize */
     if (NULL == (dst = (int *)HDcalloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Setup */
     for (u = 0; u < ARRAY_FILL_SIZE; u++)
@@ -1033,7 +1033,7 @@ test_array_fill(size_t lo, size_t hi)
         for (u = 0; u < w; u++)
             for (v = 0; v < ARRAY_FILL_SIZE; v++)
                 if (dst[(u * ARRAY_FILL_SIZE) + v] != src[v])
-                    TEST_ERROR
+                    TEST_ERROR;
 
         HDmemset(dst, 0, sizeof(int) * ARRAY_FILL_SIZE * w);
     } /* end for */
@@ -1084,7 +1084,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
     /* Initialize */
     if (NULL == (a = (hsize_t *)HDmalloc(sizeof(hsize_t) * x * y * z)))
-        TEST_ERROR
+        TEST_ERROR;
 
     dims[0] = z;
     dims[1] = y;
@@ -1108,11 +1108,11 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
         /* Check offset of coordinate */
         if (a[off] != off)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Get coordinates of offset */
         if (H5VM_array_calc(off, ARRAY_OFFSET_NDIMS, dims, new_coords) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Check computed coordinates */
         for (v = 0; v < ARRAY_OFFSET_NDIMS; v++)
