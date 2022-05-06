@@ -1867,7 +1867,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if (H5P_get(a_plist, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get generate_md_ck_cb info")
 
-        if(!vfd_swmr_config_ptr->writer)
+        if (!vfd_swmr_config_ptr->writer)
             use_file_locking = FALSE;
     }
 

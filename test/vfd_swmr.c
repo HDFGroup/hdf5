@@ -43,22 +43,22 @@
 
 #define FS_PAGE_SIZE 512
 
-#define FILENAME    "vfd_swmr_file"
-#define FILENAME2   "vfd_swmr_file2.h5"
-#define FILENAME3   "vfd_swmr_file3.h5"
-#define FILENAME4   "vfd_swmr_file4.h5"
-#define FNAME       "non_vfd_swmr_file"
+#define FILENAME  "vfd_swmr_file"
+#define FILENAME2 "vfd_swmr_file2.h5"
+#define FILENAME3 "vfd_swmr_file3.h5"
+#define FILENAME4 "vfd_swmr_file4.h5"
+#define FNAME     "non_vfd_swmr_file"
 
 static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
-#define namebase      FILENAME 
-#define namebase2     FILENAME2
-#define namebase3     FILENAME3
-#define namebase4     FILENAME4
-#define non_namebase  FNAME 
+#define namebase     FILENAME
+#define namebase2    FILENAME2
+#define namebase3    FILENAME3
+#define namebase4    FILENAME4
+#define non_namebase FNAME
 
 /* FILENAME */
-#define MD_FILENAME  "vfd_swmr_metadata_file"
-#define UD_FILENAME  "vfd_swmr_updater_file"
+#define MD_FILENAME "vfd_swmr_metadata_file"
+#define UD_FILENAME "vfd_swmr_updater_file"
 
 /* FILENAME2 */
 #define MD_FILENAME2 "vfd_swmr_metadata_file2"
@@ -67,8 +67,8 @@ static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
 #define MD_FILENAME3 "vfd_swmr_metadata_file3"
 
 /* FILENAME4 */
-#define MD_FILE   "vfd_swmr_md_file"
-#define UD_FILE   "vfd_swmr_ud_file"
+#define MD_FILE "vfd_swmr_md_file"
+#define UD_FILE "vfd_swmr_ud_file"
 
 #define FILE_NAME_LEN 1024
 
@@ -139,7 +139,7 @@ static herr_t   md_ck_cb(char *md_file_path, uint64_t tick_num);
  */
 static int
 vfd_swmr_fapl_augment(hid_t fapl, bool use_latest_format, bool only_meta_pages, size_t page_buf_size,
-                      H5F_vfd_swmr_config_t *config) 
+                      H5F_vfd_swmr_config_t *config)
 {
     if (use_latest_format) {
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
@@ -159,7 +159,7 @@ vfd_swmr_fapl_augment(hid_t fapl, bool use_latest_format, bool only_meta_pages, 
         return -1;
 
     return 0;
-}  /* vfd_swmr_fapl_augment() */
+} /* vfd_swmr_fapl_augment() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_fapl()
@@ -193,7 +193,7 @@ test_fapl(hid_t orig_fapl)
     TESTING("Configure VFD SWMR with fapl");
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        FAIL_STACK_ERROR; 
+        FAIL_STACK_ERROR;
 
     /* Allocate memory for the configuration structure */
     if ((my_config = HDmalloc(sizeof(*my_config))) == NULL)
@@ -371,12 +371,12 @@ error:
 static unsigned
 test_file_fapl(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */
+    char  filename[FILE_NAME_LEN];             /* Filename to use */
     hid_t fid       = H5I_INVALID_HID;         /* File ID */
     hid_t fid2      = H5I_INVALID_HID;         /* File ID */
     hid_t fcpl      = H5I_INVALID_HID;         /* File creation property list ID */
-    hid_t fapl1 = H5I_INVALID_HID;   /* File access property list ID associated with the file */
-    hid_t fapl2 = H5I_INVALID_HID;   /* File access property list ID associated with the file */
+    hid_t fapl1     = H5I_INVALID_HID;         /* File access property list ID associated with the file */
+    hid_t fapl2     = H5I_INVALID_HID;         /* File access property list ID associated with the file */
     hid_t file_fapl = H5I_INVALID_HID;         /* File access property list ID associated with the file */
     H5F_vfd_swmr_config_t *config1     = NULL; /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *config2     = NULL; /* Configuration for VFD SWMR */
@@ -405,7 +405,6 @@ test_file_fapl(hid_t orig_fapl)
     /*
      * Configured as VFD SWMR reader + no page buffering
      */
-
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
@@ -551,7 +550,6 @@ test_file_fapl(hid_t orig_fapl)
      * Set up different VFD SWMR configuration + page_buffering
      */
 
-
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
@@ -563,7 +561,7 @@ test_file_fapl(hid_t orig_fapl)
     /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
     if (vfd_swmr_fapl_augment(fapl2, FALSE, FALSE, 4096, config2) < 0)
         FAIL_STACK_ERROR;
-        
+
     /* Should succeed to open the file as VFD SWMR writer */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
         TEST_ERROR;
@@ -633,7 +631,7 @@ test_file_fapl(hid_t orig_fapl)
         FAIL_STACK_ERROR;
 
     /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
-    if (vfd_swmr_fapl_augment(fapl1, FALSE, FALSE, 4096, config1) < 0) 
+    if (vfd_swmr_fapl_augment(fapl1, FALSE, FALSE, 4096, config1) < 0)
         FAIL_STACK_ERROR;
 
     /* Re-open the same file as VFD SWMR writer */
@@ -715,9 +713,9 @@ error:
 static unsigned
 test_file_end_tick(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */
-    char filename2[FILE_NAME_LEN];   /* Filename to use */
-    char filename3[FILE_NAME_LEN];   /* Filename to use */
+    char                   filename[FILE_NAME_LEN];   /* Filename to use */
+    char                   filename2[FILE_NAME_LEN];  /* Filename to use */
+    char                   filename3[FILE_NAME_LEN];  /* Filename to use */
     hid_t                  fid1    = H5I_INVALID_HID; /* File ID */
     hid_t                  fid2    = H5I_INVALID_HID; /* File ID */
     hid_t                  fid3    = H5I_INVALID_HID; /* File ID */
@@ -739,7 +737,7 @@ test_file_end_tick(hid_t orig_fapl)
     h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
     h5_fixname(namebase2, orig_fapl, filename2, sizeof(filename2));
     h5_fixname(namebase3, orig_fapl, filename3, sizeof(filename3));
- 
+
     /* Create a file without VFD SWMR configured */
     if ((fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -965,11 +963,11 @@ error:
 static unsigned
 test_writer_create_open_flush(hid_t orig_fapl)
 {
-    char                   filename[FILE_NAME_LEN];   /* Filename to use */
-    hid_t                  fid       = -1;   /* File ID */
-    hid_t                  fapl      = -1;   /* File access property list */
-    hid_t                  fcpl      = -1;   /* File creation property list */
-    H5F_vfd_swmr_config_t *my_config = NULL; /* Configuration for VFD SWMR */
+    char                   filename[FILE_NAME_LEN]; /* Filename to use */
+    hid_t                  fid       = -1;          /* File ID */
+    hid_t                  fapl      = -1;          /* File access property list */
+    hid_t                  fcpl      = -1;          /* File creation property list */
+    H5F_vfd_swmr_config_t *my_config = NULL;        /* Configuration for VFD SWMR */
 
     TESTING("Create/Open/Flush an HDF5 file for VFD SWMR");
 
@@ -989,11 +987,11 @@ test_writer_create_open_flush(hid_t orig_fapl)
     init_vfd_swmr_config(my_config, 1, 3, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        FAIL_STACK_ERROR; 
+        FAIL_STACK_ERROR;
 
     /* use_latest_format, only_meta_page, page_buf_size, config */
     if (vfd_swmr_fapl_augment(fapl, FALSE, FALSE, 4096, my_config) < 0)
-        FAIL_STACK_ERROR; 
+        FAIL_STACK_ERROR;
 
     if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
@@ -1082,7 +1080,7 @@ error:
 static unsigned
 test_writer_md(hid_t orig_fapl)
 {
-    char           filename[FILE_NAME_LEN];    /* Filename to use */
+    char           filename[FILE_NAME_LEN];                            /* Filename to use */
     hid_t          fid         = H5I_INVALID_HID;                      /* File ID */
     hid_t          fapl        = H5I_INVALID_HID;                      /* File access property list */
     hid_t          fcpl        = H5I_INVALID_HID;                      /* File creation property list */
@@ -1394,7 +1392,7 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
 static unsigned
 test_reader_md_concur(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];        /* Filename to use */
+    char        filename[FILE_NAME_LEN]; /* Filename to use */
     unsigned    i     = 0;               /* Local index variables */
     uint8_t *   buf   = NULL;            /* Data page from the page buffer */
     hid_t       dcpl  = H5I_INVALID_HID; /* Dataset creation property list */
@@ -2041,8 +2039,8 @@ error:
 static unsigned
 test_multiple_file_opens_concur(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];       /* Filename to use */
-    char filename2[FILE_NAME_LEN];      /* Filename to use */
+    char                   filename[FILE_NAME_LEN];  /* Filename to use */
+    char                   filename2[FILE_NAME_LEN]; /* Filename to use */
     hid_t                  fcpl = H5I_INVALID_HID;
     pid_t                  tmppid;                /* Child process ID returned by waitpid */
     pid_t                  childpid = 0;          /* Child process ID */
@@ -2661,7 +2659,7 @@ error:
 static unsigned
 test_file_end_tick_concur(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */
+    char                   filename[FILE_NAME_LEN];         /* Filename to use */
     hid_t                  fcpl          = H5I_INVALID_HID; /* File creation property list */
     hid_t                  fid_writer    = H5I_INVALID_HID; /* File ID for writer */
     hid_t                  fapl_writer   = H5I_INVALID_HID; /* File access property list for writer */
@@ -2928,7 +2926,7 @@ error:
  * Function:    test_make_believe_multiple_file_opens_concur()
  *
  * Purpose:     Verify the following:
- *              A) Open a file as VFD SWMR reader 
+ *              A) Open a file as VFD SWMR reader
  *                 --there is no metadata file i.e. make-believe is enabled
  *              B) Open the file as VFD SWMR writer
  *                 --metadata file is created
@@ -2954,13 +2952,14 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
     int                    child_exit_val;        /* Exit status of the child */
     int                    parent_pfd[2];         /* Pipe for parent process as writer */
     int                    child_pfd[2];          /* Pipe for child process as reader */
-    int                    notify  = 0;           /* Notification between parent and child */
+    int                    notify = 0;            /* Notification between parent and child */
     hid_t                  fid    = H5I_INVALID_HID;
     hid_t                  fapl   = H5I_INVALID_HID;
-    H5F_vfd_swmr_config_t *config = NULL;  /* VFD SWMR configuration */
-    H5F_t *                f;              /* File pointer */
+    H5F_vfd_swmr_config_t *config = NULL; /* VFD SWMR configuration */
+    H5F_t *                f;             /* File pointer */
 
-    TESTING("Verify make-believe-data when opening files concurrently as VFD SWMR reader and then as VFD SWMR writer");
+    TESTING("Verify make-believe-data when opening files concurrently as VFD SWMR reader and then as VFD "
+            "SWMR writer");
 
     h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
@@ -3081,7 +3080,7 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
     /*
      * Set up and open file A as VFD SWMR reader
      */
-    
+
     /* Allocate memory for VFD SWMR configuration */
     if ((config = HDmalloc(sizeof(*config))) == NULL)
         FAIL_STACK_ERROR;
@@ -3109,11 +3108,10 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
         FAIL_STACK_ERROR;
 
     /* Verify make-believe: should be true */
-    if(!H5FD_vfd_swmr_get_make_believe(f->shared->lf)) {
+    if (!H5FD_vfd_swmr_get_make_believe(f->shared->lf)) {
         printf("Make believe for initial open should be true\n");
         TEST_ERROR;
     }
-
 
     /* Send notification 1 to child to open file A as VFD SWMR writer */
     notify = 1;
@@ -3127,11 +3125,11 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
     }
 
     /* Trigger end of tick processing */
-    if(H5Fvfd_swmr_end_tick(fid) < 0)
+    if (H5Fvfd_swmr_end_tick(fid) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify make-believe: should be false */
-    if(H5FD_vfd_swmr_get_make_believe(f->shared->lf)) {
+    if (H5FD_vfd_swmr_get_make_believe(f->shared->lf)) {
         printf("Make believe after end of tick processing should be false\n");
         TEST_ERROR;
     }
@@ -3140,7 +3138,6 @@ test_make_believe_multiple_file_opens_concur(hid_t orig_fapl)
     notify = 3;
     if (HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
         FAIL_STACK_ERROR;
-
 
     /*
      * Done
@@ -3211,18 +3208,18 @@ error:
 static unsigned
 test_multiple_file_opens(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];       /* Filename to use */
-    char filename2[FILE_NAME_LEN];      /* Filename to use */
-    char non_filename[FILE_NAME_LEN];   /* Filename to use */
-    hid_t                  fid1  = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid2  = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid   = H5I_INVALID_HID; /* File ID */
-    hid_t                  fcpl  = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t                  fapl1 = H5I_INVALID_HID; /* File access property list ID */
-    hid_t                  fapl2 = H5I_INVALID_HID; /* File access property list ID */
-    H5F_t *                f1, *f2, *f;             /* File pointer */
-    H5F_vfd_swmr_config_t *config1 = NULL;          /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_config_t *config2 = NULL;          /* Configuration for VFD SWMR */
+    char                   filename[FILE_NAME_LEN];     /* Filename to use */
+    char                   filename2[FILE_NAME_LEN];    /* Filename to use */
+    char                   non_filename[FILE_NAME_LEN]; /* Filename to use */
+    hid_t                  fid1  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fid2  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fid   = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fcpl  = H5I_INVALID_HID;     /* File creation property list ID */
+    hid_t                  fapl1 = H5I_INVALID_HID;     /* File access property list ID */
+    hid_t                  fapl2 = H5I_INVALID_HID;     /* File access property list ID */
+    H5F_t *                f1, *f2, *f;                 /* File pointer */
+    H5F_vfd_swmr_config_t *config1 = NULL;              /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;              /* Configuration for VFD SWMR */
     eot_queue_entry_t *    curr;
 
     TESTING("EOT queue entries when opening files with/without VFD SWMR");
@@ -3425,7 +3422,7 @@ error:
 static unsigned
 test_same_file_opens(hid_t orig_fapl, hbool_t presume)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */
+    char                   filename[FILE_NAME_LEN];   /* Filename to use */
     hid_t                  fid     = H5I_INVALID_HID; /* File ID */
     hid_t                  fid2    = H5I_INVALID_HID; /* File ID */
     hid_t                  fcpl    = H5I_INVALID_HID; /* File creation property list ID */
@@ -3434,7 +3431,8 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     H5F_vfd_swmr_config_t *config1 = NULL;            /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *config2 = NULL;            /* Configuration for VFD SWMR */
 
-    TESTING("Multiple opens of the same file with VFD SWMR configuration with/without presume_posix_semantics");
+    TESTING(
+        "Multiple opens of the same file with VFD SWMR configuration with/without presume_posix_semantics");
 
     h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
@@ -3476,7 +3474,8 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE:FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
+    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE : FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
+                         MD_FILENAME, NULL);
 
     if ((fapl1 = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3501,13 +3500,14 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
         FAIL_STACK_ERROR;
 
     /*
-     * Set up VFD SWMR configuration as reader in fapl2 
+     * Set up VFD SWMR configuration as reader in fapl2
      */
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config2, 3, 8, presume ? TRUE:FALSE, FALSE, TRUE, FALSE, TRUE, 3, NULL, MD_FILENAME, NULL);
+    init_vfd_swmr_config(config2, 3, 8, presume ? TRUE : FALSE, FALSE, TRUE, FALSE, TRUE, 3, NULL,
+                         MD_FILENAME, NULL);
 
     if ((fapl2 = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3566,7 +3566,8 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE:FALSE, FALSE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
+    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE : FALSE, FALSE, TRUE, FALSE, TRUE, 2, NULL,
+                         MD_FILENAME, NULL);
 
     if ((fapl1 = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3584,77 +3585,76 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     }
     H5E_END_TRY;
 
-    if (!presume) { 
+    if (!presume) {
         /* Should fail because there is no metadata file */
         /* Take a while to complete due to retries */
         if (fid >= 0)
             TEST_ERROR;
-    } else { /* presume is true */
+    }
+    else { /* presume is true */
         /* Should succeed since presume_posix_semantics is true allowing make_believe data */
         if (fid < 0)
             TEST_ERROR;
 
         /* Continue testing for the remaining 3 cases */
         /* Keep the file open */
-    
-    /* config, tick_len, max_lag, presume_posix_semantics, writer,
-     * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
-     * md_file_path, md_file_name, updater_file_path */
-    /* presume_posix_semantics is TRUE */
-    init_vfd_swmr_config(config2, 4, 10, TRUE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
-    if ((fapl2 = H5Pcopy(orig_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        /* config, tick_len, max_lag, presume_posix_semantics, writer,
+         * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
+         * md_file_path, md_file_name, updater_file_path */
+        /* presume_posix_semantics is TRUE */
+        init_vfd_swmr_config(config2, 4, 10, TRUE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
-    /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
-    if (vfd_swmr_fapl_augment(fapl2, FALSE, FALSE, 4096, config2) < 0)
-        FAIL_STACK_ERROR;
+        if ((fapl2 = H5Pcopy(orig_fapl)) < 0)
+            FAIL_STACK_ERROR;
 
-    /* Open the same file again as VFD SWMR writer */
-    /* Should fail */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl2);
-    }
-    H5E_END_TRY;
-    if (fid2 >= 0)
-        TEST_ERROR;
-    
+        /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
+        if (vfd_swmr_fapl_augment(fapl2, FALSE, FALSE, 4096, config2) < 0)
+            FAIL_STACK_ERROR;
 
-    /* Open the same file again as VFD SWMR reader */
-    /* Should succeed */
-    if ((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl1)) < 0)
-        TEST_ERROR;
+        /* Open the same file again as VFD SWMR writer */
+        /* Should fail */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl2);
+        }
+        H5E_END_TRY;
+        if (fid2 >= 0)
+            TEST_ERROR;
 
-    if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR;
+        /* Open the same file again as VFD SWMR reader */
+        /* Should succeed */
+        if ((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl1)) < 0)
+            TEST_ERROR;
 
-    /* Open the same file again as regular writer */
-    /* Should fail: 1st open--VFD SWMR reader, 2nd open--regular writer */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (fid2 >= 0)
-        TEST_ERROR;
+        if (H5Fclose(fid2) < 0)
+            FAIL_STACK_ERROR;
 
-    /* Open the same file again as regular reader */
-    /* Should fail: 1st open--VFD SWMR reader, 2nd open--regular reader */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (fid2 >= 0)
-        TEST_ERROR;
+        /* Open the same file again as regular writer */
+        /* Should fail: 1st open--VFD SWMR reader, 2nd open--regular writer */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (fid2 >= 0)
+            TEST_ERROR;
 
+        /* Open the same file again as regular reader */
+        /* Should fail: 1st open--VFD SWMR reader, 2nd open--regular reader */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (fid2 >= 0)
+            TEST_ERROR;
 
-    if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        if (H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
 
-    if (H5Pclose(fapl2) < 0)
-        FAIL_STACK_ERROR;
+        if (H5Pclose(fapl2) < 0)
+            FAIL_STACK_ERROR;
     }
 
     if (H5Pclose(fapl1) < 0)
@@ -3677,7 +3677,8 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE:FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
+    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE : FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
+                         MD_FILENAME, NULL);
 
     if ((fapl1 = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3735,7 +3736,8 @@ test_same_file_opens(hid_t orig_fapl, hbool_t presume)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE:FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
+    init_vfd_swmr_config(config1, 4, 10, presume ? TRUE : FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
+                         MD_FILENAME, NULL);
 
     if ((fapl1 = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3913,25 +3915,25 @@ out:
 static unsigned
 test_enable_disable_eot(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];       /* Filename to use */
-    char filename2[FILE_NAME_LEN];      /* Filename to use */
-    char filename3[FILE_NAME_LEN];      /* Filename to use */
-    char non_filename[FILE_NAME_LEN];   /* Filename to use */
-    hid_t                  fid   = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid1  = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid2  = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid3  = H5I_INVALID_HID; /* File ID */
-    hid_t                  fcpl  = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t                  fapl1 = H5I_INVALID_HID; /* File access property list ID */
-    hid_t                  fapl2 = H5I_INVALID_HID; /* File access property list ID */
-    hid_t                  fapl3 = H5I_INVALID_HID; /* File access property list ID */
-    H5F_t *                f1, *f2, *f3;            /* File pointer */
-    H5F_vfd_swmr_config_t *config1 = NULL;          /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_config_t *config2 = NULL;          /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_config_t *config3 = NULL;          /* Configuration for VFD SWMR */
-    eot_queue_entry_t *    curr;                    /* Pointer to an entry on the EOT queue */
-    unsigned               count = 0;               /* Counter */
-    herr_t                 ret;                     /* Return value */
+    char                   filename[FILE_NAME_LEN];     /* Filename to use */
+    char                   filename2[FILE_NAME_LEN];    /* Filename to use */
+    char                   filename3[FILE_NAME_LEN];    /* Filename to use */
+    char                   non_filename[FILE_NAME_LEN]; /* Filename to use */
+    hid_t                  fid   = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fid1  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fid2  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fid3  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fcpl  = H5I_INVALID_HID;     /* File creation property list ID */
+    hid_t                  fapl1 = H5I_INVALID_HID;     /* File access property list ID */
+    hid_t                  fapl2 = H5I_INVALID_HID;     /* File access property list ID */
+    hid_t                  fapl3 = H5I_INVALID_HID;     /* File access property list ID */
+    H5F_t *                f1, *f2, *f3;                /* File pointer */
+    H5F_vfd_swmr_config_t *config1 = NULL;              /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;              /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config3 = NULL;              /* Configuration for VFD SWMR */
+    eot_queue_entry_t *    curr;                        /* Pointer to an entry on the EOT queue */
+    unsigned               count = 0;                   /* Counter */
+    herr_t                 ret;                         /* Return value */
 
     TESTING("H5Fvfd_swmr_enable/disable_end_of_tick()");
 
@@ -4385,7 +4387,7 @@ error:
 static unsigned
 test_updater_flags_same_file_opens(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */    
+    char                   filename[FILE_NAME_LEN];                  /* Filename to use */
     hid_t                  fid     = H5I_INVALID_HID;                /* File ID */
     hid_t                  fid2    = H5I_INVALID_HID;                /* File ID */
     hid_t                  fcpl    = H5I_INVALID_HID;                /* File creation property list ID */
@@ -4798,13 +4800,13 @@ error:
 static unsigned
 test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
 {
-    char filename[FILE_NAME_LEN];   /* Filename to use */
-    hid_t                   fid  = H5I_INVALID_HID; /* File ID */
-    hid_t                   fcpl = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t                   fapl = H5I_INVALID_HID; /* File access property list ID */
-    H5F_vfd_swmr_config_t   config;                 /* Configuration for VFD SWMR */
-    H5F_generate_md_ck_cb_t cb_info;                /* Callback */
-    H5F_t *                 f = NULL;               /* Internal file object pointer */
+    char                    filename[FILE_NAME_LEN]; /* Filename to use */
+    hid_t                   fid  = H5I_INVALID_HID;  /* File ID */
+    hid_t                   fcpl = H5I_INVALID_HID;  /* File creation property list ID */
+    hid_t                   fapl = H5I_INVALID_HID;  /* File access property list ID */
+    H5F_vfd_swmr_config_t   config;                  /* Configuration for VFD SWMR */
+    H5F_generate_md_ck_cb_t cb_info;                 /* Callback */
+    H5F_t *                 f = NULL;                /* Internal file object pointer */
     char *                  md_file_path_name;
 
     if (file_create) {
@@ -4914,13 +4916,13 @@ error:
 static unsigned
 test_auto_generate_md(hid_t orig_fapl, const char *md_path)
 {
-    char filename[FILE_NAME_LEN];       /* Filename to use */
-    char newfilename[FILE_NAME_LEN];    /* Filename to use */
-    hid_t fid       = H5I_INVALID_HID;  /* File ID */
-    hid_t fcpl      = H5I_INVALID_HID;  /* File creation property list ID */
-    hid_t fapl = H5I_INVALID_HID;   /* File access property list ID associated with the file */
-    H5F_vfd_swmr_config_t *config     = NULL; /* Configuration for VFD SWMR */
-    H5F_t *                f;           /* File pointer */
+    char                   filename[FILE_NAME_LEN];    /* Filename to use */
+    char                   newfilename[FILE_NAME_LEN]; /* Filename to use */
+    hid_t                  fid  = H5I_INVALID_HID;     /* File ID */
+    hid_t                  fcpl = H5I_INVALID_HID;     /* File creation property list ID */
+    hid_t                  fapl = H5I_INVALID_HID; /* File access property list ID associated with the file */
+    H5F_vfd_swmr_config_t *config = NULL;          /* Configuration for VFD SWMR */
+    H5F_t *                f;                      /* File pointer */
 
     TESTING("Automatic generation of metadata file name with/without md_path");
 
@@ -4961,7 +4963,7 @@ test_auto_generate_md(hid_t orig_fapl, const char *md_path)
     /* Zero out newfilename */
     HDmemset(newfilename, 0, sizeof(newfilename));
 
-    if(md_path != NULL) {
+    if (md_path != NULL) {
         HDstrcat(newfilename, md_path);
         HDstrcat(newfilename, "/");
     }
@@ -4976,7 +4978,6 @@ test_auto_generate_md(hid_t orig_fapl, const char *md_path)
     /* Closing */
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
-
 
     if (H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
@@ -5000,7 +5001,7 @@ error:
 
     return 1;
 } /* test_auto_generate_md() */
- 
+
 /*-------------------------------------------------------------------------
  * Function:    test_long_md_path_name()
  *
@@ -5017,14 +5018,14 @@ error:
 static unsigned
 test_long_md_path_name(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN + 10];  /* Filename to use */
-    char long_md_name[FILE_NAME_LEN + 10];    /* Filename to use */
-    char long_md_path[FILE_NAME_LEN + 10];    /* Filename to use */
-    hid_t fid       = H5I_INVALID_HID;  /* File ID */
-    hid_t fapl = H5I_INVALID_HID;       /* File access property list ID associated with the file */
-    H5F_vfd_swmr_config_t *config     = NULL; /* Configuration for VFD SWMR */
-    unsigned i, times;
-    int ret;
+    char                   filename[FILE_NAME_LEN + 10];     /* Filename to use */
+    char                   long_md_name[FILE_NAME_LEN + 10]; /* Filename to use */
+    char                   long_md_path[FILE_NAME_LEN + 10]; /* Filename to use */
+    hid_t                  fid  = H5I_INVALID_HID;           /* File ID */
+    hid_t                  fapl = H5I_INVALID_HID; /* File access property list ID associated with the file */
+    H5F_vfd_swmr_config_t *config = NULL;          /* Configuration for VFD SWMR */
+    unsigned               i, times;
+    int                    ret;
 
     TESTING("Generation of metadata pathname + filename exceeding H5F__MAX_VFD_SWMR_FILE_NAME_LEN");
 
@@ -5032,7 +5033,7 @@ test_long_md_path_name(hid_t orig_fapl)
 
     /* Create long metadata pathname + filename that exceed H5F__MAX_VFD_SWMR_FILE_NAME_LEN */
 
-    times = (FILE_NAME_LEN/2) / HDstrlen("long_md_name") + 1;
+    times = (FILE_NAME_LEN / 2) / HDstrlen("long_md_name") + 1;
 
     HDmemset(long_md_path, 0, sizeof(long_md_path));
     HDmemset(long_md_name, 0, sizeof(long_md_name));
@@ -5060,10 +5061,10 @@ test_long_md_path_name(hid_t orig_fapl)
     /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
     /* Should fail when calling H5Pset_vfd_swmr_config */
     H5E_BEGIN_TRY
-        ret = vfd_swmr_fapl_augment(fapl, FALSE, FALSE, 4096, config);
+    ret = vfd_swmr_fapl_augment(fapl, FALSE, FALSE, 4096, config);
     H5E_END_TRY;
 
-    if(ret >= 0)
+    if (ret >= 0)
         TEST_ERROR;
 
     /* Free buffers */
@@ -5101,19 +5102,19 @@ error:
 static unsigned
 test_auto_long_md_path_name(hid_t orig_fapl)
 {
-    char filename[FILE_NAME_LEN + 10];      /* Filename to use */
-    char long_namebase[FILE_NAME_LEN + 10]; /* Filename to use */
-    hid_t fid       = H5I_INVALID_HID;  /* File ID */
-    hid_t fcpl      = H5I_INVALID_HID;  /* File creation property list ID */
-    hid_t fapl = H5I_INVALID_HID;   /* File access property list ID associated with the file */
-    H5F_vfd_swmr_config_t *config     = NULL; /* Configuration for VFD SWMR */
-    unsigned i, times;
+    char                   filename[FILE_NAME_LEN + 10];      /* Filename to use */
+    char                   long_namebase[FILE_NAME_LEN + 10]; /* Filename to use */
+    hid_t                  fid  = H5I_INVALID_HID;            /* File ID */
+    hid_t                  fcpl = H5I_INVALID_HID;            /* File creation property list ID */
+    hid_t                  fapl = H5I_INVALID_HID; /* File access property list ID associated with the file */
+    H5F_vfd_swmr_config_t *config = NULL;          /* Configuration for VFD SWMR */
+    unsigned               i, times;
 
     TESTING("Automatic generation of metadata file name exceeding H5F__MAX_VFD_SWMR_FILE_NAME_LEN");
 
     /* Create long hdf5 filename to trigger automatic generation of long metadata filename */
 
-    times = FILE_NAME_LEN/HDstrlen(namebase) + 1;
+    times = FILE_NAME_LEN / HDstrlen(namebase) + 1;
 
     HDmemset(long_namebase, 0, sizeof(long_namebase));
 
@@ -5149,13 +5150,13 @@ test_auto_long_md_path_name(hid_t orig_fapl)
     }
 
     /* Create the HDF5 file with VFD SWMR enabled */
-    /* Should fail when doing automatic generation of metadata filename 
+    /* Should fail when doing automatic generation of metadata filename
        because of the long hdf5 filename */
     H5E_BEGIN_TRY
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     H5E_END_TRY;
 
-    if(fid >= 0)
+    if (fid >= 0)
         TEST_ERROR;
 
     if (H5Pclose(fcpl) < 0)
@@ -5194,14 +5195,14 @@ error:
 int
 main(void)
 {
-    hid_t fapl = H5I_INVALID_HID;    /* File access property list for */
-                                     /* data files                    */
-    unsigned    nerrors      = 0;    /* Cumulative error count */
-    char *      lock_env_var = NULL; /* File locking env var pointer */
-    const char *env_h5_drvr  = NULL; /* File Driver value from environment */
-    hbool_t     use_file_locking;    /* Read from env var */
-    hid_t          driver_id    = -1;   /* ID for this VFD */
-    unsigned long  driver_flags = 0;    /* VFD feature flags */
+    hid_t fapl = H5I_INVALID_HID;      /* File access property list for */
+                                       /* data files                    */
+    unsigned      nerrors      = 0;    /* Cumulative error count */
+    char *        lock_env_var = NULL; /* File locking env var pointer */
+    const char *  env_h5_drvr  = NULL; /* File Driver value from environment */
+    hbool_t       use_file_locking;    /* Read from env var */
+    hid_t         driver_id    = -1;   /* ID for this VFD */
+    unsigned long driver_flags = 0;    /* VFD feature flags */
 
     /* Check the environment variable that determines if we care
      * about file locking. File locking should be used unless explicitly
@@ -5243,10 +5244,10 @@ main(void)
         PUTS_ERROR("Can't get VFD-dependent fapl")
     }
 
-     /* Get the VFD feature flags for this VFD */
-    if((driver_id = H5Pget_driver(fapl)) < 0)
+    /* Get the VFD feature flags for this VFD */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
         PUTS_ERROR("Can't get driver set in fapl")
-    if(H5FDdriver_query(driver_id, &driver_flags) < 0)
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         PUTS_ERROR("Can't query driver flags")
 
     /* Check whether the VFD feature flag supports VFD SWMR */
@@ -5318,5 +5319,4 @@ error:
         H5Pclose(fapl);
     }
     H5E_END_TRY;
-
 }
