@@ -2405,18 +2405,10 @@ test_vanishing_datasets(const struct mt_opts *opts)
 error:
     H5E_BEGIN_TRY
     {
-        if (fapl_id != H5I_INVALID_HID) {
-            H5Pclose(fapl_id);
-        }
-        if (file_id != H5I_INVALID_HID) {
-            H5Fclose(file_id);
-        }
-        if (dset_id != H5I_INVALID_HID) {
-            H5Dclose(dset_id);
-        }
-        if (dspace_id != H5I_INVALID_HID) {
-            H5Sclose(dspace_id);
-        }
+        H5Pclose(fapl_id);
+        H5Fclose(file_id);
+        H5Dclose(dset_id);
+        H5Sclose(dspace_id);
     }
     H5E_END_TRY;
     return -1;

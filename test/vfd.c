@@ -5975,7 +5975,7 @@ main(void)
      */
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr) {
-        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
+        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", env_h5_drvr);
         HDexit(EXIT_SUCCESS);
     }
 
