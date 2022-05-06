@@ -370,7 +370,7 @@ H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revisi
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*si*z", filename, fapl_id, revision_count);
+    H5TRACE3("e", "*six", filename, fapl_id, revision_count);
 
     /* Check args */
     if (!filename || !HDstrcmp(filename, ""))
@@ -656,7 +656,6 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write")
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec_p->comment_size +
-                                   (size_t)rec_p->username_size +
                                    (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec_p->archival_index.n_entries))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
@@ -788,7 +787,6 @@ done:
 
     H5MM_xfree(file->name_recov);
     H5MM_xfree(file->summary.record_pointer_list);
-    H5MM_xfree(file->rev_record.username);
     H5MM_xfree(file->rev_record.comment);
     H5MM_xfree(file->rev_record.archival_index.list);
 
@@ -984,12 +982,12 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
  *              H5FD_onion_revision_record_encode().
  *
  *              MUST BE CALLED TWICE:
- *              On the first call, n_entries, comment_size, and username_size
- *              in the destination structure must all all be zero, and their
+ *              On the first call, n_entries and comment_size in the
+ *              destination structure must all all be zero, and their
  *              respective variable-length components (index_entry_list,
- *              comment, username) must all be NULL.
+ *              comment) must all be NULL.
  *
- *              If the buffer is well-formed, the destinatino structure is
+ *              If the buffer is well-formed, the destination structure is
  *              tentatively populated with fixed-size values, and the number of
  *              bytes read are returned.
  *
@@ -997,8 +995,8 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
  *              variable-length components, in accordance with the associated
  *              indicators (array of index-entry structures for
  *              index_entry_list, of size n_entries; character arrays for
- *              username and comment, allocated with the *_size number of
- *              bytes -- space for NULL-terminator is included in _size).
+ *              comment, allocated with the *_size number of bytes -- space
+ *              for NULL-terminator is included in _size).
  *
  *              Then the decode operation is called a second time, and all
  *              components will be populated (and again number of bytes read is
@@ -1011,16 +1009,15 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
 uint64_t
 H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
-    uint32_t       ui32          = 0;
-    uint32_t       page_size     = 0;
-    uint32_t       sum           = 0;
-    uint64_t       ui64          = 0;
-    uint64_t       n_entries     = 0;
-    uint32_t       username_size = 0;
-    uint32_t       comment_size  = 0;
-    uint8_t *      ui8p          = NULL;
-    unsigned char *ptr           = NULL;
-    uint64_t       ret_value     = 0;
+    uint32_t       ui32         = 0;
+    uint32_t       page_size    = 0;
+    uint32_t       sum          = 0;
+    uint64_t       ui64         = 0;
+    uint64_t       n_entries    = 0;
+    uint32_t       comment_size = 0;
+    uint8_t *      ui8p         = NULL;
+    unsigned char *ptr          = NULL;
+    uint64_t       ret_value    = 0;
 
     FUNC_ENTER_NOAPI_NOINIT;
 
@@ -1070,20 +1067,10 @@ H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record
          record->archival_index.page_size_log2++)
         ;
 
-    HDmemcpy(&ui32, ptr, 4);
-    ui8p = (uint8_t *)&ui32;
-    UINT32DECODE(ui8p, record->user_id);
-    ptr += 4;
-
     HDmemcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, n_entries);
     ptr += 8;
-
-    HDmemcpy(&ui32, ptr, 4);
-    ui8p = (uint8_t *)&ui32;
-    UINT32DECODE(ui8p, username_size);
-    ptr += 4;
 
     HDmemcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
@@ -1134,18 +1121,6 @@ H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record
         }
     }
 
-    if (record->username_size == 0) {
-        if (record->username != NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "username pointer prematurely allocated")
-        record->username_size = username_size;
-    }
-    else {
-        if (record->username == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no username pointer")
-        HDmemcpy(record->username, ptr, username_size);
-    }
-    ptr += username_size;
-
     if (record->comment_size == 0) {
         if (record->comment != NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "comment pointer prematurely allocated")
@@ -1186,7 +1161,7 @@ done:
  *              The destination buffer must be sufficiently large to hold the
  *              encoded contents.
  *              (Hint: `sizeof(revision-record-struct) + comment-size +
- *              username-size + sizeof(index-entry-struct) * n_entries)`
+ *              sizeof(index-entry-struct) * n_entries)`
  *              guarantees ample/excess space.)
  *
  * Return:      Number of bytes written to buffer.
@@ -1221,9 +1196,7 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
     ptr += 16;
     UINT64ENCODE(ptr, record->logi_eof);
     UINT32ENCODE(ptr, page_size);
-    UINT32ENCODE(ptr, record->user_id);
     UINT64ENCODE(ptr, record->archival_index.n_entries);
-    UINT32ENCODE(ptr, record->username_size);
     UINT32ENCODE(ptr, record->comment_size);
 
     if (record->archival_index.n_entries > 0) {
@@ -1244,12 +1217,6 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
             sum = H5_checksum_fletcher32((ptr - 16), 16);
             UINT32ENCODE(ptr, sum);
         }
-    }
-
-    if (record->username_size > 0) {
-        HDassert(record->username != NULL && *record->username != '\0');
-        HDmemcpy(ptr, record->username, record->username_size);
-        ptr += record->username_size;
     }
 
     if (record->comment_size > 0) {
@@ -1425,40 +1392,6 @@ H5FD_onion_whole_history_encode(H5FD_onion_whole_history_t *summary, unsigned ch
 } /* end H5FD_onion_whole_history_encode() */
 
 /*-----------------------------------------------------------------------------
- * Populate user_id and username (string) in revision record pointer.
- * Assumes that the username string pointer arrives as NULL;
- * Allocated username string must be manually freed when done.
- *-----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__onion_set_userinfo_in_record(H5FD_onion_revision_record_t *rec_p)
-{
-    uid_t          uid       = 0;
-    struct passwd *user_info = NULL;
-    herr_t         ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE;
-
-    uid = HDgetuid();
-
-    HDassert(0 == ((uint64_t)uid & 0xFFFFFFFF00000000)); /* fits uint32_t */
-    rec_p->user_id = (uint32_t)uid;
-
-    if (NULL == (user_info = HDgetpwuid(uid)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get user info")
-
-    rec_p->username_size = (uint32_t)HDstrlen(user_info->pw_name) + 1;
-
-    if (NULL == (rec_p->username = H5MM_malloc(sizeof(char) * rec_p->username_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for username string")
-
-    HDmemcpy(rec_p->username, user_info->pw_name, rec_p->username_size);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_set_userinfo_in_record() */
-
-/*-----------------------------------------------------------------------------
  * Create/truncate HDF5 and onion data for a fresh file.
  *
  * Special open operation required to instantiate the canonical file and
@@ -1500,9 +1433,6 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
         hdr_p->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
 
     hdr_p->origin_eof = 0;
-
-    if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Can't record user info")
 
     backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
@@ -1659,7 +1589,6 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
      *       of the struct here is completely bananas.
      */
     r_out->comment             = H5MM_xfree(r_out->comment);
-    r_out->username            = H5MM_xfree(r_out->username);
     r_out->archival_index.list = H5MM_xfree(r_out->archival_index.list);
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
@@ -1700,7 +1629,6 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
         r_out->archival_index.n_entries = 0;
         r_out->comment_size             = 0;
-        r_out->username_size            = 0;
 
         if (r_out->revision_num < revision_num)
             low = (n == high) ? high : n + 1;
@@ -1732,10 +1660,6 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
                         "could not find target revision!") /* TODO: corrupted? */
     }                                                      /* end if revision ID at 'leaf' in binary search */
 
-    if (r_out->username_size > 0)
-        if (NULL == (r_out->username = H5MM_malloc(sizeof(char) * r_out->username_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate username space")
-
     if (r_out->comment_size > 0)
         if (NULL == (r_out->comment = H5MM_malloc(sizeof(char) * r_out->comment_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate comment space")
@@ -1752,7 +1676,6 @@ done:
     H5MM_xfree(buf);
     if (ret_value == FAIL) {
         H5MM_xfree(r_out->comment);
-        H5MM_xfree(r_out->username);
         H5MM_xfree(r_out->archival_index.list);
     }
 
@@ -1972,9 +1895,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 hdr_p->origin_eof = canon_eof;
                 file->logi_eof    = canon_eof;
 
-                if (H5FD__onion_set_userinfo_in_record(rec_p) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Can't record user info")
-
                 backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
                 if (H5I_INVALID_HID == backing_fapl_id)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID")
@@ -2137,7 +2057,6 @@ done:
 
         H5MM_xfree(file->name_recov);
         H5MM_xfree(file->rev_record.comment);
-        H5MM_xfree(file->rev_record.username);
 
         H5FL_FREE(H5FD_onion_t, file);
     }
