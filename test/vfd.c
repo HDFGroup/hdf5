@@ -140,28 +140,28 @@ test_sec2(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -186,7 +186,7 @@ test_sec2(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * Currently it should be around 2 KB.
@@ -284,26 +284,26 @@ test_core(void)
      * so backing-store related flags will not be returned here.
      */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags !=
         (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_ALLOW_FILE_IMAGE | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -352,7 +352,7 @@ test_core(void)
      * they are correct.
      */
     if (H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
     if (backing_store != TRUE)
@@ -382,7 +382,7 @@ test_core(void)
     if (os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -529,7 +529,7 @@ test_core(void)
             } /* end if */
 
     /* Check file size API.
-     * There is no garantee the size of metadata in file is constant.
+     * There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * TODO: Needs justification of why is this is a reasonable size.
@@ -845,7 +845,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 2: reopen file with correct name template but default property list */
     H5E_BEGIN_TRY
@@ -854,7 +854,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 3: reopen file with wrong member size */
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
@@ -866,7 +866,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 4: reopen file with wrong name template */
     HDstrcpy(wrong_name, fname);
@@ -885,7 +885,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -941,21 +941,21 @@ test_family(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1101,7 +1101,7 @@ error:
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
  *              of the v1.6 library.  Then tools/misc/h5repart.c was
- *              used to concantenated.  The command was "h5repart -m 5k
+ *              used to concatenated.  The command was "h5repart -m 5k
  *              family_file%05d.h5 family_v16_%05d.h5".
  *
  * Return:      Success:        0
@@ -1369,7 +1369,7 @@ H5_GCC_DIAG_ON("format-nonliteral")
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
- * Purpose:     Tests the file handle interface for MUTLI driver
+ * Purpose:     Tests the file handle interface for MULTI driver
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1452,21 +1452,21 @@ test_multi(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_USE_ALLOC_SIZE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE | H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_USE_ALLOC_SIZE |
                          H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1553,7 +1553,7 @@ test_multi(void)
 
     /* Create and write attribute for the root group. */
     if ((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Attribute string. */
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
@@ -1858,28 +1858,28 @@ test_log(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the test file */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1971,23 +1971,23 @@ test_stdio(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2089,28 +2089,28 @@ test_windows(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2191,14 +2191,12 @@ static herr_t
 test_ros3(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    hid_t            fid          = -1;     /* file ID                      */
-    hid_t            fapl_id      = -1;     /* file access property list ID */
-    hid_t            fapl_id_out  = -1;     /* from H5Fget_access_plist     */
-    hid_t            driver_id    = -1;     /* ID for this VFD              */
-    unsigned long    driver_flags = 0;      /* VFD feature flags            */
-    char             filename[1024];        /* filename                     */
-    void *           os_file_handle = NULL; /* OS file handle               */
-    hsize_t          file_size;             /* file size                    */
+    hid_t            fid          = -1; /* file ID                      */
+    hid_t            fapl_id      = -1; /* file access property list ID */
+    hid_t            fapl_id_out  = -1; /* from H5Fget_access_plist     */
+    hid_t            driver_id    = -1; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;  /* VFD feature flags            */
+    char             filename[1024];    /* filename                     */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
@@ -2245,11 +2243,11 @@ test_ros3(void)
         TEST_ERROR;
 
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -2526,7 +2524,7 @@ done:
  * Function:    driver_is_splitter_compatible
  *
  * Purpose:     Determine whether the driver set in the FAPL ID is compatible
- *              with the Splitter VFD -- specificially, Write-Only channel.
+ *              with the Splitter VFD -- specifically, Write-Only channel.
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -2570,7 +2568,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     }
 
     if (H5Pclose(split_fapl_id) < 0) {
-        FAIL_PUTS_ERROR("Can't close contained FAPL")
+        FAIL_PUTS_ERROR("Can't close contained FAPL");
     }
     split_fapl_id = H5I_INVALID_HID;
 
@@ -3099,7 +3097,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3119,7 +3117,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3150,7 +3148,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3181,7 +3179,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
         SPLITTER_TEST_FAULT("can't close file ID\n");
     }
     if (!file_exists(filename_rw, child_fapl_id)) {
-        SPLITTER_TEST_FAULT("R/W file mysteriously disappared\n");
+        SPLITTER_TEST_FAULT("R/W file mysteriously disappeared\n");
     }
     if (!file_exists(vfd_config->wo_path, child_fapl_id)) {
         SPLITTER_TEST_FAULT("W/O file mysteriously disappeared\n");
@@ -3380,7 +3378,18 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    char *env_h5_drvr = NULL;
+    int   nerrors     = 0;
+
+    /* Don't run VFD tests when HDF5_DRIVER is set. These tests expect a
+     * specific VFD to be set and HDF5_DRIVER being set can interfere
+     * with that.
+     */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr) {
+        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", env_h5_drvr);
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
 

@@ -1317,7 +1317,7 @@ CONTAINS
 ! Inputs:
 !  group_id   - Identifier specifying subject group
 !  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_NAME_F      - Alphanumeric index on name
 !                H5_INDEX_CRT_ORDER_F - Index on creation order
 !  order      - Order within index:
 !                H5_ITER_INC_F    - Increasing order
@@ -1393,7 +1393,7 @@ CONTAINS
 !  loc_id     - File or group identifier specifying location of subject group
 !  group_name - Name of subject group
 !  index_type - Type of index which determines the order:
-!                H5_INDEX_NAME_F      - Alpha-numeric index on name
+!                H5_INDEX_NAME_F      - Alphanumeric index on name
 !                H5_INDEX_CRT_ORDER_F - Index on creation order
 !  order      - Order within index:
 !                H5_ITER_INC_F    - Increasing order

@@ -1560,7 +1560,7 @@ h5tget_member_type_c(hid_t_f *type_id, int_f *field_idx, hid_t_f *datatype)
  *  Call H5Tcreate to create a datatype
  * INPUTS
  *  cls - class type
- *  size - size of the class memeber
+ *  size - size of the class member
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -2033,7 +2033,7 @@ h5tvlen_create_c(hid_t_f *type_id, hid_t_f *vltype_id)
  * NAME
  *  h5tis_variable_str_c
  * PURPOSE
- *  Call H5Tis_variable_str to detrmine if the datatype
+ *  Call H5Tis_variable_str to determine if the datatype
  *  is a variable string.
  * INPUTS
  *  type_id - identifier of the dataspace
@@ -2069,7 +2069,7 @@ h5tis_variable_str_c(hid_t_f *type_id, int_f *flag)
  * NAME
  *  h5tget_member_class_c
  * PURPOSE
- *  Call H5Tget_member_class to detrmine ithe class of the compound
+ *  Call H5Tget_member_class to determine ithe class of the compound
  *		datatype member
  * INPUTS
  *  type_id - identifier of the dataspace
