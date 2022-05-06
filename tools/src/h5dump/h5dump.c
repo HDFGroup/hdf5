@@ -1314,23 +1314,28 @@ end_collect:
         }
     }
 
-    /* Copy the VFD driver info for the input file if it's the onion file */
-    if (vfd_info_g.u.name) {
-        if (!HDstrcmp(vfd_info_g.u.name, "onion")) {
+    /* If the file uses the onion VFD, get the revision number */
+    if (vfd_info_g.u.name && !HDstrcmp(vfd_info_g.u.name, "onion")) {
+
+        if (vfd_info_g.info) {
+            if (!HDstrcmp(vfd_info_g.info, "revision_count"))
+                get_onion_revision_count = TRUE;
+            else {
+                errno = 0;
+                onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
+                if (errno == ERANGE) {
+                    HDprintf("Invalid onion revision specified\n");
+                    goto error;
+                }
+
+                HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+            }
+        }
+        else
             onion_fa_g.revision_num = 0;
 
-            if (vfd_info_g.info) {
-                if (!HDstrcmp(vfd_info_g.info, "revision_count"))
-                    get_onion_revision_count = TRUE;
-                else {
-                    onion_fa_g.revision_num = HDstrtoull((const char *)(vfd_info_g.info), NULL, 0);
-                    HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
-                }
-            }
-
-            vfd_info_g.info = &onion_fa_g;
-        }
-    } /* driver name defined */
+        vfd_info_g.info = &onion_fa_g;
+    }
 
 parse_end:
     /* check for file name to be processed */

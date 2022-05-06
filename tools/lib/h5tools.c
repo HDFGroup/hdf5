@@ -575,7 +575,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                 /* Onion driver */
                 if (!vfd_info->info)
                     H5TOOLS_GOTO_ERROR(FAIL, "Onion VFD info is invalid");
-                if (H5Pset_fapl_onion(fapl_id, (H5FD_onion_fapl_info_t *)vfd_info->info) < 0)
+                if (H5Pset_fapl_onion(fapl_id, (const H5FD_onion_fapl_info_t *)vfd_info->info) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_onion() failed");
             }
             else {
