@@ -75,6 +75,25 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 #define MIRR_MESG_SIZE 128
 static char mesg[MIRR_MESG_SIZE + 1];
 
+/* ----------------------------------------------------------------------------
+ * Structure:   struct mt_opts
+ *
+ * Purpose:     Convenience structure to hold options as parsed from the
+ *              command line.
+ *
+ * `portno` (int)
+ *      Port number, as received from arguments.
+ *
+ * `ip` (char *)
+ *      IP address string as received from arguments.
+ *
+ * ----------------------------------------------------------------------------
+ */
+struct mt_opts {
+    int  portno;
+    char ip[H5FD_MIRROR_MAX_IP_LEN + 1];
+};
+
 /* Convenience structure for passing file names via helper functions.
  */
 struct mirrortest_filenames {
@@ -98,7 +117,8 @@ static herr_t _close_chunking_ids(unsigned min_dset, unsigned max_dset, hid_t *d
 static herr_t _populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, char *path_out,
                                  hbool_t h5suffix);
 
-static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names);
+static hid_t create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names,
+                                         const struct mt_opts *opts);
 
 static void mybzero(void *dest, size_t size);
 
@@ -1246,7 +1266,8 @@ error:
  * ---------------------------------------------------------------------------
  */
 static hid_t
-create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names)
+create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *names,
+                            const struct mt_opts *opts)
 {
     H5FD_splitter_vfd_config_t splitter_config;
     H5FD_mirror_fapl_t         mirror_conf;
@@ -1274,8 +1295,8 @@ create_mirroring_split_fapl(const char *_basename, struct mirrortest_filenames *
      */
     mirror_conf.magic          = H5FD_MIRROR_FAPL_MAGIC;
     mirror_conf.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
-    mirror_conf.handshake_port = SERVER_HANDSHAKE_PORT;
-    if (HDstrncpy(mirror_conf.remote_ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN) == NULL) {
+    mirror_conf.handshake_port = opts->portno;
+    if (HDstrncpy(mirror_conf.remote_ip, opts->ip, H5FD_MIRROR_MAX_IP_LEN) == NULL) {
         TEST_ERROR;
     }
     splitter_config.wo_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1354,7 +1375,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_create_and_close(void)
+test_create_and_close(const struct mt_opts *opts)
 {
     struct mirrortest_filenames names;
     hid_t                       file_id = H5I_INVALID_HID;
@@ -1364,7 +1385,7 @@ test_create_and_close(void)
 
     /* Create FAPL for Splitter[sec2|mirror]
      */
-    fapl_id = create_mirroring_split_fapl("basic_create", &names);
+    fapl_id = create_mirroring_split_fapl("basic_create", &names, opts);
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
@@ -1889,7 +1910,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_basic_dataset_write(void)
+test_basic_dataset_write(const struct mt_opts *opts)
 {
     struct mirrortest_filenames names;
     hid_t                       file_id   = H5I_INVALID_HID;
@@ -1906,7 +1927,7 @@ test_basic_dataset_write(void)
 
     /* Create FAPL for Splitter[sec2|mirror]
      */
-    fapl_id = create_mirroring_split_fapl("basic_write", &names);
+    fapl_id = create_mirroring_split_fapl("basic_write", &names, opts);
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
@@ -2020,7 +2041,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_chunked_dataset_write(void)
+test_chunked_dataset_write(const struct mt_opts *opts)
 {
     struct mirrortest_filenames names;
     hid_t                       file_id = H5I_INVALID_HID;
@@ -2030,7 +2051,7 @@ test_chunked_dataset_write(void)
 
     /* Create FAPL for Splitter[sec2|mirror]
      */
-    fapl_id = create_mirroring_split_fapl("chunked_write", &names);
+    fapl_id = create_mirroring_split_fapl("chunked_write", &names, opts);
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
@@ -2134,7 +2155,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_on_disk_zoo(void)
+test_on_disk_zoo(const struct mt_opts *opts)
 {
     const char                  grp_name[] = "/only";
     struct mirrortest_filenames names;
@@ -2146,7 +2167,7 @@ test_on_disk_zoo(void)
 
     /* Create FAPL for Splitter[sec2|mirror]
      */
-    fapl_id = create_mirroring_split_fapl("zoo", &names);
+    fapl_id = create_mirroring_split_fapl("zoo", &names, opts);
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
@@ -2248,7 +2269,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_vanishing_datasets(void)
+test_vanishing_datasets(const struct mt_opts *opts)
 {
     struct mirrortest_filenames names;
     hid_t                       file_id   = H5I_INVALID_HID;
@@ -2269,7 +2290,7 @@ test_vanishing_datasets(void)
 
     /* Create FAPL for Splitter[sec2|mirror]
      */
-    fapl_id = create_mirroring_split_fapl("vanishing", &names);
+    fapl_id = create_mirroring_split_fapl("vanishing", &names, opts);
     if (H5I_INVALID_HID == fapl_id) {
         TEST_ERROR;
     }
@@ -2416,7 +2437,7 @@ error:
  * ---------------------------------------------------------------------------
  */
 static int
-test_concurrent_access(void)
+test_concurrent_access(const struct mt_opts *opts)
 {
     struct file_bundle {
         struct mirrortest_filenames names;
@@ -2449,7 +2470,7 @@ test_concurrent_access(void)
         char  _name[16] = "";
         hid_t _fapl_id  = H5I_INVALID_HID;
         HDsnprintf(_name, 15, "concurrent%d", i);
-        _fapl_id = create_mirroring_split_fapl(_name, &bundle[i].names);
+        _fapl_id = create_mirroring_split_fapl(_name, &bundle[i].names, opts);
         if (H5I_INVALID_HID == _fapl_id) {
             TEST_ERROR;
         }
@@ -2560,6 +2581,111 @@ error:
     return -1;
 } /* end test_concurrent_access() */
 
+/* ----------------------------------------------------------------------------
+ * Function:    parse_args
+ *
+ * Purpose:     Parse command-line arguments, populating the options struct
+ *              pointer as appropriate.
+ *              Default values will be set for unspecified options.
+ *
+ * Return:      0 on success, negative (-1) if error.
+ * ----------------------------------------------------------------------------
+ */
+static int
+parse_args(int argc, char **argv, struct mt_opts *opts)
+{
+    int i = 0;
+
+    opts->portno = SERVER_HANDSHAKE_PORT;
+    HDstrncpy(opts->ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN);
+
+    for (i = 1; i < argc; i++) { /* start with first possible option argument */
+        if (!HDstrncmp(argv[i], "--ip=", 5)) {
+            HDstrncpy(opts->ip, argv[i] + 5, H5FD_MIRROR_MAX_IP_LEN);
+        }
+        else if (!HDstrncmp(argv[i], "--port=", 7)) {
+            opts->portno = HDatoi(argv[i] + 7);
+        }
+        else {
+            HDprintf("Unrecognized option: '%s'\n", argv[i]);
+            return -1;
+        }
+    } /* end for each argument from command line */
+
+    /* auto-replace 'localhost' with numeric IP */
+    if (!HDstrncmp(opts->ip, "localhost", 10)) { /* include null terminator */
+        HDstrncpy(opts->ip, "127.0.0.1", H5FD_MIRROR_MAX_IP_LEN);
+    }
+
+    return 0;
+} /* end parse_args() */
+
+/* ----------------------------------------------------------------------------
+ * Function:    confirm_server
+ *
+ * Purpose:     Create socket and confirm remote server is available.
+ *
+ * Return:      0 on success, negative (-1) if error.
+ * ----------------------------------------------------------------------------
+ */
+static int
+confirm_server(struct mt_opts *opts)
+{
+    char               mybuf[16];
+    int                live_socket;
+    struct sockaddr_in target_addr;
+    unsigned           attempt = 0;
+
+    live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+    if (live_socket < 0) {
+        HDprintf("ERROR socket()\n");
+        return -1;
+    }
+
+    target_addr.sin_family      = AF_INET;
+    target_addr.sin_port        = HDhtons((uint16_t)opts->portno);
+    target_addr.sin_addr.s_addr = HDinet_addr(opts->ip);
+    HDmemset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
+
+    while (1) {
+        if (HDconnect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
+            if (attempt > 10) {
+                HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+                return -1;
+            }
+            attempt++;
+            HDsleep(1);
+            HDprintf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
+        }
+        else {
+            break;
+        }
+    }
+
+    /* Request confirmation from the server */
+    if (HDwrite(live_socket, "CONFIRM", 8) == -1) {
+        HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        return -1;
+    }
+
+    /* Read & verify response from port connection.  */
+    if (HDread(live_socket, &mybuf, sizeof(mybuf)) == -1) {
+        HDprintf("ERROR read() can't receive data\n");
+        return -1;
+    }
+    if (HDstrncmp("ALIVE", mybuf, 6)) {
+        HDprintf("ERROR read() didn't receive data from server\n");
+        return -1;
+    }
+
+    if (HDclose(live_socket) < 0) {
+        HDprintf("ERROR close() can't close socket\n");
+        return -1;
+    }
+
+    return 0;
+} /* end confirm_server() */
+
 /* ---------------------------------------------------------------------------
  * Function:    main
  *
@@ -2573,9 +2699,10 @@ error:
  * ---------------------------------------------------------------------------
  */
 int
-main(void)
+main(int argc, char **argv)
 {
-    int nerrors = 0;
+    struct mt_opts opts;
+    int            nerrors = 0;
 
     h5_reset();
 
@@ -2599,6 +2726,16 @@ main(void)
         }
     }
 
+    if (parse_args(argc, argv, &opts) < 0) {
+        HDprintf("Unable to parse arguments\n");
+        HDexit(EXIT_FAILURE);
+    }
+
+    if (confirm_server(&opts) < 0) {
+        HDprintf("Unable to confirm server is running\n");
+        HDexit(EXIT_FAILURE);
+    }
+
     /* -------------------- */
     /* TESTS */
     /* Tests return negative values; `-=' increments nerrors count */
@@ -2606,12 +2743,12 @@ main(void)
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
         nerrors -= test_xmit_encode_decode();
-        nerrors -= test_create_and_close();
-        nerrors -= test_basic_dataset_write();
-        nerrors -= test_chunked_dataset_write();
-        nerrors -= test_on_disk_zoo();
-        nerrors -= test_vanishing_datasets();
-        nerrors -= test_concurrent_access();
+        nerrors -= test_create_and_close(&opts);
+        nerrors -= test_basic_dataset_write(&opts);
+        nerrors -= test_chunked_dataset_write(&opts);
+        nerrors -= test_on_disk_zoo(&opts);
+        nerrors -= test_vanishing_datasets(&opts);
+        nerrors -= test_concurrent_access(&opts);
     }
 
     if (nerrors) {

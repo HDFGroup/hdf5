@@ -43,7 +43,7 @@ int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 #define NFILENAME    2
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME] = {"ParaTest", NULL};
-char        filenames[NFILENAME][PATH_MAX];
+char *      filenames[NFILENAME];
 hid_t       fapl; /* file access property list */
 
 #ifdef USE_PAUSE
@@ -231,7 +231,7 @@ parse_options(int argc, char **argv)
         n = sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; /* exclude the NULL */
 
         for (i = 0; i < n; i++)
-            if (h5_fixname(FILENAME[i], fapl, filenames[i], sizeof(filenames[i])) == NULL) {
+            if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
                 HDprintf("h5_fixname failed\n");
                 nerrors++;
                 return (1);
@@ -335,6 +335,14 @@ main(int argc, char **argv)
     };
     H5open();
     h5_show_hostname();
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
 
     /* Initialize testing framework */
     TestInit(argv[0], usage, parse_options);
@@ -542,6 +550,11 @@ main(int argc, char **argv)
         else
             HDprintf("PHDF5 tests finished with no errors\n");
         HDprintf("===================================\n");
+    }
+
+    for (int i = 0; i < NFILENAME; i++) {
+        HDfree(filenames[i]);
+        filenames[i] = NULL;
     }
 
     /* close HDF5 library */

@@ -67,21 +67,21 @@ main(void)
     }
 
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Open the file with SWMR_READ */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Should read in [1024, 2024] with buf data */
     if (H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
@@ -99,7 +99,7 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     return EXIT_SUCCESS;

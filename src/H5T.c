@@ -5522,7 +5522,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5T_nameof(const H5T_t *dt)
+H5T_nameof(H5T_t *dt)
 {
     H5G_name_t *ret_value = NULL;
 

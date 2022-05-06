@@ -1977,6 +1977,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 2: write attributes to each dataset
@@ -2031,6 +2032,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 3: write large attributes to each dataset
@@ -2078,6 +2080,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 4: write different large attributes to each dataset
@@ -2111,6 +2114,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* Step 5: Close all objects and the file */
 
@@ -2165,10 +2169,12 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* All done. Inform reader to end. */
     steps = 0;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     if (verbose)
         HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);

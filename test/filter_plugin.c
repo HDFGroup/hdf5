@@ -602,7 +602,7 @@ test_read_data(hid_t did, int *origin_data)
     for (i = 0; i < sizes_g[0]; i++)
         for (j = 0; j < sizes_g[1]; j++) {
             if (*data_p != check[i][j])
-                TEST_ERROR
+                TEST_ERROR;
             data_p++;
         }
 
@@ -1038,7 +1038,7 @@ test_path_api_calls(void)
     H5E_END_TRY
 
     if (ret >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
 

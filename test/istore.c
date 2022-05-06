@@ -330,25 +330,6 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
             }
         }
 
-#if 0
-    if (0 == ctr)
-        HDfprintf(stderr,"\n");
-    HDfprintf(stderr,"    Insert: ctr=%lu, corner=(%ld", (unsigned long)ctr, (long)offset[0]);
-    if (ndims > 1)
-        HDfprintf(stderr,",%ld", (long)offset[1]);
-    if (ndims > 2)
-        HDfprintf(stderr,",%ld", (long)offset[2]);
-    HDfprintf(stderr,"), size=(%lu", (unsigned long)size[0]);
-    if (ndims > 1)
-        HDfprintf(stderr,",%lu", (unsigned long)size[1]);
-    if (ndims > 2)
-        HDfprintf(stderr,",%lu", (unsigned long)size[2]);
-    HDfprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
-    if (0 == nelmts)
-        HDfprintf(stderr," *SKIPPED*");
-    HDfprintf(stderr,"\n");
-#endif
-
         /* Fill the source array */
         if (0 == nelmts)
             continue;
@@ -478,7 +459,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     hsize_t  ctr;
     char     dims[64], s[256], name[256];
     hsize_t  offset[3];
-    hsize_t  size[3], total = 0;
+    hsize_t  size[3];
     uint8_t *buf = NULL;
     hsize_t  whole_size[3]; /* Size of dataset's dataspace */
     size_t   u;             /* Local index variable */
@@ -503,7 +484,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     HDsprintf(s, "istore sparse: %s", dims);
     TESTING(s);
     if (skip_test) {
-        SKIPPED()
+        SKIPPED();
         return SUCCEED;
     }
     buf = (uint8_t *)HDmalloc(nx * ny * nz);
@@ -559,10 +540,6 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
             HDprintf(")\n");
             goto error;
         }
-        total += nx * ny * nz;
-#if 0
-    HDfprintf(stderr,"ctr: ctr=%Zu, total=%Zu\n", ctr, total);
-#endif
 
         /* We don't test reading yet.... */
     }

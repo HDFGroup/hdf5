@@ -41,7 +41,7 @@ const char *FILENAME[NFILENAME] = {"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* !PATH_MAX */
-char    filenames[NFILENAME][PATH_MAX];
+char *  filenames[NFILENAME];
 hid_t   fapl;                      /* file access property list */
 haddr_t max_addr = 0;              /* used to store the end of
                                     * the address space used by
@@ -192,7 +192,7 @@ struct datum {
 
 #define NUM_DATA_ENTRIES 100000
 
-struct datum data[NUM_DATA_ENTRIES];
+struct datum *data = NULL;
 
 /* Many tests use the size of data array as the size of test loops.
  * On some machines, this results in unacceptably long test runs.
@@ -231,7 +231,7 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *
  *****************************************************************************/
 
-int data_index[NUM_DATA_ENTRIES];
+int *data_index = NULL;
 
 /*****************************************************************************
  * The following two #defines are used to control code that is in turn used
@@ -1123,6 +1123,8 @@ setup_derived_types(void)
     int           block_len[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
     MPI_Aint      displs[9];
     struct mssg_t sample; /* used to compute displacements */
+
+    HDmemset(&sample, 0, sizeof(struct mssg_t));
 
     /* setup the displacements array */
     if ((MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0])) ||
@@ -2264,13 +2266,13 @@ datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr, H5_ATTR_UNUSED si
 static herr_t
 datum_image_len(const void *thing, size_t *image_len)
 {
-    int           idx;
-    struct datum *entry_ptr;
+    int                 idx;
+    const struct datum *entry_ptr;
 
     HDassert(thing);
     HDassert(image_len);
 
-    entry_ptr = (struct datum *)thing;
+    entry_ptr = (const struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
@@ -6938,6 +6940,23 @@ main(int argc, char **argv)
         goto finish;
     }
 
+    if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
+        HDprintf("    Couldn't allocate data array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+    if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
+        HDprintf("    Couldn't allocate data index array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
     set_up_file_communicator();
 
     setup_derived_types();
@@ -6964,7 +6983,7 @@ main(int argc, char **argv)
 
     /* fix the file names */
     for (u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u) {
-        if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
+        if (h5_fixname(FILENAME[u], fapl, filenames[u], PATH_MAX) == NULL) {
             nerrors++;
             if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, __func__);
@@ -7053,6 +7072,11 @@ main(int argc, char **argv)
 #endif
 
 finish:
+    if (data_index)
+        HDfree(data_index);
+    if (data)
+        HDfree(data);
+
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
@@ -7063,8 +7087,8 @@ finish:
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
         HDprintf("===================================\n");
-        if (failures) {
-            HDprintf("***metadata cache tests detected %d failures***\n", failures);
+        if (nerrors || failures) {
+            HDprintf("***metadata cache tests detected %d failures***\n", nerrors + failures);
         }
         else {
             HDprintf("metadata cache tests finished with no failures\n");
@@ -7081,5 +7105,5 @@ finish:
     MPI_Finalize();
 
     /* cannot just return (failures) because exit code is limited to 1byte */
-    return (failures != 0);
+    return (nerrors != 0 || failures != 0);
 }
