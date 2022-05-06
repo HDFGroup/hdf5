@@ -40,16 +40,16 @@ EXIT_FAILURE=1
 # This script uses the value of `prefix` in the user's environment, if
 # it is set, below.  The content of $() is evaluated in a sub-shell, so
 # if `prefix` is set in the user's environment, the shell statements in
-# $() won't clobbered it.
+# $() won't clobber it.
 #
 prefix_relto_examplesdir=$(
 prefix=@prefix@
 examplesdir=@examplesdir@
 if [ ${examplesdir##${prefix}/} != ${examplesdir} ]; then
-	echo $(echo ${examplesdir##${prefix}/} | \
-	    sed 's,[^/][^/]*,..,g')
+    echo $(echo ${examplesdir##${prefix}/} | \
+        sed 's,[^/][^/]*,..,g')
 else
-	echo $prefix
+    echo $prefix
 fi
 )
 
