@@ -298,7 +298,7 @@ H5FD__mirror_xmit_decode_uint16(uint16_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     *out = (uint16_t)HDntohs(n);
 
     return 2; /* number of bytes eaten */
@@ -326,7 +326,7 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     *out = (uint32_t)HDntohl(n);
 
     return 4; /* number of bytes eaten */
@@ -385,7 +385,7 @@ H5FD__mirror_xmit_decode_uint64(uint64_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(&n, _buf, sizeof(n));
+    H5MM_memcpy(&n, _buf, sizeof(n));
     if (TRUE == is_host_little_endian())
         *out = BSWAP_64(n);
     else
@@ -412,7 +412,7 @@ H5FD__mirror_xmit_decode_uint8(uint8_t *out, const unsigned char *_buf)
 
     HDassert(_buf && out);
 
-    HDmemcpy(out, _buf, sizeof(uint8_t));
+    H5MM_memcpy(out, _buf, sizeof(uint8_t));
 
     return 1; /* number of bytes eaten */
 } /* end H5FD__mirror_xmit_decode_uint8() */
@@ -439,7 +439,7 @@ H5FD__mirror_xmit_encode_uint16(unsigned char *_dest, uint16_t v)
     HDassert(_dest);
 
     n = (uint16_t)HDhtons(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 2;
 } /* end H5FD__mirror_xmit_encode_uint16() */
@@ -466,7 +466,7 @@ H5FD__mirror_xmit_encode_uint32(unsigned char *_dest, uint32_t v)
     HDassert(_dest);
 
     n = (uint32_t)HDhtonl(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 4;
 } /* end H5FD__mirror_xmit_encode_uint32() */
@@ -494,7 +494,7 @@ H5FD__mirror_xmit_encode_uint64(unsigned char *_dest, uint64_t v)
 
     if (TRUE == is_host_little_endian())
         n = BSWAP_64(v);
-    HDmemcpy(_dest, &n, sizeof(n));
+    H5MM_memcpy(_dest, &n, sizeof(n));
 
     return 8;
 } /* H5FD__mirror_xmit_encode_uint64() */
@@ -519,7 +519,7 @@ H5FD__mirror_xmit_encode_uint8(unsigned char *dest, uint8_t v)
 
     HDassert(dest);
 
-    HDmemcpy(dest, &v, sizeof(v));
+    H5MM_memcpy(dest, &v, sizeof(v));
 
     return 1;
 } /* end H5FD__mirror_xmit_encode_uint8() */
@@ -1166,7 +1166,7 @@ done:
 /* -------------------------------------------------------------------------
  * Function:    H5FD__mirror_fapl_get
  *
- * Purpose:     Get the file access propety list which could be used to create
+ * Purpose:     Get the file access property list which could be used to create
  *              an identical file.
  *
  * Return:      Success: pointer to the new file access property list value.
@@ -1188,7 +1188,7 @@ H5FD__mirror_fapl_get(H5FD_t *_file)
     if (NULL == fa)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "calloc failed");
 
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_mirror_fapl_t));
 
     ret_value = fa;
 
@@ -1224,7 +1224,7 @@ H5FD__mirror_fapl_copy(const void *_old_fa)
     if (new_fa == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed");
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_mirror_fapl_t));
     ret_value = new_fa;
 
 done:
@@ -1266,25 +1266,25 @@ H5FD__mirror_fapl_free(void *_fa)
  * Function:    H5Pget_fapl_mirror
  *
  * Purpose:     Get the configuration information for this fapl.
- *              Data is memcopied into the fa_out pointer.
+ *              Data is memcopied into the fa_dst pointer.
  *
  * Return:      SUCCEED/FAIL
  * -------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_out)
+H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst)
 {
-    const H5FD_mirror_fapl_t *fa        = NULL;
+    const H5FD_mirror_fapl_t *fa_src    = NULL;
     H5P_genplist_t *          plist     = NULL;
     herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "i*x", fapl_id, fa_dst);
 
     LOG_OP_CALL(FUNC);
 
-    if (NULL == fa_out)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL");
+    if (NULL == fa_dst)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (NULL == plist)
@@ -1292,13 +1292,13 @@ H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_out)
     if (H5P_peek_driver(plist) != H5FD_MIRROR)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
 
-    fa = (const H5FD_mirror_fapl_t *)H5P_peek_driver_info(plist);
-    if (NULL == fa)
+    fa_src = (const H5FD_mirror_fapl_t *)H5P_peek_driver_info(plist);
+    if (NULL == fa_src)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
-    HDassert(fa->magic == H5FD_MIRROR_FAPL_MAGIC); /* sanity check */
+    HDassert(fa_src->magic == H5FD_MIRROR_FAPL_MAGIC); /* sanity check */
 
-    HDmemcpy(fa_out, fa, sizeof(H5FD_mirror_fapl_t));
+    H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_mirror_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value);

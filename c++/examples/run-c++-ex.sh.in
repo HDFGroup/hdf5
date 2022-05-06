@@ -46,10 +46,10 @@ prefix_relto_examplesdir=$(
 prefix=@prefix@
 examplesdir=@examplesdir@
 if [ ${examplesdir##${prefix}/} != ${examplesdir} ]; then
-        echo $(echo ${examplesdir##${prefix}/} | \
-            sed 's,[^/][^/]*,..,g')
+    echo $(echo ${examplesdir##${prefix}/} | \
+        sed 's,[^/][^/]*,..,g')
 else
-        echo $prefix
+    echo $prefix
 fi
 )
 

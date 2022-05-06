@@ -984,7 +984,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5close
  *
- * Purpose:	Terminate the library and release all resources.
+ * Purpose:    Terminate the library and release all resources.
  *
  * Return:    Non-negative on success/Negative on failure
  *
@@ -1120,19 +1120,22 @@ H5free_memory(void *mem)
 herr_t
 H5is_library_threadsafe(hbool_t *is_ts)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API_NOINIT
     H5TRACE1("e", "*b", is_ts);
 
-    HDassert(is_ts);
-
-    /* At this time, it is impossible for this to fail. */
+    if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
-    *is_ts = TRUE;
+        *is_ts = TRUE;
 #else  /* H5_HAVE_THREADSAFE */
-    *is_ts = FALSE;
+        *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
+    }
+    else
+        ret_value = FAIL;
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_threadsafe() */
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API) &&         \

@@ -447,7 +447,7 @@ CONTAINS
 ! INPUTS
 !  space_id    - dataspace identifier
 !  startpoint  - element point to start with
-!  num_points  - number of elemnt points to get
+!  num_points  - number of element points to get
 ! OUTPUTS
 !  buf 	       - buffer with element points selected
 !  hdferr      - Returns 0 if successful and -1 if fails
