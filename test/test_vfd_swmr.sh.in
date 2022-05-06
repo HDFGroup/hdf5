@@ -1615,12 +1615,12 @@ if [ ${do_gfail_checksum:-no} = yes ]; then
         rm -f ./$GFAIL_FIFO_READER_TO_WRITER
     fi
 
-    echo launch vfd_swmr_gfail_writer -q -n 420000 ......may take some time......
+    echo launch vfd_swmr_gfail_writer -q -n 420000 ...may take some time...error stack messages expected
     catch_out_err_and_rc vfd_swmr_gfail_checksum_writer \
         $testdir/vfd_swmr_gfail_writer -q -m 50 -t 10 -n 4000000 &
     pid_writer=$!
 
-    echo launch vfd_swmr_gfail_reader -n 420000 ......may take some time......
+    echo launch vfd_swmr_gfail_reader -n 420000 ...may take some time...error stack messages expected
     catch_out_err_and_rc vfd_swmr_gfail_checksum_reader \
         $testdir/vfd_swmr_gfail_reader -q -m 50 -t 10 -n 4000000 &
     pid_reader=$!

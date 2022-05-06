@@ -4113,6 +4113,8 @@ main(void)
     unsigned    nerrors        = 0;     /* Cumulative error count */
     const char *env_h5_drvr    = NULL;  /* File Driver value from environment */
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hid_t          driver_id    = -1;      /* ID for this VFD */
+    unsigned long  driver_flags = 0;       /* VFD feature flags */
 
     h5_reset();
 
@@ -4121,6 +4123,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
+#if 0
     /* Temporary skip testing with multi/split drivers:
      * Page buffering depends on paged aggregation which is
      * currently disabled for multi/split drivers.
@@ -4132,11 +4135,25 @@ main(void)
         HDputs("Furthermore, VFD SWMR is not (yet) expected to work with multi/split drivers");
         HDexit(EXIT_SUCCESS);
     } /* end if */
+#endif
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
     } /* end if */
+
+    /* Get the VFD feature flags for this VFD */
+    if((driver_id = H5Pget_driver(fapl)) < 0)
+        PUTS_ERROR("Can't get driver set in fapl")
+    if(H5FDdriver_query(driver_id, &driver_flags) < 0)
+        PUTS_ERROR("Can't query driver flags")
+
+    /* Check whether the VFD feature flag supports VFD SWMR */
+    if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR)) {
+        SKIPPED();
+        HDprintf("The %s driver does not support VFD SWMR feature.\n", env_h5_drvr);
+        HDexit(EXIT_SUCCESS);
+    }
 
     /* Push API context */
     if (H5CX_push() < 0)
