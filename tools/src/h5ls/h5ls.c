@@ -2854,6 +2854,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();
@@ -2875,6 +2877,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &hdfs_fa;
 #else
             HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             usage();
