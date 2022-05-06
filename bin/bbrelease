@@ -274,8 +274,9 @@ if [ X$revmode = Xyes ]; then
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
-    bin/h5vers -s $VERS
     HDF5_VERS=hdf5-$branch-$revision
+    echo file base of $HDF5_VERS
+    bin/h5vers -s $VERS
     # use a generic directory name for revision releases
     HDF5_IN_VERS=hdfsrc
 else
