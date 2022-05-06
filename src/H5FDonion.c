@@ -354,60 +354,76 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_onion() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FDget_onion_revision_count
+ *
+ * Purpose:     Get the number of revisions in an onion file
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count)
+H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count /*out*/)
 {
-    H5P_genplist_t *plist        = NULL;
-    herr_t          ret_value    = SUCCEED;
-    H5FD_t *        file_drv_ptr = NULL;
+    H5P_genplist_t *plist     = NULL;
+    H5FD_t *        file      = NULL;
+    herr_t          ret_value = SUCCEED;
+
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "*si*z", filename, fapl_id, revision_count);
 
-    /* Check the file name */
+    /* Check args */
     if (!filename || !HDstrcmp(filename, ""))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid file name")
+    if (!revision_count)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "revision count can't be null")
 
     /* Make sure using the correct driver */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid FAPL ID")
-
     if (H5FD_ONION != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Onion VFL driver")
 
-    if (!revision_count)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "revision count can't be null")
-
     /* Open the file with the driver */
-    if (NULL == (file_drv_ptr = H5FD_open(filename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
+    if (NULL == (file = H5FD_open(filename, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to open file with onion driver")
 
     /* Call the private function */
-    if (H5FD__get_onion_revision_count(file_drv_ptr, revision_count) < 0)
+    if (H5FD__get_onion_revision_count(file, revision_count) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "failed to get the number of revisions")
 
+done:
     /* Close H5FD_t structure pointer */
-    if (H5FD_close(file_drv_ptr) < 0)
+    if (file && H5FD_close(file) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    file_drv_ptr = NULL;
-
-done:
     FUNC_LEAVE_API(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__get_onion_revision_count
+ *
+ * Purpose:     Private version of H5FDget_onion_revision_count()
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5FD__get_onion_revision_count(H5FD_t *file, size_t *revision_count)
 {
-    herr_t   ret_value = SUCCEED;
     uint64_t op_code;
     uint64_t flags;
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    HDassert(file);
+    HDassert(revision_count);
 
     op_code = H5FD_CTL__GET_NUM_REVISIONS;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
 
-    /* Call private function */
+    /* Get the number of revisions via the ctl callback */
     if (H5FD_ctl(file, op_code, flags, NULL, (void **)&revision_count) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
 
