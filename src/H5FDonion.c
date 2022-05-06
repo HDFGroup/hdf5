@@ -1009,15 +1009,15 @@ H5FD_onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned c
 uint64_t
 H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
-    uint32_t       ui32          = 0;
-    uint32_t       page_size     = 0;
-    uint32_t       sum           = 0;
-    uint64_t       ui64          = 0;
-    uint64_t       n_entries     = 0;
-    uint32_t       comment_size  = 0;
-    uint8_t *      ui8p          = NULL;
-    unsigned char *ptr           = NULL;
-    uint64_t       ret_value     = 0;
+    uint32_t       ui32         = 0;
+    uint32_t       page_size    = 0;
+    uint32_t       sum          = 0;
+    uint64_t       ui64         = 0;
+    uint64_t       n_entries    = 0;
+    uint32_t       comment_size = 0;
+    uint8_t *      ui8p         = NULL;
+    unsigned char *ptr          = NULL;
+    uint64_t       ret_value    = 0;
 
     FUNC_ENTER_NOAPI_NOINIT;
 

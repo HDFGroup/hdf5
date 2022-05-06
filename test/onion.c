@@ -1266,7 +1266,7 @@ error:
 static int
 test_revision_record_encode_decode(void)
 {
-/* clang-format off */
+    /* clang-format off */
     /* Byte array of expected values (FRAGILE!) */
     unsigned char exp[173] = {
         'O', 'R', 'R', 'S',                     /* Bytes 000-003:   signature */
@@ -1301,8 +1301,8 @@ test_revision_record_encode_decode(void)
         '\0',                                   /*                  ... */
         0, 0, 0, 0                              /* Bytes 169-172:   final checksum (populated below) */
     };
-/* clang-format on */
-    unsigned char *              buf      = NULL;
+    /* clang-format on */
+    unsigned char *              buf   = NULL;
     unsigned char *              buf_p = NULL;
     size_t                       i     = 0;
     uint64_t                     size_ret;
@@ -1316,14 +1316,14 @@ test_revision_record_encode_decode(void)
         {'\0'},        /* time of creation - populated below */
         8589934609ull, /* logical file size */
         {
-            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,     /* version */
-            12,                                          /* page_size_log2 */
-            4,                                           /* n_entries */
-            NULL,                                        /* list - populated below */
-        },                                               /* archival index struct */
-        25,                                              /* comment size */
-        comment,                                         /* comment */
-        0,                                               /* checksum (computed later) */
+            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, /* version */
+            12,                                      /* page_size_log2 */
+            4,                                       /* n_entries */
+            NULL,                                    /* list - populated below */
+        },                                           /* archival index struct */
+        25,                                          /* comment size */
+        comment,                                     /* comment */
+        0,                                           /* checksum (computed later) */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
@@ -1387,7 +1387,8 @@ test_revision_record_encode_decode(void)
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i]) {
             badness = TRUE;
-            HDprintf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i, (unsigned int)exp[i], (unsigned int)buf[i]);
+            HDprintf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i,
+                     (unsigned int)exp[i], (unsigned int)buf[i]);
         }
     }
     if (badness) {
