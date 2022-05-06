@@ -494,32 +494,39 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
         }
     }
 
-    /* Copy the VFD driver info for both the files if it's the onion file */
-    if (opts->vfd_info[0].u.name) {
-        if (!HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
-            if (opts->vfd_info[0].info)
-                onion_fa_g_1.revision_num = HDatoi((char *)(opts->vfd_info[0].info));
-            else
-                onion_fa_g_1.revision_num = 0;
-
-            /* Need to free this memory */
-            opts->vfd_info[0].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(opts->vfd_info[0].info, &onion_fa_g_1, sizeof(H5FD_onion_fapl_info_t));
+    /* If file 1 uses the onion VFD, get the revision number */
+    if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
+        if (opts->vfd_info[0].info) {
+            errno                     = 0;
+            onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
+            if (errno == ERANGE) {
+                HDprintf("Invalid onion revision specified for file 1\n");
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
         }
-    } /* driver name defined */
+        else
+            onion_fa_g_1.revision_num = 0;
 
-    if (opts->vfd_info[1].u.name) {
-        if (!HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
-            if (opts->vfd_info[1].info)
-                onion_fa_g_2.revision_num = HDatoi((char *)(opts->vfd_info[1].info));
-            else
-                onion_fa_g_2.revision_num = 0;
+        opts->vfd_info[0].info = &onion_fa_g_1;
+    }
 
-            /* Need to free this memory */
-            opts->vfd_info[1].info = HDmalloc(sizeof(H5FD_onion_fapl_info_t));
-            HDmemcpy(opts->vfd_info[1].info, &onion_fa_g_2, sizeof(H5FD_onion_fapl_info_t));
+    /* If file 2 uses the onion VFD, get the revision number */
+    if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
+        if (opts->vfd_info[1].info) {
+            errno                     = 0;
+            onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
+            if (errno == ERANGE) {
+                HDprintf("Invalid onion revision specified for file 2\n");
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
         }
-    } /* driver name defined */
+        else
+            onion_fa_g_2.revision_num = 0;
+
+        opts->vfd_info[1].info = &onion_fa_g_2;
+    }
 
     /* check options */
     check_options(opts);

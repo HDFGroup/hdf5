@@ -127,10 +127,6 @@ main(int argc, char *argv[])
                 HDfree(opts.sset[i]->count.data);
             if (opts.sset[i]->block.data)
                 HDfree(opts.sset[i]->block.data);
-            if (opts.vfd_info[0].info)
-                HDfree(opts.vfd_info[1].info);
-            if (opts.vfd_info[1].info)
-                HDfree(opts.vfd_info[1].info);
 
             HDfree(opts.sset[i]);
             opts.sset[i] = NULL;
