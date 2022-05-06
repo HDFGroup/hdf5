@@ -4109,12 +4109,12 @@ error:
 int
 main(void)
 {
-    hid_t       fapl           = -1;    /* File access property list for data files */
-    unsigned    nerrors        = 0;     /* Cumulative error count */
-    const char *env_h5_drvr    = NULL;  /* File Driver value from environment */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hid_t          driver_id    = -1;      /* ID for this VFD */
-    unsigned long  driver_flags = 0;       /* VFD feature flags */
+    hid_t         fapl           = -1;    /* File access property list for data files */
+    unsigned      nerrors        = 0;     /* Cumulative error count */
+    const char *  env_h5_drvr    = NULL;  /* File Driver value from environment */
+    hbool_t       api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hid_t         driver_id      = -1;    /* ID for this VFD */
+    unsigned long driver_flags   = 0;     /* VFD feature flags */
 
     h5_reset();
 
@@ -4143,9 +4143,9 @@ main(void)
     } /* end if */
 
     /* Get the VFD feature flags for this VFD */
-    if((driver_id = H5Pget_driver(fapl)) < 0)
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
         PUTS_ERROR("Can't get driver set in fapl")
-    if(H5FDdriver_query(driver_id, &driver_flags) < 0)
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         PUTS_ERROR("Can't query driver flags")
 
     /* Check whether the VFD feature flag supports VFD SWMR */

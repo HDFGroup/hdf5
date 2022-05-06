@@ -333,7 +333,8 @@ void
 init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag,
                      hbool_t presume_posix_semantics, hbool_t writer, hbool_t maintain_metadata_file,
                      hbool_t generate_updater_files, hbool_t flush_raw_data, uint32_t md_pages_reserved,
-                     const char *md_path_fmtstr, const char *md_file_fmtstr, const char *updater_path_fmtstr, ...)
+                     const char *md_path_fmtstr, const char *md_file_fmtstr, const char *updater_path_fmtstr,
+                     ...)
 {
     va_list ap;
 
