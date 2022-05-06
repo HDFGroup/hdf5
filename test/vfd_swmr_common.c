@@ -333,7 +333,8 @@ void
 init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag,
                      hbool_t presume_posix_semantics, hbool_t writer, hbool_t maintain_metadata_file,
                      hbool_t generate_updater_files, hbool_t flush_raw_data, uint32_t md_pages_reserved,
-                     const char *md_file_path, const char *md_file_fmtstr, const char *updater_file_path, ...)
+                     const char *md_path_fmtstr, const char *md_file_fmtstr, const char *updater_path_fmtstr,
+                     ...)
 {
     va_list ap;
 
@@ -351,24 +352,27 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
     config->flush_raw_data          = flush_raw_data;
     config->md_pages_reserved       = md_pages_reserved;
 
-    if (md_file_path == NULL)
+    if (md_path_fmtstr == NULL)
         config->md_file_path[0] = '\0';
-    else
-        HDstrcpy(config->md_file_path, md_file_path);
-
-    if (md_file_fmtstr == NULL)
-        config->md_file_name[0] = '\0';
-
     else {
-        HDva_start(ap, updater_file_path);
-
-        evsnprintf(config->md_file_name, sizeof(config->md_file_path), md_file_fmtstr, ap);
-
+        HDva_start(ap, updater_path_fmtstr);
+        evsnprintf(config->md_file_path, sizeof(config->md_file_path), md_path_fmtstr, ap);
         HDva_end(ap);
     }
 
-    if (config->generate_updater_files && updater_file_path != NULL)
-        HDstrcpy(config->updater_file_path, updater_file_path);
+    if (md_file_fmtstr == NULL)
+        config->md_file_name[0] = '\0';
+    else {
+        HDva_start(ap, updater_path_fmtstr);
+        evsnprintf(config->md_file_name, sizeof(config->md_file_name), md_file_fmtstr, ap);
+        HDva_end(ap);
+    }
+
+    if (config->generate_updater_files && updater_path_fmtstr != NULL) {
+        HDva_start(ap, updater_path_fmtstr);
+        evsnprintf(config->updater_file_path, sizeof(config->updater_file_path), updater_path_fmtstr, ap);
+        HDva_end(ap);
+    }
 
 } /* init_vfd_swmr_config() */
 
