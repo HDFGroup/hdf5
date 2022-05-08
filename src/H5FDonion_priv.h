@@ -21,6 +21,7 @@
 #ifndef H5FDonion_priv_H
 #define H5FDonion_priv_H
 
+#include "H5FDonion_header.h"
 #include "H5FDonion_history.h"
 #include "H5FDonion_index.h"
 
