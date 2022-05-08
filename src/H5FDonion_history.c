@@ -132,7 +132,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *backing_file)
+H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *file)
 {
     uint32_t       sum       = 0; /* Not used, but required by the encoder */
     uint64_t       size      = 0;
@@ -147,7 +147,7 @@ H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *backing_fi
     if (0 == (size = H5FD__onion_history_header_encode(header, buf, &sum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding updated history header")
 
-    if (H5FD_write(backing_file, H5FD_MEM_DRAW, 0, (haddr_t)size, buf) < 0)
+    if (H5FD_write(file, H5FD_MEM_DRAW, 0, (haddr_t)size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header")
 
 done:
@@ -166,7 +166,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
+H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t off_start,
                           haddr_t filesize_curr)
 {
     uint32_t       _sum      = 0; /* Required by the API call but unused here */
@@ -183,10 +183,10 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file_dest, hadd
     if (0 == (size = H5FD__onion_history_encode(history, buf, &_sum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, 0, "problem encoding updated history")
 
-    if ((size + off_start > filesize_curr) && (H5FD_set_eoa(file_dest, H5FD_MEM_DRAW, off_start + size) < 0))
+    if ((size + off_start > filesize_curr) && (H5FD_set_eoa(file, H5FD_MEM_DRAW, off_start + size) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, 0, "can't modify EOA for updated history")
 
-    if (H5FD_write(file_dest, H5FD_MEM_DRAW, off_start, size, buf) < 0)
+    if (H5FD_write(file, H5FD_MEM_DRAW, off_start, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, 0, "can't write history as intended")
 
     ret_value = size;

@@ -71,9 +71,9 @@ H5_DLL herr_t H5FD__onion_ingest_history_header(H5FD_onion_history_header_t *hdr
 H5_DLL herr_t H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, haddr_t addr,
                                          haddr_t size);
 
-H5_DLL herr_t   H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *backing_file);
-H5_DLL uint64_t H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *backing_file,
-                                          haddr_t off_start, haddr_t filesize_curr);
+H5_DLL herr_t   H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *file);
+H5_DLL uint64_t H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t off_start,
+                                          haddr_t filesize_curr);
 
 H5_DLL uint64_t H5FD__onion_history_header_decode(unsigned char *, H5FD_onion_history_header_t *);
 H5_DLL uint64_t H5FD__onion_history_header_encode(H5FD_onion_history_header_t *, unsigned char *, uint32_t *);

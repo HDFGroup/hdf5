@@ -38,11 +38,11 @@
  * Structure    H5FD__onion_index_entry
  *
  * Purpose:     Map a page in the logical file to a 'physical address' in the
- *              backing store.
+ *              onion file.
  *
  * logi_page:   Page 'id' in the logical file.
  *
- * phys_addr:   Address/offset of start of page in the backing store.
+ * phys_addr:   Address/offset of start of page in the onion file.
  *
  *-----------------------------------------------------------------------------
  */
@@ -108,7 +108,7 @@ typedef struct H5FD_onion_revision_record_t {
     uint64_t                    revision_num;
     uint64_t                    parent_revision_num;
     char                        time_of_creation[16];
-    uint64_t                    logi_eof;
+    uint64_t                    logical_eof;
     H5FD_onion_archival_index_t archival_index;
     uint32_t                    comment_size;
     char *                      comment;

@@ -625,7 +625,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
     HDmemcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
-    UINT64DECODE(ui8p, record->logi_eof);
+    UINT64DECODE(ui8p, record->logical_eof);
     ptr += 8;
 
     HDmemcpy(&ui32, ptr, 4);
@@ -770,7 +770,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     UINT64ENCODE(ptr, record->parent_revision_num);
     HDmemcpy(ptr, record->time_of_creation, 16);
     ptr += 16;
-    UINT64ENCODE(ptr, record->logi_eof);
+    UINT64ENCODE(ptr, record->logical_eof);
     UINT32ENCODE(ptr, page_size);
     UINT64ENCODE(ptr, record->archival_index.n_entries);
     UINT32ENCODE(ptr, record->comment_size);

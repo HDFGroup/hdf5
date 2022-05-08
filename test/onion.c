@@ -52,7 +52,7 @@ struct onion_filepaths {
 struct expected_revision {
     uint64_t    revision_num;
     uint64_t    parent_revision_num;
-    uint64_t    logi_eof;
+    uint64_t    logical_eof;
     uint64_t    n_index_entries;
     const char *comment;
 };
@@ -1712,7 +1712,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
             TEST_ERROR;
         if (erp->parent_revision_num != rev_out.parent_revision_num)
             TEST_ERROR;
-        if (erp->logi_eof != rev_out.logi_eof)
+        if (erp->logical_eof != rev_out.logical_eof)
             TEST_ERROR;
 
         /* Final read, get variable-length data */
@@ -2097,7 +2097,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     filter.revisions[0].n_index_entries     = (uint64_t)(-1); /* don't care */
     filter.revisions[0].revision_num        = 0;
     filter.revisions[0].parent_revision_num = 0;
-    filter.revisions[0].logi_eof            = (TRUE == with_initial_data) ? a_list_size_s : 0;
+    filter.revisions[0].logical_eof         = (TRUE == with_initial_data) ? a_list_size_s : 0;
 
     if (verify_history_as_expected_onion(vfile_raw, &filter) < 0)
         TEST_ERROR;
@@ -2467,26 +2467,26 @@ test_several_revisions_with_logical_gaps(void)
     filter.revisions[0].n_index_entries     = 0;
     filter.revisions[0].revision_num        = 0;
     filter.revisions[0].parent_revision_num = 0;
-    filter.revisions[0].logi_eof            = 0;
+    filter.revisions[0].logical_eof         = 0;
 
     filter.revisions[1].comment             = "second";
     filter.revisions[1].n_index_entries     = (a_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5;
     filter.revisions[1].revision_num        = 1;
     filter.revisions[1].parent_revision_num = 0;
-    filter.revisions[1].logi_eof            = a_off + a_list_size_s;
+    filter.revisions[1].logical_eof         = a_off + a_list_size_s;
 
     filter.revisions[2].comment = "third";
     filter.revisions[2].n_index_entries =
         filter.revisions[1].n_index_entries + ((b_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5);
     filter.revisions[2].revision_num        = 2;
     filter.revisions[2].parent_revision_num = 1;
-    filter.revisions[2].logi_eof            = b_off + b_list_size_s;
+    filter.revisions[2].logical_eof         = b_off + b_list_size_s;
 
     filter.revisions[3].comment             = "fourth";
     filter.revisions[3].n_index_entries     = filter.revisions[2].n_index_entries + 1;
     filter.revisions[3].revision_num        = 3;
     filter.revisions[3].parent_revision_num = 2;
-    filter.revisions[3].logi_eof            = b_off + b_list_size_s;
+    filter.revisions[3].logical_eof         = b_off + b_list_size_s;
 
     if (verify_history_as_expected_onion(file, &filter) < 0)
         TEST_ERROR;
