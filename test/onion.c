@@ -702,6 +702,7 @@ test_fapl(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5P_DEFAULT,                   /* backing_fapl_id                */
         ONION_TEST_PAGE_SIZE_1,        /* page_size                      */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,                        /* force_write_open               */
         0,                        /* creation_flags                 */
@@ -839,6 +840,8 @@ test_fapl(void)
     if (H5P_DEFAULT != info_out.backing_fapl_id)
         TEST_ERROR;
     if (ONION_TEST_PAGE_SIZE_1 != info_out.page_size)
+        TEST_ERROR;
+    if (H5FD_ONION_STORE_TARGET_ONION != info_out.store_target)
         TEST_ERROR;
     if (H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST != info_out.revision_num)
         TEST_ERROR;
@@ -1897,6 +1900,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
         0,               /* creation_flags   */
@@ -2203,6 +2207,7 @@ test_several_revisions_with_logical_gaps(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,      /* force_write_open */
         0,      /* flags */
@@ -2647,9 +2652,10 @@ test_page_aligned_history_create(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0, /* force_write_open */
-        H5FD_ONION_ENABLE_PAGE_ALIGNMENT,
+        H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT,
         "initial commit" /* comment          */
     };
     H5FD_t *                    file = NULL; /* Onion virtual file for read/write */
@@ -2855,9 +2861,10 @@ test_integration_create(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
     hsize_t dims[2]    = {128, 256};
@@ -3174,9 +3181,10 @@ test_integration_create_simple(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
     hid_t   file_id    = H5I_INVALID_HID;
@@ -3427,9 +3435,10 @@ test_integration_create_delete_objects(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
     hid_t   group_id      = H5I_INVALID_HID;
@@ -3779,9 +3788,10 @@ test_integration_dset_extension(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
     hid_t   file       = H5I_INVALID_HID;
@@ -4057,9 +4067,10 @@ test_integration_ctl(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment */
     };
     size_t revision_count;
@@ -4244,9 +4255,10 @@ test_integration_reference(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_ENABLE_PAGE_ALIGNMENT */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment */
     };
 
