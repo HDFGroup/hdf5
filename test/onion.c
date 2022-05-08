@@ -3447,7 +3447,10 @@ test_integration_create_delete_objects(void)
     hid_t   attr_id       = H5I_INVALID_HID;
     hsize_t attr_dim[1]   = {4};
 
-    hid_t   file, space, dset, dcpl; /* Handles */
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   dset    = H5I_INVALID_HID;
+    hid_t   dcpl    = H5I_INVALID_HID;
     hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     int     wdata[4][4], /* Write buffer */
         fillval, i, j;
@@ -4222,6 +4225,384 @@ error:
     return -1;
 }
 
+static int
+test_integration_reference(void)
+{
+    const char *basename   = "integration_refer.h5";
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       group      = H5I_INVALID_HID;
+    hid_t       space      = H5I_INVALID_HID;
+    hid_t       space2     = H5I_INVALID_HID;
+    hid_t       space_ref  = H5I_INVALID_HID;
+    hid_t       dset       = H5I_INVALID_HID;
+    hid_t       dset2      = H5I_INVALID_HID;
+    hid_t       fapl_id    = H5I_INVALID_HID;
+    hsize_t     dims[2]    = {4, 4};
+    hsize_t     dim_ref[1] = {2};
+    int         wdata[4][4]; /* Write buffer */
+    int         rdata[4][4]; /* Read buffer  */
+    H5R_ref_t   wbuf[2];
+    H5R_ref_t   rbuf[2];
+    H5O_type_t  obj_type;
+    hsize_t     start[2];
+    hsize_t     stride[2];
+    hsize_t     count[2];
+    hsize_t     block[2];
+    hsize_t     coord1[4][2]; /* Coordinates for point selection */
+    hssize_t    nelmts;
+
+    struct onion_filepaths *paths      = NULL;
+    H5FD_onion_fapl_info_t  onion_info = {
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5I_INVALID_HID,               /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE_5,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment */
+    };
+
+    TESTING("onion-created HDF5 file with revisions testing references");
+
+    /* Set up */
+    onion_info.backing_fapl_id = h5_fileaccess();
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
+
+    /* Initialize data */
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            wdata[i][j] = i + j;
+
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace */
+    if ((space = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset using the dataset creation property list */
+    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and add a dataset (DS2)
+     * of object references
+     *----------------------------------------------------------------------
+     */
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace with unlimited dimensions */
+    if ((space_ref = H5Screate_simple(1, dim_ref, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset of object references */
+    if ((dset = H5Dcreate(file, "DS2", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create reference to dataset */
+    if (H5Rcreate_object(file, "DS1", H5P_DEFAULT, &wbuf[0]) < 0)
+        TEST_ERROR;
+
+    if (H5Rget_obj_type3(&wbuf[0], H5P_DEFAULT, &obj_type) < 0)
+        TEST_ERROR;
+
+    if (obj_type != H5O_TYPE_DATASET)
+        TEST_ERROR;
+
+    /* Create reference to the root group */
+    if (H5Rcreate_object(file, "/", H5P_DEFAULT, &wbuf[1]) < 0)
+        TEST_ERROR;
+
+    if (H5Rget_obj_type3(&wbuf[1], H5P_DEFAULT, &obj_type) < 0)
+        TEST_ERROR;
+
+    if (obj_type != H5O_TYPE_GROUP)
+        TEST_ERROR;
+
+    /* Write the object reference data to the dataset */
+    if (H5Dwrite(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    for (int i = 0; i < 2; i++)
+        if (H5Rdestroy(&wbuf[i]) < 0)
+            TEST_ERROR;
+
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and add a dataset (DS3)
+     * of region references
+     *----------------------------------------------------------------------
+     */
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset of region references */
+    if ((dset = H5Dcreate(file, "DS3", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Select 2x4 hyperslab for first reference */
+    start[0]  = 0;
+    start[1]  = 0;
+    stride[0] = 1;
+    stride[1] = 1;
+    count[0]  = 1;
+    count[1]  = 1;
+    block[0]  = 2;
+    block[1]  = 4;
+
+    /* Make a hyperslab selection of 2x4 elements */
+    if (H5Sselect_hyperslab(space, H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR;
+
+    /* Verify the number of selection */
+    if ((nelmts = H5Sget_select_npoints(space)) != 8) {
+        printf("Number of selected elements is supposed to be 8, but got %lld\n", nelmts);
+        TEST_ERROR;
+    }
+
+    /* Store first data region */
+    if (H5Rcreate_region(file, "/DS1", space, H5P_DEFAULT, &wbuf[0]) < 0)
+        TEST_ERROR;
+
+    if (H5Rget_obj_type3(&wbuf[0], H5P_DEFAULT, &obj_type) < 0)
+        TEST_ERROR;
+
+    if (obj_type != H5O_TYPE_DATASET)
+        TEST_ERROR;
+
+    /* Select the sequence of four points for the second reference */
+    coord1[0][0] = 0;
+    coord1[0][1] = 0;
+    coord1[1][0] = 1;
+    coord1[1][1] = 1;
+    coord1[2][0] = 2;
+    coord1[2][1] = 2;
+    coord1[3][0] = 3;
+    coord1[3][1] = 3;
+
+    if (H5Sselect_elements(space, H5S_SELECT_SET, 4, (const hsize_t *)coord1) < 0)
+        TEST_ERROR;
+
+    /* Store the second data region */
+    if (H5Rcreate_region(file, "/DS1", space, H5P_DEFAULT, &wbuf[1]) < 0)
+        TEST_ERROR;
+
+    if (H5Rget_obj_type3(&wbuf[1], H5P_DEFAULT, &obj_type) < 0)
+        TEST_ERROR;
+
+    if (obj_type != H5O_TYPE_DATASET)
+        TEST_ERROR;
+
+    /* Write the region reference data to the dataset */
+    if (H5Dwrite(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    for (int i = 0; i < 2; i++)
+        if (H5Rdestroy(&wbuf[i]) < 0)
+            TEST_ERROR;
+
+    /*----------------------------------------------------------------------
+     *  Start to verify the revisions
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the first revision: it should have the object references
+     *----------------------------------------------------------------------
+     */
+    onion_info.revision_num = 1;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Open the dataset of the object references */
+    if ((dset = H5Dopen(file, "DS2", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+
+    /* Open the referenced dataset and check the data */
+    if ((dset2 = H5Ropen_object(&rbuf[0], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dread(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            int expected = i + j;
+            if (rdata[i][j] != expected) {
+                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                TEST_ERROR;
+            }
+        }
+    }
+
+    /* Open the referenced group and make sure it's a group object */
+    if ((group = H5Ropen_object(&rbuf[1], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5I_GROUP != H5Iget_type(group))
+        TEST_ERROR;
+
+    if (H5Gclose(group) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    if (H5Dclose(dset2) < 0)
+        TEST_ERROR;
+    dset2 = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    for (int i = 0; i < 2; i++)
+        if (H5Rdestroy(&rbuf[i]) < 0)
+            TEST_ERROR;
+
+    /*----------------------------------------------------------------------
+     * Verify the second revision: it should have the region references
+     *----------------------------------------------------------------------
+     */
+    onion_info.revision_num = 2;
+
+    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+        TEST_ERROR;
+
+    if ((file = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Open the dataset of the region reference */
+    if ((dset = H5Dopen(file, "DS3", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
+
+    /* Get the hyperslab selection and check the referenced region of the dataset */
+    if ((space2 = H5Ropen_region(&rbuf[0], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((nelmts = H5Sget_select_npoints(space2)) != 8) {
+        printf("Number of selected elements is supposed to be 8, but got %lld\n", nelmts);
+        TEST_ERROR;
+    }
+
+    if (H5Sclose(space2) < 0)
+        TEST_ERROR;
+    space2 = H5I_INVALID_HID;
+
+    /* Get the element selection and check the referenced region of the dataset */
+    if ((space2 = H5Ropen_region(&rbuf[1], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((nelmts = H5Sget_select_npoints(space2)) != 4) {
+        printf("Number of selected elements is supposed to be 4, but got %lld\n", nelmts);
+        TEST_ERROR;
+    }
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+
+    if (H5Sclose(space2) < 0)
+        TEST_ERROR;
+    space2 = H5I_INVALID_HID;
+
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    file = H5I_INVALID_HID;
+
+    for (int i = 0; i < 2; i++)
+        if (H5Rdestroy(&rbuf[i]) < 0)
+            TEST_ERROR;
+
+    /* Close and release resources */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_ref) < 0)
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
+
+    PASSED();
+    return 0;
+
+error:
+
+    if (paths != NULL) {
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
+    }
+
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
+
 /*-----------------------------------------------------------------------------
  *
  * Function:     main()
@@ -4264,6 +4645,7 @@ main(void)
     nerrors -= test_integration_create_delete_objects();
     nerrors -= test_integration_dset_extension();
     nerrors -= test_integration_ctl();
+    nerrors -= test_integration_reference();
 
     if (nerrors > 0) {
         HDprintf("***** %d Onion TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
