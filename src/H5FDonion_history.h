@@ -37,9 +37,9 @@
  */
 typedef struct H5FD_onion_history_header_t {
     uint8_t  version;
-    uint32_t flags; /* at most three bytes used! */
+    uint32_t flags; /* At most three bytes used! */
     uint32_t page_size;
-    uint64_t origin_eof; /* size of the 'original' canonical file */
+    uint64_t origin_eof; /* Size of the 'original' canonical file */
     uint64_t history_addr;
     uint64_t history_size;
     uint32_t checksum;

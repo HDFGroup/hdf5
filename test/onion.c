@@ -1159,7 +1159,7 @@ test_history_encode_decode(void)
     if (NULL == history.record_pointer_list)
         TEST_ERROR;
 
-    /* must match values in exp */
+    /* Must match values in exp */
     history.record_pointer_list[0].phys_addr   = 568ull;
     history.record_pointer_list[0].record_size = 238ull;
     history.record_pointer_list[1].phys_addr   = 241017ull;

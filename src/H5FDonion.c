@@ -164,7 +164,7 @@ static herr_t   H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5
                                            haddr_t size);
 static herr_t   H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t, bool new_open);
 static herr_t   H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *);
-static uint64_t H5FD__onion_history_write(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
+static uint64_t H5FD__onion_write_history_at_addr(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
                                           haddr_t filesize_curr);
 
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
@@ -286,15 +286,13 @@ H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
     if (NULL == fa_out)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info-out pointer")
 
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
-    if (NULL == plist)
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID")
 
     if (H5FD_ONION != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Incorrect VFL driver")
 
-    info_ptr = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
-    if (NULL == info_ptr)
+    if (NULL == (info_ptr = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     HDmemcpy(fa_out, info_ptr, sizeof(H5FD_onion_fapl_info_t));
@@ -337,14 +335,14 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size")
 
     if (H5P_DEFAULT != fa->backing_fapl_id) {
-        H5P_genplist_t *_plist_ret = NULL;
+        H5P_genplist_t *backing_fapl = NULL;
 
         H5E_BEGIN_TRY
         {
-            _plist_ret = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS);
+            backing_fapl = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS);
         }
         H5E_END_TRY;
-        if (_plist_ret == NULL)
+        if (backing_fapl == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid backing fapl id")
     }
 
@@ -514,7 +512,7 @@ done:
 } /* end H5FD__onion_sb_decode */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__onion_update_and_write_header
+ * Function:    H5FD__onion_write_header
  *
  * Purpose:     Write in-memory history header to appropriate backing file.
  *              Overwrites existing header data.
@@ -523,36 +521,32 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_update_and_write_header(H5FD_onion_t *file)
+H5FD__onion_write_header(H5FD_onion_history_header_t *header, H5FD_t *backing_file)
 {
-    uint32_t       _sum      = 0; /* required */
+    uint32_t       sum       = 0; /* Not used, but required by the encoder */
     uint64_t       size      = 0;
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
-    /* Unset write-lock flag */
-    if (file->is_open_rw)
-        file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
-
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header")
 
-    if (0 == (size = H5FD_onion_history_header_encode(&file->header, buf, &_sum)))
+    if (0 == (size = H5FD_onion_history_header_encode(header, buf, &sum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding updated history header")
 
-    if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, (haddr_t)size, buf) < 0)
+    if (H5FDwrite(backing_file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, (haddr_t)size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header")
 
 done:
     H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_update_and_write_header()*/
+} /* end H5FD__onion_write_header()*/
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD__onion_history_write
+ * Function:    H5FD__onion_write_history_at_addr
  *
  * Purpose:     Encode and write history to file at the given address.
  *
@@ -561,7 +555,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static uint64_t
-H5FD__onion_history_write(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
+H5FD__onion_write_history_at_addr(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
                           haddr_t filesize_curr)
 {
     uint32_t       _sum      = 0; /* Required by the API call but unused here */
@@ -590,15 +584,18 @@ done:
     H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_history_write() */
+} /* end H5FD__onion_write_history_at_addr() */
 
 /*-----------------------------------------------------------------------------
- * Write in-memory history to appropriate backing file.
- * Update information in other in-memory components.
+ * Function:    H5FD__onion_write_history
+ *
+ * Purpose:     Write in-memory history to appropriate backing file.
+ *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_update_and_write_history(H5FD_onion_t *file)
+H5FD__onion_write_history(H5FD_onion_t *file)
 {
     uint64_t size      = 0;
     herr_t   ret_value = SUCCEED;
@@ -607,7 +604,7 @@ H5FD__onion_update_and_write_history(H5FD_onion_t *file)
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
 
-    if (0 == (size = H5FD__onion_history_write(&file->history, file->backing_onion, file->history_eof,
+    if (0 == (size = H5FD__onion_write_history_at_addr(&file->history, file->backing_onion, file->history_eof,
                                                file->history_eof)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history")
 
@@ -621,7 +618,7 @@ H5FD__onion_update_and_write_history(H5FD_onion_t *file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_update_and_write_history() */
+} /* end H5FD__onion_write_history() */
 
 /*-----------------------------------------------------------------------------
  * Write in-memory revision record to appropriate backing file.
@@ -753,10 +750,13 @@ H5FD__onion_close(H5FD_t *_file)
             if (H5FD__onion_commit_new_revision_record(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
 
-            if (H5FD__onion_update_and_write_history(file) < 0)
+            if (H5FD__onion_write_history(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write history to backing store")
 
-            if (H5FD__onion_update_and_write_header(file) < 0)
+            /* Unset write-lock flag */
+            if (file->is_open_rw)
+                file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
+            if (H5FD__onion_write_header(&(file->header), file->backing_onion) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
         }
     }
@@ -1393,18 +1393,22 @@ H5FD_onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, uin
 } /* end H5FD_onion_history_encode() */
 
 /*-----------------------------------------------------------------------------
- * Create/truncate HDF5 and onion data for a fresh file.
+ * Function:    H5FD_onion_create_truncate_onion
  *
- * Special open operation required to instantiate the canonical file and
- * history simultaneously. If successful, the required backing files are
- * craeated and given initial population on the backing store, and the Onion
- * virtual file handle is set; open effects a write-mode open.
+ * Purpose:     Create/truncate HDF5 and onion data for a fresh file
  *
- * Cannot create 'template' history and proceed with normal write-mode open,
- * as this would in effect create an empty first revision, making the history
- * unintuitive. (create file -> initialize and commit empty first revision
- * (revision 0); any data written to file during the 'create' open, as seen by
- * the user, would be in the second revision (revision 1).)
+ *      Special open operation required to instantiate the canonical file and
+ *      history simultaneously. If successful, the required backing files are
+ *      craeated and given initial population on the backing store, and the Onion
+ *      virtual file handle is set; open effects a write-mode open.
+ *
+ *      Cannot create 'template' history and proceed with normal write-mode open,
+ *      as this would in effect create an empty first revision, making the history
+ *      unintuitive. (create file -> initialize and commit empty first revision
+ *      (revision 0); any data written to file during the 'create' open, as seen by
+ *      the user, would be in the second revision (revision 1).)
+ *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1511,8 +1515,13 @@ done:
 } /* end H5FD__onion_create_truncate_onion() */
 
 /*-----------------------------------------------------------------------------
- * Read and decode the history header information from `raw_file` at `addr`,
- * and store the decoded information in the structure at `hdr_out`.
+ * Function:    H5FD_onion_create_truncate_onion
+ *
+ * Purpose:     Read and decode the history header information from `raw_file`
+ *              at `addr`, and store the decoded information in the structure
+ *              at `hdr_out`.
+ *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -2099,7 +2108,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
                                                  file->fa.backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to create recovery file")
 
-    if (0 == (size = H5FD__onion_history_write(&file->history, file->backing_recov, 0, 0)))
+    if (0 == (size = H5FD__onion_write_history_at_addr(&file->history, file->backing_recov, 0, 0)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write history to recovery file")
     if (size != file->header.history_size)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "written history differed from expected size")
