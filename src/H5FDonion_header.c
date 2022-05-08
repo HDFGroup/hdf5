@@ -117,7 +117,7 @@ done:
  *              Failure:    0
  *-----------------------------------------------------------------------------
  */
-uint64_t
+size_t
 H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
 {
     uint32_t       ui32      = 0;
@@ -125,7 +125,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     uint64_t       ui64      = 0;
     uint8_t *      ui8p      = NULL;
     unsigned char *ptr       = NULL;
-    uint64_t       ret_value = 0;
+    size_t         ret_value = 0;
 
     FUNC_ENTER_PACKAGE;
 
@@ -176,7 +176,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     if (sum != header->checksum)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch")
 
-    ret_value = (uint64_t)(ptr - buf);
+    ret_value = (size_t)(ptr - buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -199,11 +199,11 @@ done:
  *              checksum itself) is stored in the pointer `checksum`).
  *-----------------------------------------------------------------------------
  */
-uint64_t
+size_t
 H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint32_t *checksum /*out*/)
 {
     unsigned char *ptr       = buf;
-    uint64_t       ret_value = 0;
+    size_t         ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR;
 
@@ -225,7 +225,7 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     UINT64ENCODE(ptr, header->history_size);
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
     UINT32ENCODE(ptr, *checksum);
-    ret_value = (uint64_t)(ptr - buf);
+    ret_value = (size_t)(ptr - buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_header_encode() */

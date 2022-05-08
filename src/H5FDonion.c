@@ -441,7 +441,7 @@ done:
 static herr_t
 H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 {
-    uint32_t                      _sum      = 0; /* required */
+    uint32_t                      checksum  = 0; /* required */
     size_t                        size      = 0;
     haddr_t                       phys_addr = 0; /* offset in history file to record start */
     unsigned char *               buf       = NULL;
@@ -469,7 +469,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
                                    (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
-    if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &_sum)))
+    if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding revision record")
 
     phys_addr = file->onion_eof;
@@ -685,7 +685,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     H5FD_onion_history_t *        history         = NULL;
     H5FD_onion_revision_record_t *rec             = NULL;
     unsigned char *               buf             = NULL;
-    uint64_t                      size            = 0;
+    size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
@@ -904,8 +904,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 H5FD_onion_revision_record_t *rec        = NULL;
                 unsigned char *               head_buf   = NULL;
                 unsigned char *               hist_buf   = NULL;
-                uint64_t                      size       = 0;
-                uint64_t                      saved_size = 0;
+                size_t                        size       = 0;
+                size_t                        saved_size = 0;
 
                 HDassert(file != NULL);
 
@@ -1109,8 +1109,8 @@ static herr_t
 H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, bool new_open)
 {
     unsigned char *buf       = NULL;
-    uint64_t       size      = 0;
-    uint32_t       _sum      = 0;
+    size_t         size      = 0;
+    uint32_t       checksum  = 0;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
@@ -1141,10 +1141,10 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
 
     file->header.flags |= H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
 
-    if (0 == (size = H5FD__onion_header_encode(&file->header, buf, &_sum)))
+    if (0 == (size = H5FD__onion_header_encode(&file->header, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding history header")
 
-    if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, (haddr_t)size, buf) < 0)
+    if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header")
 
     /* Prepare revision index and finalize write-mode open */

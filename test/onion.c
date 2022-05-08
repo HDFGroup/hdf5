@@ -1024,13 +1024,13 @@ test_history_encode_decode_empty(void)
     uint64_t             size_ret = 0;
     H5FD_onion_history_t history  = {
         H5FD__ONION_HISTORY_VERSION_CURR, 0, /* n_revisions */
-        NULL,                                      /* list */
-        0,                                         /* checksum */
+        NULL,                                /* list */
+        0,                                   /* checksum */
     };
     H5FD_onion_history_t history_out = {
         H5FD__ONION_HISTORY_VERSION_CURR, 0, /* n_revisions */
-        NULL,                                      /* list */
-        0,                                         /* checksum */
+        NULL,                                /* list */
+        0,                                   /* checksum */
     };
 
     TESTING("encode/decode history (empty and failures)");
@@ -1139,16 +1139,16 @@ test_history_encode_decode(void)
     size_t               i       = 0;
     H5FD_onion_history_t history = {
         H5FD__ONION_HISTORY_VERSION_CURR, 3, /* n_revisions */
-        NULL,                                      /* list set below */
-        0,                                         /* checksum  not set by us */
+        NULL,                                /* list set below */
+        0,                                   /* checksum  not set by us */
     };
     H5FD_onion_history_t history_out = {
         H5FD__ONION_HISTORY_VERSION_CURR, 0, /* n_revisions must start as zero */
-        NULL,                                      /* list */
-        0,                                         /* checksum */
+        NULL,                                /* list */
+        0,                                   /* checksum */
     };
-    uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_HISTORY +
-                        H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * history.n_revisions;
+    size_t exp_size =
+        H5FD__ONION_ENCODED_SIZE_HISTORY + H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * history.n_revisions;
 
     TESTING("encode/decode history");
 
@@ -1325,9 +1325,9 @@ test_revision_record_encode_decode(void)
         comment,                                     /* comment */
         0,                                           /* checksum (computed later) */
     };
-    uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
-                        (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
-                        HDstrlen("Example comment message.") + 1;
+    size_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
+                      (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
+                      HDstrlen("Example comment message.") + 1;
 
     r_out.archival_index.list = NULL;
     r_out.comment             = NULL;

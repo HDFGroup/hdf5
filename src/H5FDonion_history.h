@@ -52,9 +52,9 @@ H5_DLL herr_t H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD
 H5_DLL uint64_t H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t off_start,
                                           haddr_t filesize_curr);
 
-H5_DLL uint64_t H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history);
-H5_DLL uint64_t H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf,
-                                           uint32_t *checksum);
+H5_DLL size_t H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history);
+H5_DLL size_t H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf,
+                                         uint32_t *checksum);
 
 #ifdef __cplusplus
 }

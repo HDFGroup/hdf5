@@ -44,11 +44,10 @@ typedef struct H5FD_onion_header_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-H5_DLL herr_t   H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_t addr);
-H5_DLL herr_t   H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file);
-H5_DLL uint64_t H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header);
-H5_DLL uint64_t H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf,
-                                          uint32_t *checksum);
+H5_DLL herr_t H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_t addr);
+H5_DLL herr_t H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file);
+H5_DLL size_t H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header);
+H5_DLL size_t H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint32_t *checksum);
 
 #ifdef __cplusplus
 }
