@@ -4391,7 +4391,7 @@ test_integration_reference(void)
 
     /* Verify the number of selection */
     if ((nelmts = H5Sget_select_npoints(space)) != 8) {
-        printf("Number of selected elements is supposed to be 8, but got %lld\n", nelmts);
+        HDprintf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
@@ -4534,7 +4534,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     if ((nelmts = H5Sget_select_npoints(space2)) != 8) {
-        printf("Number of selected elements is supposed to be 8, but got %lld\n", nelmts);
+        HDprintf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
@@ -4547,7 +4547,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     if ((nelmts = H5Sget_select_npoints(space2)) != 4) {
-        printf("Number of selected elements is supposed to be 4, but got %lld\n", nelmts);
+        HDprintf("Number of selected elements is supposed to be 4, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
