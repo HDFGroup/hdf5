@@ -91,7 +91,7 @@ struct H5FD_onion_revision_index_hash_chain_node_t {
     H5FD_onion_revision_index_hash_chain_node_t *next;
 };
 
-typedef struct H5FD__onion_revision_index_t {
+typedef struct H5FD_onion_revision_index_t {
     uint8_t                                       version;
     uint32_t                                      page_size_log2;
     uint64_t                                      n_entries;             /* count of all entries in table */
@@ -99,7 +99,7 @@ typedef struct H5FD__onion_revision_index_t {
     uint64_t                                      _hash_table_size_log2; /* 2^(n) -> 'slots' in hash table */
     uint64_t                                      _hash_table_n_keys_populated; /* count of slots not NULL */
     H5FD_onion_revision_index_hash_chain_node_t **_hash_table;
-} H5FD__onion_revision_index_t;
+} H5FD_onion_revision_index_t;
 
 /* In-memory representation of the on-store revision record.
  */
@@ -123,14 +123,14 @@ H5_DLL hbool_t H5FD_onion_archival_index_is_valid(const H5FD_onion_archival_inde
 H5_DLL int     H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *, uint64_t,
                                               const H5FD_onion_index_entry_t **);
 
-H5_DLL H5FD__onion_revision_index_t *H5FD_onion_revision_index_init(uint32_t page_size);
-H5_DLL herr_t                        H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *);
-H5_DLL herr_t                        H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *,
-                                                                      const H5FD_onion_index_entry_t *);
-H5_DLL int H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *, uint64_t,
+H5_DLL H5FD_onion_revision_index_t *H5FD_onion_revision_index_init(uint32_t page_size);
+H5_DLL herr_t                       H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *);
+H5_DLL herr_t                       H5FD_onion_revision_index_insert(H5FD_onion_revision_index_t *,
+                                                                     const H5FD_onion_index_entry_t *);
+H5_DLL int H5FD_onion_revision_index_find(const H5FD_onion_revision_index_t *, uint64_t,
                                           const H5FD_onion_index_entry_t **);
 
-H5_DLL herr_t H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_index_t *,
+H5_DLL herr_t H5FD_onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *,
                                                                   H5FD_onion_archival_index_t *);
 
 H5_DLL uint64_t H5FD_onion_revision_record_decode(unsigned char *, H5FD_onion_revision_record_t *);

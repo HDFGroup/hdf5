@@ -24,4 +24,3 @@
 #include "H5FDprivate.h"    /* File drivers                */
 #include "H5FDonion.h"      /* Onion file driver           */
 #include "H5FDonion_priv.h" /* Onion file driver internals */
-
