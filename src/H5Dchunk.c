@@ -6950,7 +6950,7 @@ done:
  */
 herr_t
 H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
-                      H5F_block_t *new_chunk, hbool_t *need_insert, hsize_t scaled[])
+                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t scaled[])
 {
     hbool_t alloc_chunk = FALSE;   /* Whether to allocate chunk */
     herr_t  ret_value   = SUCCEED; /* Return value         */

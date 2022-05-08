@@ -348,7 +348,7 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read object header")
         if (exists) {
-            if ((dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)) < 0)
+            if (NULL == (dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
             /* Verify size */
             if (fill->size != H5T_GET_SIZE(dt))

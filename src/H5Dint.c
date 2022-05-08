@@ -1120,7 +1120,7 @@ done:
 H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t dapl_id)
 {
-    const H5T_t *   type; /* Datatype for dataset */
+    H5T_t *         type; /* Datatype for dataset */
     H5D_t *         new_dset      = NULL;
     H5P_genplist_t *dc_plist      = NULL;  /* New Property list */
     hbool_t         has_vl_type   = FALSE; /* Flag to indicate a VL-type for dataset */
@@ -1141,7 +1141,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Get the dataset's datatype */
-    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     /* Check if the datatype is "sensible" for use in a dataset */

@@ -3385,14 +3385,14 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             /* For nested VL case, free leftover heap objects from the deeper level if the
                              * length of new data elements is shorter than the old data elements.*/
                             if (nested && seq_len < bg_seq_len) {
-                                size_t   parent_seq_len;
-                                uint8_t *tmp;
-                                size_t   u;
+                                size_t         parent_seq_len;
+                                const uint8_t *tmp;
+                                size_t         u;
 
                                 /* TMP_P is reset each time in the loop because DST_BASE_SIZE may include some
                                  * data in addition to VL info. - SLU */
                                 for (u = seq_len; u < bg_seq_len; u++) {
-                                    tmp = (uint8_t *)tmp_buf + u * dst_base_size;
+                                    tmp = (const uint8_t *)tmp_buf + u * dst_base_size;
                                     UINT32DECODE(tmp, parent_seq_len);
                                     if (parent_seq_len > 0) {
                                         H5F_addr_decode(dst->shared->u.vlen.f, &tmp, &(parent_hobjid.addr));

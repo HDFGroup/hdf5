@@ -152,10 +152,10 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
         void *buf /*out*/)
 {
-    H5D_t *      dset       = NULL;
-    const H5S_t *mem_space  = NULL;
-    const H5S_t *file_space = NULL;
-    herr_t       ret_value  = SUCCEED; /* Return value */
+    H5D_t *dset       = NULL;
+    H5S_t *mem_space  = NULL;
+    H5S_t *file_space = NULL;
+    herr_t ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
@@ -283,10 +283,10 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
          const void *buf)
 {
-    H5D_t *      dset       = NULL;
-    const H5S_t *mem_space  = NULL;
-    const H5S_t *file_space = NULL;
-    herr_t       ret_value  = SUCCEED; /* Return value */
+    H5D_t *dset       = NULL;
+    H5S_t *mem_space  = NULL;
+    H5S_t *file_space = NULL;
+    herr_t ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
