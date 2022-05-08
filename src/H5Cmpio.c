@@ -160,14 +160,11 @@ herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    int                i;
-    int                m;
-    int                n;
     unsigned           first_entry_to_flush;
     unsigned           last_entry_to_flush;
     unsigned           total_entries_to_clear     = 0;
     unsigned           total_entries_to_flush     = 0;
-    int *              candidate_assignment_table = NULL;
+    unsigned *         candidate_assignment_table = NULL;
     unsigned           entries_to_flush[H5C_RING_NTYPES];
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
@@ -179,6 +176,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     char tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
+    unsigned m, n;
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -219,10 +217,11 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
     } /* end if */
 
-    n = num_candidates / mpi_size;
-    m = num_candidates % mpi_size;
-    HDassert(n >= 0);
-    if (NULL == (candidate_assignment_table = (int *)H5MM_malloc(sizeof(int) * (size_t)(mpi_size + 1))))
+    n = num_candidates / (unsigned)mpi_size;
+    m = num_candidates % (unsigned)mpi_size;
+
+    if (NULL ==
+        (candidate_assignment_table = (unsigned *)H5MM_malloc(sizeof(unsigned) * (size_t)(mpi_size + 1))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed for candidate assignment table")
 
@@ -231,31 +230,31 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     if (m == 0) { /* mpi_size is an even divisor of num_candidates */
         HDassert(n > 0);
-        for (i = 1; i < mpi_size; i++)
-            candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n;
+        for (u = 1; u < (unsigned)mpi_size; u++)
+            candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n;
     } /* end if */
     else {
-        for (i = 1; i <= m; i++)
-            candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n + 1;
+        for (u = 1; u <= m; u++)
+            candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n + 1;
 
-        if (num_candidates < mpi_size) {
-            for (i = m + 1; i < mpi_size; i++)
-                candidate_assignment_table[i] = num_candidates;
+        if (num_candidates < (unsigned)mpi_size) {
+            for (u = m + 1; u < (unsigned)mpi_size; u++)
+                candidate_assignment_table[u] = num_candidates;
         } /* end if */
         else {
-            for (i = m + 1; i < mpi_size; i++)
-                candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n;
+            for (u = m + 1; u < (unsigned)mpi_size; u++)
+                candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n;
         } /* end else */
     }     /* end else */
     HDassert((candidate_assignment_table[mpi_size - 1] + n) == num_candidates);
 
 #if H5C_DO_SANITY_CHECKS
     /* Verify that the candidate assignment table has the expected form */
-    for (i = 1; i < mpi_size - 1; i++) {
-        int a, b;
+    for (u = 1; u < (unsigned)(mpi_size - 1); u++) {
+        unsigned a, b;
 
-        a = candidate_assignment_table[i] - candidate_assignment_table[i - 1];
-        b = candidate_assignment_table[i + 1] - candidate_assignment_table[i];
+        a = candidate_assignment_table[u] - candidate_assignment_table[u - 1];
+        b = candidate_assignment_table[u + 1] - candidate_assignment_table[u];
 
         HDassert(n + 1 >= a);
         HDassert(a >= b);
@@ -267,11 +266,11 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     last_entry_to_flush  = candidate_assignment_table[mpi_rank + 1] - 1;
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    for (i = 0; i < 1024; i++)
-        tbl_buf[i] = '\0';
+    for (u = 0; u < 1024; u++)
+        tbl_buf[u] = '\0';
     HDsprintf(&(tbl_buf[0]), "candidate assignment table = ");
-    for (i = 0; i <= mpi_size; i++)
-        HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %d", candidate_assignment_table[i]);
+    for (u = 0; u <= (unsigned)mpi_size; u++)
+        HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %d", candidate_assignment_table[u]);
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
     HDfprintf(stdout, "%s", tbl_buf);
 
@@ -346,13 +345,13 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 #if H5C_DO_SANITY_CHECKS
     m = 0;
     n = 0;
-    for (i = 0; i < H5C_RING_NTYPES; i++) {
-        m += (int)entries_to_flush[i];
-        n += (int)entries_to_clear[i];
+    for (u = 0; u < H5C_RING_NTYPES; u++) {
+        m += entries_to_flush[u];
+        n += entries_to_clear[u];
     } /* end if */
 
     HDassert((unsigned)m == total_entries_to_flush);
-    HDassert((unsigned)n == total_entries_to_clear);
+    HDassert(n == total_entries_to_clear);
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
@@ -385,7 +384,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
 done:
     if (candidate_assignment_table != NULL)
-        candidate_assignment_table = (int *)H5MM_xfree((void *)candidate_assignment_table);
+        candidate_assignment_table = (unsigned *)H5MM_xfree((void *)candidate_assignment_table);
     if (cache_ptr->coll_write_list) {
         if (H5SL_close(cache_ptr->coll_write_list) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "failed to destroy skip list")

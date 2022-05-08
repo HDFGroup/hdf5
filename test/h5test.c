@@ -539,7 +539,6 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                 hbool_t nest_printf)
 {
     const char *prefix = NULL;
-    const char *env    = NULL; /* HDF5_DRIVER environment variable     */
     char *      ptr, last = '\0';
     const char *suffix = _suffix;
     size_t      i, j;
@@ -561,25 +560,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                 suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
             }
             else if (H5FD_MULTI == driver) {
-
-                /* Get the environment variable, if it exists, in case
-                 * we are using the split driver since both of those
-                 * use the multi VFD under the hood.
-                 */
-                env = HDgetenv("HDF5_DRIVER");
-#ifdef HDF5_DRIVER
-                /* Use the environment variable, then the compile-time constant */
-                if (!env)
-                    env = HDF5_DRIVER;
-#endif
-                if (env && !HDstrcmp(env, "split")) {
-                    /* split VFD */
-                    suffix = NULL;
-                }
-                else {
-                    /* multi VFD */
-                    suffix = NULL;
-                }
+                suffix = NULL;
             }
         }
     }

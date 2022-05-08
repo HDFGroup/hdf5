@@ -66,31 +66,27 @@ error:
 int
 main(void)
 {
-    hid_t        dcpl;                       /* dataset create prop. list */
-    hid_t        dapl;                       /* dataset access prop. list */
-    hid_t        dxpl;                       /* dataset xfer prop. list */
-    hid_t        gcpl;                       /* group create prop. list */
-    hid_t        ocpypl;                     /* object copy prop. list */
-    hid_t        ocpl;                       /* object create prop. list */
-    hid_t        lcpl;                       /* link create prop. list */
-    hid_t        lapl;                       /* link access prop. list */
-    hid_t        fapl;                       /* file access prop. list */
-    hid_t        fcpl;                       /* file create prop. list */
-    hid_t        strcpl;                     /* string create prop. list */
-    hid_t        acpl;                       /* attribute create prop. list */
-    hid_t        srcspace      = -1;         /* Source dataspaces */
-    hid_t        vspace        = -1;         /* Virtual dset dataspaces */
-    hsize_t      dims[1]       = {3};        /* Data space current size */
-    hsize_t      chunk_size[2] = {16384, 4}; /* chunk size */
-    double       fill          = 2.7;        /* Fill value */
-    hsize_t      max_size[1];                /* data space maximum size */
-    size_t       nslots = 521 * 2;
-    size_t       nbytes = 1048576 * 10;
-    double       w0     = 0.5;
-    unsigned     max_compact;
-    unsigned     min_dense;
-    const char * c_to_f = "x+32";
-    H5F_libver_t low, high; /* Low and high bounds */
+    hid_t       dcpl;                       /* dataset create prop. list */
+    hid_t       dapl;                       /* dataset access prop. list */
+    hid_t       dxpl;                       /* dataset xfer prop. list */
+    hid_t       gcpl;                       /* group create prop. list */
+    hid_t       ocpypl;                     /* object copy prop. list */
+    hid_t       ocpl;                       /* object create prop. list */
+    hid_t       lcpl;                       /* link create prop. list */
+    hid_t       lapl;                       /* link access prop. list */
+    hid_t       fapl;                       /* file access prop. list */
+    hid_t       fcpl;                       /* file create prop. list */
+    hid_t       strcpl;                     /* string create prop. list */
+    hid_t       acpl;                       /* attribute create prop. list */
+    hsize_t     chunk_size[2] = {16384, 4}; /* chunk size */
+    double      fill          = 2.7;        /* Fill value */
+    hsize_t     max_size[1];                /* data space maximum size */
+    size_t      nslots = 521 * 2;
+    size_t      nbytes = 1048576 * 10;
+    double      w0     = 0.5;
+    unsigned    max_compact;
+    unsigned    min_dense;
+    const char *c_to_f = "x+32";
 
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,
                                            TRUE,

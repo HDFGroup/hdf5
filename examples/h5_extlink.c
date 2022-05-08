@@ -207,7 +207,7 @@ extlink_prefix_example(void)
  * that a path was supplied in the udata.
  */
 static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size,
-                              hid_t lapl_id);
+                              hid_t lapl_id, hid_t dxpl_id);
 
 static void
 soft_link_example(void)
@@ -276,7 +276,8 @@ soft_link_example(void)
  */
 
 static hid_t
-UD_soft_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size, hid_t lapl_id)
+UD_soft_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t udata_size, hid_t lapl_id,
+                 hid_t dxpl_id)
 {
     const char *target = (const char *)udata;
     hid_t       ret_value;

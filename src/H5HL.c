@@ -543,7 +543,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
+herr_t
 H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *offset_out)
 {
     H5HL_free_t *fl = NULL, *last_fl = NULL;

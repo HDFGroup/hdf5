@@ -4053,7 +4053,7 @@ h5tools_dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_contex
 
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
     for (i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
-        void *memref = region_buf + i * nsize;
+        void *memref = region_buf + (size_t)i * nsize;
 
         H5TOOLS_DEBUG("reference loop:%d with curr_pos=%ld", i, curr_pos);
 

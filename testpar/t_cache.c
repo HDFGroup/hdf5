@@ -1501,10 +1501,10 @@ serve_read_request(struct mssg_t *mssg_ptr)
             reply.dest      = mssg_ptr->src;
             reply.mssg_num  = -1; /* set by send function */
             reply.base_addr = data[target_index].base_addr;
-            reply.len       = data[target_index].len;
-            reply.ver       = data[target_index].ver;
-            reply.count     = 0;
-            reply.magic     = MSSG_MAGIC;
+            H5_CHECKED_ASSIGN(reply.len, unsigned, data[target_index].len, size_t);
+            reply.ver   = data[target_index].ver;
+            reply.count = 0;
+            reply.magic = MSSG_MAGIC;
 
             /* and update the counters */
             total_reads++;
@@ -1707,10 +1707,10 @@ serve_write_request(struct mssg_t *mssg_ptr)
         reply.dest      = mssg_ptr->src;
         reply.mssg_num  = -1; /* set by send function */
         reply.base_addr = data[target_index].base_addr;
-        reply.len       = data[target_index].len;
-        reply.ver       = data[target_index].ver;
-        reply.count     = 0;
-        reply.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(reply.len, unsigned, data[target_index].len, size_t);
+        reply.ver   = data[target_index].ver;
+        reply.count = 0;
+        reply.magic = MSSG_MAGIC;
 
         /* and send it */
         success = send_mssg(&reply, TRUE);
@@ -2431,10 +2431,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
             mssg.dest      = world_server_mpi_rank;
             mssg.mssg_num  = -1; /* set by send function */
             mssg.base_addr = entry_ptr->base_addr;
-            mssg.len       = entry_ptr->len;
-            mssg.ver       = 0; /* bogus -- should be corrected by server */
-            mssg.count     = 0; /* not used */
-            mssg.magic     = MSSG_MAGIC;
+            H5_CHECKED_ASSIGN(mssg.len, unsigned, entry_ptr->len, size_t);
+            mssg.ver   = 0; /* bogus -- should be corrected by server */
+            mssg.count = 0; /* not used */
+            mssg.magic = MSSG_MAGIC;
 
             if (!send_mssg(&mssg, FALSE)) {
 
@@ -2576,10 +2576,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
                     mssg.dest      = world_server_mpi_rank;
                     mssg.mssg_num  = -1; /* set by send function */
                     mssg.base_addr = entry_ptr->base_addr;
-                    mssg.len       = entry_ptr->len;
-                    mssg.ver       = entry_ptr->ver;
-                    mssg.count     = 0;
-                    mssg.magic     = MSSG_MAGIC;
+                    H5_CHECKED_ASSIGN(mssg.len, unsigned, entry_ptr->len, size_t);
+                    mssg.ver   = entry_ptr->ver;
+                    mssg.count = 0;
+                    mssg.magic = MSSG_MAGIC;
 
                     if (!send_mssg(&mssg, FALSE)) {
 
@@ -4296,7 +4296,7 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
         }
         else {
 
-            reported_entry_reads = mssg.count;
+            H5_CHECKED_ASSIGN(reported_entry_reads, int, mssg.count, unsigned);
         }
     }
 
@@ -4393,7 +4393,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
         }
         else {
 
-            reported_entry_writes = mssg.count;
+            H5_CHECKED_ASSIGN(reported_entry_writes, int, mssg.count, unsigned);
         }
     }
 
@@ -4808,10 +4808,10 @@ server_smoke_check(void)
         mssg.dest      = world_server_mpi_rank;
         mssg.mssg_num  = -1; /* set by send function */
         mssg.base_addr = data[world_mpi_rank].base_addr;
-        mssg.len       = data[world_mpi_rank].len;
-        mssg.ver       = ++(data[world_mpi_rank].ver);
-        mssg.count     = 0;
-        mssg.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(mssg.len, unsigned, data[world_mpi_rank].len, size_t);
+        mssg.ver   = ++(data[world_mpi_rank].ver);
+        mssg.count = 0;
+        mssg.magic = MSSG_MAGIC;
 
         if (!(success = send_mssg(&mssg, FALSE))) {
 
@@ -4905,10 +4905,10 @@ server_smoke_check(void)
         mssg.dest      = world_server_mpi_rank;
         mssg.mssg_num  = -1; /* set by send function */
         mssg.base_addr = data[world_mpi_rank].base_addr;
-        mssg.len       = data[world_mpi_rank].len;
-        mssg.ver       = 0; /* bogus -- should be corrected by server */
-        mssg.count     = 0;
-        mssg.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(mssg.len, unsigned, data[world_mpi_rank].len, size_t);
+        mssg.ver   = 0; /* bogus -- should be corrected by server */
+        mssg.count = 0;
+        mssg.magic = MSSG_MAGIC;
 
         if (success) {
 
@@ -6704,7 +6704,8 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert(cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            H5_CHECK_OVERFLOW(cache_ptr->max_cache_size, size_t, double);
+            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);

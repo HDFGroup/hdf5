@@ -3499,39 +3499,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S__hyper_get_enc_size_real
- PURPOSE
-    Determine the size to encode the hyperslab selection info
- USAGE
-    hssize_t H5S__hyper_get_enc_size_real(max_size, enc_size)
-        hsize_t max_size:       IN: The maximum size of the hyperslab selection info
-        unint8_t *enc_size:     OUT:The encoding size
- RETURNS
-    The size to encode hyperslab selection info
- DESCRIPTION
-    Determine the size by comparing "max_size" with (2^32 - 1) and (2^16 - 1).
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static uint8_t
-H5S__hyper_get_enc_size_real(hsize_t max_size)
-{
-    uint8_t ret_value;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    if (max_size > H5S_UINT32_MAX)
-        ret_value = H5S_SELECT_INFO_ENC_SIZE_8;
-    else
-        ret_value = H5S_SELECT_INFO_ENC_SIZE_4;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S__hyper_get_enc_size_real() */
-
-/*--------------------------------------------------------------------------
- NAME
     H5S__hyper_get_version_enc_size
  PURPOSE
     Determine the version and encoded size to use for encoding hyperslab selection info

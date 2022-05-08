@@ -670,8 +670,6 @@ done:
     ssize_t H5R__get_name(f, ref_type, ref, name, size)
         H5F_t *f;       IN: Pointer to the file that the reference is pointing
                             into
-        hid_t lapl_id;  IN: LAPL to use for operation
-        hid_t id;       IN: Location ID given for reference
         H5R_type_t ref_type;    IN: Type of reference
         void *_ref;     IN: Reference to query.
         char *name;     OUT: Buffer to place name of object referenced
@@ -689,7 +687,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 ssize_t
-H5R__get_name(H5F_t *f, hid_t id, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
+H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
 {
     hid_t     file_id = H5I_INVALID_HID; /* ID for file that the reference is in */
     H5O_loc_t oloc;                      /* Object location describing object for reference */

@@ -323,7 +323,7 @@ compact_dataset(void)
     /* Verify data value */
     for (i = 0; i < size; i++)
         for (j = 0; j < size; j++)
-            if (inme[(i * size) + j] != outme[(i * size) + j])
+            if (!H5_DBL_ABS_EQUAL(inme[(i * size) + j], outme[(i * size) + j]))
                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     HDprintf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j,
                              outme[(i * size) + j], inme[(i * size) + j]);
@@ -2326,7 +2326,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
                     /* compare read data with expected data */
                     for (j = 0; j < LOCAL_DATA_SIZE; j++)
-                        if (data_read[j] != data[j]) {
+                        if (!H5_DBL_ABS_EQUAL(data_read[j], data[j])) {
                             HDfprintf(stdout,
                                       "%0d:%s: Reading datasets value failed in "
                                       "Dataset %d, at position %d: expect %f, got %f.\n",
@@ -2388,7 +2388,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for (j = 0; j < LOCAL_DATA_SIZE; j++)
-                            if (att_read[j] != att[j]) {
+                            if (!H5_DBL_ABS_EQUAL(att_read[j], att[j])) {
                                 HDfprintf(stdout,
                                           "%0d:%s: Mismatched attribute data read in Dataset %d, at position "
                                           "%d: expect %f, got %f.\n",
@@ -2439,7 +2439,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for (j = 0; j < LARGE_ATTR_SIZE; j++)
-                            if (lg_att_read[j] != lg_att[j]) {
+                            if (!H5_DBL_ABS_EQUAL(lg_att_read[j], lg_att[j])) {
                                 HDfprintf(stdout,
                                           "%0d:%s: Mismatched large attribute data read in Dataset %d, at "
                                           "position %d: expect %f, got %f.\n",

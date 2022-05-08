@@ -4321,9 +4321,9 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
                                                         of each dimension */
     hsize_t edge_chunk_scaled[H5O_LAYOUT_NDIMS]; /* Offset of the unfiltered edge chunks at the edge of each
                                                     dimension */
-    unsigned                   nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
-    const H5O_storage_chunk_t *sc                      = &(layout->storage.u.chunk);
-    herr_t                     ret_value               = SUCCEED; /* Return value */
+    unsigned             nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
+    H5O_storage_chunk_t *sc                      = &(layout->storage.u.chunk);
+    herr_t               ret_value               = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 

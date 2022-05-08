@@ -3437,9 +3437,9 @@ test_no_collective_cause_mode(int selection_mode)
     const char *test_name;
     hbool_t     is_chunked     = 1;
     hbool_t     is_independent = 0;
-    int         mpi_size       = -1;
-    int         mpi_rank       = -1;
-    int         length;
+    size_t      length;
+    int         mpi_size = -1;
+    int         mpi_rank = -1;
     int *       buffer;
     int         i;
     MPI_Comm    mpi_comm;
@@ -3594,12 +3594,12 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     /* Get the number of elements in the selection */
-    length = dims[0] * dims[1];
+    length = (size_t)(dims[0] * dims[1]);
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
+    buffer = (int *)HDmalloc(sizeof(int) * length);
     VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
-    for (i = 0; i < length; i++)
+    for (i = 0; (size_t)i < length; i++)
         buffer[i] = i;
 
     /* Set up the dxpl for the write */
