@@ -11422,7 +11422,6 @@ gent_onion_1d_dset(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE,          /* page_size        */
-        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
@@ -11593,7 +11592,6 @@ gent_onion_create_delete_objects(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE,          /* page_size        */
-        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
@@ -11841,7 +11839,6 @@ gent_onion_dset_extension(void)
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE,          /* page_size        */
-        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
         0,               /* force_write_open */
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */

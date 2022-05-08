@@ -548,32 +548,24 @@ H5FD__onion_close(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     HDassert(file);
+    HDassert(file->onion_file);
 
-    if (H5FD_ONION_STORE_TARGET_ONION == file->fa.store_target) {
+    if (file->is_open_rw) {
 
-        HDassert(file->onion_file);
+        HDassert(file->recovery_file);
 
-        if (file->is_open_rw) {
+        if (H5FD__onion_commit_new_revision_record(file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
 
-            HDassert(file->recovery_file);
+        if (H5FD__onion_write_final_history(file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write history to backing store")
 
-            if (H5FD__onion_commit_new_revision_record(file) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
-
-            if (H5FD__onion_write_final_history(file) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write history to backing store")
-
-            /* Unset write-lock flag and write header */
-            if (file->is_open_rw)
-                file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
-            if (H5FD__onion_write_header(&(file->header), file->onion_file) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
-        }
+        /* Unset write-lock flag and write header */
+        if (file->is_open_rw)
+            file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
+        if (H5FD__onion_write_header(&(file->header), file->onion_file) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
     }
-    else if (H5FD_ONION_STORE_TARGET_H5 == file->fa.store_target)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "hdf5 store-target not supported")
-    else
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid history target")
 
 done:
 
@@ -697,9 +689,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     rec     = &file->curr_rev_record;
 
     hdr->flags = H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
-    if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-        hdr->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
-    if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags)
+    if (H5FD_ONION_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags)
         hdr->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
 
     hdr->origin_eof = 0;
@@ -808,12 +798,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (fa = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
-    /* Check for unsupported target values */
-    if (H5FD_ONION_STORE_TARGET_H5 == fa->store_target)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "same-file storage not implemented")
-    else if (H5FD_ONION_STORE_TARGET_ONION != fa->store_target)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid store target")
-
     /* Allocate space for the file struct */
     if (NULL == (file = H5FL_CALLOC(H5FD_onion_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate file struct")
@@ -869,7 +853,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* Create a new onion file from scratch */
 
         /* Set flags */
-        if (fa->creation_flags & H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT) {
+        if (fa->creation_flags & H5FD_ONION_ENABLE_PAGE_ALIGNMENT) {
             file->header.flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
             file->align_history_on_pages = TRUE;
         }
@@ -915,9 +899,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 new_open = true;
 
-                if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-                    hdr->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
-                if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
+                if (H5FD_ONION_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
                     hdr->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
                     file->align_history_on_pages = TRUE;
                 }

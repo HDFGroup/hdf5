@@ -25,8 +25,7 @@
 
 /* Flags must align exactly one per bit, up to 24 bits */
 #define H5FD__ONION_HEADER_FLAG_WRITE_LOCK        0x1
-#define H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY 0x2
-#define H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT    0x4
+#define H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT    0x2
 #define H5FD__ONION_HEADER_SIGNATURE              "OHDH"
 #define H5FD__ONION_HEADER_VERSION_CURR           1
 
