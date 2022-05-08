@@ -90,11 +90,11 @@ static hid_t H5FD_ONION_g = 0;
  *
  * curr_rev_record
  *
- *      Revision record for the currently open file.
+ *      Record for the currently open revision.
  *
  * rev_index
  *
- *      Index for maintaining modified pages.
+ *      Index for maintaining modified pages (RW mode only).
  *      Pointer is NULL when the file is not opened in write mode.
  *      Pointer is allocated on open and must be freed on close.
  *      Contents must be merged with the revision record's archival index prior

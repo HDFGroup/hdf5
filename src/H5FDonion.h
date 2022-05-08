@@ -21,19 +21,29 @@
 #define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
 #define H5FD_ONION_VALUE H5_VFD_ONION
 
-#define H5FD_ONION_ENABLE_INDEX_STATS 0
+/* Current version of the fapl info struct */
+#define H5FD_ONION_FAPL_INFO_VERSION_CURR 1
 
-#define H5FD_ONION_FAPL_INFO_VERSION_CURR                         1
-#define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN                      1
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 1
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT    2
-#define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN                      255
-#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST                   UINT64_MAX
+/* Flag to open a file that has a locked header (after crashes, for example) */
+#define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN 1
+
+/* Flag to enable opening older revisions in write mode, creating a tree */
+#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 0x1
+
+/* Flag to require page alignment of onion revision data */
+#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT    0x2
+
+/* Max length of a comment */
+#define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN 255
+
+/* Indicates that you want the latest revision
+ * TODO: Does this work?
+ */
+#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST UINT64_MAX
 
 typedef enum H5FD_onion_target_file_constant_t {
     H5FD_ONION_STORE_TARGET_H5,    /* Onion history as part of HDF5 file */
     H5FD_ONION_STORE_TARGET_ONION, /* Separate, single "onion" file */
-                                   /* TODO: other storage location/scheme? */
 } H5FD_onion_target_file_constant_t;
 
 /*-----------------------------------------------------------------------------
