@@ -156,7 +156,7 @@ static herr_t  H5FD__onion_set_eoa(H5FD_t *, H5FD_mem_t, haddr_t);
 static herr_t  H5FD__onion_term(void);
 static herr_t  H5FD__onion_write(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, const void *);
 
-static herr_t   H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t, bool new_open);
+static herr_t  H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t, bool new_open);
 static herr_t  H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
@@ -442,7 +442,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     herr_t                        ret_value = SUCCEED;
     H5FD_onion_revision_record_t *rec       = &file->rev_record;
     H5FD_onion_history_t *        history   = &file->history;
-    H5FD_onion_record_pointer_t * new_list  = NULL;
+    H5FD_onion_record_loc_t *     new_list  = NULL;
 
     time_t     rawtime;
     struct tm *info;
@@ -482,37 +482,35 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     if (history->n_revisions == 0) {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_pointer_list == NULL);
+        HDassert(history->record_locs == NULL);
         history->n_revisions = 1;
-        if (NULL == (history->record_pointer_list = H5MM_calloc(sizeof(H5FD_onion_record_pointer_t))))
+        if (NULL == (history->record_locs = H5MM_calloc(sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
 
-        history->record_pointer_list[0].phys_addr   = phys_addr;
-        history->record_pointer_list[0].record_size = size;
+        history->record_locs[0].phys_addr   = phys_addr;
+        history->record_locs[0].record_size = size;
         UINT64ENCODE(ptr, phys_addr);
         UINT64ENCODE(ptr, size);
-        history->record_pointer_list[0].checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
+        history->record_locs[0].checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
         /* TODO: size-reset belongs where? */
         file->header.history_size += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER;
     } /* end if no extant revisions in history */
     else {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_pointer_list != NULL);
+        HDassert(history->record_locs != NULL);
 
-        if (NULL ==
-            (new_list = H5MM_calloc((history->n_revisions + 1) * sizeof(H5FD_onion_record_pointer_t))))
+        if (NULL == (new_list = H5MM_calloc((history->n_revisions + 1) * sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
-        HDmemcpy(new_list, history->record_pointer_list,
-                 sizeof(H5FD_onion_record_pointer_t) * history->n_revisions);
-        H5MM_xfree(history->record_pointer_list);
-        history->record_pointer_list                                   = new_list;
-        new_list                                                       = NULL;
-        history->record_pointer_list[history->n_revisions].phys_addr   = phys_addr;
-        history->record_pointer_list[history->n_revisions].record_size = size;
+        HDmemcpy(new_list, history->record_locs, sizeof(H5FD_onion_record_loc_t) * history->n_revisions);
+        H5MM_xfree(history->record_locs);
+        history->record_locs                                   = new_list;
+        new_list                                               = NULL;
+        history->record_locs[history->n_revisions].phys_addr   = phys_addr;
+        history->record_locs[history->n_revisions].record_size = size;
         UINT64ENCODE(ptr, phys_addr);
         UINT64ENCODE(ptr, size);
-        history->record_pointer_list[history->n_revisions].checksum =
+        history->record_locs[history->n_revisions].checksum =
             H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
         file->header.history_size += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER;
@@ -594,7 +592,7 @@ done:
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close revision index")
 
     H5MM_xfree(file->name_recov);
-    H5MM_xfree(file->history.record_pointer_list);
+    H5MM_xfree(file->history.record_locs);
     H5MM_xfree(file->rev_record.comment);
     H5MM_xfree(file->rev_record.archival_index.list);
 
@@ -1080,7 +1078,7 @@ done:
             if (H5FD__onion_revision_index_destroy(file->rev_index) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy revision index")
 
-        H5MM_xfree(file->history.record_pointer_list);
+        H5MM_xfree(file->history.record_locs);
 
         H5MM_xfree(file->name_recov);
         H5MM_xfree(file->rev_record.comment);
@@ -1191,8 +1189,6 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     size_t         n_pages        = 0;
     uint32_t       page_size      = 0;
     uint32_t       page_size_log2 = 0;
-    size_t         i              = 0;
-    size_t         j              = 0;
     size_t         bytes_to_read  = len;
     unsigned char *buf_out        = (unsigned char *)_buf_out;
     herr_t         ret_value      = SUCCEED;
@@ -1214,7 +1210,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     n_pages        = (len + page_size - 1) >> page_size_log2;
 
     /* Read, page-by-page */
-    for (i = 0; i < n_pages; i++) {
+    for (size_t i = 0; i < n_pages; i++) {
         const H5FD_onion_index_entry_t *entry_out     = NULL;
         haddr_t                         page_gap_head = 0; /* start of page to start of buffer */
         haddr_t                         page_gap_tail = 0; /* end of buffer to end of page */
@@ -1261,7 +1257,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             /* Fill with 0s any gaps after end of original bytes
              * and before end of page.
              */
-            for (j = read_size; j < page_readsize; j++)
+            for (size_t j = read_size; j < page_readsize; j++)
                 buf_out[j] = 0;
         } /* end if page exists in neither index */
 
@@ -1313,8 +1309,6 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     unsigned char *      page_buf       = NULL;
     uint32_t             page_size      = 0;
     uint32_t             page_size_log2 = 0;
-    size_t               i              = 0;
-    size_t               j              = 0;
     size_t               bytes_to_write = len;
     const unsigned char *buf            = (const unsigned char *)_buf;
     herr_t               ret_value      = SUCCEED;
@@ -1341,7 +1335,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate temporary buffer")
 
     /* Write, page-by-page */
-    for (i = 0; i < n_pages; i++) {
+    for (size_t i = 0; i < n_pages; i++) {
         const unsigned char *           write_buf = buf;
         H5FD_onion_index_entry_t        new_entry;
         const H5FD_onion_index_entry_t *entry_out     = NULL;
@@ -1369,16 +1363,16 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         if (H5FD__onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
             if (page_gap_head | page_gap_tail) {
                 /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
-                              page_buf) < 0)
+                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) <
+                    0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
                 /* Overlay delta from input buffer onto page buffer. */
                 HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
                 write_buf = page_buf;
             } /* end if partial page */
 
-            if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
-                           write_buf) < 0)
+            if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, write_buf) <
+                0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
             buf += page_n_used; /* overflow never touched */
@@ -1391,8 +1385,8 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             /* Fill gaps with existing data or zeroes. */
             if (H5FD__onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out)) {
                 /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
-                              page_buf) < 0)
+                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) <
+                    0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended data")
             } /* end if page exists in 'dead' archival index */
             else {
@@ -1409,13 +1403,13 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                 /* Fill with 0s any gaps after end of original bytes
                  * or start of page and before start of new data.
                  */
-                for (j = read_size; j < page_gap_head; j++)
+                for (size_t j = read_size; j < page_gap_head; j++)
                     page_buf[j] = 0;
 
                 /* Fill with 0s any gaps after end of original bytes
                  * or end of new data and before end of page.
                  */
-                for (j = MAX(read_size, page_size - page_gap_tail); j < page_size; j++)
+                for (size_t j = MAX(read_size, page_size - page_gap_tail); j < page_size; j++)
                     page_buf[j] = 0;
             } /* end if page exists in neither index */
 
@@ -1589,14 +1583,14 @@ done:
 herr_t
 H5FD__onion_write_final_history(H5FD_onion_t *file)
 {
-    size_t   size      = 0;
-    herr_t   ret_value = SUCCEED;
+    size_t size      = 0;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
     if (0 == (size = H5FD__onion_write_history(&(file->history), file->backing_onion, file->history_eof,
-                                                       file->history_eof)))
+                                               file->history_eof)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write final history")
 
     if (size != file->header.history_size)

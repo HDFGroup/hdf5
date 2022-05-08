@@ -75,7 +75,7 @@ done:
  * `addr` .. `addr + size` (taken from history header), and store the decoded
  * information in the structure at `history_out`.
  *
- * If successful, `history_out->record_pointer_list` is always allocated, even if
+ * If successful, `history_out->record_locs` is always allocated, even if
  * there is zero revisions.
  *-----------------------------------------------------------------------------
  */
@@ -107,9 +107,8 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
     if (history_out->checksum != sum)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
-    history_out->record_pointer_list =
-        H5MM_calloc(history_out->n_revisions * sizeof(H5FD_onion_record_pointer_t));
-    if (history_out->n_revisions > 0 && NULL == history_out->record_pointer_list)
+    history_out->record_locs = H5MM_calloc(history_out->n_revisions * sizeof(H5FD_onion_record_loc_t));
+    if (history_out->n_revisions > 0 && NULL == history_out->record_locs)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list")
 
     if (H5FD__onion_history_decode(buf, history_out) != size)
@@ -118,7 +117,7 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
 done:
     H5MM_xfree(buf);
     if (ret_value == FAIL)
-        H5MM_xfree(history_out->record_pointer_list);
+        H5MM_xfree(history_out->record_locs);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_ingest_history() */
@@ -168,7 +167,7 @@ done:
  */
 uint64_t
 H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file_dest, haddr_t off_start,
-                                  haddr_t filesize_curr)
+                          haddr_t filesize_curr)
 {
     uint32_t       _sum      = 0; /* Required by the API call but unused here */
     uint64_t       size      = 0;
@@ -335,14 +334,14 @@ H5FD__onion_history_header_encode(H5FD_onion_history_header_t *header, unsigned 
  *
  *              MUST BE CALLED TWICE:
  *              On the first call, n_records in the destination structure must
- *              be zero, and record_pointer_list be NULL.
+ *              be zero, and record_locs be NULL.
  *
  *              If the buffer is well-formed, the destination structure is
  *              tentatively populated with fixed-size values, and the number of
  *              bytes read are returned.
  *
  *              Prior to the second call, the user must allocate space for
- *              record_pointer_list to hold n_records record-pointer structs.
+ *              record_locs to hold n_records record-pointer structs.
  *
  *              Then the decode operation is called a second time, and all
  *              components will be populated (and again number of bytes read is
@@ -387,30 +386,28 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
         ptr += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * n_revisions;
     }
     else {
-        uint64_t i = 0;
-
         if (history->n_revisions != n_revisions)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0,
                         "history argument suggests different revision count than encoded buffer")
-        if (NULL == history->record_pointer_list)
+        if (NULL == history->record_locs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL -- cannot populate")
 
-        for (i = 0; i < n_revisions; i++) {
-            H5FD_onion_record_pointer_t *rpp = &history->record_pointer_list[i];
+        for (uint64_t i = 0; i < n_revisions; i++) {
+            H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
 
             HDmemcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
-            UINT64DECODE(ui8p, rpp->phys_addr);
+            UINT64DECODE(ui8p, rloc->phys_addr);
             ptr += 8;
 
             HDmemcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
-            UINT64DECODE(ui8p, rpp->record_size);
+            UINT64DECODE(ui8p, rloc->record_size);
             ptr += 8;
 
             HDmemcpy(&ui32, ptr, 4);
             ui8p = (uint8_t *)&ui32;
-            UINT64DECODE(ui8p, rpp->checksum);
+            UINT64DECODE(ui8p, rloc->checksum);
             ptr += 4;
         }
     }
@@ -469,13 +466,11 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     UINT32ENCODE(ptr, vers_u32);
     UINT64ENCODE(ptr, history->n_revisions);
     if (history->n_revisions > 0) {
-        uint64_t i = 0;
-
-        HDassert(history->record_pointer_list != NULL); /* TODO: error? */
-        for (i = 0; i < history->n_revisions; i++) {
-            UINT64ENCODE(ptr, history->record_pointer_list[i].phys_addr);
-            UINT64ENCODE(ptr, history->record_pointer_list[i].record_size);
-            UINT32ENCODE(ptr, history->record_pointer_list[i].checksum);
+        HDassert(history->record_locs != NULL); /* TODO: error? */
+        for (uint64_t i = 0; i < history->n_revisions; i++) {
+            UINT64ENCODE(ptr, history->record_locs[i].phys_addr);
+            UINT64ENCODE(ptr, history->record_locs[i].record_size);
+            UINT32ENCODE(ptr, history->record_locs[i].checksum);
         }
     }
     *sum_out = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
@@ -483,5 +478,3 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
 
     FUNC_LEAVE_NOAPI((uint64_t)(ptr - buf));
 } /* end H5FD__onion_history_encode() */
-
-
