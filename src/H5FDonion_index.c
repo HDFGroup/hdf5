@@ -32,7 +32,140 @@ static int      H5FD__onion_archival_index_list_sort_cmp(const void *, const voi
 static herr_t H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix);
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_archival_index_is_valid
+ * Read and decode the revision_record information from `raw_file` at
+ * `addr` .. `addr + size` (taken from history), and store the decoded
+ * information in the structure at `r_out`.
+ *-----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *raw_file,
+                                   const H5FD_onion_history_t *history, uint64_t revision_num)
+{
+    unsigned char *buf       = NULL;
+    herr_t         ret_value = SUCCEED;
+    uint64_t       n         = 0;
+    uint64_t       high      = 0;
+    uint64_t       low       = 0;
+    uint64_t       range     = 0;
+    uint32_t       sum       = 0;
+    haddr_t        addr      = 0;
+    size_t         size      = 0;
+
+    FUNC_ENTER_PACKAGE;
+
+    HDassert(r_out);
+    HDassert(raw_file);
+    HDassert(history);
+    HDassert(history->record_pointer_list);
+    HDassert(history->n_revisions > 0);
+
+    high  = history->n_revisions - 1;
+    range = high;
+    addr  = history->record_pointer_list[high].phys_addr;
+    size  = history->record_pointer_list[high].record_size;
+
+    /* Initialize r_out
+     *
+     * TODO: This function should completely initialize r_out. Relying on
+     *       other code to some of the work while we just paste over parts
+     *       of the struct here is completely bananas.
+     */
+    r_out->comment             = H5MM_xfree(r_out->comment);
+    r_out->archival_index.list = H5MM_xfree(r_out->archival_index.list);
+
+    if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF")
+
+    /* recovery-open may have EOA below revision record */
+    if ((H5FD_get_eoa(raw_file, H5FD_MEM_DRAW) < (addr + size)) &&
+        (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)) {
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA");
+    }
+
+    /* Perform binary search on records to find target revision by ID.
+     * As IDs are added sequentially, they are "guaranteed" to be sorted.
+     */
+    while (range > 0) {
+        n    = (range / 2) + low;
+        addr = history->record_pointer_list[n].phys_addr;
+        size = history->record_pointer_list[n].record_size;
+
+        if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+
+        if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file")
+
+        if (H5FD__onion_revision_record_decode(buf, r_out) != size)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)")
+
+        sum = H5_checksum_fletcher32(buf, size - 4);
+        if (r_out->checksum != sum)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+
+        if (revision_num == r_out->revision_num)
+            break;
+
+        H5MM_xfree(buf);
+        buf = NULL;
+
+        r_out->archival_index.n_entries = 0;
+        r_out->comment_size             = 0;
+
+        if (r_out->revision_num < revision_num)
+            low = (n == high) ? high : n + 1;
+        else
+            high = (n == low) ? low : n - 1;
+        range = high - low;
+    } /* end while 'non-leaf' binary search */
+
+    if (range == 0) {
+        n    = low;
+        addr = history->record_pointer_list[n].phys_addr;
+        size = history->record_pointer_list[n].record_size;
+
+        if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+
+        if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read revision record from file")
+
+        if (H5FD__onion_revision_record_decode(buf, r_out) != size)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (initial)")
+
+        sum = H5_checksum_fletcher32(buf, size - 4);
+        if (r_out->checksum != sum)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+
+        if (revision_num != r_out->revision_num)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
+                        "could not find target revision!") /* TODO: corrupted? */
+    }                                                      /* end if revision ID at 'leaf' in binary search */
+
+    if (r_out->comment_size > 0)
+        if (NULL == (r_out->comment = H5MM_malloc(sizeof(char) * r_out->comment_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate comment space")
+
+    if (r_out->archival_index.n_entries > 0)
+        if (NULL == (r_out->archival_index.list =
+                         H5MM_calloc(r_out->archival_index.n_entries * sizeof(H5FD_onion_index_entry_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate index entry list")
+
+    if (H5FD__onion_revision_record_decode(buf, r_out) != size)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (final)")
+
+done:
+    H5MM_xfree(buf);
+    if (ret_value == FAIL) {
+        H5MM_xfree(r_out->comment);
+        H5MM_xfree(r_out->archival_index.list);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD__onion_ingest_revision_record() */
+
+/*-----------------------------------------------------------------------------
+ * Function:    H5FD__onion_archival_index_is_valid
  *
  * Purpose:     Determine whether an archival index structure is valid.
  *
@@ -46,11 +179,11 @@ static herr_t H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix
  *-----------------------------------------------------------------------------
  */
 hbool_t
-H5FD_onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
+H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
     hbool_t ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(aix);
 
@@ -67,10 +200,10 @@ H5FD_onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_archival_index_is_valid() */
+} /* end H5FD__onion_archival_index_is_valid() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_archival_index_find
+ * Function:    H5FD__onion_archival_index_find
  *
  * Purpose:     Retrieve the archival index entry by logical page ID.
  *
@@ -84,7 +217,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 int
-H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t logi_page,
+H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t logi_page,
                                const H5FD_onion_index_entry_t **entry_out)
 {
     uint64_t                  low       = 0;
@@ -94,7 +227,7 @@ H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t 
     H5FD_onion_index_entry_t *x         = NULL;
     int                       ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(aix);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
@@ -142,10 +275,10 @@ H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_archival_index_find() */
+} /* end H5FD__onion_archival_index_find() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_index_destroy
+ * Function:    H5FD__onion_revision_index_destroy
  *
  * Purpose:     Release all resources of a revision index.
  *
@@ -153,11 +286,11 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
+H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(rix);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -181,10 +314,10 @@ H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
     H5MM_xfree(rix);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_revision_index_destroy() */
+} /* end H5FD__onion_revision_index_destroy() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_index_init
+ * Function:    H5FD__onion_revision_index_init
  *
  * Purpose:     Initialize a revision index structure with a default starting
  *              size. A new structure is allocated and populated with initial
@@ -195,13 +328,13 @@ H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
  *-----------------------------------------------------------------------------
  */
 H5FD_onion_revision_index_t *
-H5FD_onion_revision_index_init(uint32_t page_size)
+H5FD__onion_revision_index_init(uint32_t page_size)
 {
     uint64_t                     table_size = U64_EXP2(H5FD__ONION_REVISION_INDEX_STARTING_SIZE_LOG2);
     H5FD_onion_revision_index_t *rix        = NULL;
     H5FD_onion_revision_index_t *ret_value  = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(0 != page_size);
     HDassert(POWER_OF_TWO(page_size));
@@ -230,7 +363,7 @@ done:
         H5MM_xfree(rix);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_revision_index_init() */
+} /* end H5FD__onion_revision_index_init() */
 
 /*-----------------------------------------------------------------------------
  * Function:    H5FD__onion_revision_index_resize()
@@ -297,7 +430,7 @@ done:
 } /* end H5FD__onion_revision_index_resize() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_index_insert()
+ * Function:    H5FD__onion_revision_index_insert()
  *
  * Purpose:     Add an entry to the revision index, or update an existing
  *              entry. Must be used to update entries as well as add --
@@ -310,14 +443,14 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5FD_onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_onion_index_entry_t *entry)
+H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_onion_index_entry_t *entry)
 {
     uint64_t                                      key         = 0;
     H5FD_onion_revision_index_hash_chain_node_t * node        = NULL;
     H5FD_onion_revision_index_hash_chain_node_t **append_dest = NULL;
     herr_t                                        ret_value   = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(rix);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -368,10 +501,10 @@ H5FD_onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_on
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_revision_index_insert() */
+} /* end H5FD__onion_revision_index_insert() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_index_find()
+ * Function:    H5FD__onion_revision_index_find()
  *
  *
  * Purpose:     Get pointer to revision index entry with the given page number,
@@ -384,13 +517,13 @@ done:
  *-----------------------------------------------------------------------------
  */
 int
-H5FD_onion_revision_index_find(const H5FD_onion_revision_index_t *rix_p, uint64_t logi_page,
+H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix_p, uint64_t logi_page,
                                const H5FD_onion_index_entry_t **entry_out)
 {
     uint64_t key       = 0;
     int      ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(rix_p);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix_p->version);
@@ -413,16 +546,16 @@ H5FD_onion_revision_index_find(const H5FD_onion_revision_index_t *rix_p, uint64_
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_revision_index_find() */
+} /* end H5FD__onion_revision_index_find() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_record_decode
+ * Function:    H5FD__onion_revision_record_decode
  *
  * Purpose:     Attempt to read a buffer and store it as a revision record
  *              structure.
  *
  *              Implementation must correspond with
- *              H5FD_onion_revision_record_encode().
+ *              H5FD__onion_revision_record_encode().
  *
  *              MUST BE CALLED TWICE:
  *              On the first call, n_entries and comment_size in the
@@ -450,7 +583,7 @@ H5FD_onion_revision_index_find(const H5FD_onion_revision_index_t *rix_p, uint64_
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
+H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
     uint32_t       ui32         = 0;
     uint32_t       page_size    = 0;
@@ -462,7 +595,7 @@ H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record
     unsigned char *ptr          = NULL;
     uint64_t       ret_value    = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(buf != NULL);
     HDassert(record != NULL);
@@ -590,16 +723,16 @@ H5FD_onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_revision_record_decode() */
+} /* end H5FD__onion_revision_record_decode() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_revision_record_encode
+ * Function:    H5FD__onion_revision_record_encode
  *
  * Purpose:     Write revision-record structure to the given buffer.
  *              All multi-byte elements are stored in little-endian word order.
  *
  *              Implementation must correspond with
- *              H5FD_onion_revision_record_decode().
+ *              H5FD__onion_revision_record_decode().
  *
  *              The destination buffer must be sufficiently large to hold the
  *              encoded contents.
@@ -613,13 +746,13 @@ done:
  *-----------------------------------------------------------------------------
  */
 uint64_t
-H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf, uint32_t *sum_out)
+H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf, uint32_t *sum_out)
 {
     unsigned char *ptr       = buf;                       /* original pointer */
     uint32_t       vers_u32  = (uint32_t)record->version; /* pad out unused bytes */
     uint32_t       page_size = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(sum_out != NULL);
     HDassert(buf != NULL);
@@ -672,7 +805,7 @@ H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned
     UINT32ENCODE(ptr, *sum_out);
 
     FUNC_LEAVE_NOAPI((uint64_t)(ptr - buf));
-} /* end H5FD_onion_revision_record_encode() */
+} /* end H5FD__onion_revision_record_encode() */
 
 /*-----------------------------------------------------------------------------
  * Callback for comparisons in sorting archival index entries by logi_page.
@@ -692,7 +825,7 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
 } /* end H5FD__onion_archival_index_list_sort_cmp() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_merge_revision_index_into_archival_index
+ * Function:    H5FD__onion_merge_revision_index_into_archival_index
  *
  * Purpose:     Merge index entries from revision index into archival index.
  *
@@ -708,7 +841,7 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5FD_onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *rix,
+H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *rix,
                                                     H5FD_onion_archival_index_t *      aix)
 {
     uint64_t                    i         = 0;
@@ -721,7 +854,7 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_in
     };
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_PACKAGE;
 
     HDassert(rix);
     HDassert(aix);
@@ -767,7 +900,7 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_in
         const H5FD_onion_index_entry_t *_p = NULL;
 
         /* Add only if page not already added from revision index */
-        if (H5FD_onion_archival_index_find(&new_aix, aix->list[i].logi_page, &_p) == 0) {
+        if (H5FD__onion_archival_index_find(&new_aix, aix->list[i].logi_page, &_p) == 0) {
             HDmemcpy(&kept_list[n_kept], &aix->list[i], sizeof(H5FD_onion_index_entry_t));
             n_kept++;
         }
@@ -800,4 +933,4 @@ done:
     H5MM_xfree(new_aix.list);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_onion_merge_revision_index_into_entry_list() */
+} /* end H5FD__onion_merge_revision_index_into_archival_index() */

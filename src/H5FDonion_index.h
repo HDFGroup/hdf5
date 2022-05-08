@@ -118,23 +118,25 @@ typedef struct H5FD_onion_revision_record_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+H5_DLL herr_t H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *raw_file,
+                                   const H5FD_onion_history_t *history, uint64_t revision_num);
 
-H5_DLL hbool_t H5FD_onion_archival_index_is_valid(const H5FD_onion_archival_index_t *);
-H5_DLL int     H5FD_onion_archival_index_find(const H5FD_onion_archival_index_t *, uint64_t,
+H5_DLL hbool_t H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *);
+H5_DLL int     H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *, uint64_t,
                                               const H5FD_onion_index_entry_t **);
 
-H5_DLL H5FD_onion_revision_index_t *H5FD_onion_revision_index_init(uint32_t page_size);
-H5_DLL herr_t                       H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *);
-H5_DLL herr_t                       H5FD_onion_revision_index_insert(H5FD_onion_revision_index_t *,
+H5_DLL H5FD_onion_revision_index_t *H5FD__onion_revision_index_init(uint32_t page_size);
+H5_DLL herr_t                       H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *);
+H5_DLL herr_t                       H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *,
                                                                      const H5FD_onion_index_entry_t *);
-H5_DLL int H5FD_onion_revision_index_find(const H5FD_onion_revision_index_t *, uint64_t,
+H5_DLL int H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *, uint64_t,
                                           const H5FD_onion_index_entry_t **);
 
-H5_DLL herr_t H5FD_onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *,
+H5_DLL herr_t H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *,
                                                                   H5FD_onion_archival_index_t *);
 
-H5_DLL uint64_t H5FD_onion_revision_record_decode(unsigned char *, H5FD_onion_revision_record_t *);
-H5_DLL uint64_t H5FD_onion_revision_record_encode(H5FD_onion_revision_record_t *, unsigned char *,
+H5_DLL uint64_t H5FD__onion_revision_record_decode(unsigned char *, H5FD_onion_revision_record_t *);
+H5_DLL uint64_t H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *, unsigned char *,
                                                   uint32_t *);
 
 #ifdef __cplusplus
