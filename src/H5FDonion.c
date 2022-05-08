@@ -40,61 +40,63 @@ static hid_t H5FD_ONION_g = 0;
  *              This structure is created when such a file is "opened" and
  *              discarded when it is "closed".
  *
- * `pub` (H5FD_t)
+ * pu
  *
- *      Instance of H5FD_t which contains all fields common to all VFDs.
+ *      Instance of H5FD_t which contains fields common to all VFDs.
  *      It must be the first item in this structure, since at higher levels,
  *      this structure will be treated as an instance of H5FD_t.
  *
- * `fa` (H5FD_onion_fapl_info_t)
+ * fa
  *
  *      Instance of `H5FD_onion_fapl_info_t` containing the configuration data
  *      needed to "open" the HDF5 file.
  *
- * `backing_canon` (H5FD_t *)
+ * backing_canon
  *
  *      Virtual file handle for the canonical (i.e., logical HDF5) file in the
  *      backing store.
  *
- * `backing_onion` (H5FD_t *)
+ * backing_onion
  *
  *      Virtual file handle for the onion file in the backing store.
  *      NULL if not set to use the single, separate storage target.
  *
- * `backing_recov` (H5FD_t *)
+ * backing_recov
  *
- *      Virtual file handle for the history recovery file.
+ *      Virtual file handle for the history recovery file. This file is a
+ *      backup of the existing history when an onion file is opened in RW
+ *      mode.
  *
- * `name_recov` (char *)
+ * name_recov
  *
  *      String allocated and populated on file-open in write mode and freed on
  *      file-close, stores the path/name of the 'recovery' file. The file
  *      created at this location is to be removed upon successful file-close
  *      from write mode.
  *
- * `is_open_rw` (hbool_t)
+ * is_open_rw
  *
  *      Remember whether the file was opened in a read-write mode.
  *
- * `page_align_history` (hbool_t)
+ * page_align_history
  *
  *      Remember whether onion-writes must be aligned to page boundaries.
  *
- * `header` (H5FD_onion_history_header_t)
+ * header
  *
  *      In-memory copy of the onion history data header.
  *
- * `history` (H5FD_onion_history_t)
+ * history
  *
  *      In-memory copy of the onion history.
  *
- * `rev_record` (H5FD_onion_revision_record_t)
+ * rev_record
  *
- * `history_eof` (haddr_t)
+ * history_eof
  *
  *      Last byte in the onion history backing file.
  *
- * `rev_index` (struct H5FD__onion_revision_index *)
+ * rev_index
  *
  *      Index for maintaining modified pages.
  *      Pointer is NULL when the file is not opened in write mode.
@@ -102,19 +104,19 @@ static hid_t H5FD_ONION_g = 0;
  *      Contents must be merged with the revision record's archival index prior
  *      to commitment of history to backing store.
  *
- * `history_eof` (haddr_t)
+ * history_eof
  *
  *     Address of first byte past in-use onion history data.
  *
- * `origin_eof` (haddr_t)
+ * origin_eof
  *
  *     Size of the origin canonical file.
  *
- * `logi_eoa` (haddr_t)
+ * logi_eoa
  *
  *     Address of first byte past addressed space in logical 'canonical' file.
  *
- * `logi_eof` (haddr_t)
+ * logi_eof
  *
  *     Address of first byte past Last byte in the logical 'canonical' file.
  *     Must be copied into the revision record on close to write onion data.
