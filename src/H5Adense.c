@@ -300,7 +300,8 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
      *      allocated spaces for the intermediate decoded attribute.
      */
     if (*user_attr != NULL) {
-        H5A_t *old_attr = *user_attr;
+        H5A_t *old_attr = *(H5A_t **)_user_attr;
+
         if (old_attr->shared) {
             /* Free any dynamically allocated items */
             if (H5A__free(old_attr) < 0)

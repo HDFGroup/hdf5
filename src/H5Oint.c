@@ -261,14 +261,8 @@ done:
 herr_t
 H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc_t *loc /*out*/)
 {
-    H5P_genplist_t *oc_plist;                          /* Object creation property list */
-    H5O_t *         oh        = NULL;                  /* Object header created */
-    herr_t          ret_value = SUCCEED;               /* return value */
-    haddr_t         oh_addr;                           /* Address of initial object header */
-    size_t          oh_size;                           /* Size of initial object header */
-    uint8_t         oh_flags;                          /* Object header's initial status flags */
-    unsigned        insert_flags = H5AC__NO_FLAGS_SET; /* Flags for inserting objec t header into cache */
-    hbool_t         store_msg_crt_idx; /* Whether to always store message crea tion indices for this file */
+    H5O_t *oh        = NULL;    /* Object header created */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -1318,36 +1318,6 @@ done:
 } /* end H5FD__mpio_get_handle() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__mpio_get_info
- *
- * Purpose:     Returns the file info of MPIO file driver.
- *
- * Returns:     Non-negative if succeed or negative if fails.
- *
- * Programmer:  John Mainzer
- *              April 4, 2017
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_mpio__get_info(H5FD_t *_file, void **mpi_info)
-{
-    H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
-    herr_t       ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if (!mpi_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mpi info not valid")
-
-    *mpi_info = &(file->info);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5FD__mpio_get_info() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read
  *
  * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
@@ -1802,8 +1772,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
      * potentially be wrong.) */
     file->eof = HADDR_UNDEF;
 
-    if (bytes_written && ((bytes_written + addr) > file->local_eof))
-        file->local_eof = addr + bytes_written;
+    if (bytes_written && (((haddr_t)bytes_written + addr) > file->local_eof))
+        file->local_eof = addr + (haddr_t)bytes_written;
 
 done:
 #ifdef H5FDmpio_DEBUG

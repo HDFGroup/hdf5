@@ -1823,7 +1823,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 else {
                     hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
 
-                    HDfprintf(out, "Reference Object=%a", ref);
+                    HDfprintf(out, "Reference Object=%" PRIdHADDR, ref);
                 } /* end else */
                 break;
 

@@ -351,7 +351,7 @@ H5O_fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags
             if (NULL == (dt = H5O_msg_read_oh(f, open_oh, H5O_DTYPE_ID, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't read DTYPE message")
             /* Verify size */
-            if (fill->size != H5T_GET_SIZE(dt))
+            if (fill->size != (ssize_t)H5T_GET_SIZE(dt))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
         }
 

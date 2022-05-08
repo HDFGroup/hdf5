@@ -25,7 +25,7 @@
 /****************/
 /* Local Macros */
 /****************/
-#define TWO_GIG_LIMIT (1 << 31)
+#define TWO_GIG_LIMIT INT32_MAX
 #ifndef H5_MAX_MPI_COUNT
 #define H5_MAX_MPI_COUNT (1 << 30)
 #endif

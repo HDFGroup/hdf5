@@ -106,7 +106,7 @@ test_split_comm_access(void)
 
         /* delete the test file */
         if (sub_mpi_rank == 0) {
-            mrc = MPI_File_delete((char *)filename, info);
+            mrc = MPI_File_delete(filename, info);
             /*VRFY((mrc==MPI_SUCCESS), ""); */
         }
     }
@@ -119,8 +119,11 @@ test_split_comm_access(void)
 void
 test_page_buffer_access(void)
 {
-    hid_t       file_id = -1; /* File ID */
-    hid_t       fcpl, fapl, fapl_self;
+    hid_t file_id = -1; /* File ID */
+    hid_t fcpl, fapl;
+#if 0
+    hid_t fapl_self;
+#endif
     size_t      page_count = 0;
     int         i, num_elements = 200;
     haddr_t     raw_addr, meta_addr;

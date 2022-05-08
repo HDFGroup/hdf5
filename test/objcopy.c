@@ -6881,8 +6881,8 @@ attach_attribute_compound_vlstr(hid_t loc_id)
     hid_t   cmpd_tid   = -1; /* Compound datatype ID */
     hsize_t dim1       = 1;  /* Dimension size */
     typedef struct {         /* Compound structure for the attribute */
-        int   i;
-        char *v;
+        int         i;
+        const char *v;
     } s1;
     s1  buf;            /* Buffer */
     int ret_value = -1; /* Return value */

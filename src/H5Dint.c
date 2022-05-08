@@ -3303,7 +3303,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush_all(const H5F_t *f)
+H5D_flush_all(H5F_t *f)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
