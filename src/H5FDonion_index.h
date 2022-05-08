@@ -40,14 +40,18 @@
  * Purpose:     Map a page in the logical file to a 'physical address' in the
  *              onion file.
  *
- * logi_page:   Page 'id' in the logical file.
+ * logical_page:
  *
- * phys_addr:   Address/offset of start of page in the onion file.
+ *              Page 'id' in the logical file.
+ *
+ * phys_addr:
+ *
+ *              Address/offset of start of page in the onion file.
  *
  *-----------------------------------------------------------------------------
  */
 typedef struct H5FD_onion_index_entry_t {
-    uint64_t logi_page;
+    uint64_t logical_page;
     haddr_t  phys_addr;
 } H5FD_onion_index_entry_t;
 
@@ -62,7 +66,7 @@ typedef struct H5FD_onion_index_entry_t {
  *              Must equal H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR to be
  *              considered valid.
  *
- * page_size:   Interval to which the `logi_page` component of each list
+ * page_size:   Interval to which the `logical_page` component of each list
  *              entry must align.
  *              Value is taken from the onion history data; must not change
  *              following onionization or file or creation of onion file.
@@ -71,7 +75,7 @@ typedef struct H5FD_onion_index_entry_t {
  *
  * list:        Pointer to array of archival index entries.
  *              Cannot be NULL.
- *              Entries must be sorted by `logi_page_id` in ascending order.
+ *              Entries must be sorted by `logical_page_id` in ascending order.
  *
  *-----------------------------------------------------------------------------
  */

@@ -1421,8 +1421,8 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         } /* end if data range does not span entire page */
 
-        new_entry.logi_page = page_i;
-        new_entry.phys_addr = file->onion_eof;
+        new_entry.logical_page = page_i;
+        new_entry.phys_addr    = file->onion_eof;
 
         if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, file->onion_eof + page_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA for new page amendment")

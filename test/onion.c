@@ -313,7 +313,7 @@ test_revision_index(void)
 {
     H5FD_onion_revision_index_t *rix_p = NULL;
     H5FD_onion_index_entry_t     entry = {
-        42,     /* logi_page */
+        42,     /* logical_page */
         111112, /* phys_addr */
     };
     const H5FD_onion_index_entry_t *entry_out_p = NULL;
@@ -331,7 +331,7 @@ test_revision_index(void)
 
     /* Test missed search */
 
-    if (H5FD__onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) != 0)
+    if (H5FD__onion_revision_index_find(rix_p, entry.logical_page, &entry_out_p) != 0)
         TEST_ERROR;
 
     /* Test successful insertion and lookup */
@@ -342,45 +342,45 @@ test_revision_index(void)
     if (1 != rix_p->n_entries)
         TEST_ERROR;
     /* Lookup failed */
-    if (H5FD__onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) < 0)
+    if (H5FD__onion_revision_index_find(rix_p, entry.logical_page, &entry_out_p) < 0)
         TEST_ERROR;
     /* Failure to set output parameter */
     if (NULL == entry_out_p)
         TEST_ERROR;
-    if (entry.logi_page != entry_out_p->logi_page)
+    if (entry.logical_page != entry_out_p->logical_page)
         TEST_ERROR;
     /* Seeking missing page should miss */
-    if (H5FD__onion_revision_index_find(rix_p, entry.logi_page + 1, &entry_out_p) != 0)
+    if (H5FD__onion_revision_index_find(rix_p, entry.logical_page + 1, &entry_out_p) != 0)
         TEST_ERROR;
 
     /* Test / demonstrate stored entry independent of user object */
 
-    entry.logi_page = 100;
-    entry.phys_addr = 101;
+    entry.logical_page = 100;
+    entry.phys_addr    = 101;
     if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
         TEST_ERROR;
     if (2 != rix_p->n_entries)
         TEST_ERROR;
-    entry.logi_page = 500;
-    entry.phys_addr = 501;
+    entry.logical_page = 500;
+    entry.phys_addr    = 501;
     if (H5FD__onion_revision_index_find(rix_p, 100, &entry_out_p) < 0)
         TEST_ERROR;
-    if (100 != entry_out_p->logi_page || 101 != entry_out_p->phys_addr)
+    if (100 != entry_out_p->logical_page || 101 != entry_out_p->phys_addr)
         TEST_ERROR;
 
     /* Demonstrate updating an entry */
 
     /* Error cases */
 
-    entry.logi_page = 100; /* phys_addr still 501, checksum bbbbbbbb */
+    entry.logical_page = 100; /* phys_addr still 501, checksum bbbbbbbb */
     if (H5FD__onion_revision_index_insert(rix_p, &entry) >= 0)
         TEST_ERROR; /* all components but sum must match */
     entry.phys_addr = 101;
 
     /* Successful update */
 
-    entry.logi_page = 100;
-    entry.phys_addr = 101;
+    entry.logical_page = 100;
+    entry.phys_addr    = 101;
     if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
         TEST_ERROR;
 
@@ -389,7 +389,7 @@ test_revision_index(void)
         TEST_ERROR;
     if (H5FD__onion_revision_index_find(rix_p, 100, &entry_out_p) < 0)
         TEST_ERROR;
-    if (100 != entry_out_p->logi_page || 101 != entry_out_p->phys_addr)
+    if (100 != entry_out_p->logical_page || 101 != entry_out_p->phys_addr)
         TEST_ERROR;
 
     if (H5FD__onion_revision_index_destroy(rix_p) < 0)
@@ -420,7 +420,7 @@ test_revision_index_collisions(void)
 {
     H5FD_onion_revision_index_t *rix_p = NULL;
     H5FD_onion_index_entry_t     entry = {
-        0, /* logi_page */
+        0, /* logical_page */
         0, /* phys_addr */
     };
     const H5FD_onion_index_entry_t *entry_out_p       = NULL;
@@ -433,8 +433,8 @@ test_revision_index_collisions(void)
         TEST_ERROR;
 
     for (uint64_t i = 0; i < n_insert; i++) {
-        entry.phys_addr = i;
-        entry.logi_page = U64_EXP2(i) + offset_from_power;
+        entry.phys_addr    = i;
+        entry.logical_page = U64_EXP2(i) + offset_from_power;
         if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
             TEST_ERROR;
     }
@@ -481,7 +481,7 @@ test_revision_index_resizing(void)
 {
     H5FD_onion_revision_index_t *rix_p = NULL;
     H5FD_onion_index_entry_t     entry = {
-        0, /* logi_page */
+        0, /* logical_page */
         0, /* phys_addr */
     };
     const H5FD_onion_index_entry_t *entry_out_p = NULL;
@@ -493,8 +493,8 @@ test_revision_index_resizing(void)
         TEST_ERROR;
 
     for (uint64_t i = 0; i < n_insert; i++) {
-        entry.logi_page = i;
-        entry.phys_addr = ((uint64_t)(-1) - i);
+        entry.logical_page = i;
+        entry.phys_addr    = ((uint64_t)(-1) - i);
         if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
             TEST_ERROR;
     }
@@ -538,7 +538,7 @@ test_revision_index_to_archival_index(void)
 {
     H5FD_onion_revision_index_t *rix_p     = NULL;
     H5FD_onion_index_entry_t     rix_entry = {
-        0, /* logi_page */
+        0, /* logical_page */
         0, /* phys_addr */
     };
     H5FD_onion_archival_index_t aix = {
@@ -562,8 +562,8 @@ test_revision_index_to_archival_index(void)
     for (uint64_t i = 0; i < n_insert; i++) {
         uint64_t n = 2003 * (n_insert - i) + 47;
 
-        rix_entry.logi_page = n;
-        rix_entry.phys_addr = n * 13;
+        rix_entry.logical_page = n;
+        rix_entry.phys_addr    = n * 13;
         if (H5FD__onion_revision_index_insert(rix_p, &rix_entry) < 0)
             TEST_ERROR;
     }
@@ -591,7 +591,7 @@ test_revision_index_to_archival_index(void)
 
         aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
+        if (aix_entry_p->logical_page != n)
             TEST_ERROR;
         if (aix_entry_p->phys_addr != (n * 13))
             TEST_ERROR;
@@ -603,11 +603,11 @@ test_revision_index_to_archival_index(void)
     aix.list = NULL;
     if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
         TEST_ERROR;
-    aix.list[0].logi_page = 47;
-    aix.list[0].phys_addr = 47 * 13;
-    aix.list[1].logi_page = (2003 * (n_insert + 1) + 47);
-    aix.list[1].phys_addr = (2003 * (n_insert + 1) + 47) * 13;
-    aix.n_entries         = 2;
+    aix.list[0].logical_page = 47;
+    aix.list[0].phys_addr    = 47 * 13;
+    aix.list[1].logical_page = (2003 * (n_insert + 1) + 47);
+    aix.list[1].phys_addr    = (2003 * (n_insert + 1) + 47) * 13;
+    aix.n_entries            = 2;
 
     if (!H5FD__onion_archival_index_is_valid(&aix))
         TEST_ERROR;
@@ -627,7 +627,7 @@ test_revision_index_to_archival_index(void)
 
         aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
+        if (aix_entry_p->logical_page != n)
             TEST_ERROR;
         if (aix_entry_p->phys_addr != (n * 13))
             TEST_ERROR;
@@ -639,11 +639,11 @@ test_revision_index_to_archival_index(void)
     aix.list = NULL;
     if (NULL == (aix.list = H5MM_malloc(sizeof(H5FD_onion_index_entry_t) * 2)))
         TEST_ERROR;
-    aix.list[0].logi_page = 2003 * (n_insert / 2) + 47;
-    aix.list[0].phys_addr = 103;
-    aix.list[1].logi_page = 2003 * (n_insert / 2 + 1) + 47;
-    aix.list[1].phys_addr = 101;
-    aix.n_entries         = 2;
+    aix.list[0].logical_page = 2003 * (n_insert / 2) + 47;
+    aix.list[0].phys_addr    = 103;
+    aix.list[1].logical_page = 2003 * (n_insert / 2 + 1) + 47;
+    aix.list[1].phys_addr    = 101;
+    aix.n_entries            = 2;
 
     if (!H5FD__onion_archival_index_is_valid(&aix))
         TEST_ERROR;
@@ -663,7 +663,7 @@ test_revision_index_to_archival_index(void)
 
         aix_entry_p = &aix.list[i];
 
-        if (aix_entry_p->logi_page != n)
+        if (aix_entry_p->logical_page != n)
             TEST_ERROR;
         if (aix_entry_p->phys_addr != (n * 13))
             TEST_ERROR;
@@ -898,19 +898,19 @@ test_header_encode_decode(void)
         88,   0,    0,    0,   0,    0,    0, 0,                /* history_size */
         0,    0,    0,    0                                     /* sum populated below */
     };
-    unsigned char *     ptr      = NULL;
-    uint32_t            sum      = 0;
-    uint32_t            sum_out  = 0;
-    size_t              i        = 0;
-    uint64_t            size_ret = 0;
+    unsigned char *     ptr          = NULL;
+    uint32_t            checksum     = 0;
+    uint32_t            checksum_out = 0;
+    size_t              i            = 0;
+    uint64_t            size_ret     = 0;
     H5FD_onion_header_t hdr;
     H5FD_onion_header_t hdr_out;
 
     TESTING("encode/decode history header");
 
-    sum = H5_checksum_fletcher32(exp, H5FD__ONION_ENCODED_SIZE_HEADER - 4);
-    ptr = exp + H5FD__ONION_ENCODED_SIZE_HEADER - 4;
-    UINT32ENCODE(ptr, sum);
+    checksum = H5_checksum_fletcher32(exp, H5FD__ONION_ENCODED_SIZE_HEADER - 4);
+    ptr      = exp + H5FD__ONION_ENCODED_SIZE_HEADER - 4;
+    UINT32ENCODE(ptr, checksum);
 
     hdr.version    = H5FD__ONION_HEADER_VERSION_CURR;
     hdr.flags      = 12;
@@ -918,10 +918,10 @@ test_header_encode_decode(void)
     hdr.history_addr = 123456;
     hdr.history_size = 88;
 
-    if (H5FD__onion_header_encode(&hdr, buf, &sum_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
+    if (H5FD__onion_header_encode(&hdr, buf, &checksum_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
         TEST_ERROR;
 
-    if (sum != sum_out)
+    if (checksum != checksum_out)
         TEST_ERROR;
 
     for (i = 0; i < H5FD__ONION_ENCODED_SIZE_HEADER; i++) {
@@ -1017,12 +1017,12 @@ test_history_encode_decode_empty(void)
         1,   0,   0,   0,                          /* NOTE: update version w/ "current" as needed */
         0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *      ptr      = NULL;
-    uint32_t             sum      = 0;
-    uint32_t             sum_out  = 0;
-    size_t               i        = 0;
-    uint64_t             size_ret = 0;
-    H5FD_onion_history_t history  = {
+    unsigned char *      ptr          = NULL;
+    uint32_t             checksum     = 0;
+    uint32_t             checksum_out = 0;
+    size_t               i            = 0;
+    uint64_t             size_ret     = 0;
+    H5FD_onion_history_t history      = {
         H5FD__ONION_HISTORY_VERSION_CURR, 0, /* n_revisions */
         NULL,                                /* list */
         0,                                   /* checksum */
@@ -1036,11 +1036,11 @@ test_history_encode_decode_empty(void)
     TESTING("encode/decode history (empty and failures)");
 
     /* Generage checksum but don't store it yet */
-    sum = H5_checksum_fletcher32(exp, H5FD__ONION_ENCODED_SIZE_HISTORY - 4);
-    ptr = exp + H5FD__ONION_ENCODED_SIZE_HISTORY - 4;
-    UINT32ENCODE(ptr, sum);
+    checksum = H5_checksum_fletcher32(exp, H5FD__ONION_ENCODED_SIZE_HISTORY - 4);
+    ptr      = exp + H5FD__ONION_ENCODED_SIZE_HISTORY - 4;
+    UINT32ENCODE(ptr, checksum);
 
-    if (H5FD__onion_history_encode(&history, buf, &sum_out) != H5FD__ONION_ENCODED_SIZE_HISTORY)
+    if (H5FD__onion_history_encode(&history, buf, &checksum_out) != H5FD__ONION_ENCODED_SIZE_HISTORY)
         TEST_ERROR;
     for (i = 0; i < 20; i++) {
         if (exp[i] != buf[i]) {
@@ -1048,9 +1048,9 @@ test_history_encode_decode_empty(void)
             TEST_ERROR;
         }
     }
-    if (sum != sum_out)
+    if (checksum != checksum_out)
         TEST_ERROR;
-    history.checksum = sum; /* set to compare later */
+    history.checksum = checksum; /* set to compare later */
 
     /* Invalid signature prevents decoding */
 
@@ -1134,10 +1134,10 @@ test_history_encode_decode(void)
         /* final checksum */
         0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *      buf_p   = NULL;
-    uint32_t             sum_out = 0;
-    size_t               i       = 0;
-    H5FD_onion_history_t history = {
+    unsigned char *      buf_p        = NULL;
+    uint32_t             checksum_out = 0;
+    size_t               i            = 0;
+    H5FD_onion_history_t history      = {
         H5FD__ONION_HISTORY_VERSION_CURR, 3, /* n_revisions */
         NULL,                                /* list set below */
         0,                                   /* checksum  not set by us */
@@ -1187,13 +1187,13 @@ test_history_encode_decode(void)
     if (NULL == (buf = HDmalloc(exp_size)))
         TEST_ERROR;
 
-    if (H5FD__onion_history_encode(&history, buf, &sum_out) != exp_size)
+    if (H5FD__onion_history_encode(&history, buf, &checksum_out) != exp_size)
         TEST_ERROR;
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i])
             TEST_ERROR;
     }
-    if (history.checksum != sum_out)
+    if (history.checksum != checksum_out)
         TEST_ERROR;
 
     /* Initial decode, gets always-present components */
@@ -1307,7 +1307,7 @@ test_revision_record_encode_decode(void)
     size_t                       i     = 0;
     uint64_t                     size_ret;
     H5FD_onion_revision_record_t r_out;
-    uint32_t                     sum_out     = 0;
+    uint32_t                     checksum    = 0;
     char                         comment[25] = "Example comment message.";
     H5FD_onion_revision_record_t record      = {
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
@@ -1339,15 +1339,15 @@ test_revision_record_encode_decode(void)
     if (NULL == record.archival_index.list)
         TEST_ERROR;
 
-    /* Convert logi_page and should match address in expected buffer */
-    record.archival_index.list[0].logi_page = 491ull;
-    record.archival_index.list[0].phys_addr = 587ull;
-    record.archival_index.list[1].logi_page = 751ull;
-    record.archival_index.list[1].phys_addr = 167ull;
-    record.archival_index.list[2].logi_page = 8589934933ull;
-    record.archival_index.list[2].phys_addr = 8589934609ull;
-    record.archival_index.list[3].logi_page = 590ull;
-    record.archival_index.list[3].phys_addr = 433ull;
+    /* Convert logical_page and should match address in expected buffer */
+    record.archival_index.list[0].logical_page = 491ull;
+    record.archival_index.list[0].phys_addr    = 587ull;
+    record.archival_index.list[1].logical_page = 751ull;
+    record.archival_index.list[1].phys_addr    = 167ull;
+    record.archival_index.list[2].logical_page = 8589934933ull;
+    record.archival_index.list[2].phys_addr    = 8589934609ull;
+    record.archival_index.list[3].logical_page = 590ull;
+    record.archival_index.list[3].phys_addr    = 433ull;
 
     /* Set expected checksum for each archival index entry in buffer */
     for (i = 0; i < record.archival_index.n_entries; i++) {
@@ -1355,13 +1355,13 @@ test_revision_record_encode_decode(void)
         uint64_t idx_pre  = H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY - 4;
         uint64_t idx_size = H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY;
 
-        buf_p   = exp + rec_pre + idx_size * i;
-        sum_out = H5_checksum_fletcher32(buf_p, idx_pre);
+        buf_p    = exp + rec_pre + idx_size * i;
+        checksum = H5_checksum_fletcher32(buf_p, idx_pre);
         buf_p += idx_pre;
-        UINT32ENCODE(buf_p, sum_out);
+        UINT32ENCODE(buf_p, checksum);
     }
 
-    sum_out = 0;
+    checksum = 0;
 
     record.checksum = H5_checksum_fletcher32(exp, exp_size - 4);
     buf_p           = exp + exp_size - 4;
@@ -1380,7 +1380,7 @@ test_revision_record_encode_decode(void)
 
     /* Test encode */
 
-    if (H5FD__onion_revision_record_encode(&record, buf, &sum_out) != exp_size)
+    if (H5FD__onion_revision_record_encode(&record, buf, &checksum) != exp_size)
         TEST_ERROR;
 
     hbool_t badness = FALSE;
@@ -1410,7 +1410,7 @@ test_revision_record_encode_decode(void)
     }
     if (badness)
         TEST_ERROR;
-    if (record.checksum != sum_out)
+    if (record.checksum != checksum)
         TEST_ERROR;
 
     /* Test decode (malformed encoding) */
@@ -1501,7 +1501,7 @@ test_revision_record_encode_decode(void)
 
         if (ep->phys_addr != ap->phys_addr)
             TEST_ERROR;
-        if (ep->logi_page != ap->logi_page)
+        if (ep->logical_page != ap->logical_page)
             TEST_ERROR;
     }
 
@@ -1794,7 +1794,7 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
         'O', 'W', 'H', 'S', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 /* checksum encoded below */
     };
     unsigned char *ptr           = NULL;
-    uint32_t       sum           = 0;
+    uint32_t       checksum      = 0;
     hid_t          onion_fapl_id = H5I_INVALID_HID;
 
     onion_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1806,15 +1806,15 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
     UINT32ENCODE(ptr, onion_info->page_size);
-    sum = H5_checksum_fletcher32(hdr_exp_bytes, H5FD__ONION_ENCODED_SIZE_HEADER - 4);
-    ptr = hdr_exp_bytes + H5FD__ONION_ENCODED_SIZE_HEADER - 4;
-    UINT32ENCODE(ptr, sum);
+    checksum = H5_checksum_fletcher32(hdr_exp_bytes, H5FD__ONION_ENCODED_SIZE_HEADER - 4);
+    ptr      = hdr_exp_bytes + H5FD__ONION_ENCODED_SIZE_HEADER - 4;
+    UINT32ENCODE(ptr, checksum);
     ptr = NULL;
 
     /* Finish populating expected history bytes */
-    sum = H5_checksum_fletcher32(history_exp_bytes, H5FD__ONION_ENCODED_SIZE_HISTORY - 4);
-    ptr = history_exp_bytes + H5FD__ONION_ENCODED_SIZE_HISTORY - 4;
-    UINT32ENCODE(ptr, sum);
+    checksum = H5_checksum_fletcher32(history_exp_bytes, H5FD__ONION_ENCODED_SIZE_HISTORY - 4);
+    ptr      = history_exp_bytes + H5FD__ONION_ENCODED_SIZE_HISTORY - 4;
+    UINT32ENCODE(ptr, checksum);
     ptr = NULL;
 
     /* Look at h5 file: should have zero bytes */
