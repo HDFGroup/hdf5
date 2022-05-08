@@ -629,8 +629,8 @@ static herr_t
 H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 {
     uint32_t                      _sum      = 0; /* required */
-    uint64_t                      size      = 0;
-    uint64_t                      phys_addr = 0; /* offset in history file to record start */
+    size_t                        size      = 0;
+    haddr_t                       phys_addr = 0; /* offset in history file to record start */
     unsigned char *               buf       = NULL;
     herr_t                        ret_value = SUCCEED;
     H5FD_onion_revision_record_t *rec       = &file->rev_record;
@@ -1570,7 +1570,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     uint64_t       range     = 0;
     uint32_t       sum       = 0;
     haddr_t        addr      = 0;
-    haddr_t        size      = 0;
+    size_t         size      = 0;
 
     FUNC_ENTER_PACKAGE;
 
@@ -1582,8 +1582,8 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
     high  = history->n_revisions - 1;
     range = high;
-    addr  = (haddr_t)history->record_pointer_list[high].phys_addr;
-    size  = (haddr_t)history->record_pointer_list[high].record_size;
+    addr  = history->record_pointer_list[high].phys_addr;
+    size  = history->record_pointer_list[high].record_size;
 
     /* Initialize r_out
      *
@@ -1608,8 +1608,8 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
      */
     while (range > 0) {
         n    = (range / 2) + low;
-        addr = (haddr_t)history->record_pointer_list[n].phys_addr;
-        size = (haddr_t)history->record_pointer_list[n].record_size;
+        addr = history->record_pointer_list[n].phys_addr;
+        size = history->record_pointer_list[n].record_size;
 
         if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
@@ -1642,8 +1642,8 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
     if (range == 0) {
         n    = low;
-        addr = (haddr_t)history->record_pointer_list[n].phys_addr;
-        size = (haddr_t)history->record_pointer_list[n].record_size;
+        addr = history->record_pointer_list[n].phys_addr;
+        size = history->record_pointer_list[n].record_size;
 
         if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
@@ -1706,10 +1706,8 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF")
 
-    buf = H5MM_malloc(sizeof(char) * size);
-    if (NULL == buf) {
+    if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
-    }
 
     if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA")
@@ -2208,13 +2206,13 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
-            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, (haddr_t)entry_out->phys_addr + page_gap_head,
+            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
         else if (file->fa.revision_num != 0 &&
                  H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out)) {
-            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, (haddr_t)entry_out->phys_addr + page_gap_head,
+            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
         } /* end if page exists in 'dead' archival index */
@@ -2342,7 +2340,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         if (H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
             if (page_gap_head | page_gap_tail) {
                 /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, (haddr_t)entry_out->phys_addr, page_size,
+                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
                               page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
                 /* Overlay delta from input buffer onto page buffer. */
@@ -2350,7 +2348,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                 write_buf = page_buf;
             } /* end if partial page */
 
-            if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, (haddr_t)entry_out->phys_addr, page_size,
+            if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
                            write_buf) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
@@ -2364,7 +2362,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             /* Fill gaps with existing data or zeroes. */
             if (H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out)) {
                 /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, (haddr_t)entry_out->phys_addr, page_size,
+                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size,
                               page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended data")
             } /* end if page exists in 'dead' archival index */
@@ -2598,7 +2596,6 @@ done:
 herr_t
 H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
 {
-    size_t i         = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
@@ -2606,7 +2603,7 @@ H5FD_onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
     HDassert(rix);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
 
-    for (i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
+    for (size_t i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
         H5FD_onion_revision_index_hash_chain_node_t *next_p = NULL;
         H5FD_onion_revision_index_hash_chain_node_t *node_p = rix->_hash_table[i];
 

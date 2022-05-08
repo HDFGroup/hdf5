@@ -49,8 +49,8 @@ typedef struct H5FD_onion_history_header_t {
  * Used in the whole-history.
  */
 typedef struct H5FD_onion_record_pointer_t {
-    uint64_t phys_addr;
-    uint64_t record_size;
+    haddr_t  phys_addr;
+    size_t   record_size;
     uint32_t checksum;
 } H5FD_onion_record_pointer_t;
 

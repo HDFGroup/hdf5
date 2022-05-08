@@ -48,7 +48,7 @@
  */
 typedef struct H5FD_onion_index_entry_t {
     uint64_t logi_page;
-    uint64_t phys_addr;
+    haddr_t  phys_addr;
 } H5FD_onion_index_entry_t;
 
 /*-----------------------------------------------------------------------------
