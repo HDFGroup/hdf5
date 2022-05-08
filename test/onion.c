@@ -3447,10 +3447,10 @@ test_integration_create_delete_objects(void)
     hid_t   attr_id       = H5I_INVALID_HID;
     hsize_t attr_dim[1]   = {4};
 
-    hid_t   file          = H5I_INVALID_HID;
-    hid_t   space         = H5I_INVALID_HID;
-    hid_t   dset          = H5I_INVALID_HID;
-    hid_t   dcpl          = H5I_INVALID_HID;
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   dset    = H5I_INVALID_HID;
+    hid_t   dcpl    = H5I_INVALID_HID;
     hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     int     wdata[4][4], /* Write buffer */
         fillval, i, j;
@@ -4228,28 +4228,28 @@ error:
 static int
 test_integration_reference(void)
 {
-    const char *            basename   = "integration_refer.h5";
-    hid_t                   file       = H5I_INVALID_HID;
-    hid_t                   group      = H5I_INVALID_HID;
-    hid_t                   space      = H5I_INVALID_HID;
-    hid_t                   space2     = H5I_INVALID_HID;
-    hid_t                   space_ref  = H5I_INVALID_HID;
-    hid_t                   dset       = H5I_INVALID_HID;
-    hid_t                   dset2      = H5I_INVALID_HID;
-    hid_t                   fapl_id    = H5I_INVALID_HID;
-    hsize_t                 dims[2]    = {4, 4};
-    hsize_t                 dim_ref[1] = {2};
-    int                     wdata[4][4]; /* Write buffer */
-    int                     rdata[4][4]; /* Read buffer  */
-    H5R_ref_t               wbuf[2];
-    H5R_ref_t               rbuf[2];
-    H5O_type_t              obj_type;
-    hsize_t                 start[2];
-    hsize_t                 stride[2];
-    hsize_t                 count[2];
-    hsize_t                 block[2];
-    hsize_t                 coord1[4][2];        /* Coordinates for point selection */
-    hssize_t                nelmts;
+    const char *basename   = "integration_refer.h5";
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       group      = H5I_INVALID_HID;
+    hid_t       space      = H5I_INVALID_HID;
+    hid_t       space2     = H5I_INVALID_HID;
+    hid_t       space_ref  = H5I_INVALID_HID;
+    hid_t       dset       = H5I_INVALID_HID;
+    hid_t       dset2      = H5I_INVALID_HID;
+    hid_t       fapl_id    = H5I_INVALID_HID;
+    hsize_t     dims[2]    = {4, 4};
+    hsize_t     dim_ref[1] = {2};
+    int         wdata[4][4]; /* Write buffer */
+    int         rdata[4][4]; /* Read buffer  */
+    H5R_ref_t   wbuf[2];
+    H5R_ref_t   rbuf[2];
+    H5O_type_t  obj_type;
+    hsize_t     start[2];
+    hsize_t     stride[2];
+    hsize_t     count[2];
+    hsize_t     block[2];
+    hsize_t     coord1[4][2]; /* Coordinates for point selection */
+    hssize_t    nelmts;
 
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
