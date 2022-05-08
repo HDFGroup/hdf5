@@ -308,7 +308,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
     /* Build full path */
     HDstrncpy(full_path, prefix, orig_path_len + 1);
     if (need_sep)
-        HDstrncat(full_path, "/", (size_t)1);
+        HDstrcat(full_path, "/");
     HDstrncat(full_path, name, name_len);
 
     /* Create reference counted string for path */

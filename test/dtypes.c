@@ -2320,6 +2320,8 @@ test_compound_11(void)
         ((big_t *)buf)[u].i1 = (int)(u * 3);
         ((big_t *)buf)[u].i2 = (int)(u * 5);
         ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
+        if (!((big_t *)buf)[u].s1)
+            TEST_ERROR
         HDsprintf(((big_t *)buf)[u].s1, "%u", (unsigned)u);
     } /* end for */
 

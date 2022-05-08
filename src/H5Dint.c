@@ -45,7 +45,7 @@
 
 /* General stuff */
 static H5D_shared_t *H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type);
-static herr_t        H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
+static herr_t        H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, H5T_t *type);
 static herr_t        H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t        H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t        H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
@@ -470,7 +470,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
+H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, H5T_t *type)
 {
     htri_t  relocatable;         /* Flag whether the type is relocatable */
     htri_t  immutable;           /* Flag whether the type is immutable */
@@ -526,8 +526,8 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 
         /* Use existing datatype */
         dset->shared->type_id = type_id;
-        dset->shared->type    = (H5T_t *)type; /* (Cast away const OK - QAK) */
-    }                                          /* end else */
+        dset->shared->type    = type;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1120,7 +1120,7 @@ done:
 H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t dapl_id)
 {
-    const H5T_t *   type; /* Datatype for dataset */
+    H5T_t *         type; /* Datatype for dataset */
     H5D_t *         new_dset      = NULL;
     H5P_genplist_t *dc_plist      = NULL;  /* New Property list */
     hbool_t         has_vl_type   = FALSE; /* Flag to indicate a VL-type for dataset */
@@ -1141,7 +1141,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Get the dataset's datatype */
-    if (NULL == (type = (const H5T_t *)H5I_object(type_id)))
+    if (NULL == (type = (H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     /* Check if the datatype is "sensible" for use in a dataset */
@@ -2199,7 +2199,7 @@ H5D_oloc(H5D_t *dataset)
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5D_nameof(const H5D_t *dataset)
+H5D_nameof(H5D_t *dataset)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
