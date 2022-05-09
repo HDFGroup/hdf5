@@ -10,33 +10,79 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-
-# Purpose: Combine subfiles into a single HDF5 file. Requires the subfiling 
-# configuration file either as a command-line argument, or the script will 
-# search for the *.config file in the current directory. 
-
+BLD='\033[1m'
 GRN='\033[0;32m'
 RED='\033[0;31m'
 PUR='\033[0;35m'
 NC='\033[0m' # No Color
 
+############################################################
+# Usage                                                    #
+############################################################
+function usage() {
+   echo ""
+   # Display usage
+   echo "Purpose: Combine subfiles into a single HDF5 file. Requires the subfiling
+         configuration file either as a command-line argument, or the script will
+         search for the *.config file in the current directory."
+   echo ""
+   echo "usage: h5fuse.sh [-h] [-f filename]"
+   echo "-h            Print this help."
+   echo "-f filename   Subfile configuration file."
+   echo ""
+}
+
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+file_config=""
+
+while getopts ":h:f:" option; do
+   case $option in
+      h) # display Help
+         usage
+         exit;;
+      f) # subfiling configureation file
+         file_config=$OPTARG;;
+     \?) # Invalid option
+         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
+         usage
+         exit 1;;
+     * ) usage
+         exit 1;;
+   esac
+done
+
 FAILED=1
-
-## CONFIG FILE CHECKS ##
-
-if [ $# -eq 0 ]; then
+nfiles=1
+############################################################
+# Configure file checks                                    #
+############################################################
+if [ -z "$file_config" ]; then
     nfiles=$(find . -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
     if [[ "$nfiles" != "1" ]]; then
-       echo -e "$RED More than one .config file found in current directory. $NC"
-       exit $FAILED
+      if [[ "$nfiles" == "0" ]]; then
+         echo -e "$RED Failed to find .config file in current directory. $NC"
+         usage
+         exit $FAILED
+      else
+         echo -e "$RED More than one .config file found in current directory. $NC"
+         usage
+         exit $FAILED
+      fi
     fi
     file_config=$(find . -maxdepth 1 -type f -iname "*.config")
-else
-    file_config=$1
 fi
 
 if [ ! -f "$file_config" ]; then
-    echo -e "$RED $file_config does not exist. $NC"
+    echo -e "${RED} configuration file ${BLD}$file_config${NC} ${RED}does not exist. $NC"
     exit $FAILED
 fi
 
