@@ -296,7 +296,7 @@ These documents provide additional information for the use and tuning of specifi
   <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/Chunking/index.html">Chunking in HDF5</a></span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p>Structuring the use of chunking and tun&#173;ing it for performance.</p>
+  <p>Structuring the use of chunking and tuning it for performance.</p>
 </td>
 </tr>
   <tr style="height: 36.00pt;">
@@ -312,7 +312,7 @@ These documents provide additional information for the use and tuning of specifi
   <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/CommittedDatatypeCopying/CopyingCommittedDatatypesWithH5Ocopy.pdf">Copying Committed Datatypes with H5Ocopy</a></span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p>Describes how to copy to another file a dataset that uses a committed datatype or an object with an attribute that uses a committed datatype so that the commit&#173;ted datatype in the destination file can be used by multiple objects.</p>
+  <p>Describes how to copy to another file a dataset that uses a committed datatype or an object with an attribute that uses a committed datatype so that the committed datatype in the destination file can be used by multiple objects.</p>
 </td>
 </tr>
   <tr style="height: 36.00pt;">
@@ -360,7 +360,7 @@ These documents provide additional information for the use and tuning of specifi
   <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingUnicode/index.html">Using UTF-8 Encoding in HDF5 Applications</a></span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p>Describes the use of UTF-8 Unicode char&#173;acter encodings in HDF5 applications.</p>
+  <p>Describes the use of UTF-8 Unicode character encodings in HDF5 applications.</p>
 </td>
 </tr>
   <tr style="height: 49.00pt;">
@@ -368,7 +368,7 @@ These documents provide additional information for the use and tuning of specifi
   <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/FreeingMemory/FreeingMemoryAllocatedByTheHdf5Library.pdf">Freeing Memory Allocated by the HDF5 Library</a></span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p>Describes how inconsistent memory man&#173;agement can cause heap corruption or resource leaks and possible solutions.</p>
+  <p>Describes how inconsistent memory management can cause heap corruption or resource leaks and possible solutions.</p>
 </td>
 </tr>
   <tr style="height: 23.00pt;">
