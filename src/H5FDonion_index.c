@@ -83,7 +83,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     }
 
     /* Perform binary search on records to find target revision by ID.
-     * As IDs are added sequentially, they are "guaranteed" to be sorted.
+     * As IDs are added sequentially, they are guaranteed to be sorted.
      */
     while (range > 0) {
         n    = (range / 2) + low;
@@ -583,7 +583,7 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
  *              Failure:    0
  *-----------------------------------------------------------------------------
  */
-uint64_t
+size_t
 H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
     uint32_t       ui32         = 0;
@@ -594,7 +594,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     uint32_t       comment_size = 0;
     uint8_t *      ui8p         = NULL;
     unsigned char *ptr          = NULL;
-    uint64_t       ret_value    = 0;
+    size_t         ret_value    = 0;
 
     FUNC_ENTER_PACKAGE;
 
@@ -719,7 +719,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     if (sum != record->checksum)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "checksum mismatch")
 
-    ret_value = (uint64_t)(ptr - buf);
+    ret_value = (size_t)(ptr - buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -742,12 +742,12 @@ done:
  *
  * Return:      Number of bytes written to buffer.
  *              The checksum of the generated buffer contents (excluding the
- *              checksum itself) is stored in the pointer `sum_out`).
+ *              checksum itself) is stored in the pointer `checksum`).
  *-----------------------------------------------------------------------------
  */
-uint64_t
+size_t
 H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf,
-                                   uint32_t *sum_out)
+                                   uint32_t *checksum)
 {
     unsigned char *ptr       = buf;                       /* original pointer */
     uint32_t       vers_u32  = (uint32_t)record->version; /* pad out unused bytes */
@@ -755,7 +755,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
 
     FUNC_ENTER_PACKAGE_NOERR;
 
-    HDassert(sum_out != NULL);
+    HDassert(checksum != NULL);
     HDassert(buf != NULL);
     HDassert(record != NULL);
     HDassert(vers_u32 < 0x100);
@@ -801,10 +801,10 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
         ptr += record->comment_size;
     }
 
-    *sum_out = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
-    UINT32ENCODE(ptr, *sum_out);
+    *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
+    UINT32ENCODE(ptr, *checksum);
 
-    FUNC_LEAVE_NOAPI((uint64_t)(ptr - buf));
+    FUNC_LEAVE_NOAPI((size_t)(ptr - buf));
 } /* end H5FD__onion_revision_record_encode() */
 
 /*-----------------------------------------------------------------------------

@@ -139,9 +139,9 @@ H5_DLL int H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *, 
 H5_DLL herr_t H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *,
                                                                    H5FD_onion_archival_index_t *);
 
-H5_DLL uint64_t H5FD__onion_revision_record_decode(unsigned char *, H5FD_onion_revision_record_t *);
-H5_DLL uint64_t H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *, unsigned char *,
-                                                   uint32_t *);
+H5_DLL size_t H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record);
+H5_DLL size_t H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf,
+                                                 uint32_t *checksum);
 
 #ifdef __cplusplus
 }

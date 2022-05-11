@@ -1237,18 +1237,22 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD__onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
+            /* Page exists in 'live' revision index */
             if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
-        } /* end if page exists in 'live' revision index */
+        }
         else if (file->fa.revision_num != 0 &&
                  H5FD__onion_archival_index_find(&file->curr_rev_record.archival_index, page_i, &entry_out)) {
+            /* Page exists in archival index */
             if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
-        } /* end if page exists in 'dead' archival index */
+        }
         else {
-            /* casts prevent truncation */
+            /* Page does not exist in either index */
+
+            /* Casts prevent truncation */
             haddr_t addr_start   = (haddr_t)page_i * (haddr_t)page_size + (haddr_t)page_gap_head;
             haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
             haddr_t read_size    = MIN(overlap_size, page_readsize);
@@ -1263,7 +1267,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
              */
             for (size_t j = read_size; j < page_readsize; j++)
                 buf_out[j] = 0;
-        } /* end if page exists in neither index */
+        }
 
         buf_out += page_readsize;
         bytes_to_read -= page_readsize;
@@ -1386,10 +1390,12 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         if (page_gap_head || page_gap_tail) {
             /* Fill gaps with existing data or zeroes. */
             if (H5FD__onion_archival_index_find(&file->curr_rev_record.archival_index, page_i, &entry_out)) {
-                /* Copy existing page verbatim. */
+                /* Page exists in archival index */
+
+                /* Copy existing page verbatim */
                 if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended data")
-            } /* end if page exists in 'dead' archival index */
+            }
             else {
                 haddr_t addr_start   = (haddr_t)(page_i * page_size);
                 haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
