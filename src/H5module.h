@@ -26,7 +26,6 @@
 #define H5_MY_PKG_ERR  H5E_LIB
 #define H5_MY_PKG_INIT NO
 
-
 /** \page H5DM_UG The HDF5 Data Model and File Structure
  *
  * \section sec_data_model The HDF5 Data Model and File Structure

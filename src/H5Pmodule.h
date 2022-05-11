@@ -704,8 +704,8 @@
  *
  * Consider the following examples which illustrate the determination of dataset layout and chunking settings:
  *
- * The application must first identify the creation property list with the appropriate get creation property list
- * call. There is one such call for each kind of object.
+ * The application must first identify the creation property list with the appropriate get creation property
+ * list call. There is one such call for each kind of object.
  *
  * \ref H5Dget_create_plist will return a property list identifier for the creation property list that was
  * used to create the dataset. Call it DCPL1_id.

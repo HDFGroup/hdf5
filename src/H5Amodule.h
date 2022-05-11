@@ -40,8 +40,8 @@
  *
  * Attributes are assumed to be very small as data objects go, so storing them as standard HDF5 datasets would
  * be quite inefficient. HDF5 attributes are therefore managed through a special attributes interface,
- * \ref H5A, which is designed to easily attach attributes to primary data objects as small datasets containing
- * metadata information and to minimize storage requirements.
+ * \ref H5A, which is designed to easily attach attributes to primary data objects as small datasets
+ * containing metadata information and to minimize storage requirements.
  *
  * Consider, as examples of the simplest case, a set of laboratory readings taken under known temperature and
  * pressure conditions of 18.0 degrees Celsius and 0.5 atmospheres, respectively. The temperature and pressure
