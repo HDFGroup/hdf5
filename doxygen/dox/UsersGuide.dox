@@ -267,7 +267,123 @@ HDF5 Release 1.10
 \li \ref subsec_plist_resources
 \li \ref subsec_plist_notes
 
+\ref sec_addition
+
+\page AR_UG Additional Resources
+
 \section sec_addition Additional Resources
+These documents provide additional information for the use and tuning of specific HDF5 features.
+ <table style=" border-spacing:0; padding-left:6.00pt; padding-top:6.00pt; padding-right:6.00pt; padding-bottom:6.00pt; float:aligncenter; width:100%; max-width:432.00pt;" cellspacing="0">
+  <caption x-list-start="1" style="font-size: 12.0pt;">Table of Additional resources</caption>
+  <tr style="height: 23.00pt;">
+  <th style="width: 234.000pt; border-top-style: solid; border-top-width: 1px; border-top-color: #228a22; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align : top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Document</p>
+</th>
+  <th style="width: 198.000pt; border-top-style: solid; border-top-width: 1px; border-top-color: #228a22; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align : top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Comments</p>
+</th>
+</tr>
+  <tr style="height: 23.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/examples/">HDF5 Examples</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Code examples by API. </p>
+</td>
+</tr>
+  <tr style="height: 36.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/Chunking/index.html">Chunking in HDF5</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Structuring the use of chunking and tun&#173;ing it for performance.</p>
+</td>
+</tr>
+  <tr style="height: 36.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span class="FM_LT_LinkText"><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/DirectChunkWrite/UsingDirectChunkWrite.pdf">Using the Direct Chunk Write Function</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes another way that chunks can be written to datasets.</p>
+</td>
+</tr>
+  <tr style="height: 88.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/CommittedDatatypeCopying/CopyingCommittedDatatypesWithH5Ocopy.pdf">Copying Committed Datatypes with H5Ocopy</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how to copy to another file a dataset that uses a committed datatype or an object with an attribute that uses a committed datatype so that the commit&#173;ted datatype in the destination file can be used by multiple objects.</p>
+</td>
+</tr>
+  <tr style="height: 36.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/MetadataCache/index.html">Metadata Caching in HDF5</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Managing the HDF5 metadata cache and tuning it for performance.</p>
+</td>
+</tr>
+  <tr style="height: 49.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf">HDF5 Dynamically Loaded Filters</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how an HDF5 application can apply a filter that is not registered with the HDF5 Library.</p>
+</td>
+</tr>
+  <tr style="height: 62.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/FileImageOperations/HDF5FileImageOperations.pdf">HDF5 File Image Operations</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how to work with HDF5 files in memory. Disk I/O is not required when file images are opened, created, read from, or written to.</p>
+</td>
+</tr>
+  <tr style="height: 62.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/ModifiedRegionWrites/ModifiedRegionWrites.pdf">Modified Region Writes</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how to set write operations for in-memory files so that only modified regions are written to storage. Available when the Core (Memory) VFD is used.</p>
+</td>
+</tr>
+  <tr style="height: 36.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingIdentifiers/index.html">Using Identifiers</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how identifiers behave and how they should be treated.</p>
+</td>
+</tr>
+  <tr style="height: 36.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingUnicode/index.html">Using UTF-8 Encoding in HDF5 Applications</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes the use of UTF-8 Unicode char&#173;acter encodings in HDF5 applications.</p>
+</td>
+</tr>
+  <tr style="height: 49.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Advanced/FreeingMemory/FreeingMemoryAllocatedByTheHdf5Library.pdf">Freeing Memory Allocated by the HDF5 Library</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>Describes how inconsistent memory man&#173;agement can cause heap corruption or resource leaks and possible solutions.</p>
+</td>
+</tr>
+  <tr style="height: 23.00pt;">
+  <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/doc/Glossary.html">HDF5 Glossary</a></span></p>
+</td>
+  <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
+  <p>A glossary of terms.</p>
+</td>
+</tr>
+ </table>
+
+Previous Chapter \ref sec_plist
+
+
 
 <!-- 
 <table>
