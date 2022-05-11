@@ -29,7 +29,7 @@
 #define H5_MY_PKG_ERR  H5E_LINK
 #define H5_MY_PKG_INIT YES
 
-/**\defgroup H5L H5L
+/**\defgroup H5L H5L Links
  *
  * Use the functions in this module to manage HDF5 links and link types.
  *

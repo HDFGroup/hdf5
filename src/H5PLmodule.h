@@ -27,7 +27,7 @@
 #define H5_MY_PKG_ERR  H5E_PLUGIN
 #define H5_MY_PKG_INIT YES
 
-/**\defgroup H5PL H5PL
+/**\defgroup H5PL H5PL Plugins
  *
  * Use the functions in this module to manage the loading behavior of HDF5
  * plugins.

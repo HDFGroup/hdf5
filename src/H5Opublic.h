@@ -270,7 +270,7 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
  *          The object’s address within the file, \p addr, is the byte offset of the first byte
  *          of the object header from the beginning of the HDF5 file space, i.e., from the
  *          beginning of the super block (see the “HDF5 Storage Model” section of the The
- *          HDF5 Data Model and File Structure chapter of the <em>HDF5 User's Guide</em>.)
+ *          HDF5 Data Model and File Structure chapter of the <em>\ref UG</em>.)
  *
  *          \p addr can be obtained via either of two function calls. H5Gget_objinfo() returns
  *          the object’s address in the \c objno field of the H5G_stat_t \c struct;
@@ -652,7 +652,7 @@ H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_
  *
  *          An object’s reference count is the number of hard links in the
  *          file that point to that object. See the “Programming Model”
- *          section of the HDF5 Groups chapter in the -- <em>HDF5 User’s Guide</em>
+ *          section of the HDF5 Groups chapter in the -- <em>\ref UG</em>
  *          for a more complete discussion of reference counts.
  *
  *          If a user application needs to determine an object’s reference
@@ -687,7 +687,7 @@ H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
  *
  *          An object’s reference count is the number of hard links in the
  *          file that point to that object. See the “Programming Model”
- *          section of the HDF5 Groups chapter in the <em>HDF5 User’s Guide</em>
+ *          section of the HDF5 Groups chapter in the <em>\ref UG</em>
  *          for a more complete discussion of reference counts.
  *
  *          If a user application needs to determine an object’s reference

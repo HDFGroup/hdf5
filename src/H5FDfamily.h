@@ -39,7 +39,7 @@ H5_DLL hid_t H5FD_family_init(void);
  *            each family member
  * \returns \herr_t
  *
- * \details H5Pset_fapl_family() sets the file access property list identifier,
+ * \details H5Pset_fapl_family sets the file access property list identifier,
  *          \p fapl_id, to use the family driver.
  *
  *          \p memb_size is the size in bytes of each file member. This size
@@ -71,7 +71,7 @@ H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fa
  *             each family member
  * \returns \herr_t
  *
- * \details H5Pget_fapl_family() returns file access property list for use with
+ * \details H5Pget_fapl_family returns file access property list for use with
  *          the family driver. This information is returned through the output
  *          parameters.
  *

@@ -29,7 +29,31 @@
 #define H5_MY_PKG_ERR  H5E_SYM
 #define H5_MY_PKG_INIT YES
 
-/** \defgroup H5G H5G
+/**  \page H5G_UG HDF5 Groups
+ *
+ * \section sec_group HDF5 Groups
+ * \subsection subsec_group_intro Introduction
+ * \subsection subsec_group_descr Description of the Group Object
+ * \subsubsection subsubsec_group_descr_object The Group Object
+ * \subsubsection subsubsec_group_descr_model The Hierarchy of Data Objects
+ * \subsubsection subsubsec_group_descr_path HDF5 Path Names
+ * \subsubsection subsubsec_group_descr_impl Group Implementations in HDF5
+ * \subsection subsec_group_h5dump Using h5dump
+ * \subsection subsec_group_function Group Function Summaries
+ * \subsection subsec_group_program Programming Model for Groups
+ * \subsubsection subsubsec_group_program_create Creating a Group
+ * \subsubsection subsubsec_group_program_open Opening a Group and Accessing an Object in that Group
+ * \subsubsection subsubsec_group_program_dataset Creating a Dataset in a Specific Group
+ * \subsubsection subsubsec_group_program_close Closing a Group
+ * \subsubsection subsubsec_group_program_links Creating Links
+ * \subsubsection subsubsec_group_program_info Discovering Information about Objects
+ * \subsubsection subsubsec_group_program_objs Discovering Objects in a Group
+ * \subsubsection subsubsec_group_program_all Discovering All of the Objects in the File
+ * \subsection subsec_group_examples Examples of File Structures
+ *
+ */
+
+/** \defgroup H5G H5G Groups
  *
  * Use the functions in this module to manage HDF5 groups.
  *

@@ -17,7 +17,7 @@ the recursion will not enter an infinite loop, but does
 not prevent objects from being visited more than once.
 The program prints the directory structure of the file
 specified in FILE.  The default file used by this example
-implements the structure described in the User's Guide,
+implements the structure described in the User Guide,
 chapter 4, figure 26.
  ************************************************************/
 package examples.groups;
