@@ -1900,14 +1900,14 @@ CONTAINS
   SUBROUTINE H5Dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, dxpl_id)
     IMPLICIT NONE
 
-    INTEGER(SIZE_T),      INTENT(IN)                     :: count
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: dset_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: mem_type_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: mem_space_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: file_space_id
-    TYPE(C_PTR),                      DIMENSION(1:count) :: buf
-    INTEGER,              INTENT(OUT)                    :: hdferr
-    INTEGER(HID_T),       INTENT(IN), OPTIONAL           :: dxpl_id
+    INTEGER(SIZE_T),      INTENT(IN)               :: count
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: dset_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_type_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_space_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
+    TYPE(C_PTR),                      DIMENSION(*) :: buf
+    INTEGER,              INTENT(OUT)              :: hdferr
+    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: dxpl_id
 !*****
     INTEGER(HID_T) :: dxpl_id_default
 
@@ -1919,19 +1919,19 @@ CONTAINS
          IMPORT :: C_PTR
          IMPLICIT NONE
          INTEGER(SIZE_T), VALUE :: count
-         INTEGER(HID_T), DIMENSION(1:count) :: dset_id
-         INTEGER(HID_T), DIMENSION(1:count) :: mem_type_id
-         INTEGER(HID_T), DIMENSION(1:count) :: mem_space_id
-         INTEGER(HID_T), DIMENSION(1:count) :: file_space_id
-         INTEGER(HID_T) :: dxpl_id
-         TYPE(C_PTR), DIMENSION(1:count) :: buf
+         INTEGER(HID_T), DIMENSION(*) :: dset_id
+         INTEGER(HID_T), DIMENSION(*) :: mem_type_id
+         INTEGER(HID_T), DIMENSION(*) :: mem_space_id
+         INTEGER(HID_T), DIMENSION(*) :: file_space_id
+         INTEGER(HID_T), VALUE :: dxpl_id
+         TYPE(C_PTR), DIMENSION(*) :: buf
        END FUNCTION H5Dread_multi
     END INTERFACE 
 
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
 
-    hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf)
+    hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id_default, buf)
 
   END SUBROUTINE H5Dread_multi_f
             
@@ -1962,14 +1962,14 @@ CONTAINS
   SUBROUTINE H5Dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, dxpl_id)
     IMPLICIT NONE
 
-    INTEGER(SIZE_T),      INTENT(IN)                     :: count
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: dset_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: mem_type_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: mem_space_id
-    INTEGER(HID_T),       INTENT(IN), DIMENSION(1:count) :: file_space_id
-    TYPE(C_PTR),                      DIMENSION(1:count) :: buf       
-    INTEGER,              INTENT(OUT)                    :: hdferr
-    INTEGER(HID_T),       INTENT(IN), OPTIONAL           :: dxpl_id
+    INTEGER(SIZE_T),      INTENT(IN)               :: count
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: dset_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_type_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_space_id
+    INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
+    TYPE(C_PTR),                      DIMENSION(*) :: buf
+    INTEGER,              INTENT(OUT)              :: hdferr
+    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: dxpl_id
 !*****
     INTEGER(HID_T) :: dxpl_id_default
 
@@ -1981,19 +1981,19 @@ CONTAINS
          IMPORT :: C_PTR
          IMPLICIT NONE
          INTEGER(SIZE_T), VALUE :: count
-         INTEGER(HID_T), DIMENSION(1:count) :: dset_id
-         INTEGER(HID_T), DIMENSION(1:count) :: mem_type_id
-         INTEGER(HID_T), DIMENSION(1:count) :: mem_space_id
-         INTEGER(HID_T), DIMENSION(1:count) :: file_space_id
-         INTEGER(HID_T) :: dxpl_id
-         TYPE(C_PTR), DIMENSION(1:count) :: buf
+         INTEGER(HID_T), DIMENSION(*) :: dset_id
+         INTEGER(HID_T), DIMENSION(*) :: mem_type_id
+         INTEGER(HID_T), DIMENSION(*) :: mem_space_id
+         INTEGER(HID_T), DIMENSION(*) :: file_space_id
+         INTEGER(HID_T), VALUE :: dxpl_id
+         TYPE(C_PTR), DIMENSION(*) :: buf
        END FUNCTION H5Dwrite_multi
     END INTERFACE
 
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
 
-    hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf)
+    hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id_default, buf)
 
   END SUBROUTINE H5Dwrite_multi_f
 
