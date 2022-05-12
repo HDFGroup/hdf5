@@ -40,104 +40,110 @@ static hid_t H5FD_ONION_g = 0;
  *              This structure is created when such a file is "opened" and
  *              discarded when it is "closed".
  *
- * `pub` (H5FD_t)
+ * pu
  *
- *      Instance of H5FD_t which contains all fields common to all VFDs.
+ *      Instance of H5FD_t which contains fields common to all VFDs.
  *      It must be the first item in this structure, since at higher levels,
  *      this structure will be treated as an instance of H5FD_t.
  *
- * `fa` (H5FD_onion_fapl_info_t)
+ * fa
  *
  *      Instance of `H5FD_onion_fapl_info_t` containing the configuration data
  *      needed to "open" the HDF5 file.
  *
- * `backing_canon` (H5FD_t *)
+ * original_file
  *
- *      Virtual file handle for the canonical (i.e., logical HDF5) file in the
- *      backing store.
+ *      VFD handle for the original HDF5 file.
  *
- * `backing_onion` (H5FD_t *)
+ * onion_file
  *
- *      Virtual file handle for the onion file in the backing store.
+ *      VFD handle for the onion file.
  *      NULL if not set to use the single, separate storage target.
  *
- * `backing_recov` (H5FD_t *)
+ * recovery_file
  *
- *      Virtual file handle for the history recovery file.
+ *      VFD handle for the history recovery file. This file is a backup of
+ *      the existing history when an existing onion file is opened in RW mode.
  *
- * `name_recov` (char *)
+ * recovery_file_name
  *
  *      String allocated and populated on file-open in write mode and freed on
  *      file-close, stores the path/name of the 'recovery' file. The file
  *      created at this location is to be removed upon successful file-close
  *      from write mode.
  *
- * `is_open_rw` (hbool_t)
+ * is_open_rw
  *
  *      Remember whether the file was opened in a read-write mode.
  *
- * `page_align_history` (hbool_t)
+ * align_history_on_pages
  *
  *      Remember whether onion-writes must be aligned to page boundaries.
  *
- * `header` (H5FD_onion_history_header_t)
+ * header
  *
  *      In-memory copy of the onion history data header.
  *
- * `history` (H5FD_onion_history_t)
+ * history
  *
  *      In-memory copy of the onion history.
  *
- * `rev_record` (H5FD_onion_revision_record_t)
+ * curr_rev_record
  *
- * `history_eof` (haddr_t)
+ *      Record for the currently open revision.
  *
- *      Last byte in the onion history backing file.
+ * rev_index
  *
- * `rev_index` (struct H5FD__onion_revision_index *)
- *
- *      Index for maintaining modified pages.
+ *      Index for maintaining modified pages (RW mode only).
  *      Pointer is NULL when the file is not opened in write mode.
  *      Pointer is allocated on open and must be freed on close.
  *      Contents must be merged with the revision record's archival index prior
  *      to commitment of history to backing store.
  *
- * `history_eof` (haddr_t)
+ * onion_eof
  *
- *     Address of first byte past in-use onion history data.
+ *      Last byte in the onion file.
  *
- * `origin_eof` (haddr_t)
+ * origin_eof
  *
- *     Size of the origin canonical file.
+ *     Size of the original HDF5 file.
  *
- * `logi_eoa` (haddr_t)
+ * logical_eoa
  *
- *     Address of first byte past addressed space in logical 'canonical' file.
+ *     Address of first byte past addressed space in the logical 'file'
+ *     presented by this VFD.
  *
- * `logi_eof` (haddr_t)
+ * logical_eof
  *
- *     Address of first byte past Last byte in the logical 'canonical' file.
+ *     Address of first byte past last byte in the logical 'file' presented
+ *     by this VFD.
  *     Must be copied into the revision record on close to write onion data.
  *
  ******************************************************************************
  */
 typedef struct H5FD_onion_t {
-    H5FD_t                       pub;
-    H5FD_onion_fapl_info_t       fa;
-    H5FD_t *                     backing_canon;
-    H5FD_t *                     backing_onion;
-    H5FD_t *                     backing_recov;
-    char *                       name_recov;
-    hbool_t                      is_open_rw;
-    hbool_t                      page_align_history;
-    H5FD_onion_history_header_t  header;
+    H5FD_t                 pub;
+    H5FD_onion_fapl_info_t fa;
+    hbool_t                is_open_rw;
+    hbool_t                align_history_on_pages;
+
+    /* Onion-related files */
+    H5FD_t *original_file;
+    H5FD_t *onion_file;
+    H5FD_t *recovery_file;
+    char *  recovery_file_name;
+
+    /* Onion data structures */
+    H5FD_onion_header_t          header;
     H5FD_onion_history_t         history;
-    H5FD_onion_revision_record_t rev_record;
+    H5FD_onion_revision_record_t curr_rev_record;
     H5FD_onion_revision_index_t *rev_index;
-    haddr_t                      history_eof;
-    haddr_t                      origin_eof;
-    haddr_t                      logi_eoa;
-    haddr_t                      logi_eof;
+
+    /* End of addresses and files */
+    haddr_t onion_eof;
+    haddr_t origin_eof;
+    haddr_t logical_eoa;
+    haddr_t logical_eof;
 } H5FD_onion_t;
 
 H5FL_DEFINE_STATIC(H5FD_onion_t);
@@ -365,10 +371,10 @@ H5FD__onion_sb_size(H5FD_t *_file)
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->backing_canon);
+    HDassert(file->original_file);
 
-    if (file->backing_canon)
-        ret_value = H5FD_sb_size(file->backing_canon);
+    if (file->original_file)
+        ret_value = H5FD_sb_size(file->original_file);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_sb_size */
@@ -391,9 +397,9 @@ H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->backing_canon);
+    HDassert(file->original_file);
 
-    if (file->backing_canon && H5FD_sb_encode(file->backing_canon, name, buf) < 0)
+    if (file->original_file && H5FD_sb_encode(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
 
 done:
@@ -418,9 +424,9 @@ H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->backing_canon);
+    HDassert(file->original_file);
 
-    if (H5FD_sb_load(file->backing_canon, name, buf) < 0)
+    if (H5FD_sb_load(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
 
 done:
@@ -435,12 +441,12 @@ done:
 static herr_t
 H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 {
-    uint32_t                      _sum      = 0; /* required */
+    uint32_t                      checksum  = 0; /* required */
     size_t                        size      = 0;
     haddr_t                       phys_addr = 0; /* offset in history file to record start */
     unsigned char *               buf       = NULL;
     herr_t                        ret_value = SUCCEED;
-    H5FD_onion_revision_record_t *rec       = &file->rev_record;
+    H5FD_onion_revision_record_t *rec       = &file->curr_rev_record;
     H5FD_onion_history_t *        history   = &file->history;
     H5FD_onion_record_loc_t *     new_list  = NULL;
 
@@ -453,29 +459,28 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     info = HDgmtime(&rawtime);
     HDstrftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
-    rec->logi_eof = file->logi_eof;
+    rec->logical_eof = file->logical_eof;
 
     if ((TRUE == file->is_open_rw) && (H5FD__onion_merge_revision_index_into_archival_index(
-                                           file->rev_index, &file->rev_record.archival_index) < 0))
+                                           file->rev_index, &file->curr_rev_record.archival_index) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write")
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
                                    (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
-    if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &_sum)))
+    if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding revision record")
 
-    phys_addr = file->history_eof;
-    if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, phys_addr + size) < 0)
+    phys_addr = file->onion_eof;
+    if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, phys_addr + size) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA for new revision record")
-    if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, phys_addr, size, buf) < 0)
+    if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, phys_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write new revision record")
 
-    file->history_eof = phys_addr + size;
-    if (TRUE == file->page_align_history)
-        file->history_eof =
-            (file->history_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
+    file->onion_eof = phys_addr + size;
+    if (TRUE == file->align_history_on_pages)
+        file->onion_eof = (file->onion_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
 
     /* Update history info to accommodate new revision */
 
@@ -517,7 +522,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         history->n_revisions += 1;
     } /* end if one or more revisions present in history */
 
-    file->header.history_addr = file->history_eof;
+    file->header.history_addr = file->onion_eof;
 
 done:
     H5MM_xfree(buf);
@@ -546,11 +551,11 @@ H5FD__onion_close(H5FD_t *_file)
 
     if (H5FD_ONION_STORE_TARGET_ONION == file->fa.store_target) {
 
-        HDassert(file->backing_onion);
+        HDassert(file->onion_file);
 
         if (file->is_open_rw) {
 
-            HDassert(file->backing_recov);
+            HDassert(file->recovery_file);
 
             if (H5FD__onion_commit_new_revision_record(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
@@ -558,10 +563,10 @@ H5FD__onion_close(H5FD_t *_file)
             if (H5FD__onion_write_final_history(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write history to backing store")
 
-            /* Unset write-lock flag */
+            /* Unset write-lock flag and write header */
             if (file->is_open_rw)
                 file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
-            if (H5FD__onion_write_header(&(file->header), file->backing_onion) < 0)
+            if (H5FD__onion_write_header(&(file->header), file->onion_file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
         }
     }
@@ -573,28 +578,28 @@ H5FD__onion_close(H5FD_t *_file)
 done:
 
     /* Destroy things as best we can, even if there were earlier errors */
-    if (file->backing_canon)
-        if (H5FD_close(file->backing_canon) < 0)
+    if (file->original_file)
+        if (H5FD_close(file->original_file) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing canon file")
-    if (file->backing_onion)
-        if (H5FD_close(file->backing_onion) < 0)
+    if (file->onion_file)
+        if (H5FD_close(file->onion_file) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing onion file")
-    if (file->backing_recov) {
-        if (H5FD_close(file->backing_recov) < 0)
+    if (file->recovery_file) {
+        if (H5FD_close(file->recovery_file) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close backing recovery file")
         /* TODO: Use the VFD's del callback instead of remove (this requires
          *       storing a copy of the fapl that was used to open it)
          */
-        HDremove(file->name_recov);
+        HDremove(file->recovery_file_name);
     }
     if (file->rev_index)
         if (H5FD__onion_revision_index_destroy(file->rev_index) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close revision index")
 
-    H5MM_xfree(file->name_recov);
+    H5MM_xfree(file->recovery_file_name);
     H5MM_xfree(file->history.record_locs);
-    H5MM_xfree(file->rev_record.comment);
-    H5MM_xfree(file->rev_record.archival_index.list);
+    H5MM_xfree(file->curr_rev_record.comment);
+    H5MM_xfree(file->curr_rev_record.archival_index.list);
 
     file = H5FL_FREE(H5FD_onion_t, file);
 
@@ -616,7 +621,7 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR;
 
-    FUNC_LEAVE_NOAPI(file->logi_eoa)
+    FUNC_LEAVE_NOAPI(file->logical_eoa)
 } /* end H5FD__onion_get_eoa() */
 
 /*-----------------------------------------------------------------------------
@@ -634,7 +639,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR;
 
-    FUNC_LEAVE_NOAPI(file->logi_eof)
+    FUNC_LEAVE_NOAPI(file->logical_eof)
 } /* end H5FD__onion_get_eof() */
 
 /*-----------------------------------------------------------------------------
@@ -673,14 +678,14 @@ H5FD__onion_get_legit_fapl_id(hid_t fapl_id)
  */
 static herr_t
 H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, const char *name_onion,
-                                  const char *name_recovery, unsigned int flags, haddr_t maxaddr)
+                                  const char *recovery_file_nameery, unsigned int flags, haddr_t maxaddr)
 {
     hid_t                         backing_fapl_id = H5I_INVALID_HID;
-    H5FD_onion_history_header_t * hdr             = NULL;
+    H5FD_onion_header_t *         hdr             = NULL;
     H5FD_onion_history_t *        history         = NULL;
     H5FD_onion_revision_record_t *rec             = NULL;
     unsigned char *               buf             = NULL;
-    uint64_t                      size            = 0;
+    size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
@@ -689,7 +694,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     hdr     = &file->header;
     history = &file->history;
-    rec     = &file->rev_record;
+    rec     = &file->curr_rev_record;
 
     hdr->flags = H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
     if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
@@ -705,32 +710,32 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     /* Create backing files for onion history */
 
-    if (NULL == (file->backing_canon = H5FD_open(filename, flags, backing_fapl_id, maxaddr)))
+    if (NULL == (file->original_file = H5FD_open(filename, flags, backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
 
-    if (NULL == (file->backing_onion = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr)))
+    if (NULL == (file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing onion file")
 
-    if (NULL == (file->backing_recov = H5FD_open(name_recovery, flags, backing_fapl_id, maxaddr)))
+    if (NULL == (file->recovery_file = H5FD_open(recovery_file_nameery, flags, backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
 
     /* Write "empty" .h5 file contents (signature ONIONEOF) */
 
-    if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, 8) < 0)
+    if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, 8) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
-    if (H5FD_write(file->backing_canon, H5FD_MEM_DRAW, 0, 8, "ONIONEOF") < 0)
+    if (H5FD_write(file->original_file, H5FD_MEM_DRAW, 0, 8, "ONIONEOF") < 0)
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing h5 file")
 
     /* Write nascent history (with no revisions) to "recovery" */
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY)))
+    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HISTORY)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD__onion_history_encode(history, buf, &history->checksum);
-    if (H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY != size)
+    if (H5FD__ONION_ENCODED_SIZE_HISTORY != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history")
-    if (H5FD_set_eoa(file->backing_recov, H5FD_MEM_DRAW, size) < 0)
+    if (H5FD_set_eoa(file->recovery_file, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
-    if (H5FD_write(file->backing_recov, H5FD_MEM_DRAW, 0, size, buf) < 0)
+    if (H5FD_write(file->recovery_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write history to the backing recovery file")
     hdr->history_size = size; /* record for later use */
     H5MM_xfree(buf);
@@ -742,16 +747,16 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
-    size = H5FD__onion_history_header_encode(hdr, buf, &hdr->checksum);
+    size = H5FD__onion_header_encode(hdr, buf, &hdr->checksum);
     if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history header")
-    if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, size) < 0)
+    if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
-    if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, 0, size, buf) < 0)
+    if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file")
-    file->history_eof = (haddr_t)size;
-    if (TRUE == file->page_align_history)
-        file->history_eof = (file->history_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
+    file->onion_eof = (haddr_t)size;
+    if (TRUE == file->align_history_on_pages)
+        file->onion_eof = (file->onion_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
 
     rec->archival_index.list = NULL;
 
@@ -762,7 +767,7 @@ done:
     H5MM_xfree(buf);
 
     if (FAIL == ret_value)
-        HDremove(name_recovery); /* destroy new temp file, if 'twas created */
+        HDremove(recovery_file_nameery); /* destroy new temp file, if 'twas created */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_create_truncate_onion() */
@@ -783,12 +788,12 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_onion_t *                file  = NULL;
     const H5FD_onion_fapl_info_t *fa    = NULL;
     ;
-    hid_t   backing_fapl_id = H5I_INVALID_HID;
-    char *  name_onion      = NULL;
-    char *  name_recovery   = NULL;
-    H5FD_t *ret_value       = NULL;
-    bool    new_open        = false;
-    haddr_t canon_eof       = 0;
+    hid_t   backing_fapl_id       = H5I_INVALID_HID;
+    char *  name_onion            = NULL;
+    char *  recovery_file_nameery = NULL;
+    H5FD_t *ret_value             = NULL;
+    bool    new_open              = false;
+    haddr_t canon_eof             = 0;
 
     FUNC_ENTER_PACKAGE
 
@@ -818,14 +823,14 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate onion name string")
     HDsnprintf(name_onion, HDstrlen(filename) + 7, "%s.onion", filename);
 
-    if (NULL == (name_recovery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (recovery_file_nameery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
-    HDsnprintf(name_recovery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
-    file->name_recov = name_recovery;
+    HDsnprintf(recovery_file_nameery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
+    file->recovery_file_name = recovery_file_nameery;
 
-    if (NULL == (file->name_recov = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (file->recovery_file_name = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
-    HDsnprintf(file->name_recov, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
+    HDsnprintf(file->recovery_file_name, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
     /* Translate H5P_DEFAULT to a a real fapl ID, if necessary */
     backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
@@ -839,10 +844,10 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     file->header.version   = H5FD__ONION_HEADER_VERSION_CURR;
     file->header.page_size = file->fa.page_size; /* guarded on FAPL-set */
 
-    file->history.version = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR;
+    file->history.version = H5FD__ONION_HISTORY_VERSION_CURR;
 
-    file->rev_record.version                = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
-    file->rev_record.archival_index.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
+    file->curr_rev_record.version                = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
+    file->curr_rev_record.archival_index.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
     /* Check that the page size is a power of two */
     if ((fa->page_size == 0) || ((fa->page_size & (fa->page_size - 1)) != 0))
@@ -854,8 +859,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
      *       instead of division, which is some severely premature optimization
      *       with a major hit on maintainability.
      */
-    double log2_page_size                          = HDlog2((double)(fa->page_size));
-    file->rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
+    double log2_page_size                               = HDlog2((double)(fa->page_size));
+    file->curr_rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
 
     /* Proceed with open. */
 
@@ -866,12 +871,12 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* Set flags */
         if (fa->creation_flags & H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT) {
             file->header.flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
-            file->page_align_history = TRUE;
+            file->align_history_on_pages = TRUE;
         }
 
         /* Truncate and create everything as necessary */
-        if (H5FD__onion_create_truncate_onion(file, filename, name_onion, file->name_recov, flags, maxaddr) <
-            0)
+        if (H5FD__onion_create_truncate_onion(file, filename, name_onion, file->recovery_file_name, flags,
+                                              maxaddr) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to create/truncate onionized files")
         file->is_open_rw = TRUE;
     }
@@ -880,33 +885,33 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* Opening an existing onion file */
 
         /* Open the existing file using the specified fapl */
-        if (NULL == (file->backing_canon = H5FD_open(filename, flags, backing_fapl_id, maxaddr)))
+        if (NULL == (file->original_file = H5FD_open(filename, flags, backing_fapl_id, maxaddr)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open canonical file (does not exist?)")
 
         /* Try to open any existing onion file */
         H5E_BEGIN_TRY
         {
-            file->backing_onion = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr);
+            file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr);
         }
         H5E_END_TRY;
 
         /* If that didn't work, create a new onion file */
         /* TODO: Move to a new function */
-        if (NULL == file->backing_onion) {
+        if (NULL == file->onion_file) {
             if (H5F_ACC_RDWR & flags) {
-                H5FD_onion_history_header_t * hdr        = NULL;
+                H5FD_onion_header_t *         hdr        = NULL;
                 H5FD_onion_history_t *        history    = NULL;
                 H5FD_onion_revision_record_t *rec        = NULL;
                 unsigned char *               head_buf   = NULL;
-                unsigned char *               wh_buf     = NULL;
-                uint64_t                      size       = 0;
-                uint64_t                      saved_size = 0;
+                unsigned char *               hist_buf   = NULL;
+                size_t                        size       = 0;
+                size_t                        saved_size = 0;
 
                 HDassert(file != NULL);
 
                 hdr     = &file->header;
                 history = &file->history;
-                rec     = &file->rev_record;
+                rec     = &file->curr_rev_record;
 
                 new_open = true;
 
@@ -914,16 +919,16 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     hdr->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
                     hdr->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
-                    file->page_align_history = TRUE;
+                    file->align_history_on_pages = TRUE;
                 }
 
-                if (HADDR_UNDEF == (canon_eof = H5FD_get_eof(file->backing_canon, H5FD_MEM_DEFAULT))) {
+                if (HADDR_UNDEF == (canon_eof = H5FD_get_eof(file->original_file, H5FD_MEM_DEFAULT))) {
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "cannot get size of canonical file")
                 }
-                if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, canon_eof) < 0)
+                if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, canon_eof) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
-                hdr->origin_eof = canon_eof;
-                file->logi_eof  = canon_eof;
+                hdr->origin_eof   = canon_eof;
+                file->logical_eof = canon_eof;
 
                 backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
                 if (H5I_INVALID_HID == backing_fapl_id)
@@ -931,51 +936,50 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 /* Create backing files for onion history */
 
-                if ((file->backing_onion =
-                         H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                   backing_fapl_id, maxaddr)) == NULL) {
+                if ((file->onion_file = H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
+                                                  backing_fapl_id, maxaddr)) == NULL) {
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
                 /* Write history header with "no" history */
-                hdr->history_size = H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY; /* record for later use */
+                hdr->history_size = H5FD__ONION_ENCODED_SIZE_HISTORY; /* record for later use */
                 hdr->history_addr =
                     H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
                 head_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER);
                 if (NULL == head_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
-                size = H5FD__onion_history_header_encode(hdr, head_buf, &hdr->checksum);
+                size = H5FD__onion_header_encode(hdr, head_buf, &hdr->checksum);
                 if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history header")
 
-                wh_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
-                if (NULL == wh_buf)
+                hist_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HISTORY);
+                if (NULL == hist_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size                = size;
                 history->n_revisions      = 0;
-                size                      = H5FD__onion_history_encode(history, wh_buf, &history->checksum);
+                size                      = H5FD__onion_history_encode(history, hist_buf, &history->checksum);
                 file->header.history_size = size; /* record for later use */
-                if (H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY != size) {
+                if (H5FD__ONION_ENCODED_SIZE_HISTORY != size) {
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history")
                 }
-                if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
+                if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
 
-                if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, 0, saved_size, head_buf) < 0) {
+                if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, saved_size, head_buf) < 0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write header to the backing onion file")
                 }
 
-                file->history_eof = (haddr_t)saved_size;
-                if (TRUE == file->page_align_history)
-                    file->history_eof = (file->history_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
+                file->onion_eof = (haddr_t)saved_size;
+                if (TRUE == file->align_history_on_pages)
+                    file->onion_eof = (file->onion_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
 
                 rec->archival_index.list = NULL;
 
-                file->header.history_addr = file->history_eof;
+                file->header.history_addr = file->onion_eof;
 
                 /* Write nascent history (with no revisions) to the backing onion file */
-                if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, saved_size + 1, size, wh_buf) < 0) {
+                if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, saved_size + 1, size, hist_buf) < 0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write history to the backing onion file")
                 }
@@ -983,23 +987,23 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 file->header.history_size = size; /* record for later use */
 
                 H5MM_xfree(head_buf);
-                H5MM_xfree(wh_buf);
+                H5MM_xfree(hist_buf);
             }
             else {
                 HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open onion file (does not exist?).")
             }
         }
 
-        if (HADDR_UNDEF == (canon_eof = H5FD_get_eof(file->backing_canon, H5FD_MEM_DEFAULT))) {
+        if (HADDR_UNDEF == (canon_eof = H5FD_get_eof(file->original_file, H5FD_MEM_DEFAULT))) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "cannot get size of canonical file")
         }
-        if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, canon_eof) < 0)
+        if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, canon_eof) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
 
         /* Get the history header from the onion file */
-        if (H5FD__onion_ingest_history_header(&file->header, file->backing_onion, 0) < 0)
+        if (H5FD__onion_ingest_header(&file->header, file->onion_file, 0) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get history header from backing store")
-        file->page_align_history =
+        file->align_history_on_pages =
             (file->header.flags & H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT) ? TRUE : FALSE;
 
         if (H5FD__ONION_HEADER_FLAG_WRITE_LOCK & file->header.flags) {
@@ -1008,7 +1012,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         }
         else {
             /* Read in the history from the onion file */
-            if (H5FD__onion_ingest_history(&file->history, file->backing_onion, file->header.history_addr,
+            if (H5FD__onion_ingest_history(&file->history, file->onion_file, file->header.history_addr,
                                            file->header.history_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get history from backing store")
 
@@ -1018,11 +1022,11 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
             if (fa->revision_num == 0) {
-                file->rev_record.logi_eof = canon_eof;
+                file->curr_rev_record.logical_eof = canon_eof;
             }
             else if (file->history.n_revisions > 0 &&
                      H5FD__onion_ingest_revision_record(
-                         &file->rev_record, file->backing_onion, &file->history,
+                         &file->curr_rev_record, file->onion_file, &file->history,
                          MIN(fa->revision_num - 1, (file->history.n_revisions - 1))) < 0) {
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
             }
@@ -1038,40 +1042,39 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     if ((H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC) & flags) {
         if (fa->comment) {
             /* Free the old comment */
-            file->rev_record.comment = H5MM_xfree(file->rev_record.comment);
+            file->curr_rev_record.comment = H5MM_xfree(file->curr_rev_record.comment);
 
             /* TODO: Lengths of strings should be size_t */
-            file->rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
+            file->curr_rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
 
-            if (NULL == (file->rev_record.comment = H5MM_xstrdup(fa->comment)))
+            if (NULL == (file->curr_rev_record.comment = H5MM_xstrdup(fa->comment)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate comment string")
         }
     }
-    file->origin_eof = file->header.origin_eof;
-    file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
-    file->logi_eoa   = 0;
+    file->origin_eof  = file->header.origin_eof;
+    file->logical_eof = MAX(file->curr_rev_record.logical_eof, file->logical_eof);
+    file->logical_eoa = 0;
 
-    file->history_eof = H5FD_get_eoa(file->backing_onion, H5FD_MEM_DRAW);
-    if (TRUE == file->page_align_history)
-        file->history_eof =
-            (file->history_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
+    file->onion_eof = H5FD_get_eoa(file->onion_file, H5FD_MEM_DRAW);
+    if (TRUE == file->align_history_on_pages)
+        file->onion_eof = (file->onion_eof + (file->header.page_size - 1)) & (~(file->header.page_size - 1));
 
     ret_value = (H5FD_t *)file;
 
 done:
     H5MM_xfree(name_onion);
-    H5MM_xfree(name_recovery);
+    H5MM_xfree(recovery_file_nameery);
 
     if ((NULL == ret_value) && file) {
 
-        if (file->backing_canon)
-            if (H5FD_close(file->backing_canon) < 0)
+        if (file->original_file)
+            if (H5FD_close(file->original_file) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing canon")
-        if (file->backing_onion)
-            if (H5FD_close(file->backing_onion) < 0)
+        if (file->onion_file)
+            if (H5FD_close(file->onion_file) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing onion")
-        if (file->backing_recov)
-            if (H5FD_close(file->backing_recov) < 0)
+        if (file->recovery_file)
+            if (H5FD_close(file->recovery_file) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy backing recov")
 
         if (file->rev_index)
@@ -1080,8 +1083,8 @@ done:
 
         H5MM_xfree(file->history.record_locs);
 
-        H5MM_xfree(file->name_recov);
-        H5MM_xfree(file->rev_record.comment);
+        H5MM_xfree(file->recovery_file_name);
+        H5MM_xfree(file->curr_rev_record.comment);
 
         H5FL_FREE(H5FD_onion_t, file);
     }
@@ -1106,8 +1109,8 @@ static herr_t
 H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, bool new_open)
 {
     unsigned char *buf       = NULL;
-    uint64_t       size      = 0;
-    uint32_t       _sum      = 0;
+    size_t         size      = 0;
+    uint32_t       checksum  = 0;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
@@ -1121,11 +1124,12 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
 
     /* Copy history to recovery file */
 
-    if (NULL == (file->backing_recov = H5FD_open(file->name_recov, (flags | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                                 file->fa.backing_fapl_id, maxaddr)))
+    if (NULL ==
+        (file->recovery_file = H5FD_open(file->recovery_file_name, (flags | H5F_ACC_CREAT | H5F_ACC_TRUNC),
+                                         file->fa.backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to create recovery file")
 
-    if (0 == (size = H5FD__onion_write_history(&file->history, file->backing_recov, 0, 0)))
+    if (0 == (size = H5FD__onion_write_history(&file->history, file->recovery_file, 0, 0)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write history to recovery file")
     if (size != file->header.history_size)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "written history differed from expected size")
@@ -1137,27 +1141,27 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
 
     file->header.flags |= H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
 
-    if (0 == (size = H5FD__onion_history_header_encode(&file->header, buf, &_sum)))
+    if (0 == (size = H5FD__onion_header_encode(&file->header, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding history header")
 
-    if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, 0, (haddr_t)size, buf) < 0)
+    if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header")
 
     /* Prepare revision index and finalize write-mode open */
 
     if (NULL == (file->rev_index = H5FD__onion_revision_index_init(file->fa.page_size)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index")
-    file->rev_record.parent_revision_num = file->rev_record.revision_num;
+    file->curr_rev_record.parent_revision_num = file->curr_rev_record.revision_num;
     if (!new_open)
-        file->rev_record.revision_num += 1;
+        file->curr_rev_record.revision_num += 1;
     file->is_open_rw = TRUE;
 
 done:
     if (FAIL == ret_value) {
-        if (file->backing_recov != NULL) {
-            if (H5FD_close(file->backing_recov) < 0)
+        if (file->recovery_file != NULL) {
+            if (H5FD_close(file->recovery_file) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close recovery file")
-            file->backing_recov = NULL;
+            file->recovery_file = NULL;
         }
 
         if (file->rev_index != NULL) {
@@ -1198,14 +1202,14 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     HDassert(file != NULL);
     HDassert(buf_out != NULL);
 
-    if ((uint64_t)(offset + len) > file->logi_eoa)
+    if ((uint64_t)(offset + len) > file->logical_eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Read extends beyond addressed space")
 
     if (0 == len)
         goto done;
 
     page_size      = file->header.page_size;
-    page_size_log2 = file->rev_record.archival_index.page_size_log2;
+    page_size_log2 = file->curr_rev_record.archival_index.page_size_log2;
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
 
@@ -1233,24 +1237,28 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
         if (TRUE == file->is_open_rw && file->fa.revision_num != 0 &&
             H5FD__onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
-            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
+            /* Page exists in 'live' revision index */
+            if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
-        } /* end if page exists in 'live' revision index */
+        }
         else if (file->fa.revision_num != 0 &&
-                 H5FD__onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out)) {
-            if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
+                 H5FD__onion_archival_index_find(&file->curr_rev_record.archival_index, page_i, &entry_out)) {
+            /* Page exists in archival index */
+            if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr + page_gap_head,
                           page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
-        } /* end if page exists in 'dead' archival index */
+        }
         else {
-            /* casts prevent truncation */
+            /* Page does not exist in either index */
+
+            /* Casts prevent truncation */
             haddr_t addr_start   = (haddr_t)page_i * (haddr_t)page_size + (haddr_t)page_gap_head;
             haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
             haddr_t read_size    = MIN(overlap_size, page_readsize);
 
             /* Get all original bytes in page range */
-            if ((read_size > 0) && H5FD_read(file->backing_canon, type, addr_start, read_size, buf_out) < 0) {
+            if ((read_size > 0) && H5FD_read(file->original_file, type, addr_start, read_size, buf_out) < 0) {
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get original file data")
             }
 
@@ -1259,7 +1267,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
              */
             for (size_t j = read_size; j < page_readsize; j++)
                 buf_out[j] = 0;
-        } /* end if page exists in neither index */
+        }
 
         buf_out += page_readsize;
         bytes_to_read -= page_readsize;
@@ -1286,7 +1294,7 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
     FUNC_ENTER_PACKAGE_NOERR;
 
-    file->logi_eoa = addr;
+    file->logical_eoa = addr;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5FD__onion_set_eoa() */
@@ -1318,7 +1326,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     HDassert(file != NULL);
     HDassert(buf != NULL);
     HDassert(file->rev_index != NULL);
-    HDassert((uint64_t)(offset + len) <= file->logi_eoa);
+    HDassert((uint64_t)(offset + len) <= file->logical_eoa);
 
     if (FALSE == file->is_open_rw)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Write not allowed if file not opened in write mode")
@@ -1327,7 +1335,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         goto done;
 
     page_size      = file->header.page_size;
-    page_size_log2 = file->rev_record.archival_index.page_size_log2;
+    page_size_log2 = file->curr_rev_record.archival_index.page_size_log2;
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
 
@@ -1363,16 +1371,14 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
         if (H5FD__onion_revision_index_find(file->rev_index, page_i, &entry_out)) {
             if (page_gap_head | page_gap_tail) {
                 /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) <
-                    0)
+                if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
                 /* Overlay delta from input buffer onto page buffer. */
                 HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
                 write_buf = page_buf;
             } /* end if partial page */
 
-            if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, write_buf) <
-                0)
+            if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, write_buf) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
             buf += page_n_used; /* overflow never touched */
@@ -1383,12 +1389,13 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         if (page_gap_head || page_gap_tail) {
             /* Fill gaps with existing data or zeroes. */
-            if (H5FD__onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out)) {
-                /* Copy existing page verbatim. */
-                if (H5FD_read(file->backing_onion, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) <
-                    0)
+            if (H5FD__onion_archival_index_find(&file->curr_rev_record.archival_index, page_i, &entry_out)) {
+                /* Page exists in archival index */
+
+                /* Copy existing page verbatim */
+                if (H5FD_read(file->onion_file, H5FD_MEM_DRAW, entry_out->phys_addr, page_size, page_buf) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended data")
-            } /* end if page exists in 'dead' archival index */
+            }
             else {
                 haddr_t addr_start   = (haddr_t)(page_i * page_size);
                 haddr_t overlap_size = (addr_start > file->origin_eof) ? 0 : file->origin_eof - addr_start;
@@ -1396,7 +1403,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
                 /* Get all original bytes in page range */
                 if ((read_size > 0) &&
-                    H5FD_read(file->backing_canon, type, addr_start, read_size, page_buf) < 0) {
+                    H5FD_read(file->original_file, type, addr_start, read_size, page_buf) < 0) {
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get original file data")
                 }
 
@@ -1420,19 +1427,19 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         } /* end if data range does not span entire page */
 
-        new_entry.logi_page = page_i;
-        new_entry.phys_addr = file->history_eof;
+        new_entry.logical_page = page_i;
+        new_entry.phys_addr    = file->onion_eof;
 
-        if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, file->history_eof + page_size) < 0)
+        if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, file->onion_eof + page_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA for new page amendment")
 
-        if (H5FD_write(file->backing_onion, H5FD_MEM_DRAW, file->history_eof, page_size, write_buf) < 0)
+        if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, file->onion_eof, page_size, write_buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
         if (H5FD__onion_revision_index_insert(file->rev_index, &new_entry) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "can't insert new index entry into revision index")
 
-        file->history_eof += page_size;
+        file->onion_eof += page_size;
         buf += page_n_used; /* possible overflow never touched */
         bytes_to_write -= page_n_used;
 
@@ -1440,7 +1447,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     HDassert(0 == bytes_to_write);
 
-    file->logi_eof = MAX(file->logi_eof, (offset + len));
+    file->logical_eof = MAX(file->logical_eof, (offset + len));
 
 done:
     H5MM_xfree(page_buf);
@@ -1589,8 +1596,8 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     FUNC_ENTER_PACKAGE;
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
-    if (0 == (size = H5FD__onion_write_history(&(file->history), file->backing_onion, file->history_eof,
-                                               file->history_eof)))
+    if (0 == (size = H5FD__onion_write_history(&(file->history), file->onion_file, file->onion_eof,
+                                               file->onion_eof)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write final history")
 
     if (size != file->header.history_size)
@@ -1599,7 +1606,7 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     /* Is last write operation to history file; no need to extend to page
      * boundary if set to page-align.
      */
-    file->history_eof += size;
+    file->onion_eof += size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

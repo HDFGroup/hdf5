@@ -38,16 +38,20 @@
  * Structure    H5FD__onion_index_entry
  *
  * Purpose:     Map a page in the logical file to a 'physical address' in the
- *              backing store.
+ *              onion file.
  *
- * logi_page:   Page 'id' in the logical file.
+ * logical_page:
  *
- * phys_addr:   Address/offset of start of page in the backing store.
+ *              Page 'id' in the logical file.
+ *
+ * phys_addr:
+ *
+ *              Address/offset of start of page in the onion file.
  *
  *-----------------------------------------------------------------------------
  */
 typedef struct H5FD_onion_index_entry_t {
-    uint64_t logi_page;
+    uint64_t logical_page;
     haddr_t  phys_addr;
 } H5FD_onion_index_entry_t;
 
@@ -62,7 +66,7 @@ typedef struct H5FD_onion_index_entry_t {
  *              Must equal H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR to be
  *              considered valid.
  *
- * page_size:   Interval to which the `logi_page` component of each list
+ * page_size:   Interval to which the `logical_page` component of each list
  *              entry must align.
  *              Value is taken from the onion history data; must not change
  *              following onionization or file or creation of onion file.
@@ -71,7 +75,7 @@ typedef struct H5FD_onion_index_entry_t {
  *
  * list:        Pointer to array of archival index entries.
  *              Cannot be NULL.
- *              Entries must be sorted by `logi_page_id` in ascending order.
+ *              Entries must be sorted by `logical_page_id` in ascending order.
  *
  *-----------------------------------------------------------------------------
  */
@@ -108,7 +112,7 @@ typedef struct H5FD_onion_revision_record_t {
     uint64_t                    revision_num;
     uint64_t                    parent_revision_num;
     char                        time_of_creation[16];
-    uint64_t                    logi_eof;
+    uint64_t                    logical_eof;
     H5FD_onion_archival_index_t archival_index;
     uint32_t                    comment_size;
     char *                      comment;
@@ -135,9 +139,9 @@ H5_DLL int H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *, 
 H5_DLL herr_t H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *,
                                                                    H5FD_onion_archival_index_t *);
 
-H5_DLL uint64_t H5FD__onion_revision_record_decode(unsigned char *, H5FD_onion_revision_record_t *);
-H5_DLL uint64_t H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *, unsigned char *,
-                                                   uint32_t *);
+H5_DLL size_t H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record);
+H5_DLL size_t H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigned char *buf,
+                                                 uint32_t *checksum);
 
 #ifdef __cplusplus
 }
