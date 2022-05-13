@@ -28,7 +28,7 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--branch BRANCHNAME] [-h] [--private] [--revision] <methods> ...
+Usage: $0 -d <dir> [-h] [--private] [--revision [--branch BRANCHNAME]] <methods> ...
    -d DIR       The name of the directory where the release(s) should be
                 placed.
    --branch BRANCHNAME  This is to get the correct version of the branch name from the
@@ -36,6 +36,9 @@ Usage: $0 -d <dir> [--branch BRANCHNAME] [-h] [--private] [--revision] <methods>
    -h           print the help page.
    --private    Make a private release with today's date in version information.
    --revision   Make a private release with the code revision number in version information.
+                This allows --branch to be used for the file name.
+   --branch BRANCHNAME  This is to get the correct version of the branch name from the
+                        repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -237,14 +240,14 @@ if [ X$revmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     if [ "${BRANCHNAME}" = "" ]; then
-        branch=`git symbolic-ref -q --short HEAD`
+        BRANCHNAME=`git symbolic-ref -q --short HEAD`
     fi
     revision=`git rev-parse --short HEAD`
     # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
-    HDF5_VERS=hdf5-$branch-$revision
+    HDF5_VERS=hdf5-$BRANCHNAME-$revision
     echo file base of $HDF5_VERS
     bin/h5vers -s $VERS
     # use a generic directory name for revision releases
