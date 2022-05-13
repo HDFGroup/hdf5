@@ -338,11 +338,11 @@ H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t file_create)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Open the metadata file */
-    if ((md_fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_RDONLY)) < 0)
+    if ((md_fd = HDopen(f->shared->md_file_path_name, O_RDONLY)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "error opening metadata file")
 
     /* Verify the minimum size for the metadata file */
-    if (HDstat(f->shared->vfd_swmr_config.md_file_path, &stat_buf) < 0)
+    if (HDstat(f->shared->md_file_path_name, &stat_buf) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat the metadata file")
 
     if (file_create) { /* Creating file */
@@ -634,7 +634,7 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */
-    if ((md_fd = HDopen(f->shared->vfd_swmr_config.md_file_path, O_RDONLY)) < 0)
+    if ((md_fd = HDopen(f->shared->md_file_path_name, O_RDONLY)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "error opening metadata file")
 
     /* Decode the header in the metadata file */

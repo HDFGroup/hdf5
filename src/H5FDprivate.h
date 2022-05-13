@@ -370,11 +370,15 @@ H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for VFD SWMR */
-H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index, uint64_t *tick_ptr,
-                                             uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
-H5_DLL void   H5FD_vfd_swmr_dump_status(H5FD_t *file, uint64_t page);
-H5_DLL void   H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
-H5_DLL void   H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed);
+H5_DLL herr_t  H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index, uint64_t *tick_ptr,
+                                              uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
+H5_DLL void    H5FD_vfd_swmr_dump_status(H5FD_t *file, uint64_t page);
+H5_DLL void    H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
+H5_DLL void    H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed);
+H5_DLL void    H5FD_vfd_swmr_get_md_path_name(H5FD_t *_file, char **name);
+H5_DLL hbool_t H5FD_vfd_swmr_get_make_believe(H5FD_t *_file);
+H5_DLL void    H5FD_vfd_swmr_set_make_believe(H5FD_t *_file, hbool_t make_believe);
+H5_DLL htri_t  H5FD_vfd_swmr_assess_make_believe(H5FD_t *_file);
 H5_DLL H5FD_t *H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id);
 
 /* Function prototypes for MPI based VFDs*/

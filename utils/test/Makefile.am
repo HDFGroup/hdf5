@@ -23,7 +23,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib 
 
 # These are our main targets, the tools
 
-noinst_PROGRAMS=swmr_check_compat_vfd
+noinst_PROGRAMS=swmr_check_compat_vfd vfd_swmr_check_compat_vfd
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.

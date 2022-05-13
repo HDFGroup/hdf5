@@ -83,7 +83,8 @@
 herr_t
 H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5FD_mem_t map_type  = type;    /* Mapped memory type */
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -96,8 +97,12 @@ H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t 
     if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
+    if (!H5F_SHARED_USE_VFD_SWMR(f_sh))
+        /* Treat global heap as raw data */
+        map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
     /* Pass through page buffer layer */
-    if (H5PB_read(f_sh, type, addr, size, buf) < 0)
+    if (H5PB_read(f_sh, map_type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
 
 done:
@@ -141,7 +146,8 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /
 herr_t
 H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5FD_mem_t map_type  = type;    /* Mapped memory type */
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -155,8 +161,12 @@ H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t
     if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
+    if (!H5F_SHARED_USE_VFD_SWMR(f_sh))
+        /* Treat global heap as raw data */
+        map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
     /* Pass through page buffer layer */
-    if (H5PB_write(f_sh, type, addr, size, buf) < 0)
+    if (H5PB_write(f_sh, map_type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
 
 done:

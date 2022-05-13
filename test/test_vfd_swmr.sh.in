@@ -152,14 +152,15 @@ catch_out_err_and_rc()
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-$utils_testdir/swmr_check_compat_vfd
+$utils_testdir/vfd_swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
-    echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support SWMR."
+    echo "Either the VFD specified by the HDF5_DRIVER environment variable"
+    echo "does not support SWMR or this is parallel HDF5, which does not"
+    echo "support VFD SWMR due to a lack of page buffer support."
     echo
-    echo "SWMR acceptance tests skipped"
+    echo "VFD SWMR acceptance tests skipped"
     echo
     exit 0
 fi
@@ -1095,6 +1096,9 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 16" "-d 2 -F -l 16" "-d 1 -t" "-d 1 -t 
     if [ ${do_many_small:-no} = no ]; then
         continue
     fi
+
+    rm vfd_swmr_bigset*.h5 2> /dev/null
+
     #
     # Test many small datasets of two or three dimensions.
     #
@@ -1188,6 +1192,9 @@ for options in "-d 1" "-d 1 -F" "-d 2 -l 10" "-d 2 -F -l 10" "-d 1 -t -l 10" "-d
     if [ ${do_few_big:-no} = no ]; then
         continue
     fi
+
+    rm vfd_swmr_bigset*.h5 2> /dev/null
+
     echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
 
     # Launch the auxiliary process for testing NFS if the --enable-aux-process option is enabled for configuration.
@@ -1609,12 +1616,12 @@ if [ ${do_gfail_checksum:-no} = yes ]; then
         rm -f ./$GFAIL_FIFO_READER_TO_WRITER
     fi
 
-    echo launch vfd_swmr_gfail_writer -q -n 420000 ......may take some time......
+    echo launch vfd_swmr_gfail_writer -q -n 420000 ...may take some time...error stack messages expected
     catch_out_err_and_rc vfd_swmr_gfail_checksum_writer \
         $testdir/vfd_swmr_gfail_writer -q -m 50 -t 10 -n 4000000 &
     pid_writer=$!
 
-    echo launch vfd_swmr_gfail_reader -n 420000 ......may take some time......
+    echo launch vfd_swmr_gfail_reader -n 420000 ...may take some time...error stack messages expected
     catch_out_err_and_rc vfd_swmr_gfail_checksum_reader \
         $testdir/vfd_swmr_gfail_reader -q -m 50 -t 10 -n 4000000 &
     pid_reader=$!
