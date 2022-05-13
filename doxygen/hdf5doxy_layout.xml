@@ -5,6 +5,7 @@
     <tab type="user" url="index.html" title="Overview" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/Learning+HDF5" title="Getting started" />
     <tab type="user" url="@ref Cookbook" title="Cookbook" />
+    <tab type="user" url="@ref UG" title="User Guide" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+User+Guides" title="User Guides" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide" title="Application Developer's Guide" />
     <tab type="user" url="@ref GLS" title="Glossary" />
