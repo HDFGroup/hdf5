@@ -673,16 +673,16 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     /* Adjust I/O info for any parallel I/O */
     if (H5D__ioinfo_adjust(count, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
-#else
-    io_info.is_coll_broken = TRUE;
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* Invoke correct "high level" I/O routine */
-    /* If collective mode is broken, perform read IO in independent mode via
-     * single-dset path with looping.
-     * Multiple-dset path can not be called since it is not supported, so make
-     * detour through single-dset path */
-    if (TRUE == io_info.is_coll_broken) {
+    /* If multi dataset I/O callback is not provided, perform read IO via
+     * single-dset path with looping */
+    if (io_info.io_ops.multi_read_md) {
+        /* Invoke correct "high level" I/O routine */
+        if ((*io_info.io_ops.multi_read_md)(count, &io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    } /* end if */
+    else {
         haddr_t prev_tag = HADDR_UNDEF;
 
         /* Loop with serial & single-dset read IO path */
@@ -692,6 +692,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             io_info.dsets_info = &(dset_info[i]);
 
+            /* Invoke correct "high level" I/O routine */
             if ((*io_info.io_ops.multi_read)(
                     &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
                     dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
@@ -700,9 +701,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
         }
-    } /* end if */
-    else if ((*io_info.io_ops.multi_read_md)(count, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    }
 
 done:
     /* Shut down the I/O op information */
@@ -960,15 +959,16 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     /* Adjust I/O info for any parallel I/O */
     if (H5D__ioinfo_adjust(count, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
-#else
-    io_info.is_coll_broken = TRUE;
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* If collective mode is broken, perform write IO in independent mode via
-     * single-dset path with looping.
-     * Multiple-dset path can not be called since it is not supported, so make
-     * detour through single-dset path */
-    if (TRUE == io_info.is_coll_broken) {
+    /* If multi dataset I/O callback is not provided, perform write IO via
+     * single-dset path with looping */
+    if (io_info.io_ops.multi_write_md) {
+        /* Invoke correct "high level" I/O routine */
+        if ((*io_info.io_ops.multi_write_md)(count, &io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    } /* end if */
+    else {
         haddr_t prev_tag = HADDR_UNDEF;
 
         /* loop with serial & single-dset write IO path */
@@ -983,14 +983,11 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
                     &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
                     dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
         }
-    } /* end if */
-    else
-        /* Invoke correct "high level" I/O routine */
-        if ((*io_info.io_ops.multi_write_md)(count, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    }
 
 #ifdef OLD_WAY
     /*
@@ -1071,7 +1068,6 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
     /* Set up "normal" I/O fields */
     dset_info->dset         = dset;
     io_info->f_sh           = H5F_SHARED(dset->oloc.file);
-    io_info->is_coll_broken = FALSE; /* is collective broken? */
     dset_info->store        = store;
 
     /* Set I/O operations to initial values */
@@ -1080,6 +1076,13 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
     /* Set the "high-level" I/O operations for the dataset */
     io_info->io_ops.multi_read  = dset->shared->layout.ops->ser_read;
     io_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
+
+    /* Start without multi-dataset I/O ops. If we're not using the collective
+     * I/O path then we will call the single dataset callbacks in a loop. */
+    io_info->io_ops.multi_read_md   = NULL;
+    io_info->io_ops.multi_write_md  = NULL;
+    io_info->io_ops.single_read_md  = NULL;
+    io_info->io_ops.single_write_md = NULL;
 
     /* Set the I/O operations for reading/writing single blocks on disk */
     if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
@@ -1446,12 +1449,8 @@ H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info)
                 if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
             } /* end if */
-
-            io_info->is_coll_broken = TRUE;
         } /* end else */
     }     /* end if */
-    else
-        io_info->is_coll_broken = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

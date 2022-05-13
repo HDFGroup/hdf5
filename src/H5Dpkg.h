@@ -294,7 +294,6 @@ typedef struct H5D_io_info_t {
     haddr_t          store_faddr;    /* lowest file addr for read/write */
     const void *     base_maddr_w;   /* start mem addr for write */
     void *           base_maddr_r;   /* start mem addr for read */
-    hbool_t          is_coll_broken; /* is collective mode broken? */
     hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
 } H5D_io_info_t;
 
