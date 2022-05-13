@@ -236,9 +236,13 @@ if [ X$revmode = Xyes ]; then
     # Copy old version of config/lt_vers.am, since it's hard to
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
+<<<<<<< HEAD
     if [ "${BRANCHNAME}" = "" ]; then
         branch=`git symbolic-ref -q --short HEAD`
     fi
+=======
+    branch=`git symbolic-ref -q --short HEAD`
+>>>>>>> branch 'develop' of https://github.com/HDFGroup/hdf5.git
     revision=`git rev-parse --short HEAD`
     # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)

@@ -2755,14 +2755,6 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-parallel is also incompatible with --enable-threadsafe, unless
-## --enable-unsupported has been specified on the configure line.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-    AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
-  fi
-fi
-
 AC_MSG_CHECKING([for parallel support files])
 case "X-$enable_parallel" in
   X-|X-no|X-none)
