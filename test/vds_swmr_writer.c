@@ -50,27 +50,27 @@ main(int argc, char *argv[])
 
     file_number = HDatoi(argv[1]);
     if (file_number < 0 || file_number >= N_SOURCES)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open the source file and dataset */
     /* All SWMR files need to use the latest file format */
     if ((faplid = h5_fileaccess()) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_libver_bounds(faplid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((fid = H5Fopen(FILE_NAMES[file_number], H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, faplid)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((did = H5Dopen2(fid, SOURCE_DSET_PATH, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create a data buffer that represents a plane */
     n_elements = PLANES[file_number][1] * PLANES[file_number][2];
     if (NULL == (buffer = (int *)HDmalloc(n_elements * sizeof(int))))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the memory dataspace */
     if ((msid = H5Screate_simple(RANK, PLANES[file_number], NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Write planes to the dataset */
     for (i = 0; i < N_PLANES_TO_WRITE; i++) {
@@ -79,18 +79,18 @@ main(int argc, char *argv[])
 
         /* Cork the dataset's metadata in the cache */
         if (H5Odisable_mdc_flushes(did) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Set the dataset's extent. This is inefficient but that's ok here. */
         extent[0] = i + 1;
         extent[1] = PLANES[file_number][1];
         extent[2] = PLANES[file_number][2];
         if (H5Dset_extent(did, extent) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Get the file dataspace */
         if ((fsid = H5Dget_space(did)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Each plane is filled with the plane number as a data value. */
         value = (((int)i + 1) * 10) + (int)i;
@@ -102,15 +102,15 @@ main(int argc, char *argv[])
         start[1] = 0;
         start[2] = 0;
         if (H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, PLANES[file_number], NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Write the plane to the dataset. */
         if (H5Dwrite(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, buffer) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Uncork the dataset's metadata from the cache */
         if (H5Oenable_mdc_flushes(did) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Wait one second between writing planes */
         delay = HDtime(0) + (time_t)1;
@@ -119,20 +119,20 @@ main(int argc, char *argv[])
 
         /* Flush */
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     } /* end for */
 
     if (H5Pclose(faplid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(msid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(fsid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     HDfree(buffer);
 
     HDfprintf(stderr, "SWMR writer exited successfully\n");

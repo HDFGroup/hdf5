@@ -231,6 +231,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   # Append more extra warning flags that only gcc 7.x+ knows about
   if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0)
     ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/7")
+    ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-7")
     if (HDF5_ENABLE_DEV_WARNINGS)
       ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-7")
     #else ()

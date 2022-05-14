@@ -166,9 +166,12 @@ H5VL__term_opt_operation(void)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Iterate over the VOL subclasses */
-    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
-        if (H5VL_opt_ops_g[subcls])
+    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++) {
+        if (H5VL_opt_ops_g[subcls]) {
             H5SL_destroy(H5VL_opt_ops_g[subcls], H5VL__term_opt_operation_cb, NULL);
+            H5VL_opt_ops_g[subcls] = NULL;
+        }
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL__term_opt_operation() */

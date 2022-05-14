@@ -40,7 +40,7 @@ check_PROGRAMS=$(TEST_PROG_PARA)
 CHECK_CLEANFILES+=parf[12].h5
 
 # Test source files
-parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
+parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)

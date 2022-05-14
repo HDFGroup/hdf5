@@ -1711,6 +1711,15 @@ main(int argc, char *argv[])
         vfd_info.info   = NULL;
         vfd_info.u.name = drivername;
 
+#ifdef H5_HAVE_ROS3_VFD
+        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX]))
+            vfd_info.info = &ros3_fa;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+        if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX]))
+            vfd_info.info = &hdfs_fa;
+#endif
+
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
             goto done;
