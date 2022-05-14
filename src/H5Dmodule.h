@@ -29,7 +29,35 @@
 #define H5_MY_PKG_ERR  H5E_DATASET
 #define H5_MY_PKG_INIT YES
 
-/**\defgroup H5D H5D
+/** \page H5D_UG HDF5 Datasets
+ *
+ * \section sec_dataset HDF5 Datasets
+ * \subsection subsec_dataset_intro Introduction
+ * \subsection subsec_dataset_function Dataset Function Summaries
+ * \subsection subsec_dataset_program Programming Model for Datasets
+ * \subsubsection subsubsec_dataset_program_general General Model
+ * \subsubsection subsubsec_dataset_program_create Create Dataset
+ * \subsubsection subsubsec_dataset_program_transfer Data Transfer Operations on a Dataset
+ * \subsubsection subsubsec_dataset_program_read Retrieve the Properties of a Dataset
+ * \subsection subsec_dataset_transfer Data Transfer
+ * \subsubsection subsubsec_dataset_transfer_pipe The Data Pipeline
+ * \subsubsection subsubsec_dataset_transfer_filter Data Pipeline Filters
+ * \subsubsection subsubsec_dataset_transfer_drive File Drivers
+ * \subsubsection subsubsec_dataset_transfer_props Data Transfer Properties to Manage the Pipeline
+ * \subsubsection subsubsec_dataset_transfer_store Storage Strategies
+ * \subsubsection subsubsec_dataset_transfer_partial Partial I/O Sub‐setting and Hyperslabs
+ * \subsection subsec_dataset_allocation Allocation of Space in the File
+ * \subsubsection subsubsec_dataset_allocation_store Storage Allocation in the File: Early, Incremental, Late
+ * \subsubsection subsubsec_dataset_allocation_delete Deleting a Dataset from a File and Reclaiming Space
+ * \subsubsection subsubsec_dataset_allocation_release Releasing Memory Resources
+ * \subsubsection subsubsec_dataset_allocation_ext External Storage Properties
+ * \subsection subsec_dataset_filters Using HDF5 Filters
+ * \subsubsection subsubsec_dataset_filters_nbit N‐bit Filter
+ * \subsubsection subsubsec_dataset_filters_scale Scale‐offset Filter
+ * \subsubsection subsubsec_dataset_filters_szip Szip Filter
+ */
+
+/**\defgroup H5D H5D Datasets
  *
  * Use the functions in this module to manage HDF5 datasets, including the
  * transfer of data between memory and disk and the description of dataset

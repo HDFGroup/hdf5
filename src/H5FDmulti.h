@@ -172,7 +172,7 @@ H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const
  * \param[out] relax Allows read-only access to incomplete file sets when \c TRUE
  * \returns \herr_t
  *
- * \details H5Pget_fapl_multi() returns information about the multi-file access
+ * \details H5Pget_fapl_multi returns information about the multi-file access
  *          property list.
  *
  * \since 1.4.0
@@ -193,7 +193,7 @@ H5_DLL herr_t H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid
  * \param[in] raw_plist_id
  * \returns \herr_t
  *
- * \details H5Pset_fapl_split() is a compatibility function that enables the
+ * \details H5Pset_fapl_split is a compatibility function that enables the
  *          multi-file driver to emulate the split driver from HDF5 Releases 1.0
  *          and 1.2. The split file driver stored metadata and raw data in
  *          separate files but provided no mechanism for separating types of

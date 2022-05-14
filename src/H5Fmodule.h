@@ -29,7 +29,46 @@
 #define H5_MY_PKG_ERR  H5E_FILE
 #define H5_MY_PKG_INIT YES
 
-/**\defgroup H5F H5F
+/** \page H5F_UG  The HDF5 File
+ *
+ * \section sec_file The HDF5 File
+ * \subsection subsec_file_intro Introduction
+ * \subsection subsec_file_access_modes File Access Modes
+ * \subsection subsec_file_creation_access File Creation and File Access Properties
+ * \subsection subsec_file_drivers Low-level File Drivers
+ * \subsection subsec_file_program_model Programming Model for Files
+ * \subsubsection subsubsec_file_program_model_create Creating a New File
+ * \subsubsection subsubsec_file_program_model_open Opening an Existing File
+ * \subsubsection subsubsec_file_program_model_close Closing a File
+ * \subsection subsec_file_h5dump Using h5dump to View a File
+ * \subsection subsec_file_summary File Function Summaries
+ * \subsection subsec_file_create Creating or Opening an HDF5 File
+ * \subsection subsec_file_closes Closing an HDF5 File
+ * \subsection subsec_file_property_lists File Property Lists
+ * \subsubsection subsubsec_file_property_lists_create Creating a Property List
+ * \subsubsection subsubsec_file_property_lists_props File Creation Properties
+ * \subsubsection subsubsec_file_property_lists_access File Access Properties
+ * \subsection subsec_file_alternate_drivers Alternate File Storage Layouts and Low-level File Drivers
+ * \subsubsection subsubsec_file_alternate_drivers_id Identifying the Previously‐used File Driver
+ * \subsubsection subsubsec_file_alternate_drivers_sec2 The POSIX (aka SEC2) Driver
+ * \subsubsection subsubsec_file_alternate_drivers_direct The Direct Driver
+ * \subsubsection subsubsec_file_alternate_drivers_log The Log Driver
+ * \subsubsection subsubsec_file_alternate_drivers_win The Windows Driver
+ * \subsubsection subsubsec_file_alternate_drivers_stdio The STDIO Driver
+ * \subsubsection subsubsec_file_alternate_drivers_mem The Memory (aka Core) Driver
+ * \subsubsection subsubsec_file_alternate_drivers_family The Family Driver
+ * \subsubsection subsubsec_file_alternate_drivers_multi The Multi Driver
+ * \subsubsection subsubsec_file_alternate_drivers_split The Split Driver
+ * \subsubsection subsubsec_file_alternate_drivers_par The Parallel Driver
+ * \subsection subsec_file_examples Code Examples for Opening and Closing Files
+ * \subsubsection subsubsec_file_examples_trunc Example Using the H5F_ACC_TRUNC Flag
+ * \subsubsection subsubsec_file_examples_props Example with the File Creation Property List
+ * \subsubsection subsubsec_file_examples_access Example with the File Access Property List
+ * \subsection subsec_file_multiple Working with Multiple HDF5 Files
+ *
+ */
+
+/**\defgroup H5F H5F File
  *
  * Use the functions in this module to manage HDF5 files.
  *

@@ -29,7 +29,28 @@
 #define H5_MY_PKG_ERR  H5E_DATASPACE
 #define H5_MY_PKG_INIT YES
 
-/**\defgroup H5S H5S
+/** \page H5S_UG Dataspaces and Partial I/O
+ *
+ *
+ * \section sec_dataspace HDF5 Dataspaces and Partial I/O
+ * \subsection subsec_dataspace_intro Introduction
+ * \subsection subsec_dataspace_function Dataspace Function Summaries
+ * \subsection subsec_dataspace_program  Definition of Dataspace Objects and the Dataspace Programming Model
+ * \subsubsection subsubsec_dataspace_program_object Dataspace Objects
+ * \subsubsection subsubsec_dataspace_program_model Dataspace Programming Model
+ * \subsection subsec_dataspace_transfer Dataspaces and Data Transfer
+ * \subsubsection subsubsec_dataspace_transfer_select Data Selection
+ * \subsubsection subsubsec_dataspace_transfer_model Programming Model
+ * \subsection subsec_dataspace_select Dataspace Selection Operations and Data Transfer
+ * \subsection subsec_dataspace_refer References to Dataset Regions
+ * \subsubsection subsubsec_dataspace_refer_use Example Uses for Region References
+ * \subsubsection subsubsec_dataspace_refer_create Creating References to Regions
+ * \subsubsection subsubsec_dataspace_refer_read Reading References to Regions
+ * \subsection subsec_dataspace_sample Sample Programs
+ *
+ */
+
+/**\defgroup H5S H5S Dataspaces
  *
  * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
  *

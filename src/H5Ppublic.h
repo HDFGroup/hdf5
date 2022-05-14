@@ -353,7 +353,7 @@ H5_DLLVAR hid_t H5P_CLS_OBJECT_COPY_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_ID_g;
 
-/* Default roperty list IDs */
+/* Default property list IDs */
 /* (Internal to library, do not use!  Use macros above) */
 H5_DLLVAR hid_t H5P_LST_FILE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_FILE_ACCESS_ID_g;
@@ -378,7 +378,7 @@ H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_ID_g;
 /* Generic property list routines */
 
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Terminates access to a property list
  *
@@ -396,7 +396,7 @@ H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_ID_g;
  */
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Closes an existing property list class
  *
@@ -413,7 +413,7 @@ H5_DLL herr_t H5Pclose(hid_t plist_id);
  */
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Copies an existing property list to create a new property list
  *
@@ -430,7 +430,7 @@ H5_DLL herr_t H5Pclose_class(hid_t plist_id);
  */
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Copies a property from one list or class to another
  *
@@ -466,7 +466,7 @@ H5_DLL hid_t H5Pcopy(hid_t plist_id);
  */
 H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Creates a new property list as an instance of a property list class
  *
@@ -584,7 +584,7 @@ H5_DLL herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
  */
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Creates a new property list class
  *
@@ -627,7 +627,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
                              H5P_cls_copy_func_t copy, void *copy_data, H5P_cls_close_func_t close,
                              void *close_data);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Decodes property list received in a binary object buffer and
  *        returns a new property list identifier
@@ -656,7 +656,7 @@ H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func
  */
 H5_DLL hid_t H5Pdecode(const void *buf);
 /**
- * \ingroup GPLO
+ * \ingroup PLCR
  *
  * \brief Encodes the property values in a property list into a binary
  *        buffer
@@ -695,7 +695,7 @@ H5_DLL hid_t H5Pdecode(const void *buf);
  */
 H5_DLL herr_t H5Pencode(hid_t plist_id, void *buf, size_t *nalloc);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Compares two property lists or classes for equality
  *
@@ -715,7 +715,7 @@ H5_DLL herr_t H5Pencode(hid_t plist_id, void *buf, size_t *nalloc);
  */
 H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries whether a property name exists in a property list or
  *       class
@@ -733,7 +733,7 @@ H5_DLL htri_t H5Pequal(hid_t id1, hid_t id2);
  */
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries the value of a property
  *
@@ -765,7 +765,7 @@ H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
  */
 H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
 /**
- *\ingroup GPLO
+ *\ingroup PLCR
  *
  * \brief Returns the property list class identifier for a property list
  *
@@ -828,7 +828,7 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
  */
 H5_DLL hid_t H5Pget_class(hid_t plist_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Retrieves the name of a class
  *
@@ -972,7 +972,7 @@ H5_DLL hid_t H5Pget_class(hid_t plist_id);
  */
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Retrieves the parent class of a property class
  *
@@ -988,7 +988,7 @@ H5_DLL char *H5Pget_class_name(hid_t pclass_id);
  */
 H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief  Queries the number of properties in a property list or class
  *
@@ -1011,7 +1011,7 @@ H5_DLL hid_t H5Pget_class_parent(hid_t pclass_id);
  */
 H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Queries the size of a property value in bytes
  *
@@ -1032,7 +1032,7 @@ H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
  */
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a temporary property with a property list
  *
@@ -1282,7 +1282,7 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *va
                          H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
                          H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Determines whether a property list is a member of a class
  *
@@ -1302,7 +1302,7 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *va
  */
 H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Iterates over properties in a property class or list
  *
@@ -1348,7 +1348,7 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  */
 H5_DLL int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a permanent property with a property list class
  *
@@ -1629,7 +1629,7 @@ H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *de
                            H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
                            H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Removes a property from a property list
  *
@@ -1655,7 +1655,7 @@ H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *de
  */
 H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Sets a property list value
  *
@@ -1687,7 +1687,7 @@ H5_DLL herr_t H5Premove(hid_t plist_id, const char *name);
  */
 H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Removes a property from a property list class
  *
@@ -1705,8 +1705,6 @@ H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, const void *value);
  *
  */
 H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
-
-/* Object creation property list (OCPL) routines */
 
 /**
  * \ingroup DCPL
@@ -1727,6 +1725,9 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
  *
  */
 H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
+
+/* Object creation property list (OCPL) routines */
+
 /**
  * \ingroup OCPL
  *
@@ -7899,7 +7900,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
 
 /* Link creation property list (LCPL) routines */
 /**
- * \ingroup ALCAPL
+ * \ingroup STRCPL
  *
  * \brief Determines whether property is set to enable creating missing
  *        intermediate groups
@@ -7930,7 +7931,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  */
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
 /**
- * \ingroup ALCAPL
+ * \ingroup STRCPL
  *
  * \brief Specifies in property list whether to create missing
  *        intermediate groups
@@ -8266,7 +8267,7 @@ H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
 
 /* String creation property list (STRCPL) routines */
 /**
- * \ingroup ALCAPL
+ * \ingroup STRCPL
  *
  * \brief  Retrieves the character encoding used to create a link or
  *         attribute name
@@ -8295,7 +8296,7 @@ H5_DLL herr_t H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint);
  */
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 /**
- * \ingroup ALCAPL
+ * \ingroup STRCPL
  *
  * \brief Sets the character encoding used to encode link and attribute
  *        names
@@ -8336,7 +8337,6 @@ H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
  */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);
 
-/* Link access property list (LAPL) routines */
 /**
  * \ingroup LAPL
  *
@@ -8695,7 +8695,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
 
 /* Object copy property list (OCPYPL) routines */
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Adds a path to the list of paths that will be searched in the
  *        destination file for a matching committed datatype
@@ -8810,7 +8810,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  */
 H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Clears the list of paths stored in the object copy property list
  *
@@ -8861,7 +8861,7 @@ H5_DLL herr_t H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path
  */
 H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Retrieves the properties to be used when an object is copied
  *
@@ -8886,7 +8886,7 @@ H5_DLL herr_t H5Pfree_merge_committed_dtype_paths(hid_t plist_id);
  */
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Retrieves the callback function from the specified object copy
  *        property list
@@ -8924,7 +8924,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  */
 H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Sets properties to be used when an object is copied
  *
@@ -9017,7 +9017,7 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
 /**
- * \ingroup OCPPL
+ * \ingroup OCPYPL
  *
  * \brief Sets the callback function that H5Ocopy() will invoke before
  *        searching the entire destination file for a matching committed
@@ -9115,7 +9115,7 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
 
 /* Typedefs */
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a permanent property with a property list class
  *
@@ -9245,7 +9245,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
                            H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_del,
                            H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
 /**
- * \ingroup GPLOA
+ * \ingroup PLCRA
  *
  * \brief Registers a temporary property with a property list
  *

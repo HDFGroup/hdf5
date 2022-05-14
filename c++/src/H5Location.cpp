@@ -1323,7 +1323,7 @@ H5Location::copyLink(const H5std_string &src_name, const H5std_string &dst_name,
 ///\note
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with H5Location::moveLink. Please refer
-///             to the Group Interface in the HDF5 User's Guide for details.
+///             to the Group Interface in the HDF5 User Guide for details.
 // March, 2018
 //--------------------------------------------------------------------------
 void
@@ -1366,7 +1366,7 @@ H5Location::moveLink(const H5std_string &src_name, const Group &dst, const H5std
 ///\note
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with H5Location::moveLink. Please refer
-///             to the Group Interface in the HDF5 User's Guide for details.
+///             to the Group Interface in the HDF5 User Guide for details.
 // March, 2018
 //--------------------------------------------------------------------------
 void
@@ -1406,7 +1406,7 @@ H5Location::moveLink(const H5std_string &src_name, const H5std_string &dst_name,
 ///\note
 ///             Exercise care in moving groups as it is possible to render
 ///             data in a file inaccessible with H5Location::move. Please refer
-///             to the Group Interface in the HDF5 User's Guide for details.
+///             to the Group Interface in the HDF5 User Guide for details.
 // Modification
 //      2007: QAK modified to use H5L APIs - BMR
 //      2018: Will be replaced by H5Location::moveLink() -BMR
