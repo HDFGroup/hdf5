@@ -817,8 +817,8 @@ H5T_vlen_disk_getptr(void H5_ATTR_UNUSED *vl)
 static htri_t
 H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
 {
-    uint8_t *vl = (uint8_t *)_vl; /* Pointer to the disk VL information */
-    haddr_t  addr;                /* Sequence's heap address */
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the disk VL information */
+    haddr_t        addr;                      /* Sequence's heap address */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -829,7 +829,7 @@ H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
     vl += 4;
 
     /* Get the heap address */
-    H5F_addr_decode(f, (const uint8_t **)&vl, &addr);
+    H5F_addr_decode(f, &vl, &addr);
 
     FUNC_LEAVE_NOAPI(addr == 0 ? TRUE : FALSE)
 } /* end H5T_vlen_disk_isnull() */
@@ -849,9 +849,9 @@ H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
 static herr_t
 H5T_vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
 {
-    uint8_t *vl = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
-    H5HG_t   hobjid;
-    herr_t   ret_value = SUCCEED; /* Return value */
+    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    H5HG_t         hobjid;
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -864,7 +864,7 @@ H5T_vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
     vl += 4;
 
     /* Get the heap information */
-    H5F_addr_decode(f, (const uint8_t **)&vl, &(hobjid.addr));
+    H5F_addr_decode(f, &vl, &(hobjid.addr));
     UINT32DECODE(vl, hobjid.idx);
 
     /* Check if this sequence actually has any data */
@@ -893,11 +893,11 @@ static herr_t
 H5T_vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_alloc_info, void *_vl, void *buf,
                     void *_bg, size_t seq_len, size_t base_size)
 {
-    uint8_t *vl = (uint8_t *)_vl; /*Pointer to the user's hvl_t information*/
-    uint8_t *bg = (uint8_t *)_bg; /*Pointer to the old data hvl_t          */
-    H5HG_t   hobjid;              /* New VL sequence's heap ID */
-    size_t   len;                 /* Size of new sequence on disk (in bytes) */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    const uint8_t *bg = (const uint8_t *)_bg; /*Pointer to the old data hvl_t          */
+    uint8_t *      vl = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
+    H5HG_t         hobjid;                    /* New VL sequence's heap ID */
+    size_t         len;                       /* Size of new sequence on disk (in bytes) */
+    herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -914,7 +914,7 @@ H5T_vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_all
         bg += 4;
 
         /* Get heap information */
-        H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+        H5F_addr_decode(f, &bg, &(bg_hobjid.addr));
         UINT32DECODE(bg, bg_hobjid.idx);
 
         /* Free heap object for old data */
@@ -955,10 +955,10 @@ done:
 static herr_t
 H5T_vlen_disk_setnull(H5F_t *f, void *_vl, void *_bg)
 {
-    uint8_t *vl        = (uint8_t *)_vl; /*Pointer to the user's hvl_t information*/
-    uint8_t *bg        = (uint8_t *)_bg; /*Pointer to the old data hvl_t          */
-    uint32_t seq_len   = 0;              /* Sequence length */
-    herr_t   ret_value = SUCCEED;        /* Return value */
+    const uint8_t *bg        = (const uint8_t *)_bg; /*Pointer to the old data hvl_t          */
+    uint8_t *      vl        = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
+    uint32_t       seq_len   = 0;                    /* Sequence length */
+    herr_t         ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -974,7 +974,7 @@ H5T_vlen_disk_setnull(H5F_t *f, void *_vl, void *_bg)
         bg += 4;
 
         /* Get heap information */
-        H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+        H5F_addr_decode(f, &bg, &(bg_hobjid.addr));
         UINT32DECODE(bg, bg_hobjid.idx);
 
         /* Free heap object for old data */

@@ -1746,8 +1746,10 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
-    if (FAIL == ret_value)
-        *file_handle = NULL;
+    if (FAIL == ret_value) {
+        if (file_handle)
+            *file_handle = NULL;
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDget_vfd_handle() */

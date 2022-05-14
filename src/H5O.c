@@ -1129,12 +1129,10 @@ herr_t
 H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                    hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    H5G_loc_t  loc;                 /* Location of group */
-    H5G_loc_t  obj_loc;             /* Location used to open group */
-    H5G_name_t obj_path;            /* Opened object group hier. path */
-    H5O_loc_t  obj_oloc;            /* Opened object object location */
-    hbool_t    loc_found = FALSE;   /* Entry at 'name' found */
-    herr_t     ret_value = SUCCEED; /* Return value */
+    H5G_loc_t loc;                 /* Location of group */
+    H5G_loc_t obj_loc;             /* Location used to open group */
+    hbool_t   loc_found = FALSE;   /* Entry at 'name' found */
+    herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo, lapl_id);

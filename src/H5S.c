@@ -218,7 +218,7 @@ H5S_term_package(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
+H5S_get_validated_dataspace(hid_t space_id, H5S_t **space)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -235,7 +235,7 @@ H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
         *space = NULL;
     else {
         /* Get the dataspace pointer */
-        if (NULL == (*space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        if (NULL == (*space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "space_id is not a dataspace ID")
 
         /* Check for valid selection */

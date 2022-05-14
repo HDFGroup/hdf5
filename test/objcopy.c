@@ -4459,6 +4459,10 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     TESTING("H5Ocopy(): compressed dataset");
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
@@ -4884,6 +4888,10 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     }
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
@@ -6873,8 +6881,8 @@ attach_attribute_compound_vlstr(hid_t loc_id)
     hid_t   cmpd_tid   = -1; /* Compound datatype ID */
     hsize_t dim1       = 1;  /* Dimension size */
     typedef struct {         /* Compound structure for the attribute */
-        int   i;
-        char *v;
+        int         i;
+        const char *v;
     } s1;
     s1  buf;            /* Buffer */
     int ret_value = -1; /* Return value */
@@ -7231,6 +7239,10 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     TESTING("H5Ocopy(): compressed dataset with VLEN datatype");
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */

@@ -147,7 +147,7 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
  * ----------------------------------------------------------------------------
  */
 loginfo_t *
-mirror_log_init(char *path, char *prefix, unsigned int verbosity)
+mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
 {
     loginfo_t *info = NULL;
 

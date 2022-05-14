@@ -94,11 +94,11 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             break;
         }
         case H5I_DATASET: {
-            path = H5D_nameof((const H5D_t *)info->object);
+            path = H5D_nameof(info->object);
             break;
         }
         case H5I_DATATYPE: {
-            path = H5T_nameof((const H5T_t *)info->object);
+            path = H5T_nameof(info->object);
             break;
         }
         case H5I_UNINIT:

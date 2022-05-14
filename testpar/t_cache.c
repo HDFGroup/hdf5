@@ -41,7 +41,7 @@ const char *FILENAME[NFILENAME] = {"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* !PATH_MAX */
-char    filenames[NFILENAME][PATH_MAX];
+char *  filenames[NFILENAME];
 hid_t   fapl;                      /* file access property list */
 haddr_t max_addr = 0;              /* used to store the end of
                                     * the address space used by
@@ -192,7 +192,7 @@ struct datum {
 
 #define NUM_DATA_ENTRIES 100000
 
-struct datum data[NUM_DATA_ENTRIES];
+struct datum *data = NULL;
 
 /* Many tests use the size of data array as the size of test loops.
  * On some machines, this results in unacceptably long test runs.
@@ -231,7 +231,7 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *
  *****************************************************************************/
 
-int data_index[NUM_DATA_ENTRIES];
+int *data_index = NULL;
 
 /*****************************************************************************
  * The following two #defines are used to control code that is in turn used
@@ -1116,6 +1116,8 @@ setup_derived_types(void)
     MPI_Aint      displs[9];
     struct mssg_t sample; /* used to compute displacements */
 
+    HDmemset(&sample, 0, sizeof(struct mssg_t));
+
     /* setup the displacements array */
     if ((MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0])) ||
         (MPI_SUCCESS != MPI_Get_address(&sample.src, &displs[1])) ||
@@ -1499,10 +1501,10 @@ serve_read_request(struct mssg_t *mssg_ptr)
             reply.dest      = mssg_ptr->src;
             reply.mssg_num  = -1; /* set by send function */
             reply.base_addr = data[target_index].base_addr;
-            reply.len       = data[target_index].len;
-            reply.ver       = data[target_index].ver;
-            reply.count     = 0;
-            reply.magic     = MSSG_MAGIC;
+            H5_CHECKED_ASSIGN(reply.len, unsigned, data[target_index].len, size_t);
+            reply.ver   = data[target_index].ver;
+            reply.count = 0;
+            reply.magic = MSSG_MAGIC;
 
             /* and update the counters */
             total_reads++;
@@ -1705,10 +1707,10 @@ serve_write_request(struct mssg_t *mssg_ptr)
         reply.dest      = mssg_ptr->src;
         reply.mssg_num  = -1; /* set by send function */
         reply.base_addr = data[target_index].base_addr;
-        reply.len       = data[target_index].len;
-        reply.ver       = data[target_index].ver;
-        reply.count     = 0;
-        reply.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(reply.len, unsigned, data[target_index].len, size_t);
+        reply.ver   = data[target_index].ver;
+        reply.count = 0;
+        reply.magic = MSSG_MAGIC;
 
         /* and send it */
         success = send_mssg(&reply, TRUE);
@@ -2251,13 +2253,13 @@ datum_deserialize(const void *image_ptr, H5_ATTR_UNUSED size_t len, void *udata_
 static herr_t
 datum_image_len(const void *thing, size_t *image_len)
 {
-    int           idx;
-    struct datum *entry_ptr;
+    int                 idx;
+    const struct datum *entry_ptr;
 
     HDassert(thing);
     HDassert(image_len);
 
-    entry_ptr = (struct datum *)thing;
+    entry_ptr = (const struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
@@ -2429,10 +2431,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
             mssg.dest      = world_server_mpi_rank;
             mssg.mssg_num  = -1; /* set by send function */
             mssg.base_addr = entry_ptr->base_addr;
-            mssg.len       = entry_ptr->len;
-            mssg.ver       = 0; /* bogus -- should be corrected by server */
-            mssg.count     = 0; /* not used */
-            mssg.magic     = MSSG_MAGIC;
+            H5_CHECKED_ASSIGN(mssg.len, unsigned, entry_ptr->len, size_t);
+            mssg.ver   = 0; /* bogus -- should be corrected by server */
+            mssg.count = 0; /* not used */
+            mssg.magic = MSSG_MAGIC;
 
             if (!send_mssg(&mssg, FALSE)) {
 
@@ -2574,10 +2576,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
                     mssg.dest      = world_server_mpi_rank;
                     mssg.mssg_num  = -1; /* set by send function */
                     mssg.base_addr = entry_ptr->base_addr;
-                    mssg.len       = entry_ptr->len;
-                    mssg.ver       = entry_ptr->ver;
-                    mssg.count     = 0;
-                    mssg.magic     = MSSG_MAGIC;
+                    H5_CHECKED_ASSIGN(mssg.len, unsigned, entry_ptr->len, size_t);
+                    mssg.ver   = entry_ptr->ver;
+                    mssg.count = 0;
+                    mssg.magic = MSSG_MAGIC;
 
                     if (!send_mssg(&mssg, FALSE)) {
 
@@ -4294,7 +4296,7 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
         }
         else {
 
-            reported_entry_reads = mssg.count;
+            H5_CHECKED_ASSIGN(reported_entry_reads, int, mssg.count, unsigned);
         }
     }
 
@@ -4391,7 +4393,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
         }
         else {
 
-            reported_entry_writes = mssg.count;
+            H5_CHECKED_ASSIGN(reported_entry_writes, int, mssg.count, unsigned);
         }
     }
 
@@ -4806,10 +4808,10 @@ server_smoke_check(void)
         mssg.dest      = world_server_mpi_rank;
         mssg.mssg_num  = -1; /* set by send function */
         mssg.base_addr = data[world_mpi_rank].base_addr;
-        mssg.len       = data[world_mpi_rank].len;
-        mssg.ver       = ++(data[world_mpi_rank].ver);
-        mssg.count     = 0;
-        mssg.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(mssg.len, unsigned, data[world_mpi_rank].len, size_t);
+        mssg.ver   = ++(data[world_mpi_rank].ver);
+        mssg.count = 0;
+        mssg.magic = MSSG_MAGIC;
 
         if (!(success = send_mssg(&mssg, FALSE))) {
 
@@ -4903,10 +4905,10 @@ server_smoke_check(void)
         mssg.dest      = world_server_mpi_rank;
         mssg.mssg_num  = -1; /* set by send function */
         mssg.base_addr = data[world_mpi_rank].base_addr;
-        mssg.len       = data[world_mpi_rank].len;
-        mssg.ver       = 0; /* bogus -- should be corrected by server */
-        mssg.count     = 0;
-        mssg.magic     = MSSG_MAGIC;
+        H5_CHECKED_ASSIGN(mssg.len, unsigned, data[world_mpi_rank].len, size_t);
+        mssg.ver   = 0; /* bogus -- should be corrected by server */
+        mssg.count = 0;
+        mssg.magic = MSSG_MAGIC;
 
         if (success) {
 
@@ -6702,7 +6704,8 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert(cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            H5_CHECK_OVERFLOW(cache_ptr->max_cache_size, size_t, double);
+            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
@@ -6932,6 +6935,23 @@ main(int argc, char **argv)
         goto finish;
     }
 
+    if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
+        HDprintf("    Couldn't allocate data array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+    if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
+        HDprintf("    Couldn't allocate data index array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
     set_up_file_communicator();
 
     setup_derived_types();
@@ -6958,8 +6978,7 @@ main(int argc, char **argv)
 
     /* fix the file names */
     for (u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u) {
-        if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
-
+        if (h5_fixname(FILENAME[u], fapl, filenames[u], PATH_MAX) == NULL) {
             nerrors++;
             if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, FUNC);
@@ -7047,14 +7066,19 @@ main(int argc, char **argv)
 #endif
 
 finish:
+    if (data_index)
+        HDfree(data_index);
+    if (data)
+        HDfree(data);
+
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
         HDprintf("===================================\n");
-        if (failures) {
-            HDprintf("***metadata cache tests detected %d failures***\n", failures);
+        if (nerrors || failures) {
+            HDprintf("***metadata cache tests detected %d failures***\n", nerrors + failures);
         }
         else {
             HDprintf("metadata cache tests finished with no failures\n");
@@ -7071,5 +7095,5 @@ finish:
     MPI_Finalize();
 
     /* cannot just return (failures) because exit code is limited to 1byte */
-    return (failures != 0);
+    return (nerrors != 0 || failures != 0);
 }

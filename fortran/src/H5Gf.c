@@ -390,13 +390,13 @@ DONE:
  *  Call H5Glink2 to link the specified type
  * INPUTS
  *  cur_loc_id - identifier of file or group
- *  cur_name - name of the existing object for hard link releative
+ *  cur_name - name of the existing object for hard link relative
  *  to cur_loc_id location,
  *  anything for the soft link
  *  current_namelen - current name length
  *  link_type - link type
  *  new_loc_id - location identifier
- *  new_name - new name for the object releative to the new_loc_id
+ *  new_name - new name for the object relative to the new_loc_id
  *  location
  *  new_namelen - new_name length
  * RETURNS
@@ -879,7 +879,7 @@ done:
  *  February 15, 2008
  * HISTORY
  *
- *  - Added 'mounted' paramater
+ *  - Added 'mounted' parameter
  *  M. Scot Breitenfeld
  *  July 16, 2008
  * SOURCE
@@ -1014,7 +1014,7 @@ done:
  *  February 18, 2008
  * HISTORY
  *
- *  - Added 'mounted' paramater
+ *  - Added 'mounted' parameter
  *    M. Scot Breitenfeld
  *    July 16, 2008
  * SOURCE

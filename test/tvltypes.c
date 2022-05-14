@@ -2487,17 +2487,17 @@ test_vltypes_fill_value(void)
     typedef struct dtype1_struct {
         unsigned int gui;
         unsigned int pgui;
-        char *       str_id;
-        char *       str_name;
-        char *       str_desc;
-        char *       str_orig;
-        char *       str_stat;
+        const char * str_id;
+        const char * str_name;
+        const char * str_desc;
+        const char * str_orig;
+        const char * str_stat;
         unsigned int ver;
         double       val;
         double       ma;
         double       mi;
-        char *       str_form;
-        char *       str_unit;
+        const char * str_form;
+        const char * str_unit;
     } dtype1_struct;
 
     herr_t              ret;

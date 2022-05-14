@@ -880,10 +880,18 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     while (node) {
         next_node = node->forward[0];
 
-        /* Call callback, if one is given */
+        /* Call callback, if one is given.
+         *
+         * Ignoring const here is fine as we only need the value to be const
+         * with respect to the list code, which should never modify the
+         * elements. The library code that is making use of the skip list
+         * container can do what it likes with the elements.
+         */
+        H5_GCC_DIAG_OFF("cast-qual")
         if (op)
             /* Casting away const OK -QAK */
             (void)(op)(node->item, (void *)node->key, op_data);
+        H5_GCC_DIAG_ON("cast-qual")
 
         node->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[node->log_nalloc], node->forward);
         node          = H5FL_FREE(H5SL_node_t, node);
@@ -2179,11 +2187,18 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
         /* Protect against the node being deleted by the callback */
         next = node->forward[0];
 
-        /* Call the iterator callback */
-        /* Casting away const OK -QAK */
+        /* Call the iterator callback
+         *
+         * Ignoring const here is fine as we only need the value to be const
+         * with respect to the list code, which should never modify the
+         * elements. The library code that is making use of the skip list
+         * container can do what it likes with the elements.
+         */
+        H5_GCC_DIAG_OFF("cast-qual")
         if (!node->removed)
             if ((ret_value = (op)(node->item, (void *)node->key, op_data)) != 0)
                 break;
+        H5_GCC_DIAG_ON("cast-qual")
 
         /* Advance to next node */
         node = next;
@@ -2336,10 +2351,17 @@ H5SL_try_free_safe(H5SL_t *slist, H5SL_try_free_op_t op, void *op_data)
     while (node) {
         /* Check if the node was already removed */
         if (!node->removed) {
-            /* Call callback */
-            /* Casting away const OK -NAF */
+            /* Call callback, if one is given.
+             *
+             * Ignoring const here is fine as we only need the value to be const
+             * with respect to the list code, which should never modify the
+             * elements. The library code that is making use of the skip list
+             * container can do what it likes with the elements.
+             */
+            H5_GCC_DIAG_OFF("cast-qual")
             if ((op_ret = (op)(node->item, (void *)node->key, op_data)) < 0)
                 HGOTO_ERROR(H5E_SLIST, H5E_CALLBACK, FAIL, "callback operation failed")
+            H5_GCC_DIAG_ON("cast-qual")
 
             /* Check if op indicated that the node should be removed */
             if (op_ret)

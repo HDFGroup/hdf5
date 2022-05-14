@@ -42,8 +42,10 @@
 #include "H5Spkg.h" /* Dataspaces                           */
 #include "testphdf5.h"
 
+#define LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG 0
+
 static void coll_write_test(int chunk_factor);
-static void coll_read_test(int chunk_factor);
+static void coll_read_test(void);
 
 /*-------------------------------------------------------------------------
  * Function:    coll_irregular_cont_write
@@ -86,7 +88,7 @@ void
 coll_irregular_cont_read(void)
 {
 
-    coll_read_test(0);
+    coll_read_test();
 }
 
 /*-------------------------------------------------------------------------
@@ -130,7 +132,7 @@ void
 coll_irregular_simple_chunk_read(void)
 {
 
-    coll_read_test(1);
+    coll_read_test();
 }
 
 /*-------------------------------------------------------------------------
@@ -174,7 +176,7 @@ void
 coll_irregular_complex_chunk_read(void)
 {
 
-    coll_read_test(4);
+    coll_read_test();
 }
 
 /*-------------------------------------------------------------------------
@@ -214,9 +216,9 @@ coll_write_test(int chunk_factor)
     hsize_t block[2];  /* Block sizes */
     hsize_t chunk_dims[2];
 
-    herr_t   ret;
-    unsigned i;
-    int      fillvalue = 0; /* Fill value for the dataset */
+    herr_t ret;
+    int    i;
+    int    fillvalue = 0; /* Fill value for the dataset */
 
     int *matrix_out  = NULL;
     int *matrix_out1 = NULL; /* Buffer to read from the dataset */
@@ -651,7 +653,7 @@ coll_write_test(int chunk_factor)
  *-------------------------------------------------------------------------
  */
 static void
-coll_read_test(int chunk_factor)
+coll_read_test(void)
 {
 
     const char *filename;
@@ -670,7 +672,7 @@ coll_read_test(int chunk_factor)
     hsize_t block[2];  /* Block sizes */
     herr_t  ret;
 
-    unsigned i;
+    int i;
 
     int *matrix_out;
     int *matrix_out1; /* Buffer to read from the dataset */
@@ -1430,8 +1432,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
  *-------------------------------------------------------------------------
  */
 
-#define LDSCT_DS_RANK                             5
-#define LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG 0
+#define LDSCT_DS_RANK 5
 
 static void
 lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_collective_io,
@@ -1460,38 +1461,40 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     size_t      small_ds_size;
     size_t      small_ds_slice_size;
     size_t      large_ds_size;
-    size_t      large_ds_slice_size;
-    uint32_t    expected_value;
-    uint32_t *  small_ds_buf_0 = NULL;
-    uint32_t *  small_ds_buf_1 = NULL;
-    uint32_t *  large_ds_buf_0 = NULL;
-    uint32_t *  large_ds_buf_1 = NULL;
-    uint32_t *  ptr_0;
-    uint32_t *  ptr_1;
-    hsize_t     small_chunk_dims[LDSCT_DS_RANK];
-    hsize_t     large_chunk_dims[LDSCT_DS_RANK];
-    hsize_t     small_dims[LDSCT_DS_RANK];
-    hsize_t     large_dims[LDSCT_DS_RANK];
-    hsize_t     start[LDSCT_DS_RANK];
-    hsize_t     stride[LDSCT_DS_RANK];
-    hsize_t     count[LDSCT_DS_RANK];
-    hsize_t     block[LDSCT_DS_RANK];
-    hsize_t     small_sel_start[LDSCT_DS_RANK];
-    hsize_t     large_sel_start[LDSCT_DS_RANK];
-    hid_t       full_mem_small_ds_sid;
-    hid_t       full_file_small_ds_sid;
-    hid_t       mem_small_ds_sid;
-    hid_t       file_small_ds_sid;
-    hid_t       full_mem_large_ds_sid;
-    hid_t       full_file_large_ds_sid;
-    hid_t       mem_large_ds_sid;
-    hid_t       file_large_ds_sid;
-    hid_t       small_ds_dcpl_id = H5P_DEFAULT;
-    hid_t       large_ds_dcpl_id = H5P_DEFAULT;
-    hid_t       small_dataset; /* Dataset ID                   */
-    hid_t       large_dataset; /* Dataset ID                   */
-    htri_t      check;         /* Shape comparison return value */
-    herr_t      ret;           /* Generic return value */
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
+    size_t large_ds_slice_size;
+#endif
+    uint32_t  expected_value;
+    uint32_t *small_ds_buf_0 = NULL;
+    uint32_t *small_ds_buf_1 = NULL;
+    uint32_t *large_ds_buf_0 = NULL;
+    uint32_t *large_ds_buf_1 = NULL;
+    uint32_t *ptr_0;
+    uint32_t *ptr_1;
+    hsize_t   small_chunk_dims[LDSCT_DS_RANK];
+    hsize_t   large_chunk_dims[LDSCT_DS_RANK];
+    hsize_t   small_dims[LDSCT_DS_RANK];
+    hsize_t   large_dims[LDSCT_DS_RANK];
+    hsize_t   start[LDSCT_DS_RANK];
+    hsize_t   stride[LDSCT_DS_RANK];
+    hsize_t   count[LDSCT_DS_RANK];
+    hsize_t   block[LDSCT_DS_RANK];
+    hsize_t   small_sel_start[LDSCT_DS_RANK];
+    hsize_t   large_sel_start[LDSCT_DS_RANK];
+    hid_t     full_mem_small_ds_sid;
+    hid_t     full_file_small_ds_sid;
+    hid_t     mem_small_ds_sid;
+    hid_t     file_small_ds_sid;
+    hid_t     full_mem_large_ds_sid;
+    hid_t     full_file_large_ds_sid;
+    hid_t     mem_large_ds_sid;
+    hid_t     file_large_ds_sid;
+    hid_t     small_ds_dcpl_id = H5P_DEFAULT;
+    hid_t     large_ds_dcpl_id = H5P_DEFAULT;
+    hid_t     small_dataset; /* Dataset ID                   */
+    hid_t     large_dataset; /* Dataset ID                   */
+    htri_t    check;         /* Shape comparison return value */
+    herr_t    ret;           /* Generic return value */
 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -1511,9 +1514,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     small_ds_size       = (size_t)((mpi_size + 1) * 1 * 1 * 10 * 10);
     small_ds_slice_size = (size_t)(1 * 1 * 10 * 10);
     large_ds_size       = (size_t)((mpi_size + 1) * 10 * 10 * 10 * 10);
-    large_ds_slice_size = (size_t)(10 * 10 * 10 * 10);
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
+    large_ds_slice_size = (size_t)(10 * 10 * 10 * 10);
+
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
         HDfprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n", fcnName, mpi_rank,
                   (int)small_ds_size, (int)small_ds_slice_size);

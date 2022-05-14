@@ -211,7 +211,7 @@ CONTAINS
 !
 ! INPUTS
 !  obj_id 	 - identifier of a group, dataset, or named
-!                  datatype atttribute to be attached to
+!                  datatype attribute to be attached to
 !  name 	 - attribute name
 ! OUTPUTS
 !  attr_id 	 - attribute identifier
@@ -487,7 +487,7 @@ CONTAINS
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
        n, name, hdferr, size, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed *TEST* check NULL
     INTEGER, INTENT(IN) :: idx_type ! Type of index; Possible values are:
@@ -846,7 +846,7 @@ CONTAINS
 !  identifier and attribute name
 !
 ! INPUTS
-!  obj_id 	 - Identifer for object to which attribute is attached
+!  obj_id 	 - Identifier for object to which attribute is attached
 !  attr_name 	 - Name of attribute to open
 ! OUTPUTS
 !  attr_id 	 - attribute identifier
@@ -934,7 +934,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed
     INTEGER, INTENT(IN) :: idx_type           ! Type of index; Possible values are:
@@ -991,7 +991,7 @@ CONTAINS
 !  Removes an attribute from a specified location
 !
 ! INPUTS
-!  loc_id 	 - Identifer for object to which attribute is attached
+!  loc_id 	 - Identifier for object to which attribute is attached
 !  obj_name 	 - Name of attribute to open
 !  attr_name 	 - Attribute access property list
 !  lapl_id 	 - Link access property list
@@ -1005,7 +1005,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifier for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
                                               !  from which attribute is to be removed
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Name of attribute to delete
@@ -1841,7 +1841,7 @@ CONTAINS
 !  dims parameter was added to make code portable;
 !  Aprile 4, 2001
 !
-!  Changed buf intent to INOUT to be consistant
+!  Changed buf intent to INOUT to be consistent
 !  with how the C functions handles it. The pg
 !  compiler will return 0 if a buf value is not set.
 !  February, 2008

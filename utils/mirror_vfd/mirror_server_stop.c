@@ -15,7 +15,7 @@
  *              Exists for cross-platform, optionally remote shutdown.
  */
 
-#include "H5private.h" /* System compatability call-wrapper macros */
+#include "H5private.h" /* System compatibility call-wrapper macros */
 
 #ifdef H5_HAVE_MIRROR_VFD
 
@@ -60,13 +60,13 @@ struct mshs_opts {
 static void
 usage(void)
 {
-    HDprintf("mirror_server_halten_sie [options]\n"
+    HDprintf("mirror_server_stop [options]\n"
              "System-independent Mirror Server shutdown program.\n"
              "Sends shutdown message to Mirror Server at given IP:port\n"
              "\n"
              "Options:\n"
              "    -h | --help Print this usage message and exit.\n"
-             "    --ip=ADDR   IP Address of remote server (defaut %s)\n"
+             "    --ip=ADDR   IP Address of remote server (default %s)\n"
              "    --port=PORT Handshake port of remote server (default %d)\n",
              MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
 } /* end usage() */
@@ -128,6 +128,7 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
 static int
 send_shutdown(struct mshs_opts *opts)
 {
+    char               mybuf[16];
     int                live_socket;
     struct sockaddr_in target_addr;
 
@@ -154,6 +155,16 @@ send_shutdown(struct mshs_opts *opts)
 
     if (HDwrite(live_socket, "SHUTDOWN", 9) == -1) {
         HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        return -1;
+    }
+
+    /* Read & verify response from port connection.  */
+    if (HDread(live_socket, &mybuf, sizeof(mybuf)) == -1) {
+        HDprintf("ERROR read() can't receive data\n");
+        return -1;
+    }
+    if (HDstrncmp("CLOSING", mybuf, 8)) {
+        HDprintf("ERROR read() didn't receive data from server\n");
         return -1;
     }
 
