@@ -5187,7 +5187,7 @@ error:
  *  Function:    test_vfd_same_file_opens()
  *
  *  Purpose:     Verify multiple opens of the same file with different VFDs.
- *      Case #1: 
+ *      Case #1:
  *          --Open a file with sec2 driver; the open succeeds
  *          --Open the same file again with stdio driver; this second
  *            open fails as expected due to "driver lock request failed".
@@ -5208,13 +5208,13 @@ error:
  *
  *      Case #4:
  *          --Open a file as writer with both legacy SWMR and VFD SWMR configured .
- *          --NOTE: The open should fail when John's changes are merged but for 
+ *          --NOTE: The open should fail when John's changes are merged but for
  *                  now it succeeds.
  *                  This test is #if 0 out for now.
  *
- *      Case #5: 
+ *      Case #5:
  *          --Open a file as reader with both legacy SWMR and VFD SWMR configured.
- *          --NOTE: The open should fail when John's changes are merged for 
+ *          --NOTE: The open should fail when John's changes are merged for
  *                  now it succeeds.
  *                  This test is #if 0 out for now.
  *
@@ -5228,12 +5228,12 @@ error:
 static unsigned
 test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char                   filename[FILE_NAME_LEN];   /* Filename to use */
-    hid_t                  fid1    = H5I_INVALID_HID; /* File ID */
-    hid_t                  fid2    = H5I_INVALID_HID; /* File ID */
-    hid_t                  fcpl    = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t                  fapl    = H5I_INVALID_HID; /* File access property list ID */
-    H5F_vfd_swmr_config_t *config  = NULL;            /* Configuration for VFD SWMR */
+    char                   filename[FILE_NAME_LEN];  /* Filename to use */
+    hid_t                  fid1   = H5I_INVALID_HID; /* File ID */
+    hid_t                  fid2   = H5I_INVALID_HID; /* File ID */
+    hid_t                  fcpl   = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t                  fapl   = H5I_INVALID_HID; /* File access property list ID */
+    H5F_vfd_swmr_config_t *config = NULL;            /* Configuration for VFD SWMR */
 
     TESTING("Multiple opens of the same file with different VFDs");
 
@@ -5263,11 +5263,11 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Fclose(fid1) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     *  Case #1 
+    /*
+     *  Case #1
      *  --Open the file with sec2 driver
      *  --Open the same file again with a different driver
-     */ 
+     */
 
     /* The first open: with the default driver in H5P_DEFAULT */
     if ((fid1 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -5285,14 +5285,15 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
         fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     }
     H5E_END_TRY;
-    /* This is for check-vfd: the open will succeed 
+    /* This is for check-vfd: the open will succeed
        if the HDF5_DRIVER environment variable is set to "stdio" */
     if (HDstrcmp(env_h5_drvr, "stdio") == 0) {
         if (fid2 < 0)
             TEST_ERROR
         if (H5Fclose(fid2) < 0)
             FAIL_STACK_ERROR;
-    } else {
+    }
+    else {
         /* Should fail: due to "driver lock request failed" */
         if (fid2 >= 0)
             TEST_ERROR
@@ -5304,12 +5305,11 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-
-    /* 
-     *  Case #2 
+    /*
+     *  Case #2
      *  --Open the file with VFD SWMR configured
      *  --Open the same file again with legacy SWMR
-     */ 
+     */
 
     /* Allocate memory for the configuration structure */
     if ((config = HDmalloc(sizeof(*config))) == NULL)
@@ -5322,8 +5322,7 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
-                         MD_FILENAME, NULL);
+    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -5352,8 +5351,7 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-
-    /* Test cases #3 - #5 involve legacy SWMR.  Therefore tests are 
+    /* Test cases #3 - #5 involve legacy SWMR.  Therefore tests are
        skipped if driver does not support the feature */
     if (!H5FD__supports_swmr_test(env_h5_drvr)) {
         HDprintf("The %s driver does not support legacy SWMR.\n", env_h5_drvr);
@@ -5362,11 +5360,11 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
         return 0;
     }
 
-    /* 
-     *  Case #3 
+    /*
+     *  Case #3
      *  --Open the file with legacy SWMR
      *  --Open the same file again with VFD SWMR configured
-     */ 
+     */
 
     /* The first open: as writer with legacy SWMR */
     if ((fid1 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, H5P_DEFAULT)) < 0)
@@ -5379,8 +5377,7 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
-                         MD_FILENAME, NULL);
+    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
