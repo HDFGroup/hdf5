@@ -75,7 +75,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where a
 ##
 ## By default, maintainer mode is enabled in development branches and disabled
 ## in release branches.
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
