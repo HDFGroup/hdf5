@@ -69,7 +69,13 @@
  * After reading that material, the reader should have a reasonably complete understanding of how
  * properties and property lists can be used in HDF5 applications.
  *
+ * <table>
+ * <tr>
+ * <td>
  * \image html PropListEcosystem.gif "The HDF5 property environment"
+ * </td>
+ * </tr>
+ * </table>
  *
  * The remaining sections in this chapter discuss the following topics:
  * \li What are properties, property lists, and property list classes?
@@ -305,14 +311,19 @@
  * creation of any object while the \ref GCPL (GCPL) inherits only those
  * properties that are relevant to group creation.
  *
+ * <table>
+ * <tr>
+ * <td>
  * \image html PropListClassInheritance.gif "HDF5 property list class inheritance hierarchy"
+ * </td>
+ * </tr>
+ * </table>
  * Note: In the figure above, property list classes displayed in black are directly accessible through
  * the programming interface; the root of the property environment and the \ref STRCPL and \ref OCPL
  * property list classes, in gray above, are not user-accessible. The red empty set symbol indicates
  * that the \ref FMPL (FMPL) is an empty class; that is, it has no set table
  * properties. For more information, see \ref FileMountProps "File Mount Properties". Abbreviations
  * used in this figure are defined in the preceding table, “Property list classes in HDF5”.
- *
  *
  * \subsubsection subsubsec_plist_lists Property Lists
  *
@@ -918,13 +929,13 @@
  * The second creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
  *
- * See \ref STRCPL
+ * @see STRCPL
  *
  * \defgroup ACPL Attribute Creation Properties
  * \ingroup STRCPL
  * The creation property, the choice of a character encoding, applies to attributes.
  *
- * See \ref STRCPL
+ * @see STRCPL
  *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P

@@ -63,12 +63,18 @@
  * attached directly to that object
  *
  * \subsection subsec_error_H5A Attribute Function Summaries
- * \ref H5A reference manual
+ * @see H5A reference manual
  *
  * \subsection subsec_attribute_program Programming Model for Attributes
  *
  * The figure below shows the UML model for an HDF5 attribute and its associated dataspace and datatype.
+ * <table>
+ * <tr>
+ * <td>
  * \image html UML_Attribute.jpg "The UML model for an HDF5 attribute"
+ * </td>
+ * </tr>
+ * </table>
  *
  * Creating an attribute is similar to creating a dataset. To create an attribute, the application must
  * specify the object to which the attribute is attached, the datatype and dataspace of the attribute
@@ -329,7 +335,13 @@
  * This way of handling large attributes can be used in situations where backward compatibility is important
  * and where compression is important. Applications built with versions before 1.8.x can read large
  * attributes stored in separate datasets. Datasets can be compressed while attributes cannot.
+ * <table>
+ * <tr>
+ * <td>
  * \image html Shared_Attribute.jpg "A large or shared HDF5 attribute and its associated dataset(s)"
+ * </td>
+ * </tr>
+ * </table>
  * Note: In the figure above, DatasetA is an attribute of Dataset1 that is too large to store in Dataset1's
  * header. DatasetA is associated with Dataset1 by means of an object reference pointer attached as an
  * attribute to Dataset1. The attribute in DatasetA can be shared among multiple datasets by means of
@@ -368,7 +380,7 @@
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
  * object. A primary data object may be a dataset, group, or committed datatype.
  *
- * See \ref sec_attribute
+ * @see sec_attribute
  *
  */
 

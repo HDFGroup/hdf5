@@ -62,7 +62,7 @@
  * design for the Error Handling API.
  *
  * \subsection subsec_error_H5E Error Handling Function Summaries
- * \ref H5E reference manual
+ * @see H5E reference manual
  *
  * \subsection subsec_error_program Programming Model for Error Handling
  * This section is under construction.
@@ -605,7 +605,7 @@
  *           error stack. The error stack is statically allocated to reduce the
  *           complexity of handling errors within the \ref H5E package.
  *
- * See \ref sec_error
+ * @see sec_error
  *
  */
 
