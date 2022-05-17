@@ -1066,9 +1066,9 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
     HDassert(io_info);
 
     /* Set up "normal" I/O fields */
-    dset_info->dset         = dset;
-    io_info->f_sh           = H5F_SHARED(dset->oloc.file);
-    dset_info->store        = store;
+    dset_info->dset  = dset;
+    io_info->f_sh    = H5F_SHARED(dset->oloc.file);
+    dset_info->store = store;
 
     /* Set I/O operations to initial values */
     dset_info->layout_ops = *dset->shared->layout.ops;
@@ -1449,8 +1449,8 @@ H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info)
                 if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
             } /* end if */
-        } /* end else */
-    }     /* end if */
+        }     /* end else */
+    }         /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
