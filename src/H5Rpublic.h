@@ -136,8 +136,8 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  * \return Returns identifier of referenced object if successful; otherwise
  *         returns a negative value.
  *
- * \details H5Rdereference2() opens that object and returns an identifier,
- *          given a reference, \p ref, to an object or a region in an object.
+ * \details H5Rdereference2() opens an object or a region in an object and
+ *          returns an identifier to hat object, given a reference, \p ref.
  *
  *          The parameter \p obj_id must be a valid identifier for the HDF5 file
  *          containing the referenced object or for any object in that HDF5
@@ -399,8 +399,8 @@ H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref
  *             deprecated in favor of the macro H5Rdereference() or the function
  *             H5Rdereference2().
  *
- * \details H5Rdereference1() opens that object and returns an identifier,
- *          given a reference, \p ref, to an object or a region in an object.
+ * \details H5Rdereference1() opens an object or a region in an object and
+ *          returns an identifier to hat object, given a reference, \p ref.
  *
  *          The parameter \p obj_id must be a valid identifier for an object in
  *          the HDF5 file containing the referenced object, including the file
