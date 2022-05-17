@@ -121,6 +121,7 @@ extern "C" {
  * \since 1.8.0
  */
 H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -135,8 +136,8 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  * \return Returns identifier of referenced object if successful; otherwise
  *         returns a negative value.
  *
- * \details Given a reference, \p ref, to an object or a region in an object,
- *          H5Rdereference2() opens that object and returns an identifier.
+ * \details H5Rdereference2() opens that object and returns an identifier,
+ *          given a reference, \p ref, to an object or a region in an object.
  *
  *          The parameter \p obj_id must be a valid identifier for the HDF5 file
  *          containing the referenced object or for any object in that HDF5
@@ -162,6 +163,7 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *
  */
 H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *ref);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -192,6 +194,7 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *
  */
 H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -206,8 +209,8 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *
  * \return \herr_t
  *
- * \details Given an object reference, \p ref, H5Rget_obj_type2() returns the
- *          type of the referenced object in \p obj_type.
+ * \details H5Rget_obj_type2() returns the type of the referenced object in
+ *          \p obj_type, given an object reference, \p ref.
  *
  *          A \Emph{reference type} is the type of reference, either an object
  *          reference or a dataset region reference. An \Emph{object reference}
@@ -248,6 +251,7 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  *
  */
 H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *_ref, H5O_type_t *obj_type);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -333,8 +337,8 @@ H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, c
  *             deprecated in favor of the macro H5Rget_obj_type() or the
  *             function H5Rget_obj_type2().
  *
- * \details Given an object reference, \p ref, H5Rget_obj_type1() returns the
- *          type of the referenced object.
+ * \details H5Rget_obj_type1() returns the
+ *          type of the referenced object, given an object reference.
  *
  *          A \Emph{reference type} is the type of reference, either an object
  *          reference or a dataset region reference. An \Emph{object reference}
@@ -395,8 +399,8 @@ H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref
  *             deprecated in favor of the macro H5Rdereference() or the function
  *             H5Rdereference2().
  *
- * \details Given a reference, \p ref, to an object or a region in an object,
- *          H5Rdereference1() opens that object and returns an identifier.
+ * \details H5Rdereference1() opens that object and returns an identifier,
+ *          given a reference, \p ref, to an object or a region in an object.
  *
  *          The parameter \p obj_id must be a valid identifier for an object in
  *          the HDF5 file containing the referenced object, including the file

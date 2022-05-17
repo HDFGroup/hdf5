@@ -35,7 +35,7 @@ H5_DLL hid_t H5FD_sec2_init(void);
  * \fapl_id
  * \returns \herr_t
  *
- * \details H5Pset_fapl_sec2 modifies the file access property list to use
+ * \details H5Pset_fapl_sec2() modifies the file access property list to use
  *          the sec2 driver, H5FDsec2.
  *
  * \since 1.4.0
