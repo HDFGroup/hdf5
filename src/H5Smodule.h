@@ -238,10 +238,10 @@
  * Consider the following simple example of equivalent C 3 x 5 and Fortran 5 x 3 arrays. As illustrated in
  * the figure below, a C application will store a 3 x 5 2‐dimensional array as three 5‐element rows. In order
  * to store the same data in the same order, a Fortran application must view the array as a 5 x 3 array with
- * three 5‐element columns. The dataspace of this dataset, as written from Fortran, will therefore be described
- * as 5 x 3 in the application but stored and described in the file according to the C convention as a 3 x 5
- * array. This ensures that C and Fortran applications will always read the data in the order in which it was
- * written. The HDF5 Fortran interface handles this transposition automatically.
+ * three 5‐element columns. The dataspace of this dataset, as written from Fortran, will therefore be
+ * described as 5 x 3 in the application but stored and described in the file according to the C convention
+ * as a 3 x 5 array. This ensures that C and Fortran applications will always read the data in the order in
+ * which it was written. The HDF5 Fortran interface handles this transposition automatically.
  * \code
  * // C
  *     \#define NX          3 // dataset dimensions
