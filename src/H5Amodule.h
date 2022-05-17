@@ -72,7 +72,7 @@
  * <tr>
  * <td>
  * \image html UML_Attribute.jpg "The UML model for an HDF5 attribute"
-  * </td>
+ * </td>
  * </tr>
  * </table>
  *

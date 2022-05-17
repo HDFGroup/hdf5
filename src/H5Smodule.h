@@ -53,8 +53,8 @@
  * participate in the I/O operation.
  *
  * This chapter explains the \Emph{dataspace} object and its use in dataset and attribute creation and data
- * transfer. It also describes selection operations on a dataspace used to implement sub‐setting, sub‐sampling,
- * and scatter‐gather access to datasets.
+ * transfer. It also describes selection operations on a dataspace used to implement sub‐setting,
+ * sub‐sampling, and scatter‐gather access to datasets.
  *
  * \subsection subsec_dataspace_function Dataspace Function Summaries
  * The @see H5S reference manual provides a reference list of dataspace functions, the H5S APIs.
@@ -81,10 +81,10 @@
  *
  * A simple dataspace, #H5S_SIMPLE , is a multidimensional array of elements. The dimensionality of the
  * dataspace (or the rank of the array) is fixed and is defined at creation time. The size of each dimension
- * can grow during the life time of the dataspace from the current size up to the maximum size. Both the current
- * size and the maximum size are specified at creation time. The sizes of dimensions at any particular time in
- * the life of a dataspace are called the current dimensions, or the dataspace extent. They can be queried
- * along with the maximum sizes.
+ * can grow during the life time of the dataspace from the current size up to the maximum size. Both the
+ * current size and the maximum size are specified at creation time. The sizes of dimensions at any particular
+ * time in the life of a dataspace are called the current dimensions, or the dataspace extent. They can be
+ * queried along with the maximum sizes.
  *
  * A null dataspace, #H5S_NULL, contains no data elements. Note that no selections can be applied to a null
  * dataset as there is nothing to select.
@@ -213,10 +213,10 @@
  *
  * Dataspace dimensions are numbered from 1 to rank. HDF5 uses C storage conventions, assuming that the
  * last listed dimension is the fastest‐changing dimension and the first‐listed dimension is the slowest
- * changing. The HDF5 file format storage layout specification adheres to the C convention and the HDF5 Library
- * adheres to the same convention when storing dataspace dimensions in the file. This affects how C programs
- * and tools interpret data written from Fortran programs and vice versa. The example below illustrates the
- * issue.
+ * changing. The HDF5 file format storage layout specification adheres to the C convention and the HDF5
+ * Library adheres to the same convention when storing dataspace dimensions in the file. This affects how
+ * C programs and tools interpret data written from Fortran programs and vice versa. The example below
+ * illustrates the issue.
  *
  * When a Fortran application describes a dataspace to store an array as A(20,100), it specifies the value of
  * the first dimension to be 20 and the second to be 100. Since Fortran stores data by columns, the
@@ -236,12 +236,12 @@
  * written by a Fortran application.
  *
  * Consider the following simple example of equivalent C 3 x 5 and Fortran 5 x 3 arrays. As illustrated in
- * the figure below, a C application will store a 3 x 5 2‐dimensional array as three 5‐element rows. In order to
- * store the same data in the same order, a Fortran application must view the array as a 5 x 3 array with three
- * 5‐element columns. The dataspace of this dataset, as written from Fortran, will therefore be described as
- * 5 x 3 in the application but stored and described in the file according to the C convention as a 3 x 5 array.
- * This ensures that C and Fortran applications will always read the data in the order in which it was written.
- * The HDF5 Fortran interface handles this transposition automatically.
+ * the figure below, a C application will store a 3 x 5 2‐dimensional array as three 5‐element rows. In order
+ * to store the same data in the same order, a Fortran application must view the array as a 5 x 3 array with
+ * three 5‐element columns. The dataspace of this dataset, as written from Fortran, will therefore be described
+ * as 5 x 3 in the application but stored and described in the file according to the C convention as a 3 x 5
+ * array. This ensures that C and Fortran applications will always read the data in the order in which it was
+ * written. The HDF5 Fortran interface handles this transposition automatically.
  * \code
  * // C
  *     \#define NX          3 // dataset dimensions
@@ -336,13 +336,13 @@
  *     </tr>
  *   </table>
  *
- * <em>Note: The HDF5 Library stores arrays along the fastest‐changing dimension. This approach is often referred
- * to as being “in C order.” C, C++, and Java work with arrays in row‐major order. In other words, the row, or
- * the last dimension, is the fastest‐changing dimension. Fortran, on the other hand, handles arrays in
- * column‐major order making the column, or the first dimension, the fastest‐changing dimension. Therefore,
- * the C and Fortran arrays illustrated in the top portion of this figure are stored identically in an HDF5
- * file. This ensures that data written by any language can be meaningfully read, interpreted, and manipulated
- * by any other.</em>
+ * <em>Note: The HDF5 Library stores arrays along the fastest‐changing dimension. This approach is often
+ * referred to as being “in C order.” C, C++, and Java work with arrays in row‐major order. In other words,
+ * the row, or the last dimension, is the fastest‐changing dimension. Fortran, on the other hand, handles
+ * arrays in column‐major order making the column, or the first dimension, the fastest‐changing dimension.
+ * Therefore, the C and Fortran arrays illustrated in the top portion of this figure are stored identically
+ * in an HDF5 file. This ensures that data written by any language can be meaningfully read, interpreted,
+ * and manipulated by any other.</em>
  *
  * <h4>Finding Dataspace Characteristics</h4>
  *
@@ -765,7 +765,8 @@
  * #H5S_SELECT_OR.
  *
  * It is important to emphasize that the source and destination do not have to be the same shape (or number
- * of rectangles). As long as the two selections have the same number of elements, the data can be transferred.
+ * of rectangles). As long as the two selections have the same number of elements, the data can be
+ * transferred.
  *
  * <em>Select destination hyperslabs</em>
  * \code
