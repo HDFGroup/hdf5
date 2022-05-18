@@ -753,10 +753,6 @@ H5_DLL herr_t H5D__collective_write(const size_t count, H5D_io_info_t *io_info);
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const size_t count, H5D_io_info_t *io_info);
 
-/* function to invoke collective I/O calls for ranks that have no I/O
-   on a dataset to match other ranks' collective calls */
-H5_DLL herr_t H5D__match_coll_calls(H5F_t *file, H5P_genplist_t *plist, hbool_t do_read);
-
 #endif /* H5_HAVE_PARALLEL */
 
 /* for both CHUNK and CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term. */

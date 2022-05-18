@@ -55,8 +55,8 @@ static herr_t H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 
 /* Internal I/O routines */
-static herr_t H5D__pre_read(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
-static herr_t H5D__pre_write(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
+static herr_t H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
+static herr_t H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
 
 /*********************/
 /* Package Variables */
@@ -141,12 +141,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_dset_info() */
 
-static H5F_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5D__verify_location
+ *
+ * Purpose:     Verifies that all elements of info are in the same file
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
 H5D__verify_location(size_t count, const H5D_dset_info_t *info)
 {
     H5F_shared_t *f_sh;
     size_t        u;
-    H5F_t *       ret_value = NULL; /* Return value */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -154,11 +163,9 @@ H5D__verify_location(size_t count, const H5D_dset_info_t *info)
 
     for (u = 1; u < count; u++) {
         if (f_sh != H5F_SHARED(info[u].dset->oloc.file))
-            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL,
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
                         "different files detected in multi dataset I/O request")
     } /* end for */
-
-    ret_value = info[0].dset->oloc.file;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -182,7 +189,6 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
 {
     H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
     size_t           u;                   /* Local index variable */
-    H5F_t *          file;                /* File where datasets are located */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -209,11 +215,11 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     } /* end for */
 
-    if (NULL == (file = H5D__verify_location(count, dset_info)))
+    if (H5D__verify_location(count, dset_info) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
 
     /* Call common pre-read routine */
-    if (H5D__pre_read(file, dxpl_id, count, dset_info) < 0)
+    if (H5D__pre_read(dxpl_id, count, dset_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
 
 done:
@@ -235,7 +241,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__pre_read(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
+H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 {
     H5P_genplist_t * plist;               /* DXPL property list pointer */
     H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
@@ -289,21 +295,8 @@ H5D__pre_read(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_in
     else {
         HDassert(xfer_mode == H5FD_MPIO_COLLECTIVE);
 
-        if (count > 0) {
-            if (H5D__read(count, dset_info, TRUE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-        } /* end if */
-#ifdef H5_HAVE_PARALLEL
-        /* MSC - I do not think we should allow for this. I think we
-           should make the multi dataset APIs enforce a uniform list
-           of datasets among all processes, and users would enter a
-           NULL selection when a process does not have anything to
-           write to a particulat dataset. */
-        else {
-            if (H5D__match_coll_calls(file, plist, TRUE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "failed in matching collective MPI calls")
-        } /* end else */
-#endif    /* H5_HAVE_PARALLEL */
+        if (H5D__read(count, dset_info, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }     /* end else */
 
 done:
@@ -328,7 +321,6 @@ H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spa
 {
     H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
     size_t           u;                   /* Local index variable */
-    H5F_t *          file;                /* File where datasets are located */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -355,11 +347,11 @@ H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spa
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     }
 
-    if (NULL == (file = H5D__verify_location(count, dset_info)))
+    if (H5D__verify_location(count, dset_info) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
 
     /* Call common pre-write routine */
-    if (H5D__pre_write(file, dxpl_id, count, dset_info) < 0)
+    if (H5D__pre_write(dxpl_id, count, dset_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:
@@ -381,7 +373,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__pre_write(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
+H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 {
     H5P_genplist_t * plist;               /* DXPL property list pointer */
     size_t           u;                   /* Local index variable */
@@ -432,22 +424,8 @@ H5D__pre_write(H5F_t *file, hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_i
     else {
         HDassert(xfer_mode == H5FD_MPIO_COLLECTIVE);
 
-        if (count > 0) {
-            if (H5D__write(count, dset_info, TRUE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-        } /* end if */
-
-#ifdef H5_HAVE_PARALLEL
-        /* MSC - I do not think we should allow for this. I think we
-           should make the multi dataset APIs enforce a uniform list
-           of datasets among all processes, and users would enter a
-           NULL selection when a process does not have anything to
-           write to a particulat dataset. */
-        else {
-            if (H5D__match_coll_calls(file, plist, FALSE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "failed in matching collective MPI calls")
-        } /* end else */
-#endif    /* H5_HAVE_PARALLEL */
+        if (H5D__write(count, dset_info, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     }     /* end else */
 
 done:
@@ -1304,7 +1282,6 @@ H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info)
     FUNC_ENTER_STATIC
 
     /* check args */
-    HDassert(count > 0);
     HDassert(io_info);
 
     /* check the first dset, should exist either single or multi dset cases */
