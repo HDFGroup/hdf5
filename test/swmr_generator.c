@@ -221,7 +221,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
     if (verbose)
         HDfprintf(stderr, "Closing objects\n");
 
-    /* Close everythign */
+    /* Close everything */
     if (H5Pclose(dcpl) < 0)
         return -1;
     if (H5Sclose(sid) < 0)
@@ -258,7 +258,7 @@ usage(void)
 } /* end usage() */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int         comp_level  = -1;    /* Compression level (-1 is no compression) */
     hbool_t     verbose     = TRUE;  /* Whether to emit some informational messages */

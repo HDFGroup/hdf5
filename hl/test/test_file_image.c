@@ -109,12 +109,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
         input_flags[i] = flags[(nflags + i) % nflags];
 
         /* allocate name buffer for image i */
-        filename[i] = (char *)HDmalloc(sizeof(char) * 32);
+        size_t filenamelength = sizeof(char) * 32;
+        filename[i]           = (char *)HDmalloc(filenamelength);
         if (!filename[i])
             FAIL_PUTS_ERROR("HDmalloc() failed");
 
         /* create file name */
-        HDsprintf(filename[i], "image_file%d.h5", (int)i);
+        HDsnprintf(filename[i], filenamelength, "image_file%d.h5", (int)i);
 
         /* create file */
         if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -243,7 +244,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                  */
                 HDmemset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0,
                          (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
-                /* Does the comparision */
+                /* Does the comparison */
                 if (HDmemcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
                     FAIL_PUTS_ERROR("comparison of TMP vfd and user buffer failed");
                 /* Free the temporary buffer */

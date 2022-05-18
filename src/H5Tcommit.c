@@ -106,7 +106,7 @@ H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl
     H5VL_loc_params_t loc_params;                     /* Location parameters */
     herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!name)
@@ -629,7 +629,7 @@ H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!name)
@@ -1127,7 +1127,7 @@ H5T_open(const H5G_loc_t *loc)
 done:
     if (ret_value == NULL) {
         if (dt) {
-            if (shared_fo == NULL) { /* Need to free shared fo */
+            if (shared_fo == NULL) { /* Need to free shared file object */
                 if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
                     HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
@@ -1166,7 +1166,7 @@ H5T__open_oid(const H5G_loc_t *loc)
     H5T_t *dt        = NULL; /* Datatype from the file */
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(loc->oloc->addr)
+    FUNC_ENTER_PACKAGE_TAG(loc->oloc->addr)
 
     HDassert(loc);
 

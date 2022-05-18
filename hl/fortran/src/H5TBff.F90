@@ -961,7 +961,7 @@ CONTAINS
          INTEGER(size_t),  DIMENSION(1:nfields), INTENT(inout) :: field_offsets ! field offsets
          INTEGER(size_t),  INTENT(inout):: type_size                            ! type size
          INTEGER(size_t) :: namelen                                             ! name length
-         INTEGER(size_t) :: maxlen                                              ! maxiumum length of input field names
+         INTEGER(size_t) :: maxlen                                              ! maximum length of input field names
          INTEGER(size_t), DIMENSION(1:nfields) :: namelen2                      ! name lengths
          INTEGER(size_t) :: c_maxlen_out                  ! maximum character length of a field array element
        END FUNCTION h5tbget_field_info_c

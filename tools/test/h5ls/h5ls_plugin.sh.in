@@ -166,7 +166,7 @@ VERIFY() {
 # the `nerrors' global variable and (if $verbose is set) display up to $NLINS
 # lines of the actual output from the tool test.  The actual output is not
 # removed if $HDF5_NOCLEANUP has a non-zero value.
-# Arguemnts:
+# Arguments:
 # $1 -- actual output filename to use
 # $2 and on -- argument for the h5ls tool
 TOOLTEST() {

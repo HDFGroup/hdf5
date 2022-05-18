@@ -96,7 +96,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
     size_t        vec_size;              /* Vector length */
     herr_t        ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(_io_info);
@@ -193,7 +193,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
     size_t        vec_size;              /* Vector length */
     size_t        ret_value = nelmts;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(_io_info);
@@ -437,7 +437,7 @@ done:
  */
 herr_t
 H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space)
+                   H5S_t *file_space, H5S_t *mem_space)
 {
     void *          buf            = io_info->u.rbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
@@ -577,7 +577,7 @@ done:
  */
 herr_t
 H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                    const H5S_t *file_space, const H5S_t *mem_space)
+                    H5S_t *file_space, H5S_t *mem_space)
 {
     const void *    buf            = io_info->u.wbuf; /* Local pointer to application buffer */
     H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
@@ -751,7 +751,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     size_t   vec_size;            /* Vector length */
     herr_t   ret_value = SUCCEED; /* Return value		*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(nelmts > 0);
@@ -875,7 +875,7 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     size_t   src_stride, dst_stride; /* Strides through source & destination datatypes */
     size_t   i;                      /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(nelmts > 0);

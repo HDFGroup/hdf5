@@ -75,7 +75,7 @@ const char *FILENAME[] = {"filepaged", NULL};
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -106,7 +106,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
     num_elements = NX * NY;
     if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < (int)num_elements; i++)
         data[i] = i;
 
@@ -120,28 +120,28 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsprintf(dset_name, "D1dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "D2dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "D3dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsprintf(dset_name, "dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
@@ -166,13 +166,13 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
             }
         }
 
-        HDsprintf(dset_name, "D1dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsprintf(dset_name, "D2dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsprintf(dset_name, "D3dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     }
@@ -215,7 +215,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -255,11 +255,11 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
 
     num_elements = NX * NY;
     if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsprintf(dset_name, "dset%d", i);
+        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
@@ -329,7 +329,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 
         /* Get current split settings */
         if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if (split) {
             /* Set memb_addr aligned */
@@ -345,7 +345,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
         /* Set multi driver with new FAPLs */
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl_arr, (const char *const *)memb_name, memb_addr,
                               relax) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Free memb_name */
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
@@ -370,12 +370,12 @@ error:
  *              1) verifying that API errors are caught.
  *
  *              2) verifying that the page buffer behaves more or less
- *                 as advertized.
+ *                 as advertised.
  *
  *              Any data mis-matches or unexpected failures or successes
  *              reported by the HDF5 library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -397,7 +397,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR;
@@ -549,7 +549,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -589,7 +589,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
@@ -827,7 +827,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -869,7 +869,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
@@ -1081,7 +1081,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1126,7 +1126,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
@@ -1502,7 +1502,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 2)
         TEST_ERROR;
 
-    /* adding more meta entires should replace meta entries since raw data
+    /* adding more meta entries should replace meta entries since raw data
      * is at its minimum
      */
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 600), sizeof(int) * 100, data) < 0)
@@ -1517,7 +1517,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 2)
         TEST_ERROR;
 
-    /* bring existing raw entires up the LRU */
+    /* bring existing raw entries up the LRU */
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 750), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
@@ -1533,7 +1533,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 3)
         TEST_ERROR;
 
-    /* adding 2 meta entries should replace 2 entires at the bottom of the LRU */
+    /* adding 2 meta entries should replace 2 entries at the bottom of the LRU */
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 98), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
@@ -1716,7 +1716,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1758,13 +1758,13 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
     if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR;
@@ -2019,7 +2019,7 @@ error:
  *              At present, page buffering should be disabled in parallel
  *              builds.  Verify this.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  John Mainzer
@@ -2045,7 +2045,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     /* first, try to create a file with page buffering enabled */
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (set_multi_split(env_h5_drvr, fapl, 4096) != 0)
         TEST_ERROR;
@@ -2134,7 +2134,7 @@ error:
  *
  * Purpose:     Main function for the page buffer tests.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -2163,19 +2163,19 @@ main(void)
      */
     if ((0 == HDstrcmp(env_h5_drvr, "multi")) || (0 == HDstrcmp(env_h5_drvr, "split"))) {
 
-        SKIPPED()
+        SKIPPED();
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
         HDexit(EXIT_SUCCESS);
     } /* end if */
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
-        PUTS_ERROR("Can't get VFD-dependent fapl")
+        PUTS_ERROR("Can't get VFD-dependent fapl");
     } /* end if */
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
 #ifdef H5_HAVE_PARALLEL
@@ -2200,7 +2200,7 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     HDputs("All Page Buffering tests passed.");

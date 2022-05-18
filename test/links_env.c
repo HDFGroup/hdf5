@@ -63,14 +63,14 @@ external_link_env(hid_t fapl, hbool_t new_format)
         filename3[NAME_BUF_SIZE]; /* Holders for filename */
 
     if (new_format)
-        TESTING("external links via environment variable (w/new group format)")
+        TESTING("external links via environment variable (w/new group format)");
     else
-        TESTING("external links via environment variable")
+        TESTING("external links via environment variable");
 
     if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
     if (HDstrcmp(envval, ".:tmp_links_env") != 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set up name for main file:"extlinks_env0" */
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -80,30 +80,30 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     /* Create "tmp_links_env" directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set up name (location) for the target file: "tmp_links_env/extlinks1" */
     h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
 
     /* Create the target file in "tmp_links_env" directory */
     if ((fid = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((gid = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Closing for target file */
     if (H5Gclose(gid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the main file */
     if ((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create external link to target file */
     if (H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open object through external link */
     H5E_BEGIN_TRY
@@ -121,9 +121,9 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     /* closing for main file */
     if (H5Gclose(gid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -174,7 +174,7 @@ main(void)
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     nerrors += external_link_env(fapl, TRUE) < 0 ? 1 : 0;
 

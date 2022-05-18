@@ -59,7 +59,7 @@ usage(void)
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     FILE * stream;
     size_t numread;

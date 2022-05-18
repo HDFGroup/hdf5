@@ -1248,7 +1248,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5FD_class_t cls = HDva_arg(ap, H5FD_class_t);
 
-                            H5RS_asprintf_cat(rs, "{'%s', " H5_PRINTF_HADDR_FMT ", ", cls.name, cls.maxaddr);
+                            H5RS_asprintf_cat(rs, "{'%s', %" PRIuHADDR ", ", cls.name, cls.maxaddr);
                             H5_trace_args_close_degree(rs, cls.fc_degree);
                             H5RS_acat(rs, ", ...}");
                         } /* end block */
@@ -1622,10 +1622,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_FLOAT");
                                 else if (obj == H5T_NATIVE_DOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
-#endif
                                 else if (obj == H5T_IEEE_F32BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F32BE");
                                 else if (obj == H5T_IEEE_F32LE_g)
@@ -4025,7 +4023,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
+                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
                 H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)

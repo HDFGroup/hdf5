@@ -41,7 +41,7 @@ const char *FILENAME[NFILENAME] = {"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* !PATH_MAX */
-char    filenames[NFILENAME][PATH_MAX];
+char *  filenames[NFILENAME];
 hid_t   fapl;                      /* file access property list */
 haddr_t max_addr = 0;              /* used to store the end of
                                     * the address space used by
@@ -126,7 +126,7 @@ int total_writes = 0;
  *
  *    local_pinned:    Boolean flag that is set to true iff the entry
  *        has been pinned in the local cache, but probably not all
- *        caches.  Such pins will typically not be consistant across
+ *        caches.  Such pins will typically not be consistent across
  *        processes, and thus cannot be marked as dirty unless they
  *        happen to overlap some collective operation.
  *
@@ -192,7 +192,7 @@ struct datum {
 
 #define NUM_DATA_ENTRIES 100000
 
-struct datum data[NUM_DATA_ENTRIES];
+struct datum *data = NULL;
 
 /* Many tests use the size of data array as the size of test loops.
  * On some machines, this results in unacceptably long test runs.
@@ -205,7 +205,7 @@ struct datum data[NUM_DATA_ENTRIES];
  * even divisor of NUM_DATA_ENTRIES.  So far, all tests have been with
  * powers of 10 that meet these criteria.
  *
- * Further, this value must be consistant across all processes.
+ * Further, this value must be consistent across all processes.
  */
 
 #define STD_VIRT_NUM_DATA_ENTRIES     NUM_DATA_ENTRIES
@@ -231,7 +231,7 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *
  *****************************************************************************/
 
-int data_index[NUM_DATA_ENTRIES];
+int *data_index = NULL;
 
 /*****************************************************************************
  * The following two #defines are used to control code that is in turn used
@@ -252,7 +252,7 @@ int data_index[NUM_DATA_ENTRIES];
  *
  * Strangely, at least on Phoenix, the first solution runs faster by a
  * rather large margin.  However, I can imagine this changing with
- * different OS's and MPI implementatins.
+ * different OS's and MPI implementations.
  *
  * Thus I have left code supporting the second solution in place.
  *
@@ -325,7 +325,7 @@ struct mssg_t {
     unsigned magic;
 };
 
-MPI_Datatype mpi_mssg_t; /* for MPI derived type created from mssg */
+MPI_Datatype mpi_mssg_t = MPI_DATATYPE_NULL; /* for MPI derived type created from mssg */
 
 /*****************************************************************************/
 /************************** function declarations ****************************/
@@ -565,8 +565,8 @@ set_up_file_communicator(void)
     int       mpi_result;
     int       num_excluded_ranks;
     int       excluded_ranks[1];
-    MPI_Group file_group;
-    MPI_Group world_group;
+    MPI_Group file_group  = MPI_GROUP_NULL;
+    MPI_Group world_group = MPI_GROUP_NULL;
 
     if (success) {
 
@@ -673,6 +673,12 @@ set_up_file_communicator(void)
             }
         }
     }
+
+    if (file_group != MPI_GROUP_NULL)
+        MPI_Group_free(&file_group);
+
+    if (world_group != MPI_GROUP_NULL)
+        MPI_Group_free(&world_group);
 
     return (success);
 
@@ -1118,6 +1124,8 @@ setup_derived_types(void)
     MPI_Aint      displs[9];
     struct mssg_t sample; /* used to compute displacements */
 
+    HDmemset(&sample, 0, sizeof(struct mssg_t));
+
     /* setup the displacements array */
     if ((MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0])) ||
         (MPI_SUCCESS != MPI_Get_address(&sample.src, &displs[1])) ||
@@ -1194,6 +1202,9 @@ takedown_derived_types(void)
 {
     hbool_t success = TRUE;
     int     result;
+
+    if (mpi_mssg_t == MPI_DATATYPE_NULL)
+        return (success);
 
     result = MPI_Type_free(&mpi_mssg_t);
 
@@ -1282,7 +1293,7 @@ reset_server_counters(void)
  * Function:    server_main()
  *
  * Purpose:    Main function for the server process.  This process exists
- *        to provide an independant view of the data array.
+ *        to provide an independent view of the data array.
  *
  *        The function handles request from the other processes in
  *        the test until the count of done messages received equals
@@ -2255,13 +2266,13 @@ datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr, H5_ATTR_UNUSED si
 static herr_t
 datum_image_len(const void *thing, size_t *image_len)
 {
-    int           idx;
-    struct datum *entry_ptr;
+    int                 idx;
+    const struct datum *entry_ptr;
 
     HDassert(thing);
     HDassert(image_len);
 
-    entry_ptr = (struct datum *)thing;
+    entry_ptr = (const struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
@@ -3962,7 +3973,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
  * Purpose:    Verify that the indicated entries have been written exactly
  *        once each, and that the indicated total number of writes
  *        has been processed by the server process.  Flag an error if
- *        discrepency is noted.  Finally reset the counters maintained
+ *        discrepancy is noted.  Finally reset the counters maintained
  *        by the server process.
  *
  *        This function should only be called by the metadata cache
@@ -4050,7 +4061,7 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
 
     /* final barrier to ensure that all processes think that the server
      * counters have been reset before we leave the sync point.  This
-     * barrier is probaby not necessary at this point in time (5/9/10),
+     * barrier is probably not necessary at this point in time (5/9/10),
      * but I can think of at least one likely change to the metadata write
      * strategies that will require it -- hence its insertion now.
      */
@@ -4794,7 +4805,7 @@ server_smoke_check(void)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -5141,7 +5152,7 @@ smoke_check_1(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -5305,7 +5316,7 @@ smoke_check_2(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -5453,7 +5464,7 @@ smoke_check_2(int metadata_write_strategy)
  *
  * Purpose:    Third smoke check for the parallel cache.
  *
- *        Use random reads to vary the loads on the diffferent
+ *        Use random reads to vary the loads on the different
  *        processors.  Also force different cache size adjustments.
  *
  *        In this test, load process 0 heavily, and the other
@@ -5510,7 +5521,7 @@ smoke_check_3(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -5738,7 +5749,7 @@ smoke_check_3(int metadata_write_strategy)
  *
  * Purpose:    Fourth smoke check for the parallel cache.
  *
- *        Use random reads to vary the loads on the diffferent
+ *        Use random reads to vary the loads on the different
  *        processors.  Also force different cache size adjustments.
  *
  *        In this test, load process 0 lightly, and the other
@@ -5795,7 +5806,7 @@ smoke_check_4(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -6070,7 +6081,7 @@ smoke_check_5(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -6355,7 +6366,7 @@ trace_file_check(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose)
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -6488,7 +6499,7 @@ trace_file_check(int metadata_write_strategy)
         } /* end if */
 
         if (nerrors == 0) {
-            HDsprintf(trace_file_name, "t_cache_trace.txt.%d", (int)file_mpi_rank);
+            HDsnprintf(trace_file_name, sizeof(trace_file_name), "t_cache_trace.txt.%d", (int)file_mpi_rank);
 
             if ((trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL) {
 
@@ -6623,13 +6634,15 @@ trace_file_check(int metadata_write_strategy)
 static hbool_t
 smoke_check_6(int metadata_write_strategy)
 {
-    hbool_t       success = TRUE;
-    int           i;
-    int           max_nerrors;
-    hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
-    struct mssg_t mssg;
+    H5P_coll_md_read_flag_t md_reads_file_flag;
+    hbool_t                 md_reads_context_flag;
+    hbool_t                 success = TRUE;
+    int                     i;
+    int                     max_nerrors;
+    hid_t                   fid       = -1;
+    H5F_t *                 file_ptr  = NULL;
+    H5C_t *                 cache_ptr = NULL;
+    struct mssg_t           mssg;
 
     switch (metadata_write_strategy) {
 
@@ -6660,7 +6673,7 @@ smoke_check_6(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, __func__);
@@ -6685,7 +6698,9 @@ smoke_check_6(int metadata_write_strategy)
         virt_num_data_entries = NUM_DATA_ENTRIES;
 
         /* insert the first half collectively */
-        H5CX_set_coll_metadata_read(TRUE);
+        md_reads_file_flag    = H5P_USER_TRUE;
+        md_reads_context_flag = TRUE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = 0; i < virt_num_data_entries / 2; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6704,9 +6719,13 @@ smoke_check_6(int metadata_write_strategy)
             H5_CHECK_OVERFLOW(cache_ptr->max_cache_size, size_t, double);
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* insert the other half independently */
-        H5CX_set_coll_metadata_read(FALSE);
+        md_reads_file_flag    = H5P_USER_FALSE;
+        md_reads_context_flag = FALSE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = virt_num_data_entries / 2; i < virt_num_data_entries; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6716,7 +6735,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, __func__);
                 }
             }
@@ -6724,6 +6743,8 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* flush the file */
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
@@ -6734,7 +6755,9 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* Protect the first half of the entries collectively */
-        H5CX_set_coll_metadata_read(TRUE);
+        md_reads_file_flag    = H5P_USER_TRUE;
+        md_reads_context_flag = TRUE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = 0; i < (virt_num_data_entries / 2); i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6752,9 +6775,13 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         /* protect the other half independently */
-        H5CX_set_coll_metadata_read(FALSE);
+        md_reads_file_flag    = H5P_USER_FALSE;
+        md_reads_context_flag = FALSE;
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
         for (i = virt_num_data_entries / 2; i < virt_num_data_entries; i++) {
             struct datum *entry_ptr;
             entry_ptr = &(data[i]);
@@ -6764,7 +6791,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, __func__);
                 }
             }
@@ -6772,6 +6799,8 @@ smoke_check_6(int metadata_write_strategy)
             /* Make sure coll entries do not cross the 80% threshold */
             HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
+        /* Restore collective metadata reads state */
+        H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
 
         for (i = 0; i < (virt_num_data_entries); i++) {
             unlock_entry(file_ptr, i, H5AC__NO_FLAGS_SET);
@@ -6911,6 +6940,23 @@ main(int argc, char **argv)
         goto finish;
     }
 
+    if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
+        HDprintf("    Couldn't allocate data array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+    if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
+        HDprintf("    Couldn't allocate data index array.  Exiting.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
     set_up_file_communicator();
 
     setup_derived_types();
@@ -6937,7 +6983,7 @@ main(int argc, char **argv)
 
     /* fix the file names */
     for (u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u) {
-        if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
+        if (h5_fixname(FILENAME[u], fapl, filenames[u], PATH_MAX) == NULL) {
             nerrors++;
             if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, __func__);
@@ -7026,14 +7072,23 @@ main(int argc, char **argv)
 #endif
 
 finish:
+    if (data_index)
+        HDfree(data_index);
+    if (data)
+        HDfree(data);
+
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */
+
+    if (file_mpi_comm != MPI_COMM_NULL)
+        MPI_Comm_free(&file_mpi_comm);
+
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
         HDprintf("===================================\n");
-        if (failures) {
-            HDprintf("***metadata cache tests detected %d failures***\n", failures);
+        if (nerrors || failures) {
+            HDprintf("***metadata cache tests detected %d failures***\n", nerrors + failures);
         }
         else {
             HDprintf("metadata cache tests finished with no failures\n");
@@ -7050,5 +7105,5 @@ finish:
     MPI_Finalize();
 
     /* cannot just return (failures) because exit code is limited to 1byte */
-    return (failures != 0);
+    return (nerrors != 0 || failures != 0);
 }

@@ -70,7 +70,7 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
 /*-------------------------------------------------------------------------
  * Function:    init_ref_path_cb
  *
- * Purpose:     Called by interator to create references for
+ * Purpose:     Called by iterator to create references for
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
@@ -123,7 +123,7 @@ ref_path_table_cmp(const void *key1, const void *key2)
 /*-------------------------------------------------------------------------
  * Function:    init_ref_path_table
  *
- * Purpose:     Initalize the reference path table
+ * Purpose:     Initialize the reference path table
  *
  * Return:      Non-negative on success, negative on failure
  *
@@ -377,7 +377,7 @@ lookup_ref_path(H5R_ref_t refbuf)
 /*-------------------------------------------------------------------------
  * Function:    fill_ref_path_table
  *
- * Purpose:     Called by interator to create references for
+ * Purpose:     Called by iterator to create references for
  *              all objects and enter them in the table.
  *
  * Return:      Error status.

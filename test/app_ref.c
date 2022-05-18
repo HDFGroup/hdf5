@@ -30,13 +30,15 @@
 /* Macro to increment the reference count on id a random number of times (from
  * 1 to MAX_NINC).  Assumes integers i and ninc are in scope. */
 #define RAND_INC(id)                                                                                         \
-    ninc = (HDrand() % MAX_NINC) + 1;                                                                        \
+    do {                                                                                                     \
+        ninc = (HDrand() % MAX_NINC) + 1;                                                                    \
                                                                                                              \
-    for (i = 0; i < ninc; i++)                                                                               \
-        if (H5Iinc_ref(ids[id]) != i + 2)                                                                    \
-            TEST_ERROR                                                                                       \
+        for (i = 0; i < ninc; i++)                                                                           \
+            if (H5Iinc_ref(ids[id]) != i + 2)                                                                \
+                TEST_ERROR;                                                                                  \
                                                                                                              \
-    rc[id] = ninc + 1;
+        rc[id] = ninc + 1;                                                                                   \
+    } while (0)
 
 typedef enum {
     T_FILE,
@@ -69,8 +71,10 @@ Abrt_Handler(int H5_ATTR_UNUSED sig)
 {
     int i, n;
 
+    const char *string = " ID reference count: ";
     for (i = 0; i < T_NUMCLASSES; i++) {
-        HDfprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
+        HDfprintf(stderr, "%s%s", IDNAME[i], string);
+        n = (int)(strlen(IDNAME[i]) + strlen(string));
         HDfprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
@@ -108,76 +112,76 @@ main(void)
 
     /* Create the file */
     if ((ids[T_FILE] = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_FILE)
+    RAND_INC(T_FILE);
 
     /* Create the property list */
     if ((ids[T_PLIST] = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_PLIST)
+    RAND_INC(T_PLIST);
 
     /* Create a property class */
     if ((ids[T_PCLASS] = H5Pcreate_class(H5P_DATASET_CREATE, "foo", NULL, NULL, NULL, NULL, NULL, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_PCLASS)
+    RAND_INC(T_PCLASS);
 
     /* Create a datatype */
     if ((ids[T_TYPE] = H5Tcreate(H5T_OPAQUE, (size_t)16)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_TYPE)
+    RAND_INC(T_TYPE);
 
     /* Create a dataspace */
     if ((ids[T_SPACE] = H5Screate(H5S_SCALAR)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_SPACE)
+    RAND_INC(T_SPACE);
 
     /* Create a dataset */
     if ((ids[T_DSET] = H5Dcreate2(ids[T_FILE], APPREF_DSET, H5T_NATIVE_INT, ids[T_SPACE], H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_DSET)
+    RAND_INC(T_DSET);
 
     /* Create an attribute */
     if ((ids[T_ATTR] = H5Acreate2(ids[T_DSET], APPREF_ATTR, H5T_NATIVE_INT, ids[T_SPACE], H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_ATTR)
+    RAND_INC(T_ATTR);
 
     /* Create a group */
     if ((ids[T_GROUP] = H5Gcreate2(ids[T_FILE], APPREF_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_GROUP)
+    RAND_INC(T_GROUP);
 
     /* Create an error class */
     if ((ids[T_ECLASS] = H5Eregister_class("foo", "bar", "baz")) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_ECLASS)
+    RAND_INC(T_ECLASS);
 
     /* Create an error message */
     if ((ids[T_EMSG] = H5Ecreate_msg(ids[T_ECLASS], H5E_MAJOR, "mumble")) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_EMSG)
+    RAND_INC(T_EMSG);
 
     /* Create an error stack */
     if ((ids[T_ESTACK] = H5Eget_current_stack()) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    RAND_INC(T_ESTACK)
+    RAND_INC(T_ESTACK);
 
     HDsignal(SIGABRT, &Abrt_Handler);
 
     if (H5close() < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
 
@@ -189,11 +193,11 @@ main(void)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
 
     HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
-    return 1;
+    return EXIT_FAILURE;
 }

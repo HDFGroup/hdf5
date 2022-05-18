@@ -86,7 +86,7 @@ PROGRAM H5_EXTEND
   INTEGER, DIMENSION(1:3,1:10)  :: rdata
 
   !
-  !Initialize FORTRAN predifined datatypes
+  !Initialize FORTRAN predefined datatypes
   !
   CALL h5open_f(error)
 
@@ -110,7 +110,7 @@ PROGRAM H5_EXTEND
   CALL h5pset_chunk_f(crp_list, RANK, dimsc, error)
 
   !
-  !Create a dataset with 3X3 dimensions using cparms creation propertie .
+  !Create a dataset with 3X3 dimensions using cparms creation properties.
   !
   CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, &
        dset_id, error, crp_list )

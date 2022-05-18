@@ -19,7 +19,7 @@
 #define H5LT_FILE_IMAGE_DONT_COPY 0x0002 /* The HDF5 lib won't copy   */
 /* user supplied image buffer. The same image is open with the core driver.  */
 #define H5LT_FILE_IMAGE_DONT_RELEASE 0x0004 /* The HDF5 lib won't        */
-/* deallocate user supplied image buffer. The user application is reponsible */
+/* deallocate user supplied image buffer. The user application is responsible */
 /* for doing so.                                                             */
 #define H5LT_FILE_IMAGE_ALL 0x0007
 

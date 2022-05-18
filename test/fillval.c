@@ -116,24 +116,24 @@ create_compound_vl_type(void)
 
     /* Create a string datatype */
     if ((str_id = H5Tcopy(H5T_C_S1)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_size(str_id, H5T_VARIABLE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((ret_value = H5Tcreate(H5T_COMPOUND, sizeof(comp_vl_datatype))) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(ret_value, "x", HOFFSET(comp_vl_datatype, x), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(ret_value, "a", HOFFSET(comp_vl_datatype, a), str_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(ret_value, "b", HOFFSET(comp_vl_datatype, b), str_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(ret_value, "y", HOFFSET(comp_vl_datatype, y), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close string datatype */
     if (H5Tclose(str_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return ret_value;
 
@@ -306,26 +306,26 @@ test_getset_vl(hid_t fapl)
 
     /* Create string type. */
     if ((dtypeid = H5Tcopy(H5T_C_S1)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_size(dtypeid, H5T_VARIABLE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set up dataset creation property list, with fill value */
     if ((plistid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(plistid, dtypeid, &f1) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Modify original fill value string */
     fill_value[0] = 'b';
 
     /* Retrieve fill value from property */
     if (H5Pget_fill_value(plistid, dtypeid, &f2) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify that the fill value is the original value */
     if (HDstrcmp(f2, orig_fill_value) != 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Release the fill value retrieved */
     HDfree(f2);
@@ -333,54 +333,54 @@ test_getset_vl(hid_t fapl)
     /* Open file. */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((fileid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Write an dataset of this type. */
     if ((spaceid = H5Screate_simple(1, dims, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((datasetid = H5Dcreate2(fileid, "Dataset", dtypeid, spaceid, H5P_DEFAULT, plistid, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close IDs (except datatype) */
     if (H5Dclose(datasetid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pclose(plistid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(spaceid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fileid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open file, group & dataset */
     if ((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((datasetid = H5Dopen2(fileid, "Dataset", H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get dataset's creation property list */
     if ((plistid = H5Dget_create_plist(datasetid)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Query fill value */
     if (H5Pget_fill_value(plistid, dtypeid, &f2) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify that the fill value is the original value */
     if (HDstrcmp(f2, orig_fill_value) != 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Release the fill value retrieved */
     HDfree(f2);
 
     /* Close IDs */
     if (H5Dclose(datasetid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fileid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pclose(plistid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tclose(dtypeid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1624,24 +1624,24 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Make copy of dataset creation property list */
     if ((dcpl = H5Pcopy(_dcpl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
 #ifndef NO_FILLING
     if (H5Pset_fill_value(dcpl, dtype, fillval) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 #endif
 
     /* Get class of datatype */
     if ((dtype_class = H5Tget_class(dtype)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create a dataspace */
     if ((fspace = H5Screate_simple(5, start_size, max_size)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create dataset */
     if ((dset = H5Dcreate2(file, dset_name, dtype, fspace, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set up pointers to elements */
     if (dtype_class == H5T_INTEGER) {
@@ -1672,7 +1672,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Read some data and make sure it's the fill value */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0; j < 5; j++)
@@ -1680,25 +1680,25 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, fillval) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Initialize dataspace & hyperslab info */
     for (i = 0, nelmts = 1; i < 5; i++) {
@@ -1717,23 +1717,23 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Create dataspace describing memory buffer */
     if ((mspace = H5Screate_simple(5, hs_size, hs_size)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Select elements within file dataspace */
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride, hs_size, NULL) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Write to all even data locations */
     if (H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, buf) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close memory dataspace */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read some data and make sure it's the right value */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
@@ -1743,42 +1743,42 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         should_be = odd ? odd_val : even_val;
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Extend the dataset one element in each dimension */
     for (i = 0; i < 5; i++)
         extend_size[i] = start_size[i] + 1;
     if (H5Dset_extent(dset, extend_size) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open file dataspace */
     if (H5Sclose(fspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((fspace = H5Dget_space(dset)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read some data and make sure it's the right value */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
@@ -1791,40 +1791,40 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         should_be = odd ? odd_val : even_val;
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Extend the dataset to the maximum dimension sizes */
     if (H5Dset_extent(dset, max_size) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open file dataspace */
     if (H5Sclose(fspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((fspace = H5Dget_space(dset)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read some data and make sure it's the right value */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
@@ -1837,42 +1837,42 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         should_be = odd ? odd_val : even_val;
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Shrink the dataset to half of it's maximum size, plus 1/2 of a chunk */
     for (i = 0; i < 5; i++)
         extend_size[i] = (max_size[i] / 2) + (ch_size[i] / 2);
     if (H5Dset_extent(dset, extend_size) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open file dataspace */
     if (H5Sclose(fspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((fspace = H5Dget_space(dset)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read some data and make sure it's the right value */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < 1000; i++) {
         /* Set offset for random element */
         for (j = 0, odd = 0; j < 5; j++) {
@@ -1885,42 +1885,42 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         should_be = odd ? odd_val : even_val;
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Extend the dataset's size by one element, in a dimension that won't
      *  cause additional chunks to be needed */
     extend_size[2] += 1;
     if (H5Dset_extent(dset, extend_size) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open file dataspace */
     if (H5Sclose(fspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((fspace = H5Dget_space(dset)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
-    /* Create dataspace for single element sized bufer */
+    /* Create dataspace for single element sized buffer */
     if ((mspace = H5Screate_simple(5, one, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set location for "top-most" element in dataset to write */
     for (i = 0; i < 5; i++)
@@ -1928,7 +1928,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Select the element */
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Write one element in a chunk that's 'partial' and overwrite a fill
      *  value that was initialized in the H5Dset_extent() routine.  This will
@@ -1937,23 +1937,23 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
      *  fail.
      */
     if (H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, buf) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read value back in */
     if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the element read in is the value written out */
     if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, buf) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set the element back to fillval */
     if (H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, fillval) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Release any VL components */
     if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Clear the read buffer */
     HDmemset(val_rd, 0, val_size);
@@ -1963,19 +1963,19 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Select the element */
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Read value back in */
     if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify the element read in is the fill-value */
     if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, fillval) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Release any VL components */
     if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Clear the read buffer */
     HDmemset(val_rd, 0, val_size);
@@ -1993,26 +1993,26 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
         /* Select the random element */
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read the random element */
         if (H5Dread(dset, dtype, mspace, fspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Verify the element read in */
         should_be = odd ? odd_val : even_val;
         if (verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Release any VL components */
         if (H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Release elements & memory buffer */
     for (i = 0; i < nelmts; i++)
@@ -2024,11 +2024,11 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
 
     /* Cleanup IDs */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(fspace) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -2084,9 +2084,9 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
     /* Print testing message */
     if (H5D_CHUNKED == layout)
-        TESTING("chunked dataset extend")
+        TESTING("chunked dataset extend");
     else
-        TESTING("contiguous dataset extend")
+        TESTING("contiguous dataset extend");
 
     /* Set vl datatype fill value strings */
     fillval_c.a = HDstrdup("foo");
@@ -2094,10 +2094,10 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
     /* Create dataset creation property list */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5D_CHUNKED == layout)
         if (H5Pset_chunk(dcpl, 5, ch_size) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
 #if 1
     /*
@@ -2142,7 +2142,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
 #if 1
     /*
-     * Remove this when contiguous datasets can be exended to some
+     * Remove this when contiguous datasets can be extended to some
      * predetermined fininte size, even if it's just in the slowest varying
      * dimension.  If it's removed prematurely then you'll get one of the
      * errors described above or `unable to select fill value region'.
@@ -2157,27 +2157,27 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     /* Create a file and dataset */
     h5_fixname(base_name, fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get the compound+vl datatype */
     if ((cmpd_vl_tid = create_compound_vl_type()) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Test integer datatype case */
     if (test_extend_cases(file, dcpl, "dset1", ch_size, start_size, max_size, H5T_NATIVE_INT, &fillval_i) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Test compound+vl datatype datatype case */
     if (test_extend_cases(file, dcpl, "dset2", ch_size, start_size, max_size, cmpd_vl_tid, &fillval_c) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Tclose(cmpd_vl_tid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     HDfree(fillval_c.a);
     HDfree(fillval_c.b);
@@ -2689,11 +2689,11 @@ main(int argc, char *argv[])
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Loop over using new group format */
     for (new_format = FALSE; new_format <= TRUE; new_format++) {

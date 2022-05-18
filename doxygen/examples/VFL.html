@@ -306,7 +306,7 @@ H5Dread(dataset, type, mspace, fspace, buffer, dxpl);
 </PRE>
 
 <P>
-The transfer propery list can be queried in a manner similar to the file
+The transfer property list can be queried in a manner similar to the file
 access property list: the driver provides a function (or functions) to return
 various information about the transfer property list:
 
@@ -1210,7 +1210,7 @@ Flush all data for file <VAR>file</VAR> to storage.
 </P>
 <P>
 <STRONG>Example:</STRONG> The sec2 driver doesn't cache any data but it also doesn't
-extend the Unix file as agressively as it should. Therefore, when finalizing a
+extend the Unix file as aggressively as it should. Therefore, when finalizing a
 file it should write a zero to the last byte of the allocated region so that
 when reopening the file later the EOF marker will be at least as large as the
 EOA marker saved in the superblock (otherwise HDF5 will refuse to open the

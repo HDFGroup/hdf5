@@ -373,7 +373,7 @@ H5_DLL herr_t H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab);
 /*
  * Functions that understand symbol table entries.
  */
-H5_DLL void   H5G__ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5_copy_depth_t depth);
+H5_DLL void   H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth);
 H5_DLL void   H5G__ent_reset(H5G_entry_t *ent);
 H5_DLL herr_t H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5G_entry_t *ent,
                                   unsigned n);
@@ -465,7 +465,7 @@ H5_DLL herr_t H5G__name_init(H5G_name_t *name, const char *path);
 /*
  * These functions operate on group "locations"
  */
-H5_DLL herr_t H5G__loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc, H5O_type_t obj_type,
+H5_DLL herr_t H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t obj_type,
                               const void *crt_info);
 H5_DLL herr_t H5G__loc_addr(const H5G_loc_t *loc, const char *name, haddr_t *addr /*out*/);
 

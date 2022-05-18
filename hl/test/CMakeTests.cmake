@@ -31,7 +31,9 @@ set (HL_REFERENCE_TEST_FILES
     dslat.txt
     dslon.txt
     test_ds_be.h5
+    test_ds_be_new_ref.h5
     test_ds_le.h5
+    test_ds_le_new_ref.h5
     test_ld.h5
 )
 

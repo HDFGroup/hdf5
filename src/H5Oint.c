@@ -82,9 +82,6 @@ static herr_t                 H5O__reset_info2(H5O_info2_t *oinfo);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Header message ID to class mapping
  *
  * Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new
@@ -178,21 +175,20 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__init_package
+ * Function:    H5O_init
  *
- * Purpose:    Initialize information specific to H5O interface.
+ * Purpose:     Initialize the interface from some other layer.
  *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, January 18, 2007
- *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__init_package(void)
+H5O_init(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOERR
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -200,8 +196,8 @@ H5O__init_package(void)
 
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__init_package() */
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__set_version
@@ -223,7 +219,7 @@ H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_id
     uint8_t version;             /* Message version */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(f);
@@ -293,7 +289,7 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
-    if ((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
+    if ((FAIL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -357,7 +353,7 @@ H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
     ret_value = oh;
 
 done:
-    if ((NULL == ret_value) && (NULL != oh) && (H5O__free(oh) < 0))
+    if ((NULL == ret_value) && (NULL != oh) && (H5O__free(oh, TRUE) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -567,7 +563,7 @@ H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(loc);
@@ -584,7 +580,6 @@ H5O_open(H5O_loc_t *loc)
     else
         H5F_INCR_NOPEN_OBJS(loc->file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 
@@ -1606,7 +1601,7 @@ H5O__delete_oh(H5F_t *f, H5O_t *oh)
     unsigned    u;
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(f);
@@ -1680,7 +1675,7 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 {
     const H5O_obj_class_t *obj_class; /* Class of object for header */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(oh);
@@ -1756,7 +1751,7 @@ H5O__obj_class_real(const H5O_t *oh)
     size_t                 i;                /* Local index variable */
     const H5O_obj_class_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oh);
@@ -2105,7 +2100,7 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     const H5O_chunk_t *curr_chunk; /* Pointer to current message being operated on */
     unsigned           u;          /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(oh);
@@ -2621,7 +2616,7 @@ done:
 static herr_t
 H5O__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data /*in,out*/)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
@@ -2651,7 +2646,7 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
     hbool_t              obj_found = FALSE;                     /* Object at 'name' found */
     herr_t               ret_value = H5_ITER_CONT;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(name);
@@ -3019,7 +3014,7 @@ H5O_get_proxy(const H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__free(H5O_t *oh)
+H5O__free(H5O_t *oh, hbool_t H5_ATTR_NDEBUG_UNUSED force)
 {
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -3043,10 +3038,12 @@ H5O__free(H5O_t *oh)
         for (u = 0; u < oh->nmesgs; u++) {
 #ifndef NDEBUG
             /* Verify that message is clean, unless it could have been marked
-             * dirty by decoding */
+             * dirty by decoding, or if this is a forced free (in case of
+             * failure during creation of the object some messages may be dirty)
+             */
             if (oh->ndecode_dirtied && oh->mesg[u].dirty)
                 oh->ndecode_dirtied--;
-            else
+            else if (!force)
                 HDassert(oh->mesg[u].dirty == 0);
 #endif /* NDEBUG */
 
@@ -3083,7 +3080,7 @@ done:
 static herr_t
 H5O__reset_info2(H5O_info2_t *oinfo)
 {
-    FUNC_ENTER_STATIC_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR;
 
     /* Reset the passed-in info struct */
     HDmemset(oinfo, 0, sizeof(H5O_info2_t));

@@ -60,9 +60,9 @@ typedef struct H5D_efl_writevv_ud_t {
 /********************/
 
 /* Layout operation callbacks */
-static herr_t H5D__efl_construct(H5F_t *f, H5D_t *dset);
-static herr_t H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                               const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *cm);
+static herr_t  H5D__efl_construct(H5F_t *f, H5D_t *dset);
+static herr_t  H5D__efl_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
 static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -80,12 +80,24 @@ static herr_t H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t ad
 /*********************/
 
 /* External File List (EFL) storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{H5D__efl_construct, NULL, H5D__efl_is_space_alloc, NULL,
-                                           H5D__efl_io_init, H5D__contig_read, H5D__contig_write,
+const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
+    H5D__efl_construct,      /* construct */
+    NULL,                    /* init */
+    H5D__efl_is_space_alloc, /* is_space_alloc */
+    NULL,                    /* is_data_cached */
+    H5D__efl_io_init,        /* io_init */
+    H5D__contig_read,        /* ser_read */
+    H5D__contig_write,       /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-                                           NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                           H5D__efl_readvv, H5D__efl_writevv, NULL, NULL, NULL}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    H5D__efl_readvv,  /* readvv */
+    H5D__efl_writevv, /* writevv */
+    NULL,             /* flush */
+    NULL,             /* io_term */
+    NULL              /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -114,7 +126,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -197,11 +209,11 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                 hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
-                 const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
+H5D__efl_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+                 hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
+                 H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5MM_memcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
@@ -238,7 +250,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
     char *  full_name = NULL;    /* File name with prefix */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(efl && efl->nused > 0);
@@ -326,7 +338,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
     char *  full_name = NULL;    /* File name with prefix */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(efl && efl->nused > 0);
@@ -405,7 +417,7 @@ H5D__efl_readvv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
     H5D_efl_readvv_ud_t *udata     = (H5D_efl_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t               ret_value = SUCCEED;                       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Read data */
     if (H5D__efl_read(udata->efl, udata->dset, dst_off, len, (udata->rbuf + src_off)) < 0)
@@ -438,7 +450,7 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
     H5D_efl_readvv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t             ret_value = -1; /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);
@@ -485,7 +497,7 @@ H5D__efl_writevv_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata)
     H5D_efl_writevv_ud_t *udata     = (H5D_efl_writevv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Write data */
     if (H5D__efl_write(udata->efl, udata->dset, dst_off, len, (udata->wbuf + src_off)) < 0)
@@ -518,7 +530,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
     H5D_efl_writevv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t              ret_value = -1; /* Return value (Total size of sequence in bytes) */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);

@@ -431,7 +431,7 @@ test_parse_tuple(void)
             {"stuff keeps on going"},
         },
         {
-            "4-ple, escaped seperator",
+            "4-ple, escaped separator",
             "(elem0,elem1,el\\,em2,elem3)", /* "el\,em" */
             ',',
             SUCCEED,
@@ -701,7 +701,7 @@ test_populate_ros3_fa(void)
     }
 
     /* NULL region
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -720,7 +720,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty region
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -739,7 +739,7 @@ test_populate_ros3_fa(void)
     }
 
     /* region overflow
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -781,7 +781,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty id (non-empty region, key)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -851,7 +851,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key (non-empty region, id)
-     * yeilds authenticating fapl
+     * yields authenticating fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -870,7 +870,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key, region (non-empty id)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -889,7 +889,7 @@ test_populate_ros3_fa(void)
     }
 
     /* empty key, id (non-empty region)
-     * yeilds default fapl
+     * yields default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -1029,52 +1029,38 @@ test_set_configured_fapl(void)
         2048, /* stream buffer size    */
     };
 #endif                    /* H5_HAVE_LIBHDFS */
-    unsigned n_cases = 7; /* number of common testcases */
+    unsigned n_cases = 5; /* number of common testcases */
     testcase cases[] = {
-        {
-            "(common) should fail: no fapl id",
-            0,
-            UTIL_TEST_NOFAPL,
-            "",
-            NULL,
-        },
-        {
-            "(common) should fail: no fapl id (with struct)",
-            0,
-            UTIL_TEST_NOFAPL,
-            "",
-            &wrong_fa,
-        },
         {
             "(common) H5P_DEFAULT with no struct should succeed",
             1,
             UTIL_TEST_DEFAULT,
-            "",
+            "sec2",
             NULL,
         },
         {
             "(common) H5P_DEFAULT with (ignored) struct should succeed",
             1,
             UTIL_TEST_DEFAULT,
-            "",
+            "sec2",
             &wrong_fa,
         },
         {
             "(common) provided fapl entry should not fail",
             1,
             UTIL_TEST_CREATE,
-            "",
+            "sec2",
             NULL,
         },
         {
             "(common) provided fapl entry should not fail; ignores struct",
             1,
             UTIL_TEST_CREATE,
-            "",
+            "sec2",
             &wrong_fa,
         },
         {
-            "(common) should fail: unrecoginzed vfd name",
+            "(common) should fail: unrecognized vfd name",
             0,
             UTIL_TEST_DEFAULT,
             "unknown",
@@ -1092,13 +1078,6 @@ test_set_configured_fapl(void)
             NULL,
         },
         {
-            "(ROS3) should fail: no fapl id",
-            0,
-            UTIL_TEST_NOFAPL,
-            "ros3",
-            &ros3_anon_fa,
-        },
-        {
             "(ROS3) should fail: no struct",
             0,
             UTIL_TEST_CREATE,
@@ -1109,13 +1088,6 @@ test_set_configured_fapl(void)
             "(ROS3) successful set",
             1,
             UTIL_TEST_CREATE,
-            "ros3",
-            &ros3_anon_fa,
-        },
-        {
-            "(ROS3) should fail: attempt to set DEFAULT fapl",
-            0,
-            UTIL_TEST_DEFAULT,
             "ros3",
             &ros3_anon_fa,
         },
@@ -1132,13 +1104,6 @@ test_set_configured_fapl(void)
             NULL,
         },
         {
-            "(HDFS) should fail: no fapl id",
-            0,
-            UTIL_TEST_NOFAPL,
-            "hdfs",
-            &hdfs_fa,
-        },
-        {
             "(HDFS) should fail: no struct",
             0,
             UTIL_TEST_CREATE,
@@ -1152,24 +1117,17 @@ test_set_configured_fapl(void)
             "hdfs",
             &hdfs_fa,
         },
-        {
-            "(HDFS) should fail: attempt to set DEFAULT fapl",
-            0,
-            UTIL_TEST_DEFAULT,
-            "hdfs",
-            &hdfs_fa,
-        },
 #endif /* H5_HAVE_LIBHDFS */
 
     }; /* testcases `cases` array */
     unsigned int i;
 
 #ifdef H5_HAVE_ROS3_VFD
-    n_cases += 5;
+    n_cases += 3;
 #endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
-    n_cases += 5;
+    n_cases += 3;
 #endif /* H5_HAVE_LIBHDFS */
 
     TESTING("programmatic fapl set");
@@ -1205,10 +1163,12 @@ test_set_configured_fapl(void)
         vfd_info.info   = C.conf_fa;
         vfd_info.u.name = C.vfdname;
         result          = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
-        if (C.expected == 0)
+        if (C.expected == 0) {
             JSVERIFY(result, H5I_INVALID_HID, C.message)
-        else
+        }
+        else {
             JSVERIFY_NOT(result, H5I_INVALID_HID, C.message)
+        }
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after test\n");

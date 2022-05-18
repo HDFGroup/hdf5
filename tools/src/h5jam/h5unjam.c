@@ -92,7 +92,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[])
+parse_command_line(int argc, const char *const *argv)
 {
     int opt = FALSE;
 
@@ -172,7 +172,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t     ifile = H5I_INVALID_HID;
     hid_t     plist = H5I_INVALID_HID;
@@ -189,7 +189,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib  */
     h5tools_init();
 
-    if (EXIT_FAILURE == parse_command_line(argc, argv))
+    if (EXIT_FAILURE == parse_command_line(argc, (const char *const *)argv))
         goto done;
 
     /* enable error reporting if command line option */

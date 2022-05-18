@@ -116,7 +116,7 @@ H5FL_DEFINE_STATIC(H5VL_dyn_op_t);
 static void
 H5VL__release_dyn_op(H5VL_dyn_op_t *dyn_op)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     H5MM_xfree(dyn_op->op_name);
     H5FL_FREE(H5VL_dyn_op_t, dyn_op);
@@ -139,7 +139,7 @@ H5VL__term_opt_operation_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_
 {
     H5VL_dyn_op_t *item = (H5VL_dyn_op_t *)_item; /* Item to release */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Release the dynamically registered operation info */
     H5VL__release_dyn_op(item);
@@ -166,9 +166,12 @@ H5VL__term_opt_operation(void)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Iterate over the VOL subclasses */
-    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++)
-        if (H5VL_opt_ops_g[subcls])
+    for (subcls = 0; subcls < NELMTS(H5VL_opt_vals_g); subcls++) {
+        if (H5VL_opt_ops_g[subcls]) {
             H5SL_destroy(H5VL_opt_ops_g[subcls], H5VL__term_opt_operation_cb, NULL);
+            H5VL_opt_ops_g[subcls] = NULL;
+        }
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL__term_opt_operation() */

@@ -707,7 +707,7 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
     herr_t           cb_ret_val;                        /* User callback return value */
     int              ret_value = H5_ITER_ERROR;         /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     cb_ret_val = (*udata->app_cb)(obj, id, udata->app_key);
 
@@ -795,7 +795,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
     herr_t                cb_ret_val = FAIL;                           /* User callback return value */
     int                   ret_value  = H5_ITER_ERROR;                  /* Callback return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Invoke the callback */
     cb_ret_val = (*udata->op)(id, udata->op_data);
@@ -814,7 +814,7 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 /*-------------------------------------------------------------------------
  * Function:    H5Iiterate
  *
- * Purpose:     Call the callback funciton op for each member of the id
+ * Purpose:     Call the callback function op for each member of the id
  *              type type.  op takes as parameters the id and a
  *              passthrough of op_data, and returns an herr_t.  A positive
  *              return from op will cause the iteration to stop and

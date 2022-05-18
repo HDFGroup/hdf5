@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* changes:
  * rename pio_timer.c as io_timer.c;
- * Removed pio_perf.h so that it is not dependant on it;
+ * Removed pio_perf.h so that it is not dependent on it;
  * Removed set_timer_type() and get_timer_type() since no one calls them;
  * Merged sio_timer.c into io_timer.c;
  */

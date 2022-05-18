@@ -44,7 +44,7 @@ static void ph5diff_worker(int);
  */
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     int         nID      = 0;
     const char *fname1   = NULL;
@@ -72,7 +72,7 @@ main(int argc, const char *argv[])
 
         g_Parallel = 0;
 
-        parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
+        parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
         h5diff(fname1, fname2, objname1, objname2, &opts);
 
@@ -83,7 +83,8 @@ main(int argc, const char *argv[])
 
         /* Have the manager process the command-line */
         if (nID == 0) {
-            parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
+            parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2,
+                               &opts);
 
             h5diff(fname1, fname2, objname1, objname2, &opts);
 
@@ -311,5 +312,5 @@ h5diff_exit(int status)
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK
      */
-    HDexit(0);
+    HDexit(status);
 }

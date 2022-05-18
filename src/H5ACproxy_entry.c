@@ -249,7 +249,7 @@ H5AC__proxy_entry_add_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_ud
     H5AC_proxy_entry_t *pentry    = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
     int                 ret_value = H5_ITER_CONT;                 /* Callback return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Add flush dependency on parent for proxy entry */
     if (H5AC_create_flush_dependency(parent, pentry) < 0)
@@ -342,7 +342,7 @@ H5AC__proxy_entry_remove_child_cb(void *_item, void H5_ATTR_UNUSED *_key, void *
     H5AC_proxy_entry_t *pentry    = (H5AC_proxy_entry_t *)_udata; /* Pointer to the proxy entry */
     int                 ret_value = H5_ITER_CONT;                 /* Callback return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Remove flush dependency on parent for proxy entry */
     if (H5AC_destroy_flush_dependency(parent, pentry) < 0)
@@ -421,7 +421,7 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(pentry);
@@ -433,7 +433,6 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
     /* Free the proxy entry object */
     pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_proxy_entry_dest() */
 
@@ -452,7 +451,7 @@ done:
 static herr_t
 H5AC__proxy_entry_image_len(const void H5_ATTR_UNUSED *thing, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image_len);
@@ -481,7 +480,7 @@ static herr_t
 H5AC__proxy_entry_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *image,
                             size_t H5_ATTR_UNUSED len, void H5_ATTR_UNUSED *thing)
 {
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+    FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
         /* Should never be invoked */
         HDassert(0 && "Invalid callback?!?");
@@ -509,7 +508,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
     H5AC_proxy_entry_t *pentry    = (H5AC_proxy_entry_t *)_thing;
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(pentry);
@@ -633,7 +632,7 @@ H5AC__proxy_entry_free_icr(void *_thing)
     H5AC_proxy_entry_t *pentry    = (H5AC_proxy_entry_t *)_thing;
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Destroy the proxy entry */
     if (H5AC_proxy_entry_dest(pentry) < 0)

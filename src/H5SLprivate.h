@@ -85,6 +85,7 @@ H5_DLL herr_t       H5SL_release(H5SL_t *slist);
 H5_DLL herr_t       H5SL_free(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 H5_DLL herr_t       H5SL_close(H5SL_t *slist);
 H5_DLL herr_t       H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data);
+H5_DLL herr_t       H5SL_init(void);
 H5_DLL int          H5SL_term_interface(void);
 
 #endif /* H5SLprivate_H */

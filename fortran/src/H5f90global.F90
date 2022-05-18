@@ -855,7 +855,7 @@ CONTAINS
   END SUBROUTINE H5_Fortran_string_f2c
 
 
-! Copy Fortran string to C charater array, assuming the C array is one-char
+! Copy Fortran string to C character array, assuming the C array is one-char
 ! longer for the terminating null char.
 ! fstring : the Fortran input string
 ! cstring : the C output string (with memory already allocated)
@@ -883,7 +883,7 @@ CONTAINS
 !!$    cstring(j) = C_NULL_CHAR
 !!$end subroutine MPIR_Fortran_string_f2c
 !!$
-!!$! Copy C charater array to Fortran string
+!!$! Copy C character array to Fortran string
 !!$subroutine MPIR_Fortran_string_c2f(cstring, fstring)
 !!$    implicit none
 !!$    character(kind=c_char), intent(in) :: cstring(:)

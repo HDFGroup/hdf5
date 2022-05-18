@@ -202,13 +202,12 @@ generate_symbols(void)
     unsigned u, v; /* Local index variables */
 
     for (u = 0; u < NLEVELS; u++) {
-        symbol_info[u] = (symbol_info_t *)HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
+        symbol_info[u] = HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
         for (v = 0; v < symbol_count[u]; v++) {
             char name_buf[64];
 
             generate_name(name_buf, u, v);
-            symbol_info[u][v].name = (char *)HDmalloc(HDstrlen(name_buf) + 1);
-            HDstrcpy(symbol_info[u][v].name, name_buf);
+            symbol_info[u][v].name     = HDstrdup(name_buf);
             symbol_info[u][v].dsid     = -1;
             symbol_info[u][v].nrecords = 0;
         } /* end for */

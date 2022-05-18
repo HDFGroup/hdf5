@@ -75,110 +75,110 @@ main(void)
 
     /* To exit from the file for SIGABRT signal */
     if (HDsignal(SIGABRT, catch_signal) == SIG_ERR)
-        TEST_ERROR
+        TEST_ERROR;
 
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Set to latest format */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the file  */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the group creation property list */
     if ((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set to use dense storage for all attributes on the group */
     if (H5Pset_attr_phase_change(gcpl, 0, 0) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the group in the file */
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get a copy of the datatype */
     if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create attributes in the group */
     for (i = ATTR_COUNT; i >= 0; i--) {
         /* Set up the attribute name */
-        HDsprintf(aname, "%s%d", basename, i);
+        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Create the attribute */
         if ((aid = H5Acreate2(gid, aname, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Write to the attribute */
         if (H5Awrite(aid, tid, &i) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Close the attribute */
         if (H5Aclose(aid) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     /* Close the datatype */
     if (H5Tclose(tid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the dataspace */
     if (H5Sclose(sid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the group */
     if (H5Gclose(gid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the group creation property list */
     if (H5Pclose(gcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Open the group */
     if ((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Delete the attributes */
     for (i = 0; i <= ATTR_COUNT; i++) {
         /* Set up the attribute name */
-        HDsprintf(aname, "%s%d", basename, i);
+        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Delete the attribute */
         if (H5Adelete(gid, aname) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end for */
 
     /* Close the group */
     if (H5Gclose(gid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl);
 

@@ -1013,28 +1013,28 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
 
      IF(nsize.NE.LEN(SRC_FILE_LEN_EXACT))THEN
-        PRINT*,"virtual filenname size is incorrect"
+        PRINT*,"virtual filename size is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is very small
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_TINY, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_TINY.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_TINY)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that small by one
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_SMALL, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_SMALL.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_SMALL)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is exact
      CALL H5Pget_virtual_filename_f(dcpl, INT(i-1, size_t), SRC_FILE_LEN_EXACT, error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_EXACT.NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)))THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that bigger by one
@@ -1042,7 +1042,7 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_LARGE(1:LEN(SRC_FILE_LEN_EXACT)).NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)).AND. &
          SRC_FILE_LEN_LARGE(LEN(SRC_FILE_LEN_EXACT):).NE.'')THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! check passing a buffer that is very big
@@ -1050,7 +1050,7 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Pget_virtual_filename_f", error, total_error)
      IF(SRC_FILE_LEN_HUGE(1:LEN(SRC_FILE_LEN_EXACT)).NE.SRC_FILE(i)(1:LEN(SRC_FILE_LEN_EXACT)).AND. &
          SRC_FILE_LEN_HUGE(LEN(SRC_FILE_LEN_EXACT):).NE.'')THEN
-        PRINT*,"virtual filenname returned is incorrect"
+        PRINT*,"virtual filename returned is incorrect"
         total_error = total_error + 1
      ENDIF
      ! Get source dataset name

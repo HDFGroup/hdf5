@@ -25,7 +25,7 @@
 
 const char *FILENAME[] = {"flush", "noflush", NULL};
 
-static int data_g[100][100];
+static int *data_g = NULL;
 
 #define N_GROUPS 100
 
@@ -43,7 +43,7 @@ static int data_g[100][100];
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_test_file(char *name, hid_t fapl_id)
+create_test_file(char *name, size_t name_length, hid_t fapl_id)
 {
     hid_t   fid           = H5I_INVALID_HID;
     hid_t   dcpl_id       = H5I_INVALID_HID;
@@ -77,7 +77,7 @@ create_test_file(char *name, hid_t fapl_id)
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            data_g[i][j] = (int)(i + (i * j) + j);
+            data_g[(i * 100) + j] = (int)(i + (i * j) + j);
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
         goto error;
@@ -86,7 +86,7 @@ create_test_file(char *name, hid_t fapl_id)
     if ((top_level_gid = H5Gcreate2(fid, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsprintf(name, "grp%02u", (unsigned)i);
+        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gcreate2(top_level_gid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -146,6 +146,9 @@ main(int argc, char *argv[])
         HDexit(EXIT_FAILURE);
     }
 
+    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+        goto error;
+
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
     if (H5Pset_fapl_mpio(fapl_id, comm, info) < 0)
@@ -153,7 +156,7 @@ main(int argc, char *argv[])
 
     /* Create the file */
     h5_fixname(FILENAME[0], fapl_id, name, sizeof(name));
-    if ((fid1 = create_test_file(name, fapl_id)) < 0)
+    if ((fid1 = create_test_file(name, sizeof(name), fapl_id)) < 0)
         goto error;
     /* Flush and exit without closing the library */
     if (H5Fflush(fid1, H5F_SCOPE_GLOBAL) < 0)
@@ -161,7 +164,7 @@ main(int argc, char *argv[])
 
     /* Create the other file which will not be flushed */
     h5_fixname(FILENAME[1], fapl_id, name, sizeof(name));
-    if ((fid2 = create_test_file(name, fapl_id)) < 0)
+    if ((fid2 = create_test_file(name, sizeof(name), fapl_id)) < 0)
         goto error;
 
     if (mpi_rank == 0)
@@ -192,6 +195,11 @@ main(int argc, char *argv[])
     HDfflush(stdout);
     HDfflush(stderr);
 
+    if (data_g) {
+        HDfree(data_g);
+        data_g = NULL;
+    }
+
     /* Always exit with a failure code!
      *
      * In accordance with the standard, not having all processes
@@ -208,6 +216,9 @@ error:
     HDprintf("*** ERROR ***\n");
     HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
     HDfflush(stdout);
+
+    if (data_g)
+        HDfree(data_g);
 
     HD_exit(EXIT_FAILURE);
 } /* end main() */

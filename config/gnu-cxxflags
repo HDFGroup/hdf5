@@ -58,7 +58,7 @@ load_gnu_arguments()
 if test "X-" = "X-$cxx_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
-    # icc beginning with version 12 includes a "gcc version compatiblilty"
+    # icc beginning with version 12 includes a "gcc version compatibility"
     # string, causing the gcc H5_CXXFLAGS to be erroneously added.  The line
     # "grep -v 'icc version'" causes the discarding of any output
     # containing 'icc version'.  The cxx_version for icc is correctly determined

@@ -217,7 +217,7 @@ usage(void)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t    fid;                /* File ID for file opened */
     long     nshrinks    = 0;    /* # of times to shrink the dataset */

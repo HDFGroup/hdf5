@@ -7,7 +7,7 @@
 !  src/fortran/test/tHDF5.f90
 !
 ! PURPOSE
-!  This is the test  module used for testing the Fortran90 HDF library APIs.
+!  This is the test module used for testing the Fortran90 HDF library APIs.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

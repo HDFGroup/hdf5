@@ -540,7 +540,7 @@ H5_FCDLL int_f h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode);
 H5_FCDLL int_f h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode);
 #endif
 /*
- * Functions frome H5Rf.c
+ * Functions from H5Rf.c
  */
 H5_FCDLL int_f h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id);
 H5_FCDLL int_f h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *ref_type,

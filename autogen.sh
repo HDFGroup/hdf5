@@ -50,17 +50,7 @@
 # Note that aclocal will attempt to include libtool's share/aclocal
 # directory.
 #
-# This script takes two potential options:
-#
-# -p
-#
-# When this is selected, the autotools versions are set to the paths
-# and versions used by The HDF Group to produce the released versions
-# of the library.
-#
-# NOTE: This is probably temporary. Once we update our dev machines
-# to have recent versions of the autotools this option will probably
-# be removed.
+# Aside from -h for help, this script takes one potential option:
 #
 # -v
 #
@@ -71,9 +61,6 @@ echo "**************************"
 echo "* HDF5 autogen.sh script *"
 echo "**************************"
 echo
-
-# Default is not production
-production=false
 
 # Default is not verbose output
 verbose=false
@@ -86,21 +73,12 @@ while getopts "$optspec" optchar; do
         echo
         echo "      -h      Print this help message."
         echo
-        echo "      -p      Used by THG to use hard-codes autotools"
-        echo "              paths on THG machines. Not for non-HDF-Group"
-        echo "              users!"
-        echo
         echo "      -v      Show more verbose output."
         echo
         echo "  NOTE: Each tool can be set via an environment variable."
         echo "        These are documented inside this autogen.sh script."
         echo
         exit 0
-        ;;
-    p)
-        echo "Setting THG production mode..."
-        echo
-        production=true
         ;;
     v)
         echo "Setting verbosity: high"
@@ -117,84 +95,52 @@ while getopts "$optspec" optchar; do
     esac
 done
 
-if [ "$production" = true ] ; then
-
-    # Production mode
-    #
-    # Hard-code canonical HDF Group tool locations.
-
-    # If paths to tools are not specified, assume they are
-    # located in /usr/hdf/bin/AUTOTOOLS and set paths accordingly.
-    if test -z ${HDF5_AUTOCONF}; then
-        HDF5_AUTOCONF=/usr/hdf/bin/AUTOTOOLS/autoconf
-    fi
-    if test -z ${HDF5_AUTOMAKE}; then
-        HDF5_AUTOMAKE=/usr/hdf/bin/AUTOTOOLS/automake
-    fi
-    if test -z ${HDF5_AUTOHEADER}; then
-        HDF5_AUTOHEADER=/usr/hdf/bin/AUTOTOOLS/autoheader
-    fi
-    if test -z ${HDF5_ACLOCAL}; then
-        HDF5_ACLOCAL=/usr/hdf/bin/AUTOTOOLS/aclocal
-    fi
-    if test -z ${HDF5_LIBTOOL}; then
-        HDF5_LIBTOOL=/usr/hdf/bin/AUTOTOOLS/libtool
-    fi
-    if test -z ${HDF5_M4}; then
-        HDF5_M4=/usr/hdf/bin/AUTOTOOLS/m4
-    fi
-
-else
-
-    # Not in production mode
-    #
-    # If paths to autotools are not specified, use whatever the system
-    # has installed as the default. We use 'which <tool>' to
-    # show exactly what's being used.
-    if test -z ${HDF5_AUTOCONF}; then
-        HDF5_AUTOCONF=$(which autoconf)
-    fi
-    if test -z ${HDF5_AUTOMAKE}; then
-        HDF5_AUTOMAKE=$(which automake)
-    fi
-    if test -z ${HDF5_AUTOHEADER}; then
-        HDF5_AUTOHEADER=$(which autoheader)
-    fi
-    if test -z ${HDF5_ACLOCAL}; then
-        HDF5_ACLOCAL=$(which aclocal)
-    fi
-    if test -z ${HDF5_LIBTOOL}; then
-        case "`uname`" in
-        Darwin*)
-            # libtool on OS-X is non-gnu
-            HDF5_LIBTOOL=$(which glibtool)
-            ;;
-        *)
-            HDF5_LIBTOOL=$(which libtool)
-            ;;
-        esac
-    fi
-    if test -z ${HDF5_M4}; then
-        HDF5_M4=$(which m4)
-    fi
-
-fi # production
+# If paths to autotools are not specified, use whatever the system
+# has installed as the default. We use 'command -v <tool>' to
+# show exactly what's being used (shellcheck complains that 'which'
+# is non-standard and deprecated).
+if test -z "${HDF5_AUTOCONF}"; then
+    HDF5_AUTOCONF="$(command -v autoconf)"
+fi
+if test -z "${HDF5_AUTOMAKE}"; then
+    HDF5_AUTOMAKE="$(command -v automake)"
+fi
+if test -z "${HDF5_AUTOHEADER}"; then
+    HDF5_AUTOHEADER="$(command -v autoheader)"
+fi
+if test -z "${HDF5_ACLOCAL}"; then
+    HDF5_ACLOCAL="$(command -v aclocal)"
+fi
+if test -z "${HDF5_LIBTOOL}"; then
+    case "$(uname)" in
+    Darwin*)
+        # libtool on OS-X is non-gnu
+        HDF5_LIBTOOL="$(command -v glibtool)"
+        ;;
+    *)
+        HDF5_LIBTOOL="$(command -v libtool)"
+        ;;
+    esac
+fi
+if test -z "${HDF5_M4}"; then
+    HDF5_M4="$(command -v m4)"
+fi
 
 
 # Make sure that these versions of the autotools are in the path
-AUTOCONF_DIR=`dirname ${HDF5_AUTOCONF}`
-LIBTOOL_DIR=`dirname ${HDF5_LIBTOOL}`
-M4_DIR=`dirname ${HDF5_M4}`
+AUTOCONF_DIR=$(dirname "${HDF5_AUTOCONF}")
+LIBTOOL_DIR=$(dirname "${HDF5_LIBTOOL}")
+M4_DIR=$(dirname "${HDF5_M4}")
 PATH=${AUTOCONF_DIR}:${LIBTOOL_DIR}:${M4_DIR}:$PATH
 
 # Make libtoolize match the specified libtool
-case "`uname`" in
+case "$(uname)" in
 Darwin*)
     # On OS X, libtoolize could be named glibtoolize or
     # libtoolize. Try the former first, then fall back
     # to the latter if it's not found.
     HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
-    if [ ! -f $HDF5_LIBTOOLIZE ] ; then
+    if [ ! -f "$HDF5_LIBTOOLIZE" ] ; then
         HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
     fi
     ;;
@@ -249,7 +195,7 @@ echo
 
 # LIBTOOLIZE
 libtoolize_cmd="${HDF5_LIBTOOLIZE} --copy --force"
-echo ${libtoolize_cmd}
+echo "${libtoolize_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_LIBTOOLIZE} --version
 fi
@@ -264,7 +210,7 @@ if test -e "${LIBTOOL_DIR}/../share/aclocal" ; then
     aclocal_include="-I ${LIBTOOL_DIR}/../share/aclocal"
 fi
 aclocal_cmd="${HDF5_ACLOCAL} --force -I m4 ${aclocal_include}"
-echo ${aclocal_cmd}
+echo "${aclocal_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_ACLOCAL} --version
 fi
@@ -273,7 +219,7 @@ echo
 
 # AUTOHEADER
 autoheader_cmd="${HDF5_AUTOHEADER} --force"
-echo ${autoheader_cmd}
+echo "${autoheader_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOHEADER} --version
 fi
@@ -282,7 +228,7 @@ echo
 
 # AUTOMAKE
 automake_cmd="${HDF5_AUTOMAKE} --copy --add-missing --force-missing"
-echo ${automake_cmd}
+echo "${automake_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOMAKE} --version
 fi
@@ -291,7 +237,7 @@ echo
 
 # AUTOCONF
 autoconf_cmd="${HDF5_AUTOCONF} --force"
-echo ${autoconf_cmd}
+echo "${autoconf_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOCONF} --version
 fi

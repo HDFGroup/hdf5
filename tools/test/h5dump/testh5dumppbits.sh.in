@@ -516,7 +516,7 @@ TOOLTEST tnofilename-with-packed-bits.ddl --enable-error-stack
 # Limits:
 # Maximum number of packed bits is 8 (for now).
 # Maximum integer size is 64 (for now).
-# Maximun Offset is 63 (Maximum size - 1).
+# Maximum Offset is 63 (Maximum size - 1).
 # Maximum Offset+Length is 64 (Maximum size).
 # Tests:
 # Normal operation on both signed and unsigned int datasets.

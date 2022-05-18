@@ -99,9 +99,6 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_ord
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Format version bounds for attribute */
 const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_1,     /* H5F_LIBVER_EARLIEST */
@@ -139,9 +136,6 @@ static const H5I_class_t H5I_ATTR_CLS[1] = {{
     (H5I_free_t)H5A__close_cb /* Callback routine for closing objects of this class */
 }};
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5A_top_package_initialize_s = FALSE;
-
 /*-------------------------------------------------------------------------
  * Function: H5A_init
  *
@@ -158,30 +152,6 @@ H5A_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5A__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5A__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-herr_t
-H5A__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /*
      * Create attribute ID type.
@@ -189,12 +159,9 @@ H5A__init_package(void)
     if (H5I_register_type(H5I_ATTR_CLS) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    /* Mark "top" of interface as initialized, too */
-    H5A_top_package_initialize_s = TRUE;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__init_package() */
+} /* end H5A_init() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -220,16 +187,10 @@ H5A_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5A_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_ATTR) > 0) {
-            (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-
-        /* Mark closed */
-        if (0 == n)
-            H5A_top_package_initialize_s = FALSE;
-    } /* end if */
+    if (H5I_nmembers(H5I_ATTR) > 0) {
+        (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
+        n++; /*H5I*/
+    }        /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* H5A_top_term_package() */
@@ -260,18 +221,11 @@ H5A_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_ATTR));
-        HDassert(FALSE == H5A_top_package_initialize_s);
+    /* Sanity checks */
+    HDassert(0 == H5I_nmembers(H5I_ATTR));
 
-        /* Destroy the attribute object id group */
-        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the attribute object id group */
+    n += (H5I_dec_type_ref(H5I_ATTR) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* H5A_term_package() */
@@ -520,7 +474,7 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -1148,7 +1102,7 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(attr);
@@ -1166,7 +1120,6 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
         ainfo->corder       = attr->shared->crt_idx;
     } /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_info() */
 
@@ -1296,7 +1249,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(attr_vol_obj);
@@ -1383,14 +1336,13 @@ H5A_oloc(H5A_t *attr)
 {
     H5O_loc_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->oloc);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_oloc() */
 
@@ -1414,14 +1366,13 @@ H5A_nameof(H5A_t *attr)
 {
     H5G_name_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->path);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_nameof() */
 
@@ -1443,14 +1394,13 @@ H5A_type(const H5A_t *attr)
 {
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = attr->shared->dt;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_type() */
 
@@ -1528,7 +1478,7 @@ H5A__compact_build_table_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*
     H5A_compact_bt_ud_t *udata     = (H5A_compact_bt_ud_t *)_udata; /* Operator user data */
     herr_t               ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(mesg);
@@ -1644,7 +1594,7 @@ H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
     H5A_dense_bt_ud_t *udata     = (H5A_dense_bt_ud_t *)_udata; /* 'User data' passed in */
     herr_t             ret_value = H5_ITER_CONT;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(attr);
@@ -1770,7 +1720,7 @@ done:
 static int
 H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
         HDstrcmp((*(const H5A_t *const *)attr1)->shared->name, (*(const H5A_t *const *)attr2)->shared->name))
@@ -1796,7 +1746,7 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
         HDstrcmp((*(const H5A_t *const *)attr2)->shared->name, (*(const H5A_t *const *)attr1)->shared->name))
@@ -1823,7 +1773,7 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if ((*(const H5A_t *const *)attr1)->shared->crt_idx < (*(const H5A_t *const *)attr2)->shared->crt_idx)
         ret_value = -1;
@@ -1857,7 +1807,7 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
     int ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if ((*(const H5A_t *const *)attr1)->shared->crt_idx < (*(const H5A_t *const *)attr2)->shared->crt_idx)
         ret_value = 1;
@@ -1885,7 +1835,7 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 static herr_t
 H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_order_t order)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(atable);
@@ -2553,7 +2503,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
     H5A_t *                 attr_dst  = NULL;
     herr_t                  ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(attr_src);
@@ -2703,7 +2653,7 @@ H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hs
     hsize_t last_attr;           /* Index of last attribute examined */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Call attribute iteration routine */
     last_attr = start_idx = (idx ? *idx : 0);

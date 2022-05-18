@@ -75,9 +75,6 @@ static H5EA_t *H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Extensible array client ID to class mapping */
 
 /* Remember to add client ID to H5EA_cls_id_t in H5EAprivate.h when adding a new
@@ -123,7 +120,7 @@ H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
     H5EA_hdr_t *hdr       = NULL; /* The extensible array header information */
     H5EA_t *    ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -342,7 +339,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
     hbool_t           hdr_dirty          = FALSE;              /* Whether the array header changed */
     herr_t            ret_value          = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(ea);

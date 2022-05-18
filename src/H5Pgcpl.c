@@ -120,7 +120,7 @@ H5P__gcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register group info property */
     if (H5P__register_real(pclass, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE, &H5G_def_ginfo_g, NULL,
@@ -532,7 +532,7 @@ H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size)
     const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)value; /* Create local aliases for values */
     uint8_t **         pp    = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (NULL != *pp) {
         UINT32ENCODE(*pp, ginfo->lheap_size_hint)
@@ -569,7 +569,7 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
     const uint8_t **pp        = (const uint8_t **)_pp;
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set property to default value */
     HDmemset(ginfo, 0, sizeof(H5O_ginfo_t));
@@ -617,7 +617,7 @@ H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size)
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)value; /* Create local aliases for values */
     uint8_t **         pp    = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (NULL != *pp) {
         unsigned crt_order_flags = 0;
@@ -661,7 +661,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
     unsigned        enc_size;
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     enc_size = *(*pp)++;
     if (enc_size != sizeof(unsigned))

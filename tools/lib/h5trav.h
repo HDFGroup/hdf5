@@ -87,7 +87,7 @@ typedef struct trav_link_t {
 } trav_link_t;
 
 /*-------------------------------------------------------------------------
- * struct to store basic info needed for the h5trav table traversal algorythm
+ * struct to store basic info needed for the h5trav table traversal algorithm
  *-------------------------------------------------------------------------
  */
 

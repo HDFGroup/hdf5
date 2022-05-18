@@ -112,7 +112,7 @@ H5FL_EXTERN(H5S_sel_iter_t);
     on each element so that each of them has a copy of the VL data.
 --------------------------------------------------------------------------*/
 herr_t
-H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type, const H5S_t *space)
+H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type, H5S_t *space)
 {
     H5S_sel_iter_t *mem_iter      = NULL;  /* Memory selection iteration info */
     hbool_t         mem_iter_init = FALSE; /* Whether the memory selection iterator has been initialized */
@@ -590,7 +590,7 @@ done:
 static herr_t
 H5D__fill_release(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(fb_info);

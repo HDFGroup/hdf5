@@ -217,7 +217,7 @@ H5O_SHARED_DELETE(H5F_t *f, H5O_t *open_oh, void *_mesg)
     H5O_shared_t *sh_mesg   = (H5O_shared_t *)_mesg; /* Pointer to shared message portion of actual message */
     herr_t        ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -268,7 +268,7 @@ H5O_SHARED_LINK(H5F_t *f, H5O_t *open_oh, void *_mesg)
     H5O_shared_t *sh_mesg   = (H5O_shared_t *)_mesg; /* Pointer to shared message portion of actual message */
     herr_t        ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -319,7 +319,7 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst, hbool_
     void *dst_mesg  = NULL; /* Destination message */
     void *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"

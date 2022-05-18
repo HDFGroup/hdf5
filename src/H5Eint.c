@@ -190,7 +190,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     unsigned     have_desc = 1; /* Flag to indicate whether the error has a "real" description */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -313,7 +313,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     unsigned     have_desc = 1; /* Flag to indicate whether the error has a "real" description */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -807,7 +807,7 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
     unsigned      u;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(estack);
@@ -930,7 +930,7 @@ H5E_dump_api_stack(hbool_t is_api)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Only dump the error stack during an API call */
     if (is_api) {
@@ -953,6 +953,5 @@ H5E_dump_api_stack(hbool_t is_api)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     }  /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */

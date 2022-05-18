@@ -554,7 +554,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
 #ifdef H5_HAVE_ROS3_VFD
                 if (!vfd_info->info)
                     H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-                if (H5Pset_fapl_ros3(fapl_id, (H5FD_ros3_fapl_t *)vfd_info->info) < 0)
+                if (H5Pset_fapl_ros3(fapl_id, (const H5FD_ros3_fapl_t *)vfd_info->info) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
@@ -600,7 +600,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
 done:
     if (ret_value < 0) {
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -705,7 +705,7 @@ done:
             H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
 
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -762,7 +762,7 @@ done:
         }
 
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -945,7 +945,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
      * as TRUE, we should return failure now since the file couldn't be opened with
      * the VFL driver/VOL connector that was set on the FAPL by the caller.
      */
-    if (fid < 0 && use_specific_driver)
+    if (use_specific_driver)
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
 
     /*
@@ -1033,8 +1033,10 @@ done:
         H5Pclose(tmp_fapl_id);
 
     /* Clear error message unless asked for */
-    if (ret_value < 0 && enable_error_stack <= 1)
-        H5Epop(H5tools_ERR_STACK_g, 1);
+    if (ret_value < 0) {
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
+            H5Epop(H5tools_ERR_STACK_g, 1);
+    }
 
     return ret_value;
 }
@@ -1052,7 +1054,7 @@ done:
 H5_ATTR_PURE static size_t
 h5tools_count_ncols(const char *s)
 {
-    register size_t i;
+    size_t i;
 
     for (i = 0; *s; s++)
         if (*s >= ' ')
@@ -1890,15 +1892,22 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     hid_t        region_id    = H5I_INVALID_HID;
                     hid_t        region_space = H5I_INVALID_HID;
                     H5S_sel_type region_type;
+                    H5R_ref_t    tref;
+
+                    if (size > sizeof(tref))
+                        H5TOOLS_THROW((-1), "unexpectedly large ref");
+
+                    HDmemset(&tref, 0, sizeof(tref));
 
                     for (block_index = 0; block_index < block_nelmts; block_index++) {
                         mem = ((unsigned char *)_mem) + block_index * size;
-                        if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        HDmemcpy(&tref, mem, size);
+                        if ((region_id = H5Ropen_object(&tref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                         else {
-                            if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >=
-                                0) {
-                                if (!h5tools_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
+                            if ((region_space = H5Ropen_region(&tref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                if (!h5tools_is_zero(&tref, H5Tget_size(H5T_STD_REF))) {
+
                                     region_type = H5Sget_select_type(region_space);
                                     if (region_type == H5S_SEL_POINTS)
                                         render_bin_output_region_points(region_space, region_id, stream,

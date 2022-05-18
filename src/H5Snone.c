@@ -49,22 +49,22 @@
 static herr_t   H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 static herr_t   H5S__none_release(H5S_t *space);
 static htri_t   H5S__none_is_valid(const H5S_t *space);
-static hssize_t H5S__none_serial_size(const H5S_t *space);
-static herr_t   H5S__none_serialize(const H5S_t *space, uint8_t **p);
+static hssize_t H5S__none_serial_size(H5S_t *space);
+static herr_t   H5S__none_serialize(H5S_t *space, uint8_t **p);
 static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t   H5S__none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__none_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__none_unlim_dim(const H5S_t *space);
 static htri_t   H5S__none_is_contiguous(const H5S_t *space);
 static htri_t   H5S__none_is_single(const H5S_t *space);
-static htri_t   H5S__none_is_regular(const H5S_t *space);
-static htri_t   H5S__none_shape_same(const H5S_t *space1, const H5S_t *space2);
-static htri_t   H5S__none_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
+static htri_t   H5S__none_is_regular(H5S_t *space);
+static htri_t   H5S__none_shape_same(H5S_t *space1, H5S_t *space2);
+static htri_t   H5S__none_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 static herr_t   H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__none_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__none_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t  H5S__none_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -144,9 +144,9 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
+H5S__none_iter_init(H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space && H5S_SEL_NONE == H5S_GET_SELECT_TYPE(space));
@@ -174,7 +174,7 @@ H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 static herr_t
 H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_UNUSED *coords)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -200,7 +200,7 @@ static herr_t
 H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_UNUSED *start,
                      hsize_t H5_ATTR_UNUSED *end)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -225,7 +225,7 @@ H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_
 static hsize_t
 H5S__none_iter_nelmts(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -253,7 +253,7 @@ H5S__none_iter_nelmts(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 static htri_t
 H5S__none_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -282,7 +282,7 @@ H5S__none_iter_has_next_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 static herr_t
 H5S__none_iter_next(H5S_sel_iter_t H5_ATTR_UNUSED *iter, size_t H5_ATTR_UNUSED nelem)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -311,7 +311,7 @@ H5S__none_iter_next(H5S_sel_iter_t H5_ATTR_UNUSED *iter, size_t H5_ATTR_UNUSED n
 static herr_t
 H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -353,7 +353,7 @@ H5S__none_iter_get_seq_list(H5S_sel_iter_t H5_ATTR_UNUSED *iter, size_t H5_ATTR_
                             size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
                             hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -393,7 +393,7 @@ H5S__none_iter_get_seq_list(H5S_sel_iter_t H5_ATTR_UNUSED *iter, size_t H5_ATTR_
 static herr_t
 H5S__none_iter_release(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -421,7 +421,7 @@ H5S__none_iter_release(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 static herr_t
 H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -452,7 +452,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
 static herr_t
 H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(src);
     HDassert(dst);
@@ -486,7 +486,7 @@ H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUS
 static htri_t
 H5S__none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -513,9 +513,9 @@ H5S__none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S__none_serial_size(const H5S_t H5_ATTR_UNUSED *space)
+H5S__none_serial_size(H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -533,7 +533,7 @@ H5S__none_serial_size(const H5S_t H5_ATTR_UNUSED *space)
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S__none_serialize(space, p)
-        const H5S_t *space;     IN: Dataspace with selection to serialize
+        H5S_t *space;           IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -548,11 +548,11 @@ H5S__none_serial_size(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_serialize(const H5S_t *space, uint8_t **p)
+H5S__none_serialize(H5S_t *space, uint8_t **p)
 {
     uint8_t *pp = (*p); /* Local pointer for decoding */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -601,7 +601,7 @@ H5S__none_deserialize(H5S_t **space, const uint8_t **p)
     uint32_t version;             /* Version number */
     herr_t   ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(p);
     HDassert(*p);
@@ -673,7 +673,7 @@ static herr_t
 H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *start,
                  hsize_t H5_ATTR_UNUSED *end)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(start);
@@ -705,7 +705,7 @@ H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *star
 static herr_t
 H5S__none_offset(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *offset)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(offset);
@@ -735,7 +735,7 @@ H5S__none_offset(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *offs
 static int
 H5S__none_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(-1)
 } /* end H5S__none_unlim_dim() */
@@ -761,7 +761,7 @@ H5S__none_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
 static htri_t
 H5S__none_is_contiguous(const H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -789,7 +789,7 @@ H5S__none_is_contiguous(const H5S_t H5_ATTR_UNUSED *space)
 static htri_t
 H5S__none_is_single(const H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -803,7 +803,7 @@ H5S__none_is_single(const H5S_t H5_ATTR_UNUSED *space)
     Check if a "none" selection is "regular"
  USAGE
     htri_t H5S__none_is_regular(space)
-        const H5S_t *space;     IN: Dataspace pointer to check
+        H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -816,9 +816,9 @@ H5S__none_is_single(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
+H5S__none_is_regular(H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -833,8 +833,8 @@ H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
     Check if a two "none" selections are the same shape
  USAGE
     htri_t H5S__none_shape_same(space1, space2)
-        const H5S_t *space1;     IN: First dataspace to check
-        const H5S_t *space2;     IN: Second dataspace to check
+        H5S_t *space1;           IN: First dataspace to check
+        H5S_t *space2;           IN: Second dataspace to check
  RETURNS
     TRUE / FALSE / FAIL
  DESCRIPTION
@@ -846,9 +846,9 @@ H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1, const H5S_t H5_ATTR_UNUSED *space2)
+H5S__none_shape_same(H5S_t H5_ATTR_UNUSED *space1, H5S_t H5_ATTR_UNUSED *space2)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space1);
@@ -864,7 +864,7 @@ H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1, const H5S_t H5_ATTR_UNU
     Detect intersections of selection with block
  USAGE
     htri_t H5S__none_intersect_block(space, start, end)
-        const H5S_t *space;     IN: Dataspace with selection to use
+        H5S_t *space;           IN: Dataspace with selection to use
         const hsize_t *start;   IN: Starting coordinate for block
         const hsize_t *end;     IN: Ending coordinate for block
  RETURNS
@@ -877,10 +877,10 @@ H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1, const H5S_t H5_ATTR_UNU
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S__none_intersect_block(const H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *start,
+H5S__none_intersect_block(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *start,
                           const hsize_t H5_ATTR_UNUSED *end)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(space);
@@ -912,7 +912,7 @@ H5S__none_intersect_block(const H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_AT
 static herr_t
 H5S__none_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *offset)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -942,7 +942,7 @@ H5S__none_adjust_u(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNUSED *of
 static herr_t
 H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *offset)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -966,7 +966,7 @@ H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *o
 static herr_t
 H5S__none_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *offset)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space && H5S_SEL_NONE == H5S_GET_SELECT_TYPE(space));
@@ -994,7 +994,7 @@ H5S__none_project_simple(const H5S_t H5_ATTR_UNUSED *base_space, H5S_t *new_spac
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(base_space && H5S_SEL_NONE == H5S_GET_SELECT_TYPE(base_space));

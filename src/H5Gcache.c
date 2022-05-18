@@ -118,7 +118,7 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5F_t *f = (H5F_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(f);
@@ -134,7 +134,7 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
  * Function:    H5G__cache_node_deserialize
  *
  * Purpose:	Given a buffer containing the on disk image of a symbol table
- *		node, allocate an instance of H5G_node_t, load the contence of the
+ *		node, allocate an instance of H5G_node_t, load the contents of the
  *		image into it, and return a pointer to the instance.
  *
  *		Note that deserializing the image requires access to the file
@@ -160,7 +160,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_
     const uint8_t *image_end = image + len - 1;         /* Pointer to end of image buffer */
     void *         ret_value = NULL;                    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -224,7 +224,7 @@ H5G__cache_node_image_len(const void *_thing, size_t *image_len)
 {
     const H5G_node_t *sym = (const H5G_node_t *)_thing; /* Pointer to object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(sym);
@@ -240,7 +240,7 @@ H5G__cache_node_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:    H5G__cache_node_serialize
  *
- * Purpose:	Given a correctly sized buffer and an instace of H5G_node_t,
+ * Purpose:	Given a correctly sized buffer and an instance of H5G_node_t,
  *		serialize the contents of the instance of H5G_node_t, and write
  *		this data into the supplied buffer.  This buffer will be written
  *		to disk.
@@ -260,7 +260,7 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing
     uint8_t *   image     = (uint8_t *)_image;    /* Pointer into raw data buffer */
     herr_t      ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -317,7 +317,7 @@ H5G__cache_node_free_icr(void *_thing)
     H5G_node_t *sym       = (H5G_node_t *)_thing; /* Pointer to the object */
     herr_t      ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(sym);

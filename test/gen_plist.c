@@ -81,7 +81,7 @@ main(void)
     H5AC_cache_image_config_t my_cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                        -1};
 
-    /* check endianess */
+    /* check endianness */
     {
         short int word = 0x0001;
         char *    byte = (char *)&word;
