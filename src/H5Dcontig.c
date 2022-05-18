@@ -565,9 +565,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
 
-    int          sm_ndims;     /* The number of dimensions of the memory buffer's dataspace (signed) */
-    int          sf_ndims;     /* The number of dimensions of the file dataspace (signed) */
-    H5S_sel_type fsel_type;    /* file space selection type */
+    int          sm_ndims;  /* The number of dimensions of the memory buffer's dataspace (signed) */
+    int          sf_ndims;  /* The number of dimensions of the file dataspace (signed) */
+    H5S_sel_type fsel_type; /* file space selection type */
 
     herr_t ret_value = SUCCEED; /* Return value		*/
 
