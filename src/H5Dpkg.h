@@ -288,13 +288,12 @@ typedef struct H5D_io_info_t {
 #endif                       /* H5_HAVE_PARALLEL */
     H5D_io_ops_t     io_ops; /* I/O operation function pointers */
     H5D_io_op_type_t op_type;
-    const H5D_t *    dset;           /* Pointer to dataset being operated on */
-    H5D_dset_info_t *dsets_info;     /* dsets info where I/O is done to/from */
-    H5SL_t *         sel_pieces;     /* Skip list containing information for each piece selected */
-    haddr_t          store_faddr;    /* lowest file addr for read/write */
-    const void *     base_maddr_w;   /* start mem addr for write */
-    void *           base_maddr_r;   /* start mem addr for read */
-    hbool_t          is_coll_broken; /* is collective mode broken? */
+    const H5D_t *    dset;         /* Pointer to dataset being operated on */
+    H5D_dset_info_t *dsets_info;   /* dsets info where I/O is done to/from */
+    H5SL_t *         sel_pieces;   /* Skip list containing information for each piece selected */
+    haddr_t          store_faddr;  /* lowest file addr for read/write */
+    const void *     base_maddr_w; /* start mem addr for write */
+    void *           base_maddr_r; /* start mem addr for read */
     hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
 } H5D_io_info_t;
 
@@ -753,10 +752,6 @@ H5_DLL herr_t H5D__collective_write(const size_t count, H5D_io_info_t *io_info);
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const size_t count, H5D_io_info_t *io_info);
-
-/* function to invoke collective I/O calls for ranks that have no I/O
-   on a dataset to match other ranks' collective calls */
-H5_DLL herr_t H5D__match_coll_calls(H5F_t *file, H5P_genplist_t *plist, hbool_t do_read);
 
 #endif /* H5_HAVE_PARALLEL */
 

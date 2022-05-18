@@ -974,11 +974,11 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info)
     }
 
     /* Set the actual-chunk-opt-mode property. */
-    H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
+    H5CX_set_mpio_actual_chunk_opt(actual_chunk_opt_mode);
 
     /* Set the actual-io-mode property.
      * Link chunk I/O does not break to independent, so can set right away */
-    H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
+    H5CX_set_mpio_actual_io_mode(actual_io_mode);
 
     /* Code block for actual actions (Build a MPI Type, IO) */
     {
@@ -2189,68 +2189,6 @@ H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective
     FUNC_LEAVE_NOAPI(owner1 - owner2)
 } /* end H5D__cmp_filtered_collective_io_info_entry_owner() */
 #endif
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__match_coll_calls
- *
- * Purpose: For processes that are not reading/writing to a particular
- * datasets through the multi-dataset interface, but are participating
- * in the collective call, match the collective I/O calls from the
- * other processes.
- *
- * Return:      non-negative on success, negative on failure.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__match_coll_calls(H5F_t *file, H5P_genplist_t *plist, hbool_t do_read)
-{
-    int                        local_cause  = 0;
-    int                        global_cause = 0;
-    int                        mpi_code;
-    H5FD_mpio_collective_opt_t para_io_mode;
-    H5FD_mpio_xfer_t           xfer_mode;
-    herr_t                     ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    HDassert(file);
-
-    /* Get the transfer mode */
-    if (H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-    HDassert(xfer_mode == H5FD_MPIO_COLLECTIVE);
-
-    /* get parallel io mode */
-    if (H5P_get(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &para_io_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
-
-    /* just to match up with MPI_Allreduce from H5D__mpio_opt_possible() */
-    if (MPI_SUCCESS !=
-        (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, H5F_mpi_get_comm(file))))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
-
-    /* if collective mode is not broken according to the
-     * H5D__mpio_opt_possible, since the below MPI funcs will be
-     * called only in collective mode */
-    if (!global_cause) {
-        H5D_io_info_t io_info;
-
-        /* Init io_info */
-        io_info.f_sh                   = H5F_SHARED(file);
-        io_info.op_type                = do_read ? H5D_IO_OP_READ : H5D_IO_OP_WRITE;
-        io_info.io_ops.single_read_md  = H5D__mpio_select_read;
-        io_info.io_ops.single_write_md = H5D__mpio_select_write;
-        io_info.store_faddr            = 0;
-
-        /* Call the I/O routine with no data to match collective calls */
-        if (H5D__inter_collective_io(&io_info, NULL, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish shared collective MPI-IO")
-    } /* end if !global_cause */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__match_coll_calls */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__obtain_mpio_mode

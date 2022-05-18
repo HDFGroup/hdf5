@@ -3148,12 +3148,9 @@ test_actual_io_mode(int selection_mode)
              * collective I/O */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
-            test_name = "Contiguous";
-            actual_chunk_opt_mode_expected =
-                H5D_MPIO_LINK_CHUNK; /*!FIXME Could reinstate single chunk case and mark it as
-                                        H5D_MPIO_NO_CHUNK_OPTIMIZATION, or reevaluate how we report these in
-                                        the wake of mdset -NAF */
-            actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE; /*!FIXME -NAF */
+            test_name                      = "Contiguous";
+            actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
+            actual_io_mode_expected        = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
             break;
 
         case TEST_ACTUAL_IO_NO_COLLECTIVE:

@@ -565,10 +565,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
 
-    int          sm_ndims;     /* The number of dimensions of the memory buffer's dataspace (signed) */
-    int          sf_ndims;     /* The number of dimensions of the file dataspace (signed) */
-    H5S_class_t  fsclass_type; /* file space class type */
-    H5S_sel_type fsel_type;    /* file space selection type */
+    int          sm_ndims;  /* The number of dimensions of the memory buffer's dataspace (signed) */
+    int          sf_ndims;  /* The number of dimensions of the file dataspace (signed) */
+    H5S_sel_type fsel_type; /* file space selection type */
 
     herr_t ret_value = SUCCEED; /* Return value		*/
 
@@ -636,12 +635,8 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     /* We are not using single element mode */
     dinfo->use_single = FALSE;
 
-    /* Get type of space class on disk */
-    if ((fsclass_type = H5S_GET_EXTENT_TYPE(file_space)) < H5S_SCALAR)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADTYPE, FAIL, "unable to get fspace class type")
-
     /* Get type of selection on disk & in memory */
-    if ((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+    if ((dinfo->fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
     if ((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
@@ -655,6 +650,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
          * purpose
          * This tmp_fspace allows multiple write before close dset */
         H5S_t *tmp_fspace; /* Temporary file dataspace */
+
         /* Create "temporary" chunk for selection operations (copy file space) */
         if (NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
