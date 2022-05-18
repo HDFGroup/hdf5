@@ -835,7 +835,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              with the cache API calls.
  *
  *              NOTE: This test takes some time to run and checks the
- *                    HDF5TestExpress environment variable.
+ *                    testing express level value.
  *
  * Return:      Test pass status (TRUE/FALSE)
  *
@@ -1885,7 +1885,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
     pass = TRUE;
 
-    /* Create a file for test purposes, and veify that its metadata cache
+    /* Create a file for test purposes, and verify that its metadata cache
      * set to the default MDC configuration.
      */
 
@@ -2254,7 +2254,7 @@ main(void)
     } /* end if */
 
     /* Test with paged aggregation enabled or not */
-    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordinly */
+    /* The "my_fcpl" passed to each test has the paged or non-paged strategy set up accordingly */
     for (paged = FALSE; paged <= TRUE; paged++) {
         hid_t my_fcpl = fcpl_id;
 
