@@ -297,7 +297,7 @@ H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 
         if (H5D__read(count, dset_info, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -426,7 +426,7 @@ H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 
         if (H5D__write(count, dset_info, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -3148,7 +3148,7 @@ test_actual_io_mode(int selection_mode)
              * collective I/O */
             slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
-            test_name = "Contiguous";
+            test_name                      = "Contiguous";
             actual_chunk_opt_mode_expected = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
             actual_io_mode_expected        = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
             break;
