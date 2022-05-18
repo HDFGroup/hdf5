@@ -931,13 +931,6 @@ if (BUILD_TESTING)
     H5_SET_VFD_LIST()
   endif ()
 
-  option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
-  mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
-  if (HDF5_TEST_PASSTHROUGH_VOL)
-    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
-  endif ()
-
   set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
   set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
       CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)")
