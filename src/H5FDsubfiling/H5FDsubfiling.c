@@ -139,12 +139,13 @@ typedef struct H5FD_subfiling_t {
      *
      * Everything which follows is unique to the H5FD_subfiling_t
      */
-    haddr_t        eoa; /* end of allocated region          */
-    haddr_t        eof; /* end of file; current file size   */
-    haddr_t        pos; /* current file I/O position        */
-    H5FD_file_op_t op;  /* last operation                   */
-                        /* Copy of file name from open operation    */
-    char filename[H5FD_MAX_FILENAME_LEN];
+    haddr_t        eoa;                             /* end of allocated region                    */
+    haddr_t        eof;                             /* end of file; current file size             */
+    haddr_t        last_eoa;                        /* Last known end-of-address marker           */
+    haddr_t        local_eof;                       /* Local end-of-file address for each process */
+    haddr_t        pos;                             /* current file I/O position                  */
+    H5FD_file_op_t op;                              /* last operation                             */
+    char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 } H5FD_subfiling_t;
 
 /*
@@ -783,7 +784,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    int                            mpi_code;    /* MPI return code */
+    int64_t                        sf_eof;
+    int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -928,6 +930,11 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
                              file_ptr->comm, &file_ptr->fa.context_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
+
+    if (H5FD__subfiling__get_real_eof(file_ptr->fa.context_id, &sf_eof) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get EOF")
+    file_ptr->eof       = (haddr_t)sf_eof;
+    file_ptr->local_eof = file_ptr->eof;
 
     ret_value = (H5FD_t *)file_ptr;
 
@@ -1198,6 +1205,7 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE
 
+#if 0
 #if 0 /* TODO */
     int64_t local_eof = H5FDget_eof(file->sf_file, type);
 
@@ -1215,6 +1223,9 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     /* Return the global max of all the subfile EOF values */
     ret_value = (haddr_t)(logical_eof);
+#endif
+
+    ret_value = file->eof;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1679,8 +1690,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     /* Update current file position and EOF */
     file_ptr->pos = addr;
     file_ptr->op  = OP_WRITE;
+
+#if 1 /* Mimic the MPI I/O VFD */
+    file_ptr->eof = HADDR_UNDEF;
+
+    if (file_ptr->pos > file_ptr->local_eof)
+        file_ptr->local_eof = file_ptr->pos;
+#else
     if (file_ptr->pos > file_ptr->eof)
         file_ptr->eof = file_ptr->pos;
+#endif
 
 done:
     HDfree(io_bufs);
@@ -2021,6 +2040,46 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
     HDassert(file);
 
     /* Extend the file to make sure it's large enough */
+#if 1 /* Mimic the MPI I/O VFD */
+    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+        int64_t sf_eof;
+        int     mpi_code;
+
+        if (!H5CX_get_mpi_file_flushing())
+            if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+        if (0 == file->mpi_rank) {
+            if (H5FD__subfiling__get_real_eof(file->fa.context_id, &sf_eof) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get EOF")
+        }
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if (sf_eof < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid EOF")
+
+        /* truncate sub-files */
+        /* This is a hack.  We should be doing the truncate of the sub-files via calls to
+         * H5FD_truncate() with the IOC.  However, that system is messed up at present.
+         * thus the following hack.
+         *                                                 JRM -- 12/18/21
+         */
+        if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eoa, file->comm) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+        /* Reset last file I/O information */
+        file->pos = HADDR_UNDEF;
+        file->op  = OP_UNKNOWN;
+
+        /* Update the 'last' eoa value */
+        file->last_eoa = file->eoa;
+    }
+#else
     if (!H5F_addr_eq(file->eoa, file->eof)) {
 
         /* Update the eof value */
@@ -2029,6 +2088,9 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
+
+        /* Update the 'last' eoa value */
+        file->last_eoa = file->eoa;
     } /* end if */
 
     /* truncate sub-files */
@@ -2039,6 +2101,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      */
     if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eof, file->comm) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
