@@ -604,7 +604,7 @@ done:
 herr_t
 H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*out*/)
 {
-    herr_t                           ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "xx", f_sh, flag);

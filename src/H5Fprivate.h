@@ -974,7 +974,7 @@ H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mp
 H5_DLL herr_t  H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived);
 H5_DLL hbool_t H5F_get_coll_metadata_reads(const H5F_t *f);
 H5_DLL void H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag);
-H5_DLL herr_t   H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag);
+H5_DLL herr_t H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
