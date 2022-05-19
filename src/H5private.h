@@ -2598,6 +2598,7 @@ H5_DLL herr_t  H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_
                                             MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
                                             int mpi_rank, int mpi_size, void **out_buf,
                                             size_t *out_buf_num_entries);
+H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */
