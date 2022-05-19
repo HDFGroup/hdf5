@@ -68,13 +68,13 @@ main(void)
 
     /* Create VDS dcpl */
     if ((vds_dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(vds_dcplid, VDS_DATATYPE, &VDS_FILL_VALUE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create VDS dataspace */
     if ((vds_sid = H5Screate_simple(RANK, VDS_DIMS, VDS_MAX_DIMS)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /************************************
      * Create source files and datasets *
@@ -87,58 +87,58 @@ main(void)
 
     /* All SWMR files need to use the latest file format */
     if ((faplid = h5_fileaccess()) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_libver_bounds(faplid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     for (i = 0; i < N_SOURCES; i++) {
 
         /* source dataset dcpl */
         if ((src_dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Pset_chunk(src_dcplid, RANK, PLANES[i]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Pset_fill_value(src_dcplid, SOURCE_DATATYPE, &FILL_VALUES[i]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Use a mix of compressed and uncompressed datasets */
         if (0 != i % 2)
             if (H5Pset_deflate(src_dcplid, COMPRESSION_LEVEL) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
         /* Create source file, dataspace, and dataset */
         if ((fid = H5Fcreate(FILE_NAMES[i], H5F_ACC_TRUNC, H5P_DEFAULT, faplid)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if ((src_sid = H5Screate_simple(RANK, DIMS[i], MAX_DIMS[i])) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if ((did = H5Dcreate2(fid, SOURCE_DSET_NAME, SOURCE_DATATYPE, src_sid, H5P_DEFAULT, src_dcplid,
                               H5P_DEFAULT)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* set up hyperslabs for source and destination datasets */
         start[1] = 0;
         if (H5Sselect_hyperslab(src_sid, H5S_SELECT_SET, start, NULL, MAX_DIMS[i], NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         start[1] = (hsize_t)map_start;
         if (H5Sselect_hyperslab(vds_sid, H5S_SELECT_SET, start, NULL, MAX_DIMS[i], NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (PLANES[i][1] > INT_MAX)
-            TEST_ERROR
+            TEST_ERROR;
         map_start += (int)PLANES[i][1];
 
         /* Add VDS mapping */
         if (H5Pset_virtual(vds_dcplid, vds_sid, FILE_NAMES[i], SOURCE_DSET_PATH, src_sid) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* close */
         if (H5Sclose(src_sid) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Pclose(src_dcplid) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Dclose(did) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Fclose(fid) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     } /* end for */
 
@@ -148,24 +148,24 @@ main(void)
 
     /* file */
     if ((fid = H5Fcreate(VDS_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, faplid)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* dataset */
     if ((did = H5Dcreate2(fid, VDS_DSET_NAME, VDS_DATATYPE, vds_sid, H5P_DEFAULT, vds_dcplid, H5P_DEFAULT)) <
         0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* close */
     if (H5Pclose(faplid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pclose(vds_dcplid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(vds_sid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return EXIT_SUCCESS;
 

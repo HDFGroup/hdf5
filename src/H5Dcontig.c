@@ -605,23 +605,25 @@ done:
 static htri_t
 H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io_op_type_t op_type)
 {
-    const H5D_t *dataset   = io_info->dset; /* Local pointer to dataset info */
-    htri_t       ret_value = FAIL;          /* Return value */
+    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    htri_t       ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(dataset);
+    HDassert(io_info->dset);
     HDassert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
+
+    dataset = io_info->dset;
 
     /* Don't use selection I/O if it's globally disabled, if there is a type
      * conversion, or if it's not a contiguous dataset, or if the sieve buffer
      * exists (write) or is dirty (read) */
     if (!H5_use_selection_io_g || io_info->io_ops.single_read != H5D__select_read ||
         io_info->layout_ops.readvv != H5D__contig_readvv ||
-        (op_type == H5D_IO_OP_READ && io_info->dset->shared->cache.contig.sieve_dirty) ||
-        (op_type == H5D_IO_OP_WRITE && io_info->dset->shared->cache.contig.sieve_buf))
+        (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
+        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
         ret_value = FALSE;
     else {
         hbool_t page_buf_enabled;

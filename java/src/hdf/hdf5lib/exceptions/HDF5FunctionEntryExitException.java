@@ -24,9 +24,7 @@ public class HDF5FunctionEntryExitException extends HDF5LibraryException {
      * Constructs an <code>HDF5FunctionEntryExitException</code> with no
      * specified detail message.
      */
-    public HDF5FunctionEntryExitException() {
-        super();
-    }
+    public HDF5FunctionEntryExitException() { super(); }
 
     /**
      * Constructs an <code>HDF5FunctionEntryExitException</code> with the
@@ -35,7 +33,5 @@ public class HDF5FunctionEntryExitException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5FunctionEntryExitException(String s) {
-        super(s);
-    }
+    public HDF5FunctionEntryExitException(String s) { super(s); }
 }

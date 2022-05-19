@@ -65,12 +65,6 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
      * Find the HDF5 type of the Fortran Integer KIND.
      */
 
-    /* Initialized INTEGER KIND types to default to native integer */
-    for (i = 0; i < 5; i++) {
-        if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0)
-            return ret_value;
-    }
-
     for (i = 0; i < H5_FORTRAN_NUM_INTEGER_KINDS; i++) {
         if (IntKinds_SizeOf[i] == sizeof(char)) {
             if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0)
@@ -94,6 +88,12 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
             if (H5Tset_precision(types[i], 128) < 0)
                 return ret_value;
         } /*end else */
+    }
+
+    /* Initialized missing INTEGER KIND types to default to native integer */
+    for (i = H5_FORTRAN_NUM_INTEGER_KINDS; i < 5; i++) {
+        if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0)
+            return ret_value;
     }
 
     if (sizeof(int_f) == sizeof(int)) {

@@ -47,70 +47,70 @@ test_named(hid_t file)
 
     TESTING("named enumeration types");
     if ((cwg = H5Gcreate2(file, "test_named", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* A native integer */
     if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tcommit2(cwg, "e1_a", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* A smaller type */
     if ((type = H5Tcreate(H5T_ENUM, (size_t)1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "RED", CPTR(val8, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "GREEN", CPTR(val8, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLUE", CPTR(val8, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tcommit2(cwg, "e1_b", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* A non-native type */
     if (H5T_ORDER_BE == H5Tget_order(H5T_NATIVE_INT)) {
         if ((type = H5Tenum_create(H5T_STD_U8LE)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     }
     else {
         if ((type = H5Tenum_create(H5T_STD_U8BE)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     }
     if (H5Tenum_insert(type, "RED", CPTR(val8, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "GREEN", CPTR(val8, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLUE", CPTR(val8, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tcommit2(cwg, "e1_c", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -161,36 +161,36 @@ test_conv(hid_t file)
     TESTING("enumeration conversions");
 
     if ((cwg = H5Gcreate2(file, "test_conv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /***************************************
      *    Dataset of enumeration type
      ***************************************/
     /* Create a dataset of enum type and write enum data to it */
     if ((dset = H5Dcreate2(cwg, "color_table1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test reading back the data with no conversion */
     if (H5Dread(dset, type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
@@ -202,7 +202,7 @@ test_conv(hid_t file)
 
     /* Test converting the data to integer. Read enum data back as integer */
     if (H5Dread(dset, H5T_NATIVE_SHORT, space, space, H5P_DEFAULT, data_short) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((short)data1[i] != data_short[i]) {
@@ -214,7 +214,7 @@ test_conv(hid_t file)
 
     /* Test converting the data to floating number. Read enum data back as floating number */
     if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != (int)data_double[i]) {
@@ -225,7 +225,7 @@ test_conv(hid_t file)
         } /* end if */
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /***************************************
      *    Dataset of integer type
@@ -233,14 +233,14 @@ test_conv(hid_t file)
     /* Create a dataset of native integer and write enum data to it */
     if ((dset = H5Dcreate2(cwg, "color_table2", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
                            H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test reading back the data with no conversion */
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, data_int) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != data_int[i]) {
@@ -251,7 +251,7 @@ test_conv(hid_t file)
         } /* end if */
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /***************************************
      *    Dataset of double type
@@ -259,14 +259,14 @@ test_conv(hid_t file)
     /* Create a dataset of native double and write enum data to it */
     if ((dset = H5Dcreate2(cwg, "color_table3", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                            H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test reading back the data with no conversion */
     if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if ((int)data1[i] != (int)data_double[i]) {
@@ -277,14 +277,14 @@ test_conv(hid_t file)
         } /* end if */
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -335,42 +335,42 @@ test_tr1(hid_t file)
     TESTING("O(1) conversions");
 
     if ((cwg = H5Gcreate2(file, "test_tr1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "RED", CPTR(eval, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "GREEN", CPTR(eval, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "BLUE", CPTR(eval, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "RED", CPTR(ival, 105)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "GREEN", CPTR(ival, 104)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "BLUE", CPTR(ival, 103)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "WHITE", CPTR(ival, 102)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if ((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
@@ -381,15 +381,15 @@ test_tr1(hid_t file)
         }
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(m_type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(f_type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -439,42 +439,42 @@ test_tr2(hid_t file)
     TESTING("O(log N) conversions");
 
     if ((cwg = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "RED", CPTR(val1, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "GREEN", CPTR(val1, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "BLUE", CPTR(val1, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "WHITE", CPTR(val1, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(m_type, "BLACK", CPTR(val1, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((f_type = H5Tcreate(H5T_ENUM, sizeof(int))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "RED", CPTR(val2, 1050)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "GREEN", CPTR(val2, 1040)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "BLUE", CPTR(val2, 1030)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "WHITE", CPTR(val2, 1020)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(f_type, "BLACK", CPTR(val2, 1010)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if ((space = H5Screate_simple(1, ds_size, NULL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if ((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     for (i = 0; i < (size_t)ds_size[0]; i++)
         if (data1[i] != data2[i]) {
@@ -485,15 +485,15 @@ test_tr2(hid_t file)
         }
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(m_type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tclose(f_type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Gclose(cwg) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -641,28 +641,28 @@ test_funcs(void)
 
     /* A native integer */
     if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "RED", CPTR(val, E1_RED)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLUE", CPTR(val, E1_BLUE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Tget_precision(type) == 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tget_size(type) == 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tget_offset(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tget_sign(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tget_super(type) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     H5E_BEGIN_TRY
     {

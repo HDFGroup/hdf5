@@ -302,7 +302,7 @@ static herr_t H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_ty
 static herr_t H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                                      H5D_chunk_map_t *fm, int mpi_rank, int mpi_size);
 static herr_t H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                       const H5S_t *file_space, const H5S_t *mem_space);
+                                       H5S_t *file_space, H5S_t *mem_space);
 static herr_t H5D__final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                        hsize_t nelmts, MPI_Datatype mpi_file_type, MPI_Datatype mpi_buf_type);
 static herr_t H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
@@ -2372,8 +2372,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
-                         const H5S_t *mem_space)
+H5D__inter_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5S_t *file_space,
+                         H5S_t *mem_space)
 {
     int          mpi_buf_count; /* # of MPI types */
     hbool_t      mbt_is_derived = FALSE;
@@ -3467,8 +3467,9 @@ done:
 static herr_t
 H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chunk_list,
                                          size_t *num_chunks_assigned_map, hbool_t all_ranks_involved,
-                                         const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
-                                         int mpi_rank, int mpi_size)
+                                         const H5D_io_info_t * io_info,
+                                         const H5D_chunk_map_t H5_ATTR_NDEBUG_UNUSED *fm, int mpi_rank,
+                                         int mpi_size)
 {
     MPI_Datatype struct_type;
     MPI_Datatype packed_type;
@@ -3797,7 +3798,8 @@ done:
 static herr_t
 H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk_list,
                                         size_t *chunk_list_num_entries, H5D_io_info_t *io_info,
-                                        const H5D_type_info_t *type_info, int mpi_rank, int mpi_size,
+                                        const H5D_type_info_t *type_info, int mpi_rank,
+                                        int H5_ATTR_NDEBUG_UNUSED           mpi_size,
                                         H5D_filtered_collective_io_info_t **chunk_hash_table,
                                         unsigned char ***chunk_msg_bufs, int *chunk_msg_bufs_len)
 {
@@ -4547,7 +4549,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                                            H5D_filtered_collective_io_info_t *chunk_hash_table,
                                            unsigned char **chunk_msg_bufs, int chunk_msg_bufs_len,
                                            const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                           int mpi_rank, int mpi_size)
+                                           int H5_ATTR_NDEBUG_UNUSED mpi_rank, int mpi_size)
 {
     H5D_fill_buf_info_t fb_info;
     H5D_chunk_info_t *  chunk_info = NULL;

@@ -246,8 +246,8 @@ H5_DLL herr_t   H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_sele
 H5_DLL htri_t   H5S_select_shape_same(H5S_t *space1, H5S_t *space2);
 H5_DLL htri_t   H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 H5_DLL herr_t   H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr,
-                                                unsigned new_space_rank, const void *buf,
-                                                void const **adj_buf_ptr, hsize_t element_size);
+                                                unsigned new_space_rank, hsize_t element_size,
+                                                ptrdiff_t *buf_adj);
 H5_DLL herr_t   H5S_select_release(H5S_t *ds);
 H5_DLL hssize_t H5S_select_serial_size(H5S_t *space);
 H5_DLL herr_t   H5S_select_serialize(H5S_t *space, uint8_t **p);
@@ -299,7 +299,7 @@ H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t H5S_sel_iter_close(H5S_sel_iter_t *sel_iter);
 
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
+H5_DLL herr_t H5S_mpio_space_type(H5S_t *space, size_t elmt_size,
                                   /* out: */ MPI_Datatype *new_type, int *count, hbool_t *is_derived_type,
                                   hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
 #endif /* H5_HAVE_PARALLEL */

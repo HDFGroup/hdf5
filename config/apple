@@ -22,11 +22,11 @@
 # No support for OS older than darwin 10.X.
 if test "X-" = "X-$CC"; then
     case "$host_os" in
-	darwin10.*)	# Snow Leopard. Use gcc/g++ because clang++ is not available.
-	    CC=gcc
-	    CC_BASENAME=gcc
-	    ;;
-	*)
+        darwin10.*)	# Snow Leopard. Use gcc/g++ because clang++ is not available.
+            CC=gcc
+            CC_BASENAME=gcc
+            ;;
+        *)
             if test "X-$enable_parallel" = "X-yes"; then
                 # default to use mpicc which is the defacto MPI compiler name
                 CC=mpicc
@@ -36,20 +36,20 @@ if test "X-" = "X-$CC"; then
                 CC_BASENAME=clang
             fi
 
-	    # Production
-	    PROD_CFLAGS="-O3" 
-	    PROD_CPPFLAGS=
+            # Production
+            PROD_CFLAGS="-O3" 
+            PROD_CPPFLAGS=
 
-	    # Debug
-	    DEBUG_CFLAGS="-g -O0"
-	    DEBUG_CPPFLAGS=
+            # Debug
+            DEBUG_CFLAGS="-g -O0"
+            DEBUG_CPPFLAGS=
 
-	    # Profile
-	    # Use this for profiling with gprof
-	    # Just "-g" for now. More later.
-	    PROFILE_CFLAGS="-g"
-	    PROFILE_CPPFLAGS=
-	    ;;
+            # Profile
+            # Use this for profiling with gprof
+            # Just "-g" for now. More later.
+            PROFILE_CFLAGS="-g"
+            PROFILE_CPPFLAGS=
+            ;;
     esac
 fi
 
@@ -62,16 +62,16 @@ fi
 # use -O option as it causes failures in test/dt_arith.
 case "$host_os" in
     darwin1[12].*)   # lion & mountain lion
-	#echo cc_vendor=$cc_vendor'-'cc_version=$cc_version
-	case "$cc_vendor-$cc_version" in
-	    gcc-4.2.1)
-		# Remove any -O flags
-		#echo PROD_CFLAGS=$PROD_CFLAGS
-		PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O[0-3]*//'`"
-		#echo new PROD_CFLAGS=$PROD_CFLAGS
-		;;
-	esac
-	;;
+        #echo cc_vendor=$cc_vendor'-'cc_version=$cc_version
+        case "$cc_vendor-$cc_version" in
+            gcc-4.2.1)
+                # Remove any -O flags
+                #echo PROD_CFLAGS=$PROD_CFLAGS
+                PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O[0-3]*//'`"
+                #echo new PROD_CFLAGS=$PROD_CFLAGS
+                ;;
+        esac
+        ;;
 esac
 
 if test "X-" = "X-$FC"; then
@@ -89,7 +89,7 @@ if test "X-" = "X-$FC"; then
             FC_BASENAME=mpif90
             ;;
         clang)
-	    # clang has no fortran compiler. Use gfortran.
+            # clang has no fortran compiler. Use gfortran.
             FC=gfortran
             FC_BASENAME=gfortran
             ;;

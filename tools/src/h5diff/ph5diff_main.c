@@ -312,5 +312,5 @@ h5diff_exit(int status)
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK
      */
-    HDexit(0);
+    HDexit(status);
 }

@@ -24,9 +24,7 @@ public class HDF5MetaDataCacheException extends HDF5LibraryException {
      * Constructs an <code>HDF5MetaDataCacheException</code> with no specified
      * detail message.
      */
-    public HDF5MetaDataCacheException() {
-        super();
-    }
+    public HDF5MetaDataCacheException() { super(); }
 
     /**
      * Constructs an <code>HDF5MetaDataCacheException</code> with the specified
@@ -35,7 +33,5 @@ public class HDF5MetaDataCacheException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5MetaDataCacheException(String s) {
-        super(s);
-    }
+    public HDF5MetaDataCacheException(String s) { super(s); }
 }

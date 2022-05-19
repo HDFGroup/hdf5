@@ -123,53 +123,53 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
      * Create the dataset creation property list, set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace and
      * little-endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME, H5T_IEEE_F64LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close dataset
      */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace and
      * big-endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME1, H5T_IEEE_F64BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close dataset
      */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -222,44 +222,44 @@ create_scale_offset_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_FLOAT_DSCALE, 3) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME2, H5T_IEEE_F32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME3, H5T_IEEE_F32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -312,44 +312,44 @@ create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_FLOAT_DSCALE, 3) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME4, H5T_IEEE_F64LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME5, H5T_IEEE_F64BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_DOUBLE, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -410,44 +410,44 @@ create_scale_offset_dsets_char(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME6, H5T_STD_I8LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_CHAR, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME7, H5T_STD_I8BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_CHAR, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -508,44 +508,44 @@ create_scale_offset_dsets_short(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_SHORT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME8, H5T_STD_I16LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_SHORT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME9, H5T_STD_I16BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_SHORT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -606,44 +606,44 @@ create_scale_offset_dsets_int(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME10, H5T_STD_I32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME11, H5T_STD_I32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -705,44 +705,44 @@ create_scale_offset_dsets_long_long(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, H5Z_SO_INT_MINBITS_DEFAULT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_LLONG, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME12, H5T_STD_I64LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_LLONG, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME13, H5T_STD_I64BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_LLONG, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -795,44 +795,44 @@ create_fletcher_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_filter(dcpl, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME14, H5T_IEEE_F32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME15, H5T_IEEE_F32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -886,44 +886,44 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_deflate(dcpl, 6) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME16, H5T_IEEE_F32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME17, H5T_IEEE_F32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
 #else  /* H5_HAVE_FILTER_DEFLATE */
     const char *not_supported = "Deflate filter is not enabled. Can't create the dataset.";
@@ -986,44 +986,44 @@ create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_szip(dcpl, H5_SZIP_NN_OPTION_MASK, 4) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME18, H5T_IEEE_F32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME19, H5T_IEEE_F32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -1077,44 +1077,44 @@ create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_shuffle(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace, little
      * endian datatype and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME20, H5T_IEEE_F32LE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if ((dataset = H5Dcreate2(fid, DATASETNAME21, H5T_IEEE_F32BE, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -1169,63 +1169,63 @@ create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
      * filter, set the chunk size, and set the fill value.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_nbit(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, RANK, chunk) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_FLOAT, &fillvalue) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Define user-defined single-precision floating-point type for dataset.
      * A 20-bit little-endian data type. */
     if ((datatype = H5Tcopy(H5T_IEEE_F32LE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     offset = 7;
     if (H5Tset_offset(datatype, offset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     precision = 20;
     if (H5Tset_precision(datatype, precision) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_size(datatype, (size_t)4) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_ebias(datatype, (size_t)31) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using defined dataspace,
      * user-defined datatype, and default dataset creation properties.
      */
     if ((dataset = H5Dcreate2(fid, DATASETNAME22, datatype, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close dataset */
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Now create a dataset with a big-endian type */
     if (H5Tset_order(datatype, H5T_ORDER_BE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((dataset = H5Dcreate2(fid, DATASETNAME23, datatype, fsid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, msid, fsid, H5P_DEFAULT, data) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Dclose(dataset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /*
      * Close/release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 

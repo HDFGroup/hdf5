@@ -554,7 +554,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
 #ifdef H5_HAVE_ROS3_VFD
                 if (!vfd_info->info)
                     H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-                if (H5Pset_fapl_ros3(fapl_id, (H5FD_ros3_fapl_t *)vfd_info->info) < 0)
+                if (H5Pset_fapl_ros3(fapl_id, (const H5FD_ros3_fapl_t *)vfd_info->info) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
@@ -600,7 +600,7 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
 done:
     if (ret_value < 0) {
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -705,7 +705,7 @@ done:
             H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
 
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -762,7 +762,7 @@ done:
         }
 
         /* Clear error message unless asked for */
-        if (enable_error_stack <= 1)
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
             H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
@@ -1033,8 +1033,10 @@ done:
         H5Pclose(tmp_fapl_id);
 
     /* Clear error message unless asked for */
-    if (ret_value < 0 && enable_error_stack <= 1)
-        H5Epop(H5tools_ERR_STACK_g, 1);
+    if (ret_value < 0) {
+        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
+            H5Epop(H5tools_ERR_STACK_g, 1);
+    }
 
     return ret_value;
 }
@@ -1905,6 +1907,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                         else {
                             if ((region_space = H5Ropen_region(&tref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 if (!h5tools_is_zero(&tref, H5Tget_size(H5T_STD_REF))) {
+
                                     region_type = H5Sget_select_type(region_space);
                                     if (region_type == H5S_SEL_POINTS)
                                         render_bin_output_region_points(region_space, region_id, stream,

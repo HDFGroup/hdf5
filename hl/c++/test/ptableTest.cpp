@@ -305,7 +305,7 @@ TestCompress()
         char filter_name[8];
         dcpl.getFilterById(H5Z_FILTER_DEFLATE, flags, cd_nelemts, NULL, 8, filter_name, config);
         if (HDstrncmp(filter_name, "deflate", 7) != 0)
-            H5_FAILED()
+            H5_FAILED();
     }
     catch (Exception const &) {
         H5_FAILED();

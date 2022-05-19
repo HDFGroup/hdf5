@@ -16,13 +16,13 @@
 
 package examples.groups;
 
-import hdf.hdf5lib.H5;
-import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.structs.H5G_info_t;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+
+import hdf.hdf5lib.H5;
+import hdf.hdf5lib.HDF5Constants;
+import hdf.hdf5lib.structs.H5G_info_t;
 
 public class H5Ex_G_Compact {
 
@@ -38,44 +38,42 @@ public class H5Ex_G_Compact {
 
         private static final Map<Integer, H5G_storage> lookup = new HashMap<Integer, H5G_storage>();
 
-        static {
+        static
+        {
             for (H5G_storage s : EnumSet.allOf(H5G_storage.class))
                 lookup.put(s.getCode(), s);
         }
 
         private int code;
 
-        H5G_storage(int layout_type) {
-            this.code = layout_type;
-        }
+        H5G_storage(int layout_type) { this.code = layout_type; }
 
-        public int getCode() {
-            return this.code;
-        }
+        public int getCode() { return this.code; }
 
-        public static H5G_storage get(int code) {
-            return lookup.get(code);
-        }
+        public static H5G_storage get(int code) { return lookup.get(code); }
     }
 
-    public static void CreateGroup() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
+    public static void CreateGroup()
+    {
+        long file_id  = HDF5Constants.H5I_INVALID_HID;
         long group_id = HDF5Constants.H5I_INVALID_HID;
-        long fapl_id = HDF5Constants.H5I_INVALID_HID;
+        long fapl_id  = HDF5Constants.H5I_INVALID_HID;
         H5G_info_t ginfo;
         long size;
 
         // Create file 1. This file will use original format groups.
         try {
-            file_id = H5.H5Fcreate (FILE1, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fcreate(FILE1, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         // Create a group in the file1.
         try {
-            if(file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if (file_id >= 0)
+                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                        HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +81,7 @@ public class H5Ex_G_Compact {
 
         // Obtain the group info and print the group storage type.
         try {
-            if(group_id >= 0) {
+            if (group_id >= 0) {
                 ginfo = H5.H5Gget_info(group_id);
                 System.out.print("Group storage type for " + FILE1 + " is: ");
                 switch (H5G_storage.get(ginfo.storage_type)) {
@@ -160,7 +158,8 @@ public class H5Ex_G_Compact {
         try {
             fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
             if (fapl_id >= 0)
-                H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
+                H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST,
+                                        HDF5Constants.H5F_LIBVER_LATEST);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -175,8 +174,9 @@ public class H5Ex_G_Compact {
         }
         // Create group in file2.
         try {
-            if(file_id >= 0)
-                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if (file_id >= 0)
+                group_id = H5.H5Gcreate(file_id, GROUP, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                        HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -257,7 +257,5 @@ public class H5Ex_G_Compact {
         }
     }
 
-    public static void main(String[] args) {
-        H5Ex_G_Compact.CreateGroup();
-    }
+    public static void main(String[] args) { H5Ex_G_Compact.CreateGroup(); }
 }

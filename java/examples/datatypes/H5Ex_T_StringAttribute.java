@@ -24,29 +24,30 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_T_StringAttribute {
-    private static String FILENAME = "H5Ex_T_StringAttribute.h5";
-    private static String DATASETNAME = "DS1";
+    private static String FILENAME      = "H5Ex_T_StringAttribute.h5";
+    private static String DATASETNAME   = "DS1";
     private static String ATTRIBUTENAME = "A1";
-    private static final int DIM0 = 4;
-    private static final int SDIM = 8;
-    private static final int RANK = 1;
+    private static final int DIM0       = 4;
+    private static final int SDIM       = 8;
+    private static final int RANK       = 1;
 
-    private static void CreateDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
-        long attribute_id = HDF5Constants.H5I_INVALID_HID;
-        long[] dims = { DIM0 };
-        byte[][] dset_data = new byte[DIM0][SDIM];
-        StringBuffer[] str_data = { new StringBuffer("Parting"), new StringBuffer("is such"),
-                new StringBuffer("sweet"), new StringBuffer("sorrow.") };
+    private static void CreateDataset()
+    {
+        long file_id            = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims             = {DIM0};
+        byte[][] dset_data      = new byte[DIM0][SDIM];
+        StringBuffer[] str_data = {new StringBuffer("Parting"), new StringBuffer("is such"),
+                                   new StringBuffer("sweet"), new StringBuffer("sorrow.")};
 
         // Create a new file using default properties.
         try {
             file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -77,7 +78,8 @@ public class H5Ex_T_StringAttribute {
             dataspace_id = H5.H5Screate(HDF5Constants.H5S_SCALAR);
             if (dataspace_id >= 0) {
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                          HDF5Constants.H5P_DEFAULT);
                 H5.H5Sclose(dataspace_id);
                 dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
@@ -99,7 +101,7 @@ public class H5Ex_T_StringAttribute {
         try {
             if ((dataset_id >= 0) && (dataspace_id >= 0) && (filetype_id >= 0))
                 attribute_id = H5.H5Acreate(dataset_id, ATTRIBUTENAME, filetype_id, dataspace_id,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +112,7 @@ public class H5Ex_T_StringAttribute {
             for (int indx = 0; indx < DIM0; indx++) {
                 for (int jndx = 0; jndx < SDIM; jndx++) {
                     if (jndx < str_data[indx].length())
-                        dset_data[indx][jndx] = (byte) str_data[indx].charAt(jndx);
+                        dset_data[indx][jndx] = (byte)str_data[indx].charAt(jndx);
                     else
                         dset_data[indx][jndx] = 0;
                 }
@@ -174,18 +176,18 @@ public class H5Ex_T_StringAttribute {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void ReadDataset() {
-        long file_id = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id = HDF5Constants.H5I_INVALID_HID;
+    private static void ReadDataset()
+    {
+        long file_id      = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id  = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id   = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
         long attribute_id = HDF5Constants.H5I_INVALID_HID;
-        long sdim = 0;
-        long[] dims = { DIM0 };
+        long sdim         = 0;
+        long[] dims       = {DIM0};
         byte[][] dset_data;
         StringBuffer[] str_data;
 
@@ -209,7 +211,7 @@ public class H5Ex_T_StringAttribute {
         try {
             if (dataset_id >= 0)
                 attribute_id = H5.H5Aopen_by_name(dataset_id, ".", ATTRIBUTENAME, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT);
+                                                  HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -246,8 +248,8 @@ public class H5Ex_T_StringAttribute {
         }
 
         // Allocate space for data.
-        dset_data = new byte[(int) dims[0]][(int)sdim];
-        str_data = new StringBuffer[(int) dims[0]];
+        dset_data = new byte[(int)dims[0]][(int)sdim];
+        str_data  = new StringBuffer[(int)dims[0]];
 
         // Create the memory datatype.
         try {
@@ -264,7 +266,7 @@ public class H5Ex_T_StringAttribute {
             if ((attribute_id >= 0) && (memtype_id >= 0))
                 H5.H5Aread(attribute_id, memtype_id, dset_data);
             byte[] tempbuf = new byte[(int)sdim];
-            for (int indx = 0; indx < (int) dims[0]; indx++) {
+            for (int indx = 0; indx < (int)dims[0]; indx++) {
                 for (int jndx = 0; jndx < sdim; jndx++) {
                     tempbuf[jndx] = dset_data[indx][jndx];
                 }
@@ -333,10 +335,10 @@ public class H5Ex_T_StringAttribute {
         catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         H5Ex_T_StringAttribute.CreateDataset();
         // Now we begin the read section of this example. Here we assume
         // the dataset and array have the same name and rank, but can have
@@ -344,5 +346,4 @@ public class H5Ex_T_StringAttribute {
         // data using malloc().
         H5Ex_T_StringAttribute.ReadDataset();
     }
-
 }

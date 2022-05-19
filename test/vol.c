@@ -794,7 +794,7 @@ test_basic_file_operation(const char *env_h5_drvr)
     if (H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI) < 0)
         TEST_ERROR;
     if (H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* H5Fcreate */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
@@ -1987,11 +1987,11 @@ test_async_vol_props(void)
     conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
     if (conn_env_str) {
         if (NULL == (conn_env_str = HDstrdup(conn_env_str)))
-            TEST_ERROR
+            TEST_ERROR;
         if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
 
     /* Test query w/default VOL, which should indicate no async, since native connector
@@ -2000,9 +2000,9 @@ test_async_vol_props(void)
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) > 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close FAPL */
     if (H5Pclose(fapl_id) < 0)
@@ -2014,9 +2014,9 @@ test_async_vol_props(void)
 
     /* Set environment variable to use 'fake async' connector & re-init default connector */
     if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", TRUE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Retrieve the file access property again */
     fapl_id = h5_fileaccess();
@@ -2026,15 +2026,15 @@ test_async_vol_props(void)
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Reset environment variable & re-init default connector */
     if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close FAPL */
     if (H5Pclose(fapl_id) < 0)
@@ -2052,9 +2052,9 @@ test_async_vol_props(void)
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
     passthru_info.under_vol_id   = vol_id;
@@ -2067,9 +2067,9 @@ test_async_vol_props(void)
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Unregister the fake async VOL ID */
     if (H5VLunregister_connector(vol_id) < 0)
@@ -2082,11 +2082,11 @@ test_async_vol_props(void)
     /* Restore environment variable, if there was one */
     if (conn_env_str) {
         if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         HDfree(conn_env_str);
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
 
     PASSED();
