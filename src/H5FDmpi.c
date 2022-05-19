@@ -259,7 +259,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  *
  * Return:	Success:	Non-negative
  *
- *		Failure:	Negative
+ *              Failure:	Negative
  *
  * Programmer:	Houjun Tang
  *              May 19, 2022
