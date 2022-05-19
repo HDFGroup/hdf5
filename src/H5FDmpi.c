@@ -270,7 +270,7 @@ herr_t
 H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags     = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -287,7 +287,6 @@ H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_get_file_sync_required() */
-
 
 #ifdef NOT_YET
 

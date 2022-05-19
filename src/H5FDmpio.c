@@ -60,16 +60,16 @@ static char H5FD_mpi_native_g[] = "native";
  * driver doesn't bother to keep it updated since it's an expensive operation.
  */
 typedef struct H5FD_mpio_t {
-    H5FD_t   pub;       /* Public stuff, must be first                  */
-    MPI_File f;         /* MPIO file handle                             */
-    MPI_Comm comm;      /* MPI Communicator                             */
-    MPI_Info info;      /* MPI info object                              */
-    int      mpi_rank;  /* This process's rank                          */
-    int      mpi_size;  /* Total number of processes                    */
-    haddr_t  eof;       /* End-of-file marker                           */
-    haddr_t  eoa;       /* End-of-address marker                        */
-    haddr_t  last_eoa;  /* Last known end-of-address marker             */
-    haddr_t  local_eof; /* Local end-of-file address for each process   */
+    H5FD_t   pub;                    /* Public stuff, must be first                  */
+    MPI_File f;                      /* MPIO file handle                             */
+    MPI_Comm comm;                   /* MPI Communicator                             */
+    MPI_Info info;                   /* MPI info object                              */
+    int      mpi_rank;               /* This process's rank                          */
+    int      mpi_size;               /* Total number of processes                    */
+    haddr_t  eof;                    /* End-of-file marker                           */
+    haddr_t  eoa;                    /* End-of-address marker                        */
+    haddr_t  last_eoa;               /* Last known end-of-address marker             */
+    haddr_t  local_eof;              /* Local end-of-file address for each process   */
     hbool_t  mpi_file_sync_required; /* Whether the ROMIO driver requires MPI_File_sync after write */
 } H5FD_mpio_t;
 

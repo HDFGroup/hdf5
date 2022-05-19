@@ -804,8 +804,8 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 {
     herr_t   ret_value = SUCCEED;
     MPI_Info info_used;
-    int flag;
-    char value[MPI_MAX_INFO_VAL];
+    int      flag;
+    char     value[MPI_MAX_INFO_VAL];
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -816,8 +816,8 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
     if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
 
-    if (MPI_SUCCESS != MPI_Info_get(info_used, "romio_visibility_immediate",
-                                    MPI_MAX_INFO_VAL-1, value, &flag))
+    if (MPI_SUCCESS !=
+        MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
 
     if (flag)
