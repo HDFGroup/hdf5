@@ -606,8 +606,7 @@ H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
-    H5TRACE2("e", "xx", f_sh, flag);
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f_sh);
     HDassert(flag);
@@ -617,7 +616,7 @@ H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_file_sync_required request failed")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_shared_get_mpi_file_sync_required() */
 
 #endif /* H5_HAVE_PARALLEL */

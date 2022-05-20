@@ -272,6 +272,7 @@ H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
     const H5FD_class_t *cls;
     uint64_t            flags     = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
     herr_t              ret_value = SUCCEED;
+    void *              file_sync_required_ptr = (void *)(&file_sync_required);
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -281,7 +282,7 @@ H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_FILE_SYNC_OPCODE, flags, NULL, file_sync_required) < 0)
+    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_FILE_SYNC_OPCODE, flags, NULL, file_sync_required_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_file_synce request failed")
 
 done:
