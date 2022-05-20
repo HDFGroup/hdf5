@@ -966,7 +966,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     file->mpi_size = mpi_size;
 
     /* Retrieve the flag indicating whether MPI_File_sync is needed after each write */
-    if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required))
+    if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
         HDONE_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint")
 
     /* Only processor p0 will get the filesize and broadcast it. */

@@ -829,7 +829,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 
     /* Tang debug: temporary force setting the flag via env var */
     char *sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
+    if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
         *file_sync_required = TRUE;
 
 done:
