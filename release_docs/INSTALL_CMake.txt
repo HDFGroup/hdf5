@@ -769,7 +769,7 @@ HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
                                 FALSE to build according to BUILD_SHARED_LIBS"                FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
-HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
+HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "3"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 DEFAULT_API_VERSION            "Enable default API (v16, v18)"                                "v18"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
