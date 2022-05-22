@@ -70,10 +70,11 @@ static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
 int sf_verbose_flag = 0;
 
 #ifdef H5_SUBFILING_DEBUG
+char  sf_logile_name[PATH_MAX];
+FILE *sf_logfile = NULL;
+
 static int sf_open_file_count = 0;
 #endif
-
-FILE *sf_logfile = NULL;
 
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
@@ -822,6 +823,13 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
         return FAIL;
     sf_context->topology = NULL;
 
+#ifdef H5_SUBFILING_DEBUG
+    if (sf_context->sf_logfile) {
+        HDfclose(sf_context->sf_logfile);
+        sf_context->sf_logfile = NULL;
+    }
+#endif
+
     return SUCCEED;
 }
 
@@ -971,6 +979,28 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
         ret_value = FAIL;
         goto done;
     }
+
+#ifdef H5_SUBFILING_DEBUG
+    {
+        int mpi_rank;
+
+        /* Open debugging logfile */
+
+        if (MPI_SUCCESS != MPI_Comm_rank(sf_context->sf_file_comm, &mpi_rank)) {
+            HDprintf("%s: couldn't get MPI rank\n", __func__);
+            ret_value = FAIL;
+            goto done;
+        }
+
+        HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
+
+        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "w"))) {
+            HDprintf("%s: couldn't open subfiling debug logfile\n", __func__);
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+#endif
 
     *context_id_out = context_id;
 
@@ -1444,6 +1474,10 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->h5_filename    = NULL;
     sf_context->sf_filename    = NULL;
     sf_context->subfile_prefix = NULL;
+
+#ifdef H5_SUBFILING_DEBUG
+    sf_context->sf_logfile = NULL;
+#endif
 
     /* Check for an IOC stripe size setting in the environment */
     if ((env_value = HDgetenv(H5_IOC_STRIPE_SIZE))) {
@@ -2894,3 +2928,36 @@ H5_subfile_fid_to_context(uint64_t sf_fid)
 
     return -1;
 } /* end H5_subfile_fid_to_context() */
+
+#ifdef H5_SUBFILING_DEBUG
+void
+H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
+{
+    subfiling_context_t *sf_context = NULL;
+    va_list              log_args;
+
+    va_start(log_args, fmt);
+
+    /* Retrieve the subfiling object for the newly-created context ID */
+    if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
+        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
+        return;
+    }
+
+    if (sf_context->sf_logfile) {
+        HDvfprintf(sf_context->sf_logfile, fmt, log_args);
+        HDfputs("\n", sf_context->sf_logfile);
+        HDfflush(sf_context->sf_logfile);
+    }
+    else {
+        HDvprintf(fmt, log_args);
+        HDputs("");
+        HDfflush(stdout);
+    }
+
+done:
+    va_end(log_args);
+
+    return;
+}
+#endif

@@ -597,10 +597,11 @@ handle_work_request(void *arg)
             break;
 
         default:
-#ifdef H5FD_IOC_DEBUG
-            HDprintf("[ioc(%d)] received message tag(%x)from rank %d\n", msg->subfile_rank, msg->tag,
-                     msg->source);
+#ifdef H5_SUBFILING_DEBUG
+            H5_subfiling_log(file_context_id, "%s: IOC %d received message tag(%x) from rank %d", __func__,
+                             msg->subfile_rank, msg->tag, msg->source);
 #endif
+
             op_ret = -1;
             break;
     }
@@ -608,12 +609,11 @@ handle_work_request(void *arg)
     atomic_fetch_sub(&sf_work_pending, 1);
 
     if (op_ret < 0) {
-#ifdef H5FD_IOC_DEBUG
-        HDprintf("[ioc(%d) %s]: request(%s) filename=%s from "
-                 "rank(%d), size=%ld, offset=%ld FAILED\n",
-                 msg->subfile_rank, __func__, translate_opcode((io_op_t)msg->tag), sf_context->sf_filename,
-                 msg->source, msg->header[0], msg->header[1]);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(file_context_id,
+                         "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED",
+                         __func__, msg->subfile_rank, translate_opcode((io_op_t)msg->tag),
+                         sf_context->sf_filename, msg->source, msg->header[0], msg->header[1]);
 #endif
 
         /* TODO: set error value for work request queue entry */
@@ -1293,6 +1293,10 @@ ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Co
     eof_req_reply[1] = (int64_t)(sb.st_size);
     eof_req_reply[2] = 0; /* not used */
 
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(file_context_id, "%s: reporting file EOF as %" PRId64 ".", __func__, eof_req_reply[1]);
+#endif
+
     /* return the subfile EOF to the querying rank */
     if (MPI_SUCCESS != (mpi_code = MPI_Send(eof_req_reply, 3, MPI_INT64_T, source, GET_EOF_COMPLETED, comm)))
         H5FD_IOC_MPI_GOTO_ERROR(-1, "MPI_Send", mpi_code);
@@ -1430,14 +1434,12 @@ ioc_io_queue_add_entry(sf_work_request_t *wk_req_ptr)
 
     atomic_fetch_add(&sf_io_ops_pending, 1);
 
-#ifdef H5FD_IOC_DEBUG
-    HDfprintf(stdout,
-              "\n\nioc_io_queue_add_entry: request %d queued. op = %d, offset/len = %lld/%lld, "
-              "q-ed/disp/ops_pend = %d/%d/%d.\n",
-              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
-              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-              atomic_load(&sf_io_ops_pending));
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(wk_req_ptr->context_id,
+                     "%s: request %d queued. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.",
+                     __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
+                     (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
+                     io_queue_g.num_pending, io_queue_g.num_in_progress, atomic_load(&sf_io_ops_pending));
 #endif
 
     HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
@@ -1477,14 +1479,11 @@ ioc_io_queue_add_entry(sf_work_request_t *wk_req_ptr)
 
 #endif /* H5FD_IOC__COLLECT_STATS */
 
-#ifdef H5FD_IOC_DEBUG
+#ifdef H5_SUBFILING_DEBUG
     if (io_queue_g.q_len != atomic_load(&sf_io_ops_pending)) {
-
-        HDfprintf(
-            stdout,
-            "\n\nioc_io_queue_add_entry: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).\n\n",
-            io_queue_g.q_len, atomic_load(&sf_io_ops_pending));
-        HDfflush(stdout);
+        H5_subfiling_log(wk_req_ptr->context_id,
+                         "%s: io_queue_g.q_len = %d != %d = atomic_load(&sf_io_ops_pending).", __func__,
+                         io_queue_g.q_len, atomic_load(&sf_io_ops_pending));
     }
 #endif
 
@@ -1651,15 +1650,14 @@ ioc_io_queue_dispatch_eligible_entries(void)
 
                 io_queue_g.requests_dispatched++;
 
-#ifdef H5FD_IOC_DEBUG
-                HDfprintf(stdout,
-                          "\n\nioc_io_queue_dispatch_eligible_entries: request %d dispatched. op = %d, "
-                          "offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.\n",
-                          entry_ptr->counter, (entry_ptr->wk_req.tag),
-                          (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
-                          io_queue_g.num_pending, io_queue_g.num_in_progress,
-                          atomic_load(&sf_io_ops_pending));
-                HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+                H5_subfiling_log(entry_ptr->wk_req.context_id,
+                                 "%s: request %d dispatched. op = %d, offset/len = %lld/%lld, "
+                                 "q-ed/disp/ops_pend = %d/%d/%d.",
+                                 __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
+                                 (long long)(entry_ptr->wk_req.header[1]),
+                                 (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending,
+                                 io_queue_g.num_in_progress, atomic_load(&sf_io_ops_pending));
 #endif
 
                 entry_ptr->dispatch_time = H5_now_usec();
@@ -1728,21 +1726,20 @@ ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
 
     atomic_fetch_sub(&sf_io_ops_pending, 1);
 
-#ifdef H5FD_IOC_DEBUG
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(
+        entry_ptr->wk_req.context_id,
+        "%s: request %d completed. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.", __func__,
+        entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
+        (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
+        atomic_load(&sf_io_ops_pending));
+
     /*
      * If this I/O request is a truncate or "get eof" op, make sure
      * there aren't other operations in progress
      */
     if ((entry_ptr->wk_req.tag == GET_EOF_OP) || (entry_ptr->wk_req.tag == TRUNC_OP))
         HDassert(io_queue_g.num_in_progress == 0);
-
-    HDfprintf(stdout,
-              "ioc_io_queue_complete_entry: request %d completed. op = %d, offset/len = %lld/%lld, "
-              "q-ed/disp/ops_pend = %d/%d/%d.\n",
-              entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
-              (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-              atomic_load(&sf_io_ops_pending));
-    HDfflush(stdout);
 #endif
 
     HDassert(io_queue_g.q_len == atomic_load(&sf_io_ops_pending));

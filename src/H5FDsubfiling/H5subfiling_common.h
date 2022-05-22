@@ -197,6 +197,10 @@ typedef struct {
     char *         sf_filename;             /* A generated subfile name          */
     char *         h5_filename;             /* The user supplied file name       */
     sf_topology_t *topology;                /* pointer to our topology           */
+#ifdef H5_SUBFILING_DEBUG
+    char  sf_logfile_name[PATH_MAX];
+    FILE *sf_logfile;
+#endif
 } subfiling_context_t;
 
 /* The following is a somewhat augmented input (by the IOC) which captures
@@ -220,8 +224,6 @@ typedef struct {
     int          depend_id;   /* work queue index of the dependent */
 } sf_work_request_t;
 
-extern FILE *sf_logfile;
-
 extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;
 extern atomic_int sf_shutdown_flag;
@@ -239,6 +241,8 @@ H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_
 H5_DLL void *  H5_get_subfiling_object(int64_t object_id);
 H5_DLL int64_t H5_subfile_fid_to_context(uint64_t h5_fid);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
+
+H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 
 H5_DLL void H5FD_ioc_take_down_thread_pool(void);
 

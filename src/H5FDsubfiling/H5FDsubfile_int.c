@@ -312,6 +312,10 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         }
     }
 
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(context_id, "%s: calculated logical EOF = %" PRId64 ".", __func__, logical_eof);
+#endif
+
     *logical_eof_ptr = logical_eof;
 
 done:
