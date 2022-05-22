@@ -472,6 +472,7 @@ ioc_main(int64_t context_id)
             wk_req.tag          = tag;
             wk_req.source       = source;
             wk_req.subfile_rank = subfile_rank;
+            wk_req.context_id   = context_id;
             wk_req.start_time   = queue_start_time;
             wk_req.buffer       = NULL;
 
