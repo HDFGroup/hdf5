@@ -4303,11 +4303,11 @@ main(int argc, char **argv)
 {
     unsigned nerrs = 0;
 #ifdef H5_HAVE_SUBFILING_VFD
-    int      required = MPI_THREAD_MULTIPLE;
-    int      provided = 0;
+    int required = MPI_THREAD_MULTIPLE;
+    int provided = 0;
 #endif
-    int      mpi_size;
-    int      mpi_rank;
+    int mpi_size;
+    int mpi_rank;
 
 #ifdef H5_HAVE_SUBFILING_VFD
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
