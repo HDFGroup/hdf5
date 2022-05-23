@@ -58,7 +58,7 @@ load_gnu_arguments()
 if test "X-" = "X-$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
-    # icc beginning with version 12 includes a "gcc version compatiblilty"
+    # icc beginning with version 12 includes a "gcc version compatibility"
     # string, causing the gcc H5_CFLAGS to be erroneously added.  The line
     # "grep -v 'icc version'" causes the discarding of any output
     # containing 'icc version'.  The cc_version for icc is correctly determined
@@ -254,6 +254,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc >= 7
     if test $cc_vers_major -ge 7; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-7)"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
     fi
 

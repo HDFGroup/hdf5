@@ -67,7 +67,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O_PLINE_ID,                              /* message id number            */
     "filter pipeline",                         /* message name for debugging   */
     sizeof(H5O_pline_t),                       /* native message size          */
-    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are sharable?       */
+    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are shareable?       */
     H5O__pline_shared_decode,                  /* decode message               */
     H5O__pline_shared_encode,                  /* encode message               */
     H5O__pline_copy,                           /* copy the native value        */
@@ -86,7 +86,7 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
     H5O__pline_shared_debug                    /* debug the message            */
 }};
 
-/* Format version bounds for filter pipleline */
+/* Format version bounds for filter pipeline */
 const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_1,     /* H5F_LIBVER_EARLIEST */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V18 */
@@ -122,7 +122,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     const uint8_t *    p_end     = p + p_size - 1; /* End of the p buffer */
     void *             ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(p);
@@ -260,7 +260,7 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
     const H5Z_filter_info_t *filter;                            /* Filter to encode */
     size_t                   i, j;                              /* Local index variables */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(p);
@@ -362,7 +362,7 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
     size_t             i;                               /* Local index variable */
     H5O_pline_t *      ret_value = NULL;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate pipeline message, if not provided */
     if (!dst && NULL == (dst = H5FL_MALLOC(H5O_pline_t)))
@@ -453,7 +453,7 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
     size_t             i;                                 /* Local index variable */
     size_t             ret_value = 0;                     /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Message header */
     ret_value = (size_t)(1 +                                               /*version            */
@@ -515,7 +515,7 @@ H5O__pline_reset(void *mesg)
     H5O_pline_t *pline = (H5O_pline_t *)mesg; /* Pipeline message */
     size_t       i;                           /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* NOTE: This function can be called during error processing from
      *       other API calls so DO NOT ASSUME THAT ANY VALUES ARE SANE.
@@ -565,7 +565,7 @@ H5O__pline_reset(void *mesg)
 static herr_t
 H5O__pline_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -597,7 +597,7 @@ H5O__pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     H5O_copy_file_ud_common_t *udata     = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
     herr_t                     ret_value = SUCCEED;                             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(pline_src);
@@ -641,7 +641,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
     const H5O_pline_t *pline = (const H5O_pline_t *)mesg;
     size_t             i, j;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

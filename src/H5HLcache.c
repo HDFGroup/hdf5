@@ -153,7 +153,7 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, H5HL_cache_prfx_ud_t *
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(heap);
@@ -210,7 +210,7 @@ H5HL__fl_deserialize(H5HL_t *heap)
     hsize_t      free_block;              /* Offset of free block */
     herr_t       ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(heap);
@@ -278,7 +278,7 @@ H5HL__fl_serialize(const H5HL_t *heap)
 {
     H5HL_free_t *fl; /* Pointer to heap free list node */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -319,7 +319,7 @@ H5HL__fl_serialize(const H5HL_t *heap)
 static herr_t
 H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(image_len);
@@ -353,7 +353,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     H5HL_t                heap;                                   /* Local heap */
     herr_t                ret_value = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(image);
@@ -404,7 +404,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     H5HL_cache_prfx_ud_t *udata     = (H5HL_cache_prfx_ud_t *)_udata; /* User data for callback */
     void *                ret_value = NULL;                           /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -496,7 +496,7 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
 {
     const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)_thing; /* Pointer to local heap prefix to query */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(prfx);
@@ -541,7 +541,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     uint8_t *    image = (uint8_t *)_image;    /* Pointer into image buffer */
     size_t       buf_size;                     /* expected size of the image buffer */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -638,7 +638,7 @@ H5HL__cache_prefix_free_icr(void *_thing)
     H5HL_prfx_t *prfx      = (H5HL_prfx_t *)_thing; /* Pointer to local heap prefix to query */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(prfx);
@@ -674,7 +674,7 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5HL_t *heap = (H5HL_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(heap);
@@ -709,7 +709,7 @@ H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, h
     H5HL_t *     heap      = (H5HL_t *)_udata; /* User data for callback */
     void *       ret_value = NULL;             /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -768,7 +768,7 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
 {
     const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(dblk);
@@ -804,7 +804,7 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
     H5HL_t *     heap;                         /* Pointer to the local heap */
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(f);
@@ -849,7 +849,7 @@ H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing)
     H5HL_dblk_t *dblk      = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dblk);
@@ -921,7 +921,7 @@ H5HL__cache_datablock_free_icr(void *_thing)
     H5HL_dblk_t *dblk      = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(dblk);

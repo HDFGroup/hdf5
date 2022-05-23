@@ -148,7 +148,7 @@ H5HF__hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
     unsigned curr_row;            /* Current row in block */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.

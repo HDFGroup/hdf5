@@ -104,7 +104,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     H5F_t *    parent      = NULL;  /*file containing mount point	*/
     unsigned   lt, rt, md;          /*binary search indices		*/
     int        cmp;                 /*binary search comparison value*/
-    H5G_loc_t  mp_loc;              /* entry of moint point to be opened */
+    H5G_loc_t  mp_loc;              /* entry of mount point to be opened */
     H5G_name_t mp_path;             /* Mount point group hier. path */
     H5O_loc_t  mp_oloc;             /* Mount point object location */
     H5G_loc_t  root_loc;            /* Group location of root of file to mount */
@@ -440,7 +440,7 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
 {
     unsigned u; /* Local index value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -523,7 +523,7 @@ H5F__flush_mounts_recurse(H5F_t *f)
     unsigned u;                   /* Index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);

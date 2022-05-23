@@ -43,7 +43,7 @@
  * that disk space is allocated only when the contents are actually written.
  * E.g., If one creates a new file, seeks forward 10 million bytes, writes
  * 1 bytes and closes the file, then a sparse file, will show file size of
- * 10 million bytes but actaully uses only couple disk blocks, much smaller
+ * 10 million bytes but actually uses only couple disk blocks, much smaller
  * than the formal file size.)
  *
  * One more consideration is that we want to distinguish an HDF5 library
@@ -70,7 +70,7 @@
 #endif
 
 /* Define Small, Large, Extra Large, Huge File which
- * corrspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
+ * correspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
  * NO_FILE stands for "no file" to be tested.
  */
 typedef enum fsizes_t { SFILE, LFILE, XLFILE, HUGEFILE, NO_FILE } fsizes_t;
@@ -506,17 +506,17 @@ reader(char *filename, hid_t fapl)
 
     /* Open HDF5 file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Open the dataset */
     if ((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if ((fspace = H5Dget_space(d2)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Describe `buf' */
     if ((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Read each region */
     while (HDfgets(ln, (int)sizeof(ln), script)) {
@@ -528,9 +528,9 @@ reader(char *filename, hid_t fapl)
         HDfflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         if (H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Check */
         for (j = zero = wrong = 0; j < WRT_SIZE; j++) {
@@ -554,13 +554,13 @@ reader(char *filename, hid_t fapl)
     }
 
     if (H5Dclose(d2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(mspace) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(fspace) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     HDfree(buf);
     HDfclose(script);
 
@@ -607,9 +607,9 @@ usage(void)
               "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
               "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
               "Examples:\n"
-              "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
-              "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
-              "\tBe sure the file system can support the file size requested\n",
+              "\t big -fsize 2.1e9 \t# test with file size just under 2GB\n"
+              "\t big -fsize 2.2e9 \t# test with file size just above 2GB\n"
+              "\t Be sure the file system can support the file size requested\n",
               (hsize_t)FAMILY_SIZE);
 }
 

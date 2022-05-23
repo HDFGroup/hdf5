@@ -2022,7 +2022,7 @@ test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
 {
     hid_t    fapl = -1;                 /* File access property list ID */
     hid_t    sid;                       /* Dataspace ID */
-    hsize_t  numparticles    = 8388608; /* Used to calculate dimenion size */
+    hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
     unsigned num_dsets       = 513;     /* used to calculate dimension size */
     hsize_t  total_particles = numparticles * num_dsets;
     hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */

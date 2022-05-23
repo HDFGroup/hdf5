@@ -1912,7 +1912,7 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
     hid_t *  src_memb_id = priv->src_memb_id, *dst_memb_id = priv->dst_memb_id;
     unsigned i;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     for (i = 0; i < priv->src_nmembs; i++)
         if (src2dst[i] >= 0) {
@@ -1987,7 +1987,7 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned           i, j;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     src_nmembs = src->shared->u.compnd.nmembs;
     dst_nmembs = dst->shared->u.compnd.nmembs;
@@ -2680,7 +2680,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned           i, j;                /*counters            */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     cdata->need_bkg = H5T_BKG_NO;
     if (NULL == (priv = (H5T_enum_struct_t *)(cdata->priv = H5MM_calloc(sizeof(*priv)))))
@@ -2753,7 +2753,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         HDassert(domain[1] >= domain[0]);
         length = (unsigned)(domain[1] - domain[0]) + 1;
         if (src->shared->u.enumer.nmembs < 2 ||
-            (double)length / src->shared->u.enumer.nmembs < (double)(1.2f)) {
+            (double)length / src->shared->u.enumer.nmembs < (double)(1.2F)) {
             priv->base   = domain[0];
             priv->length = length;
             if (NULL == (map = (int *)H5MM_malloc(length * sizeof(int))))
@@ -3266,9 +3266,10 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* If we're down to the last few elements, just wrap up */
                     /* with a "real" reverse copy */
                     if (safe < 2) {
-                        s        = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
-                        d        = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
-                        b        = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
                         s_stride = -s_stride;
                         d_stride = -d_stride;
                         b_stride = -b_stride;
@@ -3278,7 +3279,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     else {
                         s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
                         d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
-                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
                 }     /* end if */
                 else {
@@ -3406,8 +3408,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             /* For nested VL case, free leftover heap objects from the deeper level if the
                              * length of new data elements is shorter than the old data elements.*/
                             if (nested && seq_len < bg_seq_len) {
-                                const uint8_t *tmp;
-                                size_t         u;
+                                uint8_t *tmp;
+                                size_t   u;
 
                                 /* Sanity check */
                                 HDassert(write_to_file);
@@ -3426,7 +3428,9 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
-                    b += b_stride;
+
+                    if (b)
+                        b += b_stride;
                 } /* end for */
 
                 /* Decrement number of elements left to convert */
@@ -3716,9 +3720,10 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     /* If we're down to the last few elements, just wrap up */
                     /* with a "real" reverse copy */
                     if (safe < 2) {
-                        s        = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
-                        d        = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
-                        b        = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
                         s_stride = -s_stride;
                         d_stride = -d_stride;
                         b_stride = -b_stride;
@@ -3728,7 +3733,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     else {
                         s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
                         d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
-                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
                 }     /* end if */
                 else {
@@ -3796,7 +3802,9 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
-                    b += b_stride;
+
+                    if (b)
+                        b += b_stride;
                 } /* end for */
 
                 /* Decrement number of elements left to convert */
@@ -4867,7 +4875,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t   olap;                 /*num overlapping elements    */
     size_t   nchars = 0;           /*number of characters copied    */
     uint8_t *s, *sp, *d, *dp;      /*src and dst traversal pointers*/
-    uint8_t *dbuf      = NULL;     /*temp buf for overlap convers.    */
+    uint8_t *dbuf      = NULL;     /*temp buf for overlap converts.    */
     herr_t   ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -7009,14 +7017,12 @@ H5T__conv_float_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_float_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_double_float
@@ -7051,14 +7057,12 @@ H5T__conv_double_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ldouble_float
@@ -7073,14 +7077,12 @@ H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ldouble_double
@@ -7095,14 +7097,12 @@ H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_schar_float
@@ -7153,7 +7153,7 @@ H5T__conv_schar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7213,7 +7213,7 @@ H5T__conv_uchar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7273,7 +7273,7 @@ H5T__conv_short_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7333,7 +7333,7 @@ H5T__conv_ushort_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7393,7 +7393,7 @@ H5T__conv_int_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7453,7 +7453,7 @@ H5T__conv_uint_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7513,7 +7513,7 @@ H5T__conv_long_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7573,7 +7573,7 @@ H5T__conv_ulong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7633,7 +7633,7 @@ H5T__conv_llong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7695,7 +7695,7 @@ H5T__conv_ullong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7805,7 +7805,7 @@ H5T__conv_double_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7827,7 +7827,7 @@ H5T__conv_ldouble_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7937,7 +7937,7 @@ H5T__conv_double_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7959,7 +7959,7 @@ H5T__conv_ldouble_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8069,7 +8069,7 @@ H5T__conv_double_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8091,7 +8091,7 @@ H5T__conv_ldouble_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8201,7 +8201,7 @@ H5T__conv_double_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8223,7 +8223,7 @@ H5T__conv_ldouble_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8333,7 +8333,7 @@ H5T__conv_double_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -8357,7 +8357,7 @@ H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -9445,7 +9445,7 @@ H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 {
     size_t i;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(s);
     HDassert(size);

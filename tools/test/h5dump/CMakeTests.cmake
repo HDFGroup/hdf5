@@ -412,7 +412,7 @@
   # --------------------------------------------------------------------
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
-  if (WIN32)
+  if (WIN32 AND CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0)
     configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
@@ -863,7 +863,7 @@
   # test for named data types
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
   ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5)
-  # test for unamed type
+  # test for unnamed type
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)

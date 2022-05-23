@@ -381,7 +381,7 @@ error:
 /*
  * Function: gen_err_level()
  *
- * Generate a file to test the situtation described in HDFFV-9434:
+ * Generate a file to test the situation described in HDFFV-9434:
  *    Exceed the limit of v1-btree level
  *
  *    Create a file with H5Pset_istore_k(fcpl, 1).

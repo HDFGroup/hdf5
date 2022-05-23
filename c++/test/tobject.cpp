@@ -740,7 +740,7 @@ test_object()
     MESSAGE(5, ("Testing Object Functions\n"));
 
     test_get_objname();             // Test get object name from groups/datasets
-    test_existance();               // Test check for object existance
+    test_existance();               // Test check for object existence
     test_get_objname_ontypes();     // Test get object name from types
     test_get_objtype();             // Test get object type
     test_open_object_header();      // Test object header functions (H5O)

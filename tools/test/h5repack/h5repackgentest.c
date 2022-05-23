@@ -27,9 +27,9 @@
  * There is no restriction on the name, number, or structure of datasets and
  * groups in HDF5 file.
  *
- * The inluded datatypes should be more than adequate to verify the correctness
+ * The included datatypes should be more than adequate to verify the correctness
  * of the behavior -- if one type can be consolidated from external storage,
- * then thay all can.
+ * then they all can.
  */
 
 #include "hdf5.h"
@@ -307,7 +307,7 @@ generate_f32le(hbool_t external)
     /* Generate values */
     for (i = 0, k = 0, n = 0; (hsize_t)i < dims[0]; i++) {
         for (j = 0; (hsize_t)j < dims[1]; j++, k++, n++) {
-            wdata[k] = n * 801.1f * ((k % 5 == 1) ? (-1) : (1));
+            wdata[k] = n * 801.1F * ((k % 5 == 1) ? (-1) : (1));
         }
     }
 

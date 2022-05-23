@@ -118,7 +118,7 @@ H5P__strcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register character encoding */
     if (H5P__register_real(pclass, H5P_STRCRT_CHAR_ENCODING_NAME, H5P_STRCRT_CHAR_ENCODING_SIZE,
@@ -220,7 +220,7 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
     const H5T_cset_t *encoding = (const H5T_cset_t *)value; /* Create local alias for values */
     uint8_t **        pp       = (uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(encoding);
@@ -257,7 +257,7 @@ H5P__strcrt_char_encoding_dec(const void **_pp, void *_value)
     H5T_cset_t *    encoding = (H5T_cset_t *)_value; /* Character set encoding */
     const uint8_t **pp       = (const uint8_t **)_pp;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pp);

@@ -388,7 +388,7 @@ done:
  * PURPOSE
  *  Call  H5Sget_select_elem_pointlist
  *  get a list of  element points in the
- *  current dataspace selectin.
+ *  current dataspace selection.
  *  Starting with the startpoint-th point in the
  *  list of points, numpoints points are put into the user's
  *  buffer. If the user's buffer fills up before numpoints
@@ -759,7 +759,7 @@ done:
  *  space_id     - identifier of the dataspace
  *  rank         - dataspace rank
  *  current_size - array with the new dimension sizes
- *  maximum_size - aray with maximum sizes of dimensions
+ *  maximum_size - array with maximum sizes of dimensions
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -804,7 +804,7 @@ done:
  *  space_id - identifier of the dataspace
  * OUTPUTS
  *  dims    - array with the dimension sizes
- *  maxdims - aray with maximum sizes of dimensions
+ *  maxdims - array with maximum sizes of dimensions
  * RETURNS
  *  number of dataspace dimensions (rank) on success, -1 on failure
  * AUTHOR
@@ -852,7 +852,7 @@ done:
  * NAME
  *  h5sis_simple_c
  * PURPOSE
- *  Call H5Sis_simple to detrmine if the dataspace
+ *  Call H5Sis_simple to determine if the dataspace
  *  is simple.
  * INPUTS
  *  space_id - identifier of the dataspace

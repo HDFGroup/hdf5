@@ -55,7 +55,7 @@
 /* This test uses many POSIX things that are not available on
  * Windows.
  */
-#ifdef H5_HAVE_UNISTD_H
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 
 #include "use.h"
 
@@ -265,7 +265,7 @@ done:
     return (ret_value);
 } /* end main() */
 
-#else /* H5_HAVE_UNISTD_H */
+#else /* defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) */
 
 int
 main(void)
@@ -274,4 +274,4 @@ main(void)
     return EXIT_SUCCESS;
 } /* end main() */
 
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) */

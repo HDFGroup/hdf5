@@ -487,7 +487,7 @@ CONTAINS
 !
 !  Changed name from the now obsolete h5dextend_f
 !  to h5dset_extent_f. Provided interface to old name
-!  for backward compatability. -MSB- March 14, 2008
+!  for backward compatibility. -MSB- March 14, 2008
 !
 ! SOURCE
   SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
@@ -1206,7 +1206,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the bufffer buf
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the buffer buf
     TYPE(hobj_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
@@ -1238,7 +1238,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the bufffer buf
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the buffer buf
     TYPE(hdset_reg_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
@@ -1636,8 +1636,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
@@ -1687,8 +1686,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
@@ -1735,8 +1733,7 @@ CONTAINS
   ! Inputs:
   !		fill_value	- fill value
   !		space_id	- memory space selection identifier
-  !		buf		- data buffer iin memory ro apply selection to
-  !				- of k-th dimension of the buf array
+  !		buf		- memory buffer containing the selection to be filled
   ! Outputs:
   !		hdferr:		- error code
   !				 	Success:  0
@@ -1810,8 +1807,7 @@ CONTAINS
 ! Inputs:
 !		fill_value	- fill value
 !		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
+!		buf		- memory buffer containing the selection to be filled
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0

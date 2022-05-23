@@ -172,11 +172,11 @@ SUBROUTINE test_table1()
   !
   offset = 0
   field_offset(1) = offset
-  offset = offset + type_sizec ! Offset of the second memeber is 2
+  offset = offset + type_sizec ! Offset of the second member is 2
   field_offset(2) = offset
-  offset = offset + type_sizei ! Offset of the second memeber is 6
+  offset = offset + type_sizei ! Offset of the second member is 6
   field_offset(3) = offset
-  offset = offset + type_sized ! Offset of the second memeber is 14
+  offset = offset + type_sized ! Offset of the second member is 14
   field_offset(4) = offset
 
   !-------------------------------------------------------------------------
@@ -571,7 +571,7 @@ SUBROUTINE test_table2()
   INTEGER(HSIZE_T), PARAMETER :: nrecords = 8            ! nrecords
 
   CHARACTER(len=8), PARAMETER :: filename = "f2tab.h5"   ! File name
-  CHARACTER(LEN=5), PARAMETER :: table_name = "tabel"    ! table name
+  CHARACTER(LEN=5), PARAMETER :: table_name = "table"    ! table name
   CHARACTER(LEN=10), PARAMETER :: table_name_fill = "tabel_fill"    ! table name
 
   ! Define field information

@@ -44,13 +44,13 @@ const char *FILENAME[] = {"vds_env_virt_0", "vds_env_virt_3", "vds_env_src_2", "
 static int
 test_vds_prefix_second(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        vfilename2[FILENAME_BUF_SIZE];
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
+    char *      srcfilename             = NULL;
+    char *      srcfilename_map         = NULL;
+    char *      vfilename               = NULL;
+    char *      vfilename2              = NULL;
+    char *      srcfilenamepct          = NULL;
+    char *      srcfilenamepct_map      = NULL;
     hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile                   = -1;               /* File with virtual dset */
     hid_t       dcpl                    = -1;               /* Dataset creation property list */
@@ -58,7 +58,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
     hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
     hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datsets */
+    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
     hid_t       vdset                   = -1;               /* Virtual dataset */
     hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
     int         buf[10][26];                                /* Write and expected read buffer */
@@ -67,87 +67,100 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     int         i, j;
     char        buffer[1024]; /* buffer to read vds_prefix       */
 
-    TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix")
+    TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix");
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, vfilename2, sizeof vfilename2);
-    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[3], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if (NULL == (srcfilename = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (srcfilename_map = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (vfilename = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (vfilename2 = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (srcfilenamepct = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (srcfilenamepct_map = HDmalloc(FILENAME_BUF_SIZE)))
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[1], fapl, vfilename2, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[3], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* create tmp directory and get current working directory path */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create DCPL */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set fill value */
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Set prefix to a nonexistent directory, will be overwritten by environment variable */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Pset_virtual_prefix(dapl, "someprefix") < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (HDstrcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("vds prefix not set correctly");
 
     /* Create source dataspace */
     if ((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create virtual dataspace */
     if ((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Select all (should not be necessary, but just to be sure) */
     if (H5Sselect_all(srcspace[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sselect_all(vspace[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Add virtual layout mapping */
     if (H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset",
                        srcspace[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create virtual file */
     if ((vfile = H5Fcreate(vfilename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create source file if requested */
     if (config & TEST_IO_DIFFERENT_FILE) {
         if (NULL == HDgetcwd(buffer, 1024))
-            TEST_ERROR
+            TEST_ERROR;
         if (HDchdir(TMPDIR) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if ((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (HDchdir(buffer) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
     else {
         srcfile[0] = vfile;
         if (H5Iinc_ref(srcfile[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     /* Create source dataset */
     if ((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT,
                                  H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create virtual dataset */
     if ((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, dapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Populate write buffer */
     for (i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
@@ -156,17 +169,17 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 
     /* Write data directly to source dataset */
     if (H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close srcdset and srcfile if config option specified */
     if (config & TEST_IO_CLOSE_SRC) {
         if (H5Dclose(srcdset[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         srcdset[0] = -1;
 
         if (config & TEST_IO_DIFFERENT_FILE) {
             if (H5Fclose(srcfile[0]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             srcfile[0] = -1;
         }
     }
@@ -174,27 +187,27 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     /* Reopen virtual dataset and file if config option specified */
     if (config & TEST_IO_REOPEN_VIRT) {
         if (H5Dclose(vdset) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         vdset = -1;
         if (H5Fclose(vfile) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         vfile = -1;
         if ((vfile = H5Fopen(vfilename2, H5F_ACC_RDWR, fapl)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if ((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     /* Read data through virtual dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify read data */
     for (i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++) {
         for (j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
             if (rbuf[i][j] != buf[i][j]) {
-                TEST_ERROR
+                TEST_ERROR;
             }
     }
 
@@ -205,65 +218,79 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 
     /* Write data through virtual dataset */
     if (H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Reopen srcdset and srcfile if config option specified */
     if (config & TEST_IO_CLOSE_SRC) {
         if (config & TEST_IO_DIFFERENT_FILE) {
             if (NULL == HDgetcwd(buffer, 1024))
-                TEST_ERROR
+                TEST_ERROR;
             if (HDchdir(TMPDIR) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if ((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (HDchdir(buffer) < 0)
-                TEST_ERROR
+                TEST_ERROR;
         }
         if ((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     /* Read data directly from source dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
     if (H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify read data */
     for (i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
         for (j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
             if (rbuf[i][j] != buf[i][j])
-                TEST_ERROR
+                TEST_ERROR;
 
     /* Close */
     if (H5Dclose(vdset) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     vdset = -1;
     if (H5Dclose(srcdset[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     srcdset[0] = -1;
     if (H5Fclose(srcfile[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     srcfile[0] = -1;
     if (H5Fclose(vfile) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     vfile = -1;
     if (H5Sclose(srcspace[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     srcspace[0] = -1;
     if (H5Sclose(vspace[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     vspace[0] = -1;
     if (H5Pclose(dapl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     dapl = -1;
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     dcpl = -1;
+
+    HDfree(srcfilenamepct_map);
+    HDfree(srcfilenamepct);
+    HDfree(vfilename2);
+    HDfree(vfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename);
 
     PASSED();
     return 0;
 
 error:
+    HDfree(srcfilenamepct_map);
+    HDfree(srcfilenamepct);
+    HDfree(vfilename2);
+    HDfree(vfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename);
+
     H5E_BEGIN_TRY
     {
         for (i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
@@ -322,7 +349,7 @@ main(void)
 
     /* Set to use the latest file format */
     if ((my_fapl = H5Pcopy(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Loop through all the combinations of low/high version bounds */
     for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
@@ -341,13 +368,14 @@ main(void)
 
             /* Set the low/high version bounds */
             if (H5Pset_libver_bounds(my_fapl, low, high) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsprintf(msg, "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
-                      high_string);
+            HDsnprintf(msg, sizeof(msg),
+                       "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
+                       high_string);
             HDputs(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
@@ -364,7 +392,7 @@ main(void)
     }     /* end for low */
 
     if (H5Pclose(my_fapl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (nerrors)
         goto error;

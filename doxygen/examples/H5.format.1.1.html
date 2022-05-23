@@ -36,18 +36,18 @@ TABLE.list TD { border:none; }
     <table border=0 width=90%>
     <tr>
     <td valign=top>
-    <ol type=I>
+    <ol type="I">
       <li><a href="#Intro">Introduction</a>
       <li><a href="#FileMetaData">Disk Format Level 0 - File Metadata</a>
         <font size=-2>
-	<ol type=A>
+	<ol type="A">
 	  <li><a href="#SuperBlock">Disk Format Level 0A - File Signature and Super Block</a>
 	  <li><a href="#DriverInfo">Disk Format Level 0B - File Driver Info</a>
 	</ol>
         </font>
       <li><a href="#FileInfra">Disk Format Level 1 - File Infrastructure</a>
         <font size=-2>
-	<ol type=A>
+	<ol type="A">
 	  <li><a href="#Btrees">Disk Format Level 1A - B-link Trees and B-tree Nodes</a>
 	  <li><a href="#SymbolTable">Disk Format Level 1B - Group</a>
 	  <li><a href="#SymbolTableEntry">Disk Format Level 1C - Group Entry</a>
@@ -58,9 +58,9 @@ TABLE.list TD { border:none; }
         </font>
       <li><a href="#DataObject">Disk Format Level 2 - Data Objects</a>
         <font size=-2>
-	<ol type=A>
+	<ol type="A">
 	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a>
-	    <ol type=1>
+	    <ol type="1">
 	      <li><a href="#NILMessage">Name: NIL</a>                                                       <!-- 0x0000 -->
 	      <li><a href="#SimpleDataSpace">Name: Simple Dataspace</a>                                     <!-- 0x0001 -->
 <!--          <li><a href="#DataSpaceMessage">Name: Complex Dataspace</a>  -->                              <!-- 0x0002 -->
@@ -73,13 +73,13 @@ TABLE.list TD { border:none; }
         </font>
     </ol>
     </td><td>&nbsp;&nbsp;</td><td valign=top>
-    <ol type=I start=4>
+    <ol type="I" start="4">
 
       <li><a href="#DataObject">Disk Format Level 2 - Data Objects</a>
         <font size=-2><i>(Continued)</i>
 	<ol type=A>
 	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a><i>(Continued)</i>
-	    <ol type=1 start=6>
+	    <ol type="1" start="7">
 <!--          <li><a href="#CompactDataStorageMessage">Name: Data Storage - Compact</a>  -->                <!-- 0x0006 -->
 	      <li><a href="#ReservedMessage_0006">Name: Reserved - not assigned yet</a>                     <!-- 0x0006 -->
 	      <li><a href="#ExternalFileListMessage">Name: Data Storage - External Data Files</a>           <!-- 0x0007 -->
@@ -616,7 +616,7 @@ TABLE.list TD { border:none; }
           <td>
             <P>This is the absolute file address of the first byte past
             the end of all HDF5 data.  It is used to determine whether a
-            file has been accidently truncated and as an address where
+            file has been accidentally truncated and as an address where
             file data allocation can occur if space from the free list is
             not used.
             </P>
@@ -1059,7 +1059,7 @@ TABLE.list TD { border:none; }
             only does the level indicate whether child pointers
             point to sub-trees or to data, but it can also be used
             to help file consistency checking utilities reconstruct
-            damanged trees.
+            damaged trees.
             </P>
           </td>
         </tr>
@@ -3184,7 +3184,7 @@ TABLE.list TD { border:none; }
 	  <td><b>Normalization.</b> The value can be 0 if there is no
 	    normalization, 1 if the most significant bit of the
 	    mantissa is always set (except for 0.0), and 2 if the most
-	    signficant bit of the mantissa is not stored but is
+	    significant bit of the mantissa is not stored but is
 	    implied to be set. The value 3 is reserved and will not
 	    appear in this field.</td>
 	</tr>

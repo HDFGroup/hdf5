@@ -34,6 +34,9 @@ if (NOT ONLY_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  target_compile_definitions(${HDF5_TEST_LIB_TARGET}
+      PRIVATE "H5_TEST_EXPRESS_LEVEL_DEFAULT=${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
+  )
   TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET}
       PUBLIC ${LINK_LIBS} ${HDF5_LIB_TARGET}
@@ -53,7 +56,10 @@ if (BUILD_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_compile_definitions(${HDF5_TEST_LIBSH_TARGET} PUBLIC "H5_BUILT_AS_DYNAMIC_LIB")
+  target_compile_definitions(${HDF5_TEST_LIBSH_TARGET}
+      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
+      PRIVATE "H5_TEST_EXPRESS_LEVEL_DEFAULT=${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
+  )
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_TEST_LIBSH_TARGET}
       PUBLIC ${LINK_LIBS} ${HDF5_LIBSH_TARGET}
@@ -266,7 +272,6 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tgenprop.c
     ${HDF5_TEST_SOURCE_DIR}/th5o.c
     ${HDF5_TEST_SOURCE_DIR}/th5s.c
-    ${HDF5_TEST_SOURCE_DIR}/theap.c
     ${HDF5_TEST_SOURCE_DIR}/tid.c
     ${HDF5_TEST_SOURCE_DIR}/titerate.c
     ${HDF5_TEST_SOURCE_DIR}/tmeta.c
@@ -318,7 +323,6 @@ set (H5_TESTS
     earray
     btree2
     fheap
-    pool
     accum
     hyperslab
     istore

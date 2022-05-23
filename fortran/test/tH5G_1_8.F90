@@ -654,7 +654,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER(HID_T) :: file, scalar, grp, d1
      CHARACTER(LEN=12), PARAMETER :: filename ='TestLinks.h5'
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-     INTEGER ::   arank = 1                      ! Attribure rank
+     INTEGER ::   arank = 1                      ! Attribute rank
      INTEGER :: error
 
      INTEGER :: cset ! Indicates the character set used for the link’s name.
@@ -1923,7 +1923,7 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   ! Open file
 
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   ! Create LAPL with higher-than-usual nlinks value
   ! Create a non-default lapl with udata set to point to the first group

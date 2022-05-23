@@ -91,9 +91,6 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Based on the value of the HDF5_USE_FILE_LOCKING environment variable.
  * TRUE/FALSE have obvious meanings. FAIL means the environment variable was
  * not set, so the code should ignore it and use the fapl value instead.
@@ -138,29 +135,6 @@ H5F_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5F__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5F__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-herr_t
-H5F__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_FILE_CLS) < 0)
@@ -172,7 +146,7 @@ H5F__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_package() */
+} /* end H5F_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_term_package
@@ -196,23 +170,17 @@ H5F_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        if (H5I_nmembers(H5I_FILE) > 0) {
-            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-        else {
-            /* Make certain we've cleaned up all the shared file objects */
-            H5F_sfile_assert_num(0);
+    if (H5I_nmembers(H5I_FILE) > 0) {
+        (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
+        n++; /*H5I*/
+    }        /* end if */
+    else {
+        /* Make certain we've cleaned up all the shared file objects */
+        H5F_sfile_assert_num(0);
 
-            /* Destroy the file object id group */
-            n += (H5I_dec_type_ref(H5I_FILE) > 0);
-
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
+        /* Destroy the file object id group */
+        n += (H5I_dec_type_ref(H5I_FILE) > 0);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5F_term_package() */
@@ -239,7 +207,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file_vol_obj);
@@ -305,7 +273,7 @@ H5F__set_vol_conn(H5F_t *file)
     void *                new_connector_info = NULL;    /* Copy of connector info */
     herr_t                ret_value          = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -557,7 +525,7 @@ H5F__get_objects(const H5F_t *f, unsigned types, size_t max_nobjs, hid_t *obj_id
     H5F_olist_t olist;               /* Structure to hold search results */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(obj_id_count_ptr);
@@ -659,7 +627,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     hbool_t      add_obj   = FALSE;
     int          ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(obj_ptr);
     HDassert(olist);
@@ -771,7 +739,7 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name /*ou
     size_t fname_len;           /* Length of external link file name */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     prefix_len = HDstrlen(prefix);
     fname_len  = HDstrlen(file_name);
@@ -807,7 +775,7 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
     char *strret;           /* Pointer to next separator */
     char *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value now */
     ret_value = *env_prefix;
@@ -1060,7 +1028,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
     H5FD_t *      file      = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
-    haddr_t       sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature    */
+    haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */
 
     FUNC_ENTER_PACKAGE
@@ -1118,7 +1086,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
     H5F_t *f         = NULL;
     H5F_t *ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (f = H5FL_CALLOC(H5F_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
@@ -1157,7 +1125,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         /* Initialization for handling file space (for paged aggregation) */
         f->shared->pgend_meta_thres = H5F_FILE_SPACE_PGEND_META_THRES;
 
-        /* intialize point of no return */
+        /* initialize point of no return */
         f->shared->point_of_no_return = FALSE;
 
         /* Copy the file creation and file access property lists into the
@@ -1294,7 +1262,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
                 f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
         }
 
-        /* Determine the # of bins for metdata read retries */
+        /* Determine the # of bins for metadata read retries */
         if (H5F_set_retries(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
 
@@ -1386,7 +1354,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -1681,7 +1649,7 @@ H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make sure the out parameter has a value */
     *use_file_locking = TRUE;
@@ -1819,7 +1787,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * or creating it) so we can compare it with files that are already
      * open. If that fails then we try again with the full set of flags
      * (only if they're different than the original failed attempt).
-     * However, if the file driver can't distinquish between files then
+     * However, if the file driver can't distinguish between files then
      * there's no reason to open the file tentatively because it's the
      * application's responsibility to prevent this situation (there's no
      * way for us to detect it here anyway).
@@ -2162,7 +2130,7 @@ H5F__flush_phase1(H5F_t *f)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
     HDassert(f);
@@ -2199,7 +2167,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check arguments */
     HDassert(f);
@@ -2691,7 +2659,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
 #endif                          /* H5_HAVE_SYMLINK */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -3148,7 +3116,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      * file driver.  However, this test will not work if there is some
      * other file driver sitting on top of the multi file driver.
      *
-     * I'm not sure if this is possible at present, but in all likelyhood,
+     * I'm not sure if this is possible at present, but in all likelihood,
      * it will become possible in the future.  On the other hand, we may
      * remove the split/multi file drivers before then.
      *
@@ -3168,7 +3136,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      *
      * While this problem is quite solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
-     * allow the get file image operation to be perfomed on files
+     * allow the get file image operation to be performed on files
      * opened with the family file driver.
      *
      * Observe that the following test only looks at the top level
@@ -3599,7 +3567,7 @@ done:
  *              1) The file being opened has v3 superblock
  *              2) The file is opened with H5F_ACC_RDWR
  *              3) The file is not already marked for SWMR writing
- *              4) Current implementaion for opened objects:
+ *              4) Current implementation for opened objects:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects

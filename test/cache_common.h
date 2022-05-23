@@ -347,7 +347,7 @@ typedef struct test_entry_t {
     int pin_type[MAX_PINS];                          /* array of the types of entries
                                                       * pinned by this entry.
                                                       */
-    int pin_idx[MAX_PINS];                           /* array of the indicies of
+    int pin_idx[MAX_PINS];                           /* array of the indices of
                                                       * entries pinned by this entry.
                                                       */
     int num_flush_ops;                               /* integer field containing the
@@ -393,7 +393,7 @@ typedef struct test_entry_t {
     unsigned flush_dep_npar;                         /* Number of flush dependency parents */
     unsigned flush_dep_nchd;                         /* Number of flush dependency children */
     unsigned
-             flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including granchildren, etc.) */
+             flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including grandchildren, etc.) */
     hbool_t  pinned_from_client; /* entry was pinned by client call */
     hbool_t  pinned_from_cache;  /* entry was pinned by cache internally */
     unsigned flush_order;        /* Order that entry was flushed in */

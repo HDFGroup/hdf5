@@ -142,6 +142,7 @@ static herr_t  H5FD__direct_unlock(H5FD_t *_file);
 static herr_t  H5FD__direct_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_direct_g = {
+    H5FD_CLASS_VERSION,         /* struct version       */
     H5FD_DIRECT_VALUE,          /* value                */
     "direct",                   /* name                 */
     MAXADDR,                    /* maxaddr              */
@@ -170,6 +171,10 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD__direct_get_handle,    /* get_handle           */
     H5FD__direct_read,          /* read                 */
     H5FD__direct_write,         /* write                */
+    NULL,                       /* read_vector          */
+    NULL,                       /* write_vector         */
+    NULL,                       /* read_selection       */
+    NULL,                       /* write_selection      */
     NULL,                       /* flush                */
     H5FD__direct_truncate,      /* truncate             */
     H5FD__direct_lock,          /* lock                 */
@@ -181,42 +186,6 @@ static const H5FD_class_t H5FD_direct_g = {
 
 /* Declare a free list to manage the H5FD_direct_t struct */
 H5FL_DEFINE_STATIC(H5FD_direct_t);
-
-/*--------------------------------------------------------------------------
-NAME
-   H5FD__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5FD__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_direct_init currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5FD__init_package(void)
-{
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    herr_t ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
-
-    if (H5FD_direct_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize direct VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_direct_init
@@ -235,12 +204,25 @@ done:
 hid_t
 H5FD_direct_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
+
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g)) {
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g, sizeof(H5FD_class_t), FALSE);
+        if (H5I_INVALID_HID == H5FD_DIRECT_g)
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register direct");
+    }
 
     /* Set return value */
     ret_value = H5FD_DIRECT_g;
@@ -264,7 +246,7 @@ done:
 static herr_t
 H5FD__direct_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
     H5FD_DIRECT_g = 0;
@@ -366,7 +348,7 @@ H5FD__direct_populate_config(size_t boundary, size_t block_size, size_t cbuf_siz
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa_out);
 
@@ -421,7 +403,7 @@ H5FD__direct_fapl_get(H5FD_t *_file)
     H5FD_direct_t *file      = (H5FD_direct_t *)_file;
     void *         ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = H5FD__direct_fapl_copy(&(file->fa));
@@ -449,7 +431,7 @@ H5FD__direct_fapl_copy(const void *_old_fa)
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t *)_old_fa;
     H5FD_direct_fapl_t *      new_fa = H5MM_calloc(sizeof(H5FD_direct_fapl_t));
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(new_fa);
 
@@ -492,7 +474,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     void *          buf1, *buf2;
     H5FD_t *        ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check on file offsets */
     HDassert(sizeof(HDoff_t) >= sizeof(size_t));
@@ -646,7 +628,7 @@ H5FD__direct_close(H5FD_t *_file)
     H5FD_direct_t *file      = (H5FD_direct_t *)_file;
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
@@ -680,7 +662,7 @@ H5FD__direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_direct_t *f2        = (const H5FD_direct_t *)_f2;
     int                  ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_WIN32_API
     if (f1->fileindexhi < f2->fileindexhi)
@@ -739,7 +721,7 @@ done:
 static herr_t
 H5FD__direct_query(const H5FD_t H5_ATTR_UNUSED *_f, unsigned long *flags /* out */)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -776,7 +758,7 @@ H5FD__direct_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_direct_t *file = (const H5FD_direct_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
 }
@@ -802,7 +784,7 @@ H5FD__direct_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     file->eoa = addr;
 
@@ -832,7 +814,7 @@ H5FD__direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_direct_t *file = (const H5FD_direct_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->eof)
 }
@@ -855,7 +837,7 @@ H5FD__direct_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_ha
     H5FD_direct_t *file      = (H5FD_direct_t *)_file;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -899,7 +881,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
     size_t         copy_size = size; /* Size remaining to read when using copy buffer */
     size_t         copy_offset;      /* Offset into copy buffer of the requested data */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1082,7 +1064,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
     size_t         copy_size = size; /* Size remaining to write when using copy buffer */
     size_t         copy_offset;      /* Offset into copy buffer of the data to write */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1296,7 +1278,7 @@ H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_AT
     H5FD_direct_t *file      = (H5FD_direct_t *)_file;
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1360,7 +1342,7 @@ H5FD__direct_lock(H5FD_t *_file, hbool_t rw)
     int            lock_flags;                    /* file locking flags   */
     herr_t         ret_value = SUCCEED;           /* Return value         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1400,7 +1382,7 @@ H5FD__direct_unlock(H5FD_t *_file)
     H5FD_direct_t *file      = (H5FD_direct_t *)_file; /* VFD file struct */
     herr_t         ret_value = SUCCEED;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1433,7 +1415,7 @@ H5FD__direct_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 

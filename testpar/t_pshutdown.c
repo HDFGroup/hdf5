@@ -114,7 +114,7 @@ main(int argc, char **argv)
         if (0 == nerrors)
             PASSED();
         else
-            H5_FAILED()
+            H5_FAILED();
     }
 
     return (nerrors != 0);

@@ -63,10 +63,10 @@
 #define NOT_FLUSHED "NOT_FLUSHED"
 
 /* Error Handling */
-/* For errors occuring in the main process, use the standard TEST_ERROR macro.
+/* For errors occurring in the main process, use the standard TEST_ERROR macro.
    For errors occurring in the spawned process (from the test script), use
    the PROCESS_ERROR macro, which will send a signal to the main process so the
-   main process can propogate errors correctly. */
+   main process can propagate errors correctly. */
 FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
@@ -93,7 +93,7 @@ FILE *errorfile;
 /* ===================== */
 
 /* Main */
-int main(int argc, const char *argv[]);
+int main(int argc, char *argv[]);
 
 /* Flush Test Framework */
 herr_t test_flush(void);
@@ -137,7 +137,7 @@ herr_t end_verification(void);
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     /* Variables */
     const char *envval = NULL;
@@ -222,7 +222,7 @@ test_flush(void)
      * object, a series of verifications will occur on each object in the file.
      *
      * Each verification consists of spawning off a new process and determining
-     * if the object can be opened and its information retreived in said
+     * if the object can be opened and its information retrieved in said
      * alternate process. It reports the results, which are compared to an
      * expected value (either that the object can be found on disk, or that it
      * cannot).
@@ -695,7 +695,7 @@ test_refresh(void)
      * that an attribute has been added, and is only visible after a
      * successful call to a H5*refresh function).
      *
-     * As with the flush case, the implemention is a bit tricky as it's
+     * As with the flush case, the implementation is a bit tricky as it's
      * dealing with signals going back and forth between the two processes
      * to ensure the timing is correct, but basically, an example:
      *
@@ -1166,7 +1166,7 @@ error:
  * Purpose:     This function is used to communicate with the verification
  *              process spawned by the start_refresh_verification_process
  *              function. It gives it the go-ahead to call H5*refresh
- *              on an object and conlcude the refresh verification.
+ *              on an object and conclude the refresh verification.
  *
  * Return:      0 on Success, 1 on Failure
  *
@@ -1371,7 +1371,7 @@ error:
  *
  * Purpose:     This function checks the status of external verification
  *              processes to see if they've succeeded. It checks for the
- *              existance of flushrefresh_ERROR file. If present, that indicates
+ *              existence of flushrefresh_ERROR file. If present, that indicates
  *              an external verification process has failed, and this function
  *              thus fails as well. If not present, then nothing else has
  *              failed, and this function succeeds.

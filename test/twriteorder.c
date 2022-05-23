@@ -54,7 +54,7 @@
  *
  * If the system, in which the writer and reader processes run, the readers
  * will always get all chain-linked blocks correctly. If the order of write
- * is not maintained, some reader processes may found unexpect block data.
+ * is not maintained, some reader processes may found unexpected block data.
  *
  *************************************************************/
 
@@ -63,7 +63,7 @@
 /* This test uses many POSIX things that are not available on
  * Windows.
  */
-#ifdef H5_HAVE_UNISTD_H
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 
 #define DATAFILE "twriteorder.dat"
 /* #define READERS_MAX      10 */ /* max number of readers */
@@ -466,7 +466,7 @@ done:
     return ret_value;
 }
 
-#else /* H5_HAVE_UNISTD_H */
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 int
 main(void)
@@ -475,4 +475,4 @@ main(void)
     return EXIT_SUCCESS;
 } /* end main() */
 
-#endif /* H5_HAVE_UNISTD_H */
+#endif /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */

@@ -53,11 +53,6 @@ typedef struct trav_path_op_data_t {
     const char *path;
 } trav_path_op_data_t;
 
-/* format for hsize_t */
-#ifdef H5TRAV_PRINT_SPACE
-#define HSIZE_T_FORMAT "%" H5_PRINTF_LL_WIDTH "u"
-#endif /* H5TRAV_PRINT_SPACE */
-
 /*-------------------------------------------------------------------------
  * local functions
  *-------------------------------------------------------------------------
@@ -534,7 +529,7 @@ trav_info_free(trav_info_t *info)
 /*-------------------------------------------------------------------------
  * Function: trav_table_visit_obj
  *
- * Purpose: Callback for visiting object, with 'table' sructure
+ * Purpose: Callback for visiting object, with 'table' structure
  *
  * Return:   0 on success,
  *          -1 on failure
@@ -559,7 +554,7 @@ trav_table_visit_obj(const char *path, const H5O_info2_t *oinfo, const char *alr
 /*-------------------------------------------------------------------------
  * Function: trav_table_visit_lnk
  *
- * Purpose:  Callback for visiting link, with 'table' sructure
+ * Purpose:  Callback for visiting link, with 'table' structure
  *
  * Return:   0 on success,
  *          -1 on failure
@@ -856,7 +851,7 @@ trav_attr(hid_t
                     /* simple dataspace */
                     HDprintf(" {");
                     for (i = 0; i < ndims; i++) {
-                        HDprintf("%s" HSIZE_T_FORMAT, i ? ", " : "", size[i]);
+                        HDprintf("%s%" PRIuHSIZE, i ? ", " : "", size[i]);
                     }
                     HDprintf("}\n");
                     break;
@@ -1127,7 +1122,7 @@ symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, c
     /* Look for symlink */
     for (u = 0; u < visited->nused; u++) {
         /* Check for symlink values already in array */
-        /* check type and path pair to distingush between symbolic links */
+        /* check type and path pair to distinguish between symbolic links */
         if ((visited->objs[u].type == type) && !HDstrcmp(visited->objs[u].path, path)) {
             /* if external link, file need to be matched as well */
             if (visited->objs[u].type == H5L_TYPE_EXTERNAL)

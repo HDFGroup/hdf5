@@ -1721,7 +1721,7 @@ io_mode_confusion(void)
  * Open the each of the data sets in turn.  If all opens are successful,
  * the test passes.  Otherwise the test fails.
  *
- * Note that this test will probably become irrelevent shortly, when we
+ * Note that this test will probably become irrelevant shortly, when we
  * land the journaling modifications on the trunk -- at which point all
  * cache clients will have to construct on disk images on demand.
  *
@@ -1782,7 +1782,7 @@ rr_obj_hdr_flush_confusion(void)
     mrc       = MPI_Comm_split(MPI_COMM_WORLD, is_reader, mpi_rank, &comm);
     VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");
 
-    /* The reader proocesses branches off to do reading
+    /* The reader processes branches off to do reading
      * while the writer processes continues to do writing
      * Whenever writers finish one writing step, including a H5Fflush,
      * they inform the readers, via MPI_COMM_WORLD, to verify.
@@ -1977,6 +1977,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 2: write attributes to each dataset
@@ -2031,6 +2032,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 3: write large attributes to each dataset
@@ -2063,7 +2065,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /*
      * flush the metadata cache yet again to clean the object headers.
      *
-     * This is an attempt to crate a situation where we have dirty
+     * This is an attempt to create a situation where we have dirty
      * object header continuation chunks, but clean opject headers
      * to verify a speculative bug fix -- it doesn't seem to work,
      * but I will leave the code in anyway, as the object header
@@ -2078,6 +2080,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 4: write different large attributes to each dataset
@@ -2111,6 +2114,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* Step 5: Close all objects and the file */
 
@@ -2165,10 +2169,12 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* All done. Inform reader to end. */
     steps = 0;
     Reader_check(mrc, steps, steps_done);
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     if (verbose)
         HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);

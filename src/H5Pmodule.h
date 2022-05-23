@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5P_MODULE
-#define H5_MY_PKG      H5P
-#define H5_MY_PKG_ERR  H5E_PLIST
-#define H5_MY_PKG_INIT YES
+#define H5_MY_PKG     H5P
+#define H5_MY_PKG_ERR H5E_PLIST
 
 /**\defgroup H5P H5P
  *
@@ -111,7 +110,8 @@
  *
  * \defgroup GAPL General Access Properties
  * \ingroup H5P
- * \todo Should this be as standalone page?
+ * The functions in this section can be applied to different kinds of property
+ * lists.
  *
  * \defgroup GCPL Group Creation Properties
  * \ingroup H5P

@@ -154,7 +154,7 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Register max. compact attribute storage property */
     if (H5P__register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE,
@@ -482,7 +482,7 @@ done:
  *        transfer property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -543,7 +543,7 @@ done:
  *              transfer property list.  The FLAGS argument specifies certain
  *              general properties of the filter and is documented below.
  *              The CD_VALUES is an array of CD_NELMTS integers which are
- *              auxiliary data for the filter.  The integer vlues will be
+ *              auxiliary data for the filter.  The integer values will be
  *              stored in the dataset object header as part of the filter
  *              information.
  *
@@ -609,7 +609,7 @@ done:
  *        creation property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -671,7 +671,7 @@ done:
  *        creation property list.  The FLAGS argument specifies certain
  *        general properties of the filter and is documented below.
  *        The CD_VALUES is an array of CD_NELMTS integers which are
- *        auxiliary data for the filter.  The integer vlues will be
+ *        auxiliary data for the filter.  The integer values will be
  *        stored in the dataset object header as part of the filter
  *        information.
  *
@@ -705,7 +705,7 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags, 
     htri_t      filter_avail;        /* Filter availability */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check if filter is already available */
     if ((filter_avail = H5Z_filter_avail(filter)) < 0)
@@ -782,7 +782,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The IDX
+ *      field containing encode/decode flags from H5Zpublic.h.  The IDX
  *      should be a value between zero and N-1 as described for
  *      H5Pget_nfilters() and the function will return failure if the
  *      filter number is out of range.
@@ -867,7 +867,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The ID
+ *      field containing encode/decode flags from H5Zpublic.h.  The ID
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
@@ -916,7 +916,7 @@ done:
  *        CD_NELMTS indicates the number of entries in the CD_VALUES
  *        array allocated by the caller while on exit it contains the
  *        number of values defined by the filter.  FILTER_CONFIG is a bit
- *      field contaning encode/decode flags from H5Zpublic.h.  The ID
+ *      field containing encode/decode flags from H5Zpublic.h.  The ID
  *      should be the filter ID to retrieve the parameters for.  If the
  *      filter is not set for the property list, an error will be returned.
  *
@@ -940,6 +940,8 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE8("e", "iZfx*zxzxx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
@@ -1284,7 +1286,7 @@ H5P__ocrt_pipeline_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     H5O_pline_t  new_pline;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1321,7 +1323,7 @@ H5P__ocrt_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
     H5O_pline_t  new_pline;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1359,7 +1361,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
     uint8_t **         pp    = (uint8_t **)_pp;
     size_t             u; /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(pline);
     HDassert(size);
@@ -1455,7 +1457,7 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     size_t          u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -1543,7 +1545,7 @@ H5P__ocrt_pipeline_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1576,7 +1578,7 @@ H5P__ocrt_pipeline_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED s
     H5O_pline_t  new_pline;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(pline);
@@ -1615,7 +1617,7 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
     int    cmp_value;     /* Value from comparison */
     herr_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(pline1);
@@ -1707,7 +1709,7 @@ H5P__ocrt_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(value);
@@ -1838,6 +1840,8 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE7("e", "iZfx*zxzx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so

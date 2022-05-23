@@ -131,7 +131,7 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
     endif ()
@@ -186,7 +186,7 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
     endif ()

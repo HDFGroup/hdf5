@@ -1,0 +1,86 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5. The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+srcdir=@srcdir@
+TOP_BUILDDIR=..
+
+# Determine if backward compatibility options enabled
+DEPRECATED_SYMBOLS="yes"
+
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+CP='cp'
+
+THIS_DIR=`pwd`
+SRC_TOOLS_DIR=$srcdir/../../../../tools
+
+nerrors=0
+verbose=yes
+exit_code=$EXIT_SUCCESS
+
+
+# Add Testing files into the local testfiles directory::
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+echo "HDF5 \"$THIS_DIR/testfiles/h5diff_basic1.h5\" {" > "$THIS_DIR"/testfiles/h5diff_basic1.h5_h5dump.txt
+echo "FILE_CONTENTS {
+ group      /
+ group      /g1
+ dataset    /g1/d1
+ dataset    /g1/d2
+ dataset    /g1/dset1
+ dataset    /g1/dset10
+ dataset    /g1/dset11
+ dataset    /g1/dset12
+ dataset    /g1/dset3
+ dataset    /g1/dset5
+ dataset    /g1/dset6
+ dataset    /g1/dset7
+ dataset    /g1/dset8
+ dataset    /g1/dset9
+ dataset    /g1/fp1
+ dataset    /g1/fp15
+ dataset    /g1/fp16
+ dataset    /g1/fp17
+ dataset    /g1/fp18
+ dataset    /g1/fp18_COPY
+ dataset    /g1/fp19
+ dataset    /g1/fp19_COPY
+ dataset    /g1/fp2
+ dataset    /g1/fp20
+ dataset    /g1/fp20_COPY
+ dataset    /g1/ld
+ }
+}" >> "$THIS_DIR"/testfiles/h5diff_basic1.h5_h5dump.txt
+
+# Create the help-1.txt output file for '-h' validation
+echo "
+Usage: h5dwalk [options] <path> ...
+
+Options:
+  -i, --input <file>      - read list from file
+  -o, --output <file>     - write output summary to the named file.
+  -E, --error  <file>     - write processed errors to file in text format
+  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an optional named directory.
+  -T, --tool <executable> - name of the HDF5 tool to invoke
+  -h, --help              - print usage
+
+For more information see https://mpifileutils.readthedocs.io. 
+" > "$THIS_DIR"/testfiles/help-1.txt
+
+# Make a copy of the help-1.txt output file for --help validation
+$CP "$srcdir"/help.h5dwalk "$THIS_DIR"/testfiles/help-1.txt
+$CP "$srcdir"/help.h5dwalk "$THIS_DIR"/testfiles/help-2.txt
+# Make a copy of a simple HDF5 datafile which will be used as input for h5dump -n (see the expected output above)
+$CP "$SRC_TOOLS_DIR"/test/h5diff/testfiles/h5diff_basic1.h5 "$THIS_DIR"/testfiles

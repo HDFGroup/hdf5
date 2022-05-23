@@ -22,7 +22,7 @@
 #define H5FDros3_H
 
 #ifdef H5_HAVE_ROS3_VFD
-#define H5FD_ROS3       (H5FD_ros3_init())
+#define H5FD_ROS3       (H5FDperform_init(H5FD_ros3_init))
 #define H5FD_ROS3_VALUE H5_VFD_ROS3
 #else
 #define H5FD_ROS3       (H5I_INVALID_HID)
@@ -105,7 +105,7 @@ H5_DLL herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out);
  *
  * \todo Add missing documentation
  */
-H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa);
+H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa);
 
 #ifdef __cplusplus
 }

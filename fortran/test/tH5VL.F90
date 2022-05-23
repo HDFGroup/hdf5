@@ -147,7 +147,7 @@ CONTAINS
               CALL check("h5dvlen_get_max_len_f", error, total_error)
               if(max_len .ne. data_dims(1)) then
                       total_error = total_error + 1
-                      write(*,*) "Wrong number of elemets returned by h5dvlen_get_max_len_f"
+                      write(*,*) "Wrong number of elements returned by h5dvlen_get_max_len_f"
               endif
           !
           ! Read the dataset.
@@ -317,7 +317,7 @@ CONTAINS
               CALL check("h5dvlen_get_max_len_f", error, total_error)
               if(max_len .ne. data_dims(1)) then
                       total_error = total_error + 1
-                      write(*,*) "Wrong number of elemets returned by h5dvlen_get_max_len_f"
+                      write(*,*) "Wrong number of elements returned by h5dvlen_get_max_len_f"
               endif
           !
           ! Read the dataset.

@@ -19,6 +19,8 @@ set (CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
     "note.*expected.*void.*but argument is of type.*volatile"
+    "plugin-build.*:[ \t]*warning"
+    "CMake Warning*stamp"
     "src.ZLIB.*:[ \t]*warning"
     "warning LNK4197:.*ZLIB-prefix"
     "src.SZIP.*:[ \t]*warning"

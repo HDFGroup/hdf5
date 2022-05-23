@@ -15,7 +15,7 @@
 #ifndef H5Location_H
 #define H5Location_H
 
-#include "H5Classes.h" // constains forward class declarations
+#include "H5Classes.h" // contains forward class declarations
 
 namespace H5 {
 
@@ -334,7 +334,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
     // Noop destructor.
-    virtual ~H5Location();
+    virtual ~H5Location() override;
 
 }; // end of H5Location
 } // namespace H5

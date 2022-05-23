@@ -139,11 +139,11 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
 #    add_subdirectory(${szip_SOURCE_DIR} ${szip_BINARY_DIR})
 #  endif()
 #
-##include (${BINARY_DIR}/${SZ_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
+##include (${BINARY_DIR}/${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target szip-static
   if (USE_LIBAEC)
     add_library(${HDF_PACKAGE_NAMESPACE}sz-static STATIC IMPORTED)
-    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}sz-static "sz" STATIC "")
+    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}sz-static "szaec" STATIC "")
     add_dependencies (${HDF_PACKAGE_NAMESPACE}sz-static SZIP)
     add_library(${HDF_PACKAGE_NAMESPACE}aec-static STATIC IMPORTED)
     HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}aec-static "aec" STATIC "")
@@ -188,7 +188,7 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_ZLIB_LIBRARY compress_type)
   if (${compress_type} MATCHES "GIT")
-    EXTERNALPROJECT_ADD (ZLIB
+    EXTERNALPROJECT_ADD (HDF5_ZLIB
         GIT_REPOSITORY ${ZLIB_URL}
         GIT_TAG ${ZLIB_BRANCH}
         INSTALL_COMMAND ""
@@ -207,7 +207,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
             -DPACKAGE_NAMESPACE=${HDF_PACKAGE_NAMESPACE}
     )
   elseif (${compress_type} MATCHES "TGZ")
-    EXTERNALPROJECT_ADD (ZLIB
+    EXTERNALPROJECT_ADD (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_MD5 ""
         INSTALL_COMMAND ""
@@ -226,19 +226,15 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
             -DPACKAGE_NAMESPACE=${HDF_PACKAGE_NAMESPACE}
     )
   endif ()
-  externalproject_get_property (ZLIB BINARY_DIR SOURCE_DIR)
+  externalproject_get_property (HDF5_ZLIB BINARY_DIR SOURCE_DIR)
 
-  if (WIN32)
-    set (ZLIB_LIB_NAME "zlib")
-  else ()
-    set (ZLIB_LIB_NAME "z")
-  endif ()
+  set (ZLIB_LIB_NAME "z")
 ##include (${BINARY_DIR}/${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target zlib-static
   add_library(${HDF_PACKAGE_NAMESPACE}zlib-static STATIC IMPORTED)
 #  add_library(${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
   HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}zlib-static ${ZLIB_LIB_NAME} STATIC "")
-  add_dependencies (${HDF_PACKAGE_NAMESPACE}zlib-static ZLIB)
+  add_dependencies (${HDF_PACKAGE_NAMESPACE}zlib-static HDF5_ZLIB)
   set (ZLIB_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}zlib-static")
   set (ZLIB_LIBRARIES ${ZLIB_STATIC_LIBRARY})
 
@@ -256,6 +252,6 @@ macro (PACKAGE_ZLIB_LIBRARY compress_type)
   )
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zconf.h)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
-    add_dependencies (ZLIB-GenHeader-Copy ZLIB)
+    add_dependencies (ZLIB-GenHeader-Copy HDF5_ZLIB)
   endif ()
 endmacro ()

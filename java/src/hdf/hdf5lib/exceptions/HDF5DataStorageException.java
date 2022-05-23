@@ -24,9 +24,7 @@ public class HDF5DataStorageException extends HDF5LibraryException {
      * Constructs an <code>HDF5DataStorageExceptionn</code> with no specified
      * detail message.
      */
-    public HDF5DataStorageException() {
-        super();
-    }
+    public HDF5DataStorageException() { super(); }
 
     /**
      * Constructs an <code>HDF5DataStorageException</code> with the specified
@@ -35,7 +33,5 @@ public class HDF5DataStorageException extends HDF5LibraryException {
      * @param s
      *            the detail message.
      */
-    public HDF5DataStorageException(String s) {
-        super(s);
-    }
+    public HDF5DataStorageException(String s) { super(s); }
 }

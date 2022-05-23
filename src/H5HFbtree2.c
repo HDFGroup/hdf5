@@ -192,7 +192,7 @@ H5HF__huge_bt2_crt_context(void *_f)
     H5HF_huge_bt2_ctx_t *ctx;              /* Callback context structure */
     void *               ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -232,7 +232,7 @@ H5HF__huge_bt2_dst_context(void *_ctx)
 {
     H5HF_huge_bt2_ctx_t *ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -317,7 +317,7 @@ done:
 static herr_t
 H5HF__huge_bt2_indir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5HF_huge_bt2_indir_rec_t *)nrecord = *(const H5HF_huge_bt2_indir_rec_t *)udata;
 
@@ -341,7 +341,7 @@ H5HF__huge_bt2_indir_store(void *nrecord, const void *udata)
 static herr_t
 H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *result = (int)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id -
                     ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id);
@@ -368,7 +368,7 @@ H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *            ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -400,7 +400,7 @@ H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *      ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_indir_rec_t *nrecord = (H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -432,7 +432,7 @@ H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *_nr
 {
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent, "", fwidth,
               "Record:", nrecord->addr, nrecord->len, nrecord->id);
@@ -515,7 +515,7 @@ done:
 static herr_t
 H5HF__huge_bt2_filt_indir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5HF_huge_bt2_filt_indir_rec_t *)nrecord = *(const H5HF_huge_bt2_filt_indir_rec_t *)udata;
 
@@ -539,7 +539,7 @@ H5HF__huge_bt2_filt_indir_store(void *nrecord, const void *udata)
 static herr_t
 H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *result = (int)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id -
                     ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id);
@@ -566,7 +566,7 @@ H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *                 ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -600,7 +600,7 @@ H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *           ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_filt_indir_rec_t *nrecord = (H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -634,7 +634,7 @@ H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void
 {
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n",
               indent, "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask,
@@ -693,7 +693,7 @@ done:
 static herr_t
 H5HF__huge_bt2_dir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5HF_huge_bt2_dir_rec_t *)nrecord = *(const H5HF_huge_bt2_dir_rec_t *)udata;
 
@@ -720,7 +720,7 @@ H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
     const H5HF_huge_bt2_dir_rec_t *rec1 = (const H5HF_huge_bt2_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_dir_rec_t *rec2 = (const H5HF_huge_bt2_dir_rec_t *)_rec2;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (rec1->addr < rec2->addr)
         *result = -1;
@@ -755,7 +755,7 @@ H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *          ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -786,7 +786,7 @@ H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *    ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_dir_rec_t *nrecord = (H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -817,7 +817,7 @@ H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrec
 {
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE "}\n", indent, "", fwidth,
               "Record:", nrecord->addr, nrecord->len);
@@ -900,7 +900,7 @@ done:
 static herr_t
 H5HF__huge_bt2_filt_dir_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     *(H5HF_huge_bt2_filt_dir_rec_t *)nrecord = *(const H5HF_huge_bt2_filt_dir_rec_t *)udata;
 
@@ -927,7 +927,7 @@ H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *resul
     const H5HF_huge_bt2_filt_dir_rec_t *rec1 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_filt_dir_rec_t *rec2 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec2;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (rec1->addr < rec2->addr)
         *result = -1;
@@ -962,7 +962,7 @@ H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *               ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -995,7 +995,7 @@ H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
     H5HF_huge_bt2_ctx_t *         ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_filt_dir_rec_t *nrecord = (H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -1028,7 +1028,7 @@ H5HF__huge_bt2_filt_dir_debug(FILE *stream, int indent, int fwidth, const void *
 {
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE "}\n", indent, "", fwidth,
               "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);

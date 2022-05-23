@@ -681,7 +681,7 @@ H5G__stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     const char *      name;                /* Pointer to name string in heap */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(ent);
@@ -808,7 +808,7 @@ H5G__stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
     H5G_stab_fnd_ud_t *udata     = (H5G_stab_fnd_ud_t *)_udata; /* 'User data' passed in */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check for setting link info */
     if (udata->lnk)
@@ -901,7 +901,7 @@ H5G__stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     const char *     name;                /* Pointer to name string in heap */
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(ent);

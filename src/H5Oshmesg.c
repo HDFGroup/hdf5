@@ -37,7 +37,7 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     H5O_SHMESG_ID,              /*message id number                     */
     "shared message table",     /*message name for debugging            */
     sizeof(H5O_shmesg_table_t), /*native message size                   */
-    0,                          /* messages are sharable?       */
+    0,                          /* messages are shareable?       */
     H5O__shmesg_decode,         /*decode message                        */
     H5O__shmesg_encode,         /*encode message                        */
     H5O__shmesg_copy,           /*copy the native value                 */
@@ -77,7 +77,7 @@ H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     H5O_shmesg_table_t *mesg;             /* Native message */
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -116,7 +116,7 @@ H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 {
     const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -152,7 +152,7 @@ H5O__shmesg_copy(const void *_mesg, void *_dest)
     H5O_shmesg_table_t *      dest      = (H5O_shmesg_table_t *)_dest;
     void *                    ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(mesg);
@@ -190,7 +190,7 @@ H5O__shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -219,7 +219,7 @@ H5O__shmesg_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
 {
     const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(f);

@@ -56,7 +56,7 @@ test_fapl_mpio_dup(void)
         HDprintf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
-     * Use MPI_Comm_split because it is simplier than MPI_Comm_create
+     * Use MPI_Comm_split because it is simpler than MPI_Comm_create
      */
     mrc = MPI_Comm_split(MPI_COMM_WORLD, 0, 0, &comm);
     VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");

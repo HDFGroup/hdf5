@@ -241,7 +241,7 @@ H5HF__space_revert_root_cb(H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_uda
     H5HF_free_section_t *sect      = (H5HF_free_section_t *)_sect; /* Section to dump info */
     herr_t               ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -323,7 +323,7 @@ H5HF__space_create_root_cb(H5FS_section_info_t *_sect, void *_udata)
     H5HF_indirect_t *    root_iblock = (H5HF_indirect_t *)_udata;    /* User data for callback */
     herr_t               ret_value   = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -383,7 +383,7 @@ H5HF__space_create_root(const H5HF_hdr_t *hdr, H5HF_indirect_t *root_iblock)
 
     /* Only need to scan the sections if the free space has been initialized */
     if (hdr->fspace)
-        /* Iterate over all sections, seting the parent pointers in 'single' sections to the new indirect
+        /* Iterate over all sections, setting the parent pointers in 'single' sections to the new indirect
          * block */
         if (H5FS_sect_iterate(hdr->f, hdr->fspace, H5HF__space_create_root_cb, root_iblock) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over sections to set parent pointers")

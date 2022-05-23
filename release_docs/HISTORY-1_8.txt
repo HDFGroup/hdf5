@@ -1213,7 +1213,7 @@ New Features
         H5PLreplace - Replace the path at the specified index.
         H5PLinsert  - Insert a plugin path at the specified index, moving
                       other paths after the index.
-        H5PLremove  - Remove the plugin path at the specifed index and
+        H5PLremove  - Remove the plugin path at the specified index and
                       compacting the list.
         H5PLget     - Query the plugin path at the specified index.
         H5PLsize    - Query the size of the current list of plugin paths.
@@ -1251,7 +1251,7 @@ New Features
         // Returns a copy of the creation property list of a datatype.
         DataType::getCreatePlist() - C API H5Tget_create_plist()
 
-        // Opens an object within a location, regarless its type.
+        // Opens an object within a location, regardless its type.
         H5Location::openObjId() - C API H5Oopen()
         H5Location::openObjId() - C API H5Oopen()
 
@@ -1730,7 +1730,7 @@ Bug Fixes since HDF5-1.8.17
       files to ensure that the library fails gracefully in these cases:
 
       * Writing to a corrupted file that has an object message which is
-        incorrectly marked as sharable on disk results in a buffer overflow /
+        incorrectly marked as shareable on disk results in a buffer overflow /
         invalid write instead of a clean error message.
 
       * Decoding data from a corrupted file with a dataset encoded with the
@@ -4622,7 +4622,7 @@ Bug Fixes since HDF5-1.8.13
 
       Removed the module name from the package list of Fortran modules because
       that module was never generated. This was only an issue for Fortran
-      compliers that are not F2003 compatible.
+      compilers that are not F2003 compatible.
 
       (ADB - 2014/10/16, HDFFV-8932)
 
@@ -4632,7 +4632,7 @@ Bug Fixes since HDF5-1.8.13
       change was made which required the renaming of several public symbols in
       H5Ppublic.h.
 
-      The shared libary interface version number ("soname") has been increased
+      The shared library interface version number ("soname") has been increased
       on account of these changes. For a full list of the changed symbols, see
       the interface compatibility report, which is available as a link off of
       the 'HDF5 Software Changes from Release to Release' document:
@@ -5891,7 +5891,7 @@ Known Problems
 
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -6746,7 +6746,7 @@ Bug Fixes since HDF5-1.8.10
     - Fixed a bug in the core VFD that causes failures when opening files
       > 2 GB.
       Fixes HDFFV-8124 and HDFFV-8158 (DER 2013/01/07)
-    - Fixed a bug where unintialized memory was read during variable-length
+    - Fixed a bug where uninitialized memory was read during variable-length
       type conversion.  This caused segfaults in netCDF.  Fixes HDFFV-8159.
       (DER 2013/03/30)
     - Removed the H5Pset/get_dxpl_multi functions from the library.  The
@@ -7094,7 +7094,7 @@ Known Problems
 
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -7718,8 +7718,8 @@ Known Problems
   (MSC - 2012/04/18)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -8317,8 +8317,8 @@ Known Problems
   (MSC - 2012/04/18)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -8696,7 +8696,7 @@ Bug Fixes since HDF5-1.8.8
     ------
     - h5ltget_attribute_string_f: The h5ltget_attribute_string_f used to return
       the C NULL character in the returned character buffer. The returned
-      charactor buffer now does not return the C NULL character; the buffer
+      character buffer now does not return the C NULL character; the buffer
       is blank-padded if needed. (MSB - 2012/03/23)
 
 
@@ -8799,7 +8799,7 @@ The following platforms and compilers have been tested for this release.
     Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
     Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
     Intel 64-bit                      (Apple Inc. build 5666) (dot 3)
-    (fred)                        GNU Fortan (GCC) 4.6.1 (gfortran)
+    (fred)                        GNU Fortran (GCC) 4.6.1 (gfortran)
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
@@ -8976,8 +8976,8 @@ Known Problems
   (MSC - 2012/04/18)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
+  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernel
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of
   "configure" like:
@@ -9394,7 +9394,7 @@ Bug Fixes since HDF5-1.8.7
     Tools
     -----
     - h5diff: fixed segfault over non-comparable attribute with different
-      dimention or rank, along with '-c' option to display details.
+      dimension or rank, along with '-c' option to display details.
       (JKM - 2011/10/24 - HDFFV-7770)
     - Fixed h5diff to display all the comparable objects and attributes
       regardless of detecting non-comparables. (JKM - 2011/09/16 - HDFFV-7693)
@@ -9433,7 +9433,7 @@ Bug Fixes since HDF5-1.8.7
       (-d, -p and --use-system-epsilon) are used together.
       (JKM - 2011/07/07 - HDFFV-7600)
     - Fixed h5dump so that it displays the first line of each element in correct
-      position for multiple dimention array types. Before this fix,
+      position for multiple dimension array types. Before this fix,
       the first line of each element in an array was
       displayed after the last line of previous element without
       moving to the next line (+indentation).
@@ -10024,7 +10024,7 @@ Bug Fixes since HDF5-1.8.6
       ibm-aix. (AKC - 2011/4/14)
     - Shared C libraries are no longer disabled on Mac when Fortran
       is enabled. Shared Fortran libraries are still not supported on Mac,
-      so configure will disable them by default, but this is overrideable
+      so configure will disable them by default, but this is overridable
       with the new --enable-unsupported configure option. The configure
       summary has been updated to reflect the fact that the shared-ness of
       the C++/Fortran wrapper libraries may not align with the C library.
@@ -10666,7 +10666,7 @@ Bug Fixes since HDF5-1.8.5
     - Added a new set of unit tests that are run during 'make check' to verify
       the behavior of the metadata accumulator. (MAM - 2010/10/15)
     - Modified library to always cache symbol table information.  Libraries
-      from version 1.6.3 and earler have a bug which causes them to require
+      from version 1.6.3 and earlier have a bug which causes them to require
       this information for some operations. (NAF - 2010/09/21 - Bug 1864)
     - Fixed a bug where the library could generate an assertion/core dump when
       a file that had been created with H5Pset_libver_bounds(fapl,
@@ -11826,7 +11826,7 @@ Bug Fixes since HDF5-1.8.3
       created files exhibiting this problem should now be readable.
       NAF - 2009/10/27 - 1483
     - Fixed error in library's internal caching mechanisms which could cause
-      an assertion failure (and attendent core dump) when encountering an
+      an assertion failure (and attendant core dump) when encountering an
       unusually formatted file.  (QAK - 2009/10/13)
     - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
     - Fixed an assertion failure that occurred when H5Ocopy was called on a
@@ -12350,7 +12350,7 @@ Bug Fixes since HDF5-1.8.2
       can only be successfully opened with write access. NAF - 2009/03/23 - 1189
     - Removed the long_long #define and replaced all instances with
       "long long". This caused problems with third party products. All
-      currently supported compliers support the type. ADB - 2009/03/05
+      currently supported compilers support the type. ADB - 2009/03/05
     - Fixed various bugs that could prevent the fill value from being written
       in certain rare cases. NAF - 2009/02/26 - 1469
     - Fixed a bug that prevented more than one dataset chunk from being cached
@@ -13488,7 +13488,7 @@ Bug Fixes since HDF5-1.8.0
         - The h5tset(get)_fields subroutines were missing the parameter to
           specify a sign position; fixed.  (EIP - 2008/05/23)
         - Many APIs were fixed to work with the 8-byte integers in Fortran vs.
-          4-byte integers in C. This change is trasparent to user applications.
+          4-byte integers in C. This change is transparent to user applications.
 
         C++ API
         ------
@@ -13882,7 +13882,7 @@ Known Problems
 
         exit $RETURN_VALUE
 
-  You get the HDF5 make files and test scipts to execute your filter script
+  You get the HDF5 make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.
@@ -14419,7 +14419,7 @@ Known Problems
 
         exit $RETURN_VALUE
 
-  You get the HDF5 make files and test scipts to execute your filter script
+  You get the HDF5 make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.
