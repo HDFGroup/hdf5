@@ -50,11 +50,6 @@ few limitations -- most notably:
   However, there is no ETA for delivery.  Variable length attributes 
   on datasets and groups should work, but are currently un-tested.
 
-* At present the Virtual Data Set (VDS) feature is not 
-  well integrated with VFD SWMR.  While we have a work around that
-  allowed us to test for more fundamental issues (sse below), a proper 
-  solution is on hold pending the availability of the original developer.
-
 * VFD SWMR is only tested with, and should only be used with 
   the latest HDF5 file format.  Theoretically, there is no functional
   reason why it will not work with earlier versions of the file format.  
@@ -85,7 +80,7 @@ Clone the HDF5 repository in a new directory, then switch to the
 ```
 % git clone https://github.com/HDFGroup/hdf5 swmr
 % cd swmr
-% git checkout feature/vfd_swmr_beta_1
+% git checkout feature/vfd_swmr_beta_2
 ```
 
 ## Build
@@ -94,18 +89,12 @@ There are no special instructions for building VFD SWMR. Simply follow
 the usual build procedure for CMake or the Autotools using the guides
 in the `release_docs` directory.
 
-IMPORTANT:
-
-The VFD SWMR branches are maintenance branches and will default to a debug
-build. They also do not come with generated files, so Perl will be required
-when building with CMake and Perl and the Autotools (autoconf, etc.) will
-be required when building with the Autotools.
-
 Some notes:
 
 - The VFD SWMR tests can take some time to run.
 - The VFD SWMR acceptance tests will typically emit some output about "expected errors" that you can ignore. Real errors are clearly flagged.
 - If the tests do not pass on your system, please let the developers know via the email address given at the end of this document.
+- VFD SWMR is not compatible with parallel HDF5 because page buffering is disabled in parallel HDF5.
 
 # Sample programs
 
@@ -296,58 +285,23 @@ The `version` parameter tells what version of VFD SWMR configuration
 the parameter struct `config` contains.  For now, it should be
 initialized to `H5F__CURR_VFD_SWMR_CONFIG_VERSION`.
 
-## Using virtual datasets (VDS)
-
-An application may want to use VFD SWMR to create, read, or write
-a virtual dataset.  Unfortunately, VDS does not work properly with
-VFD SWMR at this time.  In this section, we describe some workarounds
-that can be used with great care to make VDS and VFD SWMR cooperate.
-
-A virtual dataset, when it is read or written, will open files on
-an application's behalf in order to access the source datasets
-inside.  If a virtual dataset resides on file `v.h5`, and one of
-its source datasets resides on a second file, `s1.h5`, then the
-virtual dataset will try to open `s1.h5` using the same file-access
-properties as `v.h5`.  Thus, if `v.h5` is open with VFD SWMR with
-metadata file `v.shadow`, then the virtual dataset will try to open
-`s1.h5` with the same metadata file, which will fail.
-
-Suppose that `v.h5` is *not* open with VFD SWMR, but it was opened
-with default file-access properties.  Then the virtual dataset will
-open the source dataset on `s1.h5` with default file-access
-properties, too.  This default virtual-dataset behavior is not
-helpful to the application that wants to use VFD SWMR to read or
-write source datasets.
-
-To use VFD SWMR with VDS, an application should *pre-open* each file
-using its preferred file-access properties, including independent metadata
-filenames for each source file.  As long as the virtual dataset remains
-in use, the application should leave each of the pre-opened files open.
-In this way the library, when it tries to open the source files, will
-always find them already open and re-use the already-open files with the
-file-access properties established on first open.
-
 ## Pushing HDF5 raw data to reader visibility
 
-At present, VFD SWMR is hard coded to flush raw data at the end of 
-each tick.  While this imposes additional overhead, it simplifies testing, 
-and is probably desirable for applications that do not require the best
-possible raw data throughput.  We plan to upgrade our tests and make this 
-user configurable in the first production release.
+DISCUSS FLUSH DATA END OF TICK HERE
 
-With the currently hard coded flush of raw data at the end of each tick, 
+If <flush of raw data at end of tick> is selected, 
 it should not be necessary to call H5Fflush().  In fact, when VFD SWMR is 
 active, H5Fflush() may require up to `max_lag` ticks to complete due to 
 metadata consistency issues.
 
-Instead, a writer can make its last changes to HDF5 file visible to all
+A writer can make its last changes to HDF5 file visible to all
 readers immediately using the new call, `H5Fvfd_swmr_end_tick()`.  Note
 that this call should be used sparingly, as it terminates the current 
 tick early, thus effectively reducing `max_lag`.  Repeated calls in 
 quick succession can force a reader to overrun `max_lag`, and 
 read stale metadata.
 
-When the flush of raw data at end of tick is disabled (not possible at present), 
+When the flush of raw data at end of tick is disabled, 
 the `H5Fvfd_swmr_end_tick()` call will make the writers current view of metadata
 visible to the reader -- which may refer to raw data that hasn't been written to 
 the HDF5 file yet.
@@ -443,6 +397,10 @@ of the HDF5 file will become stale.  Under those circumstances, HDF5
 content could be mis-read, or the library could crash with a diagnostic
 assertion.
 
+NOTE: The HDF5 command-line tools (h5dump, etc.) use iteration routines to do
+their work, so they should be used carefully with files open for VFD SWMR
+writing.
+
 ## Object handles
 
 At the present level of development, the writer cannot invalidate
@@ -481,11 +439,9 @@ NFS, et al.).
 
 ## File-opening order
 
-If an application tries to open a file in VFD SWMR reader mode, and the
-file is not already open by a VFD SWMR writer, then the application will
-sleep in the `H5Fopen()` call until either the writer opens the same
-file (using the same shadow file) or the reader times out after several
-seconds.
+If the file already exists, you can open the file via the writer and readers
+in any order. If the file does not exist, the reader will wait for the file
+to be created (until the default timeout expires).
 
 # Reporting bugs
 
