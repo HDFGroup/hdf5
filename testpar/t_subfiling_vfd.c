@@ -136,7 +136,7 @@ create_subfiling_ioc_fapl(const char *base_filename)
         TEST_ERROR;
 
     if (H5Pset_mpi_params(ret_value, comm, info) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get defaults for Subfiling configuration */
     if (H5Pget_fapl_subfiling(ret_value, subfiling_conf) < 0)
@@ -151,7 +151,7 @@ create_subfiling_ioc_fapl(const char *base_filename)
             TEST_ERROR;
 
         if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if (H5Pset_fapl_ioc(ioc_fapl, ioc_conf) < 0)
             TEST_ERROR;

@@ -361,7 +361,7 @@ H5FD__subfiling_term(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (H5FD_SUBFILING_g >= 0) {
         /* Terminate MPI if the driver initialized it */
@@ -504,7 +504,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     char *   h5_require_ioc;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(config_out);
 
@@ -586,7 +586,7 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa != NULL);
 
@@ -626,7 +626,7 @@ H5FD__subfiling_fapl_get(H5FD_t *_file)
     H5FD_subfiling_config_t *fa        = NULL;
     void *                   ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     fa = (H5FD_subfiling_config_t *)H5MM_calloc(sizeof(H5FD_subfiling_config_t));
 
@@ -667,7 +667,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     H5FD_SUBFILING_LOG_CALL(FUNC);
 
@@ -711,7 +711,7 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
     H5FD_subfiling_config_t *      new_fa    = NULL;
     void *                         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     new_fa = (H5FD_subfiling_config_t *)H5MM_malloc(sizeof(H5FD_subfiling_config_t));
     if (new_fa == NULL) {
@@ -751,7 +751,7 @@ H5FD__subfiling_fapl_free(void *_fa)
 {
     H5FD_subfiling_config_t *fa = (H5FD_subfiling_config_t *)_fa;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fa != NULL); /* sanity check */
 
@@ -786,7 +786,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     int                            mpi_code;    /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     if (!name || !*name)
@@ -964,7 +964,7 @@ H5FD__subfiling_close(H5FD_t *_file)
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file_ptr);
@@ -1025,7 +1025,7 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_subfiling_t *f2        = (const H5FD_subfiling_t *)_f2;
     int                     ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(f1);
     HDassert(f2);
@@ -1055,7 +1055,7 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 static herr_t
 H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -1090,7 +1090,7 @@ H5FD__subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD__subfiling_get_eoa() */
@@ -1113,7 +1113,7 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 {
     H5FD_subfiling_t *file_ptr = (H5FD_subfiling_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     file_ptr->eoa = addr;
 
@@ -1196,7 +1196,7 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     int64_t                 logical_eof = -1;
     haddr_t                 ret_value   = HADDR_UNDEF;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if 0 /* TODO */
     int64_t local_eof = H5FDget_eof(file->sf_file, type);
@@ -1235,7 +1235,7 @@ H5FD__subfiling_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -1277,7 +1277,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file_ptr && file_ptr->pub.cls);
     HDassert(buf);
@@ -1502,7 +1502,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file_ptr && file_ptr->pub.cls);
     HDassert(buf);
@@ -1745,7 +1745,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments
      * RAW - Do we really need to check arguments once again?
@@ -1894,7 +1894,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file_ptr != NULL); /* sanity check */
 
@@ -2016,7 +2016,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -2064,7 +2064,7 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct  */
     herr_t            ret_value = SUCCEED;                   /* Return value       */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -2100,7 +2100,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct */
     herr_t            ret_value = SUCCEED;                   /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -2147,7 +2147,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);
