@@ -82,9 +82,9 @@ static H5FD_onion_fapl_info_t onion_fa_in_g = {
     32,                            /* page_size                      */
     H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
     H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-    0,                  /* force_write_open               */
-    0,                  /* creation_flags                 */
-    "input file",       /* comment                        */
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
 };
 
 /*-------------------------------------------------------------------------
@@ -889,7 +889,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     /* If the input file uses the onion VFD, get the revision number */
     if (in_vfd_info.u.name && !HDstrcmp(in_vfd_info.u.name, "onion")) {
         if (in_vfd_info.info) {
-            errno                     = 0;
+            errno                      = 0;
             onion_fa_in_g.revision_num = HDstrtoull(in_vfd_info.info, NULL, 10);
             if (errno == ERANGE) {
                 HDprintf("Invalid onion revision specified for the input file\n");
